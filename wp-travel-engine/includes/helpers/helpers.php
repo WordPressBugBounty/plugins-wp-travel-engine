@@ -6,11 +6,9 @@
  * @package WP_Travel_Engine
  */
 
-use WPTravelEngine\Core\Models\Settings\PluginSettings;
-use WPTravelEngine\Packages;
-use WPTravelEngine\PaymentGateways\PaymentGateways;
 use WPTravelEngine\Core\Models\Post\Trip;
 use WPTravelEngine\Core\Models\Post\TripPackage;
+use WPTravelEngine\PaymentGateways\PaymentGateways;
 
 /**
  * Trip primary package.

@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 6.1.1
+Stable tag: 6.1.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -367,6 +367,17 @@ Yes. We have created WooCommerce Payments add-ons that supports all the payment 
 Please send us an email via [support ticket](https://wptravelengine.com/support-ticket/?utm_source=free_plugin&utm_medium=wporg&utm_campaign=support), and we will be happy to help you.
 
 == Changelog ==
+
+= 6.1.2 - 3rd October 2024 =
+* Fix: Resolved an issue where a 100% discount was displayed on the archive page when no sale price was set.
+* Fix: New trips were not being displayed on archive pages after v6.1.0.
+* Fix: Slider range on the archive page for price was not displaying the correct range after v6.1.0.
+* Fix: Newly added pricing categories were not listed on trips created before v6.1.0
+* Fix: Custom tab content was not showing on the trip edit page after v6.1.0
+* Fix: Allowed users to set total seats to 0
+* Fix: Price range calculated on the basis of trashed and draft trip posts.
+* Fix: The trip search result page was displaying shortcode tags instead of the actual content for the shortcode.
+* Feature: Integrated compatibility of the single trip page with Yoast SEO and Rank Math.
 
 = 6.1.1 - 17th September 2024 =
 * Fix: Primary package designation now works correctly.

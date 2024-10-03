@@ -65,20 +65,48 @@ class TravelerCategories extends Iterator {
 
 		$_categories = array();
 
-		foreach ( $categories[ 'c_ids' ] as $id ) {
-			foreach ( $categories as $key => $values ) {
-				if ( $key === 'enabled_group_discount' ) {
-					$_categories[ $id ][ $key ] = (bool) ( $values[ $id ] ?? false );
-					continue;
-				}
-				if ( $key === 'group_pricing' ) {
-					$_categories[ $id ][ $key ] = $_categories[ $id ][ 'enabled_group_discount' ] ? $values[ $id ] : array();
-					continue;
-				}
+		$traveler_categories = wptravelengine_settings()
+			->get_traveler_categories( array( 'fields' => 'id=>name' ) );
 
-				$_categories[ $id ][ $key ] = $values[ $id ] ?? '';
+		foreach ( $traveler_categories as $id => $label ) {
+			foreach ( $categories as $key => $values ) {
+				switch ( $key ) {
+					case 'c_ids':
+						$_categories[ $id ][ 'c_ids' ] = $id;
+						break;
+					case 'labels':
+						$_categories[ $id ][ 'labels' ] = $label;
+						break;
+					case 'prices':
+						$_categories[ $id ][ 'prices' ] = $values[ $id ] ?? '';
+						break;
+					case 'pricing_types':
+						$_categories[ $id ][ 'pricing_types' ] = $values[ $id ] ?? 'per-person';
+						break;
+					case 'sale_prices':
+						$_categories[ $id ][ 'sale_prices' ] = $values[ $id ] ?? '';
+						break;
+					case 'min_paxes':
+						$_categories[ $id ][ 'min_paxes' ] = $values[ $id ] ?? '';
+						break;
+					case 'max_paxes':
+						$_categories[ $id ][ 'max_paxes' ] = $values[ $id ] ?? '';
+						break;
+					case 'enabled_sale':
+						$_categories[ $id ][ 'enabled_sale' ] = (bool) ( $values[ $id ] ?? false );
+						break;
+					case 'enabled_group_discount':
+						$_categories[ $id ][ 'enabled_group_discount' ] = (bool) ( $values[ $id ] ?? false );
+						break;
+					case 'group_pricing':
+						$_categories[ $id ][ 'group_pricing' ] = $_categories[ $id ][ 'enabled_group_discount' ] ? $values[ $id ] : array();
+						break;
+					default:
+						$_categories[ $id ][ $key ] = $values[ $id ] ?? '';
+						break;
+				}
 			}
-			$_categories[$id]['age_group'] = (string) ( get_term_meta( $id )['age_group'][0] ?? '' );
+			$_categories[ $id ][ 'age_group' ] = (string) ( get_term_meta( $id )[ 'age_group' ][ 0 ] ?? '' );
 		}
 
 		$data = array_map(
@@ -114,14 +142,15 @@ class TravelerCategories extends Iterator {
 	}
 
 	/**
-	 * Get primary traveler category.
+	 * Get the primary traveler category.
 	 *
-	 * @return array
+	 * @return TravelerCategory
 	 */
-	public function get_primary_traveler_category() {
-		$category_id = Options::get( 'primary_pricing_category', 0 );
+	public function get_primary_traveler_category(): TravelerCategory {
+		$traveler_term = wptravelengine_settings()->get_primary_pricing_category();
+
 		foreach ( $this->data as $category ) {
-			if ( isset( $category->id ) && $category->id === $category_id ) {
+			if ( isset( $category->id ) && $category->id === $traveler_term->term_id ) {
 				return $category;
 			}
 		}

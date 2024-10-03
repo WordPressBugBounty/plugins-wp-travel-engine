@@ -17,12 +17,9 @@ wp_enqueue_script( 'wp-travel-engine' );
 			<div class="page-header">
 				<?php echo apply_filters( 'wte-trip-search-page-title', sprintf( '<h1 class="page-title">%1$s</h1>', get_the_title() ) ); ?>
 				<div class="page-content">
-					<p>
-						<?php
-						$content = apply_filters( 'the_content', $post->post_content );
-						echo wp_kses_post ( $content );
-						?>
-					</p>
+					<?php
+					the_content();
+					?>
 				</div>
 			</div>
 		<?php endif; ?>

@@ -8,9 +8,9 @@
 
 namespace WPTravelEngine\Core\Models\Post;
 
+use DateInterval;
+use DateTime;
 use WPTravelEngine\Abstracts\PostModel;
-use WPTravelEngine\Core\Booking\Inventory;
-use WPTravelEngine\Core\Models\Settings\Options;
 use WPTravelEngine\Helpers\PackageDateParser;
 
 /**
@@ -36,6 +36,41 @@ class TripPackage extends PostModel {
 	protected Trip $trip;
 
 	/**
+	 * if the primary traveler category has sale.
+	 *
+	 * @var bool
+	 */
+	public bool $has_sale = false;
+
+	/**
+	 * The primary traveler category price.
+	 *
+	 * @var float
+	 */
+	public float $price = 0.0;
+
+	/**
+	 * The primary traveler category sale price.
+	 *
+	 * @var float
+	 */
+	public float $sale_price = 0.0;
+
+	/**
+	 * The primary traveler category sale percentage.
+	 *
+	 * @var float
+	 */
+	public float $sale_percentage = 0.0;
+
+	/**
+	 * If the package has a group discount.
+	 *
+	 * @var bool
+	 */
+	public bool $has_group_discount = false;
+
+	/**
 	 *
 	 * @param $package
 	 * @param Trip $trip
@@ -43,6 +78,7 @@ class TripPackage extends PostModel {
 	public function __construct( $package, Trip $trip ) {
 		$this->trip = $trip;
 		parent::__construct( $package );
+
 		$this->set_primary_pricing_category_details();
 	}
 
@@ -56,7 +92,7 @@ class TripPackage extends PostModel {
 	}
 
 	/**
-	 *
+	 * Package Group Pricing.
 	 *
 	 * @return array
 	 */
@@ -75,9 +111,11 @@ class TripPackage extends PostModel {
 	/**
 	 * Package Dates.
 	 *
-	 * @return mixed
+	 * @param array $args
+	 *
+	 * @return array
 	 */
-	public function get_package_dates( $args = array() ) {
+	public function get_package_dates( array $args = array() ): array {
 
 		$fields = apply_filters( 'wte_rest_fields__trip-packages', array(), true );
 
@@ -89,7 +127,7 @@ class TripPackage extends PostModel {
 		$cut_off_enabled = wptravelengine_toggled( $this->trip->get_setting( 'trip_cutoff_enable', 'false' ) );
 		if ( $cut_off_enabled ) {
 			$cut_off_days = (int) $this->trip->get_setting( 'trip_cut_off_time', 0 );
-			$from         = date( 'Y-m-d', strtotime( "+{$cut_off_days} days", strtotime( $from ) ) );
+			$from         = date( 'Y-m-d', strtotime( "+$cut_off_days days", strtotime( $from ) ) );
 		}
 
 		if ( $callback ) {
@@ -122,7 +160,7 @@ class TripPackage extends PostModel {
 						continue;
 					}
 
-					foreach ( $date_data['times'] as $value ) {
+					foreach ( $date_data[ 'times' ] as $value ) {
 						if ( ! in_array( $value[ 'key' ], array_column( $dates[ $date ][ 'times' ], 'key' ) ) ) {
 							$dates[ $date ][ 'times' ][] = $value;
 						}
@@ -135,15 +173,15 @@ class TripPackage extends PostModel {
 
 		$enabled_time_slots = ( $this->get_meta( 'enable_weekly_time_slots' ) ?? 'no' ) === 'yes';
 
-		$dates = array();
+		$dates           = array();
 		$available_seats = $this->trip->is_enabled_min_max_participants() ? $this->trip->get_maximum_participants() : '';
 		$available_seats = is_numeric( $available_seats ) ? (int) $available_seats : '';
 		if ( $enabled_time_slots && 'days' !== $this->trip->get_setting( 'trip_duration_unit', 'days' ) ) {
-			$week_days_mapping  = array_combine( range( 1, 7 ), array( 'MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU' ) );
-			$weekly_time_slots 	= $this->get_meta( 'weekly_time_slots' );
-			$enable_week_days 	= $this->get_meta( 'enable_week_days' );
-			$enable_week_days   = empty( $enable_week_days ) ? array_combine( array_values( $week_days_mapping ), array_fill( 0, 7, true ) ) : $enable_week_days;
-			$week_days         	= array_keys( $weekly_time_slots );
+			$week_days_mapping = array_combine( range( 1, 7 ), array( 'MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU' ) );
+			$weekly_time_slots = $this->get_meta( 'weekly_time_slots' );
+			$enable_week_days  = $this->get_meta( 'enable_week_days' );
+			$enable_week_days  = empty( $enable_week_days ) ? array_combine( array_values( $week_days_mapping ), array_fill( 0, 7, true ) ) : $enable_week_days;
+			$week_days         = array_keys( $weekly_time_slots );
 
 			$package_date_parser = new PackageDateParser(
 				$this,
@@ -157,6 +195,8 @@ class TripPackage extends PostModel {
 								if ( $enable_week_days[ $week_days_mapping[ $week_day ] ] ) {
 									return $week_days_mapping[ $week_day ];
 								}
+
+								return null;
 							},
 							$week_days
 						) ),
@@ -167,7 +207,7 @@ class TripPackage extends PostModel {
 			);
 
 			$package_dates = $package_date_parser->get_dates();
-			/* @var \DateTime $package_date */
+			/* @var DateTime $package_date */
 			foreach ( $package_dates as $package_date ) {
 				$times         = array();
 				$times_by_days = $weekly_time_slots[ $package_date->format( 'w' ) ] ?? array();
@@ -178,13 +218,12 @@ class TripPackage extends PostModel {
 
 					list( $hours, $minutes ) = explode( ':', $time );
 
-					$package_date->setTime( $hours, $minutes, 0, 0 );
+					$package_date->setTime( $hours, $minutes );
 
-					$duration      = $this->trip->get_setting( 'trip_duration', 0 );
-					$duration_unit = $this->trip->get_setting( 'trip_duration_unit', 'days' );
+					$duration = $this->trip->get_setting( 'trip_duration', 0 );
 
 					$to = clone $package_date;
-					$to->add( new \DateInterval( "PT{$duration}H" ) );
+					$to->add( new DateInterval( "PT{$duration}H" ) );
 
 					$times[] = array(
 						'key'   => "{$this->ID}_{$package_date->format( 'Y-m-d_H:i' )}_{$to->format('H:i')}",
@@ -228,50 +267,51 @@ class TripPackage extends PostModel {
 	}
 
 	/**
-	 * Get pricing categories.
+	 * Get Package meta-value.
 	 *
-	 * @param $key string The meta key.
-	 * @since 6.1.0
+	 * @param $key string The meta-key.
 	 *
 	 * @return mixed
+	 * @since 6.1.0
 	 */
 	public function __get( string $key ) {
-		switch( $key ){
+		switch ( $key ) {
 			case 'package-categories':
 			case 'group-pricing':
 			case 'package-dates':
-				return $this->data[$key] ?? $this->get_meta( $key );
-			case 'has_sale':
-			case 'price':
-			case 'sale_price':
-			case 'sale_percentage':
-			case 'has_group_discount':
-				if ( ! isset( $this->data[$key] ) ) {
-					$this->set_primary_pricing_category_details();
-				}
-				return $this->data[ $key ];
+				return $this->data[ $key ] ?? $this->get_meta( $key );
+			default:
+				return null;
 		}
+	}
 
+	/**
+	 * Check if the package has a group discount.
+	 *
+	 * @return bool
+	 * @since 6.1.0
+	 *
+	 */
+	public function has_group_discount(): bool {
+		return $this->has_group_discount;
 	}
 
 	/**
 	 * Sets primary pricing category details.
 	 *
+	 * @return void
 	 * @since 6.1.0
 	 *
-	 * @return void
 	 */
-	public function set_primary_pricing_category_details() {
-		$primary_pricing_category 	= (int) Options::get( 'primary_pricing_category', '' );
-		$package_categories 		= $this->{'package-categories'};
-		// $term_id 					= get_term( $primary_pricing_category, 'trip-packages-categories' )->term_id ?? '';
-		// $traveler_categories 		= $this->get_traveler_categories()->get_categories();
-		// if ( in_array( $term_id, array_column( $traveler_categories, 'id' ) ) ) {
-			$this->data['has_sale']        		= wptravelengine_toggled( $package_categories['enabled_sale'][$primary_pricing_category] ?? false );
-			$this->data['price']           		= (float) ( $package_categories['prices'][$primary_pricing_category] ?? 0 );
-			$this->data['sale_price']      		= (float) ( $package_categories['sale_prices'][$primary_pricing_category] ?? 0 );
-			$this->data['sale_percentage'] 		= $this->data['price'] ? round( ( ( $this->data['price'] - $this->data['sale_price'] ) / $this->data['price'] * 100 ) ) : 0;
-			$this->data['has_group_discount'] 	= wptravelengine_toggled( $package_categories['enabled_group_discount'][$primary_pricing_category] ?? false );
-		// }
+	protected function set_primary_pricing_category_details() {
+
+		$primary_traveler_category = $this->get_traveler_categories()->get_primary_traveler_category();
+
+		$this->has_sale           = (bool) $primary_traveler_category->get( 'has_sale' ) ?? false;
+		$this->price              = (float) $primary_traveler_category->get( 'price' ) ?? 0;
+		$this->sale_price         = (float) $primary_traveler_category->get( 'sale_price' ) ?? 0;
+		$this->sale_percentage    = ( $this->has_sale && $this->price > 0 ) ? round( ( ( $this->price - $this->sale_price ) / $this->price ) * 100 ) : 0;
+		$this->has_group_discount = (bool) $primary_traveler_category->get( 'enabled_group_discount' );
+
 	}
 }

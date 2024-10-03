@@ -7,6 +7,7 @@
 
 namespace WPTravelEngine\Packages;
 
+use WP_Term;
 use WPTravelEngine\Posttype\Trip;
 
 function get_packages_by_trip_id( $trip_id ) {
@@ -128,34 +129,13 @@ function get_trip_lowest_price_by_package_id( $package_id ) {
 	return (float) $category_price;
 }
 
-function get_packages_pricing_categories() {
-	global $wpdb;
-
-	$pricing_taxonomy = 'trip-packages-categories';
-
-	$results = wp_cache_get( 'trip_package_categories', 'wptravelengine' );
-	if ( ! $results ) {
-		$prepared_statement = $wpdb->prepare(
-			"SELECT {$wpdb->terms}.term_id, {$wpdb->terms}.name FROM {$wpdb->term_taxonomy} 
-             INNER JOIN {$wpdb->terms} ON {$wpdb->term_taxonomy}.term_id = {$wpdb->terms}.term_id 
-             WHERE taxonomy = %s",
-			$pricing_taxonomy
-		);
-
-		$results = $wpdb->get_results( $prepared_statement );
-
-		if ( empty( $results ) && is_array( $results ) && function_exists( 'wp_insert_term' ) ) {
-			$term = wp_insert_term( 'Adult', $pricing_taxonomy, array( 'slug' => 'adult' ) );
-			if ( ! \is_wp_error( $term ) ) {
-				update_option( 'primary_pricing_category', $term['term_id'] );
-			}
-			$term    = wp_insert_term( 'Child', $pricing_taxonomy, array( 'slug' => 'child' ) );
-			$results = $wpdb->get_results( $prepared_statement );
-		}
-		wp_cache_add( 'trip_package_categories', $results, 'wptravelengine' );
-	}
-
-	return $results;
+/**
+ * Gets Packages Pricing Categories.
+ *
+ * @return WP_Term[]
+ */
+function get_packages_pricing_categories(): array {
+	return wptravelengine_settings()->get_traveler_categories();
 }
 
 /**
@@ -167,7 +147,7 @@ function update_trip_packages( $post_ID, $posted_data ) {
 	$pricing_ids = null;
 	$categories  = null;
 
-	if ( ! isset( $posted_data['trip-edit-tab__dates-pricings'] ) ) {
+	if ( ! isset( $posted_data[ 'trip-edit-tab__dates-pricings' ] ) ) {
 		return;
 	}
 
@@ -180,16 +160,16 @@ function update_trip_packages( $post_ID, $posted_data ) {
 
 	$package_post_type = 'trip-packages';
 
-	$packages_ids               = isset( $posted_data['packages_ids'] ) ? $posted_data['packages_ids'] : array();
-	$packages_titles            = isset( $posted_data['packages_titles'] ) ? wp_unslash( $posted_data['packages_titles'] ) : array();
-	$packages_descriptions      = isset( $posted_data['packages_descriptions'] ) ? wp_unslash( $posted_data['packages_descriptions'] ) : array();
-	$categories                 = isset( $posted_data['categories'] ) ? $posted_data['categories'] : array();
-	$primary_pricing_categories = isset( $posted_data['packages_primary_category'] ) ? (array) $posted_data['packages_primary_category'] : array();
-	$original_packages          = isset( $posted_data['packages_original_package'] ) ? (array) $posted_data['packages_original_package'] : array();
+	$packages_ids               = isset( $posted_data[ 'packages_ids' ] ) ? $posted_data[ 'packages_ids' ] : array();
+	$packages_titles            = isset( $posted_data[ 'packages_titles' ] ) ? wp_unslash( $posted_data[ 'packages_titles' ] ) : array();
+	$packages_descriptions      = isset( $posted_data[ 'packages_descriptions' ] ) ? wp_unslash( $posted_data[ 'packages_descriptions' ] ) : array();
+	$categories                 = isset( $posted_data[ 'categories' ] ) ? $posted_data[ 'categories' ] : array();
+	$primary_pricing_categories = isset( $posted_data[ 'packages_primary_category' ] ) ? (array) $posted_data[ 'packages_primary_category' ] : array();
+	$original_packages          = isset( $posted_data[ 'packages_original_package' ] ) ? (array) $posted_data[ 'packages_original_package' ] : array();
 
-	$package_weekly_time_slots = isset( $posted_data['package_weekly_time_slots'] ) ? $posted_data['package_weekly_time_slots'] : array();
+	$package_weekly_time_slots = isset( $posted_data[ 'package_weekly_time_slots' ] ) ? $posted_data[ 'package_weekly_time_slots' ] : array();
 
-	$package_weekly_time_slots_enable = isset( $posted_data['package_weekly_time_slots_enable'] ) ? $posted_data['package_weekly_time_slots_enable'] : 'no';
+	$package_weekly_time_slots_enable = isset( $posted_data[ 'package_weekly_time_slots_enable' ] ) ? $posted_data[ 'package_weekly_time_slots_enable' ] : 'no';
 
 	$meta_packages_ids        = array();
 	$primary_pricing_category = get_option( 'primary_pricing_category', 0 );
@@ -211,7 +191,7 @@ function update_trip_packages( $post_ID, $posted_data ) {
 				if ( is_array( $time_slots ) ) {
 					$slots[ $index ] = array_filter(
 						$time_slots,
-						function( $time_slot ) {
+						function ( $time_slot ) {
 							return ! empty( $time_slot );
 						}
 					);
@@ -220,14 +200,14 @@ function update_trip_packages( $post_ID, $posted_data ) {
 
 			$settings = get_post_meta( $post_ID, 'wp_travel_engine_setting', true );
 
-			$trip_duration = $settings['trip_duration'];
+			$trip_duration = $settings[ 'trip_duration' ];
 
 			$now   = new \DateTime();
 			$dates = array();
 
 			if ( ! empty( $slots ) ) {
 				$weekdays = array_combine( range( 1, 7 ), array( 'MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU' ) );
-				foreach ( $slots  as $index => $slot ) {
+				foreach ( $slots as $index => $slot ) {
 					if ( empty( $slot ) ) {
 						continue;
 					}
@@ -243,7 +223,7 @@ function update_trip_packages( $post_ID, $posted_data ) {
 							}
 							$_time      = explode( ':', $time );
 							$_date_time = new \DateTime();
-							$_date_time->setTime( (int) $_time[0], (int) $_time[1], 0, 0 );
+							$_date_time->setTime( (int) $_time[ 0 ], (int) $_time[ 1 ], 0, 0 );
 							$from = $_date_time->format( 'H:i' );
 							$_date_time->add( new \DateInterval( 'PT' . $trip_duration . 'H' ) );
 							$to      = $_date_time->format( 'H:i' );
@@ -260,49 +240,53 @@ function update_trip_packages( $post_ID, $posted_data ) {
 						'rrule'        => array(
 							'r_frequency' => 'WEEKLY',
 							'r_weekdays'  => array( $weekdays[ $index ] ),
-							'r_until'     => implode( '-', array( $now->format( 'Y' ) + 1, $now->format( 'm' ), $now->format( 'd' ) ) ),
+							'r_until'     => implode( '-', array(
+								$now->format( 'Y' ) + 1,
+								$now->format( 'm' ),
+								$now->format( 'd' ),
+							) ),
 						),
 					);
 				}
-				update_post_meta( +$package_id, 'package-dates', $dates );
+				update_post_meta( + $package_id, 'package-dates', $dates );
 			}
 
-			update_post_meta( +$package_id, 'weekly_time_slots', $slots );
+			update_post_meta( + $package_id, 'weekly_time_slots', $slots );
 
 		}
 
 		if ( isset( $package_weekly_time_slots_enable[ $package_id ] ) ) {
-			update_post_meta( +$package_id, 'enable_weekly_time_slots', $package_weekly_time_slots_enable[ $package_id ] );
+			update_post_meta( + $package_id, 'enable_weekly_time_slots', $package_weekly_time_slots_enable[ $package_id ] );
 		}
 
 		// Update Categories.
 		if ( isset( $categories[ $package_id ] ) ) {
 			$package_categories = $categories[ $package_id ];
 
-			$meta_input['package-categories'] = $package_categories;
+			$meta_input[ 'package-categories' ] = $package_categories;
 
-			if ( $primary_pricing_category && isset( $package_categories['c_ids'][ $primary_pricing_category ] ) ) {
-				if ( isset( $package_categories['enabled_sale'][ $primary_pricing_category ] ) && '1' === $package_categories['enabled_sale'][ $primary_pricing_category ] ) {
-					$lowest_price = ! empty( $package_categories['sale_prices'][ $primary_pricing_category ] ) && ( 0 === $lowest_price || (float) $package_categories['sale_prices'][ $primary_pricing_category ] < $lowest_price ) ? (float) $package_categories['sale_prices'][ $primary_pricing_category ] : $lowest_price;
+			if ( $primary_pricing_category && isset( $package_categories[ 'c_ids' ][ $primary_pricing_category ] ) ) {
+				if ( isset( $package_categories[ 'enabled_sale' ][ $primary_pricing_category ] ) && '1' === $package_categories[ 'enabled_sale' ][ $primary_pricing_category ] ) {
+					$lowest_price = ! empty( $package_categories[ 'sale_prices' ][ $primary_pricing_category ] ) && ( 0 === $lowest_price || (float) $package_categories[ 'sale_prices' ][ $primary_pricing_category ] < $lowest_price ) ? (float) $package_categories[ 'sale_prices' ][ $primary_pricing_category ] : $lowest_price;
 				} else {
-					$lowest_price = ! empty( $package_categories['prices'][ $primary_pricing_category ] ) && ( 0 === $lowest_price || (float) $package_categories['prices'][ $primary_pricing_category ] < $lowest_price ) ? (float) $package_categories['prices'][ $primary_pricing_category ] : $lowest_price;
+					$lowest_price = ! empty( $package_categories[ 'prices' ][ $primary_pricing_category ] ) && ( 0 === $lowest_price || (float) $package_categories[ 'prices' ][ $primary_pricing_category ] < $lowest_price ) ? (float) $package_categories[ 'prices' ][ $primary_pricing_category ] : $lowest_price;
 				}
 			}
 
-			update_post_meta( +$package_id, 'package-categories', $package_categories );
+			update_post_meta( + $package_id, 'package-categories', $package_categories );
 		}
 
 		// Update Primary Pricing Category.
 		if ( isset( $primary_pricing_categories[ $package_id ] ) ) {
 			$primary_pricing_category = $primary_pricing_categories[ $package_id ];
 
-			$meta_input['primary_pricing_category'] = $primary_pricing_category;
+			$meta_input[ 'primary_pricing_category' ] = $primary_pricing_category;
 
-			update_post_meta( +$package_id, 'primary_pricing_category', $primary_pricing_category );
+			update_post_meta( + $package_id, 'primary_pricing_category', $primary_pricing_category );
 		}
 
 		if ( ! empty( $original_packages[ $package_id ] ) ) {
-			update_post_meta( +$package_id, '_original_package_id', $original_packages[ $package_id ] );
+			update_post_meta( + $package_id, '_original_package_id', $original_packages[ $package_id ] );
 		}
 
 		$postarr             = new \stdClass();

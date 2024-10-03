@@ -32,6 +32,20 @@ class TravelerCategory {
 	protected TripPackage $package;
 
 	/**
+	 * The traveler category price.
+	 *
+	 * @var float|string
+	 */
+	public $price;
+
+	/**
+	 * The traveler category sale price.
+	 *
+	 * @var float|string
+	 */
+	public $sale_price;
+
+	/**
 	 * Traveler Category Model Constructor.
 	 *
 	 * @param Trip $trip The trip object.
@@ -55,7 +69,12 @@ class TravelerCategory {
 
 		foreach ( $package_category_data as $property => $value ) {
 			if ( isset( $key_mapping[ $property ] ) ) {
-				$property = $key_mapping[ $property ];
+				$mapped_property = $key_mapping[ $property ];
+				if ( in_array( $property, [ 'prices', 'sale_prices' ], true ) ) {
+					$value = is_numeric( $value ) ? max( 0, (float) $value ) : '';
+				}
+				$this->{$mapped_property} = $value;
+				continue;
 			}
 			$this->{$property} = $value;
 		}
@@ -70,27 +89,12 @@ class TravelerCategory {
 	 * @return mixed
 	 */
 	public function get( $key, $default = null ) {
-//		$key_mapping = array(
-//			'id'           => 'c_ids',
-//			'label'        => 'labels',
-//			'price'        => 'prices',
-//			'pricing_type' => 'pricing_types',
-//			'sale_price'   => 'sale_prices',
-//			'min_pax'      => 'min_paxes',
-//			'max_pax'      => 'max_paxes',
-//			'has_sale'     => 'enabled_sale',
-//		);
-
-		if ( isset( $key_mapping[ $key ] ) ) {
-			$value = $this->{$key_mapping[ $key ]} ?? $default;
-		} else {
-			$value = $this->{$key} ?? $default;
-		}
-
 		switch ( $key ) {
 			case 'group_pricing':
 				$value = $this->package->get_group_pricing()[ $this->{'id'} ] ?? [];
 				break;
+			default:
+				$value = $this->{$key} ?? $default;
 		}
 
 		return $value;
@@ -99,12 +103,27 @@ class TravelerCategory {
 	/**
 	 * Calculate Sale Percentage.
 	 *
-	 * @return void
+	 * @return float
 	 */
-	public function sale_percentage() {
-		$prices      = floatval( $this->prices );
-		$sale_prices = floatval( $this->sale_prices );
+	public function sale_percentage(): float {
+		return ( ! $this->price ) ? 0 : ( ( $this->price - $this->sale_price ) / $this->price ) * 100;
+	}
 
-		return ( $prices - $sale_prices ) / $prices * 100;
+	/**
+	 * Get the traveler category actual price.
+	 *
+	 * @return float|string
+	 */
+	public function get_price() {
+		return $this->price;
+	}
+
+	/**
+	 * Get the traveler category sale price.
+	 *
+	 * @return float|string
+	 */
+	public function get_sale_price() {
+		return $this->sale_price;
 	}
 }

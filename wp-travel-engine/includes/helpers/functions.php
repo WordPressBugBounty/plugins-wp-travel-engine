@@ -19,17 +19,45 @@ require_once __DIR__ . '/helpers-prices.php';
 require_once __DIR__ . '/wp-travel-engine-form-fields.php';
 
 /**
+ * Get the instance of the wptravelengine tabs UI.
+ *
+ * @return WP_Travel_Engine_Tabs_UI
+ * @since 6.1.2
+ */
+function wptravelengine_tabs_ui(): WP_Travel_Engine_Tabs_UI {
+	if ( ! class_exists( 'WP_Travel_Engine_Tabs_UI' ) ) {
+		require_once plugin_dir_path( WP_TRAVEL_ENGINE_FILE_PATH ) . 'admin/class-wp-travel-engine-tabs-ui.php';
+	}
+
+	return new WP_Travel_Engine_Tabs_UI();
+}
+
+/**
+ * Generates and Render Admin Tabs UI.
+ *
+ * @return void
+ * @since 6.1.2
+ */
+function wptravelengine_tabs_ui_render( $args = array(), $tabs = array() ) {
+	wptravelengine_tabs_ui()->init( $args )->template( $tabs );
+}
+
+/**
  * Get the ordinal suffix for a number.
- * 
+ *
  * @param int $num
- * 
- * @since 6.1.0
+ *
  * @return string
+ * @since 6.1.0
  */
 function get_num_suffix( int $num ): string {
-    $last_two_digits = $num % 100;
+	$last_two_digits = $num % 100;
 
-    return $num . ( ( $last_two_digits >= 11 && $last_two_digits <= 13 ) ? 'th' : ( [ 'st', 'nd', 'rd' ][ $num % 10 - 1 ] ?? 'th' ) );
+	return $num . ( ( $last_two_digits >= 11 && $last_two_digits <= 13 ) ? 'th' : ( [
+																						'st',
+																						'nd',
+																						'rd',
+																					][ $num % 10 - 1 ] ?? 'th' ) );
 }
 
 

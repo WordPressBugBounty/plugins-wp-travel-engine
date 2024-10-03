@@ -8,13 +8,11 @@
 
 namespace WPTravelEngine\Core\Models\Post;
 
-use WPTravelEngine\Core\Booking\Inventory;
-use WPTravelEngine\Core\Models\Settings\PluginSettings;
-use WPTravelEngine\Core\Models\Settings\Options;
 use WP_Post;
 use WPTravelEngine\Abstracts\PostModel;
-use WPTravelEngine\Core\Functions\Packages;
-use WPTravelEngine\Core\Models\Post\TripPackages;
+use WPTravelEngine\Core\Booking\Inventory;
+use WPTravelEngine\Core\Models\Settings\Options;
+use WPTravelEngine\Core\Models\Settings\PluginSettings;
 
 /**
  * Class Trip.
@@ -42,14 +40,21 @@ class Trip extends PostModel {
 	/**
 	 * Holds Inventory object.
 	 */
-	protected $inventory = null;
+	protected ?Inventory $inventory = null;
 
 	/**
 	 * Trip packages.
 	 *
 	 * @var TripPackages
 	 */
-	protected $trip_packages;
+	protected TripPackages $trip_packages;
+
+	/**
+	 * The primary package of the trip.
+	 *
+	 * @var ?TripPackage
+	 */
+	protected ?TripPackage $primary_package = null;
 
 	/**
 	 * Constructs a new instance of the Trip class.
@@ -58,7 +63,7 @@ class Trip extends PostModel {
 	 * the trip version from the post meta. If the trip version is not
 	 * found in the post meta, it defaults to the initial trip version.
 	 *
-	 * @param WP_Post|int $post The post object.
+	 * @param WP_Post|int $post The post-object.
 	 */
 	public function __construct( $post ) {
 		parent::__construct( $post );
@@ -67,7 +72,9 @@ class Trip extends PostModel {
 
 		$this->trip_version = empty( $trip_version ) ? $this->trip_version : $trip_version;
 
-		$this->trip_packages = $this->packages();
+		$this->trip_packages = new TripPackages( $this );
+
+		$this->set_primary_package();
 	}
 
 	/**
@@ -135,9 +142,6 @@ class Trip extends PostModel {
 		$settings = $this->data[ '__changes' ][ $first_key ] ??= array();
 
 		foreach ( $keys as $key ) {
-			if ( ! isset( $settings[ $key ] ) ) {
-
-			}
 			if ( ! isset( $settings[ $key ] ) && ! is_array( $settings[ $key ] ) && ! is_object( $settings[ $key ] ) ) {
 				$settings[ $key ] = array();
 			}
@@ -181,7 +185,7 @@ class Trip extends PostModel {
 			if ( 'default' === $service_data[ 'service_type' ] ) {
 				$service_unit      = $service_data[ 'service_unit' ] ?? 'unit';
 				$service_options[] = array(
-					'key'         => wptravelengine_generate_key( "{$service->ID}" ),
+					'key'         => wptravelengine_generate_key( $service->ID ),
 					'label'       => get_the_title( $service->ID ),
 					'price'       => is_numeric( $service_data[ 'service_cost' ] ) ? (float) $service_data[ 'service_cost' ] : 0,
 					'description' => apply_filters( 'the_content', get_the_content( '', false, $service->ID ) ),
@@ -196,7 +200,7 @@ class Trip extends PostModel {
 
 					$service_unit      = 'unit';
 					$service_options[] = array(
-						'key'         => wptravelengine_generate_key( "{$service->ID}-{$index}" ),
+						'key'         => wptravelengine_generate_key( "$service->ID-$index" ),
 						'label'       => $option,
 						'price'       => is_numeric( $price ) ? (float) $price : 0,
 						'serviceUnit' => [ 'value' => $service_unit, 'label' => $unit_labels[ $service_unit ] ],
@@ -219,20 +223,53 @@ class Trip extends PostModel {
 	}
 
 	/**
+	 * Get the trip price.
+	 *
+	 * @return float
+	 */
+	public function get_price(): float {
+		return $this->primary_package->price ?? 0;
+	}
+
+	/**
+	 * Get the trip sale price.
+	 *
+	 * @return float
+	 */
+	public function get_sale_price(): float {
+		return $this->primary_package->sale_price ?? 0;
+	}
+
+	/**
+	 * Check if the trip has a sale price.
+	 *
+	 * @return bool
+	 */
+	public function has_sale(): bool {
+		return $this->primary_package->has_sale ?? false;
+	}
+
+	/**
 	 * Get the default package.
 	 *
 	 * @return ?TripPackage
 	 */
 	public function default_package(): ?TripPackage {
 
-		if ( empty( Options::get( 'primary_pricing_category', '' ) ) || ! $this->has_package ) {
+		if ( ! $this->has_package() ) {
 			return null;
 		}
 
-		$primary_id = (int) $this->get_meta( 'primary_package' );
-		foreach ( $this->packages as $package ) {
-			if ( $package->ID === $primary_id ) {
-				return $package;
+		if ( count( $this->trip_packages ) === 1 ) {
+			return $this->trip_packages->current();
+		}
+
+		$primary_package_id = $this->get_meta( 'primary_package' );
+
+		if ( is_numeric( $primary_package_id ) ) {
+			$primary_package = $this->trip_packages->get_package( $primary_package_id );
+			if ( $primary_package ) {
+				return $primary_package;
 			}
 		}
 
@@ -246,7 +283,7 @@ class Trip extends PostModel {
 	 * @return TripPackages
 	 */
 	public function packages(): TripPackages {
-		return new TripPackages( $this );
+		return $this->trip_packages;
 	}
 
 	/**
@@ -254,13 +291,8 @@ class Trip extends PostModel {
 	 *
 	 * @return bool
 	 */
-	protected function has_package(): bool {
-
-		if ( $this->trip_packages instanceof TripPackages ) {
-			$this->data[ 'has_package' ] = $this->trip_packages->rewind() || $this->trip_packages->valid();
-		}
-
-		return $this->data[ 'has_package' ] ?? false;
+	public function has_package(): bool {
+		return count( $this->trip_packages ) > 0;
 	}
 
 	/**
@@ -271,7 +303,7 @@ class Trip extends PostModel {
 	 *
 	 * @return bool
 	 */
-	public function __isset( $key ) {
+	public function __isset( string $key ) {
 		return isset( $this->data[ $key ] );
 	}
 
@@ -291,7 +323,7 @@ class Trip extends PostModel {
 
 		switch ( $key ) {
 			case 'settings':
-				return $this->get_meta( 'wp_travel_engine_setting', array() );
+				return $this->get_meta( 'wp_travel_engine_setting' );
 			case 'trip_version':
 				return $this->version();
 			case 'post':
@@ -303,7 +335,7 @@ class Trip extends PostModel {
 			case 'packages':
 				return $this->trip_packages;
 			case 'default_package':
-				$this->data[ 'default_package' ] = $this->trip_packages->get_default_package();
+				$this->data[ 'default_package' ] = $this->default_package();
 
 				return $this->data[ 'default_package' ];
 			default:
@@ -328,7 +360,7 @@ class Trip extends PostModel {
 	 *
 	 * @return string
 	 */
-	public function get_trip_duration() {
+	public function get_trip_duration(): string {
 		return $this->get_setting( 'trip_duration' ) ?? '';
 	}
 
@@ -338,7 +370,7 @@ class Trip extends PostModel {
 	 *
 	 * @return string
 	 */
-	public function get_trip_duration_unit() {
+	public function get_trip_duration_unit(): string {
 		return $this->get_setting( 'trip_duration_unit' ) ?? 'days';
 	}
 
@@ -347,7 +379,7 @@ class Trip extends PostModel {
 	 *
 	 * @return string
 	 */
-	public function get_trip_nights() {
+	public function get_trip_nights(): string {
 		$nights = $this->get_setting( 'trip_duration_nights' );
 
 		/* translators: %s: number of nights */
@@ -360,7 +392,7 @@ class Trip extends PostModel {
 	 *
 	 * @return boolean
 	 */
-	public function is_enabled_cutoff_time() {
+	public function is_enabled_cutoff_time(): bool {
 		return $this->get_setting( 'trip_cutoff_enable' ) ?? false;
 	}
 
@@ -369,7 +401,7 @@ class Trip extends PostModel {
 	 *
 	 * @return string
 	 */
-	public function get_trip_cutoff_time() {
+	public function get_trip_cutoff_time(): string {
 		return $this->get_setting( 'trip_cut_off_time' ) ?? '';
 	}
 
@@ -378,7 +410,7 @@ class Trip extends PostModel {
 	 *
 	 * @return string
 	 */
-	public function get_trip_cutoff_unit() {
+	public function get_trip_cutoff_unit(): string {
 		return $this->get_setting( 'trip_cut_off_unit' ) ?? '';
 	}
 
@@ -387,7 +419,7 @@ class Trip extends PostModel {
 	 *
 	 * @return boolean
 	 */
-	public function is_enabled_min_max_age() {
+	public function is_enabled_min_max_age(): bool {
 		return $this->get_setting( 'min_max_age_enable' ) ?? false;
 	}
 
@@ -396,7 +428,7 @@ class Trip extends PostModel {
 	 *
 	 * @return string
 	 */
-	public function get_minimum_age() {
+	public function get_minimum_age(): string {
 		return $this->get_meta( 'wp_travel_engine_trip_min_age' ) ?? '';
 	}
 
@@ -405,16 +437,16 @@ class Trip extends PostModel {
 	 *
 	 * @return string
 	 */
-	public function get_maximum_age() {
+	public function get_maximum_age(): string {
 		return $this->get_meta( 'wp_travel_engine_trip_max_age' ) ?? '';
 	}
 
 	/**
-	 * Check if the trip minimum/maximum participants is enabled.
+	 * Check if the trip minimum/maximum participants are enabled.
 	 *
 	 * @return boolean
 	 */
-	public function is_enabled_min_max_participants() {
+	public function is_enabled_min_max_participants(): bool {
 		return $this->get_setting( 'minmax_pax_enable' ) ?? false;
 	}
 
@@ -423,7 +455,7 @@ class Trip extends PostModel {
 	 *
 	 * @return string
 	 */
-	public function get_minimum_participants() {
+	public function get_minimum_participants(): string {
 		return $this->get_setting( 'trip_minimum_pax' ) ?? '';
 	}
 
@@ -432,7 +464,7 @@ class Trip extends PostModel {
 	 *
 	 * @return string
 	 */
-	public function get_maximum_participants() {
+	public function get_maximum_participants(): string {
 		return $this->get_setting( 'trip_maximum_pax' ) ?? '';
 	}
 
@@ -441,7 +473,7 @@ class Trip extends PostModel {
 	 *
 	 * @return string
 	 */
-	public function get_group_size() {
+	public function get_group_size(): string {
 		$group_size = array();
 		if ( ! empty( $this->get_minimum_participants() ) ) {
 			$group_size[] = (int) $this->get_minimum_participants();
@@ -460,7 +492,7 @@ class Trip extends PostModel {
 	 *
 	 * @return string A string of term links.
 	 */
-	public function get_trip_terms( $taxonomy ) {
+	public function get_trip_terms( string $taxonomy ): string {
 		$terms = get_the_terms( $this->post->ID, $taxonomy );
 		$value = '';
 		if ( is_array( $terms ) ) {
@@ -479,35 +511,18 @@ class Trip extends PostModel {
 	 *
 	 * @return string
 	 */
-	public function get_tab_section_title( $key ) {
-		switch ( $key ) {
-			case 'trip_facts':
-				$value = 'trip_facts';
-				break;
-			case 'trip_overview':
-				$value = 'overview_section';
-				break;
-			case 'trip_highlights':
-				$value = 'trip_highlights';
-				break;
-			case 'trip_itinerary':
-				$value = 'trip_itinerary';
-				break;
-			case 'trip_cost':
-				$value = 'cost_tab_sec';
-				break;
-			case 'trip_map':
-				$value = 'map_section';
-				break;
-			case 'trip_faq':
-				$value = 'faq_section';
-				break;
-			default:
-				$value = $key;
-				break;
-		}
+	public function get_tab_section_title( string $key ): string {
+		$mapping = array(
+			'trip_facts'      => 'trip_facts_title',
+			'trip_overview'   => 'overview_section_title',
+			'trip_highlights' => 'trip_highlights_title',
+			'trip_itinerary'  => 'trip_itinerary_title',
+			'trip_cost'       => 'cost_tab_sec_title',
+			'trip_map'        => 'map_section_title',
+			'trip_faq'        => 'faq_section_title',
+		);
 
-		return $this->get_setting( $value . '_title' ) ?? '';
+		return $this->get_setting( $mapping[ $key ] ?? "{$key}_title" ) ?? '';
 	}
 
 	/**
@@ -517,7 +532,7 @@ class Trip extends PostModel {
 	 *
 	 * @return mixed
 	 */
-	public function get_editor_content( $id ) {
+	public function get_editor_content( int $id ) {
 		$tab_content = $this->get_setting( 'tab_content' );
 		if ( isset( $tab_content ) ) {
 			$tab_content = $tab_content[ $id . '_wpeditor' ];
@@ -531,7 +546,7 @@ class Trip extends PostModel {
 	 *
 	 * @return string
 	 */
-	public function get_overview_content() {
+	public function get_overview_content(): string {
 		$overview_content = $this->get_setting( 'tab_content' );
 		if ( isset( $overview_content ) ) {
 			$overview_content = $overview_content[ '1_wpeditor' ];
@@ -545,7 +560,7 @@ class Trip extends PostModel {
 	 *
 	 * @return string
 	 */
-	public function get_highlights_content() {
+	public function get_highlights_content(): string {
 		return $this->get_setting( 'trip_highlights' ) ?? '';
 	}
 
@@ -554,7 +569,7 @@ class Trip extends PostModel {
 	 *
 	 * @return array
 	 */
-	public function get_itinerary_data() {
+	public function get_itinerary_data(): array {
 		$itinerary_data = $this->get_setting( 'itinerary' );
 
 		if ( ! is_array( $itinerary_data ) || ! isset( $itinerary_data[ 'itinerary_title' ] ) ) {
@@ -577,11 +592,10 @@ class Trip extends PostModel {
 	 *
 	 * @return string
 	 */
-	public function get_cost_includes_title() {
-		$cost_includes       = $this->get_setting( 'cost' );
-		$cost_includes_title = $cost_includes[ 'includes_title' ];
+	public function get_cost_includes_title(): string {
+		$cost_includes = $this->get_setting( 'cost' );
 
-		return $cost_includes_title;
+		return $cost_includes[ 'includes_title' ];
 	}
 
 	/**
@@ -589,11 +603,10 @@ class Trip extends PostModel {
 	 *
 	 * @return array
 	 */
-	public function get_cost_includes_content() {
-		$cost_includes         = $this->get_setting( 'cost' );
-		$cost_includes_content = preg_split( '/\r\n|[\r\n]/', $cost_includes[ 'cost_includes' ] );
+	public function get_cost_includes_content(): array {
+		$cost_includes = $this->get_setting( 'cost' );
 
-		return $cost_includes_content;
+		return preg_split( '/\r\n|[\r\n]/', $cost_includes[ 'cost_includes' ] );
 	}
 
 	/**
@@ -601,7 +614,7 @@ class Trip extends PostModel {
 	 *
 	 * @return array
 	 */
-	public function get_cost_includes_data() {
+	public function get_cost_includes_data(): array {
 		$title   = $this->get_cost_includes_title();
 		$content = $this->get_cost_includes_content();
 
@@ -807,7 +820,7 @@ class Trip extends PostModel {
 	 *
 	 * @return array
 	 */
-	public function get_gallery_images() {
+	public function get_gallery_images(): array {
 		$gallery_data                   = $this->get_meta( 'wpte_gallery_id' );
 		$option                         = new PluginSettings();
 		$show_featured_image_in_gallery = $option->get( 'show_featured_image_in_gallery', 'yes' );
@@ -836,9 +849,9 @@ class Trip extends PostModel {
 					'alt' => $image_alt,
 				);
 			}
-
-			return $gallery_images;
 		}
+
+		return $gallery_images;
 	}
 
 	/**
@@ -846,7 +859,7 @@ class Trip extends PostModel {
 	 *
 	 * @return array
 	 */
-	public function get_featured_image() {
+	public function get_featured_image(): array {
 		$featured_image_url = WP_TRAVEL_ENGINE_IMG_URL . '/public/css/images/single-trip-featured-img.jpg';
 		$image_alt          = get_the_title();
 		if ( has_post_thumbnail( $this->post->ID ) ) {
@@ -865,12 +878,12 @@ class Trip extends PostModel {
 	}
 
 	/**
-	 * Check if video gallery is enabled.
+	 * Check if a video gallery is enabled.
 	 *
 	 * @return boolean
 	 */
-	public function is_enabled_video_gallery() {
-		return $this->get_setting( 'enable_video_gallery' ) ?? false;
+	public function is_enabled_video_gallery(): bool {
+		return (bool) ( $this->get_setting( 'enable_video_gallery' ) ?? false );
 	}
 
 	/**
@@ -878,7 +891,7 @@ class Trip extends PostModel {
 	 *
 	 * @return array
 	 */
-	public function get_video_gallery() {
+	public function get_video_gallery(): array {
 		$video_gallery = $this->get_meta( 'wpte_vid_gallery' );
 
 		if ( ! is_array( $video_gallery ) ) {
@@ -979,8 +992,8 @@ class Trip extends PostModel {
 				$difficulty_attribute        = $difficulty_term_description ? 'data-content="' . $difficulty_term_description . '"' : '';
 				$difficulty_link             = get_term_link( $term );
 				$difficulty_name             = $term->name;
-				$difficulty_span_class       = isset( $difficulty_attribute ) && $difficulty_attribute != '' ? 'wte-difficulty-content tippy-exist' : 'wte-difficulty-content';
-				$difficulty_data_content     = isset( $difficulty_attribute ) && $difficulty_attribute != '' ? $difficulty_attribute : '';
+				$difficulty_span_class       = $difficulty_attribute != '' ? 'wte-difficulty-content tippy-exist' : 'wte-difficulty-content';
+				$difficulty_data_content     = $difficulty_attribute != '' ? $difficulty_attribute : '';
 
 				$trip_difficulty_level[ $key ] += array(
 					'difficulty_levels'       => $difficulty_levels,
@@ -1062,13 +1075,17 @@ class Trip extends PostModel {
 
 	}
 
-	public function get_inventory() {
+	/**
+	 * Get the trip Inventory.
+	 *
+	 * @return Inventory
+	 */
+	public function get_inventory(): Inventory {
 		if ( is_null( $this->inventory ) ) {
 			$this->inventory = new Inventory( $this->ID );
 		}
 
 		return $this->inventory;
-
 	}
 
 	/**
@@ -1112,5 +1129,40 @@ class Trip extends PostModel {
 
 			return $this->search( $data[ $meta_keys ], $meta_keyss );
 		}
+	}
+
+	/**
+	 * Set Primary Package.
+	 *
+	 * @return $this
+	 *
+	 * @since 6.1.2
+	 */
+	public function set_primary_package( ?TripPackage $package = null ): Trip {
+		if ( $package ) {
+			$this->primary_package = $package;
+		} else if ( $this->has_package() ) {
+			if ( count( $this->trip_packages ) === 1 ) {
+				$this->primary_package = $this->trip_packages->current();
+
+				return $this;
+			}
+
+			$primary_package_id = $this->get_meta( 'primary_package' );
+
+			if ( is_numeric( $primary_package_id ) ) {
+				$primary_package = $this->trip_packages->get_package( $primary_package_id );
+				if ( $primary_package ) {
+					$this->primary_package = $primary_package;
+
+					return $this;
+				}
+			}
+
+			$this->trip_packages->get_package_with_low_price();
+
+		}
+
+		return $this;
 	}
 }

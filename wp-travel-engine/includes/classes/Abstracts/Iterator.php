@@ -11,7 +11,7 @@ namespace WPTravelEngine\Abstracts;
  * Class Iterator
  * This class represents an iterator in the WP Travel Engine plugin.
  */
-abstract class Iterator implements \Iterator {
+abstract class Iterator implements \Iterator, \Countable {
 	/**
 	 * The data array.
 	 *
@@ -29,10 +29,10 @@ abstract class Iterator implements \Iterator {
 	/**
 	 * Iterator Constructor.
 	 *
-	 * @param array $data The data array.
+	 * @param array $package_ids The data array.
 	 */
-	public function __construct( array $data ) {
-		$this->data = $data;
+	public function __construct( array $package_ids ) {
+		$this->data = $package_ids;
 	}
 
 	/**
@@ -89,4 +89,14 @@ abstract class Iterator implements \Iterator {
 	public function array(): array {
 		return $this->data;
 	}
+
+	/**
+	 * Get the count of the data array.
+	 *
+	 * @return int
+	 */
+	public function count(): int {
+		return count( $this->data );
+	}
+
 }

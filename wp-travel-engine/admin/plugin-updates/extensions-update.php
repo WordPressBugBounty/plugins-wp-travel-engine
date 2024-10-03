@@ -486,6 +486,9 @@ function wptravelengine_get_licensed_addons( $addon_id = null, $key = 'id' ) {
 		if ( $slug === 'wte_hbl' ) {
 			$slug = 'wte_hbl_payment';
 		}
+		if ( $slug === 'wptravelengine_we_travel' ) {
+			$slug = 'wte_affiliate_booking';
+		}
 		$item_id = wte_get_extensions_ids( $slug );
 		if ( ! is_plugin_active( $plugin_id ) || ! $item_id ) {
 			continue;

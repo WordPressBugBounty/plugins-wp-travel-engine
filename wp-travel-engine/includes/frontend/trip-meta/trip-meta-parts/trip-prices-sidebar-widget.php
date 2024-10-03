@@ -150,7 +150,8 @@ $custom_enquiry_link = $settings['custom_enquiry_link'] ?? '#';
 						?>
 						<button type="button"
 								data-trip-booking="<?php echo esc_attr( wp_json_encode( $trip_booking_data ) ); ?>"
-								class="wpte-bf-btn wte-book-now"><?php echo esc_html__( 'Check Availability', 'wp-travel-engine' ); ?></button>
+								disabled="disabled"
+								class="wpte-bf-btn wte-book-now btn-loading"><?php echo esc_html__( 'Check Availability', 'wp-travel-engine' ); ?></button>
 					</div>
 				</div>
 				<?php

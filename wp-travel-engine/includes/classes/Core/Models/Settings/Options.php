@@ -44,6 +44,8 @@ class Options {
 	 * @return bool
 	 */
 	public static function update( string $option_name, $value ): bool {
+		static::unset( $option_name );
+
 		return update_option( $option_name, $value );
 	}
 

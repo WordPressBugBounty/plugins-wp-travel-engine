@@ -107,36 +107,6 @@ class Wp_Travel_Engine_Activator {
 			deactivate_plugins( 'wte-paypal-gateway/wte-paypal-gateway.php' );
 		}
 
-		$wte_doc_tax_post_args = array(
-			'post_type'      => 'trip', // Your Post type Name that You Registered
-			'posts_per_page' => -1,
-			'order'          => 'ASC',
-		);
-		$wte_doc_tax_post_qry  = new WP_Query( $wte_doc_tax_post_args );
-		$cost                  = 0;
-		if ( $wte_doc_tax_post_qry->have_posts() ) :
-			while ( $wte_doc_tax_post_qry->have_posts() ) :
-				$wte_doc_tax_post_qry->the_post();
-				$wp_travel_engine_setting = get_post_meta( get_the_ID(), 'wp_travel_engine_setting', true );
-				if ( isset( $wp_travel_engine_setting['trip_price'] ) ) {
-					$cost = $wp_travel_engine_setting['trip_price'];
-					update_post_meta( get_the_ID(), 'wp_travel_engine_setting_trip_price', $cost );
-				}
-				if ( isset( $wp_travel_engine_setting['trip_prev_price'] ) ) {
-					$prev_cost = $wp_travel_engine_setting['trip_prev_price'];
-					update_post_meta( get_the_ID(), 'wp_travel_engine_setting_trip_prev_price', $prev_cost );
-				}
-				if ( isset( $wp_travel_engine_setting['trip_duration'] ) ) {
-					$duration = $wp_travel_engine_setting['trip_duration'];
-					update_post_meta( get_the_ID(), 'wp_travel_engine_setting_trip_duration', $duration );
-				}
-				$actual_price = wp_travel_engine_get_actual_trip_price( get_the_ID(), true );
-				update_post_meta( get_the_ID(), 'wp_travel_engine_setting_trip_actual_price', $actual_price );
-			endwhile;
-			wp_reset_postdata();
-		endif;
-		wp_reset_query();
-
 		$options                          = get_option( 'wp_travel_engine_settings', array() );
 		$wp_travel_engine_option_settings = get_option( 'wp_travel_engine_settings', array() );
 		$wishlist__page                   = wptravelengine_get_page_by_title( 'Wishlist' );

@@ -476,7 +476,7 @@ class Trip extends WP_CLI_Command {
 			$package_categories[ 'c_ids' ][ $term_id ]         = $term_id;
 			$package_categories[ 'labels' ][ $term_id ]        = $term_name;
 			$package_categories[ 'prices' ][ $term_id ]        = $price;
-			$package_categories[ 'pricing_types' ][ $term_id ] = 'fixed';
+			$package_categories[ 'pricing_types' ][ $term_id ] = 'per-person';
 			$package_categories[ 'enabled_sale' ][ $term_id ]  = (bool) array_rand( [ 0, 1 ] );
 			$package_categories[ 'sale_prices' ][ $term_id ]   = (int) $price * rand( 80, 90 ) / 100;
 			$package_categories[ 'min_paxes' ][ $term_id ]     = rand( 0, 1 );

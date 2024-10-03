@@ -13,6 +13,7 @@ use WPTravelEngine\Core\Models\Post\TravelerCategories;
 use WPTravelEngine\Core\Models\Post\Trip;
 use WPTravelEngine\Core\Models\Post\TripPackage;
 use WPTravelEngine\Core\Models\Settings\PluginSettings;
+
 global $wtetrip;
 global $post;
 
@@ -20,8 +21,8 @@ global $post;
  * @var Trip $trip_model
  */
 $trip_model      = Trip::make( $wtetrip->post->ID );
-$default_package = $trip_model->packages()->get_default_package();
-if( !isset( $default_package ) ) {
+$default_package = $trip_model->default_package();
+if ( ! $default_package ) {
 	return;
 }
 if ( $default_package instanceof TripPackage ) {
@@ -49,10 +50,10 @@ $trip_booking_data = apply_filters(
 	)
 );
 ?>
-<div <?php echo esc_attr($attributes_parser->wrapper_attributes()); ?>>
-<div class="wpte-bf-btn-wrap">
-	<button type="button"
-			data-trip-booking="<?php echo esc_attr( wp_json_encode( $trip_booking_data ) ); ?>"
-			class="wpte-bf-btn wte-book-now"><?php echo esc_html__( 'Check Availability', 'wp-travel-engine' ); ?></button>
-</div>
+<div <?php echo esc_attr( $attributes_parser->wrapper_attributes() ); ?>>
+	<div class="wpte-bf-btn-wrap">
+		<button type="button"
+				data-trip-booking="<?php echo esc_attr( wp_json_encode( $trip_booking_data ) ); ?>"
+				class="wpte-bf-btn wte-book-now"><?php echo esc_html__( 'Check Availability', 'wp-travel-engine' ); ?></button>
+	</div>
 </div>

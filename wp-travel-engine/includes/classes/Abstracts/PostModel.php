@@ -8,6 +8,7 @@
 
 namespace WPTravelEngine\Abstracts;
 
+use InvalidArgumentException;
 use WP_Error;
 use WP_Post;
 use WPTravelEngine\Traits\Factory;
@@ -54,7 +55,7 @@ abstract class PostModel {
 	 *
 	 * @param WP_Post|int $post The post-object.
 	 *
-	 * @throws \InvalidArgumentException If the provided $post is not an instance of WP_Post or if the post type is invalid.
+	 * @throws InvalidArgumentException If the provided $post is not an instance of WP_Post or if the post-type is invalid.
 	 */
 	public function __construct( $post ) {
 		if ( is_numeric( $post ) ) {
@@ -62,11 +63,11 @@ abstract class PostModel {
 		}
 
 		if ( ! $post instanceof WP_Post ) {
-			throw new \InvalidArgumentException( 'Invalid post object' );
+			throw new InvalidArgumentException( 'Invalid post object' );
 		}
 
 		if ( $post->post_type !== $this->post_type ) {
-			throw new \InvalidArgumentException( 'Invalid post type' );
+			throw new InvalidArgumentException( 'Invalid post type' );
 		}
 
 		$this->ID = $post->ID;
@@ -75,11 +76,11 @@ abstract class PostModel {
 	}
 
 	/**
-	 * Get the post ID
+	 * Get the post-ID.
 	 *
 	 * This method is not abstract and can be used directly in child classes
 	 *
-	 * @return int The post ID
+	 * @return int The post-ID.
 	 */
 	public function get_id(): int {
 		return $this->post->ID;
@@ -93,7 +94,7 @@ abstract class PostModel {
 	 * @return string The post-title
 	 */
 	public function get_title(): string {
-		return \get_the_title( $this->post );
+		return get_the_title( $this->post );
 	}
 
 	/**
@@ -153,10 +154,10 @@ abstract class PostModel {
 	 * @param $meta_key
 	 * @param $meta_value
 	 *
-	 * @return mixed
+	 * @return $this
 	 */
-	public function set_meta( $meta_key, $meta_value ) {
-		$this->data['__changes'][ $meta_key ] = $meta_value;
+	public function set_meta( $meta_key, $meta_value ): PostModel {
+		$this->data[ '__changes' ][ $meta_key ] = $meta_value;
 
 		return $this;
 	}
@@ -173,17 +174,32 @@ abstract class PostModel {
 	}
 
 	/**
+	 * Deletes metadata from a post.
+	 *
+	 * @param string $meta_key Metadata name.
+	 * @param mixed $meta_value Optional. Metadata value. If provided,
+	 *                           rows will only be removed that match the value.
+	 *                           Must be serializable if non-scalar. Default empty.
+	 *
+	 * @return bool True on success, false on failure.
+	 * @since 6.1.2
+	 */
+	public function delete_meta( string $meta_key, $meta_value = '' ): bool {
+		return delete_post_meta( $this->ID, $meta_key, $meta_value );
+	}
+
+	/**
 	 * Save the post-metadata.
 	 * This method saves all the changes made to the post-metadata.
 	 *
 	 * @return object
 	 */
 	public function save(): object {
-		foreach ( $this->data['__changes'] as $meta_key => $meta_value ) {
+		foreach ( $this->data[ '__changes' ] as $meta_key => $meta_value ) {
 			$this->update_meta( $meta_key, $meta_value );
 			unset( $this->data[ $meta_key ] );
 		}
-		unset( $this->data['__changes'] );
+		unset( $this->data[ '__changes' ] );
 
 		return $this;
 	}
@@ -214,7 +230,7 @@ abstract class PostModel {
 	 * @return $this The new post ID on success. The value 0 or WP_Error on failure.
 	 */
 	public static function create_post( array $postarr ): PostModel {
-		return new static( \wp_insert_post( $postarr ) );
+		return new static( wp_insert_post( $postarr ) );
 	}
 
 	/**
@@ -227,7 +243,7 @@ abstract class PostModel {
 	 * @return int|WP_Error The post-ID on success. The value 0 or WP_Error on failure.
 	 */
 	public function update_post( array $postarr ) {
-		$postarr['ID'] = $this->ID;
+		$postarr[ 'ID' ] = $this->ID;
 
 		return wp_update_post( $postarr );
 	}
