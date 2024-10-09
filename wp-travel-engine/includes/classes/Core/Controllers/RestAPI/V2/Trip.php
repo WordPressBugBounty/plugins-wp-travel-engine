@@ -248,9 +248,9 @@ class Trip extends WP_REST_Posts_Controller {
 					$trip->delete_meta( 'primary_package' );
 				}
 				$default_package = $trip->default_package();
-				if( $default_package ){
+				if ( $default_package ) {
 					$trip->update_meta( '_s_price', $trip->has_sale() ? $trip->get_sale_price() : $trip->get_price() );
-				}else{
+				} else {
 					$trip->delete_meta( '_s_price' );
 				}
 				$previous           = $this->prepare_item_for_response( $trip->post, $request );
@@ -576,7 +576,7 @@ class Trip extends WP_REST_Posts_Controller {
 
 		if ( $this->is_valid_request_param( 'packages' ) ) {
 
-			$trip_package_ids = array_column( $request[ 'packages' ], 'id' );
+			$primary_package_id = $trip->get_meta( 'primary_package' );
 
 			foreach ( $request[ 'packages' ] ?? [] as $key => $package ) {
 
@@ -584,7 +584,7 @@ class Trip extends WP_REST_Posts_Controller {
 					continue;
 				}
 
-				$package[ 'name' ] = empty( $package[ 'name' ] ?? '' ) ? get_num_suffix( ++ $key ) : $package[ 'name' ];
+				$package[ 'name' ] = empty( $package[ 'name' ] ?? '' ) ? wptravelengine_get_num_suffix( ++ $key ) : $package[ 'name' ];
 
 				if ( is_null( $package[ 'id' ] ?? null ) ) {
 					$package[ 'id' ] = wp_insert_post( [
@@ -594,6 +594,10 @@ class Trip extends WP_REST_Posts_Controller {
 						'post_status'  => 'publish',
 						'post_author'  => get_current_user_id(),
 					] );
+				}
+
+				if ( $package[ 'is_primary' ] || empty( $primary_package_id ) ) {
+					$primary_package_id = $package[ 'id' ];
 				}
 
 				$group_pricing = null;
@@ -690,24 +694,21 @@ class Trip extends WP_REST_Posts_Controller {
 					$this->set_bad_request( 'invalid_param', sprintf( __( '%sMaximum Pax%s %s must be greater than 0 in \'%s Package\'.', 'wp-travel-engine' ), '<strong>', '</strong>', $package[ 'name' ] ), "{$package['name']}_max_pax" );
 				}
 
-				$trip_package_ids[ $key ] = $package[ 'id' ];
-
 				unset( $group_pricing, $package_dates, $package_ids, $last_meta_input, $common_plain_text, $regularVsSalePrices, $areCountsValid, $areSeatsValid, $arePricesValid, $areSalePricesValid, $areMinPaxesValid, $areMaxPaxesValid );
-
 			}
 
-			$primaryPackageId = array_search( true, array_combine( array_filter( $trip_package_ids ), array_column( $request[ 'packages' ], 'is_primary' ) ) );
-			$primaryPackageId = $primaryPackageId !== false ? $primaryPackageId : ( $trip_package_ids[ 0 ] ?? '' );
+			$trip->set_meta( 'primary_package', $primary_package_id );
 
-			if ( ! empty( $primaryPackageId ) ) {
-				$trip->set_meta( 'primary_package', $primaryPackageId );
-			}
+			$trip_package_ids = array_unique( array_merge(
+				array_filter( array_column( $request[ 'packages' ], 'id' ) )
+				, array_column( $meta_inputs ?? array(), 'package_id' )
+			) );
 
 			if ( ! isset( $this->errors ) ) {
 				$trip->set_meta( 'packages_ids', $trip_package_ids );
 				foreach ( $meta_inputs ?? [] as $meta_input ) {
-					$available_months = array_map( function( $string ) {
-						return substr( $string,  2, 4 );
+					$available_months = array_map( function ( $string ) {
+						return substr( $string, 2, 4 );
 					}, array_keys( $meta_input[ 'package-dates' ] ) );
 					wp_update_post( [
 						'ID'           => array_shift( $meta_input ),
@@ -722,8 +723,9 @@ class Trip extends WP_REST_Posts_Controller {
 				}
 
 				$trip->save();
+
 				$updated_trip = new Post\Trip( $trip->ID );
-				$price = $updated_trip->has_sale() ? $updated_trip->get_sale_price() : $updated_trip->get_price();
+				$price        = $updated_trip->has_sale() ? $updated_trip->get_sale_price() : $updated_trip->get_price();
 				$trip->set_meta( 'wp_travel_engine_setting_trip_actual_price', $updated_trip->get_price() );
 				$trip->set_meta( 'wp_travel_engine_setting_trip_price', $price );
 				$trip->set_meta( '_s_price', $price );
@@ -1081,9 +1083,11 @@ class Trip extends WP_REST_Posts_Controller {
 			$data[ 'packages' ][ $key ][ 'is_primary' ] = $default_package_id === $trip_package->ID;
 		}
 		$settings = Options::get( 'wp_travel_engine_settings', [] );
+		$def_tabs = array( 'itinerary', 'cost', 'dates', 'faqs', 'map', 'review' );
 		foreach ( $settings[ 'trip_tabs' ][ 'id' ] ?? [] as $key => $i ) {
-			$i = (int) $i;
-			if ( $i < 7 || ( ( $settings[ 'trip_tabs' ][ 'field' ][ $i ] ?? '' ) === 'review' ) ) {
+			$i     = (int) $i;
+			$field = $settings[ 'trip_tabs' ][ 'field' ][ $i ] ?? '';
+			if ( 1 === $i || in_array( $field, $def_tabs ) ) {
 				continue;
 			}
 			$data[ 'custom_tabs' ][ 'tab_' . $i ] = [

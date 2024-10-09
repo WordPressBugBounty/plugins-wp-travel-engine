@@ -50,14 +50,16 @@ function wptravelengine_tabs_ui_render( $args = array(), $tabs = array() ) {
  * @return string
  * @since 6.1.0
  */
-function get_num_suffix( int $num ): string {
+function wptravelengine_get_num_suffix( int $num ): string {
 	$last_two_digits = $num % 100;
 
-	return $num . ( ( $last_two_digits >= 11 && $last_two_digits <= 13 ) ? 'th' : ( [
-																						'st',
-																						'nd',
-																						'rd',
-																					][ $num % 10 - 1 ] ?? 'th' ) );
+	if ( in_array( $last_two_digits, range( 11, 13 ) ) ) {
+		return $num . 'th';
+	}
+
+	$suffix = [ 'st', 'nd', 'rd' ];
+
+	return $num . ( $suffix[ ( $num % 10 ) - 1 ] ?? 'th' );
 }
 
 

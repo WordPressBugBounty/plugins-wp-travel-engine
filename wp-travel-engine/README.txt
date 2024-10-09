@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 6.1.2
+Stable tag: 6.1.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -367,6 +367,11 @@ Yes. We have created WooCommerce Payments add-ons that supports all the payment 
 Please send us an email via [support ticket](https://wptravelengine.com/support-ticket/?utm_source=free_plugin&utm_medium=wporg&utm_campaign=support), and we will be happy to help you.
 
 == Changelog ==
+
+= 6.1.3 - 9th October 2024 =
+* Fix: Resolved a fatal error that occurred when retrieving the primary package ID.
+* Fix: Corrected an issue where more than three packages were not displayed in the booking modal
+* Fix: Fixed an issue where custom tab content was not appearing in the editor view.
 
 = 6.1.2 - 3rd October 2024 =
 * Fix: Resolved an issue where a 100% discount was displayed on the archive page when no sale price was set.
