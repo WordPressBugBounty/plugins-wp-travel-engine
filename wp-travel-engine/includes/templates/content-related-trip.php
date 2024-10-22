@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 global $post;
 $is_featured              = wte_is_trip_featured( get_the_ID() );
-$settings                 = wp_travel_engine_get_settings();
+$settings                 = wptravelengine_settings()->get();
 $related_new_trip_listing = isset( $settings['related_display_new_trip_listing'] ) && $settings['related_display_new_trip_listing'] == 'yes';
 $set_duration_type        = isset( $settings['set_duration_type'] ) && ! empty( $settings['set_duration_type'] ) ? $settings['set_duration_type'] : 'days';
 $wp_travel_engine_setting = get_post_meta( get_the_ID(), 'wp_travel_engine_setting', true );

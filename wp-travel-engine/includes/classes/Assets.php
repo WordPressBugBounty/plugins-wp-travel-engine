@@ -10,8 +10,7 @@
 namespace WPTravelEngine;
 
 use WPTravelEngine\Abstracts\AssetsAbstract;
-use WPTravelEngine\Core\Functions;
-use WPTravelEngine\Core\Models\Post\Booking;
+use WPTravelEngine\Helpers\Functions;
 use WPTravelEngine\Core\Models\Settings\PluginSettings;
 use WPTravelEngine\Helpers\Asset;
 use WPTravelEngine\Helpers\AssetLib;
@@ -43,6 +42,7 @@ class Assets extends AssetsAbstract {
 		$this->version = WP_TRAVEL_ENGINE_VERSION;
 
 		add_action( 'wp_enqueue_scripts', array( $this, 'plugin_scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'plugin_admin_scripts' ) );
 		add_action( 'wp_print_scripts', array( $this, 'dequeue_assets' ), 11 );
 		add_action( 'wp_print_styles', array( $this, 'dequeue_assets' ), 11 );
 
@@ -77,9 +77,8 @@ class Assets extends AssetsAbstract {
 		$post_meta = is_object( $post ) ? get_post_meta( $post->ID, 'wp_travel_engine_setting', true ) : [];
 
 		$currency_code_js = apply_filters( 'wpte_cc_allow_payment_with_switcher', true ) ? wp_travel_engine_get_currency_code() : wte_currency_code_in_db();
-		$lazy_loading     = wptravelengine_settings()->get( "enable_lazy_loading", "inactive" );
-		$map_lazy_loading = wptravelengine_settings()->get( "enable_map_lazy_loading", "inactive" );
-		$map_lazy_load    = ( "active" === $lazy_loading && "active" === $map_lazy_loading ) ? "enable" : "disable";
+		$lazy_loading     = wptravelengine_toggled( wptravelengine_settings()->get( "enable_lazy_loading", "no" ) );
+		$map_lazy_loading = wptravelengine_toggled( wptravelengine_settings()->get( "enable_map_lazy_loading", "no" ) );
 
 		$data = [
 			'wtePreFetch'      => array(
@@ -89,7 +88,7 @@ class Assets extends AssetsAbstract {
 					'nonce'         => wp_create_nonce( 'wp_rest' ),
 					'versionString' => 'wp/v2/',
 				),
-				'map_lazy_load' => $map_lazy_load,
+				'map_lazy_load' => ( $lazy_loading && $map_lazy_loading ) ? "enable" : "disable",
 				'iframe_url'    => isset( $post_meta[ 'map' ][ 'iframe' ] ) ? wptravelengine_esc_iframe( $post_meta[ 'map' ][ 'iframe' ] ) : '',
 			),
 			'wte_account_page' => array(
@@ -138,6 +137,15 @@ class Assets extends AssetsAbstract {
 	}
 
 	/**
+	 * Register Plugin Scripts for Admin.
+	 *
+	 * @since 6.2.0
+	 */
+	public function plugin_admin_scripts() {
+		$this->register_script( Asset::register( 'wptravelengine-settings', 'admin/global-settings.js' ) );
+	}
+
+	/**
 	 * Register Plugin Scripts.
 	 */
 	protected function register_plugin_scripts() {
@@ -147,28 +155,28 @@ class Assets extends AssetsAbstract {
 
 		$this->register_style( Asset::register( 'wptravelengine-rtl', 'public/wte-rtl.css' ) );
 
-		$optimized_loading = wptravelengine_settings()->get( 'enable_optimize_loading', 'inactive' );
+		$optimized_loading = wptravelengine_toggled( wptravelengine_settings()->get( 'enable_optimize_loading', false ) );
 
-		$trip_booking_modal_script = $optimized_loading === 'inactive'
-			? 'public/components/trip-booking-modal.js'
-			: 'bundle/trip-booking-modal.bundle.js';
+		$trip_booking_modal_script = $optimized_loading
+			? 'bundle/trip-booking-modal.bundle.js'
+			: 'public/components/trip-booking-modal.js';
 
-		$trip_booking_modal_dependencies = $optimized_loading === 'inactive'
-			? [ 'single-trip', 'wte-fpickr' ]
-			: [ 'single-trip', 'wte-fpickr', 'wp-element' ];
+		$trip_booking_modal_dependencies = $optimized_loading
+			? [ 'single-trip', 'wte-fpickr', 'wp-element' ]
+			: [ 'single-trip', 'wte-fpickr' ];
 
 		$this->register_script(
 			Asset::register( 'trip-booking-modal', $trip_booking_modal_script )
 			     ->dependencies( $trip_booking_modal_dependencies )
 		);
 
-		$single_trip_script = $optimized_loading === 'inactive'
-			? 'public/single-trip.js'
-			: 'bundle/single-trip.bundle.js';
+		$single_trip_script = $optimized_loading
+			? 'bundle/single-trip.bundle.js'
+			: 'public/single-trip.js';
 
-		$single_trip_dependencies = $optimized_loading === 'inactive'
-			? [ 'wp-dom-ready', 'wp-api-fetch', 'lodash', 'jquery' ]
-			: [ 'wp-element' ];
+		$single_trip_dependencies = $optimized_loading
+			? [ 'wp-element' ]
+			: [ 'wp-dom-ready', 'wp-api-fetch', 'lodash', 'jquery' ];
 
 		$this->register_script(
 			Asset::register( 'single-trip', $single_trip_script )
@@ -190,7 +198,7 @@ class Assets extends AssetsAbstract {
 		if ( wp_travel_engine_is_checkout_page() && isset( $wte_cart ) ) {
 			$cart_data           = array(
 				'cart_items'  => $wte_cart->getItems(),
-				'cart_totals' => $wte_cart->get_total(),
+				'cart_totals' => $wte_cart->get_totals(),
 			);
 			$wptravelengine_cart = sprintf( "window['wptravelengineCart'] = %s;", wp_json_encode( $cart_data ) );
 			wp_add_inline_script( 'wp-travel-engine', $wptravelengine_cart );
@@ -206,7 +214,6 @@ class Assets extends AssetsAbstract {
 		//Wishlist Page.
 		$this->register_style( Asset::register( 'trip-wishlist', 'public/trip-wishlist.css' ) );
 		$this->register_script( Asset::register( 'trip-wishlist', 'public/trip-wishlist.js' )->dependencies( [ 'wp-travel-engine' ] ) );
-
 	}
 
 	/**
@@ -684,6 +691,8 @@ class Assets extends AssetsAbstract {
 					'invalidCartExtraReq'  => __( '%s selection is essential. Please specify a number.', 'wp-travel-engine' ),
 					// Translators: Required Extra Services.
 					'invalidCartExtra'     => __( 'Extra Services marked with * is essential. Please specify a number.', 'wp-travel-engine' ),
+
+					'extraServicesTitle' => $settings[ 'extra_service_title' ] ?? __( 'Extra Servicess', 'wp-travel-engine' ),
 				)
 			),
 			'layout'             => array(
@@ -946,7 +955,7 @@ class Assets extends AssetsAbstract {
 			'l10n'   => array(
 				'ajaxurl'     => admin_url( 'admin-ajax.php' ),
 				'cartURL'     => '',
-				'CheckoutURL' => add_query_arg( 'wte_id', time(), wp_travel_engine_get_checkout_url() ),
+				'CheckoutURL' => add_query_arg( 'wte_id', time(), wptravelengine_get_checkout_url() ),
 			),
 		);
 
@@ -973,7 +982,7 @@ class Assets extends AssetsAbstract {
 		if ( wp_travel_engine_is_checkout_page() && isset( $wte_cart ) ) {
 			$cart_data = array(
 				'cart_items'  => $wte_cart->getItems(),
-				'cart_totals' => $wte_cart->get_total(),
+				'cart_totals' => $wte_cart->get_totals(),
 			);
 
 			$wptravelengine_cart = "window['wptravelengineCart'] = %s;";
@@ -1110,5 +1119,6 @@ class Assets extends AssetsAbstract {
 		}
 
 		wp_register_style( 'wte-plugins-php', plugin_dir_url( WP_TRAVEL_ENGINE_FILE_PATH ) . 'dist/admin/plugins-php.css', array(), filemtime( WP_TRAVEL_ENGINE_ABSPATH . 'dist/admin/plugins-php.css' ) );
+		wp_set_script_translations( 'wp-travel-engine', 'wp-travel-engine', plugin_dir_path( WP_TRAVEL_ENGINE_FILE_PATH ) . '/languages/' );
 	}
 }

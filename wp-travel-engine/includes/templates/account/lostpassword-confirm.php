@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 // Print Errors / Notices.
 wp_travel_engine_print_notices();
-$settings                      = wp_travel_engine_get_settings();
+$settings                      = wptravelengine_settings()->get();
 $wp_travel_engine_dashboard_id = isset( $settings['pages']['wp_travel_engine_dashboard_page'] ) ? esc_attr( $settings['pages']['wp_travel_engine_dashboard_page'] ) : wp_travel_engine_get_page_id( 'my-account' );
 ?>
 <p class="col-xs-12 wp-travel-notice-success wp-travel-notice"><?php echo esc_html( apply_filters( 'wp_travel_lost_password_message', __( 'A password reset email has been sent to the email address for your account, but may take several minutes to show up in your inbox. Please wait at least 10 minutes before attempting another reset. Go back to ', 'wp-travel-engine' ) ) ); ?>

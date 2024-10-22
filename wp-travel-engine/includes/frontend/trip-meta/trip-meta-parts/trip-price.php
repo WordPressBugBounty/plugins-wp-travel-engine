@@ -133,7 +133,7 @@ $wte_options     = get_option( 'wp_travel_engine_settings', true );
 			</div>
 		</div>
 		<?php
-		$global_settings   = wp_travel_engine_get_settings();
+		$global_settings   = wptravelengine_settings()->get();
 		$hide_enquiry_form = ! empty( $global_settings['enquiry'] );
 
 		if ( ! $hide_enquiry_form ) :

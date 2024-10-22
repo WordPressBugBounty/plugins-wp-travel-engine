@@ -520,9 +520,11 @@ class WP_Travel_Engine_Template_Hooks {
 		$nights = isset( $post_meta[ 'trip_duration_nights' ] ) && '' != $post_meta[ 'trip_duration_nights' ]
 			? $post_meta[ 'trip_duration_nights' ] : '';
 
-		$show_trip_duration_days_nights = isset( $option_meta[ 'show_trip_duration_days_nights' ] ) ? $option_meta[ 'show_trip_duration_days_nights' ] : '';
-		wte_get_template( 'single-trip/title.php', compact( 'duration', 'duration_unit', 'nights','show_trip_duration_days_nights' ) );
+		$trip_duration_format = $option_meta[ 'trip_duration_format' ] ?? 'days';
+		$show_trip_duration_days_nights = 'days_and_nights' === $trip_duration_format ? 'yes' : 'no';
+		wte_get_template( 'single-trip/title.php', compact( 'duration', 'duration_unit', 'nights', 'show_trip_duration_days_nights', 'trip_duration_format' ) );
 	}
+
 
 	/**
 	 * Single Trip Feat Image or Gallery.

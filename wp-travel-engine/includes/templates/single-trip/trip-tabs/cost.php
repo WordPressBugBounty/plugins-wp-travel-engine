@@ -12,10 +12,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-$include_title = $cost['includes_title'];
-$cost_includes = preg_split( '/\r\n|[\r\n]/', $cost['cost_includes'] );
-$exclude_title = $cost['excludes_title'];
-$cost_excludes = preg_split( '/\r\n|[\r\n]/', $cost['cost_excludes'] );
+$include_title = $cost['includes_title'] ?? '';
+$cost_includes = preg_split( '/\r\n|[\r\n]/', $cost['cost_includes'] ?? '' );
+$exclude_title = $cost['excludes_title'] ?? '';
+$cost_excludes = preg_split( '/\r\n|[\r\n]/', $cost['cost_excludes'] ?? '' );
 
 do_action( 'wte_before_cost_content' ); ?>
 
@@ -31,7 +31,7 @@ do_action( 'wte_before_cost_content' ); ?>
 		if ( ! empty( $include_title ) ) {
 			echo '<h3>' . esc_attr( $include_title ) . '</h3>';
 		}
-		if ( ! empty( trim( $cost['cost_includes'] ) ) ) :
+		if ( ! empty( trim( $cost['cost_includes'] ?? '' ) ) ) :
 			echo "<ul id='include-result'>";
 			foreach ( $cost_includes as $include ) {
 				echo '<li>' . esc_html( $include ) . '</li>';
@@ -45,7 +45,7 @@ do_action( 'wte_before_cost_content' ); ?>
 		if ( ! empty( $exclude_title ) ) :
 			echo '<h3>' . esc_attr( $exclude_title ) . '</h3>';
 		endif;
-		if ( ! empty( trim( $cost['cost_excludes'] ) ) ) :
+		if ( ! empty( trim( $cost['cost_excludes'] ?? '' ) ) ) :
 			echo "<ul id='exclude-result'>";
 			foreach ( $cost_excludes as $exclude ) {
 				echo '<li>' . esc_html( $exclude ) . '</li>';

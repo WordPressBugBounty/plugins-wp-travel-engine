@@ -16,6 +16,8 @@
  * @version 1.3.7
  */
 
+use WPTravelEngine\Helpers\Functions;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -60,8 +62,7 @@ $billing_phone   = isset( $biling_data[ 'billing_phone' ] ) ? $biling_data[ 'bil
 					data-msg="Please select a country" data-parsley-required-message="Please select a country">
 				<option value=""><?php esc_html_e( 'Select a Country', 'wp-travel-engine' ); ?></option>
 				<?php
-				$obj          = \wte_functions();
-				$country_list = $obj->wp_travel_engine_country_list();
+				$country_list = Functions::get_countries();
 				$country_list = array_combine( $country_list, $country_list );
 				foreach ( $country_list as $key => $value ) :
 					?>

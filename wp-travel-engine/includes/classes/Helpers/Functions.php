@@ -361,7 +361,7 @@ class Functions {
 	 *
 	 * @return string
 	 */
-	function wp_travel_engine_currencies_symbol( $currency = '' ) {
+	function wp_travel_engine_currencies_symbol( string $currency = '' ): string {
 		return self::currency_symbol_by_code( $currency );
 	}
 
@@ -383,7 +383,7 @@ class Functions {
 	 *
 	 * @return array
 	 */
-	function trip_facts_field_options() {
+	function trip_facts_field_options(): array {
 		$options = array(
 			'text'     => 'text',
 			'number'   => 'number',
@@ -391,19 +391,16 @@ class Functions {
 			'textarea' => 'textarea',
 			'duration' => 'duration',
 		);
-		$options = apply_filters( 'wp_travel_engine_trip_facts_field_options', $options );
 
-		return $options;
+		return apply_filters( 'wp_travel_engine_trip_facts_field_options', $options );
 	}
 
 	/**
-	 * Get options for title while booking trip.
+	 * Get options for title while a booking trip.
 	 *
-	 * @param string $title (default: '')
-	 *
-	 * @return string
+	 * @return array
 	 */
-	function order_form_title_options() {
+	function order_form_title_options(): array {
 		$options = array(
 			'Mr'    => __( 'Mr', 'wp-travel-engine' ),
 			'Mrs'   => __( 'Mrs', 'wp-travel-engine' ),
@@ -411,9 +408,8 @@ class Functions {
 			'Miss'  => __( 'Miss', 'wp-travel-engine' ),
 			'Other' => __( 'Other', 'wp-travel-engine' ),
 		);
-		$options = apply_filters( 'wp_travel_engine_order_form_title_options', $options );
 
-		return $options;
+		return apply_filters( 'wp_travel_engine_order_form_title_options', $options );
 	}
 
 	/**
@@ -836,4 +832,5 @@ class Functions {
 	public function wp_travel_engine_currencies(): array {
 		return static::get_currencies();
 	}
+
 }

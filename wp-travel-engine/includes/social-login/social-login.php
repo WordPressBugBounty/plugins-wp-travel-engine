@@ -20,14 +20,14 @@ $enable_social_login       = isset( $wp_travel_engine_settings['enable_social_lo
 $enable_google_login       = isset( $wp_travel_engine_settings['enable_google_login'] ) && 'yes' === $wp_travel_engine_settings['enable_google_login'];
 $enable_facebook_login     = isset( $wp_travel_engine_settings['enable_facebook_login'] ) && 'yes' === $wp_travel_engine_settings['enable_facebook_login'];
 $enable_linkedin_login     = isset( $wp_travel_engine_settings['enable_linkedin_login'] ) && 'yes' === $wp_travel_engine_settings['enable_linkedin_login'];
-$settings                  = wp_travel_engine_get_settings();
+$settings                  = wptravelengine_settings()->get();
 
 
 if ( $enable_social_login ) {
 	?>
 	<div class="wte-social-login-wrapper">
 	<?php
-	if ( $enable_facebook_login && ( $wp_travel_engine_settings['facebook_client_id'] != '' && $wp_travel_engine_settings['facebook_client_secret'] != '' ) ) {
+	if ( $enable_facebook_login && ( isset( $wp_travel_engine_settings['facebook_client_id'] ) && $wp_travel_engine_settings['facebook_client_id'] != '' && $wp_travel_engine_settings['facebook_client_secret'] != '' ) ) {
 		?>
 		<a href="<?php echo site_url(); ?>/wp-login.php?wte_login=facebook" class="login-with-facebook">
 			<span class="social-icon">
@@ -40,7 +40,7 @@ if ( $enable_social_login ) {
 		</a>
 			<?php
 	}
-	if ( $enable_google_login && ( $wp_travel_engine_settings['google_client_id'] != '' && $wp_travel_engine_settings['google_client_secret'] != '' ) ) {
+	if ( $enable_google_login && ( isset( $wp_travel_engine_settings['google_client_id'] ) && $wp_travel_engine_settings['google_client_id'] != '' && $wp_travel_engine_settings['google_client_secret'] != '' ) ) {
 		?>
 		<a href="<?php echo site_url(); ?>/wp-login.php?wte_login=google" class="login-with-google">
 			<span class="social-icon">
@@ -53,7 +53,7 @@ if ( $enable_social_login ) {
 		</a>
 			<?php
 	}
-	if ( $enable_linkedin_login && ( $wp_travel_engine_settings['linkedin_client_id'] != '' && $wp_travel_engine_settings['linkedin_client_secret'] != '' ) ) {
+	if ( $enable_linkedin_login && ( isset( $wp_travel_engine_settings['linkedin_client_id'] ) && $wp_travel_engine_settings['linkedin_client_id'] != '' && $wp_travel_engine_settings['linkedin_client_secret'] != '' ) ) {
 		?>
 		<a href="<?php echo site_url(); ?>/wp-login.php?wte_login=linkedin" class="login-with-linkedin">
 			<span class="social-icon">

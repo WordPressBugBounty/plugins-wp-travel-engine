@@ -19,6 +19,76 @@ require_once __DIR__ . '/helpers-prices.php';
 require_once __DIR__ . '/wp-travel-engine-form-fields.php';
 
 /**
+ * Recursive helper function to check if key exists in given data.
+ *
+ * @param array $data The current level of data to traverse.
+ * @param array $keys The remaining keys in the dot-separated path.
+ * @since 6.2.0
+ * 
+ * @return bool
+ */
+function wptravelengine_key_exists( array $data, array $keys ): bool {
+    $key = array_shift( $keys );
+
+    if ( ! array_key_exists( $key, $data ) ) {
+        return false;
+    }
+
+    if ( ! is_array( $data[ $key ] ) || empty( $keys ) ) {
+        return true;
+    }
+
+    return wptravelengine_key_exists( $data[ $key ], $keys );
+}
+
+/**
+ * Replaces targeted value with provided value to the provided data.
+ * Supports array and boolean data types.
+ *
+ * @param mixed $data Data to replace value in.
+ * @param mixed $target_value Value to replace.
+ * @param mixed $by Value to replace with.
+ * @param mixed $else Value to replace with if target value is not found. 'null' by default.
+ *
+ * @return mixed
+ * @since 6.2.0
+ *
+ */
+function wptravelengine_replace( $data, $target_value, $by, $else = null ) {
+	if ( is_bool( $data ) ) {
+		return ( $data === $target_value ) ? $by : $else;
+	}
+
+	if ( is_array( $data ) ) {
+		$is_assoc     = empty( array_filter( array_keys( $data ), fn ( $key ) => is_numeric( $key ) ) );
+		$data         = $is_assoc ? array_values( $data ) : $data;
+		$new_array    = array_fill( key( $data ), count( $data ), $else );
+		$target_array = array_fill_keys( array_keys( $data, $target_value, true ), $by );
+
+		return array_replace( $new_array, $target_array );
+	}
+}
+
+/**
+ * Get the ordinal suffix for a number.
+ *
+ * @param int $num
+ *
+ * @return string
+ * @since 6.1.0
+ */
+function get_num_suffix( int $num ): string {
+	$last_two_digits = $num % 100;
+
+	return $num . ( ( $last_two_digits >= 11 && $last_two_digits <= 13 ) ? 'th' : ( [
+																						'st',
+																						'nd',
+																						'rd',
+																					][ $num % 10 - 1 ] ?? 'th' ) );
+}
+
+
+/**
  * Get the instance of the wptravelengine tabs UI.
  *
  * @return WP_Travel_Engine_Tabs_UI
@@ -90,7 +160,7 @@ function wptravelengine_toggled( $value ): bool {
 	if ( is_numeric( $value ) ) {
 		return (bool) $value;
 	} else if ( is_string( $value ) ) {
-		return in_array( $value, [ 'yes', 'true' ], true );
+		return in_array( $value, [ 'yes', 'true', 'on' ], true );
 	}
 
 	return (bool) $value;
@@ -1087,14 +1157,15 @@ function wte_trip_get_trip_rest_metadata( $trip_id ) {
 }
 
 /**
- * Retrive currency code.
+ * Retrieve currency code.
  *
  * @since 5.2.0
  */
-function wte_currency_code() {
-	$code = wte_array_get( get_option( 'wp_travel_engine_settings', array() ), 'currency_code', 'USD' );
-
-	return wte_functions()->wp_travel_engine_currencies_symbol( $code );
+function wte_currency_code(): string {
+	return wptravelengine_functions()
+		->wp_travel_engine_currencies_symbol(
+			wptravelengine_settings()->get( 'currency_code', 'USD' )
+		);
 }
 
 /**
@@ -1232,7 +1303,7 @@ function wte_input_clean( $data, $schema = array() ) {
  *
  * Escapes for SVGs.
  *
- * @param strign $value SVG String.
+ * @param string $value SVG String.
  *
  * 5.3.2
  */
@@ -1535,22 +1606,33 @@ function wptravelengine_get_fa_icons() {
  *
  * @since 5.5.0
  */
-function wptravelengine_svg_by_fa_icon( $icon_name, $echo = true, $class_names = array() ) {
+function wptravelengine_svg_by_fa_icon( $icon, $echo = true, $class_names = array() ) {
 	$data = wptravelengine_get_fa_icons();
 
-	$path = $data[ $icon_name ] ?? '';
-
-	if ( empty( $path ) ) {
-		return $path;
+	if ( is_array( $icon ) ) {
+		$new_icon = $icon[ 'icon' ] ?? '';
+		$path = $icon[ 'path' ] ?: ( $data[ $new_icon ][ 'path' ] ?? '' );
+		if ( empty( $path ) ) {
+			return $path;
+		}
+		$view_box = $icon[ 'view_box' ] ?: ( $data[ $new_icon ][ 'viewBox' ] ?? '' );
+		$icon = $new_icon;
+	} else {
+		$path = $data[ $icon ] ?? '';
+		if ( empty( $path ) ) {
+			return $path;
+		}
+		$view_box = $path[ 'viewBox' ];
+		$path     = $path[ 'path' ];
 	}
 
 	$attr       = array(
 		'fill'        => 'currentColor',
-		'data-prefix' => substr( $icon_name, 0, 3 ),
-		'data-icon'   => substr( $icon_name, 7, strlen( $icon_name ) ),
+		'data-prefix' => substr( $icon, 0, 3 ),
+		'data-icon'   => substr( $icon, 7, strlen( $icon ) ),
 		'xmlns'       => 'http://www.w3.org/2000/svg',
 		'class'       => implode( ' ', array_merge( array( 'svg-inline--fa' ), $class_names ) ),
-		'viewBox'     => $path[ 'viewBox' ],
+		'viewBox'     => $view_box,
 		'height'      => 24,
 		'width'       => 24,
 	);
@@ -1558,10 +1640,10 @@ function wptravelengine_svg_by_fa_icon( $icon_name, $echo = true, $class_names =
 	foreach ( $attr as $attr_name => $attr_value ) {
 		$attributes[] = "{$attr_name}=\"$attr_value\"";
 	}
-	$path = $path[ 'path' ];
-	$svg  = '<svg ';
-	$svg  .= implode( ' ', $attributes );
-	$svg  .= "><path d=\"{$path}\"/></svg>";
+
+	$svg = '<svg ';
+	$svg .= implode( ' ', $attributes );
+	$svg .= "><path d=\"{$path}\"/></svg>";
 
 	if ( ! $echo ) {
 		return $svg;

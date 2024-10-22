@@ -3,7 +3,7 @@ global $wte_cart;
 
 $booking_metas           = get_post_meta( $booking, 'wp_travel_engine_booking_setting', true );
 $booking_meta            = booking_meta_details( $booking );
-$global_settings         = wp_travel_engine_get_settings();
+$global_settings         = wptravelengine_settings()->get();
 $default_payment_gateway = isset( $global_settings[ 'default_gateway' ] ) && ! empty( $global_settings[ 'default_gateway' ] ) ? $global_settings[ 'default_gateway' ] : 'booking_only';
 $user_account_page_id    = wp_travel_engine_get_dashboard_page_id();
 

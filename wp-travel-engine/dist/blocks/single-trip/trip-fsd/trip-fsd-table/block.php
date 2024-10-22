@@ -16,7 +16,7 @@ global $wtetrip;
 $dates_data         = array();
 $trip_duration_unit = 'days';
 $today              = gmdate( 'Y-m-d' );
-$globals_settings   = wp_travel_engine_get_settings();
+$globals_settings   = wptravelengine_settings()->get();
 $pagination_num     = (int) $attributes_parser->get( 'noofRow' );
 $date_format        = $attributes_parser->get( 'dateFormat' );
 $custom_date_format = $attributes_parser->get( 'customDateFormat' );

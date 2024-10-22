@@ -1705,7 +1705,7 @@ class Booking {
 	 * @return array Order Meta.
 	 */
 	private function prepare_legacy_order_metas() {
-		$cart_total = $this->cart->get_total();
+		$cart_total = $this->cart->get_totals();
 
 		$payment_mode = isset( $_POST['wp_travel_engine_payment_mode'] ) ? sanitize_text_field( wp_unslash( $_POST['wp_travel_engine_payment_mode'] ) ) : 'full_payment';
 		$due          = 'partial' === $payment_mode ? + ( $cart_total['total'] - $cart_total['total_partial'] ) : 0;

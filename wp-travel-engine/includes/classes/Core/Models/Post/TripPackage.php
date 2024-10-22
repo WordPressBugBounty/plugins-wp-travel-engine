@@ -210,7 +210,7 @@ class TripPackage extends PostModel {
 			/* @var DateTime $package_date */
 			foreach ( $package_dates as $package_date ) {
 				$times         = array();
-				$times_by_days = $weekly_time_slots[ $package_date->format( 'w' ) ] ?? array();
+				$times_by_days = $weekly_time_slots[ $package_date->format( 'w' ) ?: 7 ] ?? array();
 				foreach ( $times_by_days as $time ) {
 					if ( empty( $time ) ) {
 						continue;

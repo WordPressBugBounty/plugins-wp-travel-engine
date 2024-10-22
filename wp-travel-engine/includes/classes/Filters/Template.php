@@ -27,11 +27,11 @@ class Template {
 	 */
 	public function include_trip_template( string $template_path ): string {
 
-		$optimized_loading = wptravelengine_settings()->get( 'enable_optimize_loading', 'inactive' );
+		$optimized_loading = wptravelengine_toggled( wptravelengine_settings()->get( 'enable_optimize_loading', false ) );
+		\WP_Travel_Engine_Template_Hooks::get_instance();
 		if ( current_theme_supports( 'wptravelengine-templates' ) || ( wp_is_block_theme() && 'yes' == wptravelengine_settings()->get( "enable_fse_template", "no" ) ) ) {
 			if ( is_single() ) {
-				\WP_Travel_Engine_Template_Hooks::get_instance();
-				if ( 'inactive' === $optimized_loading ) {
+				if ( ! $optimized_loading ) {
 					Assets::instance()->enqueue_script( 'trip-booking-modal' );
 				}
 				Assets::instance()
@@ -47,8 +47,7 @@ class Template {
 
 
 		if ( is_singular( WP_TRAVEL_ENGINE_POST_TYPE ) ) {
-			\WP_Travel_Engine_Template_Hooks::get_instance();
-			if ( 'inactive' === $optimized_loading ) {
+			if ( ! $optimized_loading ) {
 				Assets::instance()->enqueue_script( 'trip-booking-modal' );
 			}
 			Assets::instance()

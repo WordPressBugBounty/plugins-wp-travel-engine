@@ -164,9 +164,10 @@ class BaseSetting {
 	}
 
 	/**
-	 * Loads the settings data from the options table into the cache.
+	 * Loads the settings data from the option table into the cache.
 	 */
 	protected function load_settings() {
+		Options::unset( $this->option_name );
 		$this->settings = ArrayUtility::make( Options::get( $this->option_name ) );
 	}
 }

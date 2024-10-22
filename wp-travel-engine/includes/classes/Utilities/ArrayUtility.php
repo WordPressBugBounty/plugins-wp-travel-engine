@@ -108,4 +108,26 @@ class ArrayUtility {
 		}
 	}
 
+	/**
+	 * Flatten a multi-dimensional associative array with dots.
+	 *
+	 * @param array $array The array to flatten.
+	 * @param string $prefix The prefix to prepend to the keys.
+	 *
+	 * @return array The flattened array.
+	 * @since 6.2.0
+	 */
+	public static function flatten( array $array, string $prefix = '' ): array {
+		$result = array();
+		foreach ( $array as $key => $value ) {
+			if ( is_array( $value ) ) {
+				$result = array_merge( $result, static::flatten( $value, $prefix . $key . '.' ) );
+			} else {
+				$result[ $prefix . $key ] = $value;
+			}
+		}
+
+		return $result;
+	}
+
 }

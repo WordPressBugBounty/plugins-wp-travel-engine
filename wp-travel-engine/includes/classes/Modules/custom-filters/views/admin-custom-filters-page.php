@@ -39,7 +39,7 @@ $nonce = wp_create_nonce( '_add_filter_nonce' );
 						<div class="form-field">
 							<label for="label"><?php esc_html_e( 'Filter/Category Slug', 'wp-travel-engine' ); ?></label>
 							<input <?php wte_readonly( 'edit', $mode ); ?>  type="text" name="filter_slug" id="filter-slug" value="<?php echo esc_attr( $slug ); ?>">
-							<p><?php esc_html_e( 'Slug for filter or Category.', 'wp-travel-engine' ); ?></p>
+							<p><?php esc_html_e( 'Taxonomy key. Must not exceed 32 characters and may only contain lowercase alphanumeric characters, dashes, and underscores.', 'wp-travel-engine' ); ?></p>
 						</div>
 						<div class="form-field">
 							<label for="label"><?php esc_html_e( 'Hierarchical', 'wp-travel-engine' ); ?></label>

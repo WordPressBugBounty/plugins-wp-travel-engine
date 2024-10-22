@@ -17,7 +17,6 @@ use WP_REST_Response;
 use WP_REST_Server;
 use WPTravelEngine\Core\Models\Post;
 use WPTravelEngine\Core\Models\Settings\Options;
-use WPTravelEngine\Helpers\PackageDateParser;
 use WPTravelEngine\Utilities\ArrayUtility;
 
 /**
@@ -730,6 +729,7 @@ class Trip extends WP_REST_Posts_Controller {
 				$trip->set_meta( 'wp_travel_engine_setting_trip_price', $price );
 				$trip->set_meta( '_s_price', $price );
 				$trip->set_meta( '_s_has_sale', $updated_trip->has_sale() ? 'yes' : 'no' );
+        Options::delete( 'wptravelengine_indexed_trips_by_dates' );
 			}
 
 		}
@@ -824,10 +824,10 @@ class Trip extends WP_REST_Posts_Controller {
 		$data[ 'cost_title' ] = (string) $trip->get_setting( 'cost_tab_sec_title', '' );
 
 		$data[ 'cost_includes_title' ] = (string) $trip->get_setting( 'cost.includes_title', '' );
-		$data[ 'cost_includes' ]       = array_filter( explode( "\n", $trip->get_setting( 'cost.cost_includes', '' ) ), fn ( $val ) => ! empty( $val ) );
+		$data[ 'cost_includes' ]       = array_values( array_filter( explode( "\n", $trip->get_setting( 'cost.cost_includes', '' ) ), fn ( $val ) => ! empty( $val ) ) );
 
 		$data[ 'cost_excludes_title' ] = (string) $trip->get_setting( 'cost.excludes_title', '' );
-		$data[ 'cost_excludes' ]       = array_filter( explode( "\n", $trip->get_setting( 'cost.cost_excludes', '' ) ), fn ( $val ) => ! empty( $val ) );
+		$data[ 'cost_excludes' ]       = array_values( array_filter( explode( "\n", $trip->get_setting( 'cost.cost_excludes', '' ) ), fn ( $val ) => ! empty( $val ) ) );
 
 		$data[ 'full_payment_enable' ] = wptravelengine_toggled( $trip->get_setting( 'trip_full_payment_enabled', false ) );
 
@@ -861,28 +861,18 @@ class Trip extends WP_REST_Posts_Controller {
 			'max'    => (int) $trip->get_setting( 'trip_maximum_pax', 0 ),
 		];
 
+		$map_img_id = $trip->get_setting( 'map.image_url', array() );
+		$trip_imgs 	= array();
+		if ( ! empty( $map_img_id ) ) {
+			$id 			= (int) $map_img_id;
+			$alt 			= get_post_meta( $id, '_wp_attachment_image_alt', true );
+			$url 			= wp_get_attachment_image_url( $id, 'full' );
+			$trip_imgs[] 	= compact( 'id', 'alt', 'url' );
+		}
+
 		$data[ 'map_title' ] = (string) $trip->get_setting( 'map_section_title', '' );
 		$data[ 'trip_map' ]  = [
-			'images' => array_map(
-				function ( $id ) {
-
-					foreach ( [ 'thumbnail', 'medium', 'full' ] as $size ) {
-						$image = wp_get_attachment_image_src( $id, $size );
-						if ( $image ) {
-							list( $url, $width, $height ) = $image;
-							$orientation = ( $width >= $height ) ? 'landscape' : 'portrait';
-							$$size       = compact( 'url', 'width', 'height', 'orientation' );
-						} else {
-							$$size = null;
-						}
-					}
-					$alt  = get_post_meta( $id, '_wp_attachment_image_alt', true );
-					$type = explode( '/', get_post_mime_type( $id ) )[ 0 ];
-
-					return $image ? compact( 'id', 'alt', 'type', 'thumbnail', 'medium', 'full' ) : '';
-				},
-				(array) $trip->get_setting( 'map.image_url', array() )
-			),
+			'images' => $trip_imgs,
 			'iframe' => (string) $trip->get_setting( 'map.iframe', '' ),
 		];
 
@@ -909,24 +899,15 @@ class Trip extends WP_REST_Posts_Controller {
 		$data[ 'gallery' ]        = array();
 		$i                        = 0;
 		$gallery                  = empty( $trip->get_meta( 'wpte_gallery_id' ) ) ? [] : $trip->get_meta( 'wpte_gallery_id' );
-		foreach ( (array) $gallery as $index => $image_id ) {
+		foreach ( (array) $gallery as $index => $id ) {
 			if ( 'enable' === $index ) {
 				continue;
 			}
-			foreach ( [ 'thumbnail', 'medium', 'full' ] as $size ) {
-				$image = wp_get_attachment_image_src( $image_id, $size );
-				if ( $image ) {
-					list( $url, $width, $height ) = $image;
-					$orientation = ( $width >= $height ) ? 'landscape' : 'portrait';
-					$$size       = compact( 'url', 'width', 'height', 'orientation' );
-				} else {
-					$$size = null;
-				}
-			}
-			$id                         = (int) $image_id;
-			$alt                        = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
-			$type                       = explode( '/', get_post_mime_type( $image_id ) )[ 0 ];
-			$data[ 'gallery' ][ $i ++ ] = compact( 'id', 'alt', 'type', 'thumbnail', 'medium', 'full' );
+			$id  = (int) $id;
+			$alt = get_post_meta( $id, '_wp_attachment_image_alt', true );
+			$url = wp_get_attachment_image_url( $id, 'full' );
+
+			$data[ 'gallery' ][$i++] = compact( 'id', 'alt', 'url' );
 		}
 
 		$data[ 'video_gallery_enable' ] = wptravelengine_toggled( $trip->get_setting( 'enable_video_gallery', false ) );
@@ -984,24 +965,13 @@ class Trip extends WP_REST_Posts_Controller {
 				if ( ! isset( $data[ 'itineraries' ][ $key - 1 ] ) ) {
 					continue;
 				}
-				$temp_img = empty( $img[ $key ] ) ? [] : array_unique( $img[ $key ] );
+				$temp_img    	= empty( $img[$key] ) ? [] : array_values( array_unique( $img[$key] ) );
 				$images   = array();
-				$i        = 0;
-				foreach ( $temp_img as $id ) {
+				foreach ( $temp_img as $key => $id ) {
 					$id = (int) $id;
-					foreach ( [ 'thumbnail', 'medium', 'full' ] as $size ) {
-						$attach = wp_get_attachment_image_src( $id, $size );
-						if ( $attach ) {
-							list( $url, $width, $height ) = $attach;
-							$orientation = ( $width >= $height ) ? 'landscape' : 'portrait';
-							$$size       = compact( 'url', 'width', 'height', 'orientation' );
-						} else {
-							$$size = null;
-						}
-					}
 					$alt             = get_post_meta( $id, '_wp_attachment_image_alt', true );
-					$type            = explode( '/', get_post_mime_type( $id ) )[ 0 ];
-					$images[ $i ++ ] = compact( 'id', 'alt', 'type', 'thumbnail', 'medium', 'full' );
+					$url = wp_get_attachment_image_url( $id, 'full' );
+					$images[ $key ] = compact( 'id', 'alt', 'url' );
 				}
 				$period         = (float) ( $advanced_itinerary[ 'itinerary_duration' ][ $key ] ?? 0 );
 				$meals_included = (array) ( $advanced_itinerary[ 'meals_included' ][ $key ] ?? [] );
@@ -1072,15 +1042,15 @@ class Trip extends WP_REST_Posts_Controller {
 			}
 		}
 
-		$trip_packages      = new Post\TripPackages( $trip );
 		$primary_package    = (int) $trip->get_meta( 'primary_package' );
 		$default_package    = $trip->default_package();
 		$default_package_id = is_null( $default_package ) ? $primary_package : $default_package->ID;
+		$trip_packages 		= new Post\TripPackages( $trip );
 		$data[ 'packages' ] = [];
 		foreach ( $trip_packages as $key => $trip_package ) {
 			/* @var Post\TripPackage $trip_package */
 			$data[ 'packages' ][ $key ]                 = $this->prepare_package( $trip_package );
-			$data[ 'packages' ][ $key ][ 'is_primary' ] = $default_package_id === $trip_package->ID;
+			$data[ 'packages' ][$key][ 'is_primary' ] = $primary_package === $trip_package->ID;
 		}
 		$settings = Options::get( 'wp_travel_engine_settings', [] );
 		$def_tabs = array( 'itinerary', 'cost', 'dates', 'faqs', 'map', 'review' );
@@ -1512,72 +1482,10 @@ class Trip extends WP_REST_Posts_Controller {
 										'description' => __( 'Image alt.', 'wp-travel-engine' ),
 										'type'        => 'string',
 									),
-									'thumbnail' => [
-										'description' => __( 'Thumbnail URL.', 'wp-travel-engine' ),
-										'type'        => array( 'object', 'null' ),
-										'properties'  => [
-											'url'         => [
-												'description' => __( 'Thumbnail image URL.', 'wp-travel-engine' ),
-												'type'        => 'string',
-											],
-											'width'       => [
-												'description' => __( 'Thumbnail image width.', 'wp-travel-engine' ),
-												'type'        => 'integer',
-											],
-											'height'      => [
-												'description' => __( 'Thumbnail image height.', 'wp-travel-engine' ),
-												'type'        => 'integer',
-											],
-											'orientation' => [
-												'description' => __( 'Thumbnail image orientation.', 'wp-travel-engine' ),
-												'type'        => 'string',
-											],
-										],
-									],
-									'medium'    => [
-										'description' => __( 'Medium image URL.', 'wp-travel-engine' ),
-										'type'        => array( 'object', 'null' ),
-										'properties'  => [
-											'url'         => [
-												'description' => __( 'Medium image URL.', 'wp-travel-engine' ),
-												'type'        => 'string',
-											],
-											'width'       => [
-												'description' => __( 'Medium image width.', 'wp-travel-engine' ),
-												'type'        => 'integer',
-											],
-											'height'      => [
-												'description' => __( 'Medium image height.', 'wp-travel-engine' ),
-												'type'        => 'integer',
-											],
-											'orientation' => [
-												'description' => __( 'Medium image orientation.', 'wp-travel-engine' ),
-												'type'        => 'string',
-											],
-										],
-									],
-									'full'      => [
-										'description' => __( 'Full image URL.', 'wp-travel-engine' ),
-										'type'        => array( 'object', 'null' ),
-										'properties'  => [
-											'url'         => [
-												'description' => __( 'Full image URL.', 'wp-travel-engine' ),
-												'type'        => 'string',
-											],
-											'width'       => [
-												'description' => __( 'Full image width.', 'wp-travel-engine' ),
-												'type'        => 'integer',
-											],
-											'height'      => [
-												'description' => __( 'Full image height.', 'wp-travel-engine' ),
-												'type'        => 'integer',
-											],
-											'orientation' => [
-												'description' => __( 'Full image orientation.', 'wp-travel-engine' ),
-												'type'        => 'string',
-											],
-										],
-									],
+									'url'       => array(
+										'description' => __( 'Image URL.', 'wp-travel-engine' ),
+										'type'        => 'string',
+									),
 								),
 							),
 						),
@@ -1686,71 +1594,9 @@ class Trip extends WP_REST_Posts_Controller {
 							'description' => __( 'Image alt text.', 'wp-travel-engine' ),
 							'type'        => 'string',
 						],
-						'thumbnail' => [
-							'description' => __( 'Thumbnail URL.', 'wp-travel-engine' ),
-							'type'        => array( 'object', 'null' ),
-							'properties'  => [
-								'url'         => [
-									'description' => __( 'Thumbnail image URL.', 'wp-travel-engine' ),
-									'type'        => 'string',
-								],
-								'width'       => [
-									'description' => __( 'Thumbnail image width.', 'wp-travel-engine' ),
-									'type'        => 'integer',
-								],
-								'height'      => [
-									'description' => __( 'Thumbnail image height.', 'wp-travel-engine' ),
-									'type'        => 'integer',
-								],
-								'orientation' => [
-									'description' => __( 'Thumbnail image orientation.', 'wp-travel-engine' ),
-									'type'        => 'string',
-								],
-							],
-						],
-						'medium'    => [
-							'description' => __( 'Medium image URL.', 'wp-travel-engine' ),
-							'type'        => array( 'object', 'null' ),
-							'properties'  => [
-								'url'         => [
-									'description' => __( 'Medium image URL.', 'wp-travel-engine' ),
-									'type'        => 'string',
-								],
-								'width'       => [
-									'description' => __( 'Medium image width.', 'wp-travel-engine' ),
-									'type'        => 'integer',
-								],
-								'height'      => [
-									'description' => __( 'Medium image height.', 'wp-travel-engine' ),
-									'type'        => 'integer',
-								],
-								'orientation' => [
-									'description' => __( 'Medium image orientation.', 'wp-travel-engine' ),
-									'type'        => 'string',
-								],
-							],
-						],
-						'full'      => [
-							'description' => __( 'Full image URL.', 'wp-travel-engine' ),
-							'type'        => array( 'object', 'null' ),
-							'properties'  => [
-								'url'         => [
-									'description' => __( 'Full image URL.', 'wp-travel-engine' ),
-									'type'        => 'string',
-								],
-								'width'       => [
-									'description' => __( 'Full image width.', 'wp-travel-engine' ),
-									'type'        => 'integer',
-								],
-								'height'      => [
-									'description' => __( 'Full image height.', 'wp-travel-engine' ),
-									'type'        => 'integer',
-								],
-								'orientation' => [
-									'description' => __( 'Full image orientation.', 'wp-travel-engine' ),
-									'type'        => 'string',
-								],
-							],
+						'url'       => [
+							'description' => __( 'Image URL.', 'wp-travel-engine' ),
+							'type'        => 'string',
 						],
 					],
 					'context'    => [ 'view' ],
@@ -1802,72 +1648,10 @@ class Trip extends WP_REST_Posts_Controller {
 									'description' => __( 'Image alt text.', 'wp-travel-engine' ),
 									'type'        => 'string',
 								),
-								'thumbnail' => [
-									'description' => __( 'Thumbnail URL.', 'wp-travel-engine' ),
-									'type'        => array( 'object', 'null' ),
-									'properties'  => [
-										'url'         => [
-											'description' => __( 'Thumbnail image URL.', 'wp-travel-engine' ),
-											'type'        => 'string',
-										],
-										'width'       => [
-											'description' => __( 'Thumbnail image width.', 'wp-travel-engine' ),
-											'type'        => 'integer',
-										],
-										'height'      => [
-											'description' => __( 'Thumbnail image height.', 'wp-travel-engine' ),
-											'type'        => 'integer',
-										],
-										'orientation' => [
-											'description' => __( 'Thumbnail image orientation.', 'wp-travel-engine' ),
-											'type'        => 'string',
-										],
-									],
-								],
-								'medium'    => [
-									'description' => __( 'Medium image URL.', 'wp-travel-engine' ),
-									'type'        => array( 'object', 'null' ),
-									'properties'  => [
-										'url'         => [
-											'description' => __( 'Medium image URL.', 'wp-travel-engine' ),
-											'type'        => 'string',
-										],
-										'width'       => [
-											'description' => __( 'Medium image width.', 'wp-travel-engine' ),
-											'type'        => 'integer',
-										],
-										'height'      => [
-											'description' => __( 'Medium image height.', 'wp-travel-engine' ),
-											'type'        => 'integer',
-										],
-										'orientation' => [
-											'description' => __( 'Medium image orientation.', 'wp-travel-engine' ),
-											'type'        => 'string',
-										],
-									],
-								],
-								'full'      => [
-									'description' => __( 'Full image URL.', 'wp-travel-engine' ),
-									'type'        => array( 'object', 'null' ),
-									'properties'  => [
-										'url'         => [
-											'description' => __( 'Full image URL.', 'wp-travel-engine' ),
-											'type'        => 'string',
-										],
-										'width'       => [
-											'description' => __( 'Full image width.', 'wp-travel-engine' ),
-											'type'        => 'integer',
-										],
-										'height'      => [
-											'description' => __( 'Full image height.', 'wp-travel-engine' ),
-											'type'        => 'integer',
-										],
-										'orientation' => [
-											'description' => __( 'Full image orientation.', 'wp-travel-engine' ),
-											'type'        => 'string',
-										],
-									],
-								],
+								'url'       => array(
+									'description' => __( 'Image URL.', 'wp-travel-engine' ),
+									'type'        => 'string',
+								),
 							),
 						),
 					),

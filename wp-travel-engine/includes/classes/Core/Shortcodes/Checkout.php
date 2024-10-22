@@ -38,10 +38,10 @@ class Checkout extends Shortcode {
 		ob_start();
 
 		// Check if login is required for checkout.
-		$settings = wp_travel_engine_get_settings();
+		$settings = wptravelengine_settings()->get();
 
-		$generate_user_account     = $settings['generate_user_account'] ?? 'no';
-		$require_login_to_checkout = $settings['enable_checkout_customer_registration'] ?? 'no';
+		$generate_user_account     = $settings[ 'generate_user_account' ] ?? 'no';
+		$require_login_to_checkout = $settings[ 'enable_checkout_customer_registration' ] ?? 'no';
 
 		if ( 'no' === $generate_user_account && 'yes' === $require_login_to_checkout && ! is_user_logged_in() ) {
 			wte_get_template( 'account/form-login.php' );
@@ -52,11 +52,11 @@ class Checkout extends Shortcode {
 		if ( defined( 'WTE_USE_OLD_BOOKING_PROCESS' ) && WTE_USE_OLD_BOOKING_PROCESS ) :
 			wp_die( new \WP_Error( 'WTE_FUNCTIONALITY_NOT_AVAILABLE', __( 'Old Booking Process functionality has been removed since WP Travel Engine 5.3.1.', 'wp-travel-engine' ) ) );
 		elseif ( ! empty( $wte_cart->getItems() ) && is_array( $wte_cart->getItems() ) ) :
-				wp_enqueue_script( 'parsley' );
-				$checkout = new CheckoutController( $wte_cart );
-				wte_get_template( 'template-checkout-new.php', compact( 'checkout' ) );
+			wp_enqueue_script( 'parsley' );
+			$checkout = new CheckoutController( $wte_cart );
+			wte_get_template( 'template-checkout-new.php', compact( 'checkout' ) );
 		else :
-				return __( 'Sorry, you may not have selected the number of travellers for the trip. Please select number of travellers and confirm your booking. Thank you.', 'wp-travel-engine' );
+			return __( 'Sorry, you may not have selected the number of travellers for the trip. Please select number of travellers and confirm your booking. Thank you.', 'wp-travel-engine' );
 
 		endif;
 

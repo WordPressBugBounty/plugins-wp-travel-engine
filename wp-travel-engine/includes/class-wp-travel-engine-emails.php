@@ -124,7 +124,7 @@ class WP_Travel_Engine_Emails {
 
 		// cart items array.
 		$cart_items     = $wte_cart->getItems();
-		$totals         = $wte_cart->get_total();
+		$totals         = $wte_cart->get_totals();
 		$cart_discounts = $wte_cart->get_discounts();
 		$total          = $totals['total'];
 		$trip_ids       = $wte_cart->get_cart_trip_ids();

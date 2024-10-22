@@ -1,4 +1,5 @@
 <?php
+
 namespace WPTravelEngine\Modules;
 
 /**
@@ -45,14 +46,14 @@ class Filters {
 
 		foreach ( $filters as $filter ) {
 			register_taxonomy(
-				$filter['slug'],
+				$filter[ 'slug' ],
 				WP_TRAVEL_ENGINE_POST_TYPE,
 				array(
 					'labels'       => array(
-						'name' => $filter['label'],
+						'name' => $filter[ 'label' ],
 					),
 					'show_in_rest' => true,
-					'hierarchical' => $filter['hierarchical'],
+					'hierarchical' => $filter[ 'hierarchical' ],
 					'sort'         => true,
 				)
 			);
@@ -67,7 +68,7 @@ class Filters {
 						'label'  => $filter->label,
 						'show'   => (bool) $filter->show,
 						'render' => function ( $_filter ) use ( $filter ) {
-							$_filter = (object) $_filter;
+							$_filter    = (object) $_filter;
 							$categories = get_categories( "taxonomy={$filter->slug}" );
 							if ( empty( $categories ) ) {
 								return;
@@ -76,6 +77,7 @@ class Filters {
 						},
 					);
 				}
+
 				return $_filters;
 			}
 		);
@@ -84,12 +86,13 @@ class Filters {
 			'wte_filter_categories',
 			function ( $categories ) use ( $filters ) {
 				foreach ( $filters as $filter ) {
-					$categories[ $filter['slug'] ] = array(
-						'taxonomy'         => $filter['slug'],
+					$categories[ $filter[ 'slug' ] ] = array(
+						'taxonomy'         => $filter[ 'slug' ],
 						'field'            => 'slug',
 						'include_children' => true,
 					);
 				}
+
 				return $categories;
 			}
 		);
@@ -97,16 +100,17 @@ class Filters {
 		\add_filter(
 			'wte_register_block_types',
 			function ( $args ) use ( $filters ) {
-				if ( isset( $args['trip-search']['attributes']['searchFilters']['default'] ) ) {
+				if ( isset( $args[ 'trip-search' ][ 'attributes' ][ 'searchFilters' ][ 'default' ] ) ) {
 					foreach ( $filters as $filter ) {
-						$search_filter = array(
-							'label'   => $filter['label'],
+						$search_filter                                                                              = array(
+							'label'   => $filter[ 'label' ],
 							'show'    => false,
-							'default' => $filter['label'],
+							'default' => $filter[ 'label' ],
 						);
-						$args['trip-search']['attributes']['searchFilters']['default'][ $filter['slug'] ] = $search_filter;
+						$args[ 'trip-search' ][ 'attributes' ][ 'searchFilters' ][ 'default' ][ $filter[ 'slug' ] ] = $search_filter;
 					}
 				}
+
 				return $args;
 			}
 		);
@@ -119,24 +123,33 @@ class Filters {
 	}
 
 	private function filter_modify_requests() {
-		if ( ( isset( $_REQUEST['wte_action'] ) && 'add_filter' === $_REQUEST['wte_action'] && ! empty( $_REQUEST['filter_label'] ) ) || ( ! empty( $_REQUEST['edit_filter'] ) && ! empty( $_REQUEST['filter_label'] ) ) || ! empty( $_REQUEST['delete_filter'] ) ) {
-			return \wp_verify_nonce( wte_clean( wp_unslash( $_REQUEST['_nonce'] ) ), '_add_filter_nonce' );
+		if ( ( isset( $_REQUEST[ 'wte_action' ] ) && 'add_filter' === $_REQUEST[ 'wte_action' ] && ! empty( $_REQUEST[ 'filter_label' ] ) ) || ( ! empty( $_REQUEST[ 'edit_filter' ] ) && ! empty( $_REQUEST[ 'filter_label' ] ) ) || ! empty( $_REQUEST[ 'delete_filter' ] ) ) {
+			return \wp_verify_nonce( wte_clean( wp_unslash( $_REQUEST[ '_nonce' ] ) ), '_add_filter_nonce' );
 		}
+
 		return false;
 	}
 
 	private function update_filter() {
 		$request = $_REQUEST; // phpcs:ignore
 		$filters = get_option( 'wte_custom_filters', array() );
-		if ( isset( $request['delete_filter'] ) ) {
-			if ( isset( $filters[ $request['delete_filter'] ] ) ) {
-				unset( $filters[ $request['delete_filter'] ] );
+		if ( isset( $request[ 'delete_filter' ] ) ) {
+			$delete_slug = urldecode( $request[ 'delete_filter' ] );
+			foreach ( $filters as $key => $filter ) {
+				if ( $delete_slug === urldecode( $key ) ) {
+					unset( $filters[ $key ] );
+					break;
+				}
 			}
 		} else {
-			$label           = wp_kses( wp_unslash( $request['filter_label'] ), array() );
-			$is_hierarchical = isset( $request['filter_is_hierarchical'] ) && 'yes' === $request['filter_is_hierarchical'];
-			$show            = isset( $request['show_in_filters'] ) && 'yes' === $request['show_in_filters'];
-			$slug            = ! empty( $request['filter_slug'] ) ? \sanitize_title( $request['filter_slug'], '', 'save' ) : \sanitize_title( $label, '', 'save' );
+			$label           = wp_kses( wp_unslash( $request[ 'filter_label' ] ), array() );
+			$is_hierarchical = isset( $request[ 'filter_is_hierarchical' ] ) && 'yes' === $request[ 'filter_is_hierarchical' ];
+			$show            = isset( $request[ 'show_in_filters' ] ) && 'yes' === $request[ 'show_in_filters' ];
+			$slug            = ! empty( $request[ 'filter_slug' ] ) ? untrailingslashit( $request[ 'filter_slug' ], '', 'save' ) : untrailingslashit( $label, '', 'save' );
+
+			if ( strlen( $slug ) > 32 ) {
+				wp_die( esc_html__( 'Taxonomy names must be between 1 and 32 characters in length.' ), 'wp-travel-engine' );
+			}
 
 			$filters[ $slug ] = array(
 				'label'        => $label,

@@ -1,5 +1,8 @@
 <?php
+
+use WPTravelEngine\Helpers\Functions;
 use WPTravelEngine\Modules\CouponCode;
+
 /**
  * Coupons General Tab Contents
  *
@@ -10,26 +13,26 @@ wp_enqueue_script( 'wte-edit--coupon' );
 
 // General Tab Data.
 $coupon_metas = get_post_meta( $post->ID, 'wp_travel_engine_coupon_metas', true );
-$general_tab  = isset( $coupon_metas['general'] ) ? $coupon_metas['general'] : array();
+$general_tab  = isset( $coupon_metas[ 'general' ] ) ? $coupon_metas[ 'general' ] : array();
 $coupon_code  = get_post_meta( $post->ID, 'wp_travel_engine_coupon_code', true );
 
 // Field Values.
-$coupon_active = isset( $general_tab['coupon_active'] ) ? $general_tab['coupon_active'] : 'yes';
+$coupon_active = isset( $general_tab[ 'coupon_active' ] ) ? $general_tab[ 'coupon_active' ] : 'yes';
 $coupon_code   = ! empty( $coupon_code ) ? $coupon_code : '';
-$coupon_type   = isset( $general_tab['coupon_type'] ) ? $general_tab['coupon_type'] : 'fixed';
-$coupon_value  = isset( $general_tab['coupon_value'] ) ? $general_tab['coupon_value'] : '';
+$coupon_type   = isset( $general_tab[ 'coupon_type' ] ) ? $general_tab[ 'coupon_type' ] : 'fixed';
+$coupon_value  = isset( $general_tab[ 'coupon_value' ] ) ? $general_tab[ 'coupon_value' ] : '';
 
 $date_format = get_option( 'date_format' );
 
-$coupon_expiry_date = isset( $general_tab['coupon_expiry_date'] ) ? $general_tab['coupon_expiry_date'] : '';
+$coupon_expiry_date = isset( $general_tab[ 'coupon_expiry_date' ] ) ? $general_tab[ 'coupon_expiry_date' ] : '';
 
 try {
-	$coupon_expiry_date = ! empty( $general_tab['coupon_expiry_date'] ) ? ( new \DateTime( $general_tab['coupon_expiry_date'] ) )->format( 'Y-m-d' ) : '';
+	$coupon_expiry_date = ! empty( $general_tab[ 'coupon_expiry_date' ] ) ? ( new \DateTime( $general_tab[ 'coupon_expiry_date' ] ) )->format( 'Y-m-d' ) : '';
 } catch ( \Exception $e ) {
 	$coupon_expiry_date = '';
 }
 try {
-	$coupon_start_date = isset( $general_tab['coupon_start_date'] ) ? ( new \DateTime( $general_tab['coupon_start_date'] ) )->format( 'Y-m-d' ) : gmdate( 'Y-m-d' );
+	$coupon_start_date = isset( $general_tab[ 'coupon_start_date' ] ) ? ( new \DateTime( $general_tab[ 'coupon_start_date' ] ) )->format( 'Y-m-d' ) : gmdate( 'Y-m-d' );
 } catch ( \Exception $e ) {
 	$coupon_start_date = gmdate( 'Y-m-d' );
 }
@@ -38,39 +41,39 @@ $coupon_id = CouponCode::coupon_id_by_code( $coupon_code );
 
 $wp_travel_engine_settings = get_option( 'wp_travel_engine_settings', true );
 
-$code = ! empty( $wp_travel_engine_settings['currency_code'] ) ? $wp_travel_engine_settings['currency_code'] : 'USD';
+$code = ! empty( $wp_travel_engine_settings[ 'currency_code' ] ) ? $wp_travel_engine_settings[ 'currency_code' ] : 'USD';
 
-$obj      = new \Wp_Travel_Engine_Functions();
-$currency = $obj->wp_travel_engine_currencies_symbol( $code );
+$currency = Functions::currency_symbol_by_code( $code );
 ?>
 <div class="wpte-block-content"><!-- Start .wpte-block-content -->
 	<div class="wpte-form-block">
 		<?php if ( $coupon_id ) : ?>
-		<div class="wpte-field wpte-floated departure-dates-options">
-			<label
-				class="wpte-field-label"
-				for="currency"
-			>
-				<?php esc_html_e( 'Coupon Status ', 'wp-travel-engine' ); ?>
-			</label>
-			<?php
-			$coupon_status = CouponCode::get_coupon_status( $coupon_id );
-			if ( 'active' === $coupon_status ) {
-				?>
-				<span class="wp-travel-engine-info-msg">
+			<div class="wpte-field wpte-floated departure-dates-options">
+				<label
+					class="wpte-field-label"
+					for="currency"
+				>
+					<?php esc_html_e( 'Coupon Status ', 'wp-travel-engine' ); ?>
+				</label>
+				<?php
+				$coupon_status = CouponCode::get_coupon_status( $coupon_id );
+				if ( 'active' === $coupon_status ) {
+					?>
+					<span class="wp-travel-engine-info-msg">
 					<?php echo esc_html__( 'Active', 'wp-travel-engine' ); ?>
 				</span>
-				<?php
-			} else {
-				?>
-				<span class="wp-travel-engine-error-msg">
+					<?php
+				} else {
+					?>
+					<span class="wp-travel-engine-error-msg">
 					<?php echo esc_html__( 'Inactive', 'wp-travel-engine' ); ?>
 				</span>
-				<?php
-			}
-			?>
-			<span class="wpte-tooltip"><?php esc_html_e( 'Either the coupon is enabled in site or not.', 'wp-travel-engine' ); ?></span>
-		</div>
+					<?php
+				}
+				?>
+				<span
+					class="wpte-tooltip"><?php esc_html_e( 'Either the coupon is enabled in site or not.', 'wp-travel-engine' ); ?></span>
+			</div>
 		<?php endif; ?>
 		<div class="wpte-field wpte-floated departure-dates-options">
 			<label
@@ -189,12 +192,12 @@ $currency = $obj->wp_travel_engine_currencies_symbol( $code );
 				class="wpte-tooltip"><?php esc_html_e( 'Coupon expiration date. Leave blank to disable expiration.', 'wp-travel-engine' ); ?></span>
 		</div>
 		<?php
-			// Get Restrictions Tab Data.
-			$restrictions_tab = isset( $coupon_metas['restriction'] ) ? $coupon_metas['restriction'] : array();
+		// Get Restrictions Tab Data.
+		$restrictions_tab = isset( $coupon_metas[ 'restriction' ] ) ? $coupon_metas[ 'restriction' ] : array();
 
-			// Field Values.
-			$restricted_trips    = isset( $restrictions_tab['restricted_trips'] ) ? $restrictions_tab['restricted_trips'] : array();
-			$coupon_limit_number = isset( $restrictions_tab['coupon_limit_number'] ) ? $restrictions_tab['coupon_limit_number'] : '';
+		// Field Values.
+		$restricted_trips    = isset( $restrictions_tab[ 'restricted_trips' ] ) ? $restrictions_tab[ 'restricted_trips' ] : array();
+		$coupon_limit_number = isset( $restrictions_tab[ 'coupon_limit_number' ] ) ? $restrictions_tab[ 'coupon_limit_number' ] : '';
 		?>
 		<div class="wpte-field wpte-floated wpte-select">
 			<label
@@ -202,44 +205,44 @@ $currency = $obj->wp_travel_engine_currencies_symbol( $code );
 				for="wp_travel_engine_coupon[restriction][restricted_trips][]"
 			><?php echo esc_html( 'Allow Coupon Use For', 'wp-travel-engine' ); ?></label>
 			<?php
-					$trips                = wp_travel_engine_get_trips_array();
-					$count_options_data   = count( $restricted_trips );
-					$count_trips          = count( $trips );
-					$multiple_checked_all = '';
+			$trips                = wp_travel_engine_get_trips_array();
+			$count_options_data   = count( $restricted_trips );
+			$count_trips          = count( $trips );
+			$multiple_checked_all = '';
 
 			if ( $count_options_data == $count_trips ) {
 				$multiple_checked_all = 'checked=checked';
 			}
 
-					$multiple_checked_text = __( 'Select multiple', 'wp-travel-engine' );
+			$multiple_checked_text = __( 'Select multiple', 'wp-travel-engine' );
 			if ( $count_trips > 0 ) {
 				$multiple_checked_text = $count_options_data . __( ' item selected', 'wp-travel-engine' );
 			}
-				// echo esc_html( $multiple_checked_text );
+			// echo esc_html( $multiple_checked_text );
 			?>
-				<select
-					multiple
-					class="wp-travel-engine-multi-inner wpte-enhanced-select"
-					name="wp_travel_engine_coupon[restriction][restricted_trips][]"
-				>
-					<?php
-					foreach ( $trips as $key => $iti ) {
-						$checked            = '';
-						$selecte_list_class = '';
-						if ( in_array( $key, $restricted_trips ) ) {
+			<select
+				multiple
+				class="wp-travel-engine-multi-inner wpte-enhanced-select"
+				name="wp_travel_engine_coupon[restriction][restricted_trips][]"
+			>
+				<?php
+				foreach ( $trips as $key => $iti ) {
+					$checked            = '';
+					$selecte_list_class = '';
+					if ( in_array( $key, $restricted_trips ) ) {
 
-							$checked            = 'selected=selected';
-							$selecte_list_class = 'selected';
-						}
-						?>
+						$checked            = 'selected=selected';
+						$selecte_list_class = 'selected';
+					}
+					?>
 					<option
 						value="<?php echo esc_attr( $key ); ?>"
 						<?php echo esc_attr( $checked ); ?>
 					><?php echo esc_html( $iti ); ?></option>
-					<?php } ?>
-				</select>
-				<span
-					class="wpte-tooltip"><?php esc_html_e( 'Choose to apply coupons to certain trips only. Select none to apply to all trips', 'wp-travel-engine' ); ?></span>
+				<?php } ?>
+			</select>
+			<span
+				class="wpte-tooltip"><?php esc_html_e( 'Choose to apply coupons to certain trips only. Select none to apply to all trips', 'wp-travel-engine' ); ?></span>
 
 		</div>
 		<div class="wpte-field wpte-floated departure-dates-options">

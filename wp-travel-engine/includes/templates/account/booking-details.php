@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $booking_details 				= get_post( $booking );
-$settings                      	= wp_travel_engine_get_settings();
+$settings                      	= wptravelengine_settings()->get();
 $wp_travel_engine_dashboard_id 	= isset( $settings['pages']['wp_travel_engine_dashboard_page'] ) ? esc_attr( $settings['pages']['wp_travel_engine_dashboard_page'] ) : wp_travel_engine_get_page_id( 'my-account' );
 $set_duration_type    			= ! empty( $settings['set_duration_type'] ?? '' ) ? $settings['set_duration_type'] : 'days';
 $billing_info 					= $booking_details->billing_info;

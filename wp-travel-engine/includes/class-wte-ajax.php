@@ -564,7 +564,7 @@ class WTE_Ajax {
 				'code'     => 'ADD_TO_CART_SUCCESS',
 				'message'  => __( 'Trip added to cart successfully.', 'wp-travel-engine' ),
 				'items'    => $wte_cart->getItems(),
-				'redirect' => add_query_arg( 'wte_id', time(), wp_travel_engine_get_checkout_url() ),
+				'redirect' => add_query_arg( 'wte_id', time(), wptravelengine_get_checkout_url() ),
 			)
 		);
 		exit;

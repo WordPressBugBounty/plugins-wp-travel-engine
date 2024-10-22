@@ -10,8 +10,6 @@
 
 namespace WPTravelEngine\Validator;
 
-use \WPTravelEngine\Core\Functions;
-
 /**
  * Class Checkout
  *
@@ -196,7 +194,7 @@ class Checkout extends Validator {
 			return;
 		}
 
-		$this->data[ 'booking' ][ $settings[ 'name' ] ] = sanitize_text_field( $data[ $settings[ 'name' ] ] ?? '' );
+		$this->data['booking'][ $name ] = is_array( $data[ $name ] ) ? array_map( 'sanitize_text_field', $data[ $name ] ): sanitize_text_field( $data[ $name ] ?? '' );
 	}
 
 }

@@ -1,5 +1,14 @@
 == Changelog ==
 
+= 6.2.0 - 22nd October 2024 =
+* Update: Introduced a new layout for global settings.
+* Fix: Resolved an issue where empty tabs were being displayed in the navigation tab section of the single trip page, even when no content was available.
+* Fix: Corrected slug generation for custom taxonomies using non-Latin characters to ensure proper URL structure and functionality.
+* Fix: Restored the visibility of the progress bar, which was not displaying correctly after version 6.0.
+* Fix: Addressed an issue where custom tags for fields such as checkboxes and radio buttons were not being parsed correctly in email templates.
+* Fix: Resolved an issue where selecting 'Sort Trips by Departure Dates' caused new trips to not appear on the archive page.
+* Fix: Fixed the issue where double options for the 'Difficulty' taxonomy were appearing in the trip edit page.
+
 = 6.1.3 - 9th October 2024 =
 * Fix: Resolved a fatal error that occurred when retrieving the primary package ID.
 * Fix: Corrected an issue where more than three packages were not displayed in the booking modal

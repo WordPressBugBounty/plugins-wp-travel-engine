@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 6.1.3
+Stable tag: 6.2.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -367,6 +367,17 @@ Yes. We have created WooCommerce Payments add-ons that supports all the payment 
 Please send us an email via [support ticket](https://wptravelengine.com/support-ticket/?utm_source=free_plugin&utm_medium=wporg&utm_campaign=support), and we will be happy to help you.
 
 == Changelog ==
+
+= 6.2.0 - 22nd October 2024 =
+* Update: Introduced a new layout for global settings.
+* Fix: Resolved an issue where empty tabs were being displayed in the navigation tab section of the single trip page, even when no content was available.
+* Fix: Corrected slug generation for custom taxonomies using non-Latin characters to ensure proper URL structure and functionality.
+* Fix: Restored the visibility of the progress bar, which was not displaying correctly after version 6.0.
+* Fix: Addressed an issue where custom tags for fields such as checkboxes and radio buttons were not being parsed correctly in email templates.
+* Fix: Resolved an issue where selecting 'Sort Trips by Departure Dates' caused new trips to not appear on the archive page.
+* Fix: Fixed the issue where double options for the 'Difficulty' taxonomy were appearing in the trip edit page.
+
+**Check out the release note for version [6.2.0](https://wptravelengine.com/new-release-version-6-2-0/).**
 
 = 6.1.3 - 9th October 2024 =
 * Fix: Resolved a fatal error that occurred when retrieving the primary package ID.

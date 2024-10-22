@@ -15,23 +15,23 @@ use WPTravelEngine\PaymentGateways\PaymentGateways;
  *
  * @param Trip|int $trip The trip-object or ID.
  *
- * @since 6.1.0
  * @return ?TripPackage
+ * @since 6.1.0
  */
 function wptravelengine_get_trip_primary_package( $trip ) {
-    if ( is_numeric( $trip ) ) {
-        try {
-            $trip = new Trip( $trip );
-        } catch ( Exception $e ) {
-            return null;
-        }
-    }
+	if ( is_numeric( $trip ) ) {
+		try {
+			$trip = new Trip( $trip );
+		} catch ( Exception $e ) {
+			return null;
+		}
+	}
 
-    if ( $trip instanceof Trip && !$trip->use_legacy_trip ) {
-        return $trip->default_package();
-    }
+	if ( $trip instanceof Trip && ! $trip->use_legacy_trip ) {
+		return $trip->default_package();
+	}
 
-    return null;
+	return null;
 }
 
 
@@ -903,7 +903,7 @@ function wp_travel_engine_get_settings( $key = null ) {
  * @return void
  */
 function wp_travel_engine_get_dashboard_page_id() {
-	$settings = wp_travel_engine_get_settings();
+	$settings = wptravelengine_settings()->get();
 
 	$wp_travel_engine_dashboard_id = isset( $settings[ 'pages' ][ 'wp_travel_engine_dashboard_page' ] ) ? esc_attr( $settings[ 'pages' ][ 'wp_travel_engine_dashboard_page' ] ) : wp_travel_engine_get_page_id( 'my-account' );
 
@@ -989,7 +989,7 @@ function wp_travel_engine_is_dashboard_page() {
 		return false;
 	}
 	$page_id  = get_the_ID();
-	$settings = wp_travel_engine_get_settings();
+	$settings = wptravelengine_settings()->get();
 	if ( ( isset( $settings[ 'dashboard_page_id' ] ) && (int) $settings[ 'dashboard_page_id' ] === $page_id ) || wp_travel_engine_post_content_has_shortcode( 'wp_travel_engine_dashboard' ) ) {
 		return true;
 	}
@@ -1007,7 +1007,7 @@ function wp_travel_engine_is_thank_you_page() {
 		return false;
 	}
 	$page_id  = get_the_ID();
-	$settings = wp_travel_engine_get_settings();
+	$settings = wptravelengine_settings()->get();
 	if ( ( isset( $settings[ 'wp_travel_engine_thank_you' ] ) && (int) $settings[ 'wp_travel_engine_thank_you' ] === $page_id ) || wp_travel_engine_post_content_has_shortcode( 'WP_TRAVEL_ENGINE_THANK_YOU' ) ) {
 		return true;
 	}
@@ -1197,7 +1197,7 @@ function wte_get_active_single_trip_tabs() {
 				}
 				break;
 			case 'itinerary':
-				if ( ! isset( $post_meta['itinerary']['itinerary_title'] ) || empty( reset( $post_meta[ 'itinerary' ][ 'itinerary_title' ] ) ) ) {
+				if ( ! isset( $post_meta[ 'itinerary' ][ 'itinerary_title' ] ) || empty( reset( $post_meta[ 'itinerary' ][ 'itinerary_title' ] ) ) ) {
 					unset( $settings[ 'trip_tabs' ][ 'id' ][ $value ] );
 				}
 				break;
@@ -1910,13 +1910,13 @@ function wpte_add_custom_tabs_to_trip_meta( $trip_meta_tabs ) {
 		return $trip_meta_tabs;
 	}
 
-	$last_tab[array_key_last( $trip_meta_tabs )] = array_pop( $trip_meta_tabs );
-	$priority = reset( $last_tab )['priority'] ?? 120;
+	$last_tab[ array_key_last( $trip_meta_tabs ) ] = array_pop( $trip_meta_tabs );
+	$priority                                      = reset( $last_tab )[ 'priority' ] ?? 120;
 	foreach ( $settings[ 'trip_tabs' ][ 'id' ] as $key => $value ) {
 
 		$field = $settings[ 'trip_tabs' ][ 'field' ][ $value ];
 
-		if ( '1' === $value || in_array( $field, $def_tabs ) ) {
+		if ( '1' == $value || in_array( $field, $def_tabs ) ) {
 			continue;
 		}
 
@@ -1924,7 +1924,7 @@ function wpte_add_custom_tabs_to_trip_meta( $trip_meta_tabs ) {
 			continue;
 		}
 
-		$tab_label   = isset( $settings[ 'trip_tabs' ][ 'name' ][ $value ] ) && ! empty( $settings[ 'trip_tabs' ][ 'name' ][ $value ] ) ? $settings[ 'trip_tabs' ][ 'name' ][ $value ] : __( 'Custom Tab', 'wp-travel-engine' );
+		$tab_label = isset( $settings[ 'trip_tabs' ][ 'name' ][ $value ] ) && ! empty( $settings[ 'trip_tabs' ][ 'name' ][ $value ] ) ? $settings[ 'trip_tabs' ][ 'name' ][ $value ] : __( 'Custom Tab', 'wp-travel-engine' );
 		// $tab_content = isset( $wp_travel_engine_setting[ 'tab_content' ][ $value . '_wpeditor' ] ) ? $wp_travel_engine_setting[ 'tab_content' ][ $value . '_wpeditor' ] : '';
 
 		$trip_meta_tabs[ 'wp_editor_tab_' . $value ] = array(
@@ -1941,21 +1941,21 @@ function wpte_add_custom_tabs_to_trip_meta( $trip_meta_tabs ) {
 			'icon'              => 'tool',
 			'fields'            => [
 				array(
-					'label'       => __('Section Title', 'wp-travel-engine'),
-					'divider'    => true,
-					'field'       => [
-						'name'         => 'custom_tabs.tab_'.$key.'.title',
-						'type'         => 'TEXT',
-						'placeholder'  => __('Title', 'wp-travel-engine'),
+					'label'   => __( 'Section Title', 'wp-travel-engine' ),
+					'divider' => true,
+					'field'   => [
+						'name'        => 'custom_tabs.tab_' . $key . '.title',
+						'type'        => 'TEXT',
+						'placeholder' => __( 'Title', 'wp-travel-engine' ),
 					],
 				),
 
 				array(
-					'label'       => __('Tab Content', 'wp-travel-engine'),
-					'divider'    => true,
-					'field'       => [
-						'name'         => 'custom_tabs.tab_'.$key.'.content',
-						'type'         => 'EDITOR',
+					'label'   => __( 'Tab Content', 'wp-travel-engine' ),
+					'divider' => true,
+					'field'   => [
+						'name' => 'custom_tabs.tab_' . $key . '.content',
+						'type' => 'EDITOR',
 					],
 				),
 			],
@@ -1964,7 +1964,8 @@ function wpte_add_custom_tabs_to_trip_meta( $trip_meta_tabs ) {
 		$priority ++;
 	}
 
-	$last_tab[ key( $last_tab ) ]['priority'] = $priority;
+	$last_tab[ key( $last_tab ) ][ 'priority' ] = $priority;
+
 	return $trip_meta_tabs + $last_tab;
 }
 
@@ -2215,7 +2216,7 @@ function wptravelengine_get_trip_facts_custom_options() {
 		'meeting-point'      => array(
 			'fid'               => 13,
 			'field_id'          => 'Meeting Point',
-			'field_icon'        => 'fas fa-handshake',
+			'field_icon'        => 'fas fa-handshake-simple',
 			'field_type'        => 'text',
 			'input_placeholder' => 'Hotel',
 		),
@@ -2250,7 +2251,7 @@ function wptravelengine_get_trip_facts_custom_options() {
 		'walking-hours'      => array(
 			'fid'               => 18,
 			'field_id'          => 'Walking Hours',
-			'field_icon'        => 'fas fa-clock',
+			'field_icon'        => 'far fa-clock',
 			'field_type'        => 'text',
 			'input_placeholder' => '5-6 Hours',
 		),

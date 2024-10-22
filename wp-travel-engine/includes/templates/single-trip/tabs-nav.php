@@ -30,12 +30,8 @@ if ( ! empty( $tabs[ 'id' ] ) ) : ?>
 						   class="nav-tab nb-tab-trigger <?php $index === 0 && print esc_attr( 'nav-tab-active' ); ?>"
 						   data-configuration="<?php echo esc_attr( $values ); ?>">
 							<?php
-							if ( isset( $tabs[ 'icon' ][ $values ] ) && $tabs[ 'icon' ][ $values ] !== '' ) {
-								$icon_name = $tabs[ 'icon' ][ $values ];
-								if ( is_array( $tabs[ 'icon' ][ $values ] ) ) {
-									$icon_name = $tabs[ 'icon' ][ $values ][ 'icon' ];
-								}
-								echo '<span class="tab-icon">' . wptravelengine_svg_by_fa_icon( $icon_name, false ) . '</span>';
+							if ( isset( $tabs['icon'][ $values ] ) && $tabs['icon'][ $values ] !== '' ) {
+								echo '<span class="tab-icon">' . wptravelengine_svg_by_fa_icon( $tabs['icon'][ $values ], false ) . '</span>';
 							}
 							echo esc_attr( $tabs[ 'name' ][ $values ] );
 							?>

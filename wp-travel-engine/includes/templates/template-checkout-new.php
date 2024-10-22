@@ -8,15 +8,16 @@ global $wte_cart;
 use WPTravelEngine\Core\Cart\Item;
 use WPTravelEngine\Core\Controllers\Checkout;
 use WPTravelEngine\Core\Models\Post\Booking;
+use WPTravelEngine\Core\Models\Settings\Options;
 
 $cart_items     = $wte_cart->getItems();
 $tripid         = $wte_cart->get_cart_trip_ids();
-$cart_totals    = $wte_cart->get_total( false );
-$trip_total     = $wte_cart->get_total();
+$cart_totals    = $wte_cart->get_totals( false );
+$trip_total     = $wte_cart->get_totals();
 $wte_settings   = get_option( 'wp_travel_engine_settings' );
 $cart_discounts = $wte_cart->get_discounts();
 //$cart_data               = wptravelengine_get_newcost( $cart_discounts, $trip_total, $cart_totals );
-$global_settings         = wp_travel_engine_get_settings();
+$global_settings         = wptravelengine_settings()->get();
 $default_payment_gateway = isset( $global_settings[ 'default_gateway' ] ) && ! empty( $global_settings[ 'default_gateway' ] ) ? $global_settings[ 'default_gateway' ] : 'booking_only';
 
 $cart_items = wptravelengine_cart()->getItems( true );
@@ -109,7 +110,7 @@ $cart_item = reset( $cart_items );
 												>
 												<label for="wp_travel_engine_payment_mode-full">
 													<?php
-													$full_payment_data = $wte_cart->get_total()[ 'total' ];
+													$full_payment_data = $wte_cart->get_totals()[ 'total' ];
 
 													echo wp_kses_post( $checkout->full_payment_label( $full_payment_data, $down_payment_settings ) );
 													?>
@@ -128,7 +129,16 @@ $cart_item = reset( $cart_items );
 								</label>
 								<?php
 								$first_payment_option = true;
-								foreach ( $active_payment_methods as $key => $payment_method ) :
+								$payment_gateways = Options::get( 'wptravelengine_payment_gateways' ) ?? array_map( function ( $gateway ) {
+									return [
+										'id' => $gateway['gateway_id'] ?? '',
+										'name' => $gateway['label'] ?? '',
+										'enable' => true
+									];
+								}, $active_payment_methods );
+								$payments_order       = array_flip( array_column( array_filter( $payment_gateways, fn ( $v ) => $v[ 'enable' ] ), 'id' ) );
+								$sorted_gateways      = array_filter( array_replace( $payments_order, array_intersect_key( $active_payment_methods, $payments_order ) ), 'is_array' );
+								foreach ( $sorted_gateways as $key => $payment_method ) :
 									$default_gateway = $default_payment_gateway === $key ? true : $first_payment_option;
 									?>
 									<div class="wpte-bf-radio-wrap wpte-bf_payment-method">
@@ -138,9 +148,7 @@ $cart_item = reset( $cart_items );
 											value="<?php echo esc_attr( $key ); ?>"
 											id="wpte-checkout-paymnet-method-<?php echo esc_attr( $key ); ?>">
 										<label for="wpte-checkout-paymnet-method-<?php echo esc_attr( $key ); ?>">
-											<?php
-											if ( ! empty( $payment_method[ 'icon_url' ] ) ) :
-												?>
+											<?php if ( isset( $payment_method[ 'icon_url' ] ) && filter_var( $payment_method[ 'icon_url' ], FILTER_VALIDATE_URL ) ) : ?>
 												<img src="<?php echo esc_url( $payment_method[ 'icon_url' ] ); ?>"
 													 alt="<?php echo esc_attr( $payment_method[ 'label' ] ); ?>">
 											<?php

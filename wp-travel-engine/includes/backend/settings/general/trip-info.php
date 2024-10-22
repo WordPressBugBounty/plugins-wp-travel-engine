@@ -159,8 +159,7 @@ $wp_travel_engine_settings = get_option( 'wp_travel_engine_settings', array() );
 			<select id="wp_travel_engine_settings[trip_facts][field_type][{{data.key}}]" name="wp_travel_engine_settings[trip_facts][field_type][{{data.key}}]" data-placeholder="<?php esc_attr_e( 'Choose a field type&hellip;', 'wp-travel-engine' ); ?>" class="wc-enhanced-select">
 					<option value=" "><?php esc_html_e( 'Choose input type&hellip;', 'wp-travel-engine' ); ?></option>
 				<?php
-					$obj    = new Wp_Travel_Engine_Functions();
-					$fields = $obj->trip_facts_field_options();
+					$fields = wptravelengine_functions()->trip_facts_field_options();
 				foreach ( $fields as $key => $val ) {
 					echo '<option value="' . ( ! empty( $key ) ? esc_attr( $key ) : 'Please select' ) . '">' . esc_html( $key ) . '</option>';
 				}

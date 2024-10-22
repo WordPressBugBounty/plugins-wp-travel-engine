@@ -2,6 +2,9 @@
 /**
  * Personal details
  */
+
+use WPTravelEngine\Helpers\Functions;
+
 wp_enqueue_script( "jquery-ui-datepicker" );
 
 global $post;
@@ -127,8 +130,7 @@ $booked_travellers = $pno;
 																			<select class="wpte-enhanced-select"
 																					name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
 																		<?php
-																		$wte             = new Wp_Travel_Engine_Functions();
-																		$country_options = $wte->wp_travel_engine_country_list();
+																		$country_options = Functions::get_countries();
 																		foreach ( $country_options as $key => $country ) {
 																			$selected = selected( $data_value, $country, false );
 																			echo '<option ' . $selected . " value='" . esc_attr( $country ) . "'>" . esc_html( $country ) . "</option>"; // phpcs:ignore
@@ -262,8 +264,7 @@ $booked_travellers = $pno;
 																		<select class="wpte-enhanced-select"
 																				name="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
 																			<?php
-																			$wte             = new Wp_Travel_Engine_Functions();
-																			$country_options = $wte->wp_travel_engine_country_list();
+																			$country_options = Functions::get_countries();
 																			foreach ( $country_options as $key => $country ) {
 																				$selected = selected( $data_value, $country, false );
 																				echo '<option ' . $selected . " value='" . esc_attr( $country ) . "'>" . esc_html( $country ) . "</option>"; // phpcs:ignore

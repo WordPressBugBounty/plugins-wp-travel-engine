@@ -139,7 +139,7 @@ class Wp_Travel_Engine_Order_Meta {
 				),
 			),
 			'cart_info'    => array(
-				'currency'     => wp_travel_engine_get_settings( 'currency_code' ),
+				'currency'     => wptravelengine_settings()->get( 'currency_code' ),
 				'subtotal'     => 0,
 				'total'        => 0,
 				'cart_partial' => 0,
@@ -169,7 +169,7 @@ class Wp_Travel_Engine_Order_Meta {
 				'payment_status' => 'pending',
 				'billing_info'   => $booking_object->billing_info,
 				'payable'        => array(
-					'currency' => wp_travel_engine_get_settings( 'currency_code' ),
+					'currency' => wptravelengine_settings()->get( 'currency_code' ),
 					'amount'   => 0,
 				),
 			)

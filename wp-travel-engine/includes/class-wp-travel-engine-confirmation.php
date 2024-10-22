@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Place order form for personal details.
  *
@@ -29,11 +30,13 @@ class Wp_Travel_Engine_Order_Confirmation {
 
 		if ( defined( 'WTE_USE_OLD_BOOKING_PROCESS' ) && WTE_USE_OLD_BOOKING_PROCESS ) {
 			wp_die( new \WP_Error( 'WTE_ERROR', esc_html__( 'WP Travel Engine no more supports old booking process.', 'wp-travel-engine' ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
 			return;
 		}
 
 		ob_start();
 		wte_get_template( 'traveller-information/template-traveler-info.php' );
+
 		return ob_get_clean();
 
 	}
@@ -46,6 +49,7 @@ class Wp_Travel_Engine_Order_Confirmation {
 		$prepared_statement = $wpdb->prepare( "SELECT `ID` FROM {$wpdb->posts} WHERE `post_title` LIKE %s", '%' . $wpdb->esc_like( $sanitized_email ) . '%' );
 
 		$result = $wpdb->get_row( $prepared_statement );
+
 		return is_null( $result ) ? false : $result->ID;
 	}
 
@@ -68,21 +72,22 @@ class Wp_Travel_Engine_Order_Confirmation {
 			require_once ABSPATH . 'wp-admin/includes/post.php';
 		}
 		$booked_trip_ids = $wte_cart->get_cart_trip_ids();
-		$trip            = $booked_trip_ids['0'];
+		$trip            = $booked_trip_ids[ '0' ];
 		$trip            = get_post( $trip );
 
 		if ( wp_travel_engine_use_old_booking_process() ) {
 			wp_die( new \WP_Error( 'WTE_ERROR', esc_html__( 'WP Travel Engine no more supports old booking process.', 'wp-travel-engine' ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
 			return;
 		}
 
 		$customer_email = '';
 
-		if ( isset( $order_metas['place_order']['booking']['email'] ) ) {
-			$customer_email = $order_metas['place_order']['booking']['email'];
+		if ( isset( $order_metas[ 'place_order' ][ 'booking' ][ 'email' ] ) ) {
+			$customer_email = $order_metas[ 'place_order' ][ 'booking' ][ 'email' ];
 		} else {
-			if ( isset( $order_metas['additional_fields'] ) && isset( $order_metas['additional_fields']['billing_email'] ) ) {
-				$customer_email = $order_metas['additional_fields']['billing_email'];
+			if ( isset( $order_metas[ 'additional_fields' ] ) && isset( $order_metas[ 'additional_fields' ][ 'billing_email' ] ) ) {
+				$customer_email = $order_metas[ 'additional_fields' ][ 'billing_email' ];
 			}
 		}
 
@@ -108,8 +113,8 @@ class Wp_Travel_Engine_Order_Confirmation {
 		 *
 		 * @since 8.5.2
 		 */
-		$settings              = wp_travel_engine_get_settings();
-		$generate_user_account = $settings['generate_user_account'] ?? 'no';
+		$settings              = wptravelengine_settings()->get();
+		$generate_user_account = $settings[ 'generate_user_account' ] ?? 'no';
 
 		if ( ! is_user_logged_in() ) {
 			if ( 'yes' === $generate_user_account && ! empty( $customer_email ) ) {
@@ -122,9 +127,9 @@ class Wp_Travel_Engine_Order_Confirmation {
 
 				$saved_booking_ids = get_user_meta( $results, 'wp_travel_engine_user_bookings', true );
 				if ( ! $saved_booking_ids || ! is_array( $saved_booking_ids ) ) {
-					$saved_booking_ids = array( $order_metas[0] );
+					$saved_booking_ids = array( $order_metas[ 0 ] );
 				} else {
-					$saved_booking_ids[] = $order_metas[0];
+					$saved_booking_ids[] = $order_metas[ 0 ];
 				}
 				update_user_meta( $results, 'wp_travel_engine_user_bookings', $saved_booking_ids );
 			}
@@ -138,14 +143,14 @@ class Wp_Travel_Engine_Order_Confirmation {
 			);
 		}
 
-		$size = count( $booked_trip_setting['traveler'] );
+		$size = count( $booked_trip_setting[ 'traveler' ] );
 
 		$order_data = array();
-		foreach ( $order_metas['place_order'] as $key => $value ) {
+		foreach ( $order_metas[ 'place_order' ] as $key => $value ) {
 			$order_data[ $key ][ $size + 1 ] = $value;
 		}
 
-		unset( $order_data['booking'] ); // Remove Booking Data.
+		unset( $order_data[ 'booking' ] ); // Remove Booking Data.
 
 		$updated_booked_trip_setting = array_merge_recursive( $booked_trip_setting, $order_data );
 
@@ -157,8 +162,8 @@ class Wp_Travel_Engine_Order_Confirmation {
 			$customer_bookings = array();
 		}
 
-		if ( isset( $order_metas[0] ) && is_numeric( $order_metas[0] ) ) {
-			$customer_bookings[] = $order_metas[0];
+		if ( isset( $order_metas[ 0 ] ) && is_numeric( $order_metas[ 0 ] ) ) {
+			$customer_bookings[] = $order_metas[ 0 ];
 		}
 		update_post_meta( $customer_post_object->ID, 'wp_travel_engine_bookings', $customer_bookings );
 
@@ -168,7 +173,7 @@ class Wp_Travel_Engine_Order_Confirmation {
 			if ( ! is_array( $saved_booking_ids ) ) {
 				$saved_booking_ids = array();
 			}
-			$saved_booking_ids[] = $order_metas[0];
+			$saved_booking_ids[] = $order_metas[ 0 ];
 			update_user_meta( $user->ID, 'wp_travel_engine_user_bookings', $saved_booking_ids );
 		}
 	}
@@ -187,6 +192,7 @@ class Wp_Travel_Engine_Order_Confirmation {
 		// Check if email address exists.
 		if ( email_exists( $email ) ) {
 			$exists_id = email_exists( $email );
+
 			return $exists_id;
 		}
 

@@ -476,7 +476,7 @@ function wp_travel_engine_is_cart_partially_payable(): bool {
  */
 function wte_get_person_format() {
 
-	$wte_settings = wp_travel_engine_get_settings();
+	$wte_settings = wptravelengine_settings()->get();
 
 	$per_person = __( '/person', 'wp-travel-engine' );
 
@@ -501,7 +501,7 @@ function wte_get_person_format() {
  */
 function wte_get_book_now_text() {
 
-	$wte_settings = wp_travel_engine_get_settings();
+	$wte_settings = wptravelengine_settings()->get();
 
 	$per_person = wte_default_labels( 'checkout.submitButtonText' );
 

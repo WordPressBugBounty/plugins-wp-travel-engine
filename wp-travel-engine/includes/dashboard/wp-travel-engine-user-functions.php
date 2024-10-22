@@ -34,7 +34,7 @@ if ( ! function_exists( 'wp_travel_engine_create_new_customer' ) ) {
 	 */
 	function wp_travel_engine_create_new_customer( $email, $username = '', $password = '' ) {
 
-		$settings = wp_travel_engine_get_settings();
+		$settings = wptravelengine_settings()->get();
 
 		$generate_username_from_email = isset( $settings['generate_username_from_email'] ) ? $settings['generate_username_from_email'] : 'no';
 		$generate_user_password       = isset( $settings['generate_user_password'] ) ? $settings['generate_user_password'] : 'no';

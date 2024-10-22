@@ -44,7 +44,7 @@ class Optimizer {
 	 */
 	public static function add_lazyload_attributes( string $html ): string {
 		// Check if the current page is a WP Travel Engine single post and lazy loading is enabled.
-		 if ( 'active' != wptravelengine_settings()->get( 'enable_lazy_loading' ) || 'active' != wptravelengine_settings()->get( 'enable_img_lazy_loading' ) ) {
+		 if ( ! wptravelengine_toggled( wptravelengine_settings()->get( 'enable_lazy_loading' ) ) || ! wptravelengine_toggled( wptravelengine_settings()->get( 'enable_img_lazy_loading' ) ) ) {
 			return $html;
 		}
 

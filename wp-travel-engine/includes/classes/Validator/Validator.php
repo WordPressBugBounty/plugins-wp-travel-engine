@@ -11,7 +11,7 @@
 
 namespace WPTravelEngine\Validator;
 
-use WPTravelEngine\Core\Functions;
+use WPTravelEngine\Helpers\Functions;
 
 /**
  * Validator Class

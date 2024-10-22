@@ -8,8 +8,10 @@
 
 namespace WPTravelEngine\CLI;
 
+use Faker\Factory;
 use WP_CLI_Command;
 use WP_CLI;
+use WP_Error;
 use WP_Query;
 
 /**
@@ -154,282 +156,6 @@ class Trip extends WP_CLI_Command {
 				WP_CLI::log( "Inserted term $term with ID " . $inserted_term[ 'term_id' ] );
 			}
 		}
-	}
-
-	protected function generate_random_paragraph( $num_words = 50 ) {
-		$words = array(
-			'lorem',
-			'ipsum',
-			'dolor',
-			'sit',
-			'amet',
-			'consectetur',
-			'adipiscing',
-			'elit',
-			'curabitur',
-			'vel',
-			'hendrerit',
-			'libero',
-			'integer',
-			'sem',
-			'et',
-			'malesuada',
-			'fames',
-			'ac',
-			'turpis',
-			'egestas',
-			'duis',
-			'autem',
-			'vel',
-			'eum',
-			'iriure',
-			'dolor',
-			'in',
-			'hendrerit',
-			'in',
-			'vulputate',
-			'velit',
-			'esse',
-			'molestie',
-			'consequat',
-			'vel',
-			'illum',
-			'dolore',
-			'eu',
-			'feugiat',
-			'nulla',
-			'facilisis',
-			'at',
-			'vero',
-			'eros',
-			'et',
-			'accumsan',
-			'et',
-			'iusto',
-			'odio',
-			'dignissim',
-			'qui',
-			'blandit',
-			'praesent',
-			'luptatum',
-			'zzril',
-			'delenit',
-			'augue',
-			'duis',
-			'dolore',
-			'te',
-			'feugait',
-			'nulla',
-			'facilisi',
-			'nam',
-			'liber',
-			'tempor',
-			'cum',
-			'soluta',
-			'nobis',
-			'eleifend',
-			'option',
-			'congue',
-			'nihil',
-			'imperdiet',
-			'doming',
-			'id',
-			'quod',
-			'mazim',
-			'placerat',
-			'facer',
-			'possim',
-			'assum',
-			'lorem',
-			'ipsum',
-			'dolor',
-			'sit',
-			'amet',
-			'consectetur',
-			'adipiscing',
-			'elit',
-			'sed',
-			'do',
-			'eiusmod',
-			'tempor',
-			'incididunt',
-			'ut',
-			'labore',
-			'et',
-			'dolore',
-			'magna',
-			'aliqua',
-			'ut',
-			'enim',
-			'ad',
-			'minim',
-			'veniam',
-			'quis',
-			'nostrud',
-			'exercitation',
-			'ullamco',
-			'laboris',
-			'nisi',
-			'ut',
-			'aliquip',
-			'ex',
-			'ea',
-			'commodo',
-			'consequat',
-			'duis',
-			'aute',
-			'irure',
-			'dolor',
-			'in',
-			'reprehenderit',
-			'in',
-			'voluptate',
-			'velit',
-			'esse',
-			'cillum',
-			'dolore',
-			'eu',
-			'fugiat',
-			'nulla',
-			'pariatur',
-			'excepteur',
-			'sint',
-			'occaecat',
-			'cupidatat',
-			'non',
-			'proident',
-			'sunt',
-			'in',
-			'culpa',
-			'qui',
-			'officia',
-			'deserunt',
-			'mollit',
-			'anim',
-			'id',
-			'est',
-			'laborum',
-			'et',
-			'dolore',
-			'magna',
-			'aliqua',
-			'ut',
-			'enim',
-			'ad',
-			'minim',
-			'veniam',
-			'quis',
-			'nostrud',
-			'exercitation',
-			'ullamco',
-			'laboris',
-			'nisi',
-			'ut',
-			'aliquip',
-			'ex',
-			'ea',
-			'commodo',
-			'consequat',
-			'duis',
-			'aute',
-			'irure',
-			'dolor',
-			'in',
-			'reprehenderit',
-			'in',
-			'voluptate',
-			'velit',
-			'esse',
-			'cillum',
-			'dolore',
-			'eu',
-			'fugiat',
-			'nulla',
-			'pariatur',
-			'excepteur',
-			'sint',
-			'occaecat',
-			'cupidatat',
-			'non',
-			'proident',
-			'sunt',
-			'in',
-			'culpa',
-			'qui',
-			'officia',
-			'deserunt',
-			'mollit',
-			'anim',
-			'id',
-			'est',
-			'laborum',
-		);
-
-		$paragraph = '';
-
-		for ( $i = 0; $i < $num_words; $i ++ ) {
-			$paragraph .= $words[ array_rand( $words ) ] . ' ';
-		}
-
-		return $paragraph;
-	}
-
-	protected function sample_trip_settings() {
-		$duration_units     = [ 'days', 'hours' ];
-		$boolean            = [ 'true', 'false' ];
-		$trip_duration      = rand( 1, 20 );
-		$minimum_pax        = rand( 0, 5 );
-		$trip_duration_unit = $duration_units[ array_rand( $duration_units ) ];
-
-		return [
-			'trip_duration'          => $trip_duration,
-			'trip_duration_unit'     => $trip_duration_unit,
-			'trip_duration_nights'   => $trip_duration,
-			'trip_cutoff_enable'     => $boolean[ array_rand( $boolean ) ],
-			'trip_cut_off_time'      => rand( 1, $trip_duration ),
-			'trip_cut_off_unit'      => $trip_duration_unit,
-			'min_max_age_enable'     => $boolean[ array_rand( $boolean ) ],
-			'trip_minimum_pax'       => $minimum_pax,
-			'trip_maximum_pax'       => rand( $minimum_pax, 100 ),
-			'overview_section_title' => 'Overview',
-			'tab_content'            => [
-				'1_wpeditor' => $this->generate_random_paragraph( rand( 50, 100 ) ),
-			],
-			'trip_highlights_title'  => 'Trip Highlights',
-			'trip_highlights'        => array_map( function () {
-				return [ 'highlight_text' => $this->generate_random_paragraph( rand( 5, 10 ) ) ];
-			}, range( 1, rand( 5, 10 ) ) ),
-			'trip_itinerary_title'   => 'Trip Itineraries',
-			'itinerary'              => [
-				'itinerary_title'   => array_map( function ( $day ) {
-					return $this->generate_random_paragraph( rand( 5, 10 ) );
-				}, 'hours' === $trip_duration_unit ? [ 0 ] : range( 0, $trip_duration ) ),
-				'itinerary_content' => array_map( function ( $day ) {
-					return $this->generate_random_paragraph( rand( 50, 100 ) );
-				}, 'hours' === $trip_duration_unit ? [ 0 ] : range( 0, $trip_duration ) ),
-			],
-			'cost_tab_sec_title'     => 'Includes/Excludes',
-			'cost'                   => [
-				'includes_title' => 'Cost Includes',
-				'cost_includes'  => implode( "\n", array_map( function () {
-					return $this->generate_random_paragraph( rand( 5, 20 ) );
-				}, range( 1, 10 ) ) ),
-				'excludes_title' => 'Cost Excludes',
-				'cost_excludes'  => implode( "\n", array_map( function () {
-					return $this->generate_random_paragraph( rand( 5, 20 ) );
-				}, range( 1, 10 ) ) ),
-			],
-			'trip_facts_title'       => 'Trip Info',
-			'trip_facts'             => [
-				'field_id'   => [ 'Accomodation', 'Admission Fee', 'Language', 'Guides' ],
-				'field_type' => [ 'text', 'text', 'text', 'text' ],
-				0            => [ 0 => '5 Star Hotel' ],
-				1            => [ 1 => 'No' ],
-				2            => [ 2 => 'English, Deustsch' ],
-				3            => [ 3 => 'Yes' ],
-			],
-		];
-
 	}
 
 	function download_and_attach_image( $post_id, $image_url ) {
@@ -586,7 +312,7 @@ class Trip extends WP_CLI_Command {
 				$background_color = sprintf( '%06X', mt_rand( 0, 0xFFFFFF ) );
 				$text_color       = 'ffffff';
 
-				$url = "https://placehold.co/1920x1080/$background_color/$text_color.jpeg/?font=roboto&text=" . str_replace( ' ', '+', $post_title );
+				$url        = "https://placehold.co/1920x1080/$background_color/$text_color.jpeg/?font=roboto&text=" . str_replace( ' ', '+', $post_title );
 				$attachment = media_sideload_image( $url, $post_id, null, 'id' );
 
 				if ( ! is_wp_error( $attachment ) ) {
@@ -609,5 +335,199 @@ class Trip extends WP_CLI_Command {
 				WP_CLI::error( "Error creating sample trip." );
 			}
 		}
+	}
+
+	/**
+	 * Create sample trips.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <count>
+	 * : The number of sample trips to create.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp wp-travel-engine trip create-sample 10
+	 *
+	 * @when after_wp_load
+	 */
+	public function generate( $args, $assoc_args ) {
+		$faker = Factory::create();
+
+		$trip_duration      = $faker->numberBetween( 1, 20 );
+		$trip_duration_unit = $faker->randomElement( [ 'days', 'hours' ] );
+
+		$minimum_pax = $faker->numberBetween( 0, 5 );
+
+		$post_id = $this->insert_trip( [
+			'post_type'    => WP_TRAVEL_ENGINE_POST_TYPE,
+			'post_title'   => $faker->cityPrefix() . ' ' . $faker->city() . ' ' . $faker->citySuffix(),
+			'post_status'  => 'publish',
+			'post_content' => $faker->paragraph( $faker->randomDigitNotNull() ),
+			'post_author'  => get_current_user_id(),
+			'meta_input'   => [
+				'trip_version'                           => '2.0.0',
+				'wp_travel_engine_setting_trip_duration' => $trip_duration,
+				'_s_duration'                            => $trip_duration * 24,
+				'wp_travel_engine_trip_min_age'          => rand( 1, 16 ),
+				'wp_travel_engine_trip_max_age'          => rand( 40, 60 ),
+				'wp_travel_engine_setting'               => [
+					'trip_duration'          => $trip_duration,
+					'trip_duration_unit'     => $trip_duration_unit,
+					'trip_duration_nights'   => $trip_duration,
+					'trip_cutoff_enable'     => $faker->boolean(),
+					'trip_cut_off_time'      => $faker->numberBetween( 0, $trip_duration ),
+					'trip_cut_off_unit'      => $trip_duration_unit,
+					'min_max_age_enable'     => $faker->boolean(),
+					'trip_minimum_pax'       => $minimum_pax,
+					'trip_maximum_pax'       => $faker->numberBetween( $minimum_pax, 100 ),
+					'overview_section_title' => 'Overview',
+					'tab_content'            => [
+						'1_wpeditor' => $faker->paragraph( $faker->randomDigitNotNull() ),
+					],
+					'trip_highlights_title'  => 'Trip Highlights',
+					'trip_highlights'        => array_map(
+						fn ( $highlight_text ) => compact( 'highlight_text' ),
+						$faker->sentences( $faker->randomDigitNotNull() )
+					),
+					'trip_itinerary_title'   => 'Trip Itineraries',
+					'itinerary'              => [
+						'itinerary_title'   => $faker->sentences( $trip_duration_unit === 'days' ? $trip_duration : 1 ),
+						'itinerary_content' => $faker->paragraphs( $trip_duration_unit === 'days' ? $trip_duration : 1 ),
+					],
+					'cost_tab_sec_title'     => 'Includes/Excludes',
+					'cost'                   => [
+						'includes_title' => 'Cost Includes',
+						'cost_includes'  => implode( "\n", $faker->paragraphs( $faker->randomDigitNotNull() ) ),
+						'excludes_title' => 'Cost Excludes',
+						'cost_excludes'  => implode( "\n", $faker->paragraphs( $faker->randomDigitNotNull() ) ),
+					],
+					'trip_facts_title'       => 'Trip Info',
+					'trip_facts'             => [
+						'field_id'   => [ 'Accommodation', 'Admission Fee', 'Language', 'Guides' ],
+						'field_type' => [ 'text', 'text', 'text', 'text' ],
+						0            => [ 0 => '5 Star Hotel' ],
+						1            => [ 1 => 'No' ],
+						2            => [ 2 => 'English, Deutsch' ],
+						3            => [ 3 => 'Yes' ],
+					],
+				],
+			],
+		] );
+
+
+		$destination_term = (object) wp_insert_term( $faker->country(), 'destination' );
+		if ( ! is_wp_error( $destination_term ) ) {
+			wp_set_object_terms( $post_id, $destination_term->term_id, 'destination' );
+		}
+
+		$activities     = [ 'Tour', 'Trekking', 'Day Tour', 'Adventure', 'Hiking', 'Short Tour', ];
+		$trip_type_term = (object) wp_insert_term( wp_slash( $faker->randomElement( $activities ) ), 'trip_types' );
+		if ( ! is_wp_error( $trip_type_term ) ) {
+			wp_set_object_terms( $post_id, $trip_type_term->term_id, 'trip_types' );
+			wp_set_object_terms( $post_id, $trip_type_term->term_id, 'activities' );
+		}
+
+
+		$primary_pricing_category = get_option( 'primary_pricing_category', false );
+		if ( ! $primary_pricing_category ) {
+			$terms = array( 'Adult', 'Child', 'Infant' );
+
+			foreach ( $terms as $term ) {
+				$inserted_term = wp_insert_term( $term, 'trip-packages-categories' );
+				if ( is_wp_error( $inserted_term ) ) {
+					if ( 'term_exists' === $inserted_term->get_error_code() ) {
+						continue;
+					}
+				}
+
+				if ( is_wp_error( $inserted_term ) ) {
+					WP_CLI::error( "Error inserting term $term: " . $inserted_term->get_error_message() );
+				} else {
+					if ( 'Adult' === $term ) {
+						update_option( 'primary_pricing_category', $inserted_term[ 'term_id' ] );
+					}
+					WP_CLI::log( "Inserted term $term with ID " . $inserted_term[ 'term_id' ] );
+				}
+			}
+		}
+
+		$terms = get_terms( [
+			'taxonomy'   => 'trip-packages-categories',
+			'hide_empty' => false,
+			'fields'     => 'id=>name',
+		] );
+
+		$package_categories = [];
+		foreach ( $terms as $term_id => $term_name ) {
+			$price                                             = $faker->numberBetween( 100, 1000 );
+			$package_categories[ 'c_ids' ][ $term_id ]         = $term_id;
+			$package_categories[ 'labels' ][ $term_id ]        = $term_name;
+			$package_categories[ 'prices' ][ $term_id ]        = $price;
+			$package_categories[ 'pricing_types' ][ $term_id ] = 'fixed';
+			$package_categories[ 'enabled_sale' ][ $term_id ]  = $faker->boolean( 80 );
+			$package_categories[ 'sale_prices' ][ $term_id ]   = (int) $price * rand( 80, 90 ) / 100;
+			$package_categories[ 'min_paxes' ][ $term_id ]     = rand( 0, 1 );
+			$package_categories[ 'max_paxes' ][ $term_id ]     = rand( 6, 100 );
+		}
+
+		$package_ids = array();
+
+		foreach ( $faker->words( $faker->numberBetween( 1, 3 ) ) as $word ) {
+			$package_id = wp_insert_post(
+				array(
+					'post_title'  => $word,
+					'post_status' => 'publish',
+					'post_type'   => 'trip-packages',
+					'meta_input'  => [
+						'trip_ID'            => $post_id,
+						'package-categories' => $package_categories,
+					],
+				)
+			);
+
+			$package_ids[] = $package_id;
+		}
+
+
+		update_post_meta( $post_id, 'packages_ids', $package_ids );
+
+
+		if ( ! $post_id ) {
+			WP_CLI::error( 'Error creating trip.' );
+		} else {
+			WP_CLI::success( "Created trip $post_id." );
+		}
+	}
+
+	/**
+	 * @return void
+	 */
+	public function reset() {
+		$trips = new WP_Query( array(
+			'post_type'      => [ 'trip', 'booking', 'enquiry', 'customer', 'wte-coupon' ],
+			'posts_per_page' => - 1,
+		) );
+
+		foreach ( $trips->posts as $trip ) {
+			$result = wp_delete_post( $trip->ID, true );
+			if ( is_wp_error( $result ) ) {
+				/* @var $result WP_Error */
+				WP_CLI::error( "Error deleting trip {$trip->ID}: " . $result->get_error_message() );
+			} else {
+				WP_CLI::success( "Deleted trip {$result->ID}." );
+			}
+		}
+
+		WP_CLI::success( 'All trips deleted.' );
+	}
+
+	/**
+	 * @param array $postarr
+	 *
+	 * @return int|WP_Error
+	 */
+	protected function insert_trip( array $postarr ) {
+		return wp_insert_post( $postarr );
 	}
 }

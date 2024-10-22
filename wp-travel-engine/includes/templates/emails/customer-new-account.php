@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-$settings = wp_travel_engine_get_settings();
+$settings = wptravelengine_settings()->get();
 
 $generate_username_from_email = $settings[ 'generate_username_from_email' ] ?? 'no';
 $generate_user_password       = $settings[ 'generate_user_password' ] ?? 'no';

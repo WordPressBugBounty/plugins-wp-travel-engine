@@ -9,6 +9,7 @@
 namespace WPTravelEngine\Core\Controllers\Ajax;
 
 use WPTravelEngine\Abstracts\AjaxController;
+use WPTravelEngine\Helpers\Functions;
 
 /**
  * Handles the payment gateway ajax request.
@@ -59,8 +60,7 @@ class PaymentGateway extends AjaxController {
 								<option
 									value=" "><?php esc_html_e( 'Choose country&hellip;', 'wp-travel-engine' ); ?></option>
 								<?php
-								$obj     = \wptravelengine_functions();
-								$options = $obj->wp_travel_engine_country_list();
+								$options = Functions::get_countries();
 								foreach ( $options as $key => $val ) {
 									echo '<option value="' . ( ! empty( $val ) ? esc_attr( $val ) : 'Please select' ) . '">' . esc_html( $val ) . '</option>';
 								}

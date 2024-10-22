@@ -19,7 +19,7 @@ if ( ! empty( $_POST['register'] ) && wp_verify_nonce( $nonce_value, 'wp-travel-
 	$reg_form_toogle   = 'style="display:none"';
 }
 
-$settings = wp_travel_engine_get_settings();
+$settings = wptravelengine_settings()->get();
 
 $disable_my_account_customer_registration = isset( $settings['disable_my_account_customer_registration'] ) ? $settings['disable_my_account_customer_registration'] : 'no';
 

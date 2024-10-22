@@ -98,7 +98,7 @@ class WP_Travel_Engine_Tabs_UI {
 						<?php
 						foreach ( $admin_tabs as $key => $tab ) :
 							$next_tab = next( $admin_tabs );
-							$tab_key = isset( $tab[ 'tab_key' ] ) ? $tab[ 'tab_key' ] : '';
+							$tab_key = $tab[ 'tab_key' ] ?? '';
 							$tab_details = array(
 								'content_path' => base64_encode( $tab[ 'content_path' ] ),
 								// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
