@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 6.2.0
+Stable tag: 6.2.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -367,6 +367,15 @@ Yes. We have created WooCommerce Payments add-ons that supports all the payment 
 Please send us an email via [support ticket](https://wptravelengine.com/support-ticket/?utm_source=free_plugin&utm_medium=wporg&utm_campaign=support), and we will be happy to help you.
 
 == Changelog ==
+
+= 6.2.1 - 28th October 2024 =
+* New: Introduced a sorting toolbar for taxonomy terms, allowing users to dynamically sort items in ascending or descending order.
+* Update: Updates freemius SDK to the latest version.
+* Chore: Streamlined the data retrieval process for extra services, enhancing overall robustness.
+* Refactor : Streamlined handling of itinerary images for better readability and performance.
+* Fix: Improved handling of extra services in trip meta tabs to prevent the inclusion of empty or invalid entries.
+* Fix: Improved error handling for package deletion, providing clearer feedback on failures.
+* Fix: Improved error handling in the admin settings, enhancing stability when including configuration files.
 
 = 6.2.0 - 22nd October 2024 =
 * Update: Introduced a new layout for global settings.

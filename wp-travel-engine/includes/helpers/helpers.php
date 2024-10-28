@@ -2411,3 +2411,25 @@ function wptravelengine_trip_facts_value( $trip_id, $trip_settings ) {
 		),
 	);
 }
+
+/**
+ * @param $template
+ * @param array $args
+ *
+ * @return void
+ * @since 6.2.1
+ */
+function wptravelengine_view( $template, array $args = array() ) {
+	$template = apply_filters( 'wptravelengine_view_template_path', $template );
+
+	if ( ! file_exists( $template ) ) {
+		return;
+	}
+
+	if ( ! empty( $args ) && is_array( $args ) ) {
+		extract( $args );
+	}
+
+	include $template;
+
+}

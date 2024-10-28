@@ -63,13 +63,14 @@ $services = get_posts(
 	)
 );
 foreach ( $services ?? [] as $service ) {
-	$service_data = get_post_meta( $service->ID, 'wte_services', true );
-	$extra_services[] = [
-		'id'      => (int) $service->ID ?? 0,
-		'label'   => (string) $service->post_title ?? '',
-		'type'    => (string) $service_data[ 'service_type' ] ?? '',
-		'options' => (array) $service_data[ 'options' ] ?? '',
-	];
+	if ( $service_data = get_post_meta( $service->ID, 'wte_services', true ) ) {
+		$extra_services[] = [
+			'id'      => (int) $service->ID ?? 0,
+			'label'   => (string) $service->post_title ?? '',
+			'type'    => (string) $service_data[ 'service_type' ] ?? '',
+			'options' => (array) $service_data[ 'options' ] ?? '',
+		];
+	}
 }
 
 $sleepModeOptions = [ [ 'label' => __( 'Select Sleep Mode', 'wp-travel-engine' ), 'value' => '' ] ];

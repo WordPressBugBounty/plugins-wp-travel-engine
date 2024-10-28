@@ -29,10 +29,12 @@ class AdminSettings {
 				}
 			}
 
+			$tab_settings = apply_filters( "wptravelengine_settings:tabs:" . $tab_settings[ 'id' ], $tab_settings );
 
 			$tabs[] = $tab_settings;
-
 		}
+
+		$tabs = apply_filters( 'wptravelengine_settings_ui_config', $tabs );
 
 		usort( $tabs, function ( $a, $b ) {
 			return $a[ 'order' ] - $b[ 'order' ];
@@ -53,10 +55,12 @@ class AdminSettings {
 
 		$tabs = array();
 		foreach ( $iterator as $directory ) {
-			if ( $directory->isDot() || ! $directory->isFile() ) {
+
+			if ( $directory->isDot() || ! $directory->isFile() || ! $tab_settings = include $directory->getPathname() ) {
 				continue;
 			}
-			$tab_settings = include $directory->getPathname();
+
+			$tab_settings = apply_filters( "wptravelengine_settings:sub_tabs:" . $tab_settings[ 'id' ], $tab_settings );
 
 			$tabs[] = $tab_settings;
 
@@ -67,14 +71,15 @@ class AdminSettings {
 			if ( ! isset( $a[ 'order' ] ) || ! isset( $b[ 'order' ] ) ) {
 				return 100;
 			}
-				return $a[ 'order' ] - $b[ 'order' ];
+
+			return $a[ 'order' ] - $b[ 'order' ];
 
 		} );
 
-		$tabs = array_values( array_filter( $tabs, function( $tab ) {
-			return !empty( $tab );
+		$tabs = array_values( array_filter( $tabs, function ( $tab ) {
+			return ! empty( $tab );
 		} ) );
 
-        return $tabs;
+		return $tabs;
 	}
 }

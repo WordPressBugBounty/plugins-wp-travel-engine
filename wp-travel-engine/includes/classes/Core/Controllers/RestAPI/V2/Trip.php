@@ -965,14 +965,16 @@ class Trip extends WP_REST_Posts_Controller {
 				if ( ! isset( $data[ 'itineraries' ][ $key - 1 ] ) ) {
 					continue;
 				}
-				$temp_img    	= empty( $img[$key] ) ? [] : array_values( array_unique( $img[$key] ) );
-				$images   = array();
-				foreach ( $temp_img as $key => $id ) {
-					$id = (int) $id;
-					$alt             = get_post_meta( $id, '_wp_attachment_image_alt', true );
-					$url = wp_get_attachment_image_url( $id, 'full' );
-					$images[ $key ] = compact( 'id', 'alt', 'url' );
-				}
+				$temp_img    	= empty( $img[ $key ] ) ? [] : array_values( array_unique( $img[ $key ] ) );
+				$images 		= array_values( array_filter( array_map( function( $id ) {
+					$id   = (int) $id;
+					if ( ! wp_attachment_is_image( $id ) ) {
+						return null;
+					}
+					$alt  = get_post_meta( $id, '_wp_attachment_image_alt', true );
+					$url  = wp_get_attachment_image_url( $id, 'full' );
+					return compact( 'id', 'alt', 'url' );
+				}, $temp_img ) ) );
 				$period         = (float) ( $advanced_itinerary[ 'itinerary_duration' ][ $key ] ?? 0 );
 				$meals_included = (array) ( $advanced_itinerary[ 'meals_included' ][ $key ] ?? [] );
 				$unit           = (string) ( $advanced_itinerary[ 'itinerary_duration_type' ][ $key ] ?? 'hour' );

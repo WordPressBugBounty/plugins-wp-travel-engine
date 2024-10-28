@@ -5,7 +5,7 @@
 
 add_action(
 	'admin_init',
-	function() {
+	function () {
 		if ( ! class_exists( 'EDD_SL_Plugin_Updater' ) ) {
 			// load our custom updater.
 			include plugin_dir_path( WP_TRAVEL_ENGINE_FILE_PATH ) . 'admin/plugin-updates/EDD_SL_Plugin_Updater.php';
@@ -19,10 +19,10 @@ add_action(
 		$license_settings = get_option( 'wp_travel_engine_license', array() );
 
 		foreach ( $extensions as $file_path => $extension ) {
-			if ( empty( $extension['WTE'] ) ) {
+			if ( empty( $extension[ 'WTE' ] ) ) {
 				continue;
 			}
-			list( $item_id, $license_key_index ) = explode( ':', $extension['WTE'] );
+			list( $item_id, $license_key_index ) = explode( ':', $extension[ 'WTE' ] );
 			if ( ! isset( $license_settings[ $license_key_index ] ) ) {
 				continue;
 			}
@@ -31,10 +31,14 @@ add_action(
 				WP_TRAVEL_ENGINE_STORE_URL,
 				$file_path,
 				array(
-					'version' => $extension['Version'], // current version number
-					'license' => $license_settings[ $license_key_index ], // license key (used get_option above to retrieve from DB)
-					'item_id' => $item_id, // ID of the product
-					'author'  => 'WP Travel Engine', // author of this plugin
+					'version' => $extension[ 'Version' ],
+					// current version number
+					'license' => $license_settings[ $license_key_index ],
+					// license key (used get_option above to retrieve from DB)
+					'item_id' => $item_id,
+					// ID of the product
+					'author'  => 'WP Travel Engine',
+					// author of this plugin
 					'beta'    => false,
 				)
 			);
@@ -45,7 +49,7 @@ add_action(
 
 add_action(
 	'admin_init',
-	function() {
+	function () {
 		// creates our settings in the options table
 		register_setting(
 			'wp_travel_engine_license',
@@ -56,12 +60,12 @@ add_action(
 		);
 
 		// If License activation request.
-		if ( isset( $_REQUEST['edd_license_activate'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_REQUEST[ 'edd_license_activate' ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			wp_travel_engine_activate_license();
 		}
 
 		// If License deactivation request.
-		if ( isset( $_REQUEST['edd_license_deactivate'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_REQUEST[ 'edd_license_deactivate' ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			wp_travel_engine_deactivate_license();
 		}
 	}
@@ -69,16 +73,16 @@ add_action(
 
 function wpte_sanitize_license( $new ) {
 	// phpcs:disable
-	$value                      = wte_clean( wp_unslash( $_POST['addon_name'] ) );
+	$value                      = wte_clean( wp_unslash( $_POST[ 'addon_name' ] ) );
 	$option                     = get_option( 'wp_travel_engine_license', [] );
 	$addon_name                 = apply_filters( 'wp_travel_engine_addons', array() );
 	$wte_fixed_departure_status = isset( $option[ $value . '_license_status' ] ) ? esc_attr( $option[ $value . '_license_status' ] ) : false;
 	$arr                        = array();
-	if ( isset( $_POST['edd_license_activate'] ) && $_POST['edd_license_activate'] == 'Activate License' ) {
+	if ( isset( $_POST[ 'edd_license_activate' ] ) && $_POST[ 'edd_license_activate' ] == 'Activate License' ) {
 		$new[ $value . '_license_key' ]    = $option[ $value . '_license_key' ];
 		$new[ $value . '_license_status' ] = 'valid';
 	}
-	if ( isset( $_POST['edd_license_deactivate'] ) && $_POST['edd_license_deactivate'] == 'Deactivate License' ) {
+	if ( isset( $_POST[ 'edd_license_deactivate' ] ) && $_POST[ 'edd_license_deactivate' ] == 'Deactivate License' ) {
 
 		$old = $option[ $value . '_license_key' ];
 		if ( $old && $old != $new[ $value . '_license_key' ] ) {
@@ -89,16 +93,17 @@ function wpte_sanitize_license( $new ) {
 			$new[ $value . '_license_status' ] = '';
 		}
 	}
-	if ( isset( $_POST['submit'] ) ) {
+	if ( isset( $_POST[ 'submit' ] ) ) {
 		foreach ( $addon_name as $key => $val ) {
 			$license_key = '';
-			if ( isset( $_POST['wp_travel_engine_license'][ $val . '_license_key' ] ) ) {
-				$license_key = wp_filter_nohtml_kses( wp_unslash( $_POST['wp_travel_engine_license'][ $val . '_license_key' ] ) );
+			if ( isset( $_POST[ 'wp_travel_engine_license' ][ $val . '_license_key' ] ) ) {
+				$license_key = wp_filter_nohtml_kses( wp_unslash( $_POST[ 'wp_travel_engine_license' ][ $val . '_license_key' ] ) );
 			}
 			$new[ $val . '_license_key' ]    = $license_key;
 			$new[ $val . '_license_status' ] = isset( $option[ $val . '_license_status' ] ) ? esc_attr( $option[ $val . '_license_status' ] ) : false;
 		}
 	}
+
 	// phpcs:enable
 	return $new;
 }
@@ -150,7 +155,7 @@ function wp_travel_engine_activate_license() {
 	// return; // get out if we didn't click the Activate button
 	$wp_travel_engine = get_option( 'wp_travel_engine_license', array() );
 	// phpcs:disable
-	$addon_name = wte_clean( wp_unslash( $_POST['addon_name'] ) );
+	$addon_name = wte_clean( wp_unslash( $_POST[ 'addon_name' ] ) );
 	$addon_id   = apply_filters( 'wp_travel_engine_addons_id', array() );
 	// retrieve the license from the database
 	$wte_fixed_departure_license = isset( $wp_travel_engine[ $addon_name . '_license_key' ] ) ? esc_attr( $wp_travel_engine[ $addon_name . '_license_key' ] ) : false;
@@ -217,7 +222,7 @@ function wp_travel_engine_activate_license() {
 
 function wp_travel_engine_deactivate_license() {
 
-	if ( isset( $_POST['edd_license_deactivate'] ) ) {
+	if ( isset( $_POST[ 'edd_license_deactivate' ] ) ) {
 		// run a quick security check
 		if ( ! check_admin_referer( 'wp_travel_engine_license_nonce', 'wp_travel_engine_license_nonce' ) ) {
 			return;
@@ -225,7 +230,7 @@ function wp_travel_engine_deactivate_license() {
 		// phpcs:disable
 		$wp_travel_engine = get_option( 'wp_travel_engine_license' );
 
-		$addon_name = wte_clean( wp_unslash( $_POST['addon_name'] ) );
+		$addon_name = wte_clean( wp_unslash( $_POST[ 'addon_name' ] ) );
 		$addon_id   = apply_filters( 'wp_travel_engine_addons_id', array() );
 		// retrieve the license from the database
 		$wte_fixed_departure_license = isset( $wp_travel_engine[ $addon_name . '_license_key' ] ) ? esc_attr( $wp_travel_engine[ $addon_name . '_license_key' ] ) : false;
@@ -268,16 +273,16 @@ function wp_travel_engine_deactivate_license() {
  */
 add_action(
 	'admin_notices',
-	function() {
+	function () {
 		// Show notices for each invalid licences.
 		wptravelengine_show_invalid_notice();
 
 		// phpcs:disable
 		// If sl_activation.
-		if ( isset( $_GET['sl_activation'] ) && ! empty( $_GET['message'] ) ) {
-			switch ( $_GET['sl_activation'] ) {
+		if ( isset( $_GET[ 'sl_activation' ] ) && ! empty( $_GET[ 'message' ] ) ) {
+			switch ( $_GET[ 'sl_activation' ] ) {
 				case 'false':
-					$message = urldecode( wp_unslash( $_GET['message'] ) ); // phpcs:ignore
+					$message = urldecode( wp_unslash( $_GET[ 'message' ] ) ); // phpcs:ignore
 					?>
 					<div class="error">
 						<p><?php echo esc_html( $message ); ?></p>
@@ -295,7 +300,7 @@ add_action(
 		}
 
 		// If License Page.
-		if ( isset( $_GET['page'] ) && 'wp_travel_engine_license_page' === $_GET['page'] ) {
+		if ( isset( $_GET[ 'page' ] ) && 'wp_travel_engine_license_page' === $_GET[ 'page' ] ) {
 			wp_travel_engine_show_update_notification();
 		}
 		// phpcs:enable
@@ -310,7 +315,7 @@ function wptravelengine_show_invalid_notice() {
 
 	foreach ( $addon_name as $key => $value ) {
 		if ( ! empty( $option[ $value . '_license_value' ] ) && isset( $option[ $value . '_license_status' ] ) && $option[ $value . '_license_status' ] != 'valid' ) {
-			$message  = '<div class="error">';
+			$message = '<div class="error">';
 			$message .= '<p>' . __( 'You have invalid or expired license keys for WP Travel Engine. Please go to the <a href="%s">Licenses page</a> to correct this issue.', 'wp-travel-engine' ) . '</p>';
 			$message .= '</div>';
 			echo sprintf(
@@ -333,7 +338,7 @@ function wptravelengine_addon_check_license( $addon ) {
 
 	$addon = (array) $addon;
 
-	$addon_slug = $addon['slug'];
+	$addon_slug = $addon[ 'slug' ];
 
 	$response = wp_remote_post(
 		'https://wptravelengine.com/',
@@ -342,11 +347,11 @@ function wptravelengine_addon_check_license( $addon ) {
 			'sslverify' => $verify_ssl,
 			'body'      => array(
 				'edd_action' => 'check_license',
-				'license'    => $addon['license_key'],
-				'item_name'  => $addon['name'],
-				'item_id'    => $addon['item_id'],
-				'version'    => $addon['version'],
-				'slug'       => $addon['slug'],
+				'license'    => $addon[ 'license_key' ],
+				'item_name'  => $addon[ 'name' ],
+				'item_id'    => $addon[ 'item_id' ],
+				'version'    => $addon[ 'version' ],
+				'slug'       => $addon[ 'slug' ],
 				'author'     => 'WP Travel Engine',
 				'url'        => home_url(),
 				'beta'       => '',
@@ -365,6 +370,7 @@ function wptravelengine_addon_check_license( $addon ) {
  * Get Addon version remotely.
  *
  * @param [type] $addon
+ *
  * @return void
  */
 function wptravelengine_addon_get_version( $addon ) {
@@ -417,7 +423,7 @@ function wptravelengine_addon_get_version( $addon ) {
 }
 
 function wptravelengine_show_addon_expired_notice( $addon ) {
-	$value = str_replace( '_', '-', $addon['slug'] );
+	$value = str_replace( '_', '-', $addon[ 'slug' ] );
 
 	$table = '<tr class="plugin-update-tr" id="' . $value . '-update" data-slug="' . $value . '" data-plugin="' . $aaa . '">';
 
@@ -435,7 +441,7 @@ function wptravelengine_show_addon_expired_notice( $addon ) {
 
 	$table .= '</td></tr>';
 	echo '<div class="update-message notice inline notice-warning notice-alt">';
-		echo '<p>' . $table . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	echo '<p>' . $table . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	echo '</div>';
 }
 
@@ -472,7 +478,7 @@ function wptravelengine_get_licensed_addons( $addon_id = null, $key = 'id' ) {
 	$licenses        = get_option( 'wp_travel_engine_license', array() );
 	$licensed_addons = array();
 	foreach ( $plugins as $plugin_id => $plugin ) {
-		$slug = str_replace( array( 'wp-travel-engine-', '-' ), array( 'wte_', '_' ), $plugin['TextDomain'] );
+		$slug = str_replace( array( 'wp-travel-engine-', '-' ), array( 'wte_', '_' ), $plugin[ 'TextDomain' ] );
 
 		if ( $slug === 'wte_payumoney_bolt' ) {
 			$slug = 'wte_payu_money_bolt_checkout';
@@ -499,18 +505,19 @@ function wptravelengine_get_licensed_addons( $addon_id = null, $key = 'id' ) {
 			'item_id'     => $item_id,
 			'author'      => 'WP Travel Engine',
 			'url'         => home_url(),
-			'version'     => $plugin['Version'],
+			'version'     => $plugin[ 'Version' ],
 			'name'        => call_user_func(
-				function( $name ) {
-					$addon_name = $name;
+				function ( $name ) {
+					$addon_name  = $name;
 					$addon_title = $addon_name;
-					$addon_name = substr( $addon_name, strpos( $addon_name, '-' ) + 1 );
+					$addon_name  = substr( $addon_name, strpos( $addon_name, '-' ) + 1 );
 					$addon_name  = str_replace( ' ', '+', $addon_name );
+
 					return ltrim( $addon_name, '+' );
 				},
-				$plugin['Name']
+				$plugin[ 'Name' ]
 			),
-			'title'       => substr( $plugin['Name'], strpos( $plugin['Name'], '-' ) + 1 ),
+			'title'       => substr( $plugin[ 'Name' ], strpos( $plugin[ 'Name' ], '-' ) + 1 ),
 			'filepath'    => $plugin_id,
 			'license_key' => ! empty( $licenses[ "{$slug}_license_key" ] ) ? $licenses[ "{$slug}_license_key" ] : '',
 		);
@@ -518,14 +525,19 @@ function wptravelengine_get_licensed_addons( $addon_id = null, $key = 'id' ) {
 		$licensed_addons[ $item_id ] = $addon;
 	}
 
-	return $licensed_addons;
+	$items = \WPTravelEngine\Registers\ExtensionRegistry::instance()->items();
+	foreach ( $items as $item ) {
+		$licensed_addons[ $item->item_id ] = $item;
+	}
+
+	return apply_filters( 'wptravelengine_extension_licenses', $licensed_addons );
 }
 
 /**
  * show update nofication row -- needed for multisite subsites, because WP won't tell you otherwise!
  *
  * @param string $file
- * @param array  $plugin
+ * @param array $plugin
  */
 function wp_travel_engine_show_update_notification() {
 
@@ -543,7 +555,7 @@ function wp_travel_engine_show_update_notification() {
 				case 'expired':
 					$value = str_replace( '_', '-', $addon->slug );
 
-					$table  = '<div class="update-message notice inline notice-warning notice-alt">';
+					$table = '<div class="update-message notice inline notice-warning notice-alt">';
 					$table .= '<tr class="plugin-update-tr" id="' . $value . '-update" data-slug="' . $value . '" data-plugin="' . $addon->filepath . '">';
 					$table .= '<td colspan="3" class="plugin-update colspanchange">';
 					$table .= '%1$s';
@@ -551,23 +563,23 @@ function wp_travel_engine_show_update_notification() {
 					$table .= '</div>';
 
 					$message = '<p>' . sprintf(
-						__( 'Your license for %1$s extension expired on %2$s. To ensure you get features and security updates, having an active license is strongly recommended, and in some cases required. Click %3$shere%4$s to renew the license.', 'wp-travel-engine' ),
-						"<strong>{$addon->title}</strong>",
-						'<strong>' . wp_date( get_option( 'date_format', 'F j, Y' ), strtotime( $plugin_license->expires, current_time( 'timestamp' ) ) ) . '</strong>',
-						'<a href="https://wptravelengine.com/plugins/" target="_blank">',
-						'</a>'
-					) . '</p>';
+							__( 'Your license for %1$s extension expired on %2$s. To ensure you get features and security updates, having an active license is strongly recommended, and in some cases required. Click %3$shere%4$s to renew the license.', 'wp-travel-engine' ),
+							"<strong>{$addon->title}</strong>",
+							'<strong>' . wp_date( get_option( 'date_format', 'F j, Y' ), strtotime( $plugin_license->expires, current_time( 'timestamp' ) ) ) . '</strong>',
+							'<a href="https://wptravelengine.com/plugins/" target="_blank">',
+							'</a>'
+						) . '</p>';
 
 					if ( ! empty( $addon->version ) && version_compare( $addon->version, $addon_versions->new_version, '<' ) ) {
 						$message .= '<p>' . __(
-							sprintf(
-								'There is a new version of %1$s available. To update please %2$srenew%3$s the license.',
-								"<b>{$addon->title}</b>",
-								'<a href="https://wptravelengine.com/plugins/" target="_blank">',
-								'</a>'
-							),
-							'wp-travel-engine'
-						) . '</p>';
+								sprintf(
+									'There is a new version of %1$s available. To update please %2$srenew%3$s the license.',
+									"<b>{$addon->title}</b>",
+									'<a href="https://wptravelengine.com/plugins/" target="_blank">',
+									'</a>'
+								),
+								'wp-travel-engine'
+							) . '</p>';
 					}
 
 					echo sprintf( $table, $message ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -577,7 +589,7 @@ function wp_travel_engine_show_update_notification() {
 					if ( ! empty( $addon->version ) && version_compare( $addon->version, $addon_versions->new_version, '<' ) ) {
 						$value = str_replace( '_', '-', $addon->slug );
 
-						$table  = '<tr class="plugin-update-tr" id="' . $value . '-update" data-slug="' . $value . '" data-plugin="' . $addon->filepath . '">';
+						$table = '<tr class="plugin-update-tr" id="' . $value . '-update" data-slug="' . $value . '" data-plugin="' . $addon->filepath . '">';
 						$table .= '<td colspan="3" class="plugin-update colspanchange">';
 
 						$changelog_link = self_admin_url( 'index.php?edd_sl_action=view_plugin_changelog&plugin=' . $value . '&slug=' . $value . '&TB_iframe=true&width=772&height=911' );
@@ -592,7 +604,7 @@ function wp_travel_engine_show_update_notification() {
 
 						$table .= '</td></tr>';
 						echo '<div class="update-message notice inline notice-warning notice-alt">';
-							echo '<p>' . $table . '</p>'; // phpcs:ignore
+						echo '<p>' . $table . '</p>'; // phpcs:ignore
 						echo '</div>';
 					}
 					break;
