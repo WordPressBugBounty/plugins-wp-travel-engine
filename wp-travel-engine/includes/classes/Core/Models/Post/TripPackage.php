@@ -121,13 +121,17 @@ class TripPackage extends PostModel {
 
 		$callback = $fields[ 'package-dates' ][ 'get_callback' ] ?? false;
 
-		$from = $args[ 'from' ] ?? date( 'Y-m-d' );
-		$to   = $args[ 'to' ] ?? date( 'Y-m-d', strtotime( '+1 year' ) );
+		$from = $args[ 'from' ] ?? wp_date( 'Y-m-d' );
+		$to   = $args[ 'to' ] ?? wp_date( 'Y-m-d', strtotime( '+1 year' ) );
 
 		$cut_off_enabled = wptravelengine_toggled( $this->trip->get_setting( 'trip_cutoff_enable', 'false' ) );
 		if ( $cut_off_enabled ) {
-			$cut_off_days = (int) $this->trip->get_setting( 'trip_cut_off_time', 0 );
-			$from         = date( 'Y-m-d', strtotime( "+$cut_off_days days", strtotime( $from ) ) );
+			$cut_off_period 	= (int) $this->trip->get_setting( 'trip_cut_off_time', 0 );
+			$cut_off_unit 		= $this->trip->get_setting( 'trip_cut_off_unit', 'days' );
+			$valid_date_time 	= wp_date( 'Y-m-d\TH:i', strtotime( "+$cut_off_period $cut_off_unit" ) );
+			$from         		= wp_date( 'Y-m-d', strtotime( "+$cut_off_period $cut_off_unit", strtotime( $from ) ) );
+		} else {
+			$valid_date_time 	= wp_date( 'Y-m-d\TH:i' );
 		}
 
 		if ( $callback ) {
@@ -136,7 +140,7 @@ class TripPackage extends PostModel {
 			if ( ! is_array( $package_dates ) || empty( $package_dates ) ) {
 				$package_dates = array(
 					array(
-						'dtstart'      => date( 'Y-m-d' ),
+						'dtstart'      => $valid_date_time,
 						'is_recurring' => '1',
 						'rrule'        => array(
 							'r_frequency' => 'DAILY',
@@ -149,12 +153,31 @@ class TripPackage extends PostModel {
 
 			$dates = array();
 
+			$check_dates = array(
+				wp_date( 'Y-m-d' ) => true,
+				wp_date( 'Y-m-d', strtotime( '+1 day' ) ) => true,
+				wp_date( 'Y-m-d', strtotime( '+2 day' ) ) => true,
+			);
+
 			foreach ( $package_dates as $package_date ) {
 				$package_date_parser = new PackageDateParser( $this, $package_date );
 
 				$package_dates = $package_date_parser->get_dates( false, compact( 'from', 'to' ) );
-
 				foreach ( $package_dates as $date => $date_data ) {
+					if ( $date < $from ) {
+						continue;
+					}
+					if ( isset( $check_dates[ $date ] ) && $date_data[ 'times' ] ) {
+						$date_data[ 'times' ] = array_filter( $date_data[ 'times' ], function ( $time ) use ( $valid_date_time ) {
+							return $time[ 'from' ] >= $valid_date_time;
+						} );
+						if ( empty( $date_data[ 'times' ] ) ) {
+							continue;
+						} else {
+							$date_data[ 'times' ] = array_values( $date_data[ 'times' ] );
+						}
+					}
+
 					if ( ! isset( $dates[ $date ] ) ) {
 						$dates[ $date ] = $date_data;
 						continue;
@@ -186,7 +209,7 @@ class TripPackage extends PostModel {
 			$package_date_parser = new PackageDateParser(
 				$this,
 				array(
-					'dtstart'      => date( 'Y-m-d' ),
+					'dtstart'      => $valid_date_time,
 					'is_recurring' => '1',
 					'rrule'        => array(
 						'r_frequency' => 'WEEKLY',
@@ -200,7 +223,7 @@ class TripPackage extends PostModel {
 							},
 							$week_days
 						) ),
-						'r_until'     => date( 'Y-m-d', strtotime( '+1 year' ) ),
+						'r_until'     => wp_date( 'Y-m-d', strtotime( '+1 year' ) ),
 					),
 					'seats'        => '',
 				)
@@ -220,6 +243,12 @@ class TripPackage extends PostModel {
 
 					$package_date->setTime( $hours, $minutes );
 
+					$from_time = $package_date->format( 'Y-m-d\TH:i' );
+
+					if( $from_time < $valid_date_time ){
+						continue;
+					}
+
 					$duration = $this->trip->get_setting( 'trip_duration', 0 );
 
 					$to = clone $package_date;
@@ -227,21 +256,23 @@ class TripPackage extends PostModel {
 
 					$times[] = array(
 						'key'   => "{$this->ID}_{$package_date->format( 'Y-m-d_H:i' )}_{$to->format('H:i')}",
-						'from'  => $package_date->format( 'Y-m-d\TH:i' ),
+						'from'  => $from_time,
 						'to'    => $to->format( 'Y-m-d\TH:i' ),
 						'seats' => $available_seats,
 					);
 				}
-				$dates[ $package_date->format( 'Y-m-d' ) ] = array(
-					'times' => $times,
-					'seats' => is_int( $available_seats ) ? array_sum( array_column( $times, 'seats' ) ) : '',
-				);
+				if( ! empty( $times ) ){
+					$dates[ $package_date->format( 'Y-m-d' ) ] = array(
+						'times' => $times,
+						'seats' => is_int( $available_seats ) ? array_sum( array_column( $times, 'seats' ) ) : '',
+					);
+				}
 			}
 		} else {
 			$package_date_parser = new PackageDateParser(
 				$this,
 				array(
-					'dtstart'      => date( 'Y-m-d' ),
+					'dtstart'      => wp_date( 'Y-m-d' ),
 					'is_recurring' => '1',
 					'rrule'        => array(
 						'r_frequency' => 'DAILY',

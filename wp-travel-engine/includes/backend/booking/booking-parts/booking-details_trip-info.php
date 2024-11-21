@@ -288,6 +288,8 @@ $currency = $cart_info[ 'currency' ];
 			</div>
 			<?php
 		}
+
+		do_action( 'wptravelengine_booking_details_trip_info', $cart_info );
 		?>
 	</div> <!-- .wpte-block -->
 <?php

@@ -15,6 +15,7 @@ use WPTravelEngine\Core\Models\Post\Booking;
 if ( ! empty( $wte_cart->getItems() ) ) :
 	?>
 	<div class="wpte-bf-summary-wrap">
+		<?php do_action( 'wptravelengine_mini_cart_summary_start', $wte_cart ); ?>
 		<div class="wpte-bf-title"><?php echo esc_html( $mini_cart->title() ); ?></div>
 
 		<?php
@@ -67,6 +68,7 @@ if ( ! empty( $wte_cart->getItems() ) ) :
 				</tfoot>
 			</table>
 			<!-- Price Adjustments -->
+			 <?php do_action( 'wptravelengine_before_price_adjustment', $wte_cart ); ?>
 			<?php
 			$is_tax_applicable = $wte_cart->tax()->is_taxable() && $wte_cart->tax()->is_exclusive();
 
@@ -85,55 +87,57 @@ if ( ! empty( $wte_cart->getItems() ) ) :
 					</tbody>
 				</table>
 			<?php endif; ?>
+			<?php do_action( 'wptravelengine_after_price_adjustment', $wte_cart ); ?>
 
 			<!-- Partial payment Section -->
 			<?php
 			if ( wp_travel_engine_is_trip_partially_payable( $cart_item->trip_id )
-				&& ( 'due' !== $wte_cart->get_payment_type() )
-				&& 'booking_only' !== ( $wte_cart->payment_gateway ?? 'booking_only' )
+				 && ( 'due' !== $wte_cart->get_payment_type() )
+				 && 'booking_only' !== ( $wte_cart->payment_gateway ?? 'booking_only' )
 			) {
 				?>
-			<table class="wpte-bf-extra-info-table">
-				<tbody>
-				<tr>
-					<td><span><?php echo esc_html__( 'Down Payment', 'wp-travel-engine' ); ?></span></td>
-					<td>
-						<b><?php wptravelengine_the_price( $wte_cart->get_total_partial() ); ?></b>
-					</td>
-				</tr>
-				<tr>
-					<td><span><?php echo esc_html__( 'Full Payment', 'wp-travel-engine' ); ?></span></td>
-					<td>
-						<b><?php wptravelengine_the_price( $wte_cart->get_cart_total() ); ?></b>
-					</td>
-				</tr>
-				</tbody>
-			</table>
+				<table class="wpte-bf-extra-info-table">
+					<tbody>
+					<tr>
+						<td><span><?php echo esc_html__( 'Down Payment', 'wp-travel-engine' ); ?></span></td>
+						<td>
+							<b><?php wptravelengine_the_price( $wte_cart->get_total_partial() ); ?></b>
+						</td>
+					</tr>
+					<tr>
+						<td><span><?php echo esc_html__( 'Full Payment', 'wp-travel-engine' ); ?></span></td>
+						<td>
+							<b><?php wptravelengine_the_price( $wte_cart->get_cart_total() ); ?></b>
+						</td>
+					</tr>
+					</tbody>
+				</table>
 				<?php
-			} elseif ( 'due' === $wte_cart->get_payment_type() && $wte_cart->get_booking_ref() ) {
+			} else if ( 'due' === $wte_cart->get_payment_type() && $wte_cart->get_booking_ref() ) {
 				/* @var Booking $booking */
 				$booking = Booking::make( $wte_cart->get_booking_ref() );
 				?>
-			<table style="margin-top: 20px;">
-				<tbody>
-				<tr>
-					<td><span><?php echo esc_html__( 'Paid Amount', 'wp-travel-engine' ); ?></span></td>
-					<td class="wpte-dwnpay-amt">
-						<b>-&nbsp;<?php wptravelengine_the_price( $booking->get_paid_amount() ); ?></b>
-					</td>
-				</tr>
-				<tr>
-					<td><span><?php echo esc_html__( 'Remaining Amount', 'wp-travel-engine' ); ?></span></td>
-					<td class="wpte-dwnpay-amt">
-						<b><?php wptravelengine_the_price( $booking->get_due_amount() ); ?></b>
-					</td>
-				</tr>
-				</tbody>
-			</table>
+				<table style="margin-top: 20px;">
+					<tbody>
+					<tr>
+						<td><span><?php echo esc_html__( 'Paid Amount', 'wp-travel-engine' ); ?></span></td>
+						<td class="wpte-dwnpay-amt">
+							<b>-&nbsp;<?php wptravelengine_the_price( $booking->get_paid_amount() ); ?></b>
+						</td>
+					</tr>
+					<tr>
+						<td><span><?php echo esc_html__( 'Remaining Amount', 'wp-travel-engine' ); ?></span></td>
+						<td class="wpte-dwnpay-amt">
+							<b><?php wptravelengine_the_price( $booking->get_due_amount() ); ?></b>
+						</td>
+					</tr>
+					</tbody>
+				</table>
 				<?php
 			}
 		endforeach;
 		?>
+		<?php do_action( 'wptravelengine_mini_cart_summary_end', $wte_cart ); ?>
 	</div>
 	<div class="wpte-bf-summary-total">
 		<div class="wpte-bf-total-price">
@@ -164,5 +168,5 @@ if ( ! empty( $wte_cart->getItems() ) ) :
 			<?php $mini_cart->tax_summary(); ?>
 		</div>
 	</div><!-- .wpte-bf-summary-total -->
-	<?php
+<?php
 endif;

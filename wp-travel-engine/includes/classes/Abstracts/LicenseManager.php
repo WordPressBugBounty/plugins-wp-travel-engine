@@ -7,8 +7,6 @@
 
 namespace WPTravelEngine\Abstracts;
 
-use WP_Error;
-
 /**
  * Class LicenseManager
  *
@@ -111,7 +109,6 @@ abstract class LicenseManager {
 	}
 
 
-
 	/**
 	 * Get license key.
 	 *
@@ -158,31 +155,8 @@ abstract class LicenseManager {
 	 *
 	 * @param array $args
 	 *
-	 * @return \EDD_SL_Plugin_Updater
 	 */
-	public function initialize_updater( array $args = array() ): \EDD_SL_Plugin_Updater {
-		return new \EDD_SL_Plugin_Updater(
-			$this->store_url,
-			$this->plugin,
-			array_merge(
-				array(
-					'version' => $this->version,
-					'license' => $this->license,
-					'item_id' => $this->item_id,
-					'author'  => $this->author,
-					'beta'    => $this->beta,
-				),
-				$args
-			)
-		);
-	}
-
-	/**
-	 * Check license.
-	 *
-	 * @return WP_Error|License
-	 */
-	abstract public function license();
+	abstract public function initialize_updater( array $args = array() );
 
 	/**
 	 * Verify SSL.

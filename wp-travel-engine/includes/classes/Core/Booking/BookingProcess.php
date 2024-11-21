@@ -292,7 +292,7 @@ class BookingProcess {
 		return $booking->set_meta( 'paid_amount', (float) $booking->get_meta( 'paid_amount' ) )
 					   ->set_meta( 'due_amount', $this->cart->get_cart_total() - (float) $booking->get_meta( 'paid_amount' ) ?? 0 )
 					   ->set_cart_info(
-						   array(
+						   apply_filters( 'wptravelengine_before_setting_cart_info', array(
 							   'currency'     => wptravelengine_settings()->get( 'currency_code', 'USD' ),
 							   'subtotal'     => $this->cart->get_subtotal(),
 							   'totals'       => $this->cart->get_totals(),
@@ -300,7 +300,7 @@ class BookingProcess {
 							   'cart_partial' => $this->cart->get_total_partial(),
 							   'discounts'    => $this->cart->get_discounts(),
 							   'tax_amount'   => $this->cart->tax()->is_taxable() && $this->cart->tax()->is_exclusive() ? $this->cart->tax()->get_tax_percentage() : 0,
-						   )
+						   ), $this->cart )
 					   )
 					   ->set_meta( 'wp_travel_engine_booking_setting', $_items )->save();
 	}

@@ -255,16 +255,20 @@ class Cart {
 
 		do_action( 'wptravelengine_before_calculate_totals', $this );
 
+		$totals = $this->totals;
+
 		foreach ( $this->items as $item ) {
-			$this->totals[ 'subtotal' ]       += $item->subtotal();
-			$this->totals[ 'subtotal_tax' ]   += $item->tax()[ 'subtotal' ] ?? 0;
-			$this->totals[ 'discount_total' ] += $item->discount();
-			$this->totals[ 'discount_tax' ]   += $item->tax()[ 'discount' ] ?? 0;
-			$this->totals[ 'total_tax' ]      += $item->tax()[ 'total' ] ?? 0;
-			$this->totals[ 'total' ]          += $item->total();
-			$this->totals[ 'partial_total' ]  += $item->partial_total();
-			$this->totals[ 'due_total' ]      += $item->due_total();
+			$totals[ 'subtotal' ]       += $item->subtotal();
+			$totals[ 'subtotal_tax' ]   += $item->tax()[ 'subtotal' ] ?? 0;
+			$totals[ 'discount_total' ] += $item->discount();
+			$totals[ 'discount_tax' ]   += $item->tax()[ 'discount' ] ?? 0;
+			$totals[ 'total_tax' ]      += $item->tax()[ 'total' ] ?? 0;
+			$totals[ 'total' ]          += $item->total();
+			$totals[ 'partial_total' ]  += $item->partial_total();
+			$totals[ 'due_total' ]      += $item->due_total();
 		}
+
+		$this->totals = apply_filters( 'wptravelengine_cart_calculate_totals', $totals, $this );
 
 		do_action( 'wptravelengine_after_calculate_totals', $this );
 	}
@@ -636,7 +640,9 @@ class Cart {
 	 * @since 6.0.0
 	 */
 	public function get_totals(): array {
-		return empty( $this->totals ) ? $this->default_totals : $this->totals;
+		$totals = empty( $this->totals ) ? $this->default_totals : $this->totals;
+
+		return apply_filters( 'wptravelengine_cart_totals', $totals, $this );
 	}
 
 	/**

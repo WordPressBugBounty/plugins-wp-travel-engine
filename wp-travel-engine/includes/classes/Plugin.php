@@ -19,6 +19,8 @@ use WPTravelEngine\Core\Shortcodes\ThankYou;
 use WPTravelEngine\Core\Shortcodes\TravelerInformation;
 use WPTravelEngine\Core\Updates;
 use WPTravelEngine\Filters\SettingsAPISchema;
+use WPTravelEngine\Filters\TripAPISchema;
+use WPTravelEngine\Filters\TripMetaTabs;
 use WPTravelEngine\Filters\Template;
 use WPTravelEngine\Helpers\Functions;
 use WPTravelEngine\Modules\CouponCode;
@@ -113,6 +115,10 @@ final class Plugin {
 
 		$schema_filters = new SettingsAPISchema();
 		$schema_filters->hooks();
+
+		TripAPISchema::instance();
+
+		TripMetaTabs::instance();
 
 		new Blocks\Blocks();
 

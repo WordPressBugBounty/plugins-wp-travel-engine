@@ -5,80 +5,45 @@
  *
  * @package WP_Travel_Engine
  */
-global $post;
-$trip = \WPTravelEngine\Core\Models\Post\Trip::make($post);
 
 $global_settings = wptravelengine_settings()->get();
 
-$id 							= $trip->get_id();
-$isPercentage 					= "percent" === ( $global_settings['partial_payment_option'] ?? false );
-$isFSDActive 					= class_exists('WTE_Fixed_Starting_Dates');
-$isPartialPaymentEnabled 		= wptravelengine_toggled( $global_settings['partial_payment_enable'] ?? false );
-$isPartialPaymentActive 		= class_exists('Wte_Partial_Payment_Admin');
-$isExtraServicesActive 			= class_exists('Extra_Services_Wp_Travel_Engine');
-$isAdvancedActive 				= class_exists('WTE_Advanced_Itinerary');
-$isFileDownloadsActive 			= class_exists('WTE_File_Downloads');
-$isGroupDisountActive 			= class_exists('Wp_Travel_Engine_Group_Discount');
-$isItineraryDownloaderActive 	= class_exists('Wte_Itinerary_Downloader');
-
-//Sets pricing categories.
 $all_pricing_categories = \WPTravelEngine\Packages\get_packages_pricing_categories();
-foreach ( $all_pricing_categories as $pricing_category ) {
+foreach ($all_pricing_categories as $pricing_category) {
 	$pricing_categories[] = [
 		'id'    => (int) $pricing_category->term_id,
 		'label' => (string) $pricing_category->name,
 	];
 }
 
-$global_trip_facts 			= wptravelengine_get_trip_facts_options();
-$trip_facts    				= [ [ 'label' => __( 'Select Trip Fact', 'wp-travel-engine' ), 'value' => '' ] ];
-foreach ( $global_trip_facts['field_id'] ?? [] as $key => $label ) {
-	$trip_facts[] 	= [
-		'id' 		=> (int) $key ?? 0,
-		'label' 	=> (string) $label ?? '',
-		'type' 		=> (string) $global_trip_facts['field_type'][$key] ?? '',
-		'placeholder' => (string) $global_trip_facts['input_placeholder'][$key] ?? '',
-		'options'   => (array) explode( ',', $global_trip_facts['select_options'][$key] ?? '' ),
-	];
-}
-
-$global_files 	= (array) ( $global_settings['file_downloads']['wte_files_downloadable'] ?? [] );
-$files 			= [ [ 'label' => __( 'File Downloads', 'wp-travel-engine' ), 'value' => '']  ];
-foreach ( $global_files as $key => $value ) {
-	$files[] = [
-		'value' 	=> (int) ( $value['id'] ?? 0 ),
-		'label'		=> (string) ( $value['title'] ?? '' ),
-		'dataType' 	=> (string) get_post_mime_type( $value['id'] ?? '' ),
-		'dataUrl' 	=> (string) ( $value['url'] ?? '' ),
-	];
-}
-
-$extra_services = [ [ 'label' => __( 'Select Extra Service', 'wp-travel-engine' ), 'id' => '', 'type' => '', 'option' => [] ]  ];
-$services = get_posts(
+$global_trip_facts 	= wptravelengine_get_trip_facts_options();
+$trip_facts    		= array(
 	array(
-		'post_type'      => 'wte-services',
-		'post_status'    => 'publish',
-		'posts_per_page' => - 1,
-		'orderby'        => 'post__in',
+		'label' => __( 'Select Trip Fact', 'wp-travel-engine' ),
+		'value' => ''
 	)
 );
-foreach ( $services ?? [] as $service ) {
-	if ( $service_data = get_post_meta( $service->ID, 'wte_services', true ) ) {
-		$extra_services[] = [
-			'id'      => (int) $service->ID ?? 0,
-			'label'   => (string) $service->post_title ?? '',
-			'type'    => (string) $service_data[ 'service_type' ] ?? '',
-			'options' => (array) $service_data[ 'options' ] ?? '',
-		];
-	}
+foreach ($global_trip_facts['field_id'] ?? [] as $key => $label) {
+	$trip_facts[] 	= array(
+		'id' 			=> (int) $key ?? 0,
+		'label' 		=> (string) $label ?? '',
+		'type' 			=> (string) $global_trip_facts['field_type'][$key] ?? '',
+		'placeholder' 	=> (string) $global_trip_facts['input_placeholder'][$key] ?? '',
+		'options'   	=> (array) explode(',', $global_trip_facts['select_options'][$key] ?? ''),
+	);
 }
 
-$sleepModeOptions = [ [ 'label' => __( 'Select Sleep Mode', 'wp-travel-engine' ), 'value' => '' ] ];
-foreach ( $global_settings['wte_advance_itinerary']['itinerary_sleep_mode_fields'] ?? [] as $sleepModes ) {
-	$sleepModeOptions[] = [
-		'label' => $sleepModes[ 'field_text' ] ?? '',
-		'value' => $sleepModes[ 'field_text' ] ?? '',
-	];
+$sleep_mode_options = array(
+	array(
+		'label' => __('Select Sleep Mode', 'wp-travel-engine'),
+		'value' => ''
+	)
+);
+foreach ($global_settings['wte_advance_itinerary']['itinerary_sleep_mode_fields'] ?? [] as $sleep_modes) {
+	$sleep_mode_options[] = array(
+		'label' => $sleep_modes['field_text'] ?? '',
+		'value' => $sleep_modes['field_text'] ?? '',
+	);
 }
 
 $trip_meta_tabs = array(
@@ -158,7 +123,6 @@ $trip_meta_tabs = array(
 				),
 			),
 			array(
-				'condition'    => 'duration.unit == days',
 				'label'       => __('Enable Cut-off Time', 'wp-travel-engine'),
 				'description' => __('The cut-off time will be the time before which bookings are allowed for the trip.', 'wp-travel-engine'),
 				'field'       => [
@@ -167,31 +131,33 @@ $trip_meta_tabs = array(
 				],
 			),
 			array(
+				'condition'   => 'cut_off_time.enable == true',
 				'label'       => true,
 				'description' => __('Enter trip cut-off value in number of days. If you set your cutoff time to 1 day, the product cannot be booked with a start date today. If 2 days, the product cannot be booked with a start date today and tomorrow etc.', 'wp-travel-engine'),
-				'condition'   => 'cut_off_time.enable == true && duration.unit == days',
 				'field'       => [
 					'name'         => 'cut_off_time.period',
 					'type'         => 'NUMBER',
 					'placeholder'  => __('Enter Cut-off Time', 'wp-travel-engine'),
 					'min'          => 0,
 					'attributes'   => [
-						'style' => ['maxWidth' => '225px'],
+						'style' => ['maxWidth' => '100px'],
 					],
-					'suffix'	   => [
+					'suffix'       => [
 						'type'    => 'field',
-						'field'   => [
-							'name'         => 'cut_off_time.unit',
-							'defaultValue' => __('Days', 'wp-travel-engine'),
-							'type'         => 'TEXT',
-							'readOnly' => true,
-						],
 						'variant' => 'solid',
+						'field'   => [
+							'type'         => 'SELECT',
+							'name'         => 'cut_off_time.unit',
+							'options'      => [
+								['label' => __('Days', 'wp-travel-engine'), 'value' => 'days'],
+								['label' => __('Hours', 'wp-travel-engine'), 'value' => 'hours'],
+							],
+						],
 					],
 				],
 			),
 			array(
-				'condition'   => 'cut_off_time.enable == true && duration.unit == days',
+				'condition'   => 'cut_off_time.enable == true',
 				'field'		=> [
 					'type'		=> 'DIVIDER'
 				]
@@ -317,127 +283,20 @@ $trip_meta_tabs = array(
 					'type'      => 'PACKAGES',
 					'name'      => 'packages',
 					'currency_code'  		=> $global_settings['currency_code'] ?? '',
-					'isGroupDisountActive' 	=> $isGroupDisountActive,
-					'isFSDActive' 			=> $isFSDActive,
+					'isGroupDisountActive' 	=> wptravelengine_is_addon_active('group-discount'),
+					'isFSDActive' 			=> wptravelengine_is_addon_active('fixed-starting-dates'),
 					'pricingCategories'		=> $pricing_categories,
 				],
 			),
-			array(
-				'field'       	=> [
-					'type' 		=> 'TITLE',
-					'title'  	=> __('Date Settings', 'wp-travel-engine'),
-				],
-				'visibility'  	=> $isFSDActive,
+			...apply_filters(
+				'wptravelengine_tripedit:extensions:fields',
+				array(),
+				'fixed-starting-dates'
 			),
-			array(
-				'label'       	=> __('Section Title', 'wp-travel-engine'),
-				'description' 	=> __('Enter title for the Availability section.', 'wp-travel-engine'),
-				'divider'    	=> true,
-				'field'       	=> [
-					'name'      => 'fsd.title',
-					'type'         => 'TEXT',
-					'placeholder'  => __('Enter here', 'wp-travel-engine'),
-				],
-				'visibility'  	=> $isFSDActive,
-			),
-			array(
-				'divider'		=> true,
-				'label'       	=> __('Hide Fixed Trip Starts Dates section', 'wp-travel-engine'),
-				'description' 	=> __('Check this if you want to disable fixed trip starting dates section between featured image/slider and trip content sections.', 'wp-travel-engine'),
-				'field'       	=> [
-					'name'      => 'fsd.hide',
-					'type'      => 'SWITCH',
-				],
-				'visibility'  	=> $isFSDActive,
-			),
-			array(
-				'field'       	=> [
-					'type'     	=> 'TITLE',
-					'title'  	=> __('Partial Payment', 'wp-travel-engine'),
-				],
-			),
-			array(
-				'field'       	=> [
-					'type'     	=> 'ALERT',
-					'content'  	=> __('Want to collect upfront or partial payment? Partial Payment extension allows you to set upfront payment in percentage or fixed amount which travellers can pay when booking a tour. <a href="https://wptravelengine.com/plugins/partial-payment/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro" target="_blank">Get Partial Payment extension now</a>', 'wp-travel-engine'),
-				],
-				'visibility'  	=> !$isPartialPaymentActive,
-			),
-			array(
-				'field'       	=> [
-					'type'     	=> 'ALERT',
-					'content'  	=> __('Partial Payment is disabled. Please enable Partial Payment via <strong>WP Travel Engine > Settings > Extensions > Partial Payment.</strong>', 'wp-travel-engine'),
-				],
-				'visibility'  	=> $isPartialPaymentActive && !$isPartialPaymentEnabled,
-			),
-			array(
-				'label'       	=> __('Enable Partial Payment', 'wp-travel-engine'),
-				'description' 	=> __('Toggle the switch to enable partial payment for this trip on checkout. You can manually enter payout amount/percentage in the field below.', 'wp-travel-engine'),
-				'field'       	=> [
-					'name'      => 'partial_payment.enable',
-					'type'      => 'SWITCH',
-				],
-				'visibility'  	=> $isPartialPaymentActive && $isPartialPaymentEnabled,
-			),
-			array(
-				'visibility'  	=> $isPartialPaymentActive && $isPartialPaymentEnabled,
-				'condition'   	=> 'partial_payment.enable == true',
-				'label'	  		=> $isPercentage ? __('Partial Payment Percentage', 'wp-travel-engine') : __('Partial Payment Amount', 'wp-travel-engine'),
-				'description' 	=> $isPercentage ? __('Please enter the desired partial percentage to be applied.', 'wp-travel-engine') : __('Please enter the desired partial amount to be applied.', 'wp-travel-engine'),
-				'field'   		=> [
-					'name'		   	=> $isPercentage ? 'partial_payment.percentage' : 'partial_payment.amount',
-					'type'         	=> 'NUMBER',
-					'min'			=> 0,
-					'attributes'   	=> [
-						'min' 		=> [
-							'value' => 0,
-							'message' => __('Minimum value must be greater than 0', 'wp-travel-engine'),
-						],
-						'style'    => [
-							'width' => '100px',
-							'textAlign' => 'center',
-						],
-					],
-					'suffix'       => $isPercentage
-						? [
-							'type'    => 'field',
-							'field'   => [
-								'defaultValue' => __('%', 'wp-travel-engine'),
-								'type'         => 'TEXT',
-								'readOnly' => true,
-								'attributes'   => [
-									'style'    => ['width' => '45px'],
-								],
-							],
-							'variant' => 'solid',
-						] : false,
-					'prefix'       => !$isPercentage
-						? [
-							'type'    => 'field',
-							'field'   => [
-								'defaultValue' => $global_settings['currency_code'] ?? '',
-								'type'         => 'TEXT',
-								'readOnly' => true,
-								'attributes'   => [
-									'style'    => [
-										'width' => '60px',
-										'textAlign' => 'center',
-									],
-								],
-							],
-							'variant' => 'solid',
-						] : false,
-				],
-			),
-			array(
-				'visibility'  => $isPartialPaymentActive && $isPartialPaymentEnabled,
-				'condition'   => 'partial_payment.enable == true',
-				'label'       => __('Enable Full Payment', 'wp-travel-engine'),
-				'description' => __('Toggle the switch to enable full payment for this trip on checkout.', 'wp-travel-engine'),
-				'field'       => [
-					'name'         => 'full_payment_enable',
-					'type'         => 'SWITCH',
-				],
+			...apply_filters(
+				'wptravelengine_tripedit:extensions:fields',
+				array(),
+				'partial-payment'
 			),
 		),
 	),
@@ -455,7 +314,7 @@ $trip_meta_tabs = array(
 			array(
 				'field'       => [
 					'type'         => 'TITLE',
-					'title'  => __('Trip Desciption', 'wp-travel-engine'),
+					'title'  => __('Trip Description', 'wp-travel-engine'),
 				],
 			),
 			array(
@@ -521,7 +380,7 @@ $trip_meta_tabs = array(
 				],
 			),
 			array(
-				'visibility'  	=> !$isAdvancedActive,
+				'visibility'  	=> ! wptravelengine_is_addon_active('advanced-itinerary'),
 				'divider'    	=> true,
 				'field'       	=> [
 					'type'      => 'ALERT',
@@ -529,11 +388,11 @@ $trip_meta_tabs = array(
 				],
 			),
 			array(
-				'visibility'  	=> $isAdvancedActive,
+				'visibility'  	=> wptravelengine_is_addon_active('advanced-itinerary'),
 				'divider'    	=> true,
 				'field'       	=> [
 					'type'      => 'ALERT',
-					'content'  	=> __( '<p>You can add, edit and delete sleep modes via <strong>WP Travel Engine > Settings > Extensions > Advanced Itinerary Builder.</strong></p>', 'wp-travel-engine'),
+					'content'  	=> __('<p>You can add, edit and delete sleep modes via <strong>WP Travel Engine > Settings > Extensions > Advanced Itinerary Builder.</strong></p>', 'wp-travel-engine'),
 				],
 			),
 			array(
@@ -541,29 +400,14 @@ $trip_meta_tabs = array(
 				'field'       			=> [
 					'name'      		=> 'itineraries',
 					'type'      		=> 'ITINERARIES',
-					'isAdvancedActive'	=> $isAdvancedActive,
-					'sleepModeOptions'	=> $sleepModeOptions,
+					'isAdvancedActive'	=> wptravelengine_is_addon_active('advanced-itinerary'),
+					'sleepModeOptions'	=> $sleep_mode_options,
 				],
 			),
-			array(
-				'field'       	=> [
-					'type'      => 'TITLE',
-					'title'  	=> __('Itinerary Downloader', 'wp-travel-engine'),
-				],
-			),
-			array(
-				'visibility'  	=> !$isItineraryDownloaderActive,
-				'field'       	=> [
-					'type'      => 'ALERT',
-					'content'  	=> __('<strong>NOTE:</strong> Want travellers to download the tour details in PDF format & read later? <a href="https://wptravelengine.com/plugins/itinerary-downloader/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro" target="_blank">Get Itinerary Downloader extension now</a>', 'wp-travel-engine'),
-				],
-			),
-			array(
-				'visibility'  	=> $isItineraryDownloaderActive,
-				'field'       	=> [
-					'type'      => 'ALERT',
-					'content'  	=> __('<strong>NOTE:</strong> Want travellers to download the tour details in PDF format and read later? You can configure Itinerary Downloader via <b>WP Travel Engine &gt; Settings &gt; Extensions &gt; Itinerary Downloader', 'wp-travel-engine'),
-				],
+			...apply_filters(
+				'wptravelengine_tripedit:extensions:fields',
+				array(),
+				'itinerary-downloader'
 			),
 		)
 	),
@@ -803,30 +647,11 @@ $trip_meta_tabs = array(
 		'content_loaded'    => false,
 		'priority'          => 100,
 		'icon' 				=> 'download',
-		'fields'			=> array(
-			array(
-				'field'       	=> [
-					'type'     	=> 'ALERT',
-					'content'	=> __('<p>Want to provide downloadable files such as brochures, guidebooks, offline maps, etc? File Downloads extension allows you to upload files in various formats that can be downloaded by travellers. <a href="https://wptravelengine.com/plugins/file-downloads/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro" target="_blank">Get File Downloads extension now</a></p>', 'wp-travel-engine'),
-				],
-				'visibility'	=> !$isFileDownloadsActive,
-			),
-			array(
-				'field'       	=> [
-					'type'     	=> 'ALERT',
-					'content'	=> __('<p>You can add, edit and delete the global files via <strong>WP Travel Engine > Settings > Extensions > File Downloads.</strong> <a href="'.admin_url().'edit.php?post_type=booking&page=class-wp-travel-engine-admin.php" target="_blank">Go To Settings</a></p>', 'wp-travel-engine'),
-				],
-				'visibility'	=> $isFileDownloadsActive,
-			),
-			array(
-				'field'				=> [
-					'name'			=> 'file_downloads',
-					'type'			=> 'FILE_DOWNLOADS',
-					'globalFiles'	=> $files,
-				],
-				'visibility'	=> $isFileDownloadsActive,
-			)
-		)
+		'fields'			=> apply_filters(
+			'wptravelengine_tripedit:extensions:fields',
+			array(),
+			'file-downloads'
+		),
 	),
 	'wte-exta-services' => array(
 		'tab_label'         => esc_html__('Extra Services', 'wp-travel-engine'),
@@ -839,31 +664,11 @@ $trip_meta_tabs = array(
 		'priority'          => 110,
 		'icon' 				=> 'grid',
 		'fields'			=> array(
-			array(
-				'field'       	=> [
-					'type'     	=> 'ALERT',
-					'content'	=> __('<p><strong>NOTE:</strong> Do you want to provide additional services such as supplementary room, hotel upgrade, airport pick and drop, etc? Extra Services extension allows you to create add-on services and sell more to your customer. <a href="https://wptravelengine.com/plugins/extra-services/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro" target="_blank">Get Extra Services extension now</a></p>', 'wp-travel-engine'),
-				],
-				'visibility'  	=> !$isExtraServicesActive,
+			...apply_filters(
+				'wptravelengine_tripedit:extensions:fields',
+				array(),
+				'extra-services'
 			),
-			array(
-				'field'       	=> [
-					'type'     	=> 'ALERT',
-					'content'	=> __("<p><strong>NOTE:</strong> You can add, edit and delete the global extra services via <strong>WP Travel Engine > Extra Services</strong>.</p>", 'wp-travel-engine'),
-				],
-				'visibility'  	=> $isExtraServicesActive,
-			),
-			array(
-				'label'       	=> __('Section Extra Service', 'wp-travel-engine'),
-				'description' 	=> __('Choose and select the global Extra Service.', 'wp-travel-engine'),
-				'divider'    	=> true,
-				'field'   		=> [
-					'type'         => 'EXTRA_SERVICES',
-					'name'         => 'trip_extra_services',
-					'options'      => $extra_services,
-				],
-				'visibility'  	=> $isExtraServicesActive,
-			)
 		)
 	),
 	'wte-trip-shortcodes'	=> array(
@@ -872,82 +677,32 @@ $trip_meta_tabs = array(
 		'content_path'		=> plugin_dir_path(__FILE__) . '/trip-tabs/shortcodes.php',
 		'content_key'		=> 'wte-trip-shortcodes',
 		'icon'				=> 'code',
-		'priority'			=> 120,
+		'priority'			=> 125,
 		'fields'			=> array(
-			array(
-				'field'   		=> [
-					'type'      => 'SHORTCODE',
-					'title'  	=> __('To display fixed starting dates in page/post use the following <strong>Shortcode.</strong>', 'wp-travel-engine'),
-					'code'   	=> "[WTE_Fixed_Starting_Dates id='{$id}']"
-				],
-				'visibility'  	=> $isFSDActive,
-			),
-			array(
-				'divider'		=> true,
-				'field'   		=> [
-					'type'      => 'SHORTCODE',
-					'title'  	=> __('To display fixed starting dates in theme/template, please use below <strong>PHP Funtion.</strong>', 'wp-travel-engine'),
-					'code'   	=> "<?php echo do_shortcode('[WTE_Fixed_Starting_Dates id={$id}]'); ?>"
-				],
-				'visibility'  	=> $isFSDActive,
-			),
-			array(
-				'visibility'  	=> $isItineraryDownloaderActive,
-				'divider'		=> true,
-				'field'   		=> [
-					'type'      => 'SHORTCODE',
-					'title'  	=> __('To display Itinerary Downloader in current trip, please use below <strong>Shortcode.</strong>', 'wp-travel-engine'),
-					'code'   	=> "[wte_itinerary_downloader]"
-				],
-			),
-			array(
-				'field'			=> [
-					'type'		=> 'SHORTCODE',
-					'title'		=> __('To display Trip Info of this trip in posts/pages/tabs, please use following <strong>Shortcode.</strong>', 'wp-travel-engine'),
-					'code'		=> "[Trip_Info_Shortcode id='{$id}']"
-				]
-			),
-			array(
-				'divider'    	=> true,
-				'field'			=> [
-					'type'		=> 'SHORTCODE',
-					'title'		=> __('To display Trip Info in templates, please use below <strong>PHP Funtion.</strong>', 'wp-travel-engine'),
-					'code'		=> "<?php echo do_shortcode('[Trip_Info_Shortcode id={$id}]'); ?>"
-				]
-			),
-			array(
-				'field'			=> [
-					'type'		=> 'SHORTCODE',
-					'title'		=> __('<p>To display Video Gallery of this trip in posts/pages/tabs/templates, please use following <strong>Shortcode.</strong> <br/>Additional attributes are: type=\'popup/slider\' title=\'\' label=\'\', where type displays either a popup or slider layout, defaults popup layout.</p>', 'wp-travel-engine'),
-					'code'		=> "[wte_video_gallery trip_id='{$id}']"
-				]
-			),
-			array(
-				'divider'   => true,
-				'field'     => [
-					'type'  => 'SHORTCODE',
-					'title' => __('To display Tour Map of this tour in posts/pages/tabs/widgets use the following <strong>Shortcode.</strong>', 'wp-travel-engine'),
-					'code'	=> "[wte_trip_map id='{$id}']"
-				],
-			),
-			array(
-				'divider'   => false,
-				'field'     => [
-					'type'  => 'SHORTCODE',
-					'title'	=> __('To display Tour Map of this tour in posts/pages/tabs/widgets, please use below <strong>PHP Funtion.</strong>', 'wp-travel-engine'),
-					'code'	=> "<?php echo do_shortcode('[wte_trip_map id={$id}]'); ?>"
-				],
-			),
-			array(
-				'field'			=> [
-					'type'		=> 'SHORTCODE',
-					'title'		=> __('To display downloadable file list in posts/pages/tabs and widget, please use following <strong>Shortcode.</strong>', 'wp-travel-engine'),
-					'code'		=> "[trip_file_downloads trip_id='{$id}']"
-				],
-				'visibility'	=> $isFileDownloadsActive,
+			...apply_filters(
+				'wptravelengine_tripedit:extensions:fields',
+				array(),
+				'shortcodes'
 			),
 		)
-	)
+	),
+	'wte-trip-custom-booking-link' => array(
+		'tab_label'         => esc_html__('Custom Booking Link', 'wptravelengine-custom-booking-link'),
+		'tab_heading'       => esc_html__('Custom Booking Link', 'wptravelengine-custom-booking-link'),
+		'callback_function' => 'wpte_edit_trip_tab_custom_booking',
+		'content_key'       => 'wpte-custom-booking',
+		'current'           => false,
+		'content_loaded'    => false,
+		'priority'          => 120,
+		'icon'              => 'link',
+		'fields'			=> array(
+			...apply_filters(
+				'wptravelengine_tripedit:extensions:fields',
+				array(),
+				'custom-booking-link'
+			),
+		),
+	),
 );
 // Apply filter hooks.
 $trip_meta_tabs = apply_filters('wp_travel_engine_admin_trip_meta_tabs', $trip_meta_tabs);
@@ -963,9 +718,9 @@ $tab_args = array(
 );
 // Load Tabs.
 wptravelengine_tabs_ui()
-	->init( array(
+	->init(array(
 		'id'          => 'wptravelengine-edit-trip',
 		'class'       => 'wptravelengine-edit-trip',
 		'content_key' => 'wpte_edit_trip_tabs',
-	) )
-	->single_trip_metabox_template( wp_travel_engine_sort_array_by_priority( $trip_meta_tabs ) );
+	))
+	->single_trip_metabox_template(wp_travel_engine_sort_array_by_priority($trip_meta_tabs));

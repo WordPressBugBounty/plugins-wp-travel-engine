@@ -22,6 +22,10 @@ class AdminSettings {
 
 			$tab_settings = include $directory->getPathname();
 
+			if( ! isset( $tab_settings[ 'id' ] ) ) {
+				continue;
+			}
+
 			if ( isset( $tab_settings[ 'sub_tabs' ] ) ) {
 				$sub_tabs = $tab_settings[ 'sub_tabs' ];
 				if ( is_string( $sub_tabs ) && is_dir( $sub_tabs ) ) {
@@ -57,6 +61,10 @@ class AdminSettings {
 		foreach ( $iterator as $directory ) {
 
 			if ( $directory->isDot() || ! $directory->isFile() || ! $tab_settings = include $directory->getPathname() ) {
+				continue;
+			}
+
+			if( ! isset( $tab_settings[ 'id' ] ) ) {
 				continue;
 			}
 

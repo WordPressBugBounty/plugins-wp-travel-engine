@@ -175,7 +175,7 @@ class Item {
 					continue;
 				}
 				if ( isset( $cart_pricing_options[ $package_traveler->id ] ) ) {
-					$applicable_price = isset($package_traveler->has_sale) && $package_traveler->has_sale ? $package_traveler->sale_price : $package_traveler->price;
+					$applicable_price = isset( $package_traveler->has_sale ) && $package_traveler->has_sale ? $package_traveler->sale_price : $package_traveler->price;
 
 					$enable_group_discount = (bool) ( $package_traveler->enabled_group_discount ?? false );
 					$group_pricing         = $package->get_group_pricing()[ $package_traveler->id ] ?? [];
@@ -249,6 +249,8 @@ class Item {
 		$this->totals[ 'tax' ]      = $this->calculate_tax();
 		$this->totals[ 'total' ]    = $this->calculate_total();
 		$this->totals[ 'partial' ]  = $this->calculate_partial();
+
+		$this->totals = apply_filters( 'wptravelengine_cart_item_calculate_totals', $this->totals, $this );
 	}
 
 	/**

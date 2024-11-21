@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 6.2.1
+Stable tag: 6.2.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -367,6 +367,12 @@ Yes. We have created WooCommerce Payments add-ons that supports all the payment 
 Please send us an email via [support ticket](https://wptravelengine.com/support-ticket/?utm_source=free_plugin&utm_medium=wporg&utm_campaign=support), and we will be happy to help you.
 
 == Changelog ==
+
+= 6.2.2 - 21st November 2024 =
+* New: Introduced filter hooks to enable seamless support for upcoming add-ons.
+* New: Added a cut-off feature for managing booking hours effectively.
+* Fix: Resolved an incompatibility issue between the cut-off day feature and the Fixed Starting Dates add-on.
+* Security Fix: Added capability checks and nonce verification to prevent unauthorized access to plugin settings.
 
 = 6.2.1 - 28th October 2024 =
 * New: Introduced a sorting toolbar for taxonomy terms, allowing users to dynamically sort items in ascending or descending order.

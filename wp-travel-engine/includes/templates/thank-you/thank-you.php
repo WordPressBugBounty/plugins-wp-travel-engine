@@ -204,6 +204,10 @@ echo wp_kses_post( $thankyou );
 			</span>
 		</div>
 		<?php endif; ?>
+		<?php
+			// Add new row before total amount calculation on thankyou template.
+			do_action( 'wptravelengine_thankyou_trip_cost_rows', $cart_info );
+		?>
 		<div class="detail-item">
 			<strong class="item-label"><?php esc_html_e( 'Total:', 'wp-travel-engine' ); ?></strong>
 			<span class="value">

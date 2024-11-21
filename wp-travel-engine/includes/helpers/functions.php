@@ -19,12 +19,66 @@ require_once __DIR__ . '/helpers-prices.php';
 require_once __DIR__ . '/wp-travel-engine-form-fields.php';
 
 /**
+ * Checks if a WP Travel Engine add-on is active.
+ *
+ * @param string $addon Addon slug to check. Accepts:
+ *                     - fixed-starting-dates
+ *                     - partial-payment
+ *                     - extra-services
+ *                     - file-downloads
+ *                     - group-discount
+ *                     - advanced-itinerary
+ *                     - currency-converter
+ *                     - form-editor
+ *                     - itinerary-downloader
+ *                     - trip-reviews
+ *                     - user-history
+ *                     - we-travel
+ *                     - weather-forecast
+ *                     - zapier
+ *                     - custom-booking-link
+ * @since 6.2.2
+ *
+ * @return ?bool Returns true if addon is active, false if inactive, null if invalid addon
+ */
+function wptravelengine_is_addon_active( string $addon ) {
+
+    if ( empty( $addon ) ) {
+        return null;
+    }
+
+    $addon_files = array(
+        'fixed-starting-dates' 	=> 'WTE_FIXED_DEPARTURE_FILE_PATH',
+        'partial-payment' 		=> 'WP_TRAVEL_ENGINE_PARTIAL_PAYMENT_FILE_PATH',
+        'extra-services' 		=> 'WTE_EXTRA_SERVICES_FILE_PATH',
+        'file-downloads' 		=> 'WTEFD_FILE_PATH',
+        'group-discount' 		=> 'WP_TRAVEL_ENGINE_GROUP_DISCOUNT_FILE_PATH',
+        'advanced-itinerary' 	=> 'WTEAD_FILE_PATH',
+        'currency-converter' 	=> 'WTE_CURRENCY_CONVERTER_ABSPATH',
+		'form-editor'			=> 'WTE_FORM_EDITOR_PLUGIN_FILE',
+		'itinerary-downloader'	=> 'WTE_ITINERARY_DOWNLOADER_ABSPATH',
+		'trip-reviews'			=> 'WTE_TRIP_REVIEW_FILE_PATH',
+		'user-history'			=> 'WTE_USER_HISTORY_FILE_PATH',
+		'we-travel'				=> 'WTE_AFFILIATE_BOOKING_FILE_PATH',
+		'weather-forecast'		=> 'WTE_WEATHER_FORECAST_BASE_PATH',
+		'zapier'				=> 'WTE_ZAPIER_PLUGIN_FILE',
+		'custom-booking-link'	=> 'WTE_CBL_FILE_PATH',
+    );
+
+    if ( ! isset( $addon_files[ $addon ] ) ) {
+        return null;
+    }
+
+	return defined( $addon_files[ $addon ] ) && file_exists( constant( $addon_files[ $addon ] ) );
+}
+
+/**
  * Recursive helper function to check if key exists in given data.
  *
  * @param array $data The current level of data to traverse.
  * @param array $keys The remaining keys in the dot-separated path.
  * @since 6.2.0
- * 
+ *
  * @return bool
  */
 function wptravelengine_key_exists( array $data, array $keys ): bool {

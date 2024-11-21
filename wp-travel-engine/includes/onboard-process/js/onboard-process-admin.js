@@ -167,6 +167,12 @@ jQuery(document).ready(function ($) {
                         ajax_dynamic_recommendation(currency_code);
                     }
                     $('#onboard-loader').hide('slow');
+                } else {
+                    $('#onboard-loader').hide('slow');
+                    $('.obp-message-block').html(data.data.message).slideDown();
+                    setTimeout(() => {
+                        $('.obp-message-block').html('').slideUp();
+                    }, 3000);
                 }
             }
         });

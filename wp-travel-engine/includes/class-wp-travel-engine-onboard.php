@@ -137,6 +137,16 @@ class WP_TRAVEL_ENGINE_ONBOARDING_PROCESS {
 	 */
 	public static function wpte_onboard_save_function_callback() {
 
+		// Verify user has admin privileges
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'You do not have sufficient permissions to access this page.', 'wp-travel-engine' ) ) );
+		}
+
+		// Verify nonce
+		if ( ! isset( $_POST['_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_nonce'] ) ), 'wpte_onboard_save_function' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Security check failed', 'wp-travel-engine' ) ) );
+		}
+
 		// phpcs:disable
 		if ( isset( $_POST['action'] ) && 'wpte_onboard_save_function' === $_POST['action'] ) {
 

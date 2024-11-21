@@ -301,6 +301,10 @@ class Template_Tags {
                                     </td>
                                 </tr>
 							<?php } ?>
+							<?php
+								// Add new row before total amount calculation on email template.
+								do_action('wptravelengine_email_template_trip_cost_rows', $cart_info );
+							?>
                             <tr>
                                 <td><?php esc_html_e( 'Total', 'wp-travel-engine' ); ?></td>
                                 <td class="alignright">
