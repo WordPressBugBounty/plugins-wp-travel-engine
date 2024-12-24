@@ -27,7 +27,7 @@ class WP_Travel_Engine_Compatibility_Check {
 	 * Hooks.
 	 */
 	public function init_hooks() {
-		add_action( 'plugins_loaded', array( $this, 'define_backward_process' ) );
+		add_action( 'init', array( $this, 'define_backward_process' ) );
 	}
 
 	/**

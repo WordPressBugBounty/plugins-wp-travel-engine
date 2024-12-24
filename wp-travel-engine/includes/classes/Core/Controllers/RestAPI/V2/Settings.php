@@ -994,6 +994,7 @@ class Settings {
 		}
 
 		if ( isset( $request[ 'search_page' ] ) ) {
+			Options::update( 'wp_travel_engine_search_page_id', $request[ 'search_page' ] );
 			$plugin_settings->set( 'pages.search', $request[ 'search_page' ] );
 		}
 	}
@@ -2091,25 +2092,30 @@ class Settings {
 	 *
 	 * @return mixed
 	 * @since 6.2.0
+	 * @updated 6.2.3
 	 */
-	private function sanitize_params_recursive( &$params ) {
-		foreach ( $params as $key => &$value ) {
+	private function sanitize_params_recursive( $params ) {
+		$sanitized_params = array();
+	
+		foreach ( $params as $key => $value ) {
 			if ( is_array( $value ) ) {
-				$this->sanitize_params_recursive( $value );
+				$sanitized_params[$key] = $this->sanitize_params_recursive( $value );
 			} else if ( is_int( $value ) ) {
-				$value = intval( $value );
+				$sanitized_params[$key] = intval( $value );
 			} else if ( is_float( $value ) ) {
-				$value = floatval( $value );
+				$sanitized_params[$key] = floatval( $value );
 			} else if ( is_bool( $value ) ) {
-				$value = filter_var( $value, FILTER_VALIDATE_BOOLEAN );
+				$sanitized_params[$key] = filter_var( $value, FILTER_VALIDATE_BOOLEAN );
 			} else if ( is_email( $value ) ) {
-				$value = sanitize_email( $value );
+				$sanitized_params[$key] = sanitize_email( $value );
 			} else if ( filter_var( $value, FILTER_VALIDATE_URL ) ) {
-				$value = esc_url_raw( $value );
+				$sanitized_params[$key] = esc_url_raw( $value );
 			} else {
-				$value = wp_kses_post( $value );
+				$sanitized_params[$key] = $value;
 			}
 		}
+	
+		return $sanitized_params;
 	}
 
 	/**

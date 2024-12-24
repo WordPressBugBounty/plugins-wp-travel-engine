@@ -50,11 +50,15 @@ $additional_fields = is_array( $additional_fields ) ? $additional_fields : array
 					<li>
 						<b><?php echo esc_html( $data_label ); ?></b>
 						<span>
-						<div class="wpte-field">
-							<input readonly data-attrib-name="billing_info[<?php echo esc_attr( $key ); ?>]" type="text"
-								   value="<?php echo esc_attr( $value ); ?>" />
-						</div>
-					</span>
+							<?php if ( filter_var( $value, FILTER_VALIDATE_URL ) ) : ?>
+								<a href="<?php echo esc_url( $value ); ?>" target="_blank"><?php echo esc_html( basename( $value ) ); ?></a>
+							<?php else: ?>
+								<div class="wpte-field">
+									<input readonly data-attrib-name="billing_info[<?php echo esc_attr( $key ); ?>]" type="text"
+									value="<?php echo esc_attr( $value ); ?>" />
+								</div>
+							<?php endif; ?>
+						</span>
 					</li>
 				<?php
 				endforeach; // endforeachbokv

@@ -35,11 +35,12 @@ class Template {
 					Assets::instance()->enqueue_script( 'trip-booking-modal' );
 				}
 				Assets::instance()
-				      ->enqueue_script( 'single-trip' )
-				      ->enqueue_style( 'single-trip' )
-					  ->enqueue_script( 'wp-api-request' )
-				      ->dequeue_script( 'wp-travel-engine' )
-				      ->dequeue_style( 'wp-travel-engine' );
+					->dequeue_script( 'wp-travel-engine' )
+					->dequeue_style( 'wp-travel-engine' )
+					->enqueue_script( 'wp-api-request' )
+					->enqueue_script( 'single-trip' )
+					->enqueue_style( 'single-trip' )
+					->enqueue_style( 'style-trip-booking-modal' );
 			}
 
 			return $template_path;
@@ -52,15 +53,16 @@ class Template {
 			}
 			Assets::instance()
 			      ->dequeue_script( 'comment-reply' )
-			      ->enqueue_script( 'single-trip' )
-			      ->enqueue_style( 'single-trip' )
-				  ->enqueue_script( 'wp-api-request' )
 			      ->dequeue_script( 'wp-travel-engine' )
+			      ->dequeue_script( 'wte-extra-services' )
+			      ->dequeue_script( 'wp-travel-engine-group-discount' )
 			      ->dequeue_style( 'wp-travel-engine' )
 			      ->dequeue_style( 'wte-extra-services' )
-			      ->dequeue_script( 'wte-extra-services' )
 			      ->dequeue_style( 'wp-travel-engine-group-discount' )
-			      ->dequeue_script( 'wp-travel-engine-group-discount' );
+				  ->enqueue_script( 'wp-api-request' )
+			      ->enqueue_script( 'single-trip' )
+			      ->enqueue_style( 'single-trip' )
+				  ->enqueue_style( 'style-trip-booking-modal' );
 			$template_path = wte_locate_template( 'single-trip.php' );
 		} else if ( is_post_type_archive( WP_TRAVEL_ENGINE_POST_TYPE ) ) {
 			$template_path = wte_locate_template( 'archive-trip.php' );

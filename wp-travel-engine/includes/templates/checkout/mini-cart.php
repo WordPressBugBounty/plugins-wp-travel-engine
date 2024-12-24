@@ -72,7 +72,9 @@ if ( ! empty( $wte_cart->getItems() ) ) :
 			<?php
 			$is_tax_applicable = $wte_cart->tax()->is_taxable() && $wte_cart->tax()->is_exclusive();
 
-			if ( $wte_cart->has_discounts() || $is_tax_applicable ) :
+			$is_price_adjustments_enabled = apply_filters( 'wptravelengine_is_price_adjustments_enabled', false ) || $wte_cart->has_discounts() || $is_tax_applicable;
+
+			if ( $is_price_adjustments_enabled ) :
 				?>
 				<table class="wpte-bf_price-adjustments">
 					<tbody>
@@ -80,6 +82,7 @@ if ( ! empty( $wte_cart->getItems() ) ) :
 					if ( $wte_cart->has_discounts() ) {
 						$mini_cart->discount_details();
 					}
+					do_action( 'wptravelengine_before_tax_details', $wte_cart );
 					if ( $is_tax_applicable ) {
 						$mini_cart->tax_details( $cart_item, $wte_cart->tax() );
 					}

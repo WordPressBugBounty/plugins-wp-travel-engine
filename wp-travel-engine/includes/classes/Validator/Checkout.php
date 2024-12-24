@@ -188,13 +188,45 @@ class Checkout extends Validator {
 	protected function default( array $data, array $settings ) {
 		$name = $settings[ 'name' ];
 
-		if ( empty( $data[ $name ] ) && $settings[ 'required_field' ] !== 'false' ) {
+		if ( $settings[ 'type' ] === 'file' ) {
+			if ( ! isset( $_FILES[ $name ] ) || ! is_uploaded_file( $_FILES[ $name ][ 'tmp_name' ] ) ) {
+				if ( $settings[ 'required_field' ] !== 'false' ) {
+					$this->errors[ $name ] = self::REQUIRED;
+				}
+				return;
+			}
+			$data[ $name ] = $this->upload_file( $_FILES[ $name ] );
+		} else if ( empty( $data[ $name ] ) && $settings[ 'required_field' ] !== 'false' ) {
 			$this->errors[ $name ] = self::REQUIRED;
 
 			return;
 		}
 
 		$this->data['booking'][ $name ] = is_array( $data[ $name ] ) ? array_map( 'sanitize_text_field', $data[ $name ] ): sanitize_text_field( $data[ $name ] ?? '' );
+	}
+
+	/**
+	 * Handles file upload.
+	 *
+	 * @param array $file The file data array.
+	 *
+	 * @return string The uploaded file URL.
+	 */
+	private function upload_file( array $file ) {
+
+		if ( ! function_exists( 'wp_handle_upload' ) ) {
+			require_once( ABSPATH . 'wp-admin/includes/file.php' );
+		}
+
+		$upload_data = wp_handle_upload( $file, array( 'test_form' => false ) );
+
+		if ( isset( $upload_data[ 'error' ] ) ) {
+			$this->errors[ 'file_upload_error' ] = $upload_data[ 'error' ];
+			return '';
+		}
+
+		return $upload_data[ 'url' ] ?? '';
+
 	}
 
 }

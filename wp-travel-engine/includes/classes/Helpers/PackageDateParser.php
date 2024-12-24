@@ -169,7 +169,12 @@ class PackageDateParser {
 			);
 		}
 
-		$available_seats = is_numeric( $this->seats ) ? max( $this->seats - $booked_for_the_date, 0 ) : '';
+		if ( ! empty( $this->times ) && empty( $times ) ) {
+			$available_seats = 0;
+		} else {
+			$available_seats = is_numeric( $this->seats ) ? max( $this->seats - $booked_for_the_date, 0 ) : '';
+		}
+
 		if ( !class_exists( 'WTE_Fixed_Starting_Dates' ) && $trip->is_enabled_min_max_participants() ) {
 			$available_seats = $trip->get_maximum_participants();
 		}
@@ -205,10 +210,6 @@ class PackageDateParser {
 		$dates = array();
 
 		foreach ( $recurring_dates as $date ) {
-			$_date = $this->prepare_date( $date );
-			if ( is_numeric( $_date[ 'seats' ] ) && $_date[ 'seats' ] <= 0 ) {
-				continue;
-			}
 			$dates[ $date->format( 'Y-m-d' ) ] = $this->prepare_date( $date );
 		}
 

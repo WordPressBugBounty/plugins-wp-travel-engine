@@ -37,6 +37,7 @@ require_once __DIR__ . '/wp-travel-engine-form-fields.php';
  *                     - weather-forecast
  *                     - zapier
  *                     - custom-booking-link
+ *                     - booking-fee
  * @since 6.2.2
  *
  * @return ?bool Returns true if addon is active, false if inactive, null if invalid addon
@@ -63,6 +64,7 @@ function wptravelengine_is_addon_active( string $addon ) {
 		'weather-forecast'		=> 'WTE_WEATHER_FORECAST_BASE_PATH',
 		'zapier'				=> 'WTE_ZAPIER_PLUGIN_FILE',
 		'custom-booking-link'	=> 'WTE_CBL_FILE_PATH',
+		'booking-fee'			=> 'WPTRAVELENGINE_BOOKING_FEE_FILE',
     );
 
     if ( ! isset( $addon_files[ $addon ] ) ) {
@@ -96,51 +98,40 @@ function wptravelengine_key_exists( array $data, array $keys ): bool {
 }
 
 /**
- * Replaces targeted value with provided value to the provided data.
- * Supports array and boolean data types.
+ * Replaces the target value with a given value in arrays or scalar types.
+ * Returns the fallback value if the target is not found.
  *
- * @param mixed $data Data to replace value in.
- * @param mixed $target_value Value to replace.
- * @param mixed $by Value to replace with.
- * @param mixed $else Value to replace with if target value is not found. 'null' by default.
+ * @param mixed $data Data to replace the value in (array or scalar).
+ * @param mixed $target_value Value to search for and replace.
+ * @param mixed $by Value to replace the target value with.
+ * @param mixed $else Value to return if target is not found. Defaults to `null`.
+ * @param string|int $target_key Key in array to replace value in. Defaults to `null`.
  *
- * @return mixed
  * @since 6.2.0
+ * @updated 6.2.3
  *
+ * @return mixed Modified data or fallback value if target is not found.
  */
-function wptravelengine_replace( $data, $target_value, $by, $else = null ) {
-	if ( is_bool( $data ) ) {
-		return ( $data === $target_value ) ? $by : $else;
+
+function wptravelengine_replace( $data, $target_value, $by, $else = null, $target_key = null ) {
+
+    if ( is_array( $data ) ) {
+        foreach ( $data as $key => $value ) {
+			if ( is_null( $target_key ) ) {
+				$data[ $key ] = ( $target_value === $value ) ? $by : $else;
+			} else if ( array_key_exists( $target_key, $value ) ) {
+                $data[ $key ][ $target_key ] = ( $target_value === $value[ $target_key ] ) ? $by : $else;
+            }
+        }
+        return $data;
+    }
+
+	if ( ! is_scalar( $data ) ) {
+		return $else;
 	}
 
-	if ( is_array( $data ) ) {
-		$is_assoc     = empty( array_filter( array_keys( $data ), fn ( $key ) => is_numeric( $key ) ) );
-		$data         = $is_assoc ? array_values( $data ) : $data;
-		$new_array    = array_fill( key( $data ), count( $data ), $else );
-		$target_array = array_fill_keys( array_keys( $data, $target_value, true ), $by );
-
-		return array_replace( $new_array, $target_array );
-	}
+    return ( $data === $target_value ) ? $by : $else;
 }
-
-/**
- * Get the ordinal suffix for a number.
- *
- * @param int $num
- *
- * @return string
- * @since 6.1.0
- */
-function get_num_suffix( int $num ): string {
-	$last_two_digits = $num % 100;
-
-	return $num . ( ( $last_two_digits >= 11 && $last_two_digits <= 13 ) ? 'th' : ( [
-																						'st',
-																						'nd',
-																						'rd',
-																					][ $num % 10 - 1 ] ?? 'th' ) );
-}
-
 
 /**
  * Get the instance of the wptravelengine tabs UI.
@@ -185,7 +176,6 @@ function wptravelengine_get_num_suffix( int $num ): string {
 
 	return $num . ( $suffix[ ( $num % 10 ) - 1 ] ?? 'th' );
 }
-
 
 /**
  * Gets actual checkout URL to check out a trip.

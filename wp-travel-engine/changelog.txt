@@ -1,5 +1,19 @@
 == Changelog ==
 
+= 6.2.3 - 24th December 2024 =
+* New: Added functionality to duplicate trip packages easily.
+* Update: Enhanced Blocks for new Trip Fixed Starting Dates Addon Design.
+* Fix: Addressed incorrect usage of "_load_textdomain_just_in_time" function call.
+* Fix: Video thumbnails now display correctly when adding YouTube or Vimeo URLs to the Video Gallery.
+* Fix: Improved currency symbol alignment in the backend price display.
+* Fix: Corrected the error that occurred even after correctly filling the required Attachment field during booking.
+* Fix: Eliminated horizontal scrolling on the trip listing page in mobile view.
+* Fix: Deleted pricing categories no longer appear in the Booking Form.
+* Fix: Resolved Zapier webhook trigger failure when setting up Webhook URLs.
+* Fix: Resolved issue with the Extra Service title option not working.
+* Fix: Resolved issue with saving "Expert Email" in the Itinerary Downloader Addon.
+* Fix: Resolved unable to disable chart toggle switch in global setting
+
 = 6.2.2 - 21st November 2024 =
 * New: Introduced filter hooks to enable seamless support for upcoming add-ons.
 * New: Added a cut-off feature for managing booking hours effectively.

@@ -42,7 +42,13 @@ class TripPackageIterator extends Iterator {
 	public function __construct( Trip $trip ) {
 		$this->trip = $trip;
 
-		$package_ids = (array) $this->trip->get_meta( 'packages_ids' );
+		$package_ids 		= (array) $this->trip->get_meta( 'packages_ids' );
+		$primary_package_id = $this->trip->get_meta( 'primary_package' );
+
+		if ( ! empty( $primary_package_id ) ) {
+			$package_ids 		= array_diff( $package_ids, array( $primary_package_id ) );
+			array_unshift( $package_ids, $primary_package_id );
+		}
 
 		foreach ( $package_ids as $package_id ) {
 			if ( is_numeric( $package_id ) ) {

@@ -251,9 +251,10 @@ class Trip extends WP_REST_Posts_Controller {
 	 * Update Item.
 	 *
 	 * @param WP_REST_Request $request Request object.
-	 * @since 6.2.0
 	 *
 	 * @return WP_Error|WP_REST_Response
+	 * @since 6.2.0
+	 *
 	 */
 	public function update_item( $request ) {
 
@@ -263,7 +264,7 @@ class Trip extends WP_REST_Posts_Controller {
 			$request->set_param( $key, $value );
 		}
 
-		$this->trip = new Post\Trip( $request->get_param( 'id' ) );
+		$this->trip          = new Post\Trip( $request->get_param( 'id' ) );
 		$this->trip_settings = ArrayUtility::make( $this->trip->{'settings'} );
 
 		do_action( 'wptravelengine_api_update_trip', $request, $this );
@@ -286,13 +287,14 @@ class Trip extends WP_REST_Posts_Controller {
 	 * Sets WP Travel Engine Core Settings.
 	 *
 	 * @param WP_REST_Request $request Request object.
-	 * @since 6.2.2
 	 *
 	 * @return void
+	 * @since 6.2.2
+	 *
 	 */
 	protected function set_core_settings( WP_REST_Request $request ): void {
 
-		$trip = $this->trip;
+		$trip          = $this->trip;
 		$trip_settings = $this->trip_settings;
 
 		if ( empty( $trip->get_setting( 'trip_code' ) ) ) {
@@ -534,14 +536,14 @@ class Trip extends WP_REST_Posts_Controller {
 			foreach ( $request[ 'video_gallery' ] as $video ) {
 				if ( preg_match( $youtube_regex, $video[ 'url' ] ?? '', $matches ) ) {
 					$video_id = $matches[ 1 ];
-					$type = 'youtube';
+					$type     = 'youtube';
 				} else if ( preg_match( $vimeo_regex, $video[ 'url' ] ?? '', $matches ) ) {
 					$video_id = $matches[ 1 ];
-					$type = 'vimeo';
+					$type     = 'vimeo';
 				}
 				$video_gallery[] = [
-					'id' => $video_id ?? '',
-					'type' => $type ?? '',
+					'id'    => $video_id ?? '',
+					'type'  => $type ?? '',
 					'thumb' => $video[ 'thumbnail' ],
 				];
 			}
@@ -730,7 +732,7 @@ class Trip extends WP_REST_Posts_Controller {
 				$trip->set_meta( 'wp_travel_engine_setting_trip_price', $price );
 				$trip->set_meta( '_s_price', $price );
 				$trip->set_meta( '_s_has_sale', $updated_trip->has_sale() ? 'yes' : 'no' );
-        		Options::delete( 'wptravelengine_indexed_trips_by_dates' );
+				Options::delete( 'wptravelengine_indexed_trips_by_dates' );
 			}
 		}
 
@@ -815,12 +817,12 @@ class Trip extends WP_REST_Posts_Controller {
 		];
 
 		$map_img_id = $trip->get_setting( 'map.image_url', array() );
-		$trip_imgs 	= array();
+		$trip_imgs  = array();
 		if ( ! empty( $map_img_id ) ) {
-			$id 			= (int) $map_img_id;
-			$alt 			= get_post_meta( $id, '_wp_attachment_image_alt', true );
-			$url 			= wp_get_attachment_image_url( $id, 'full' );
-			$trip_imgs[] 	= compact( 'id', 'alt', 'url' );
+			$id          = (int) $map_img_id;
+			$alt         = get_post_meta( $id, '_wp_attachment_image_alt', true );
+			$url         = wp_get_attachment_image_url( $id, 'full' );
+			$trip_imgs[] = compact( 'id', 'alt', 'url' );
 		}
 
 		$data[ 'map_title' ] = (string) $trip->get_setting( 'map_section_title', '' );
@@ -860,7 +862,7 @@ class Trip extends WP_REST_Posts_Controller {
 			$alt = get_post_meta( $id, '_wp_attachment_image_alt', true );
 			$url = wp_get_attachment_image_url( $id, 'full' );
 
-			$data[ 'gallery' ][$i++] = compact( 'id', 'alt', 'url' );
+			$data[ 'gallery' ][ $i ++ ] = compact( 'id', 'alt', 'url' );
 		}
 
 		$data[ 'video_gallery_enable' ] = wptravelengine_toggled( $trip->get_setting( 'enable_video_gallery', false ) );
@@ -918,14 +920,15 @@ class Trip extends WP_REST_Posts_Controller {
 				if ( ! isset( $data[ 'itineraries' ][ $key - 1 ] ) ) {
 					continue;
 				}
-				$temp_img    	= empty( $img[ $key ] ) ? [] : array_values( array_unique( $img[ $key ] ) );
-				$images 		= array_values( array_filter( array_map( function( $id ) {
-					$id   = (int) $id;
+				$temp_img       = empty( $img[ $key ] ) ? [] : array_values( array_unique( $img[ $key ] ) );
+				$images         = array_values( array_filter( array_map( function ( $id ) {
+					$id = (int) $id;
 					if ( ! wp_attachment_is_image( $id ) ) {
 						return null;
 					}
-					$alt  = get_post_meta( $id, '_wp_attachment_image_alt', true );
-					$url  = wp_get_attachment_image_url( $id, 'full' );
+					$alt = get_post_meta( $id, '_wp_attachment_image_alt', true );
+					$url = wp_get_attachment_image_url( $id, 'full' );
+
 					return compact( 'id', 'alt', 'url' );
 				}, $temp_img ) ) );
 				$period         = (float) ( $advanced_itinerary[ 'itinerary_duration' ][ $key ] ?? 0 );
@@ -965,12 +968,12 @@ class Trip extends WP_REST_Posts_Controller {
 		$primary_package    = (int) $trip->get_meta( 'primary_package' );
 		$default_package    = $trip->default_package();
 		$default_package_id = is_null( $default_package ) ? $primary_package : $default_package->ID;
-		$trip_packages 		= new Post\TripPackages( $trip );
+		$trip_packages      = new Post\TripPackages( $trip );
 		$data[ 'packages' ] = [];
 		foreach ( $trip_packages as $key => $trip_package ) {
 			/* @var Post\TripPackage $trip_package */
 			$data[ 'packages' ][ $key ]                 = $this->prepare_package( $trip_package );
-			$data[ 'packages' ][$key][ 'is_primary' ] = $primary_package === $trip_package->ID;
+			$data[ 'packages' ][ $key ][ 'is_primary' ] = $primary_package === $trip_package->ID;
 		}
 		$settings = Options::get( 'wp_travel_engine_settings', [] );
 		$def_tabs = array( 'itinerary', 'cost', 'dates', 'faqs', 'map', 'review' );
@@ -1186,19 +1189,11 @@ class Trip extends WP_REST_Posts_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_packages( WP_REST_Request $request ) {
-		$id = $request->get_param( 'id' );
+		$packages_controller = new TripPackages();
 
-		$packages = array();
+		$request->set_param( 'trip_id', $request->get_param( 'id' ) );
 
-		/* @var Post\Trip $trip */
-		$trip          = Post\Trip::make( $id );
-		$trip_packages = new Post\TripPackages( $trip );
-
-		foreach ( $trip_packages as $trip_package ) {
-			$packages[] = $this->prepare_package_data( $trip_package );
-		}
-
-		return rest_ensure_response( $packages );
+		return $packages_controller->get_items( $request );
 	}
 
 	/**
@@ -1380,15 +1375,15 @@ class Trip extends WP_REST_Posts_Controller {
 							'items'       => array(
 								'type'       => 'object',
 								'properties' => array(
-									'id'        => array(
+									'id'  => array(
 										'description' => __( 'Image ID.', 'wp-travel-engine' ),
 										'type'        => 'integer',
 									),
-									'alt'       => array(
+									'alt' => array(
 										'description' => __( 'Image alt.', 'wp-travel-engine' ),
 										'type'        => 'string',
 									),
-									'url'       => array(
+									'url' => array(
 										'description' => __( 'Image URL.', 'wp-travel-engine' ),
 										'type'        => 'string',
 									),
@@ -1492,15 +1487,15 @@ class Trip extends WP_REST_Posts_Controller {
 				'items'       => array(
 					'type'       => 'object',
 					'properties' => [
-						'id'        => [
+						'id'  => [
 							'description' => __( 'Attachment ID.', 'wp-travel-engine' ),
 							'type'        => 'integer',
 						],
-						'alt'       => [
+						'alt' => [
 							'description' => __( 'Image alt text.', 'wp-travel-engine' ),
 							'type'        => 'string',
 						],
-						'url'       => [
+						'url' => [
 							'description' => __( 'Image URL.', 'wp-travel-engine' ),
 							'type'        => 'string',
 						],
@@ -1546,15 +1541,15 @@ class Trip extends WP_REST_Posts_Controller {
 						'items'       => array(
 							'type'       => 'object',
 							'properties' => array(
-								'id'        => array(
+								'id'  => array(
 									'description' => __( 'Attachment ID.', 'wp-travel-engine' ),
 									'type'        => 'integer',
 								),
-								'alt'       => array(
+								'alt' => array(
 									'description' => __( 'Image alt text.', 'wp-travel-engine' ),
 									'type'        => 'string',
 								),
-								'url'       => array(
+								'url' => array(
 									'description' => __( 'Image URL.', 'wp-travel-engine' ),
 									'type'        => 'string',
 								),
@@ -2006,23 +2001,30 @@ class Trip extends WP_REST_Posts_Controller {
 	 *
 	 * @return mixed
 	 * @since 6.2.2
+	 * @updated 6.2.3
 	 */
-	private function sanitize_params_recursive( &$params ) {
-		foreach ( $params as $key => &$value ) {
+	private function sanitize_params_recursive( $params ) {
+		$sanitized_params = array();
+	
+		foreach ( $params as $key => $value ) {
 			if ( is_array( $value ) ) {
-				$this->sanitize_params_recursive( $value );
+				$sanitized_params[$key] = $this->sanitize_params_recursive( $value );
 			} else if ( is_int( $value ) ) {
-				$value = intval( $value );
+				$sanitized_params[$key] = intval( $value );
 			} else if ( is_float( $value ) ) {
-				$value = floatval( $value );
+				$sanitized_params[$key] = floatval( $value );
 			} else if ( is_bool( $value ) ) {
-				$value = filter_var( $value, FILTER_VALIDATE_BOOLEAN );
+				$sanitized_params[$key] = filter_var( $value, FILTER_VALIDATE_BOOLEAN );
 			} else if ( is_email( $value ) ) {
-				$value = sanitize_email( $value );
+				$sanitized_params[$key] = sanitize_email( $value );
 			} else if ( filter_var( $value, FILTER_VALIDATE_URL ) ) {
-				$value = esc_url_raw( $value );
+				$sanitized_params[$key] = esc_url_raw( $value );
+			} else {
+				$sanitized_params[$key] = $value;
 			}
 		}
-	}
+	
+		return $sanitized_params;
+	}	
 
 }

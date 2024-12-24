@@ -143,6 +143,8 @@ class Assets extends AssetsAbstract {
 	 */
 	public function plugin_admin_scripts() {
 		$this->register_script( Asset::register( 'wptravelengine-settings', 'admin/global-settings.js' ) );
+		$this->register_script( Asset::register( 'wptravelengine-exports', 'exports.js' ) )
+		->localize( 'wptravelengine-exports', 'wteL10n' );
 	}
 
 	/**
@@ -150,6 +152,7 @@ class Assets extends AssetsAbstract {
 	 */
 	protected function register_plugin_scripts() {
 		/* @var PluginSettings $plugin_settings */
+		$this->register_style( Asset::register( 'style-trip-booking-modal', 'public/components/style-trip-booking-modal.css' ) );
 		$this->register_style( Asset::register( 'single-trip', 'public/single-trip.css' ) );
 		$this->register_style( Asset::register( 'wte-blocks-index', 'blocks/index.css' ) );
 
@@ -163,7 +166,7 @@ class Assets extends AssetsAbstract {
 
 		$trip_booking_modal_dependencies = $optimized_loading
 			? [ 'single-trip', 'wte-fpickr', 'wp-element' ]
-			: [ 'single-trip', 'wte-fpickr' ];
+			: [ 'single-trip', 'wte-fpickr', 'wp-data' ];
 
 		$this->register_script(
 			Asset::register( 'trip-booking-modal', $trip_booking_modal_script )

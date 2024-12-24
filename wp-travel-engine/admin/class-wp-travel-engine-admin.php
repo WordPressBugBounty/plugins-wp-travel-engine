@@ -1436,7 +1436,7 @@ class Wp_Travel_Engine_Admin {
 						<label>
 							<input type="radio"
 								   name="<?php echo esc_attr( $name ); ?>"
-								   <?php checked( $current, 0  ); ?>
+								<?php checked( $current, 0 ); ?>
 								   value="0" /><?php _e( 'None' ) ?>
 						</label>
 					</li>
@@ -1692,6 +1692,8 @@ class Wp_Travel_Engine_Admin {
 			'before'
 		);
 		wp_enqueue_script( 'wptravelengine-settings' );
+		wp_enqueue_script( 'wptravelengine-exports' );
+
 		$wte_settings = new Wp_Travel_Engine_Settings();
 		$wte_settings->wp_travel_engine_backend_settings();
 	}

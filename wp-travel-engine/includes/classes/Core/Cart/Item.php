@@ -428,6 +428,30 @@ class Item {
 	}
 
 	/**
+	 * Calculate the partial payment amount for a specific total amount.
+	 * 
+	 * Temporarily sets the total to the provided amount, calculates the partial payment,
+	 * then restores the original total.
+	 *
+	 * @param float $amount The total amount to calculate partial payment for
+	 * @since 6.2.3
+	 * 
+	 * @return float The calculated partial payment amount
+	 */
+	public function calculate_partial_for_amount( float $amount ): float {
+		$original_total = $this->totals['total'];
+		
+		try {
+			$this->totals['total'] = $amount;
+			$partial_amount = $this->calculate_partial();
+		} finally {
+			$this->totals['total'] = $original_total;
+		}
+
+		return (float) $partial_amount ?? $amount;
+	}
+
+	/**
 	 * Calculate the discount for the item.
 	 *
 	 * @return float
@@ -441,6 +465,17 @@ class Item {
 		}
 
 		return $discount_total;
+	}
+
+	/**
+	 * Get the item cart.
+	 * 
+	 * @since 6.2.3
+	 *
+	 * @return Cart|null
+	 */
+	public function cart() {
+		return $this->cart ?? null;
 	}
 
 	/**

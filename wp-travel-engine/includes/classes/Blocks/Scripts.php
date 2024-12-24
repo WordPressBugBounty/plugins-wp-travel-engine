@@ -80,9 +80,17 @@ class Scripts {
 				array(
 					'imageSizes' => $image_sizes,
 					'images' => $review_gallery,
+					'fsdVersion' => defined( 'WTE_FIXED_DEPARTURE_VERSION' ) ? WTE_FIXED_DEPARTURE_VERSION : '',
 				)
 			);
 			wp_enqueue_style( 'wte-trip-blocks-editor', plugins_url( 'dist/blocks/editor/trip-blocks.css', \WP_TRAVEL_ENGINE_FILE_PATH ) );
+			// FSD enqueue for block editor page.
+			wp_enqueue_style(
+				'wte-fsd-admin',
+				defined( 'WTE_FIXED_DEPARTURE_FILE_URL' ) ? WTE_FIXED_DEPARTURE_FILE_URL . '/dist/wte-fsd-public.css' : '',
+				array(),
+				defined( 'WTE_FIXED_DEPARTURE_VERSION' ) ? WTE_FIXED_DEPARTURE_VERSION : ''
+			);
 		}
 	}
 }

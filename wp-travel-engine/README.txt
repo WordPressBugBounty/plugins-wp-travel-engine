@@ -3,9 +3,9 @@ Contributors: wptravelengine
 Plugin link: https://wptravelengine.com/
 Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
-Tested up to: 6.6
+Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 6.2.2
+Stable tag: 6.2.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -367,6 +367,22 @@ Yes. We have created WooCommerce Payments add-ons that supports all the payment 
 Please send us an email via [support ticket](https://wptravelengine.com/support-ticket/?utm_source=free_plugin&utm_medium=wporg&utm_campaign=support), and we will be happy to help you.
 
 == Changelog ==
+
+= 6.2.3 - 24th December 2024 =
+* New: Added functionality to duplicate trip packages easily.
+* Update: Enhanced Blocks for new Trip Fixed Starting Dates Addon Design.
+* Fix: Addressed incorrect usage of "_load_textdomain_just_in_time" function call.
+* Fix: Video thumbnails now display correctly when adding YouTube or Vimeo URLs to the Video Gallery.
+* Fix: Improved currency symbol alignment in the backend price display.
+* Fix: Corrected the error that occurred even after correctly filling the required Attachment field during booking.
+* Fix: Eliminated horizontal scrolling on the trip listing page in mobile view.
+* Fix: Deleted pricing categories no longer appear in the Booking Form.
+* Fix: Resolved Zapier webhook trigger failure when setting up Webhook URLs.
+* Fix: Resolved issue with the Extra Service title option not working.
+* Fix: Resolved issue with saving "Expert Email" in the Itinerary Downloader Addon.
+* Fix: Resolved unable to disable chart toggle switch in global setting
+
+**Check out the release note for version [6.2.3](https://wptravelengine.com/new-release-version-6-2-3/).**
 
 = 6.2.2 - 21st November 2024 =
 * New: Introduced filter hooks to enable seamless support for upcoming add-ons.

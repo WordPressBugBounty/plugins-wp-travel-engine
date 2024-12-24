@@ -12,6 +12,7 @@ use DateInterval;
 use DateTime;
 use WPTravelEngine\Abstracts\PostModel;
 use WPTravelEngine\Helpers\PackageDateParser;
+use WPTravelEngine\Core\Models\Settings\Options;
 
 /**
  * Class TripPackage.
@@ -117,9 +118,11 @@ class TripPackage extends PostModel {
 	 */
 	public function get_package_dates( array $args = array() ): array {
 
-		$fields = apply_filters( 'wte_rest_fields__trip-packages', array(), true );
+		$dates = apply_filters( 'wptravelengine_get_package_dates', false, $this );
 
-		$callback = $fields[ 'package-dates' ][ 'get_callback' ] ?? false;
+		if ( false !== $dates ) {
+			return $dates;
+		}
 
 		$from = $args[ 'from' ] ?? wp_date( 'Y-m-d' );
 		$to   = $args[ 'to' ] ?? wp_date( 'Y-m-d', strtotime( '+1 year' ) );
@@ -134,7 +137,12 @@ class TripPackage extends PostModel {
 			$valid_date_time 	= wp_date( 'Y-m-d\TH:i' );
 		}
 
+		$fields = apply_filters( 'wte_rest_fields__trip-packages', array(), true );
+
+		$callback = $fields[ 'package-dates' ][ 'get_callback' ] ?? false;
+
 		if ( $callback ) {
+
 			$package_dates = $callback( array( 'id' => $this->ID ), 'package-dates' );
 
 			if ( ! is_array( $package_dates ) || empty( $package_dates ) ) {
@@ -194,6 +202,7 @@ class TripPackage extends PostModel {
 			return $dates;
 		}
 
+		$duration      		= (int) $this->trip->get_setting( 'trip_duration', 0 );
 		$enabled_time_slots = ( $this->get_meta( 'enable_weekly_time_slots' ) ?? 'no' ) === 'yes';
 
 		$dates           = array();

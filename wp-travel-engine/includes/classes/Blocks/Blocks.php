@@ -184,7 +184,11 @@ class Blocks {
 
 			foreach ( $dir as $fileinfo ) {
 				if ( ! $fileinfo->isDot() ) {
-					$block = $fileinfo->getPathname() . '/block.json';
+					$block = $fileinfo->getPathname() .
+					(( defined( 'WTE_FIXED_DEPARTURE_VERSION' ) && WTE_FIXED_DEPARTURE_VERSION >= '2.4.0' && file_exists($fileinfo->getPathname() . '/modified/block.json'))
+						? '/modified/block.json'
+						: '/block.json');
+
 					if ( file_exists( $block ) ) {
 						$this->set( $block );
 					} elseif ( $fileinfo->isDir() ) {
@@ -206,11 +210,16 @@ class Blocks {
 
 		foreach ( $blocks as $block ) {
 
-			$template_path = wp_normalize_path(
-				realpath(
-					dirname( $block ) . '/block.php'
-				)
-			);
+			 // Skip registering 'trip-fsd-date-selector' block if version >= 2.4.0
+			 if ( ( 'wptravelenginetripblocks/trip-fsd-date-selector' === $block || 'wptravelenginetripblocks/trip-fsd-loadmore' === $block ) && defined( 'WTE_FIXED_DEPARTURE_VERSION' ) && WTE_FIXED_DEPARTURE_VERSION >= '2.4.0') {
+				continue;
+			}
+			$template_dir = dirname( $block ) . '/';
+			$template_file = ( defined( 'WTE_FIXED_DEPARTURE_VERSION' ) && WTE_FIXED_DEPARTURE_VERSION >= '2.4.0' && file_exists( $template_dir . 'modified/block.php' ) )
+				? 'modified/block.php'
+				: 'block.php';
+
+			$template_path = wp_normalize_path( realpath( $template_dir . $template_file ) );
 			$args          = array();
 			if ( $template_path ) {
 				$args['render_callback'] = static function ( ...$args ) use ( $template_path ) {

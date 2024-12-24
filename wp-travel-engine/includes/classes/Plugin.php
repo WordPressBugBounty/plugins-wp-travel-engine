@@ -274,6 +274,8 @@ final class Plugin {
 
 		$this->add_init_hooks();
 
+		add_filter( 'is_wptravelengine_active', '__return_true' );
+
 		add_action( 'wp_footer', array( $this, 'add_booking_modal_container' ) );
 
 		add_filter( 'widget_text', 'do_shortcode' );
@@ -1058,7 +1060,7 @@ final class Plugin {
 
 		$plugin_i18n = new Wp_Travel_Engine_i18n();
 
-		$this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
+		$this->loader->add_action( 'init', $plugin_i18n, 'load_plugin_textdomain' );
 	}
 
 	/**

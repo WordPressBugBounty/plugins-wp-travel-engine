@@ -32,8 +32,7 @@ class SettingsAPISchema {
 	public function hooks() {
 		add_filter( 'wptravelengine_settings_api_schema', array( $this, 'addons_settings_api_schema' ), 10, 2 );
 		add_filter( 'wptravelengine_rest_prepare_settings', array( $this, 'prepare_addons_settings' ), 10, 3 );
-
-		add_action( 'wptravelengine_api_update_settings', array( $this, 'update_addons_settings' ), 10, 3 );
+		add_action( 'wptravelengine_api_update_settings', array( $this, 'update_addons_settings' ), 10, 2 );
 	}
 
 	/**
@@ -130,7 +129,7 @@ class SettingsAPISchema {
 			'enable_all_itinerary' => wptravelengine_toggled( $this->plugin_settings->get( 'wte_advance_itinerary.enable_expand_all' ) ),
 			'sleep_mode_fields'    => array_column( $this->plugin_settings->get( 'wte_advance_itinerary.itinerary_sleep_mode_fields', array() ), 'field_text' ),
 			'chart'                => array(
-				'enable'            => wptravelengine_toggled( $this->plugin_settings->get( 'wte_advance_itinerary.chart.show', 'yes' ) ),
+				'enable'            => wptravelengine_replace( $this->plugin_settings->get( 'wte_advance_itinerary.chart.show', 'yes' ), 'yes', true, false ),
 				'elevation_unit'    => (string) $this->plugin_settings->get( 'wte_advance_itinerary.chart.alt_unit', 'm' ),
 				'enable_x_axis'     => wptravelengine_toggled( $chart_data['options']['scales.xAxes.display'] ?? false ),
 				'enable_y_axis'     => wptravelengine_toggled( $chart_data['options']['scales.yAxes.display'] ?? false ),
@@ -563,7 +562,7 @@ class SettingsAPISchema {
 		$new_zaps = array();
 		foreach ( $zaps as $key => $value ) {
 			$new_zaps[] = array(
-				'id'   => $key + 1,
+				'id'   => $key,
 				'name' => sanitize_text_field( $value['name'] ),
 				'url'  => esc_url_raw( $value['url'] ),
 			);
@@ -896,7 +895,7 @@ class SettingsAPISchema {
 			$this->plugin_settings->set( 'itinerary_downloader.pdf_talk_to_expert_text', $pdf_content['expert_chat_label'] );
 		}
 
-		if ( isset( $pdf_content['expert'] ) ) {
+		if ( isset( $pdf_content['expert_email'] ) ) {
 			$this->plugin_settings->set( 'itinerary_downloader.pdf_expert_email', $pdf_content['expert_email'] );
 		}
 
@@ -1208,32 +1207,27 @@ class SettingsAPISchema {
 
 		if ( isset( $request['zapier']['booking_zaps'] ) && is_array( $request['zapier']['booking_zaps'] ) ) {
 			$booking_zaps = array();
-			foreach ( $request['zapier']['booking_zaps'] as $zap ) {
-				if ( isset( $zap['name'] ) && isset( $zap['url'] ) ) {
-					$booking_zaps[] = array(
-						'name' => sanitize_text_field( $zap['name'] ),
-						'url'  => esc_url_raw( $zap['url'] ),
+			foreach ( $request['zapier']['booking_zaps'] as $zap => $value ) {
+				if ( isset( $value['name'] ) && isset( $value['url'] ) ) {
+					$booking_zaps[ $zap + 1 ] = array(
+						'name' => sanitize_text_field( $value['name'] ),
+						'url'  => esc_url_raw( $value['url'] ),
 					);
 				}
 			}
-			// Re-index the array to ensure the keys start from 0 and are sequential
-			$booking_zaps = array_values( $booking_zaps );
-
 			$this->plugin_settings->set( 'zapier.booking_zaps', $booking_zaps );
 		}
 
 		if ( isset( $request['zapier']['enquiry_zaps'] ) && is_array( $request['zapier']['enquiry_zaps'] ) ) {
 			$enquiry_zaps = array();
-
-			foreach ( $request['zapier']['enquiry_zaps'] as $zap ) {
-				if ( isset( $zap['name'] ) && isset( $zap['url'] ) ) {
-					$enquiry_zaps[] = array(
-						'name' => sanitize_text_field( $zap['name'] ),
-						'url'  => esc_url_raw( $zap['url'] ),
+			foreach ( $request['zapier']['enquiry_zaps'] as $zap => $value ) {
+				if ( isset( $value['name'] ) && isset( $value['url'] ) ) {
+					$enquiry_zaps[ $zap + 1 ] = array(
+						'name' => sanitize_text_field( $value['name'] ),
+						'url'  => esc_url_raw( $value['url'] ),
 					);
 				}
 			}
-
 			$this->plugin_settings->set( 'zapier.enquiry_zaps', $enquiry_zaps );
 		}
 	}

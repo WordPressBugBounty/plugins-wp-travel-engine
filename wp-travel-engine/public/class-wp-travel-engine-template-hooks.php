@@ -168,6 +168,9 @@ class WP_Travel_Engine_Template_Hooks {
 		}
 
 		foreach ( $categories_in_package as $c_id ) {
+			if ( ! isset( $pricing_categories[ $c_id ] ) ) {
+				continue;
+			}
 			$price = $package_categories->prices[ $c_id ];
 
 			if ( '' === $price ) {
