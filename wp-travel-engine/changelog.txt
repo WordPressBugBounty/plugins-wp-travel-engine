@@ -1,5 +1,8 @@
 == Changelog ==
 
+= 6.2.4 - 1st January 2024 =
+* Fix: Primary package is now set correctly when duplicating a trip package.
+
 = 6.2.3 - 24th December 2024 =
 * New: Added functionality to duplicate trip packages easily.
 * Update: Enhanced Blocks for new Trip Fixed Starting Dates Addon Design.

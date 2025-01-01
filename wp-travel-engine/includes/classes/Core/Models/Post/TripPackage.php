@@ -118,7 +118,7 @@ class TripPackage extends PostModel {
 	 */
 	public function get_package_dates( array $args = array() ): array {
 
-		$dates = apply_filters( 'wptravelengine_get_package_dates', false, $this );
+		$dates = apply_filters( 'wptravelengine_get_package_dates', false, $this, $args );
 
 		if ( false !== $dates ) {
 			return $dates;

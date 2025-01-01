@@ -1,13 +1,13 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WP Travel Engine - Travel and Tour Booking Plugin 6.2.3\n"
+"Project-Id-Version: WP Travel Engine - Travel and Tour Booking Plugin 6.2.4\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wptravelengine\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2024-12-24T07:03:23+00:00\n"
+"POT-Creation-Date: 2025-01-01T09:07:43+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language: \n"
 "X-Generator: WP-CLI 2.11.0\n"
@@ -4830,7 +4830,7 @@ msgid "Couldn&#8217;t register you&hellip; please contact us if you continue to 
 msgstr ""
 
 #: includes/class-wp-travel-engine-custom-shortcodes.php:53
-#: includes/class-wte-ajax.php:628
+#: includes/class-wte-ajax.php:632
 #: includes/classes/Core/Controllers/Ajax/UserWishlist.php:58
 msgid "<strong>0</strong> item in wishlist"
 msgstr ""
@@ -5578,62 +5578,62 @@ msgstr ""
 msgid "Cloning post must be of trip posttype."
 msgstr ""
 
-#: includes/class-wte-ajax.php:443
+#: includes/class-wte-ajax.php:447
 #: includes/classes/Core/Controllers/Ajax/AddToCart.php:196
 msgid "Invalid data structure."
 msgstr ""
 
-#: includes/class-wte-ajax.php:452
+#: includes/class-wte-ajax.php:456
 #: includes/classes/Core/Controllers/Ajax/AddToCart.php:205
 msgid "Invalid Trip ID."
 msgstr ""
 
-#: includes/class-wte-ajax.php:545
-#: includes/class-wte-ajax.php:760
-#: includes/class-wte-ajax.php:784
+#: includes/class-wte-ajax.php:549
+#: includes/class-wte-ajax.php:764
+#: includes/class-wte-ajax.php:788
 #: includes/classes/Core/Controllers/Ajax/AddToCart.php:138
 #: includes/classes/Core/Controllers/Ajax/AddToCart.php:170
 msgid "deprecated because of more params."
 msgstr ""
 
-#: includes/class-wte-ajax.php:565
+#: includes/class-wte-ajax.php:569
 #: includes/classes/Core/Controllers/Ajax/AddToCart.php:220
 msgid "Trip added to cart successfully."
 msgstr ""
 
-#: includes/class-wte-ajax.php:597
+#: includes/class-wte-ajax.php:601
 #: includes/classes/Core/Controllers/Ajax/UserWishlist.php:32
 msgid "Wishlist fetched successfully."
 msgstr ""
 
-#: includes/class-wte-ajax.php:607
+#: includes/class-wte-ajax.php:611
 #: includes/classes/Core/Controllers/Ajax/UserWishlist.php:41
 msgid "Trip is added to wishlists."
 msgstr ""
 
-#: includes/class-wte-ajax.php:617
+#: includes/class-wte-ajax.php:621
 #: includes/classes/Core/Controllers/Ajax/UserWishlist.php:48
 msgid "Trip is removed from wishlists."
 msgstr ""
 
 #. Translators: %d is the number of items in the wishlist.
-#: includes/class-wte-ajax.php:636
+#: includes/class-wte-ajax.php:640
 #: includes/classes/Core/Controllers/Ajax/UserWishlist.php:67
 msgid "<strong>%d</strong> item in the wishlist"
 msgid_plural "<strong>%d</strong> items in the wishlist"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-wte-ajax.php:651
+#: includes/class-wte-ajax.php:655
 msgid "Nonce verification failed."
 msgstr ""
 
-#: includes/class-wte-ajax.php:663
+#: includes/class-wte-ajax.php:667
 #: includes/classes/Core/Controllers/Ajax/AddToCart.php:38
 msgid "Invalid trip ID."
 msgstr ""
 
-#: includes/class-wte-ajax.php:791
+#: includes/class-wte-ajax.php:795
 #: includes/classes/Core/Controllers/Ajax/AddToCart.php:178
 msgid "Trip added to cart successfully"
 msgstr ""

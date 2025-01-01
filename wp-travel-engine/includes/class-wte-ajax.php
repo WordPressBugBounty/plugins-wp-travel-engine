@@ -385,12 +385,16 @@ class WTE_Ajax {
 
 		$new_post_id = wptravelengine_duplicate_post( $post );
 
+		$primary_package_id = get_post_meta( $post_id, 'primary_package', true );
 		$packages_ids = get_post_meta( $post_id, 'packages_ids', true );
 
 		$_new_package_ids = array();
 		if ( is_array( $packages_ids ) ) {
 			foreach ( $packages_ids as $package_id ) {
 				$_package_id = wptravelengine_duplicate_post( $package_id );
+				if ( $package_id == $primary_package_id ) {
+					update_post_meta( $new_post_id, 'primary_package', $_package_id );
+				}
 				if ( ! is_null( $_package_id ) ) {
 					$_new_package_ids[] = $_package_id;
 					wp_update_post(
