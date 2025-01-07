@@ -142,6 +142,7 @@ class TripPackages extends WP_REST_Posts_Controller {
 		$data[ 'id' ]          = $trip_package->get_id();
 		$data[ 'name' ]        = $trip_package->get_title();
 		$data[ 'description' ] = $trip_package->get_content();
+		$data[ 'is_primary' ]  = $trip_package->get_id() === (int) $trip_package->get_trip()->get_meta( 'primary_package' );
 
 		$package_categories = $trip_package->get_traveler_categories();
 

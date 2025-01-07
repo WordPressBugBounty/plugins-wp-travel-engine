@@ -43,6 +43,16 @@ class BaseGateway extends PaymentGateway {
 		return $this->args[ 'icon_url' ] ?? '';
 	}
 
+
+	/**
+	 * Get display icon.
+	 *
+	 * @return string
+	 */
+	public function get_display_icon(): string {
+		return $this->args[ 'display_icon' ] ?? '';
+	}
+
 	/**
 	 * Public info shows at the time of checkout.
 	 *
@@ -146,6 +156,7 @@ class BaseGateway extends PaymentGateway {
 			'icon_url'     => $this->get_icon(),
 			'info_text'    => $this->get_info(),
 			'description'  => $this->get_description(),
+			'display_icon' => $this->get_display_icon(),
 		);
 	}
 

@@ -66,6 +66,7 @@ final class WP_Session extends Recursive_ArrayAccess {
 	 * create a new session with that ID.
 	 *
 	 * @param $session_id
+	 *
 	 * @uses apply_filters Calls `wp_session_expiration` to determine how long until sessions expire.
 	 */
 	protected function __construct() {
@@ -73,9 +74,9 @@ final class WP_Session extends Recursive_ArrayAccess {
 			$cookie        = sanitize_text_field( wp_unslash( $_COOKIE[ WP_TRAVEL_ENGINE_SESSION_COOKIE ] ) );
 			$cookie_crumbs = explode( '||', $cookie );
 
-			$this->session_id  = $cookie_crumbs[0];
-			$this->expires     = $cookie_crumbs[1];
-			$this->exp_variant = $cookie_crumbs[2];
+			$this->session_id  = $cookie_crumbs[ 0 ];
+			$this->expires     = $cookie_crumbs[ 1 ];
+			$this->exp_variant = $cookie_crumbs[ 2 ];
 
 			// Update the session expiration if we're past the variant time
 			if ( time() > $this->exp_variant ) {
@@ -149,12 +150,9 @@ final class WP_Session extends Recursive_ArrayAccess {
 	public function write_data() {
 		$option_key = "_wp_session_{$this->session_id}";
 
+		update_option( "_wp_session_{$this->session_id}", $this->container, '', 'no' );
 		if ( false === get_option( $option_key ) ) {
-			update_option( "_wp_session_{$this->session_id}", $this->container, '', 'no' );
 			update_option( "_wp_session_expires_{$this->session_id}", $this->expires, '', 'no' );
-		} else {
-			// delete_option( "_wp_session_{$this->session_id}" );
-			update_option( "_wp_session_{$this->session_id}", $this->container, '', 'no' );
 		}
 	}
 
@@ -179,6 +177,7 @@ final class WP_Session extends Recursive_ArrayAccess {
 
 		if ( is_array( $array ) ) {
 			$this->container = $array;
+
 			return true;
 		}
 

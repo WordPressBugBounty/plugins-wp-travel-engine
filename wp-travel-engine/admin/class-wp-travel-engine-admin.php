@@ -1437,7 +1437,7 @@ class Wp_Travel_Engine_Admin {
 							<input type="radio"
 								   name="<?php echo esc_attr( $name ); ?>"
 								<?php checked( $current, 0 ); ?>
-								   value="0" /><?php _e( 'None' ) ?>
+								   value="0" /><?php _e( 'None', 'wp-travel-engine' ) ?>
 						</label>
 					</li>
 					<?php
@@ -2028,6 +2028,7 @@ class Wp_Travel_Engine_Admin {
 		$templates[ 'templates/template-activities.php' ]   = esc_html__( 'Activities Template', 'wp-travel-engine' );
 		$templates[ 'templates/template-trip_types.php' ]   = esc_html__( 'Trip Types Template', 'wp-travel-engine' );
 		$templates[ 'templates/template-trip-listing.php' ] = esc_html__( 'Trip Listing Template', 'wp-travel-engine' );
+		$templates[ 'template-checkout.php' ]     = esc_html__( 'WP Travel Engine - Checkout', 'wp-travel-engine' );
 
 		return $templates;
 	}
@@ -3185,7 +3186,7 @@ class Wp_Travel_Engine_Admin {
 					'wte-coupon',
 					'edit-wte-coupon',
 					'trip_page_class-wp-travel-engine-admin',
-				), true )
+				),        true )
 				|| in_array( $screen->post_type, array( 'trip', 'booking', 'customer' ), true )
 				|| 'class-wp-travel-engine-admin.php' === $_GET[ 'page' ]
 			) {

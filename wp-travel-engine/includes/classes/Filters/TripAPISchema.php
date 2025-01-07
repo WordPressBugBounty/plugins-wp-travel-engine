@@ -278,7 +278,7 @@ class TripAPISchema {
 				'amount'     => (float) ( $this->trip->get_setting( 'partial_payment_amount', 0 ) ),
 				'percentage' => (float) ( $this->trip->get_setting( 'partial_payment_percent', 0 ) ),
 			];
-			$data[ 'full_payment_enable' ] = wptravelengine_toggled( $this->trip->get_setting( 'trip_full_payment_enabled', false ) );
+			$data[ 'full_payment_enable' ] = wptravelengine_toggled( $this->trip->get_setting( 'trip_full_payment_enabled', 'no' ) );
 		}
 
 	}

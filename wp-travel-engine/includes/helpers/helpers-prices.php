@@ -31,10 +31,10 @@ function wte_currency_code_in_db() {
 	// If the currency stored in the database is not in the
 	// currency converter list, append it as well.
 	$wte_settings = get_option( 'wp_travel_engine_settings' );
-	if ( ! isset( $wte_settings['currency_code'] ) ) {
-		$wte_settings['currency_code'] = 'USD';
+	if ( ! isset( $wte_settings[ 'currency_code' ] ) ) {
+		$wte_settings[ 'currency_code' ] = 'USD';
 	}
-	$code_in_db = $wte_settings['currency_code'];
+	$code_in_db = $wte_settings[ 'currency_code' ];
 
 	return $code_in_db;
 }
@@ -90,10 +90,10 @@ function wte_the_formated_price( ...$args ) {
  * This function will convert amount if converter plugin is being used and $currency_code is not provided or $use_default_currency_code is true.
  * Use only to print number not for saving data to database or sending payment amount to payment gateway use number_fromat instead.
  *
- * @param int    $num Amount figure.
+ * @param int $num Amount figure.
  * @param string $currency_code Currency Code.
  * @param string $format Format String.
- * @param bool   $use_currency_symbol Use Currency Symbol.
+ * @param bool $use_currency_symbol Use Currency Symbol.
  *
  * @return string Decorated Price with currency.
  * @since 4.3.0
@@ -109,8 +109,8 @@ function wte_get_formated_price( $num, $currency_code = '', $format = '', $use_c
 		$convert = false;
 	}
 	$price_object->set_format( $format )
-		->use_html( $use_html )
-		->format( $convert );
+	             ->use_html( $use_html )
+	             ->format( $convert );
 
 	return $price_object->set_format( $format )->use_html( $use_html )->format( $convert )->output;
 }
@@ -144,8 +144,8 @@ function wte_price_value_format(
 ) {
 	$price = $price;
 	// TODO : Move to filter.
-	if ( class_exists( 'Wte_Trip_Currency_Converter_Init' ) && $deprecated['trip_id'] ) {
-		$price = \wte_functions()->convert_trip_price( get_post( $deprecated['trip_id'] ), $price );
+	if ( class_exists( 'Wte_Trip_Currency_Converter_Init' ) && $deprecated[ 'trip_id' ] ) {
+		$price = \wte_functions()->convert_trip_price( get_post( $deprecated[ 'trip_id' ] ), $price );
 	}
 
 	if ( $convert ) {
@@ -237,7 +237,7 @@ function wp_travel_engine_get_formated_price_with_currency_code_symbol( $price, 
 	$format = '';
 
 	$settings = get_option( 'wp_travel_engine_settings' );
-	$option   = isset( $settings['currency_option'] ) && $settings['currency_option'] != '' ? esc_attr( $settings['currency_option'] ) : 'symbol';
+	$option   = isset( $settings[ 'currency_option' ] ) && $settings[ 'currency_option' ] != '' ? esc_attr( $settings[ 'currency_option' ] ) : 'symbol';
 
 	$format .= '<span class="wpte-currency-code">';
 	$format .= 'code' === $option ? '%CURRENCY_CODE%' : '%CURRENCY_SYMBOL%';
@@ -259,7 +259,7 @@ function wpte_get_formated_price_with_currency_code_symbol( $price, $trip_id = n
 	$format = '';
 
 	$settings = get_option( 'wp_travel_engine_settings' );
-	$option   = isset( $settings['currency_option'] ) && $settings['currency_option'] != '' ? esc_attr( $settings['currency_option'] ) : 'symbol';
+	$option   = isset( $settings[ 'currency_option' ] ) && $settings[ 'currency_option' ] != '' ? esc_attr( $settings[ 'currency_option' ] ) : 'symbol';
 
 	$format .= '<span class="wpte-currency-code">';
 	$format .= 'code' === $option ? '%CURRENCY_CODE%' : '%CURRENCY_SYMBOL%';
@@ -311,9 +311,9 @@ function wp_travel_engine_is_trip_partially_payable( $trip_id ): bool {
 	$wte_options    = get_option( 'wp_travel_engine_settings', array() );
 	$wte_trip_metas = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
 
-	$enabled = in_array( ( $wte_trip_metas['partial_payment_enable'] ?? 'no' ), array( 'yes', '1' ) );
+	$enabled = in_array( ( $wte_trip_metas[ 'partial_payment_enable' ] ?? 'no' ), array( 'yes', '1' ) );
 
-	$enabled_globally = in_array( ( $wte_options['partial_payment_enable'] ?? 'no' ), array( 'yes', '1' ) );
+	$enabled_globally = in_array( ( $wte_options[ 'partial_payment_enable' ] ?? 'no' ), array( 'yes', '1' ) );
 
 	return defined( 'WP_TRAVEL_ENGINE_PARTIAL_PAYMENT_FILE_PATH' ) && file_exists( WP_TRAVEL_ENGINE_PARTIAL_PAYMENT_FILE_PATH ) && $enabled_globally && $enabled;
 }
@@ -328,8 +328,8 @@ function wp_travel_engine_get_trip_partial_payment_data( $trip_id ) {
 	$trip_price_partial        = 0;
 	$wte_options               = get_option( 'wp_travel_engine_settings', true );
 	$wte_trip_metas            = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
-	$trip_full_payment_enabled = ! isset( $wte_trip_metas['trip_full_payment_enabled'] ) || ( isset( $wte_trip_metas['trip_full_payment_enabled'] ) && 'yes' === $wte_trip_metas['trip_full_payment_enabled'] );
-	$global_full_pay_enable    = ! isset( $wte_options['full_payment_enable'] ) || ( isset( $wte_options['full_payment_enable'] ) && 'yes' === $wte_options['full_payment_enable'] );
+	$trip_full_payment_enabled = ! isset( $wte_trip_metas[ 'trip_full_payment_enabled' ] ) || ( isset( $wte_trip_metas[ 'trip_full_payment_enabled' ] ) && 'yes' === $wte_trip_metas[ 'trip_full_payment_enabled' ] );
+	$global_full_pay_enable    = ! isset( $wte_options[ 'full_payment_enable' ] ) || ( isset( $wte_options[ 'full_payment_enable' ] ) && 'yes' === $wte_options[ 'full_payment_enable' ] );
 
 	if ( ! $trip_id ) {
 		return $partial_payment;
@@ -337,13 +337,13 @@ function wp_travel_engine_get_trip_partial_payment_data( $trip_id ) {
 
 	if ( wp_travel_engine_is_trip_partially_payable( $trip_id ) ) :
 
-		$partial_type = $wte_options['partial_payment_option'];
+		$partial_type = $wte_options[ 'partial_payment_option' ];
 
 		if ( 'amount' === $partial_type ) :
 
-			$trip_price_partial = isset( $wte_options['partial_payment_amount'] ) && ! empty( $wte_options['partial_payment_amount'] ) ? $wte_options['partial_payment_amount'] : 0;
+			$trip_price_partial = isset( $wte_options[ 'partial_payment_amount' ] ) && ! empty( $wte_options[ 'partial_payment_amount' ] ) ? $wte_options[ 'partial_payment_amount' ] : 0;
 
-			$trip_price_partial = isset( $wte_trip_metas['partial_payment_amount'] ) && ! empty( $wte_trip_metas['partial_payment_amount'] ) ? $wte_trip_metas['partial_payment_amount'] : $trip_price_partial;
+			$trip_price_partial = isset( $wte_trip_metas[ 'partial_payment_amount' ] ) && ! empty( $wte_trip_metas[ 'partial_payment_amount' ] ) ? $wte_trip_metas[ 'partial_payment_amount' ] : $trip_price_partial;
 
 			$partial_payment = array(
 				'type'  => 'amount',
@@ -352,9 +352,9 @@ function wp_travel_engine_get_trip_partial_payment_data( $trip_id ) {
 
 		elseif ( 'percent' === $partial_type ) :
 
-			$trip_partial_percentage = isset( $wte_options['partial_payment_percent'] ) && ! empty( $wte_options['partial_payment_percent'] ) ? $wte_options['partial_payment_percent'] : 0;
+			$trip_partial_percentage = isset( $wte_options[ 'partial_payment_percent' ] ) && ! empty( $wte_options[ 'partial_payment_percent' ] ) ? $wte_options[ 'partial_payment_percent' ] : 0;
 
-			$trip_partial_percentage = isset( $wte_trip_metas['partial_payment_percent'] ) && ! empty( $wte_trip_metas['partial_payment_percent'] ) ? $wte_trip_metas['partial_payment_percent'] : $trip_partial_percentage;
+			$trip_partial_percentage = isset( $wte_trip_metas[ 'partial_payment_percent' ] ) && ! empty( $wte_trip_metas[ 'partial_payment_percent' ] ) ? $wte_trip_metas[ 'partial_payment_percent' ] : $trip_partial_percentage;
 
 			$partial_payment = array(
 				'type'  => 'percentage',
@@ -367,8 +367,8 @@ function wp_travel_engine_get_trip_partial_payment_data( $trip_id ) {
 		 *
 		 * @since 5.7.1
 		 */
-		$partial_payment['trip_full_payment']   = $trip_full_payment_enabled;
-		$partial_payment['global_full_payment'] = $global_full_pay_enable;
+		$partial_payment[ 'trip_full_payment' ]   = $trip_full_payment_enabled;
+		$partial_payment[ 'global_full_payment' ] = $global_full_pay_enable;
 
 	endif;
 
@@ -383,9 +383,9 @@ function wp_travel_engine_get_trip_partial_payment_data( $trip_id ) {
 function wp_travel_engine_get_tax_percentage() {
 
 	$wte_options    = get_option( 'wp_travel_engine_settings', true );
-	$tax_percentage = isset( $wte_options['tax_percentage'] ) ? $wte_options['tax_percentage'] : '';
-	$tax_type       = isset( $wte_options['tax_type_option'] ) ? $wte_options['tax_type_option'] : '';
-	if ( isset( $wte_options['tax_enable'] ) && $wte_options['tax_enable'] == 'yes' ) {
+	$tax_percentage = isset( $wte_options[ 'tax_percentage' ] ) ? $wte_options[ 'tax_percentage' ] : '';
+	$tax_type       = isset( $wte_options[ 'tax_type_option' ] ) ? $wte_options[ 'tax_type_option' ] : '';
+	if ( isset( $wte_options[ 'tax_enable' ] ) && $wte_options[ 'tax_enable' ] == 'yes' ) {
 		if ( $tax_type == 'exclusive' ) {
 			$tax_details = array(
 				'type'  => 'exclusive',
@@ -410,33 +410,37 @@ function wp_travel_engine_get_tax_percentage() {
 /**
  * Calculate tax data.
  *
- * @return void
+ * @return array
  */
 function wp_travel_engine_get_tax_detail( $cart_info ) {
-	if ( ! empty( $cart_info['discounts'] ) ) {
-		$discounts = isset( $cart_info['discounts'] ) ? $cart_info['discounts'] : array();
+	if ( isset( $cart_info[ 'totals' ][ 'total_tax' ] ) ) {
+		return array(
+			'tax_actual'    => round( $cart_info[ 'totals' ][ 'total_tax' ], 2 ),
+			'new_totalcost' => round( $cart_info[ 'totals' ][ 'total' ], 2 ),
+		);
+	}
+	if ( ! empty( $cart_info[ 'discounts' ] ) ) {
+		$discounts = isset( $cart_info[ 'discounts' ] ) ? $cart_info[ 'discounts' ] : array();
 		foreach ( $discounts as $key => $discount ) {
 
-			if ( $discount['type'] == 'percentage' ) {
-				$new_tcost = number_format( ( $cart_info['subtotal'] - $cart_info['subtotal'] * ( + $discount['value'] / 100 ) ), '2', '.', '' );
+			if ( $discount[ 'type' ] == 'percentage' ) {
+				$new_tcost = number_format( ( $cart_info[ 'subtotal' ] - $cart_info[ 'subtotal' ] * ( + $discount[ 'value' ] / 100 ) ), '2', '.', '' );
 			} else {
-				$new_tcost = $cart_info['subtotal'] - $discount['value'];
+				$new_tcost = $cart_info[ 'subtotal' ] - $discount[ 'value' ];
 			}
 		}
 
-		$tax_actual    = number_format( ( ( $new_tcost * $cart_info['tax_amount'] ) / 100 ), '2', '.', '' );
+		$tax_actual    = number_format( ( ( $new_tcost * $cart_info[ 'tax_amount' ] ) / 100 ), '2', '.', '' );
 		$new_totalcost = number_format( ( $new_tcost + $tax_actual ), '2', '.', '' );
 	} else {
-		$tax_actual    = number_format( ( ( $cart_info['subtotal'] * $cart_info['tax_amount'] ) / 100 ), '2', '.', '' );
-		$new_totalcost = number_format( ( $cart_info['subtotal'] + $tax_actual ), '2', '.', '' );
+		$tax_actual    = number_format( ( ( $cart_info[ 'subtotal' ] * $cart_info[ 'tax_amount' ] ) / 100 ), '2', '.', '' );
+		$new_totalcost = number_format( ( $cart_info[ 'subtotal' ] + $tax_actual ), '2', '.', '' );
 	}
 
-	$tax_data = array(
+	return array(
 		'tax_actual'    => $tax_actual,
 		'new_totalcost' => $new_totalcost,
 	);
-
-	return $tax_data;
 }
 
 /**
@@ -458,7 +462,7 @@ function wp_travel_engine_is_cart_partially_payable(): bool {
 		$cart_items = array_filter(
 			$cart_items,
 			function ( $item ) {
-				return wp_travel_engine_is_trip_partially_payable( $item['trip_id'] );
+				return wp_travel_engine_is_trip_partially_payable( $item[ 'trip_id' ] );
 			}
 		);
 
@@ -483,10 +487,10 @@ function wte_get_person_format() {
 	if ( $wte_settings ) :
 
 		// Set default per person format.
-		if ( ! isset( $wte_settings['person_format'] ) || empty( $wte_settings['person_format'] ) ) {
-			$wte_settings['person_format'] = __( '/person', 'wp-travel-engine' );
+		if ( ! isset( $wte_settings[ 'person_format' ] ) || empty( $wte_settings[ 'person_format' ] ) ) {
+			$wte_settings[ 'person_format' ] = __( '/person', 'wp-travel-engine' );
 		}
-		$per_person = $wte_settings['person_format'];
+		$per_person = $wte_settings[ 'person_format' ];
 
 	endif;
 
@@ -507,10 +511,10 @@ function wte_get_book_now_text() {
 
 	if ( $wte_settings ) :
 
-		if ( ! isset( $wte_settings['book_btn_txt'] ) || empty( $wte_settings['book_btn_txt'] ) ) {
-			$wte_settings['book_btn_txt'] = $per_person;
+		if ( ! isset( $wte_settings[ 'book_btn_txt' ] ) || empty( $wte_settings[ 'book_btn_txt' ] ) ) {
+			$wte_settings[ 'book_btn_txt' ] = $per_person;
 		}
-		$per_person = $wte_settings['book_btn_txt'];
+		$per_person = $wte_settings[ 'book_btn_txt' ];
 
 	endif;
 
@@ -545,7 +549,7 @@ function wp_travel_engine_is_trip_multiple_pricing_enabled( $trip_id ) {
 
 	$trip_settings = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
 
-	return isset( $trip_settings['multiple_pricing_enable'] ) && '1' === $trip_settings['multiple_pricing_enable'];
+	return isset( $trip_settings[ 'multiple_pricing_enable' ] ) && '1' === $trip_settings[ 'multiple_pricing_enable' ];
 }
 
 /**
@@ -563,11 +567,11 @@ function wte_get_pricing_label_by_key( $trip_id, $pricing_key ) {
 
 	$trip_settings = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
 
-	$multiple_pricing_options = isset( $trip_settings['multiple_pricing'] ) && ! empty( $trip_settings['multiple_pricing'] ) ? $trip_settings['multiple_pricing'] : array();
+	$multiple_pricing_options = isset( $trip_settings[ 'multiple_pricing' ] ) && ! empty( $trip_settings[ 'multiple_pricing' ] ) ? $trip_settings[ 'multiple_pricing' ] : array();
 
 	if ( ! empty( $multiple_pricing_options ) && isset( $multiple_pricing_options[ $pricing_key ] ) ) :
 
-		return isset( $multiple_pricing_options[ $pricing_key ]['label'] ) ? $multiple_pricing_options[ $pricing_key ]['label'] : $pricing_key;
+		return isset( $multiple_pricing_options[ $pricing_key ][ 'label' ] ) ? $multiple_pricing_options[ $pricing_key ][ 'label' ] : $pricing_key;
 
 	endif;
 
@@ -579,12 +583,12 @@ function wte_multi_pricing_labels( $trip_id ) {
 	$labels = array();
 
 	$trip_settings            = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
-	$multiple_pricing_options = isset( $trip_settings['multiple_pricing'] ) && ! empty( $trip_settings['multiple_pricing'] ) ? $trip_settings['multiple_pricing'] : false;
+	$multiple_pricing_options = isset( $trip_settings[ 'multiple_pricing' ] ) && ! empty( $trip_settings[ 'multiple_pricing' ] ) ? $trip_settings[ 'multiple_pricing' ] : false;
 
 	if ( $multiple_pricing_options ) :
 		foreach ( $multiple_pricing_options as $key => $pricing_option ) :
 
-			$pricing_label  = isset( $pricing_option['label'] ) ? $pricing_option['label'] : ucfirst( $key );
+			$pricing_label  = isset( $pricing_option[ 'label' ] ) ? $pricing_option[ 'label' ] : ucfirst( $key );
 			$labels[ $key ] = $pricing_label;
 
 		endforeach;
@@ -613,7 +617,7 @@ function wte_get_pricing_label_by_key_invoices( $trip_id, $pricing_key, $pax ) {
 
 	$trip_settings = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
 
-	$multiple_pricing_options = isset( $trip_settings['multiple_pricing'] ) && ! empty( $trip_settings['multiple_pricing'] ) ? $trip_settings['multiple_pricing'] : array();
+	$multiple_pricing_options = isset( $trip_settings[ 'multiple_pricing' ] ) && ! empty( $trip_settings[ 'multiple_pricing' ] ) ? $trip_settings[ 'multiple_pricing' ] : array();
 
 	if ( ! empty( $multiple_pricing_options ) && isset( $multiple_pricing_options[ $pricing_key ] ) ) :
 
@@ -631,9 +635,9 @@ function wte_get_pricing_label_by_key_invoices( $trip_id, $pricing_key, $pax ) {
 
 		endif;
 
-		if ( isset( $multiple_pricing_options[ $pricing_key ]['label'] ) ) :
+		if ( isset( $multiple_pricing_options[ $pricing_key ][ 'label' ] ) ) :
 
-			$pax_label_str = sprintf( _nx( 'Number of pax in %1$s', 'Number of pax in %1$s', $pax, 'number of travellers', 'wp-travel-engine' ), ucfirst( $multiple_pricing_options[ $pricing_key ]['label'] ) );
+			$pax_label_str = sprintf( _nx( 'Number of pax in %1$s', 'Number of pax in %1$s', $pax, 'number of travellers', 'wp-travel-engine' ), ucfirst( $multiple_pricing_options[ $pricing_key ][ 'label' ] ) );
 
 		endif;
 
@@ -653,13 +657,13 @@ function wp_travel_engine_get_currency_code_or_symbol() {
 	$wp_travel_engine_settings = get_option( 'wp_travel_engine_settings', true );
 	$code                      = 'USD';
 
-	if ( isset( $wp_travel_engine_settings['currency_code'] ) && $wp_travel_engine_settings['currency_code'] != '' ) {
-		$code = $wp_travel_engine_settings['currency_code'];
+	if ( isset( $wp_travel_engine_settings[ 'currency_code' ] ) && $wp_travel_engine_settings[ 'currency_code' ] != '' ) {
+		$code = $wp_travel_engine_settings[ 'currency_code' ];
 	}
 
 	$symbol = wp_travel_engine_get_currency_symbol( $code );
 
-	$currency_option = isset( $wp_travel_engine_settings['currency_option'] ) && ! empty( $wp_travel_engine_settings['currency_option'] ) ? $wp_travel_engine_settings['currency_option'] : 'symbol';
+	$currency_option = isset( $wp_travel_engine_settings[ 'currency_option' ] ) && ! empty( $wp_travel_engine_settings[ 'currency_option' ] ) ? $wp_travel_engine_settings[ 'currency_option' ] : 'symbol';
 
 	return 'symbol' === $currency_option ? $symbol : $code;
 }
@@ -707,17 +711,17 @@ function wte_esc_price( $value ) {
 function wptravelengine_get_payable_amount( $cart_discounts, $trip_id, $cart_totals, $new_tcost, $new_totalcost ) {
 	$wp_travel_engine_settings = get_option( 'wp_travel_engine_settings', true );
 	if ( ( ! empty( $cart_discounts ) ) && wp_travel_engine_is_trip_partially_payable( $trip_id ) ) {
-		$payable_now = $cart_totals['total_partial'];
-	} elseif ( ( ! empty( $cart_discounts ) ) && ! wp_travel_engine_is_trip_partially_payable( $trip_id ) ) {
+		$payable_now = $cart_totals[ 'total_partial' ];
+	} else if ( ( ! empty( $cart_discounts ) ) && ! wp_travel_engine_is_trip_partially_payable( $trip_id ) ) {
 		$payable_now = $new_tcost;
 	} else {
-		$payable_now = wp_travel_engine_is_trip_partially_payable( $trip_id ) ? $cart_totals['total_partial'] : $cart_totals['cart_total'];
+		$payable_now = wp_travel_engine_is_trip_partially_payable( $trip_id ) ? $cart_totals[ 'total_partial' ] : $cart_totals[ 'cart_total' ];
 	}
-	$tax_enable = isset( $wp_travel_engine_settings['tax_enable'] ) ? $wp_travel_engine_settings['tax_enable'] : 'no';
+	$tax_enable = isset( $wp_travel_engine_settings[ 'tax_enable' ] ) ? $wp_travel_engine_settings[ 'tax_enable' ] : 'no';
 	if ( $tax_enable == 'yes' ) {
-		if ( isset( $wp_travel_engine_settings['tax_type_option'] ) && $wp_travel_engine_settings['tax_type_option'] == 'exclusive' ) {
+		if ( isset( $wp_travel_engine_settings[ 'tax_type_option' ] ) && $wp_travel_engine_settings[ 'tax_type_option' ] == 'exclusive' ) {
 			if ( wp_travel_engine_is_trip_partially_payable( $trip_id ) ) {
-				$payable_now = $cart_totals['total_partial'];
+				$payable_now = $cart_totals[ 'total_partial' ];
 			} else {
 				$payable_now = $new_totalcost;
 			}
@@ -731,7 +735,7 @@ function wptravelengine_get_payable_amount( $cart_discounts, $trip_id, $cart_tot
  * Display the travel price.
  *
  * @param $price
- * @param bool       $echo
+ * @param bool $echo
  * @param array|bool $html Array to pass arguments to wte_get_formated price.
  *
  * @return string|null
@@ -758,11 +762,11 @@ function wptravelengine_the_price( $price, bool $echo = true, $html = array() ):
 
 	$formated_price = wte_get_formated_price(
 		$price,
-		$args['currency_code'] ?? '',
-		$args['format'] ?? '',
-		$args['use_currency_symbol'] ?? false,
-		$args['use_html'] ?? false,
-		$args['use_default_currency_code'] ?? false
+		$args[ 'currency_code' ] ?? '',
+		$args[ 'format' ] ?? '',
+		$args[ 'use_currency_symbol' ] ?? false,
+		$args[ 'use_html' ] ?? false,
+		$args[ 'use_default_currency_code' ] ?? false
 	);
 
 	if ( $echo ) {

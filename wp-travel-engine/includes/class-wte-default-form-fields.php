@@ -156,11 +156,19 @@ class WTE_Default_Form_Fields {
 	}
 
 	/**
+	 * @return array
+	 * @since 6.3.0
+	 */
+	public static function billing_form_fields(): array {
+		return static::booking();
+	}
+
+	/**
 	 * Booking form default fields for display and modifications.
 	 *
-	 * @return void
+	 * @return array
 	 */
-	public static function booking() {
+	public static function booking(): array {
 
 		// Booking form defaults
 		$booking_fname = '';
@@ -175,7 +183,6 @@ class WTE_Default_Form_Fields {
 		if ( is_user_logged_in() ) {
 
 			$user = wp_get_current_user();
-
 			if ( in_array( 'wp-travel-engine-customer', (array) $user->roles ) ) {
 
 				$booking_fname = isset( $user->first_name ) ? $user->first_name : '';
@@ -311,7 +318,7 @@ class WTE_Default_Form_Fields {
 			),
 		);
 
-		return $fields;
+		return apply_filters( 'wp_travel_engine_booking_fields_display', $fields );
 
 	}
 
@@ -496,8 +503,8 @@ class WTE_Default_Form_Fields {
 				'wrapper_class' => 'wp-travel-engine-personal-details',
 				'field_label'   => __( 'Date of Birth', 'wp-travel-engine' ),
 				'name'          => 'wp_travel_engine_placeorder_setting[place_order][travelers][dob]',
-				'id'         => 'wp_travel_engine_placeorder_setting[place_order][travelers][dob]',
-				'attributes' => array(
+				'id'            => 'wp_travel_engine_placeorder_setting[place_order][travelers][dob]',
+				'attributes'    => array(
 					'data-id' => 'travellers_dob',
 				),
 				'validations'   => array(

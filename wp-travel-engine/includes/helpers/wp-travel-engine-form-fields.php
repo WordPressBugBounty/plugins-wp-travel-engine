@@ -372,7 +372,9 @@ function wp_travel_engine_get_enquiry_form_fields() {
 			$enquiry_fields[ 'enquiry_confirmation' ] = array(
 				'type'              => 'checkbox',
 				'label'             => __( 'Privacy Policy', 'wp-travel-engine' ),
-				'options' => array( 'on' => isset( $wp_travel_engine_settings[ 'gdpr_msg' ] ) ? wp - travel - engine - form - fields . phpesc_attr( $wp_travel_engine_settings[ 'gdpr_msg' ] ) . get_the_privacy_policy_link() . '.' : sprintf( __( 'By contacting us, you agree to our <a href="%1$s">Privacy Ploicy</a>', 'wp-travel-engine' ), get_privacy_policy_url() ) ),
+				'options' 			=> array( 
+					'on' => isset( $wp_travel_engine_settings[ 'gdpr_msg' ] ) ? esc_attr( $wp_travel_engine_settings[ 'gdpr_msg' ] ) . get_the_privacy_policy_link() . '.' : sprintf( __( 'By contacting us, you agree to our <a href="%1$s">Privacy Ploicy</a>', 'wp-travel-engine' ), get_privacy_policy_url() ) 
+				),
 				'name'              => 'enquiry_confirmation',
 				'wrapper_class'     => 'row-form confirm-holder',
 				'id'                => 'enquiry_confirmation',

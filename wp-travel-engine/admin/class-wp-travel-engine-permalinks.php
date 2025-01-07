@@ -77,6 +77,20 @@ if ( ! class_exists( 'WP_Travel_Engine_Admin_Permalink_Settings', false ) ) :
 				'permalink',
 				'wte_custom_permalinks_rw'
 			);
+			add_settings_field(
+				'wp_travel_engine_trip_tag_slug',
+				__( 'Trip Tag base', 'wp-travel-engine' ),
+				array( $this, 'trip_tag_slug_input' ),
+				'permalink',
+				'wte_custom_permalinks_rw'
+			);
+			add_settings_field(
+				'wp_travel_engine_difficulty_slug',
+				__( 'Trip Difficulty base', 'wp-travel-engine' ),
+				array( $this, 'difficulty_slug_input' ),
+				'permalink',
+				'wte_custom_permalinks_rw'
+			);
 			$this->permalinks = wp_travel_engine_get_permalink_structure();
 		}
 
@@ -129,6 +143,24 @@ if ( ! class_exists( 'WP_Travel_Engine_Admin_Permalink_Settings', false ) ) :
 		}
 
 		/**
+		 * Show a slug input box.
+		 */
+		public function trip_tag_slug_input() {
+			?>
+			<input name="wp_travel_engine_tags_base" type="text" class="regular-text code" value="<?php echo esc_attr( $this->permalinks['wp_travel_engine_tags_base'] ); ?>" placeholder="<?php echo esc_attr_x( 'trip-tags', 'slug', 'wp-travel-engine' ); ?>" />
+			<?php
+		}
+
+		/**
+		 * Show a slug input box.
+		 */
+		public function difficulty_slug_input() {
+			?>
+			<input name="wp_travel_engine_difficulty_base" type="text" class="regular-text code" value="<?php echo esc_attr( $this->permalinks['wp_travel_engine_difficulty_base'] ); ?>" placeholder="<?php echo esc_attr_x( 'difficulties', 'slug', 'wp-travel-engine' ); ?>" />
+			<?php
+		}
+
+		/**
 		 * Save the settings.
 		 */
 		public function settings_save() {
@@ -148,6 +180,8 @@ if ( ! class_exists( 'WP_Travel_Engine_Admin_Permalink_Settings', false ) ) :
 					'wp_travel_engine_trip_type_base',
 					'wp_travel_engine_destination_base',
 					'wp_travel_engine_activity_base',
+					'wp_travel_engine_tags_base',
+					'wp_travel_engine_difficulty_base',
 				);
 
 				foreach ( $base_names as $base_name ) {

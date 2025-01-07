@@ -53,14 +53,14 @@ return apply_filters(
 			array(
 				'divider'     => true,
 				'label'       => __( 'Mailchimp API Key', 'wp-travel-engine' ),
-				'description' => sprintf( __( 'Get an %1$sAPI Key%2$s', 'wte-itinerary-downloader' ), '<a href="//admin.mailchimp.com/account/api/" target="_blank">', '</a>' ),
+				'description' => sprintf( __( 'Get an %1$sAPI Key%2$s', 'wp-travel-engine' ), '<a href="//admin.mailchimp.com/account/api/" target="_blank">', '</a>' ),
 				'field_type'  => 'TEXT',
 				'name'        => 'itinerary_downloader.mailchimp_api_key',
 				'default'     => '',
 			),
 			array(
 				'field_type' => 'ALERT',
-				'content'    => sprintf( __( '<strong>Note: [wte_itinerary_downloader]</strong> - Usable shortcode to display download button/link.', 'wte-itinerary-downloader' ), '<a href="//admin.mailchimp.com/account/api/" target="_blank">', '</a>' ),
+				'content'    => sprintf( __( '<strong>Note: [wte_itinerary_downloader]</strong> - Usable shortcode to display download button/link.', 'wp-travel-engine' ), '<a href="//admin.mailchimp.com/account/api/" target="_blank">', '</a>' ),
 			),
 			array(
 				'field_type' => 'TITLE',

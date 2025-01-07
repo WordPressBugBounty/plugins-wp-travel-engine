@@ -241,6 +241,7 @@ class FSE_Template {
 				'template-activities',
 				'template-trip_types',
 				'template-searchresultpage',
+				'template-trip-checkout',
 			),
 			true
 		)
@@ -277,42 +278,39 @@ class FSE_Template {
 
 		$wp_block_template->id    = $plugin_name . '/' . $file_name . '//' . $template->slug;
 		$wp_block_template->theme = $plugin_name . '/' . $file_name;
-		// Attach the header template part at the beginning of the content
-		$header_template_part        = '<!-- wp:template-part {"slug":"header","tagName":"header","theme":"' . esc_attr( $theme_slug ) . '"} /-->';
-		$wp_block_template->content .= $header_template_part;
+		$wp_block_template->theme = $plugin_name . '/' . $file_name;
+		// Retrieve settings to determine the inclusion of header and footer
+		$wptravelengine_settings 	= get_option( 'wp_travel_engine_settings', array() );
+		$is_checkout_page 			= $template->slug === 'template-trip-checkout';
+		$checkout_version 			= $wptravelengine_settings['checkout_page_template'] ?? '1.0';
+		$display_header_footer 		= $wptravelengine_settings['display_header_footer'] ?? 'no';
+		$include_header_footer 		= $is_checkout_page && $checkout_version === '2.0' && $display_header_footer === 'yes';
 
-		// Add the original template content after the header
+		// Add header template part conditionally
+		if ( !$is_checkout_page || $include_header_footer ) {
+			$header_template_part = '<!-- wp:template-part {"slug":"header","tagName":"header","theme":"' . esc_attr( $theme_slug ) . '"} /-->';
+			$wp_block_template->content .= $header_template_part;
+		}
+
+		// Add the original template content
 		$wp_block_template->content .= $template_content;
 
-		// Attach the footer template part at the end of the content
-		$footer_template_part              = '<!-- wp:template-part {"slug":"footer","tagName":"footer","theme":"' . esc_attr( $theme_slug ) . '"} /-->';
-		$wp_block_template->content       .= $footer_template_part;
-		$wp_block_template->source         = $template->source ?? 'plugin';
-		$wp_block_template->slug           = $template->slug ?? '';
-		$wp_block_template->type           = 'wp_template';
-		$wp_block_template->title          = $template->title ?? '';
-		$wp_block_template->description    = $template->description ?? '';
-		$wp_block_template->status         = 'publish';
-		$wp_block_template->has_theme_file = true;
-		$wp_block_template->origin         = $template->source ?? 'plugin';
-		if (
-			isset( $template->slug )
-			&& in_array(
-				$template->slug,
-				array(
-					'template-destination',
-					'template-activities',
-					'template-trip_types',
-					'template-searchresultpage',
-				),
-				true
-			)
-		) {
-			$wp_block_template->post_types = array( 'post', 'page' );
-			$wp_block_template->is_custom  = true;
-		} else {
-			$wp_block_template->is_custom = false;
+		// Add footer template part conditionally
+		if ( !$is_checkout_page || $include_header_footer ) {
+			$footer_template_part = '<!-- wp:template-part {"slug":"footer","tagName":"footer","theme":"' . esc_attr( $theme_slug ) . '"} /-->';
+			$wp_block_template->content .= $footer_template_part;
 		}
+
+		$wp_block_template->source = $template->source ?? 'plugin';
+		$wp_block_template->slug = $template->slug ?? '';
+		$wp_block_template->type = 'wp_template';
+		$wp_block_template->title = $template->title ?? '';
+		$wp_block_template->description = $template->description ?? '';
+		$wp_block_template->status = 'publish';
+		$wp_block_template->has_theme_file = true;
+		$wp_block_template->origin = $template->source ?? 'plugin';
+		$wp_block_template->post_types = in_array( $template->slug, ['template-destination', 'template-activities', 'template-trip_types', 'template-searchresultpage', 'template-trip-checkout'], true ) ? ['post', 'page'] : [];
+		$wp_block_template->is_custom = !empty( $wp_block_template->post_types );
 
 		return $wp_block_template;
 	}
@@ -325,44 +323,30 @@ class FSE_Template {
 	 * @return array|null The template information or null if not found.
 	 */
 	public function get_template_info( string $template_slug ): ?array {
-		$template_info = array(
-			'single-trip'               => array(
-				'title'       => __( 'Single Trip', 'wp-travel-engine' ),
-				'description' => __( 'Displays a single trip.', 'wp-travel-engine' ),
-			),
-			'archive-trip'              => array(
-				'title'       => __( 'Trip Archive', 'wp-travel-engine' ),
-				'description' => __( 'Displays a trip archive.', 'wp-travel-engine' ),
-			),
-			'taxonomy-destination'      => array(
-				'title'       => __( 'Destination Detail Page', 'wp-travel-engine' ),
-				'description' => __( 'Displays a trip destination details.', 'wp-travel-engine' ),
-			),
-			'taxonomy-activities'       => array(
-				'title'       => __( 'Acitivities Detail Page', 'wp-travel-engine' ),
-				'description' => __( 'Displays a trip acitvities details.', 'wp-travel-engine' ),
-			),
-			'taxonomy-trip_types'       => array(
-				'title'       => __( 'Trip Types Detail Page', 'wp-travel-engine' ),
-				'description' => __( 'Displays a trip types details.', 'wp-travel-engine' ),
-			),
-			'template-destination'      => array(
-				'title'       => __( 'Destination', 'wp-travel-engine' ),
-				'description' => __( 'Displays a destination template.', 'wp-travel-engine' ),
-			),
-			'template-activities'       => array(
-				'title'       => __( 'Activities', 'wp-travel-engine' ),
-				'description' => __( 'Displays a activities template.', 'wp-travel-engine' ),
-			),
-			'template-trip_types'       => array(
-				'title'       => __( 'Trip Types', 'wp-travel-engine' ),
-				'description' => __( 'Displays a trip types template.', 'wp-travel-engine' ),
-			),
-			'template-searchresultpage' => array(
-				'title'       => __( 'Search Result Page', 'wp-travel-engine' ),
-				'description' => __( 'Displays a search result page template.', 'wp-travel-engine' ),
-			),
-		);
+		//Get the template slug from the template file name.
+		$directory = $this->directory();
+		$template_files = glob( $directory . '/*.html' );
+
+		//If no template files are found then return null.
+		if ( empty( $template_files ) ) {
+			return null;
+		}
+
+		$template_info = array();
+		//Get the template slug from the template file name.
+		foreach ( $template_files as $template_file ) {
+			$template_name = basename( $template_file, '.html' );
+			// Convert dashes and underscores to spaces and capitalize words for the title
+			$template_title = ucwords( str_replace( array('-', '_'), ' ', $template_name ) );
+			if( $template_name === 'template-trip-checkout' ) {
+				$template_title = __( 'WP Travel Engine - Checkout', 'wp-travel-engine' );
+			}
+			$template_description = sprintf( __( 'Displays a %s template.', 'wp-travel-engine' ), $template_title );
+			$template_info[ $template_name ] = array(
+				'title'       => $template_title,
+				'description' => $template_description,
+			);
+		}
 
 		return $template_info[ $template_slug ] ?? null;
 	}

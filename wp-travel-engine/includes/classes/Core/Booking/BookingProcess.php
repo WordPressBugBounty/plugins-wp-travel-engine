@@ -8,6 +8,7 @@
 
 namespace WPTravelEngine\Core\Booking;
 
+use A\B;
 use WPTravelEngine\Abstracts\PaymentGateway;
 use WPTravelEngine\Core\Cart\Cart;
 use WPTravelEngine\Core\Cart\Item;
@@ -19,6 +20,8 @@ use WPTravelEngine\Modules\CouponCode;
 use WPTravelEngine\PaymentGateways\PaymentGateways;
 use WPTravelEngine\Utilities\RequestParser;
 use WPTravelEngine\Validator\Checkout as CheckoutValidator;
+use WPTravelEngine\Validator\Travelers as TravelersValidator;
+use WPTravelEngine\Validator\Emergency as EmergencyValidator;
 
 class BookingProcess {
 
@@ -114,7 +117,7 @@ class BookingProcess {
 
 			$this->payment_method = apply_filters(
 				'wptravelengine_checkout_payment_method',
-				$this->request->get_param( 'wpte_checkout_paymnet_method' ) ?? 'N/A',
+				$this->request->get_param( 'wpte_checkout_paymnet_method' ) ?? 'booking_only',
 				$this->booking->get_id()
 			);
 
@@ -122,6 +125,62 @@ class BookingProcess {
 				$this->booking->set_meta( "wte_pg_{$this->payment_method}_ref", (string) $ref )
 							  ->set_meta( 'wp_travel_engine_booking_payment_method', $this->payment_method )
 							  ->set_meta( 'wp_travel_engine_booking_payment_gateway', $this->payment_method );
+			}
+
+			// Add additional note from the new checkout page template.
+			if ( $additional_note = $this->request->get_param( "wptravelengine_additional_note" ) ) {
+				// Set additional note to session.
+				WTE()->session->set( 'additional_note', $additional_note );
+
+				// Sanitize additional note.
+				$additional_note = sanitize_text_field( $additional_note );
+
+				// Set additional note to booking meta.
+				$this->booking->set_meta( 'wptravelengine_additional_note', $additional_note ?? '' );
+			}
+
+			// Add new billing info to booking meta.
+			if ( $this->request->get_param('billing') ) {
+				// Set billing form data to session.
+				WTE()->session->set('billing_form_data', $this->request->get_param('billing') );
+
+				// Get validated billing data.
+				$sanitized_billing = $this->validator->sanitized() ?? [];
+
+				// Set billing details to booking meta.
+				$this->booking->set_meta( 'wptravelengine_billing_details', $sanitized_billing['billing'] ?? [] );
+			}
+
+			//Add new travelers info to booking meta.
+			if ( $this->request->get_param( 'travellers' ) ) {
+				// Set travelers form data to session.
+				WTE()->session->set( 'travellers_form_data', $this->request->get_param( 'travellers' ) );
+
+				// Validate travelers data.
+				$travelers = new TravelersValidator();
+                $travelers->validate_data( $this->request->get_param( 'travellers' ) );
+
+				// Sanitize travelers data.
+				$sanitized_travellers = $travelers->sanitized() ?? [];
+
+				// Set travelers details to booking meta.
+				$this->booking->set_meta( 'wptravelengine_travelers_details', $sanitized_travellers['travelers'] ?? [] );
+			}
+
+			//Add new emergency contacts info to booking meta.
+			if ( $this->request->get_param( 'emergency' ) ) {
+				// Set emergency form data to session.
+				WTE()->session->set( 'emergency_form_data', $this->request->get_param( 'emergency' ) );
+
+				// Validate emergency data.
+				$emergency = new EmergencyValidator();
+                $emergency->validate( $this->request->get_param( 'emergency' ) );
+
+				// Sanitize emergency data.
+				$sanitized_emergency = $emergency->sanitized() ?? [];
+
+				// Set emergency details to booking meta.
+				$this->booking->set_meta( 'wptravelengine_emergency_details', $sanitized_emergency['emergency'] ?? [] );
 			}
 
 			if ( $this->payment_method === 'booking_only' ) {
@@ -224,8 +283,7 @@ class BookingProcess {
 	 */
 	protected function process_booking(): Booking {
 		if ( $booking_id = $this->get_booking_ref() ) {
-			/* @var $booking Booking */
-			$booking = Booking::make( $booking_id );
+			$booking = new Booking( $booking_id );
 		} else {
 			$booking = $this->create_booking();
 
@@ -312,7 +370,7 @@ class BookingProcess {
 	 */
 	protected function process_customer(): Customer {
 
-		if ( $customer_id = Customer::is_exists( $this->billing_info[ 'email' ] ) ) {
+		if ( $customer_id = Customer::is_exists( $this->billing_info[ 'email' ] ?? '' ) ) {
 			try {
 				$customer_model = new Customer( $customer_id );
 			} catch ( \Exception $e ) {
@@ -355,8 +413,7 @@ class BookingProcess {
 
 		$payable_amount = $amounts[ $this->payment_type ];
 		if ( $payment_id = $this->get_payment_ref() ) {
-			$payment_model  = wptravelengine_get_payment( $payment_id );
-			$payable_amount = $payment_model->get_payable_amount();
+			$payment_model = wptravelengine_get_payment( $payment_id );
 		} else {
 			$last_payment = $this->booking->get_last_payment();
 			if ( $last_payment && 'booking_only' === $last_payment->get_payment_gateway() && 'pending' === $last_payment->get_payment_status() ) {

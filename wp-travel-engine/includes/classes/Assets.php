@@ -143,8 +143,9 @@ class Assets extends AssetsAbstract {
 	 */
 	public function plugin_admin_scripts() {
 		$this->register_script( Asset::register( 'wptravelengine-settings', 'admin/global-settings.js' ) );
-		$this->register_script( Asset::register( 'wptravelengine-exports', 'exports.js' ) )
-		->localize( 'wptravelengine-exports', 'wteL10n' );
+		$this->register_script( Asset::register( 'wptravelengine-trip-edit', 'admin/trip-edit.js' ) );
+		$this->register_script( Asset::register( 'wptravelengine-exports', 'admin/exports.js' ) )
+			     ->localize( 'wptravelengine-exports', 'wteL10n' );
 	}
 
 	/**
@@ -192,10 +193,10 @@ class Assets extends AssetsAbstract {
 		     ->register_script(
 			     Asset::register( $this->plugin_name, 'public/wte-public.js' )
 			          ->dependencies( 'jquery' )
-		     )->localize( 'wp-travel-engine', 'wte,wte_account_page,rtl,wtePreFetch,WTEAjaxData,wteL10n' );
+		     )->register_script( Asset::register( 'wptravelengine-exports', 'public/exports.js' ) )
+			 ->localize( 'wp-travel-engine', 'wte,wte_account_page,rtl,wtePreFetch,WTEAjaxData,wteL10n' );
 
-		$this->enqueue_script( 'wp-travel-engine' )
-		     ->enqueue_style( 'wp-travel-engine' );
+		$this->enqueue_script( 'wp-travel-engine' )->enqueue_style( 'wp-travel-engine' );
 
 		// Adds cart data to the checkout page.
 		if ( wp_travel_engine_is_checkout_page() && isset( $wte_cart ) ) {
@@ -214,6 +215,39 @@ class Assets extends AssetsAbstract {
 
 		//Checkout Page.
 		$this->register_style( Asset::register( 'trip-checkout', 'public/trip-checkout.css' ) );
+		$this->register_script( Asset::register( 'trip-checkout', 'public/trip-checkout.js' ) )
+		     ->localize( 'trip-checkout', 'wteL10n' );
+
+		// Enqueue checkout template version 2.0 script and style.
+		global $post;
+		if ( wp_travel_engine_is_checkout_page() && isset( $wte_cart ) ) {
+			$shortcode_present = has_shortcode( $post->post_content, 'WP_TRAVEL_ENGINE_PLACE_ORDER' );
+			$version = '1.0';
+
+			if ( $shortcode_present ) {
+				$pattern = get_shortcode_regex();
+				if ( preg_match_all( '/' . $pattern . '/', $post->post_content, $matches ) && array_key_exists( 2, $matches ) ) {
+					foreach ( $matches[2] as $index => $shortcode_name ) {
+						if ( 'WP_TRAVEL_ENGINE_PLACE_ORDER' === $shortcode_name ) {
+							$shortcode_atts = shortcode_parse_atts( $matches[3][$index] );
+							$version = $shortcode_atts['version'] ?? $version;
+						}
+					}
+				}
+			}
+
+			$wptravelengine_settings = get_option( 'wp_travel_engine_settings', array() );
+			$checkout_page_template  = $wptravelengine_settings[ 'checkout_page_template' ] ?? '1.0';
+
+			if ( $version === '2.0' || $checkout_page_template === '2.0' || has_shortcode( $post->post_content, 'WPTRAVELENGINE_CHECKOUT' ) ) {
+				$this->enqueue_script( 'wte-popper' );
+				$this->enqueue_script( 'wte-tippyjs' );
+				$this->enqueue_style( 'trip-checkout' );
+				$this->enqueue_script( 'trip-checkout' );
+				$this->dequeue_style( 'wte_trip_review_public' );
+			}
+		}
+
 		//Wishlist Page.
 		$this->register_style( Asset::register( 'trip-wishlist', 'public/trip-wishlist.css' ) );
 		$this->register_script( Asset::register( 'trip-wishlist', 'public/trip-wishlist.js' )->dependencies( [ 'wp-travel-engine' ] ) );
@@ -325,6 +359,9 @@ class Assets extends AssetsAbstract {
 
 		// Tippy JS.
 		$this->register_script( AssetLib::register( 'wte-tippyjs', 'tippy/tippy.js' )->version( '5.0.0' ) );
+
+		// Validate JS.
+		$this->register_script( AssetLib::register( 'wptravelengine-validatejs', 'validate-js/validate.min.js' )->version( '2.0.1' ) );
 
 	}
 

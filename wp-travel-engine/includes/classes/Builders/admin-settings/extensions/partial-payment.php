@@ -61,6 +61,7 @@ return apply_filters(
 					'divider'    => true,
 					'label'      => __( 'Partial Payment in Amount', 'wp-travel-engine' ),
 					'help'       => __( 'Enter partial payment amount (in figures) to be paid while booking the trip (without $ sign).', 'wp-travel-engine' ),
+					'description' => __( 'This amount will be calculated on a per-traveler basis.', 'wp-travel-engine' ),
 					'field_type' => 'NUMBER',
 					'min'        => 0,
 					'name'       => 'partial_payment.payment_amount',

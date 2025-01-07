@@ -12,6 +12,12 @@ $cart_info         = get_post_meta( $post->ID, 'order_trips', ! 0 );
 $item              = array_shift( $cart_info );
 $pno = ( isset( $item[ 'pax' ] ) ) ? array_sum( $item[ 'pax' ] ) : 0;
 $booked_travellers = $pno;
+$traveller_information = get_post_meta( $post->ID, 'wptravelengine_travelers_details', true );
+$emergency_contact = get_post_meta( $post->ID, 'wptravelengine_emergency_details', true );
+if( isset( $traveller_information ) && !empty( $traveller_information ) ):
+	include plugin_dir_path( __FILE__ ) . 'booking-details_travellers.php';
+	return;
+endif;
 ?>
 	<div class="wpte-block-wrap">
 		<div class="wpte-block">
@@ -19,7 +25,7 @@ $booked_travellers = $pno;
 				<h4 class="wpte-title"><?php esc_html_e( 'Traveller Details', 'wp-travel-engine' ); ?></h4>
 			</div>
 			<div class="wpte-block-content wpte-floated">
-
+				<?php if ( isset( $personal_options ) && !empty( $personal_options ) ) : ?>
 				<div class="wpte-toggle-item-wrap wpte-col2">
 					<?php
 					for ( $i = 1; $i <= $pno; $i ++ ) {
@@ -305,7 +311,7 @@ $booked_travellers = $pno;
 					}
 					?>
 				</div>
-
+				<?php endif; ?>
 			</div>
 		</div> <!-- .wpte-block -->
 	</div> <!-- .wpte-block-wrap -->

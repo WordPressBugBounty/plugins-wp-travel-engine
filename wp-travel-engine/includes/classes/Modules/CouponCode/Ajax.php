@@ -111,7 +111,7 @@ class Ajax {
 			$discounted_total = round( $cart_total * ( 100 - $discount_value ) / 100, 2 );
 		}
 
-		$wte_cart->add_discount_values( wte_clean( wp_unslash( $_POST[ 'CouponCode' ] ) ), $discount_type, $discount_value ); // phpcs:ignore
+		$wte_cart->add_discount_values( 'coupon', wte_clean( wp_unslash( $_POST[ 'CouponCode' ] ) ), $discount_type, $discount_value ); // phpcs:ignore
 
 		if ( wp_travel_engine_is_trip_partially_payable( $trip_id ) ) {
 			$new_dicounted_cost = $discounted_total - $wte_cart->get_total_partial();

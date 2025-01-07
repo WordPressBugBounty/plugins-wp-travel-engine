@@ -34,7 +34,7 @@ return apply_filters(
 			array(
 				'field_type' => 'ALERT',
 				'content'    => sprintf(
-					__( 'If you have enabled tax for WP Travel Engine, You must configure tax settings for WooCommerce. %1$sView Documentation%2$s about setting up taxes.', 'wptravelengine-wc-payments' ),
+					__( 'If you have enabled tax for WP Travel Engine, You must configure tax settings for WooCommerce. %1$sView Documentation%2$s about setting up taxes.', 'wp-travel-engine' ),
 					'<a href="https://woocommerce.com/document/setting-up-taxes-in-woocommerce/" target="_blank">',
 					'</a>'
 				),

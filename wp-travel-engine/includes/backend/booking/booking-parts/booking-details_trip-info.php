@@ -115,6 +115,7 @@ $currency = $cart_info[ 'currency' ];
 						    </div>
 						</span>
 					</li>
+					<?php do_action( 'wptravelengine_before_trip_travellers', $order_trip ); ?>
 					<li>
 						<b><?php esc_html_e( 'Travellers', 'wp-travel-engine' ); ?></b>
 					</li>
@@ -171,6 +172,7 @@ $currency = $cart_info[ 'currency' ];
 					}
 					?>
 				</ul>
+				<?php do_action( 'wptravelengine_after_trip_travellers', $order_trip ); ?>
 				<?php
 				if ( ! empty( $order_trip->trip_extras ) ) { // ifotte
 					echo '<h5>' . esc_html__( 'Extra Services', 'wp-travel-engine' ) . '</h5>';
@@ -252,6 +254,7 @@ $currency = $cart_info[ 'currency' ];
 			<?php
 		}
 		?>
+		<?php do_action( 'wptravelengine_booking_details_before_tax_details', $cart_info ); ?>
 		<?php
 		$tax = isset( $cart_info[ 'tax_amount' ] ) ? $cart_info[ 'tax_amount' ] : array();
 		if ( ! empty( $tax ) ) {

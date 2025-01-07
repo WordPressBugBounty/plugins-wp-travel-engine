@@ -73,7 +73,7 @@ class TripMetaTabs {
 				array(
 					'field'       	=> [
 						'type'     	=> 'ALERT',
-						'content'  	=> __( '<p><strong>NOTE:</strong> Do you want to use a custom booking link for this trip instead of the default booking process? The Custom Booking Link addon allows you to replace the default booking link with any URL of your choice. <a href="https://wptravelengine.com/plugins/custom-booking-link/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro" target="_blank">Get Custom Booking Link addon now</a></p>', 'wptravelengine' ),
+						'content'  	=> __( '<p><strong>NOTE:</strong> Do you want to use a custom booking link for this trip instead of the default booking process? The Custom Booking Link addon allows you to replace the default booking link with any URL of your choice. <a href="https://wptravelengine.com/plugins/custom-booking-link/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro" target="_blank">Get Custom Booking Link addon now</a></p>', 'wp-travel-engine' ),
 					],
 				),
 				array(

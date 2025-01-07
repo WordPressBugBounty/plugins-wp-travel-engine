@@ -7,4 +7,5 @@ $baseDir = dirname($vendorDir);
 
 return array(
     '9853c3fa1a9ef82a8e9ccc06e84c7f21' => $baseDir . '/includes/helpers/functions.php',
+    '690ebd1068c22ba652d7d2e81349c83e' => $baseDir . '/includes/class-wte-session.php',
 );

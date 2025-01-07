@@ -66,7 +66,7 @@ class Asset implements \WPTravelEngine\Interfaces\Asset {
 			$assets             = include_once $script_asset_path;
 			$this->dependencies = array_merge( $this->dependencies, $assets[ 'dependencies' ] ?? [] );
 
-			$this->version( $assets[ 'version' ] );
+			$this->version( $assets['version'] ?? '' );
 		}
 
 	}

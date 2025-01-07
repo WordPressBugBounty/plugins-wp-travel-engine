@@ -29,10 +29,12 @@ class MiniCart {
 	public function trip_date_time( $cart_item ) {
 		$date_format = get_option( 'date_format', 'F j, Y' );
 		$trip_date   = $cart_item->trip_date;
-		if ( ! empty( $cart_item->trip_time ) ) :
+		$trip_time   = $cart_item->trip_time;
+		if ( ! empty( $trip_time ) ) :
 			$trip_date   = $cart_item->trip_time;
 			$date_format .= ' \a\t ' . get_option( 'time_format', 'g:i a' );
 		endif;
+
 
 		return apply_filters(
 			'wptravelengine_mini_cart_trip_date_time',
@@ -112,7 +114,7 @@ class MiniCart {
 
 	public function extra_services( $cart_item ) {
 		$settings       = get_option( 'wp_travel_engine_settings' );
-		$title          = !empty( $settings[ 'extra_service_title' ] ) ? $settings[ 'extra_service_title' ] : __( 'Extra Services', 'wp-travel-engine' );
+		$title          = ! empty( $settings[ 'extra_service_title' ] ) ? $settings[ 'extra_service_title' ] : __( 'Extra Services', 'wp-travel-engine' );
 		$title          = apply_filters( 'wptravelengine_mini_cart_services_title', $title );
 		$extra_services = '';
 		if ( isset( $cart_item->trip_extras[ 0 ] ) ) :
@@ -143,11 +145,11 @@ class MiniCart {
 
 		echo wp_kses( $content, array(
 			'table'  => [],
-			'tr'    => array(
-				'class' => array("wte-booked-package-name"),
+			'tr'     => array(
+				'class' => array( "wte-booked-package-name" ),
 			),
 			'td'     => array(
-				'colspan' => array(2),
+				'colspan' => array( 2 ),
 			),
 			'span'   => array(
 				'class' => array(),

@@ -1,9 +1,9 @@
 <?php
 /**
  * Class Coupons.
- * 
+ *
  * This class handles overall functionality of coupons.
- * 
+ *
  * @since 5.8.3
  */
 
@@ -12,26 +12,39 @@ namespace WPTravelEngine\Core;
 /**
  * WP Travel Engine Coupons Class.
  */
-class Coupons{
+class Coupons {
 
-    /**
-     * Checks available coupons in specific trip.
-     * 
-     * @return boolean
-     */
-    public static function is_coupon_available(){
-        global $wpdb, $wte_cart;
-        $keys = [
-            'wp_travel_engine_coupon_metas',
-            'publish',
-            'wte-coupon',
-            'wp_travel_engine_coupon_usage_count',
-            '',
-            '',
-            $wte_cart->get_cart_trip_ids()[0],
-        ];
+	/**
+	 * Checks available coupons in specific trip.
+	 *
+	 * @return boolean
+	 */
+	public static function is_coupon_available() {
+		global $wpdb, $wte_cart;
 
-        $sql = "SELECT EXISTS (
+		// Generate a unique cache key based on the trip ID.
+		$trip_id   = $wte_cart->get_cart_trip_ids()[ 0 ] ?? '';
+		$cache_key = 'wte_coupon_available_' . $trip_id;
+
+		// Try to get the cached result.
+		$cached_result = wp_cache_get( $cache_key, 'wptravelengine' );
+
+		// If the result is cached, return it.
+		if ( false !== $cached_result ) {
+			return $cached_result === 'yes';
+		}
+
+		$keys = [
+			'wp_travel_engine_coupon_metas',
+			'publish',
+			'wte-coupon',
+			'wp_travel_engine_coupon_usage_count',
+			'',
+			'',
+			$wte_cart->get_cart_trip_ids()[ 0 ] ?? '',
+		];
+
+		$sql = "SELECT EXISTS (
                     SELECT 1
                     FROM $wpdb->postmeta pm1
                     JOIN $wpdb->posts po ON pm1.post_id = po.id
@@ -60,9 +73,14 @@ class Coupons{
                     AND (
                         SUBSTRING_INDEX(SUBSTRING_INDEX(pm1.meta_value, ':\"restriction\";a:', -1), ':', 1) = 1
                         OR LOCATE(CONCAT('\"', %s, '\"'), SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(pm1.meta_value, ':\"restricted_trips\";a:', -1), '{', -1), '}', 1)) > 0
-                    ) 
+                    )
                 ) AS data_exists";
 
-        return ( $wpdb->get_results( $wpdb->prepare( $sql, $keys ) )[0]->data_exists == 1 );
-    }
+		$result = ( $wpdb->get_results( $wpdb->prepare( $sql, $keys ) )[ 0 ]->data_exists == 1 );
+
+		// Cache the result for future use.
+		wp_cache_set( $cache_key, $result ? 'yes' : 'no', 'wptravelengine' );
+
+		return $result;
+	}
 }

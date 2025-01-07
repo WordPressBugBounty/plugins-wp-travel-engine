@@ -186,7 +186,7 @@ class Checkout {
 		$value     = $settings[ 'value' ] ?? 0;
 		$label     = $is_amount ? wptravelengine_the_price( $value, false, false ) : "{$value}%";
 
-		// translators: %s: Down payment Amount/Percentage.
+		// translators: %s: Down payment Amount/Percentage.down_payment_label
 		$format = apply_filters( 'wte_checkout_down_pay_label', __( 'Down payment(%s)', 'wp-travel-engine' ), $settings );
 		if ( strpos( $format, '%s' ) !== false ) {
 			return sprintf( $format, $label );

@@ -51,7 +51,6 @@ class Updates {
 		$new_version_parts     = explode( '.', $plugin_data->new_version );
 		$new_version_parts     = [ '6', '0', '0' ];
 
-//		dd( compact( 'current_version_parts', 'new_version_parts' ) );
 		if ( version_compare( $current_version_parts[ 0 ] . '.' . $current_version_parts[ 1 ], $new_version_parts[ 0 ] . '.' . $new_version_parts[ 1 ], '>=' ) ) {
 			return;
 		}
@@ -64,8 +63,6 @@ class Updates {
 		$version = $new_version_parts[ 0 ];
 
 		$plugins = wte_get_engine_extensions();
-
-//		dd($plugins);
 
 		foreach ( $plugins as $file => $plugin ) {
 			if ( empty( $plugin[ self::VERSION_TESTED_HEADER ] ) ) {

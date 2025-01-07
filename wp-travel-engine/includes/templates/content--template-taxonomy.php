@@ -26,6 +26,7 @@
 					array(
 						'orderby' => apply_filters( "wpte_{$taxonomy}_terms_order_by", 'name' ),
 						'order'   => apply_filters( "wpte_{$taxonomy}_terms_order", $selected_order ),
+						'hierarchical' => true,
 					)
 				);
 				$terms_by_ids = array();
@@ -35,19 +36,15 @@
 						$term_object->children  = array();
 						$term_object->link      = get_term_link( $term_object->term_id );
 						$term_object->thumbnail = (int) get_term_meta( $term_object->term_id, 'category-image-id', true );
-						if ( isset( $terms_by_ids[ $term_object->term_id ] ) ) {
-							foreach ( (array) $terms_by_ids[ $term_object->term_id ] as $prop_name => $prop_value ) {
-								$term_object->{$prop_name} = $prop_value;
-							}
-						}
-						if ( $term_object->parent ) {
-							if ( ! isset( $terms_by_ids[ $term_object->parent ] ) ) {
-								$terms_by_ids[ $term_object->parent ] = new \stdClass();
-							}
-							$terms_by_ids[ $term_object->parent ]->children[] = $term_object->term_id;
-						}
 
 						$terms_by_ids[ $term_object->term_id ] = $term_object;
+					}
+
+					// Second pass: Organize children (maintaining sort order)
+					foreach ( $terms_by_ids as $term_id => $term_object ) {
+						if ( ! empty( $term_object->parent ) && isset( $terms_by_ids[ $term_object->parent ] ) ) {
+							$terms_by_ids[ $term_object->parent ]->children[] = $term_object;
+						}
 					}
 				}
 				if ( ! empty( $terms_by_ids ) ) {
@@ -96,7 +93,7 @@
 									<div id="sort-options" class="wpte__select-options">
 										<ul>
 											<li class="wpte__select-options__label"><?php esc_html_e( 'Name', 'wp-travel-engine' ); ?></li>
-											<li data-value="ASC" 
+											<li data-value="ASC"
 												data-label="<?php esc_attr_e( 'a - z', 'wp-travel-engine' ); ?>"
 												<?php
 												if ( $selected_order === 'ASC' ) {
@@ -150,13 +147,12 @@
 											<div class="wpte-trip-subcat-wrap">
 												<?php
 												if ( count( $term_object->children ) > 0 ) :
-													foreach ( $term_object->children as $index => $child_term_id ) {
-																// 0 === $index && print( '<div class="sub-destination">' );
-														if ( ! isset( $terms_by_ids[ $child_term_id ] ) ) {
-															continue;
-														}
-														printf( '<a href="%1$s">%2$s</a>', esc_url( $terms_by_ids[ $child_term_id ]->link ), esc_html( $terms_by_ids[ $child_term_id ]->name ) );
-														// count( $term_object->children ) === $index + 1 && print( '</div>' );
+													foreach ( $term_object->children as $child_term ) {
+														printf(
+															'<a href="%1$s">%2$s</a>',
+															esc_url( $child_term->link ),
+															esc_html( $child_term->name )
+														);
 													}
 												endif;
 												?>

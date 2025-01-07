@@ -101,6 +101,7 @@ echo wp_kses_post( $thankyou );
 					class="value"><?php echo esc_html( date_i18n( $date_format, strtotime( $item->end_datetime ) ) ); ?></span>
 				</div>
 			<?php endif; ?>
+			<?php do_action( 'wptravelengine_thankyou_after_trip_details', $item ); ?>
 			<?php
 			if ( isset( $item->trip_extras ) && ! empty( $item->trip_extras ) ) :
 				?>
@@ -190,7 +191,7 @@ echo wp_kses_post( $thankyou );
 			</div>
 			<?php
 		endif;
-
+		do_action( 'wptravelengine_before_thankyou_page_tax', $cart_info );
 		$tax_figure       = 0;
 		$cart_info        = $booking->cart_info;
 		$tax_amount       = wp_travel_engine_get_tax_detail( $cart_info );

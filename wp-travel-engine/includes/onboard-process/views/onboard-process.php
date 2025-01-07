@@ -23,7 +23,7 @@ if ( ! $addons_data ) {
 }
 if ( ! empty( $addons_data ) ) {
 	$addons_data = json_decode( $addons_data );
-	$addons_data = $addons_data->products;
+	$addons_data = $addons_data->products ?? [];
 }
 ?>
 <div class="wpte-main-wrap wpte-onboard-process">

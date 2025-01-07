@@ -53,6 +53,8 @@ if ( ! empty( $wte_cart->getItems() ) ) :
 				</tr>
 				<?php $mini_cart->trip_pax_details( $cart_item ); ?>
 
+				<?php do_action( 'wptravelengine_after_trip_pax_details', $cart_item ); ?>
+
 				<!-- Extra Services -->
 				<?php $mini_cart->extra_services( $cart_item ); ?>
 				<!-- ./ Extra Services -->
@@ -68,7 +70,7 @@ if ( ! empty( $wte_cart->getItems() ) ) :
 				</tfoot>
 			</table>
 			<!-- Price Adjustments -->
-			 <?php do_action( 'wptravelengine_before_price_adjustment', $wte_cart ); ?>
+			<?php do_action( 'wptravelengine_before_price_adjustment', $wte_cart ); ?>
 			<?php
 			$is_tax_applicable = $wte_cart->tax()->is_taxable() && $wte_cart->tax()->is_exclusive();
 
@@ -152,6 +154,7 @@ if ( ! empty( $wte_cart->getItems() ) ) :
 				$payable_amount = 0;
 
 				switch ( $payment_type ) {
+					case 'full_payment':
 					case 'full':
 						$payable_amount = $wte_cart->get_cart_total();
 						break;

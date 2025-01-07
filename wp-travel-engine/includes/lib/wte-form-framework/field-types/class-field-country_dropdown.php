@@ -28,7 +28,7 @@ class WP_Travel_Engine_Form_Field_Country_Dropdown extends WP_Travel_Engine_Form
 		$country_options = Functions::get_countries();
 		$country_options = array_combine( $country_options, $country_options );
 
-		$country_options = array( '' => __( 'Choose a country*', 'wp-travel-engine' ) ) + $country_options;
+		$country_options = apply_filters( 'wptravelengine_modify_country_selector', array( '' => __( 'Choose a country*', 'wp-travel-engine' ) ) + $country_options );
 
 		$this->field = $field;
 

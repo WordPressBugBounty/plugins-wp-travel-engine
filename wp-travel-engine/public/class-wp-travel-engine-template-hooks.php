@@ -1023,31 +1023,24 @@ class WP_Travel_Engine_Template_Hooks {
 			return;
 		}
 
-		global $wtetrip;
+		$trip = new Trip( $trip );
 
-		$package            = $wtetrip->default_package;
-		$package_categories = (object) $package->{'package-categories'};
+		/* @var $package Package */
+		$package = $trip->default_package();
+		$package_categories = $package->get_traveler_categories();
 
 		$primary_pricing_category = get_option( 'primary_pricing_category', 0 );
-		$primary_cat_price        = $package_categories->prices[ $primary_pricing_category ];
-
-		$categories_in_package = $package_categories->c_ids;
-
-		if ( in_array( $primary_pricing_category, $categories_in_package ) ) {
-			unset( $categories_in_package[ $primary_pricing_category ] );
-		}
-		foreach ( $categories_in_package as $c_id ) {
-			$price = $package_categories->prices[ $c_id ];
-			if ( isset( $primary_cat_price ) && $primary_cat_price != '' ) {
-				if ( $price == '' ) {
-					return true;
-				} else {
-					return false;
-				}
-			} else {
+		foreach( $package_categories as $pricing_category ) {
+			if( $pricing_category->id == $primary_pricing_category ) {
+				continue;
+			}
+			if( $pricing_category->price !== '' ) {
 				return false;
 			}
 		}
+
+		return true;
+
 	}
 
 }

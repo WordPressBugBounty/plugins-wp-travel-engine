@@ -13,7 +13,7 @@ class WP_Travel_Engine_Form_Field {
 	 *
 	 * @var array $fields
 	 */
-	private $fields;
+	protected $fields;
 
 	/**
 	 * Field types array

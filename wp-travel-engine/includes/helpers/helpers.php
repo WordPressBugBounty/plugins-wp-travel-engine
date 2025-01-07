@@ -6,9 +6,204 @@
  * @package WP_Travel_Engine
  */
 
+use WPTravelEngine\Builders\FormFields\BillingFormFields;
+use WPTravelEngine\Builders\FormFields\EmergencyFormFields;
+use WPTravelEngine\Builders\FormFields\PrivacyPolicyFields;
+use WPTravelEngine\Builders\FormFields\TravellersFormFields;
+use WPTravelEngine\Core\Coupons;
 use WPTravelEngine\Core\Models\Post\Trip;
 use WPTravelEngine\Core\Models\Post\TripPackage;
+use WPTravelEngine\Pages\Checkout;
 use WPTravelEngine\PaymentGateways\PaymentGateways;
+
+/**
+ * @param string $date
+ * @param string $format
+ *
+ * @return string
+ * @since 6.3.0
+ */
+function wptravelengine_format_trip_datetime( string $date, string $format = '' ): string {
+	$date_format = $format;
+	if ( empty( $format ) ) {
+		$date_format = get_option( 'date_format', 'j M, Y' );
+		$date_format .= strpos( $date, 'T' ) !== false ? ' \a\t ' . get_option( 'time_format', 'g:i a' ) : '';
+	}
+
+	return wp_date( $date_format, strtotime( $date ) );
+}
+
+/**
+ * @param string $start_date
+ * @param Trip $trip
+ * @param string $format
+ *
+ * @return string
+ * @since 6.3.0
+ */
+function wptravelengine_format_trip_end_datetime( string $start_date, Trip $trip, string $format = '' ): string {
+	$date_format = $format;
+	if ( empty( $format ) ) {
+		$date_format = get_option( 'date_format', 'j M, Y' );
+		$date_format .= strpos( $start_date, 'T' ) !== false ? ' \a\t ' . get_option( 'time_format', 'g:i a' ) : '';
+	}
+	$trip_duration      = $trip->get_trip_duration();
+	$trip_duration_type = $trip->get_trip_duration_unit() ?? 'days';
+
+	return wp_date( $date_format, strtotime( "+$trip_duration {$trip_duration_type}", strtotime( $start_date ) ) );
+}
+
+/**
+ * This function is used to get the template and pass arguments through the templates.
+ *
+ * @since 6.3.0
+ */
+function wptravelengine_get_template( string $template_name, array $args = array(), string $template_path = '', string $default_path = '' ) {
+	wte_get_template( $template_name, wptravelengine_set_template_args( $args ), $template_path, $default_path );
+}
+
+/**
+ * Add arguments to be used by templates.
+ *
+ * @param array $args Additional arguments.
+ *
+ * @return array
+ * @since 6.3.0
+ */
+function wptravelengine_set_template_args( array $args ): array {
+	global $wptravelengine_template_args;
+
+	$wptravelengine_template_args = array_merge( $wptravelengine_template_args, $args );
+
+	return $wptravelengine_template_args;
+}
+
+/**
+ * Template Arguments.
+ *
+ * @param array $args
+ *
+ * @return array
+ * @since 6.3.0
+ */
+function wptravelengine_get_template_args( array $args = array() ): array {
+	global $wptravelengine_template_args;
+
+	return array_merge( $wptravelengine_template_args, $args );
+}
+
+/**
+ * Checkout page template args.
+ *
+ * @param array $args
+ *
+ * @return array
+ * @since 6.3.0
+ */
+function wptravelengine_get_checkout_template_args( array $args = array() ): array {
+	global $wte_cart;
+
+	$wptravelengine_settings = get_option( 'wp_travel_engine_settings', array() );
+	$checkout_page_template  = $wptravelengine_settings[ 'checkout_page_template' ] ?? '1.0';
+	$display_header_footer   = $wptravelengine_settings[ 'display_header_footer' ] ?? 'no';
+	$show_travellers_info    = $wptravelengine_settings[ 'display_travellers_info' ] ?? 'yes';
+	$show_emergency_contact  = $wptravelengine_settings[ 'display_emergency_contact' ] ?? 'yes';
+	$traveller_details_form  = $wptravelengine_settings[ 'traveller_emergency_details_form' ] ?? 'on_checkout';
+	$display_billing_details = $wptravelengine_settings[ 'display_billing_details' ] ?? 'yes';
+	$show_additional_note    = $wptravelengine_settings[ 'show_additional_note' ] ?? 'yes';
+	$show_coupon_form        = $wptravelengine_settings[ 'show_discount' ] ?? 'yes';
+	$attributes              = array(
+		'version'          		=> $checkout_page_template,
+		'header'           		=> $checkout_page_template == '2.0' && $display_header_footer == 'yes' ? 'default' : 'none',
+		'footer'          		=> $checkout_page_template == '2.0' && $display_header_footer == 'yes' ? 'default' : 'none',
+		'checkout-steps'  		=> 'show',
+		'tour-details'    		=> 'show',
+		'tour-details-title' 	=> 'show',
+		'cart-summary'     		=> 'show',
+		'cart-summary-title' 	=> 'show',
+		'travellers'       		=> $show_travellers_info == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide',
+		'travellers-title' 		=> 'show',
+		'emergency'       		=> $show_emergency_contact == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide',
+		'emergency-title' 		=> 'show',
+		'billing'          		=> $display_billing_details == 'yes' ? 'show' : 'hide',
+		'billing-title' 		=> 'show',
+		'additional_note'  		=> $show_additional_note == 'yes' ? 'show' : 'hide',
+		'additional-note-title' 	=> 'show',
+		'payment'          		=> 'show',
+		'payment-title' 		=> 'show',
+		'coupon_form'      		=> $show_coupon_form == 'yes' && Coupons::is_coupon_available() && 'due' !== $wte_cart->get_payment_type() ? 'show' : 'hide',
+		'footer_copyright' 		=> $wptravelengine_settings[ 'footer_copyright' ] ?? '',
+	);
+
+	$form_sections = array(
+//		'travellers'      => 'content-travellers-details',
+//		'emergency'       => 'content-emergency-details',
+		'billing'         => 'content-billing-details',
+//		'additional_note' => 'content-checkout-note',
+		'payment'         => 'content-payments',
+	);
+
+	$template_args[ 'form_sections' ] = apply_filters( 'wptravelengine_checkoutv2_form_templates', $form_sections );
+
+	$is_partial_payment_applicable = 'due' !== $wte_cart->get_payment_type() && 'booking_only' !== ( $wte_cart->payment_gateway ?? 'booking_only' );
+	if ( $is_partial_payment_applicable ) {
+		foreach ( $wte_cart->getItems(true) as $item ) {
+			$is_partial_payment_applicable = wp_travel_engine_is_trip_partially_payable( $item->trip_id );
+			if ( ! $is_partial_payment_applicable ) {
+				break;
+			}
+		}
+	}
+
+	$coupons = array();
+
+	foreach ( $wte_cart->get_deductible_items() as $coupon_item ) {
+		if ( 'coupon' !== $coupon_item->name ) {
+			continue;
+		}
+		$coupons[] = array(
+			'label'  => $coupon_item->label,
+			'amount' => $wte_cart->get_totals()[ "total_coupon" ] ?? 0,
+		);
+	}
+	$checkout_page          = new Checkout( $wte_cart );
+	$tour_details           = $checkout_page->get_tour_details();
+	$cart_line_items        = $checkout_page->get_cart_line_items();
+	$billing_form_fields    = BillingFormFields::instance();
+	$travellers_form_fields = array();
+	foreach ( $wte_cart->getItems( true ) as $cart_item ) {
+		$travellers_form_fields[] = new TravellersFormFields( array(
+			'number_of_travellers'      => array_sum( $cart_item->travelers ?? $cart_item->pax ),
+			'number_of_lead_travellers' => 1,
+		) );
+	}
+	$note_form_fields = wptravelengine_form_field( false )->init( $checkout_page->get_note_form_fields() );
+
+	$emergency_contact_fields = new EmergencyFormFields();
+
+	$payment_options 		= $checkout_page->get_payment_options();
+
+	$payment_type 			= $checkout_page->get_payment_type();
+
+	$full_payment_enabled 	= $checkout_page->is_full_payment_enabled();
+
+	$full_payment_amount 	= $checkout_page->get_full_payment_amount();
+
+	$down_payment_amount 	= $checkout_page->get_down_payment_amount();
+
+	$due_payment_amount 	= $checkout_page->get_due_payment_amount();
+
+	$privacy_policy_fields = new PrivacyPolicyFields();
+
+	return array_merge(
+//		$template_args,
+		compact( 'note_form_fields' ),
+		compact( 'tour_details', 'cart_line_items', 'billing_form_fields', 'travellers_form_fields', 'privacy_policy_fields',
+		'emergency_contact_fields', 'payment_options', 'payment_type', 'full_payment_enabled', 'full_payment_amount', 'down_payment_amount', 'due_payment_amount' ),
+		compact( 'attributes', 'form_sections', 'is_partial_payment_applicable', 'coupons' ),
+		$args
+	);
+}
 
 /**
  * Trip primary package.
@@ -474,6 +669,7 @@ function wte_locate_template( $template_name, $template_path = '', $default_path
 		}
 	}
 
+
 	// Return what we found.
 	return apply_filters( 'wte_locate_template', $template, $template_name, $template_path );
 }
@@ -490,6 +686,7 @@ function wte_locate_template( $template_name, $template_path = '', $default_path
  *
  */
 function wte_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
+
 	$cache_key = sanitize_key( implode( '-', array(
 		'template',
 		$template_name,
@@ -617,7 +814,7 @@ function wp_travel_engine_get_booking_confirm_url() {
 
 	$wte_confirm = wte_array_get( $wte_settings, 'pages.wp_travel_engine_confirmation_page', '' );
 
-	$hide_traveler_information = wte_array_get( $wte_settings, 'travelers_information', 'yes' ) === 'yes';
+	$hide_traveler_information = apply_filters( 'wptravelengine_hide_traveler_emergency_form', wte_array_get( $wte_settings, 'travelers_information', 'yes' ) === 'yes' );
 
 	if ( $hide_traveler_information || empty( $wte_confirm ) ) {
 		$wte_confirm = wte_array_get( $wte_settings, 'pages.wp_travel_engine_thank_you', '' );

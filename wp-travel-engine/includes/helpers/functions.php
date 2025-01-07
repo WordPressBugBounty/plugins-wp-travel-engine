@@ -2,9 +2,9 @@
 /**
  * WTE Helper functions.
  */
-
 use Elementor\Plugin;
 use Firebase\JWT\JWT;
+use WPTravelEngine\Builders\FormFields\FormField;
 use WPTravelEngine\Core\Cart\Cart;
 use WPTravelEngine\Core\Functions;
 use WPTravelEngine\Core\Models\Post\Booking;
@@ -17,6 +17,7 @@ require_once __DIR__ . '/tax.php';
 require_once __DIR__ . '/helpers-analytics.php';
 require_once __DIR__ . '/helpers-prices.php';
 require_once __DIR__ . '/wp-travel-engine-form-fields.php';
+require_once __DIR__ . '/cart.php';
 
 /**
  * Checks if a WP Travel Engine add-on is active.
@@ -38,38 +39,39 @@ require_once __DIR__ . '/wp-travel-engine-form-fields.php';
  *                     - zapier
  *                     - custom-booking-link
  *                     - booking-fee
- * @since 6.2.2
  *
  * @return ?bool Returns true if addon is active, false if inactive, null if invalid addon
+ * @since 6.2.2
+ *
  */
 function wptravelengine_is_addon_active( string $addon ) {
 
-    if ( empty( $addon ) ) {
-        return null;
-    }
+	if ( empty( $addon ) ) {
+		return null;
+	}
 
-    $addon_files = array(
-        'fixed-starting-dates' 	=> 'WTE_FIXED_DEPARTURE_FILE_PATH',
-        'partial-payment' 		=> 'WP_TRAVEL_ENGINE_PARTIAL_PAYMENT_FILE_PATH',
-        'extra-services' 		=> 'WTE_EXTRA_SERVICES_FILE_PATH',
-        'file-downloads' 		=> 'WTEFD_FILE_PATH',
-        'group-discount' 		=> 'WP_TRAVEL_ENGINE_GROUP_DISCOUNT_FILE_PATH',
-        'advanced-itinerary' 	=> 'WTEAD_FILE_PATH',
-        'currency-converter' 	=> 'WTE_CURRENCY_CONVERTER_ABSPATH',
-		'form-editor'			=> 'WTE_FORM_EDITOR_PLUGIN_FILE',
-		'itinerary-downloader'	=> 'WTE_ITINERARY_DOWNLOADER_ABSPATH',
-		'trip-reviews'			=> 'WTE_TRIP_REVIEW_FILE_PATH',
-		'user-history'			=> 'WTE_USER_HISTORY_FILE_PATH',
-		'we-travel'				=> 'WTE_AFFILIATE_BOOKING_FILE_PATH',
-		'weather-forecast'		=> 'WTE_WEATHER_FORECAST_BASE_PATH',
-		'zapier'				=> 'WTE_ZAPIER_PLUGIN_FILE',
-		'custom-booking-link'	=> 'WTE_CBL_FILE_PATH',
-		'booking-fee'			=> 'WPTRAVELENGINE_BOOKING_FEE_FILE',
-    );
+	$addon_files = array(
+		'fixed-starting-dates' => 'WTE_FIXED_DEPARTURE_FILE_PATH',
+		'partial-payment'      => 'WP_TRAVEL_ENGINE_PARTIAL_PAYMENT_FILE_PATH',
+		'extra-services'       => 'WTE_EXTRA_SERVICES_FILE_PATH',
+		'file-downloads'       => 'WTEFD_FILE_PATH',
+		'group-discount'       => 'WP_TRAVEL_ENGINE_GROUP_DISCOUNT_FILE_PATH',
+		'advanced-itinerary'   => 'WTEAD_FILE_PATH',
+		'currency-converter'   => 'WTE_CURRENCY_CONVERTER_ABSPATH',
+		'form-editor'          => 'WTE_FORM_EDITOR_PLUGIN_FILE',
+		'itinerary-downloader' => 'WTE_ITINERARY_DOWNLOADER_ABSPATH',
+		'trip-reviews'         => 'WTE_TRIP_REVIEW_FILE_PATH',
+		'user-history'         => 'WTE_USER_HISTORY_FILE_PATH',
+		'we-travel'            => 'WTE_AFFILIATE_BOOKING_FILE_PATH',
+		'weather-forecast'     => 'WTE_WEATHER_FORECAST_BASE_PATH',
+		'zapier'               => 'WTE_ZAPIER_PLUGIN_FILE',
+		'custom-booking-link'  => 'WTE_CBL_FILE_PATH',
+		'booking-fee'          => 'WPTRAVELENGINE_BOOKING_FEE_FILE',
+	);
 
-    if ( ! isset( $addon_files[ $addon ] ) ) {
-        return null;
-    }
+	if ( ! isset( $addon_files[ $addon ] ) ) {
+		return null;
+	}
 
 	return defined( $addon_files[ $addon ] ) && file_exists( constant( $addon_files[ $addon ] ) );
 }
@@ -79,22 +81,23 @@ function wptravelengine_is_addon_active( string $addon ) {
  *
  * @param array $data The current level of data to traverse.
  * @param array $keys The remaining keys in the dot-separated path.
- * @since 6.2.0
  *
  * @return bool
+ * @since 6.2.0
+ *
  */
 function wptravelengine_key_exists( array $data, array $keys ): bool {
-    $key = array_shift( $keys );
+	$key = array_shift( $keys );
 
-    if ( ! array_key_exists( $key, $data ) ) {
-        return false;
-    }
+	if ( ! array_key_exists( $key, $data ) ) {
+		return false;
+	}
 
-    if ( ! is_array( $data[ $key ] ) || empty( $keys ) ) {
-        return true;
-    }
+	if ( ! is_array( $data[ $key ] ) || empty( $keys ) ) {
+		return true;
+	}
 
-    return wptravelengine_key_exists( $data[ $key ], $keys );
+	return wptravelengine_key_exists( $data[ $key ], $keys );
 }
 
 /**
@@ -107,30 +110,31 @@ function wptravelengine_key_exists( array $data, array $keys ): bool {
  * @param mixed $else Value to return if target is not found. Defaults to `null`.
  * @param string|int $target_key Key in array to replace value in. Defaults to `null`.
  *
+ * @return mixed Modified data or fallback value if target is not found.
  * @since 6.2.0
  * @updated 6.2.3
  *
- * @return mixed Modified data or fallback value if target is not found.
  */
 
 function wptravelengine_replace( $data, $target_value, $by, $else = null, $target_key = null ) {
 
-    if ( is_array( $data ) ) {
-        foreach ( $data as $key => $value ) {
+	if ( is_array( $data ) ) {
+		foreach ( $data as $key => $value ) {
 			if ( is_null( $target_key ) ) {
 				$data[ $key ] = ( $target_value === $value ) ? $by : $else;
 			} else if ( array_key_exists( $target_key, $value ) ) {
-                $data[ $key ][ $target_key ] = ( $target_value === $value[ $target_key ] ) ? $by : $else;
-            }
-        }
-        return $data;
-    }
+				$data[ $key ][ $target_key ] = ( $target_value === $value[ $target_key ] ) ? $by : $else;
+			}
+		}
+
+		return $data;
+	}
 
 	if ( ! is_scalar( $data ) ) {
 		return $else;
 	}
 
-    return ( $data === $target_value ) ? $by : $else;
+	return ( $data === $target_value ) ? $by : $else;
 }
 
 /**
@@ -1655,12 +1659,12 @@ function wptravelengine_svg_by_fa_icon( $icon, $echo = true, $class_names = arra
 
 	if ( is_array( $icon ) ) {
 		$new_icon = $icon[ 'icon' ] ?? '';
-		$path = $icon[ 'path' ] ?: ( $data[ $new_icon ][ 'path' ] ?? '' );
+		$path     = $icon[ 'path' ] ?: ( $data[ $new_icon ][ 'path' ] ?? '' );
 		if ( empty( $path ) ) {
 			return $path;
 		}
 		$view_box = $icon[ 'view_box' ] ?: ( $data[ $new_icon ][ 'viewBox' ] ?? '' );
-		$icon = $new_icon;
+		$icon     = $new_icon;
 	} else {
 		$path = $data[ $icon ] ?? '';
 		if ( empty( $path ) ) {
@@ -1956,24 +1960,28 @@ function wptravelengine_add_admin_menu_separator( $position ) {
 /**
  * @param array $fields Form fields.
  *
+ * @param bool $use_legacy_template Use legacy template.
+ *
  * @return void
  * @since 5.7.4
  */
-function wptravelengine_render_form_fields( array $fields ) {
-	$instance = wptravelengine_form_field();
+function wptravelengine_render_form_fields( array $fields, bool $use_legacy_template = true ) {
+	$instance = wptravelengine_form_field( $use_legacy_template );
 	$instance->init( $fields )->render();
 }
 
 /**
- * @return WP_Travel_Engine_Form_Field
+ * @param bool $use_legacy_template
+ *
+ * @return FormField
  * @since 5.7.4
  */
-function wptravelengine_form_field(): \WP_Travel_Engine_Form_Field {
+function wptravelengine_form_field( bool $use_legacy_template = true ): FormField {
 	// Include the form class - framework.
 	include_once \WP_TRAVEL_ENGINE_ABSPATH . '/includes/lib/wte-form-framework/class-wte-form.php';
 
 	// form fields initialize.
-	return new WP_Travel_Engine_Form_Field();
+	return new FormField( $use_legacy_template );
 }
 
 /**

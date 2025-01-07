@@ -310,14 +310,14 @@ class Trip extends WP_REST_Posts_Controller {
 		}
 
 		if ( empty( $trip->get_setting( 'trip_duration' ) ) || isset( $request[ 'duration' ][ 'period' ] ) ) {
-			if ( empty( $trip->get_setting( 'trip_duration' ) ) || $request[ 'duration' ][ 'period' ] > 0 ) {
+			if ( empty( $trip->get_setting( 'trip_duration' ) ) || $request[ 'duration' ][ 'period' ] >= 0 ) {
 				$duration = $request[ 'duration' ][ 'period' ] ?? 1;
 				$trip_settings->set( 'trip_duration', $duration );
 				$duration = ( 'days' === ( $request[ 'duration' ][ 'unit' ] ?? 'days' ) ) ? $duration * 24 : $duration;
 				$trip->set_meta( 'wp_travel_engine_setting_trip_duration', $duration );
 				$trip->set_meta( '_s_duration', $duration );
 			} else {
-				$this->set_bad_request( 'invalid_trip_duration', sprintf( __( '%sTrip Duration%s must be greater than 0.', 'wp-travel-engine' ), '<strong>', '</strong>' ) );
+				$this->set_bad_request( 'invalid_trip_duration', sprintf( __( '%sTrip Duration%s must be greater than or equal to 0.', 'wp-travel-engine' ), '<strong>', '</strong>' ) );
 			}
 		}
 
@@ -635,7 +635,7 @@ class Trip extends WP_REST_Posts_Controller {
 				}
 
 				$package_ids   = array_column( $package[ 'traveler_categories' ], 'id', 'id' );
-				$meta_inputs[] = [
+				$meta_inputs[] = apply_filters( 'wptravelengine_package_meta_inputs', [
 					'package_id'               => $package[ 'id' ],
 					'package_name'             => $package[ 'name' ],
 					'package_description'      => $package[ 'description' ] ?? '',
@@ -656,7 +656,7 @@ class Trip extends WP_REST_Posts_Controller {
 					], fn ( $v ) => $v !== null && ! empty( $v ) ),
 					'group-pricing'            => $group_pricing,
 					'package-dates'            => $package_dates ?? [],
-				];
+				], $package, $this );
 
 				$last_meta_input   = end( $meta_inputs );
 				$common_plain_text = sprintf( __( 'must be greater than or equal to 0 in \'%s Package\'.', 'wp-travel-engine' ), $package[ 'name' ] );
@@ -966,8 +966,6 @@ class Trip extends WP_REST_Posts_Controller {
 		$data[ 'trip_extra_services' ] = array();
 
 		$primary_package    = (int) $trip->get_meta( 'primary_package' );
-		$default_package    = $trip->default_package();
-		$default_package_id = is_null( $default_package ) ? $primary_package : $default_package->ID;
 		$trip_packages      = new Post\TripPackages( $trip );
 		$data[ 'packages' ] = [];
 		foreach ( $trip_packages as $key => $trip_package ) {
@@ -990,6 +988,8 @@ class Trip extends WP_REST_Posts_Controller {
 		}
 
 		$data = apply_filters( 'wptravelengine_rest_prepare_trip', $data, $request, $this );
+
+		$trip->save();
 
 		return rest_ensure_response( $this->filter_by_context( $data ) );
 	}
@@ -1061,7 +1061,7 @@ class Trip extends WP_REST_Posts_Controller {
 			}
 		}
 
-		return array_merge( $this->prepare_package_data( $trip_package ), $return_data );
+		return apply_filters( 'wptravelengine_rest_prepare_package', array_merge( $this->prepare_package_data( $trip_package ), $return_data ), $trip_package );
 	}
 
 	/**
@@ -1104,7 +1104,7 @@ class Trip extends WP_REST_Posts_Controller {
 
 		$dates = array();
 		foreach ( $trip_packages as $trip_package ) {
-			/* @var Post\TripPackage $trip_package */
+			/** @var Post\TripPackage $trip_package */
 			$data = array(
 				'package' => $this->prepare_package_data( $trip_package ),
 				'dates'   => $trip_package->get_package_dates( compact( 'from', 'to' ) ),
@@ -1133,6 +1133,7 @@ class Trip extends WP_REST_Posts_Controller {
 		$data[ 'id' ]          = $trip_package->get_id();
 		$data[ 'name' ]        = $trip_package->get_title();
 		$data[ 'description' ] = $trip_package->get_content();
+		$data[ 'is_primary' ]  = $trip_package->get_id() === (int) $trip_package->get_trip()->get_meta( 'primary_package' );
 
 		$package_categories = $trip_package->get_traveler_categories();
 

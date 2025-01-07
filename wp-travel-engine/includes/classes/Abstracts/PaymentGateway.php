@@ -59,6 +59,15 @@ abstract class PaymentGateway {
 	}
 
 	/**
+	 * Public icon shows at the time of checkout.
+	 *
+	 * @return string
+	 */
+	public function get_display_icon(): string {
+		return '';
+	}
+
+	/**
 	 * Public info shows at the time of checkout.
 	 *
 	 * @return string

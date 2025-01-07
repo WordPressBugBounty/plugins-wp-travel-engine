@@ -399,7 +399,7 @@ class TripSearch {
 			return $template;
 		}
 
-		if ( self::is_search_page() || \has_shortcode( $post->post_content, 'WTE_Trip_Search' ) ) {
+		if ( self::is_search_page() && ! has_shortcode( $post->post_content, 'WTE_Trip_Search' ) ) {
 			$wp_travel_engine_settings = get_option( 'wp_travel_engine_settings', array() );
 			$is_enabled_fse_template   = $wp_travel_engine_settings[ 'enable_fse_template' ] ?? 'no';
 			if ( current_theme_supports( 'wptravelengine-templates' ) || ( wp_is_block_theme() && $is_enabled_fse_template == 'yes' ) ) {
@@ -726,6 +726,12 @@ class TripSearch {
 	public function init() {
 		add_shortcode( 'Wte_Advanced_Search_Form', array( __CLASS__, 'search_form' ) );
 		add_shortcode( 'WTE_Trip_Search', function () {
+			ob_start();
+			wp_enqueue_script( 'wp-travel-engine' );
+			wp_enqueue_style( 'wp-travel-engine' );
+			\wte_get_template( 'content-trip-search-results.php' );
+
+			return ob_get_clean();
 		} );
 	}
 

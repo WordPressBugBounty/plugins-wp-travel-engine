@@ -687,8 +687,8 @@ $trip_meta_tabs = array(
 		)
 	),
 	'wte-trip-custom-booking-link' => array(
-		'tab_label'         => esc_html__('Custom Booking Link', 'wptravelengine-custom-booking-link'),
-		'tab_heading'       => esc_html__('Custom Booking Link', 'wptravelengine-custom-booking-link'),
+		'tab_label'         => esc_html__('Custom Booking Link', 'wp-travel-engine'),
+		'tab_heading'       => esc_html__('Custom Booking Link', 'wp-travel-engine'),
 		'callback_function' => 'wpte_edit_trip_tab_custom_booking',
 		'content_key'       => 'wpte-custom-booking',
 		'current'           => false,

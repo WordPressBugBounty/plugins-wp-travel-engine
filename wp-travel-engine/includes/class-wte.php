@@ -28,15 +28,16 @@ if ( ! class_exists( 'WTE' ) ) :
 		 * Main WTE Instance.
 		 * Ensures only one instance of WTE is loaded or can be loaded.
 		 *
+		 * @return WTE - Main instance.
+		 * @see WTE()
 		 * @since 2.2.6
 		 * @static
-		 * @see WTE()
-		 * @return WTE - Main instance.
 		 */
 		public static function instance() {
 			if ( is_null( self::$_instance ) ) {
 				self::$_instance = new self();
 			}
+
 			return self::$_instance;
 		}
 
@@ -47,8 +48,8 @@ if ( ! class_exists( 'WTE' ) ) :
 		 */
 		function __construct() {
 
-			include WP_TRAVEL_ENGINE_BASE_PATH . '/includes/class-wte-session.php';
-			include WP_TRAVEL_ENGINE_BASE_PATH . '/includes/class-wte-notices.php';
+			require_once WP_TRAVEL_ENGINE_BASE_PATH . '/includes/class-wte-session.php';
+			require_once WP_TRAVEL_ENGINE_BASE_PATH . '/includes/class-wte-notices.php';
 
 			$this->session = new WTE_Session();
 			$this->notices = new WTE_Notices();
@@ -60,8 +61,8 @@ endif;
  *
  * Returns the main instance of WTE to prevent the need to use globals.
  *
- * @since  2.2.6
  * @return WP Travel Engine Object
+ * @since  2.2.6
  */
 function WTE() {
 	return WTE::instance();

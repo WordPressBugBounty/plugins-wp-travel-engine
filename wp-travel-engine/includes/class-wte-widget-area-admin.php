@@ -1,8 +1,17 @@
 <?php
+
+use WPTravelEngine\Traits\Singleton;
+
 /**
  * Widget area definition.
  */
 class Wte_Widget_Area_Admin {
+
+	use Singleton;
+
+	protected function __construct() {
+		add_action( 'init', array( $this, 'init' ) );
+	}
 
 	public function init() {
 		$args = array(
@@ -30,5 +39,6 @@ class Wte_Widget_Area_Admin {
 		endif;
 	}
 }
-$obj = new Wte_Widget_Area_Admin();
-$obj->init();
+
+Wte_Widget_Area_Admin::instance();
+

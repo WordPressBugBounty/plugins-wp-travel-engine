@@ -18,7 +18,7 @@ use WPTravelEngine\Core\Controllers\Checkout;
 class Cart extends AjaxController {
 
 	const NONCE_KEY = '_nonce';
-	const NONCE_ACTION = 'wptravelengine_cart';
+	const NONCE_ACTION = 'wp_xhr';
 	const ACTION = 'wptravelengine_cart';
 
 	/**
@@ -44,22 +44,10 @@ class Cart extends AjaxController {
 	protected function change_payment_type() {
 		global $wte_cart;
 
-		$payment_type = $this->request->get_param( 'data' )[ 'payment_type' ] ?? false;
-		$mappings     = [
-			'full'              => 'full',
-			'due'               => 'due',
-			'partial'           => 'partial',
-			'full_payment'      => 'full',
-			'remaining_payment' => 'due',
-		];
-		$payment_type = $mappings[ $payment_type ] ?? false;
-		if ( ! in_array( $payment_type, [ 'full', 'due', 'partial' ], true ) ) {
-			wp_send_json_error( new WP_Error( 'INVALID_PAYMENT_TYPE', __( 'Invalid payment type.', 'wp-travel-engine' ) ) );
-		}
+		$payment_type    = $this->request->get_param( 'data' )[ 'payment_type' ] ?? 'full_payment';
+		$payment_gateway = $this->request->get_param( 'data' )[ 'payment_gateway' ] ?? 'booking_only';
 
-		$wte_cart->payment_gateway = $this->request->get_param( 'data' )[ 'payment_gateway' ] ?? false;
-		$wte_cart->set_payment_type( $payment_type );
-		$wte_cart->update_cart();
+		wptravelengine_update_cart( compact( 'payment_type', 'payment_gateway' ) );
 
 		$checkout = new Checkout( $wte_cart );
 		ob_start();

@@ -158,10 +158,10 @@ $cart_item = reset( $cart_items );
 											?>
 										</label>
 										<?php
-										if ( ! empty( $payment_method[ 'info_text' ] ) ) :
+										if ( ! empty( $payment_method[ 'description' ] ) ) :
 											?>
 											<div id="wpte__checkout-info--<?php echo esc_attr( $key ); ?>"
-												 class="wpte-checkout-payment-info<?php echo esc_attr( $first_payment_option ? '' : ' hidden' ); ?>"><?php echo esc_html( $payment_method[ 'info_text' ] ); ?></div>
+												 class="wpte-checkout-payment-info<?php echo esc_attr( $first_payment_option ? '' : ' hidden' ); ?>"><?php echo wp_kses_post( $payment_method[ 'description' ] ); ?></div>
 										<?php
 										endif;
 										?>

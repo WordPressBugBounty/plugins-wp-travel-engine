@@ -8,12 +8,15 @@
 
 namespace WPTravelEngine\Core\Cart;
 
+use WPTravelEngine\Core\Cart\Items\PricingCategory;
 use WP_REST_Request;
 use WPTravelEngine\Core\Coupon;
 use WPTravelEngine\Core\Models\Post\Booking;
 use WPTravelEngine\Core\Models\Post\Trip;
 use WPTravelEngine\Core\Models\Post\TripPackage;
-use WPTravelEngine\Core\Tax;
+use WPTravelEngine\Core\PartialPayment;
+use WPTravelEngine\Interfaces\CartItem;
+use WPTravelEngine\Interfaces\CartItem as CartItemInterface;
 
 #[AllowDynamicProperties]
 /**
@@ -54,7 +57,7 @@ class Item {
 	/**
 	 * @var mixed
 	 */
-	protected $trip_id;
+	public $trip_id;
 
 	/**
 	 * @var array
@@ -74,18 +77,19 @@ class Item {
 	protected $datetime;
 
 	/**
-	 * Cart object.
-	 *
-	 * @var Cart
-	 */
-	protected Cart $cart;
-
-	/**
 	 * If this item is loaded from booking.
 	 *
 	 * @var bool
 	 */
 	protected bool $is_order_item = false;
+
+	/**
+	 * Cart Charges and Fees.
+	 *
+	 * @since 6.3.0
+	 * @var array
+	 */
+	protected array $additional_line_items = array();
 
 	/**
 	 * Default totals for the item.
@@ -110,6 +114,17 @@ class Item {
 	 * @var mixed
 	 */
 	protected array $totals = array();
+	/**
+	 * @var true
+	 */
+	protected bool $calculated_totals = false;
+
+	/**
+	 * Cart.
+	 *
+	 * @var Cart
+	 */
+	public Cart $cart;
 
 	/**
 	 * @param array $attrs Attributes.
@@ -120,11 +135,13 @@ class Item {
 		$this->attrs = $attrs;
 		$this->cart  = $cart;
 
-		foreach ( $this->attrs as $key => $value ) {
-			$this->{$key} = $value;
-		}
+		$this->trip_id   = $this->attrs[ 'trip_id' ] ?? 0;
+		$this->price_key = $this->attrs[ 'price_key' ] ?? '';
+		$this->pax       = $this->attrs[ 'pax' ] ?? array();
 
 		$this->id = $this->generate_id();
+
+		$this->add_add_line_items();
 
 		$this->calculate_totals();
 	}
@@ -214,26 +231,74 @@ class Item {
 		$attrs = apply_filters(
 			'wp_travel_engine_cart_attributes',
 			array(
-				'trip_id'            => $cart_data->{'tripID'},
-				'trip_price'         => $trip_price,
-				'trip_date'          => $cart_data->{'tripDate'},
-				'trip_time'          => $cart_data->{'tripTime'} ?? '',
-				'trip_time_range'    => $cart_data->{'timeRange'} ?? array(),
-				'price_key'          => $cart_data->{'packageID'},
+				'trip_id'               => $cart_data->{'tripID'},
+				'trip_price'            => $trip_price,
+				'trip_date'             => $cart_data->{'tripDate'},
+				'trip_time'             => $cart_data->{'tripTime'} ?? '',
+				'trip_time_range'       => $cart_data->{'timeRange'} ?? array(),
+				'price_key'             => $cart_data->{'packageID'},
 				//				'pricing_options'    => $cart_data->{'pricingOptions'},
-				'pax'                => $travelers[ 'pax' ] ?? array(),
-				'pax_labels'         => array(),
-				'category_info'      => $travelers[ 'info' ],
-				'pax_cost'           => $travelers[ 'cost' ],
-				'multi_pricing_used' => ! 0,
-				'trip_extras'        => ! empty( $cart_data->{'extraServices'} ) ? (array) $cart_data->{'extraServices'} : array(),
+				'pax'                   => $travelers[ 'pax' ] ?? array(),
+				'pax_labels'            => array(),
+				'category_info'         => $travelers[ 'info' ],
+				'pax_cost'              => $travelers[ 'cost' ],
+				'multi_pricing_used'    => ! 0,
+				'trip_extras'           => ! empty( $cart_data->{'extraServices'} ) ? (array) $cart_data->{'extraServices'} : array(),
 				// Tax Percentage.
-				'datetime'           => $cart_data->{'tripDate'},
-				'tax_amount'         => $tax->get_tax_percentage(),
+				'datetime'              => $cart_data->{'tripDate'},
+				'tax_amount'            => $tax->get_tax_percentage(),
+				'subtotal_reservations' => $cart_data->{'subtotalReservations'} ?? array(),
+				'travelers'             => $cart_data->{'travelers'},
 			)
 		);
 
 		return new static( $cart, $attrs );
+	}
+
+	/**
+	 * Add additional line items.
+	 *
+	 * @param CartItemInterface $item
+	 *
+	 * @since 6.3.0
+	 */
+	public function add_additional_line_items( CartItemInterface $item ) {
+		$this->additional_line_items[ $item->item_type ][] = $item;
+	}
+
+	/**
+	 * Set additional line items.
+	 *
+	 * @param array $items
+	 *
+	 * @since 6.3.0
+	 */
+	public function set_additional_line_items( array $items ) {
+		$this->additional_line_items = $items;
+	}
+
+	/**
+	 * Get cart items.
+	 *
+	 * @return CartItem[]
+	 * @since 6.3.0
+	 */
+	public function get_additional_line_items(): array {
+		return apply_filters( 'wptravelengine_cart_' . __FUNCTION__, $this->additional_line_items, $this );
+	}
+
+	/**
+	 * Get totals.
+	 *
+	 * @return float|array
+	 * @since 6.3.0
+	 */
+	public function get_totals( ?string $key = null ) {
+		if ( $key ) {
+			return $this->totals[ $key ] ?? 0;
+		}
+
+		return $this->totals;
 	}
 
 	/**
@@ -242,16 +307,102 @@ class Item {
 	 * @return void
 	 */
 	public function calculate_totals() {
-		$this->totals = $this->default_totals;
+		$this->totals = array(
+			'subtotal'      => 0,
+			'total'         => 0,
+			'total_partial' => 0,
+		);
+		/* @var CartItem $item */
+		foreach ( $this->additional_line_items as $item ) {
+			if ( $item instanceof CartItem ) {
+				$item = [ $item ];
+			}
+			foreach ( $item as $_item ) {
+				$item_subtotal = $_item->get_totals( 'subtotal' );
 
-		$this->totals[ 'subtotal' ] = $this->calculate_subtotal();
-		$this->totals[ 'discount' ] = $this->calculate_discount();
-		$this->totals[ 'tax' ]      = $this->calculate_tax();
-		$this->totals[ 'total' ]    = $this->calculate_total();
-		$this->totals[ 'partial' ]  = $this->calculate_partial();
+				$this->totals[ 'subtotal' ] += $_item->get_totals( 'subtotal' );
+				$this->totals[ 'total' ]    += $this->apply_fees( $this->apply_discounts( $item_subtotal, $_item ), $_item );
+			}
+		}
 
-		$this->totals = apply_filters( 'wptravelengine_cart_item_calculate_totals', $this->totals, $this );
+		$this->totals[ 'total_partial' ] += $this->calculate_partial();
+
+		$this->calculated_totals = true;
 	}
+
+	/**
+	 * Apply adjustments.
+	 *
+	 * @param array $adjustment_items
+	 * @param float $subtotal
+	 * @param string $type
+	 *
+	 * @return float
+	 */
+	protected function apply_adjustments( array $adjustment_items, float $subtotal, CartItem $line_item, string $type = 'fee' ): float {
+		$_subtotal = $subtotal;
+
+		foreach ( $adjustment_items as $item ) {
+			if ( ! empty( $item->applies_to ) && ! in_array( $line_item->item_type, $item->applies_to ) ) {
+				continue;
+			}
+			$deduct_value = $item->apply_to_actual_subtotal ? $item->apply( $subtotal, $this ) : $item->apply( $_subtotal, $this );
+
+			if ( ! isset( $this->totals[ "total_{$item->name}" ] ) ) {
+				$this->totals[ "total_{$item->name}" ] = 0;
+			}
+
+			$this->totals[ "total_{$item->name}" ] += $deduct_value;
+
+			if ( $type === 'discount' ) {
+				$_subtotal = $_subtotal - $deduct_value;
+			} else {
+				$_subtotal = $_subtotal + $deduct_value;
+			}
+		}
+
+		return $_subtotal;
+	}
+
+	/**
+	 * Apply discounts.
+	 *
+	 * @param float $subtotal
+	 *
+	 * @return float
+	 */
+	protected function apply_discounts( float $subtotal, CartItem $item ): float {
+		return $this->apply_adjustments( $this->cart->get_deductible_items(), $subtotal, $item, 'discount' );
+	}
+
+	/**
+	 * Apply fees.
+	 *
+	 * @param float $subtotal
+	 * @param CartItemInterface $item
+	 *
+	 * @return float
+	 */
+	protected function apply_fees( float $subtotal, CartItem $item ): float {
+		return $this->apply_adjustments( $this->cart->get_fees(), $subtotal, $item );
+	}
+
+	/**
+	 * Calculate totals.
+	 *
+	 * @return void
+	 */
+//	public function calculate_totals() {
+//		$this->totals = $this->default_totals;
+//
+//		$this->totals[ 'subtotal' ] = $this->calculate_subtotal();
+//		$this->totals[ 'discount' ] = $this->calculate_discount();
+//		$this->totals[ 'tax' ]      = $this->calculate_tax();
+//		$this->totals[ 'total' ]    = $this->calculate_total();
+//		$this->totals[ 'partial' ]  = $this->calculate_partial();
+//
+//		$this->totals = apply_filters( 'wptravelengine_cart_item_calculate_totals', $this->totals, $this );
+//	}
 
 	/**
 	 * Calculate subtotal.
@@ -296,10 +447,12 @@ class Item {
 	 * @return string
 	 */
 	protected function generate_id(): string {
-		if ( ! empty( $this->trip_time ) ) {
-			$suffix = ( new \DateTime( $this->trip_time ) )->format( 'Y-m-d_H-i' );
+		$trip_time = $this->attrs[ 'trip_time' ] ?? '';
+		$trip_date = $this->attrs[ 'trip_date' ] ?? '';
+		if ( ! empty( $trip_time ) ) {
+			$suffix = ( new \DateTime( $trip_time ) )->format( 'Y-m-d_H-i' );
 		} else {
-			$suffix = ( new \DateTime( $this->trip_date ) )->format( 'Y-m-d_H-i' );
+			$suffix = ( new \DateTime( $trip_date ) )->format( 'Y-m-d_H-i' );
 		}
 
 		$cart_item_id = "cart_{$this->trip_id}";
@@ -392,6 +545,8 @@ class Item {
 			$value = (float) $trip_settings[ "partial_payment_{$type}" ];
 		}
 
+		$trip_full_payment = $global_full_payment;
+
 		/**
 		 * Send more data to disable full payment.
 		 *
@@ -410,45 +565,7 @@ class Item {
 	 * @return float
 	 */
 	public function calculate_partial(): float {
-		$partial_payment_data = $this->down_payment_settings();
-
-		$total = $this->totals[ 'total' ];
-
-		if ( ! isset( $partial_payment_data[ 'type' ] )
-		     || ! in_array( $partial_payment_data[ 'type' ], [ 'amount', 'percent', ], true )
-		) {
-			return $total;
-		}
-
-		if ( 'amount' === $partial_payment_data[ 'type' ] ) {
-			return (float) $partial_payment_data[ 'value' ];
-		}
-
-		return $total * ( (float) $partial_payment_data[ 'value' ] / 100 );
-	}
-
-	/**
-	 * Calculate the partial payment amount for a specific total amount.
-	 * 
-	 * Temporarily sets the total to the provided amount, calculates the partial payment,
-	 * then restores the original total.
-	 *
-	 * @param float $amount The total amount to calculate partial payment for
-	 * @since 6.2.3
-	 * 
-	 * @return float The calculated partial payment amount
-	 */
-	public function calculate_partial_for_amount( float $amount ): float {
-		$original_total = $this->totals['total'];
-		
-		try {
-			$this->totals['total'] = $amount;
-			$partial_amount = $this->calculate_partial();
-		} finally {
-			$this->totals['total'] = $original_total;
-		}
-
-		return (float) $partial_amount ?? $amount;
+		return PartialPayment::instance()->apply_to_cart_item( $this );
 	}
 
 	/**
@@ -469,10 +586,10 @@ class Item {
 
 	/**
 	 * Get the item cart.
-	 * 
-	 * @since 6.2.3
 	 *
 	 * @return Cart|null
+	 * @since 6.2.3
+	 *
 	 */
 	public function cart() {
 		return $this->cart ?? null;
@@ -542,5 +659,52 @@ class Item {
 	 */
 	public function __get( string $name ) {
 		return $this->attrs[ $name ] ?? null;
+	}
+
+	/**
+	 * Add additional line items.
+	 *
+	 * @return void
+	 * @since 6.3.0
+	 */
+	public function add_add_line_items() {
+		$package = new TripPackage( $this->price_key, new Trip( $this->trip_id ) );
+
+		if ( isset( $this->pax ) && is_array( $this->pax ) ) {
+			$package_travelers    = $package->get_traveler_categories();
+			$cart_pricing_options = $this->pax;
+
+			foreach ( $package_travelers as $package_traveler ) {
+				if ( isset( $cart_pricing_options[ $package_traveler->id ] ) ) {
+					$pax = (int) ( $cart_pricing_options[ $package_traveler->id ] ?? 0 );
+
+					$applicable_price = isset( $package_traveler->has_sale ) && $package_traveler->has_sale ? $package_traveler->sale_price : $package_traveler->price;
+
+					$enable_group_discount = (bool) ( $package_traveler->enabled_group_discount ?? false );
+					$group_pricing         = $package->get_group_pricing()[ $package_traveler->id ] ?? [];
+
+					$travelers[ 'pax' ][ $package_traveler->id ] = $pax;
+
+					if ( $enable_group_discount && ! empty( $group_pricing ) ) {
+						foreach ( $group_pricing as $pricing ) {
+							if ( $pricing[ 'from' ] <= $pax && ( empty( $pricing[ 'to' ] ) || ( $pricing[ 'to' ] >= $pax ) ) ) {
+								$applicable_price = $pricing[ 'price' ];
+								break;
+							}
+						}
+					}
+
+					$price = $package_traveler->pricing_type === 'per-group' && $pax > 0 ? $applicable_price / $pax : $applicable_price;
+
+					$this->add_additional_line_items(
+						new PricingCategory( $this->cart, array(
+							'label'    => $package_traveler->label,
+							'quantity' => $pax,
+							'price'    => apply_filters( 'wptravelengine_package_traveler_price', $price, compact( 'package', 'package_traveler', 'pax' ) ),
+						) )
+					);
+				}
+			}
+		}
 	}
 }

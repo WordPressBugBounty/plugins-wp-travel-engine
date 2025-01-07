@@ -67,7 +67,7 @@ return apply_filters(
 				'divider'     => true,
 				'label'       => __( 'API Key:', 'wp-travel-engine' ),
 				'description' => sprintf(
-					__( 'Get an %1$sFree API Key%2$s or %3$sPremium API Key%4$s', 'wte-currency-converter' ),
+					__( 'Get an %1$sFree API Key%2$s or %3$sPremium API Key%4$s', 'wp-travel-engine' ),
 					'<a href="https://currencyfreaks.com/" target="_blank" rel="nofollow">',
 					'</a>',
 					'<a href="https://www.currencyconverterapi.com/pricing" target="_blank" rel="nofollow">',

@@ -104,6 +104,8 @@ if ( isset( $booking_id ) ) {
 
 		$hide_traveller_info = isset( $options[ 'travelers_information' ] ) ? $options[ 'travelers_information' ] : 'yes';
 
+		$hide_traveller_info = apply_filters( 'wptravelengine_hide_traveler_form', $hide_traveller_info );
+
 		if ( 'yes' === $hide_traveller_info || '1' === $hide_traveller_info ) {
 			if ( isset( $posted_data ) ) {
 				$error_found = false;
@@ -157,8 +159,9 @@ if ( isset( $booking_id ) ) {
 			);
 
 			$form_fields->init( $modified_traveller_fields )->render();
+			$show_emergency_contact = apply_filters( 'wptravelengine_hide_emergency_form', $wp_travel_engine_settings_options[ 'emergency' ] );
 
-			if ( ! isset( $wp_travel_engine_settings_options[ 'emergency' ] ) ) {
+			if ( ! $show_emergency_contact ) {
 				echo '<div class="relation-options-title">' . sprintf( esc_html__( 'Emergency contact details for Traveller: #%1$s', 'wp-travel-engine' ), esc_html( $i ) ) . '</div>';
 
 				$modified_emergency_contact_fields = array_map(

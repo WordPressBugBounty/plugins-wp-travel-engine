@@ -64,6 +64,8 @@ class Wp_Travel_Engine_Tabs {
 	 * @param array $tab_args Tab Arguments.
 	 */
 	public function wp_travel_engine_trip_price_metabox_callback( $tab_args ) {
+		wp_enqueue_script( 'wptravelengine-trip-edit' );
+		wp_enqueue_script( 'wptravelengine-exports' );
 		include plugin_dir_path( __FILE__ ) . 'meta-parts/trip-metas.php';
 	}
 

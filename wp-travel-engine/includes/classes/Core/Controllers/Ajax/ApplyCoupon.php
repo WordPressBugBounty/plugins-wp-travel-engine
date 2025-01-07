@@ -16,9 +16,9 @@ use WPTravelEngine\Core\Models\Post\Coupons;
  */
 class ApplyCoupon extends AjaxController {
 
-	const NONCE_KEY    = '_nonce';
+	const NONCE_KEY = '_nonce';
 	const NONCE_ACTION = 'wte_session_cart_apply_coupon';
-	const ACTION       = 'wte_session_cart_apply_coupon';
+	const ACTION = 'wte_session_cart_apply_coupon';
 
 	/**
 	 * Process Request.
@@ -27,7 +27,7 @@ class ApplyCoupon extends AjaxController {
 	public function process_request() {
 		global $wte_cart;
 		$apply_coupon_code = $this->request->get_param( 'CouponCode' );
-		$apply_trip_ids    = $this->request->get_param( 'trip_ids' );
+		$apply_trip_ids    = $this->request->get_param( 'trip_ids' ) ?? wp_json_encode( $wte_cart->get_cart_trip_ids() );
 		if ( empty( $apply_coupon_code ) ) { // phpcs:ignore
 			\wp_send_json_error(
 				new \WP_Error( 'WTE_INVALID_REQUEST', __( 'Coupon Code is required.', 'wp-travel-engine' ) )
@@ -36,6 +36,7 @@ class ApplyCoupon extends AjaxController {
 		}
 
 		if ( empty( $apply_trip_ids ) ) { // phpcs:ignore
+
 			\wp_send_json_error(
 				new \WP_Error( 'WTE_INVALID_REQUEST', __( 'Coupon cannot be applied. No Trips to apply Coupon', 'wp-travel-engine' ) )
 			);
@@ -99,7 +100,7 @@ class ApplyCoupon extends AjaxController {
 			$discounted_total = round( $cart_total * ( 100 - $discount_value ) / 100, 2 );
 		}
 
-		$wte_cart->add_discount_values( wte_clean( wp_unslash( $apply_coupon_code ) ), $discount_type, $discount_value ); // phpcs:ignore
+		$wte_cart->add_discount_values( 'coupon', wte_clean( wp_unslash( $apply_coupon_code ) ), $discount_type, $discount_value ); // phpcs:ignore
 
 		if ( wp_travel_engine_is_trip_partially_payable( $trip_id ) ) {
 			$new_dicounted_cost = $discounted_total - $wte_cart->get_total_partial();

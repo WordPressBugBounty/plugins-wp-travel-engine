@@ -1,7 +1,9 @@
 <?php
 
 use WPTravelEngine\Core\Controllers\Ajax\AddToCart;
+use WPTravelEngine\Core\Controllers\Ajax\ApplyCoupon;
 use WPTravelEngine\Core\Controllers\Ajax\Cart;
+use WPTravelEngine\Core\Controllers\Ajax\Checkout;
 use WPTravelEngine\Core\Models\Post\Booking;
 use WPTravelEngine\Helpers\Functions;
 use WPTravelEngine\Registers\AjaxRequestRegistry;
@@ -21,6 +23,8 @@ class WTE_Ajax {
 		$ajax_registry = AjaxRequestRegistry::make();
 		$ajax_registry->register( AddToCart::class );
 
+		$ajax_registry->register( Checkout::class );
+		$ajax_registry->register( ApplyCoupon::class );
 		$ajax_registry->register( Cart::class );
 
 		add_action( 'wp_ajax_nopriv_email_test', function () {
@@ -119,12 +123,12 @@ class WTE_Ajax {
 				),
 			),
 			// [x]
-			'wte_session_cart_apply_coupon'         => array(
-				'callback' => array(
-					'\WPTravelEngine\Modules\CouponCode\Ajax',
-					'apply_coupon',
-				),
-			),
+			//			'wte_session_cart_apply_coupon'         => array(
+			//				'callback' => array(
+			//					'\WPTravelEngine\Modules\CouponCode\Ajax',
+			//					'apply_coupon',
+			//				),
+			//			),
 			// [x]
 			'wte_session_cart_reset_coupon'         => array(
 				'callback' => array(

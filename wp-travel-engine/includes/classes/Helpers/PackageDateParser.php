@@ -12,6 +12,7 @@ use DateTime;
 use RRule\RRule;
 use WPTravelEngine\Core\Booking\Inventory;
 use WPTravelEngine\Core\Models\Post\TripPackage;
+use WPTravelEngine\Core\Models\Post\TravelerCategory;
 
 #[\AllowDynamicProperties]
 /**
@@ -57,6 +58,11 @@ class PackageDateParser {
 	protected array $booked_seats = array();
 
 	/**
+	 * @var array
+	 */
+	protected array $default_pricing = array();
+
+	/**
 	 * Constructor.
 	 *
 	 * @param TripPackage $trip_package Trip package object.
@@ -71,6 +77,21 @@ class PackageDateParser {
 		$this->is_recurring = is_bool( $args[ 'is_recurring' ] ) ? $args[ 'is_recurring' ] : '1' === $args[ 'is_recurring' ];
 		$this->seats        = is_numeric( $args[ 'seats' ] ?? '' ) ? (int) $args[ 'seats' ] : '';
 		$this->rrule        = $this->parse_rrule( $args[ 'rrule' ] ?? array() );
+		
+		$this->default_pricing 			= array();
+		$traveler_categories 			= $this->package->get_traveler_categories();
+		$primary_traveler_category_id 	= $traveler_categories->get_primary_traveler_category()->get( 'id' );
+		foreach ( $traveler_categories as $traveler_category ) {
+			/** @var TravelerCategory $traveler_category */
+			$this->default_pricing[] = array(
+				'id' 			=> $traveler_category->get( 'id' ),
+				'label' 		=> $traveler_category->get( 'label' ),
+				'price' 		=> $traveler_category->get( 'has_sale' ) ? $traveler_category->get( 'sale_price' ) : $traveler_category->get( 'price' ),
+				'is_primary' 	=> $traveler_category->get( 'id' ) === $primary_traveler_category_id,
+			);
+		}
+
+		do_action( 'wptravelengine_package_date_parser_construct', $this->package, $args );
 	}
 
 	/**
@@ -183,10 +204,11 @@ class PackageDateParser {
 			$available_seats = is_numeric( $this->seats ) ? array_sum( array_column( $times, 'seats' ) ) : '';
 		}
 
-		return array(
-			'times' => $times,
-			'seats' => is_numeric( $available_seats ) ? (int) $available_seats : '',
-		);
+		return apply_filters( 'wptravelengine_package_date_parser_prepare_date', array(
+			'times' 	=> $times,
+			'seats' 	=> is_numeric( $available_seats ) ? (int) $available_seats : '',
+			'pricing' 	=> $this->default_pricing,
+		), $this->package );
 	}
 
 	/**

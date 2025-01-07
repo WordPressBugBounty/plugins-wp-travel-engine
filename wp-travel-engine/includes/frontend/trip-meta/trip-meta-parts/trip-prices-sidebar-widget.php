@@ -153,6 +153,7 @@ $custom_enquiry_link = $settings['custom_enquiry_link'] ?? '#';
 								disabled="disabled"
 								class="wpte-bf-btn wte-book-now btn-loading"><?php echo esc_html__( 'Check Availability', 'wp-travel-engine' ); ?></button>
 					</div>
+					<?php do_action( 'wptravelengine_after_booking_button' ); ?>
 				</div>
 				<?php
 				if ( $show_enquiry_info ) :
@@ -179,4 +180,5 @@ $custom_enquiry_link = $settings['custom_enquiry_link'] ?? '#';
 		?>
 		<!-- ./ Prices List -->
 	</div>
+	
 <?php

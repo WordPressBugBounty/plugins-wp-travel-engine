@@ -28,7 +28,7 @@ class Checkout extends Shortcode {
 	 * @return string
 	 * @since 1.0
 	 */
-	public function output(): string {
+	public function output( $atts ): string {
 		global $wte_cart;
 
 		if ( is_admin() ) {

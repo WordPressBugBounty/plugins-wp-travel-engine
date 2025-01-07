@@ -2,7 +2,9 @@
 
 namespace WPTravelEngine\Core;
 
-class Tax {
+use WPTravelEngine\Interfaces\Tax as TaxInterface;
+
+class Tax implements TaxInterface {
 
 	protected array $settings = array();
 

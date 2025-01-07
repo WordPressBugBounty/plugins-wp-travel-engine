@@ -20,6 +20,14 @@ class Template_Tags {
 		$this->cart_info = (object) $this->booking->cart_info;
 
 		$this->trip = (object) array_values( $this->order_trips )[ 0 ];
+
+		$this->billing_details = $this->booking->wptravelengine_billing_details ?? [];
+
+		$this->traveller_details = $this->booking->wptravelengine_travelers_details ?? [];
+
+		$this->emergency_details = $this->booking->wptravelengine_emergency_details ?? [];
+
+		$this->additional_notes = $this->booking->wptravelengine_additional_note ?? '';
 	}
 
 	public function get_trip_url() {
@@ -230,6 +238,7 @@ class Template_Tags {
                             </table>
                         </td>
                     </tr>
+					<?php do_action('wptravelengine_email_template_before_extra_services', $cart_info ); ?>
 					<?php if ( $trip->trip_extras && is_array( $trip->trip_extras ) ) : ?>
                         <tr>
                             <td colspan="2"><?php esc_html_e( 'Extra Services', 'wp-travel-engine' ); ?></td>
@@ -288,7 +297,7 @@ class Template_Tags {
 									<?php echo wte_esc_price( wte_get_formated_price( + $discount_figure, $currency, '', ! 0 ) ); ?>
                                 </td>
                             </tr>
-
+							<?php do_action('wptravelengine_email_template_before_tax_amount', $cart_info ); ?>
 							<?php if ( ! empty( $cart_info[ 'tax_amount' ] ) ) { ?>
                                 <tr>
                                     <td><?php echo esc_html( wptravelengine_get_tax_label( $cart_info[ 'tax_amount' ] ) ); ?></td>
@@ -435,8 +444,203 @@ class Template_Tags {
 				'{discount_amount}'           => wte_get_formated_price( $this->discount_amount(), $currency, '', ! 0 ),
 				'{traveler_data}'             => $traveller_email_template_content,
 				'{payment_method}'            => $this->get_payment_method( $this->payment->ID ),
+				'{billing_details}'           => $this->get_billing_details(),
+				'{additional_note}'           => $this->get_additional_note(),
+				'{traveller_details}'         => $this->get_traveller_details(),
+				'{emergency_details}'         => $this->get_emergency_details(),
 			),
 			$this->payment->ID
 		);
+	}
+
+	/**
+	 * Get additional note.
+	 *
+	 * @return string
+	 */
+	public function get_additional_note() {
+		if( empty( $this->additional_notes ) ) {
+			return '';
+		}
+		ob_start();
+		?>
+		<table width="100%">
+			<tr>
+				<td class="title-holder" style="margin: 0;" valign="top">
+					<h3 class="alignleft"><?php echo esc_html__( 'Additional Note', 'wp-travel-engine' ); ?></h3>
+				</td>
+			</tr>
+			<tr>
+				<td><?php echo esc_html( $this->additional_notes ); ?></td>
+			</tr>
+		</table>
+		<?php
+		return ob_get_clean();
+	}
+
+	public function get_billing_details() {
+		if( empty( $this->billing_details ) ) {
+			return '';
+		}
+		ob_start();
+		?>
+		<table width="100%">
+			<tr>
+				<td class="title-holder" style="margin: 0;" valign="top">
+					<h3 class="alignleft"><?php echo esc_html__( 'Billing Details', 'wp-travel-engine' ); ?></h3>
+				</td>
+			</tr>
+			<?php
+			foreach ( $this->billing_details as $key => $value ) {
+				// Map keys to more readable formats
+				$key_map = [
+					'fname'   => 'First Name',
+					'lname'   => 'Last Name',
+					'email'   => 'Email',
+					'phone'   => 'Phone',
+					'address' => 'Address',
+					'city'    => 'City',
+					'country' => 'Country'
+				];
+
+				if ( array_key_exists( $key, $key_map ) ) {
+					$key = $key_map[ $key ];
+				}
+				if ( is_array( $value ) ) {
+					$value = implode( ', ', $value );
+				}
+				 ?>
+				<tr>
+					<td><?php echo esc_html( ucfirst( $key ) ); ?></td>
+					<td>
+						<?php
+						if ( filter_var( $value, FILTER_VALIDATE_URL ) ) : ?>
+							<a href="<?php echo esc_url( $value ); ?>" target="_blank"><?php echo esc_html( basename( $value ) ); ?></a>
+						<?php else: ?>
+							<?php echo esc_html( $value ); ?>
+						<?php endif; ?>
+					</td>
+				</tr>
+				<?php
+			}
+			?>
+		</table>
+		<?php
+		return ob_get_clean();
+	}
+
+	public function get_emergency_details() {
+		if( empty( $this->emergency_details ) ) {
+			return '';
+		}
+		ob_start();
+		?>
+		<table width="100%">
+			<tr>
+				<td class="title-holder" style="margin: 0;" valign="top">
+					<h3 class="alignleft"><?php echo esc_html__( 'Emergency Details', 'wp-travel-engine' ); ?></h3>
+				</td>
+			</tr>
+			<?php
+			foreach ( $this->emergency_details as $key => $value ) {
+				// Map keys to more readable formats
+				$key_map = [
+					'title' 	=> 'Title',
+					'fname'   	=> 'First Name',
+					'lname'   	=> 'Last Name',
+					'email'   	=> 'Email',
+					'phone'   	=> 'Phone',
+					'address' 	=> 'Address',
+					'city'    	=> 'City',
+					'country' 	=> 'Country',
+					'relation' 	=> 'Relation',
+				];
+				if ( array_key_exists( $key, $key_map ) ) {
+					$key = $key_map[ $key ];
+				}
+				if ( is_array( $value ) ) {
+					$value = implode( ',', $value );
+				}
+				?>
+				<tr>
+					<td><?php echo esc_html( ucfirst( $key ) ); ?></td>
+					<td>
+						<?php
+						if ( filter_var( $value, FILTER_VALIDATE_URL ) ) : ?>
+							<a href="<?php echo esc_url( $value ); ?>" target="_blank"><?php echo esc_html( basename( $value ) ); ?></a>
+						<?php else: ?>
+							<?php echo esc_html( $value ); ?>
+						<?php endif; ?>
+					</td>
+				</tr>
+				<?php
+			}
+			?>
+		</table>
+		<?php
+		return ob_get_clean();
+	}
+
+	public function get_traveller_details() {
+		if( empty( $this->traveller_details ) ) {
+			return '';
+		}
+		ob_start();
+		?>
+		<table width="100%">
+			<tr>
+				<td class="title-holder" style="margin: 0;" valign="top">
+					<h3 class="alignleft"><?php echo esc_html__( 'Traveller Details', 'wp-travel-engine' ); ?></h3>
+				</td>
+			</tr>
+			<?php
+			foreach ( $this->traveller_details as $traveler => $details ) {
+				?>
+				<tr>
+					<td class="title-holder" style="margin: 0;" valign="top">
+						<h3 class="alignleft"><?php echo esc_html( sprintf( 'Traveller %s', $traveler + 1) ); ?></h3>
+					</td>
+				</tr>
+				<?php
+				foreach( $details as $key => $value ) {
+					// Map keys to more readable formats
+					$key_map = [
+						'title' 	=> 'Title',
+						'fname'   	=> 'First Name',
+						'lname'   	=> 'Last Name',
+						'email'   	=> 'Email',
+						'phone'   	=> 'Phone',
+						'address' 	=> 'Address',
+						'city'    	=> 'City',
+						'country' 	=> 'Country',
+						'postcode'	=> 'Postcode',
+						'dob'     	=> 'Date of Birth',
+						'passport' 	=> 'Passport Number',
+					];
+					if ( array_key_exists( $key, $key_map ) ) {
+						$key = $key_map[ $key ];
+					}
+					if ( is_array( $value ) ) {
+						$value = implode( ',', $value );
+					}
+					?>
+					<tr>
+						<td><?php echo esc_html( ucfirst( $key ) ); ?></td>
+						<td>
+							<?php
+							if ( filter_var( $value, FILTER_VALIDATE_URL ) ) : ?>
+								<a href="<?php echo esc_url( $value ); ?>" target="_blank"><?php echo esc_html( basename( $value ) ); ?></a>
+							<?php else: ?>
+								<?php echo esc_html( $value ); ?>
+							<?php endif; ?>
+						</td>
+					</tr>
+					<?php
+				}
+			}
+			?>
+		</table>
+		<?php
+		return ob_get_clean();
 	}
 }

@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 6.2.4
+Stable tag: 6.3.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -368,7 +368,24 @@ Please send us an email via [support ticket](https://wptravelengine.com/support-
 
 == Changelog ==
 
-= 6.2.4 - 1st January 2024 =
+= 6.3.0 - 7th January 2025 =
+* New: Introduced a new, customizable checkout page template with an updated UI and collapsible card boxes for a cleaner, more organized layout.
+* New: Checkout page now compatible with both FSE and non-FSE themes.
+* New: Added options to show or hide Traveler Information and Emergency Contact forms, and choose when to display them during checkout.
+* New: Customizable sections for additional notes, coupon discount, privacy policy, and footer copyright content.
+* New: Added shortcode support to customize checkout components (Checkout Form, Cart Summary, Tour Details) via block editor or Elementor.
+* New: Introduced two methods to implement the new checkout template: using shortcode or through Global Settings.
+* New: Partial payment now calculated per traveler, with clearer display of required amounts during checkout.
+* Update: Added ability to customize trip tag permalinks for better trip categorization.
+* Feature: Sticky tabs now supported on mobile for improved navigation on smaller screens.
+* Fix: Resolved issue preventing 100% discount coupon codes from working with all payment gateways.
+* Fix: Fixed sorting issue on taxonomy pages with child terms.
+* Fix: Corrected sorting issue for departure dates on custom-created trip listing pages.
+* Fix: Addressed styling conflicts caused by trip search shortcode affecting other widgets.
+
+**Check out the release note for version [6.3.0](https://wptravelengine.com/new-release-version-6-3-0/).**
+
+= 6.2.4 - 1st January 2025 =
 * Fix: Primary package is now set correctly when duplicating a trip package.
 
 = 6.2.3 - 24th December 2024 =

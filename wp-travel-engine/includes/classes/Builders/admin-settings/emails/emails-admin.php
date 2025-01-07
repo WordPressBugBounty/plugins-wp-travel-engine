@@ -27,6 +27,10 @@ $email_tags = apply_filters( 'wptravelengine_admin_email_template_tags', array(
 	'{booking_details}'           => __( 'The booking details: Booked trips, Extra Services, Traveller details etc', 'wp-travel-engine' ),
 	'{traveler_data}'             => __( 'The traveller details: Traveller details and Emergency Contact Details', 'wp-travel-engine' ),
 	'{payment_method}'            => __( 'Payment Method used to checkout.', 'wp-travel-engine' ),
+	'{billing_details}'			  => __( 'The billing details filled in new checkout template.', 'wp-travel-engine' ),
+	'{traveller_details}'		  => __( 'The traveler\'s details filled in new checkout template.', 'wp-travel-engine' ),
+	'{emergency_details}'		  => __( 'The emergency contact details filled in new checkout template.', 'wp-travel-engine' ),
+	'{additional_note}'		 	  => __( 'The additional note filled in new checkout template.', 'wp-travel-engine' ),
 ) );
 
 return apply_filters(

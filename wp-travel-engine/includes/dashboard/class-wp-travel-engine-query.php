@@ -40,6 +40,7 @@ class WP_Travel_Engine_Query {
 		}
 		$this->init_query_vars();
 	}
+
 	/**
 	 * Init query vars by loading options.
 	 */
@@ -58,12 +59,14 @@ class WP_Travel_Engine_Query {
 	 * @access public
 	 *
 	 * @param array $vars Query vars.
+	 *
 	 * @return array
 	 */
 	public function add_query_vars( $vars ) {
 		foreach ( $this->get_query_vars() as $key => $var ) {
 			$vars[] = $key;
 		}
+
 		return $vars;
 	}
 
@@ -75,18 +78,21 @@ class WP_Travel_Engine_Query {
 	public function get_query_vars() {
 		return apply_filters( 'wp_travel_engine_get_query_vars', $this->query_vars );
 	}
+
 	/**
 	 * Endpoint mask describing the places the endpoint should be added.
 	 *
-	 * @since 2.6.2
 	 * @return int
+	 * @since 2.6.2
 	 */
 	public function get_endpoints_mask() {
 		if ( 'page' === get_option( 'show_on_front' ) ) {
-			$page_on_front     = get_option( 'page_on_front' );
-			$myaccount_page_id = wp_travel_engine_get_dashboard_page_id();
+			$page_on_front   = get_option( 'page_on_front', array() );
+			$settings        = get_option( 'wp_travel_engine_settings', array() );
+			$account_page_id = $settings[ 'pages' ][ 'wp_travel_engine_dashboard_page' ] ?? wp_travel_engine_get_page_id( 'my-account' );
 
-			if ( in_array( $page_on_front, array( $myaccount_page_id ), true ) ) {
+
+			if ( in_array( $page_on_front, array( $account_page_id ), true ) ) {
 				return EP_ROOT | EP_PAGES;
 			}
 		}
@@ -108,4 +114,5 @@ class WP_Travel_Engine_Query {
 	}
 
 }
+
 new WP_Travel_Engine_Query();

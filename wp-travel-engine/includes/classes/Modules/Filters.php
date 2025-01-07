@@ -148,7 +148,7 @@ class Filters {
 			$slug            = ! empty( $request[ 'filter_slug' ] ) ? untrailingslashit( $request[ 'filter_slug' ], '', 'save' ) : untrailingslashit( $label, '', 'save' );
 
 			if ( strlen( $slug ) > 32 ) {
-				wp_die( esc_html__( 'Taxonomy names must be between 1 and 32 characters in length.' ), 'wp-travel-engine' );
+				wp_die( esc_html__( 'Taxonomy names must be between 1 and 32 characters in length.', 'wp-travel-engine' ), 'wp-travel-engine' );
 			}
 
 			$filters[ $slug ] = array(

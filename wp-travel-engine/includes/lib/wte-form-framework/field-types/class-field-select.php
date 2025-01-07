@@ -80,6 +80,7 @@ class WP_Travel_Engine_Form_Field_Select {
 			if ( ! is_array( $this->field['options'] ) ) {
 				$options_arr = json_decode( $this->field['options'], true );
 			}
+			$options_arr = apply_filters( 'wptravelengine_form_field_options', $options_arr );
 			foreach ( $options_arr as $key => $value ) {
 
 				// Option Attributes.

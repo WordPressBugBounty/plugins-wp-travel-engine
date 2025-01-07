@@ -6,7 +6,8 @@
 $booking_details       = null;
 $traveller_information = get_post_meta( $post->ID, 'wp_travel_engine_placeorder_setting', true );
 $personal_options = isset( $traveller_information[ 'place_order' ] ) ? $traveller_information[ 'place_order' ] : array();
-
+$traveller_information = get_post_meta( $post->ID, 'wptravelengine_travelers_details', true );
+$emergency_contact = get_post_meta( $post->ID, 'wptravelengine_emergency_details', true );
 /** @var array $_args */
 extract( $_args );
 
@@ -25,7 +26,7 @@ if ( is_null( $booking_details ) ) {
 	</div> <!-- .wpte-block-wrap -->
 
 	<?php
-	if ( isset( $personal_options ) && ! empty( $personal_options ) ) {
+	if ( isset( $personal_options ) && ! empty( $personal_options ) || ( isset( $traveller_information ) && ! empty( $traveller_information ) ) || ( isset( $emergency_contact ) && ! empty( $emergency_contact ) ) ) {
 		include plugin_dir_path( __FILE__ ) . 'booking-details_personal.php';
 	}
 	/**

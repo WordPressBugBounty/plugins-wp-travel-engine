@@ -66,8 +66,25 @@ class BookingOnly extends BaseGateway {
 	}
 
 	/**
+	 * Get display icon.
+	 *
+	 * @return string
+	 */
+	public function get_display_icon(): string {
+		return $this->get_icon();
+	}
+
+	/**
 	 * @inheritDoc
 	 */
 	public function process_payment( Booking $booking, Payment $payment, $booking_instance ): void {
+		$cart_info = $booking->get_cart_info();
+		if ( $cart_info[ 'total' ] <= 0 && $cart_info[ 'subtotal' ] > 0 ) { // Maybe 100% discount coupon applied.
+			$payment->set_status( 'completed' );
+			$payment->save();
+
+			$booking->update_status( 'booked' );
+		}
+
 	}
 }

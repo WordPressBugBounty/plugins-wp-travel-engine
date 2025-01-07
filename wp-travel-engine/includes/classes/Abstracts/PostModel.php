@@ -27,7 +27,9 @@ abstract class PostModel {
 	 *
 	 * @var array
 	 */
-	protected array $data = array();
+	protected array $data = array(
+		'__changes' => array(),
+	);
 
 	/**
 	 * Post type name.
@@ -199,7 +201,7 @@ abstract class PostModel {
 			$this->update_meta( $meta_key, $meta_value );
 			unset( $this->data[ $meta_key ] );
 		}
-		unset( $this->data[ '__changes' ] );
+		$this->data[ '__changes' ] = array();
 
 		return $this;
 	}

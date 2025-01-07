@@ -139,10 +139,11 @@ class Trip extends PostModel {
 
 		$first_key = array_shift( $keys );
 
-		$settings = $this->data[ '__changes' ][ $first_key ] ??= array();
+		$this->data[ '__changes' ][ $first_key ] ??= $this->get_meta( $first_key ) ?: array();
+		$settings = &$this->data[ '__changes' ][ $first_key ];
 
 		foreach ( $keys as $key ) {
-			if ( ! isset( $settings[ $key ] ) && ! is_array( $settings[ $key ] ) && ! is_object( $settings[ $key ] ) ) {
+			if ( ! isset( $settings[ $key ] ) || ! is_array( $settings[ $key ] ) || ! is_object( $settings[ $key ] ) ) {
 				$settings[ $key ] = array();
 			}
 			$settings = &$settings[ $key ];
@@ -1091,7 +1092,7 @@ class Trip extends PostModel {
 	/**
 	 * Retrieves metadata from a nested structure.
 	 * If meta_key exists, it fetches and returns its value;
-	 * otherwise, it fetches the metadata and then retrieves the value.
+	 * otherwise, sets the default value if not null.
 	 *
 	 * @param string $dot_keys The nested keys. Designed to be dot-separated.
 	 * @param mixed $default The default value.
@@ -1099,11 +1100,17 @@ class Trip extends PostModel {
 	 * @return mixed The meta-value or null if not found.
 	 */
 	public function search_in_meta( string $dot_keys, $default = null ) {
-		$key_arr = explode( '.', $dot_keys );
-		$data    = (array) ( $this->data[ $key_arr[ 0 ] ] ?? $this->get_meta( $key_arr[ 0 ] ) );
-		array_shift( $key_arr );
+		$key_arr 		= explode( '.', $dot_keys );
+		$first_key 		= array_shift( $key_arr );
+		$meta_value 	= $this->get_meta( $first_key );
+		$data    		= (array) ( $this->data[ $first_key ] ?? $meta_value );
+		$is_available 	= $this->search( $data, $key_arr );
 
-		return $this->search( $data, $key_arr ) ?? $default;
+		if ( ! is_null( $default ) && ! isset( $meta_value[ $key_arr[ 0 ] ] ) && is_null( $is_available ) ) {
+			$this->set_nested_setting( $dot_keys, $default );
+		}
+
+		return $is_available ?? $default;
 	}
 
 	/**

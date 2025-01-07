@@ -68,7 +68,7 @@ abstract class AjaxController {
 	 */
 	protected function authorize_request() {
 		if ( check_ajax_referer( static::NONCE_ACTION, static::NONCE_KEY, false ) === false ) {
-//			wp_send_json_error( new \WP_Error( 'invalid_request', __( 'Invalid request.', 'wp-travel-engine' ) ) );
+			wp_send_json_error( new \WP_Error( 'invalid_request', __( 'Invalid request.', 'wp-travel-engine' ) ) );
 		}
 
 		$request = new \WP_REST_Request( 'POST' );

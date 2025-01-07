@@ -42,9 +42,7 @@ class WTE_Session {
 		}
 
 		if ( empty( $this->session ) ) { // on page load or refresh.
-			add_action( 'plugins_loaded', array( $this, 'init' ), -1 );
-		} else {
-			add_action( 'init', array( $this, 'init' ), -1 ); // maybe not required.
+			add_action( 'plugins_loaded', array( $this, 'init' ), - 1 );
 		}
 	}
 
@@ -52,30 +50,34 @@ class WTE_Session {
 	 * Setup the WP_Session instance
 	 *
 	 * @access public
-	 * @since 1.5
 	 * @return array
+	 * @since 1.5
 	 */
 	public function init() {
 		$this->session = WP_Session::get_instance();
+
 		return $this->session;
 	}
 
 	/**
 	 * Get session data.
 	 *
-	 * @param  string $key session data key.
+	 * @param string $key session data key.
+	 *
 	 * @return mixed      session data.
 	 */
 	public function get( $key ) {
 		$key = sanitize_key( $key );
+
 		return isset( $this->session[ $key ] ) ? maybe_unserialize( $this->session[ $key ] ) : false;
 	}
 
 	/**
 	 * Set data in session.
 	 *
-	 * @param string $key   session data key.
-	 * @param mixed  $value  session data.
+	 * @param string $key session data key.
+	 * @param mixed $value session data.
+	 *
 	 * @return mixed
 	 */
 	public function set( $key, $value ) {
@@ -92,7 +94,8 @@ class WTE_Session {
 	/**
 	 * delete data in session.
 	 *
-	 * @param string $key   session data key.
+	 * @param string $key session data key.
+	 *
 	 * @return boolean
 	 */
 	public function delete( $key ) {
