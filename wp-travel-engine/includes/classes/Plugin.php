@@ -6,37 +6,35 @@ use Wp_Travel_Engine_Activator;
 use Wp_Travel_Engine_Admin;
 use Wp_Travel_Engine_Deactivator;
 use WP_Travel_Engine_Enquiry_Forms;
-use Wp_Travel_Engine_i18n;
 use Wp_Travel_Engine_Loader;
 use Wp_Travel_Engine_Public;
 use WPTravelEngine\Core\Booking\BookingProcess;
 use WPTravelEngine\Core\Cart\Cart;
-use WPTravelEngine\Core\Controllers\RestAPI\V2\Trip;
 use WPTravelEngine\Core\Controllers\RestAPI\V2\Settings;
+use WPTravelEngine\Core\Controllers\RestAPI\V2\Trip;
 use WPTravelEngine\Core\Models\Post\Booking;
-use WPTravelEngine\Core\Shortcodes\Checkout;
 use WPTravelEngine\Core\Shortcodes\CheckoutV2;
 use WPTravelEngine\Core\Shortcodes\Emergency;
 use WPTravelEngine\Core\Shortcodes\General;
-use WPTravelEngine\Core\Shortcodes\TripCheckout;
 use WPTravelEngine\Core\Shortcodes\ThankYou;
 use WPTravelEngine\Core\Shortcodes\TravelerInformation;
+use WPTravelEngine\Core\Shortcodes\TripCheckout;
 use WPTravelEngine\Core\Updates;
 use WPTravelEngine\Filters\SettingsAPISchema;
+use WPTravelEngine\Filters\Template;
 use WPTravelEngine\Filters\TripAPISchema;
 use WPTravelEngine\Filters\TripMetaTabs;
-use WPTravelEngine\Filters\Template;
 use WPTravelEngine\Helpers\Functions;
 use WPTravelEngine\Modules\CouponCode;
 use WPTravelEngine\Modules\Filters as CustomFilters;
 use WPTravelEngine\Modules\TripCode;
 use WPTravelEngine\Modules\TripSearch;
+use WPTravelEngine\Optimizer\Optimizer;
 use WPTravelEngine\Registers\ShortcodeRegistry;
 use WPTravelEngine\Traits\Singleton;
 use WTE_Booking_Emails;
 use function WTE\Upgrade500\wte_process_migration;
 use const WP_TRAVEL_ENGINE_FILE_PATH;
-use WPTravelEngine\Optimizer\Optimizer;
 
 /**
  * The file that defines the core plugin class
@@ -829,7 +827,7 @@ final class Plugin {
 		 * The class responsible for defining internationalization functionality
 		 * of the plugin.
 		 */
-		require_once plugin_dir_path( WP_TRAVEL_ENGINE_FILE_PATH ) . 'includes/class-wp-travel-engine-i18n.php';
+//		require_once plugin_dir_path( WP_TRAVEL_ENGINE_FILE_PATH ) . 'includes/class-wp-travel-engine-i18n.php';
 
 		/**
 		 * Helpers
@@ -1070,9 +1068,18 @@ final class Plugin {
 	 */
 	protected function set_locale() {
 
-		$plugin_i18n = new Wp_Travel_Engine_i18n();
+		add_action( 'init', function () {
 
-		$this->loader->add_action( 'init', $plugin_i18n, 'load_plugin_textdomain' );
+			$locale = apply_filters( 'plugin_locale', determine_locale(), 'wp-travel-engine' );
+
+			unload_textdomain( 'wp-travel-engine', true );
+			load_textdomain( 'wp-travel-engine', WP_LANG_DIR . '/wp-travel-engine/wp-travel-engine-' . $locale . '.mo' );
+			load_plugin_textdomain(
+				'wp-travel-engine',
+				false,
+				dirname( WP_TRAVEL_ENGINE_FILE_PATH ) . '/languages/'
+			);
+		} );
 	}
 
 	/**

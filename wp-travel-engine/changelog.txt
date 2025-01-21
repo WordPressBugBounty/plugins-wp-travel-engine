@@ -1,5 +1,8 @@
 == Changelog ==
 
+= 6.3.2 - 21st January 2025 =
+* Fix: Translation compatibility issues with translation plugins.
+
 = 6.3.1 - 20th January 2025 =
 * Fix: Translation issues in new checkout page template.
 * Fix: Regular price not displaying in the pricing category list in booking modal.

@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv3.
 msgid ""
 msgstr ""
-"Project-Id-Version: WP Travel Engine - Travel and Tour Booking Plugin 6.3.1\n"
+"Project-Id-Version: WP Travel Engine - Travel and Tour Booking Plugin 6.3.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wptravelengine\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-01-21T03:47:26+00:00\n"
+"POT-Creation-Date: 2025-01-21T08:03:37+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: wp-travel-engine\n"
@@ -1203,7 +1203,7 @@ msgid "Note: By clicking yes, you will get an additional messages menu inside Tr
 msgstr ""
 
 #: admin/class-wp-travel-engine-admin.php:2382
-#: includes/classes/Plugin.php:223
+#: includes/classes/Plugin.php:221
 msgid "Dismiss this notice."
 msgstr ""
 
@@ -1659,7 +1659,7 @@ msgstr ""
 #: includes/classes/Modules/TripCode.php:194
 #: includes/classes/Modules/TripCode.php:209
 #: includes/classes/Modules/TripCode.php:228
-#: includes/classes/Plugin.php:208
+#: includes/classes/Plugin.php:206
 msgid "Trip Code"
 msgstr ""
 
@@ -1945,7 +1945,7 @@ msgstr ""
 #: includes/classes/Booking/Email/Template_Tags.php:244
 #: includes/classes/Builders/admin-settings/extensions/extra-services.php:17
 #: includes/classes/Core/Controllers/MiniCart.php:117
-#: includes/classes/Plugin.php:1474
+#: includes/classes/Plugin.php:1481
 #: includes/templates/account/booking-details.php:273
 #: includes/templates/checkout/header-steps.php:35
 #: includes/templates/checkout/mini-cart-before-coupon.php:13
@@ -2790,7 +2790,7 @@ msgid "Terrible"
 msgstr ""
 
 #: dist/blocks/single-trip/trip-booking-button/block.php:57
-#: includes/classes/Plugin.php:701
+#: includes/classes/Plugin.php:699
 #: includes/frontend/trip-meta/trip-meta-parts/trip-prices-sidebar-widget.php:107
 #: includes/frontend/trip-meta/trip-meta-parts/trip-prices-sidebar-widget.php:154
 #: includes/helpers/helpers.php:609
@@ -12231,7 +12231,7 @@ msgstr ""
 
 #: includes/classes/Modules/CouponCode/views/checkout-coupon-form.php:32
 #: includes/classes/Modules/CouponCode/views/coupon-metabox-content.php:82
-#: includes/classes/Plugin.php:209
+#: includes/classes/Plugin.php:207
 msgid "Coupon Code"
 msgstr ""
 
@@ -12645,62 +12645,62 @@ msgstr ""
 msgid "Invalid IPN"
 msgstr ""
 
-#: includes/classes/Plugin.php:210
+#: includes/classes/Plugin.php:208
 msgid "Advanced Search"
 msgstr ""
 
-#: includes/classes/Plugin.php:222
+#: includes/classes/Plugin.php:220
 msgid "%1$s has been automatically deactivated, the feature providing by the plugin is now available in the WP Travel Engine Core."
 msgstr ""
 
-#: includes/classes/Plugin.php:258
+#: includes/classes/Plugin.php:256
 msgid ""
 "<p><strong>Notice:Trip Info Section and New Booking from Dashboard Disabled</strong></p>\n"
 "    <p>We have disabled the option to add new bookings and the ability to edit the \"Trip Info\" section due to bugs and the complexity of handling all possible scenarios.<br/>To avoid issues, please create a new booking through the standard process and cancel the existing one.</p>"
 msgstr ""
 
-#: includes/classes/Plugin.php:503
+#: includes/classes/Plugin.php:501
 msgid "WTE Checkout"
 msgstr ""
 
-#: includes/classes/Plugin.php:504
+#: includes/classes/Plugin.php:502
 msgid "WTE Terms and Conditions"
 msgstr ""
 
-#: includes/classes/Plugin.php:505
+#: includes/classes/Plugin.php:503
 msgid "WTE Thank You"
 msgstr ""
 
-#: includes/classes/Plugin.php:506
+#: includes/classes/Plugin.php:504
 msgid "WTE Travellers Information"
 msgstr ""
 
-#: includes/classes/Plugin.php:507
+#: includes/classes/Plugin.php:505
 #: includes/templates/account/tab-content/account.php:9
 msgid "My Account"
 msgstr ""
 
-#: includes/classes/Plugin.php:508
+#: includes/classes/Plugin.php:506
 msgid "WTE Enquiry Thank You"
 msgstr ""
 
-#: includes/classes/Plugin.php:509
+#: includes/classes/Plugin.php:507
 msgid "WTE Search Results"
 msgstr ""
 
-#: includes/classes/Plugin.php:510
+#: includes/classes/Plugin.php:508
 msgid "WTE WishList"
 msgstr ""
 
-#: includes/classes/Plugin.php:1479
+#: includes/classes/Plugin.php:1486
 msgid "Extra services"
 msgstr ""
 
-#: includes/classes/Plugin.php:1488
+#: includes/classes/Plugin.php:1495
 msgid "User History Addon E-mail Tags"
 msgstr ""
 
-#: includes/classes/Plugin.php:1493
+#: includes/classes/Plugin.php:1500
 msgid "Show buyer's browsing history before making the booking"
 msgstr ""
 
