@@ -248,7 +248,7 @@ class Item {
 				'datetime'              => $cart_data->{'tripDate'},
 				'tax_amount'            => $tax->get_tax_percentage(),
 				'subtotal_reservations' => $cart_data->{'subtotalReservations'} ?? array(),
-				'travelers'             => $cart_data->{'travelers'},
+				'travelers'             => $cart_data->{'travelers'}
 			)
 		);
 
@@ -312,6 +312,9 @@ class Item {
 			'total'         => 0,
 			'total_partial' => 0,
 		);
+
+		do_action( 'wptravelengine_before_cart_item_calculate_totals', $this );
+
 		/* @var CartItem $item */
 		foreach ( $this->additional_line_items as $item ) {
 			if ( $item instanceof CartItem ) {
@@ -326,6 +329,8 @@ class Item {
 		}
 
 		$this->totals[ 'total_partial' ] += $this->calculate_partial();
+
+		$this->totals = apply_filters( 'wptravelengine_after_cart_item_calculate_totals', $this->totals, $this );
 
 		$this->calculated_totals = true;
 	}
@@ -668,6 +673,7 @@ class Item {
 	 * @since 6.3.0
 	 */
 	public function add_add_line_items() {
+		$item    = $this;
 		$package = new TripPackage( $this->price_key, new Trip( $this->trip_id ) );
 
 		if ( isset( $this->pax ) && is_array( $this->pax ) ) {
@@ -696,11 +702,15 @@ class Item {
 
 					$price = $package_traveler->pricing_type === 'per-group' && $pax > 0 ? $applicable_price / $pax : $applicable_price;
 
-					$this->add_additional_line_items(
+					$item->add_additional_line_items(
 						new PricingCategory( $this->cart, array(
 							'label'    => $package_traveler->label,
 							'quantity' => $pax,
-							'price'    => apply_filters( 'wptravelengine_package_traveler_price', $price, compact( 'package', 'package_traveler', 'pax' ) ),
+							'price'    => apply_filters( 'wptravelengine_package_traveler_price', $price, compact(
+								'item',
+									'package_traveler'
+								)
+							),
 						) )
 					);
 				}

@@ -99,7 +99,7 @@ final class Plugin {
 
 		spl_autoload_register( array( $this, 'autoload' ) );
 
-		$GLOBALS['wptravelengine_template_args'] = array();
+		$GLOBALS[ 'wptravelengine_template_args' ] = array();
 
 		$this->version = WP_TRAVEL_ENGINE_VERSION;
 
@@ -140,15 +140,18 @@ final class Plugin {
 		$optimizer = new Optimizer();
 		$optimizer->hooks();
 
+		$static_strings = new Core\Models\Settings\StaticStrings();
+		$static_strings->hooks();
+
 		/*
 		 * Initialize CLI Commands.
 		 *
 		 * @since 6.0.0
 		 */
 		if ( class_exists( '\WP_CLI' ) && defined( '\WP_CLI' ) && \WP_CLI ) {
-			\WP_CLI::add_command( 'wptravelengine trip', \WPTravelEngine\CLI\Trip::class);
-			\WP_CLI::add_command( 'wptravelengine settings', \WPTravelEngine\CLI\Settings::class);
-			\WP_CLI::add_command( 'wptravelengine extensions', \WPTravelEngine\CLI\Extensions::class);
+			\WP_CLI::add_command( 'wptravelengine trip', \WPTravelEngine\CLI\Trip::class );
+			\WP_CLI::add_command( 'wptravelengine settings', \WPTravelEngine\CLI\Settings::class );
+			\WP_CLI::add_command( 'wptravelengine extensions', \WPTravelEngine\CLI\Extensions::class );
 		}
 	}
 
@@ -171,7 +174,7 @@ final class Plugin {
 		define( 'WP_TRAVEL_ENGINE_STORE_URL', 'https://wptravelengine.com/' );
 		define( 'WP_TRAVEL_ENGINE_PLUGIN_LICENSE_PAGE', 'wp_travel_engine_license_page' );
 		define( 'WPTRAVELENGINE_UPDATES_DATA_PATH', dirname( WP_TRAVEL_ENGINE_FILE_PATH ) . '/admin/partials/plugin-updates/getting-started/' . implode( '', array_slice( explode( '.', WP_TRAVEL_ENGINE_VERSION ), 0, 2 ) ) . '0' );
-		define( 'WP_TRAVEL_ENGINE_PAYMENT_DEBUG', ( get_option( 'wp_travel_engine_settings', array() )['payment_debug'] ?? 'no' ) === 'yes' );
+		define( 'WP_TRAVEL_ENGINE_PAYMENT_DEBUG', ( get_option( 'wp_travel_engine_settings', array() )[ 'payment_debug' ] ?? 'no' ) === 'yes' );
 	}
 
 	private function check_version() {
@@ -200,14 +203,20 @@ final class Plugin {
 		add_action( 'init', array( BookingProcess::class, 'initialize_legacy_booking_hooks' ) );
 		add_action( 'init', function () {
 			// Deactivate core integrated Plugin.
-			foreach ( array( 'WTE_TRIP_CODE_FILE_PATH' => __( 'Trip Code', 'wp-travel-engine' ), 'WP_TRAVEL_ENGINE_COUPONS_PLUGIN_FILE' => __( 'Coupon Code', 'wp-travel-engine' ), 'WTE_ADVANCED_SEARCH_FILE_PATH' => __( 'Advanced Search', 'wp-travel-engine' ), ) as $constant_name => $plugin_name ) {
+			foreach (
+				array(
+					'WTE_TRIP_CODE_FILE_PATH'              => __( 'Trip Code', 'wp-travel-engine' ),
+					'WP_TRAVEL_ENGINE_COUPONS_PLUGIN_FILE' => __( 'Coupon Code', 'wp-travel-engine' ),
+					'WTE_ADVANCED_SEARCH_FILE_PATH'        => __( 'Advanced Search', 'wp-travel-engine' ),
+				) as $constant_name => $plugin_name
+			) {
 				if ( defined( $constant_name ) ) {
 					$plugin = constant( $constant_name );
 					deactivate_plugins( $plugin );
 
 					add_action(
 						'admin_notices',
-						function () use ($plugin_name) {
+						function () use ( $plugin_name ) {
 							printf(
 								'<div id="message" class="notice notice-info is-dismissible"><p>%1$s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%2$s</span></button></div>',
 								esc_html( sprintf( __( '%1$s has been automatically deactivated, the feature providing by the plugin is now available in the WP Travel Engine Core.', 'wp-travel-engine' ), $plugin_name ) ),
@@ -245,7 +254,7 @@ final class Plugin {
 		if ( 'booking' !== $screen->id ) {
 			return;
 		}
-		$class = 'notice notice-info is-dismissible';
+		$class   = 'notice notice-info is-dismissible';
 		$message = __(
 			'<p><strong>Notice:Trip Info Section and New Booking from Dashboard Disabled</strong></p>
     <p>We have disabled the option to add new bookings and the ability to edit the "Trip Info" section due to bugs and the complexity of handling all possible scenarios.<br/>To avoid issues, please create a new booking through the standard process and cancel the existing one.</p>',
@@ -258,9 +267,9 @@ final class Plugin {
 			wp_kses(
 				$message,
 				array(
-					'p' => array(),
+					'p'      => array(),
 					'strong' => array(),
-					'br' => array(),
+					'br'     => array(),
 				)
 			)
 		);
@@ -285,7 +294,7 @@ final class Plugin {
 				}
 				if ( $payment_id ) {
 					$redirect_url = wptravelengine_get_page_url( 'wp_travel_engine_thank_you' );
-					$payment = wptravelengine_get_payment( $payment_id );
+					$payment      = wptravelengine_get_payment( $payment_id );
 
 					wp_redirect( add_query_arg( array( 'payment_key' => $payment->get_payment_key() ), $redirect_url ) );
 					exit;
@@ -321,7 +330,7 @@ final class Plugin {
 				global $post;
 
 				if ( $post ) {
-					$GLOBALS['wtetrip'] = Posttype\Trip::instance( $post->ID );
+					$GLOBALS[ 'wtetrip' ] = Posttype\Trip::instance( $post->ID );
 				}
 			}
 		);
@@ -352,7 +361,7 @@ final class Plugin {
 		add_action(
 			'activated_plugin',
 			function () {
-				$path = str_replace( WP_CONTENT_DIR . '/plugins/', '', WP_TRAVEL_ENGINE_FILE_PATH );
+				$path    = str_replace( WP_CONTENT_DIR . '/plugins/', '', WP_TRAVEL_ENGINE_FILE_PATH );
 				$plugins = get_option( 'active_plugins', array() );
 				if ( ! empty( $plugins ) ) {
 					$key = array_search( $path, $plugins, true );
@@ -378,7 +387,7 @@ final class Plugin {
 
 		add_filter(
 			'term_name',
-			function ($name, $tag) {
+			function ( $name, $tag ) {
 				if ( isset( $tag->{'taxonomy'} ) && 'trip-packages-categories' === $tag->{'taxonomy'} ) {
 					$primary_category = get_option( 'primary_pricing_category', 0 );
 					if ( $primary_category == $tag->term_id ) {
@@ -399,30 +408,30 @@ final class Plugin {
 				// Email Template preview.
 				// phpcs:disable
 				if ( wte_array_get( $_REQUEST, '_action', '' ) == 'email-template-preview' ) {
-					if ( ! isset( $_REQUEST['pid'] ) ) {
+					if ( ! isset( $_REQUEST[ 'pid' ] ) ) {
 						return;
 					}
 
 					// Mail class.
 					require_once plugin_dir_path( WP_TRAVEL_ENGINE_FILE_PATH ) . 'includes/class-wp-travel-engine-emails.php';
 
-					WTE_Booking_Emails::template_preview( wte_clean( wp_unslash( $_REQUEST['pid'] ) ), wte_clean( wp_unslash( wte_array_get( $_REQUEST, 'template_type', 'order' ) ) ), wte_clean( wp_unslash( wte_array_get( $_REQUEST, 'to', 'customer' ) ) ) );
+					WTE_Booking_Emails::template_preview( wte_clean( wp_unslash( $_REQUEST[ 'pid' ] ) ), wte_clean( wp_unslash( wte_array_get( $_REQUEST, 'template_type', 'order' ) ) ), wte_clean( wp_unslash( wte_array_get( $_REQUEST, 'to', 'customer' ) ) ) );
 				}
 
 				if ( wte_array_get( $_REQUEST, '_action', '' ) == 'wte-email-template-update' ) {
-					if ( ! isset( $_REQUEST['field'] ) ) {
+					if ( ! isset( $_REQUEST[ 'field' ] ) ) {
 						return;
 					}
-					switch ( $_REQUEST['field'] ) {
+					switch ( $_REQUEST[ 'field' ] ) {
 						case 'email.sales_wpeditor':
-							$settings = get_option( 'wp_travel_engine_settings', array() );
-							$settings['email']['sales_wpeditor'] = '';
+							$settings                                = get_option( 'wp_travel_engine_settings', array() );
+							$settings[ 'email' ][ 'sales_wpeditor' ] = '';
 							update_option( 'wp_travel_engine_settings', $settings );
 							update_option( 'payment_notification_admin_version', '2.0.0' );
 							break;
 						case 'email.purchase_wpeditor':
-							$settings = get_option( 'wp_travel_engine_settings', array() );
-							$settings['email']['purchase_wpeditor'] = '';
+							$settings                                   = get_option( 'wp_travel_engine_settings', array() );
+							$settings[ 'email' ][ 'purchase_wpeditor' ] = '';
 							update_option( 'wp_travel_engine_settings', $settings );
 							update_option( 'payment_notification_customer_version', '2.0.0' );
 							break;
@@ -435,9 +444,9 @@ final class Plugin {
 		// @TODO: Move to form Editor
 		add_filter(
 			'wte_booking_mail_tags',
-			function ($mail_tags, $payment_id) {
+			function ( $mail_tags, $payment_id ) {
 				$booking_id = get_post_meta( $payment_id, 'booking_id', ! 0 );
-				$booking = get_post( $booking_id );
+				$booking    = get_post( $booking_id );
 				if ( is_null( $booking ) || 'booking' !== $booking->post_type ) {
 					return $mail_tags;
 				}
@@ -450,23 +459,23 @@ final class Plugin {
 
 				// Move to Discount Coupon.
 				// Discount Tags.
-				$mail_tags['{discount_name}'] = '';
-				$mail_tags['{discount_amount}'] = '';
-				$mail_tags['{discount_sign}'] = '';
-				$mail_tags['{discount_value}'] = '';
+				$mail_tags[ '{discount_name}' ]   = '';
+				$mail_tags[ '{discount_amount}' ] = '';
+				$mail_tags[ '{discount_sign}' ]   = '';
+				$mail_tags[ '{discount_value}' ]  = '';
 
-				if ( isset( $booking->cart_info['discounts'] ) ) {
-					$discounts = $booking->cart_info['discounts'];
+				if ( isset( $booking->cart_info[ 'discounts' ] ) ) {
+					$discounts = $booking->cart_info[ 'discounts' ];
 					if ( ! is_array( $discounts ) || empty( $discounts ) ) {
 						return $mail_tags;
 					}
-					$discount = (object) array_shift( $discounts );
+					$discount  = (object) array_shift( $discounts );
 					$cart_info = $booking->cart_info;
 
-					$mail_tags['{discount_name}'] = $discount->name;
-					$mail_tags['{discount_amount}'] = 'percentage' === $discount->type ? wte_get_formated_price( ( +$cart_info['subtotal'] * ( +$discount->value ) / 100 ), $cart_info['currency'] ) : wte_get_formated_price( $discount->value, $cart_info['currency'] );
-					$mail_tags['{discount_sign}'] = 'percentage' === $discount->type ? '%' : $cart_info['currency'];
-					$mail_tags['{discount_value}'] = 'percentage' === $discount->type ? $discount->value : wte_get_formated_price( $discount->value, $cart_info['currency'] );
+					$mail_tags[ '{discount_name}' ]   = $discount->name;
+					$mail_tags[ '{discount_amount}' ] = 'percentage' === $discount->type ? wte_get_formated_price( ( + $cart_info[ 'subtotal' ] * ( + $discount->value ) / 100 ), $cart_info[ 'currency' ] ) : wte_get_formated_price( $discount->value, $cart_info[ 'currency' ] );
+					$mail_tags[ '{discount_sign}' ]   = 'percentage' === $discount->type ? '%' : $cart_info[ 'currency' ];
+					$mail_tags[ '{discount_value}' ]  = 'percentage' === $discount->type ? $discount->value : wte_get_formated_price( $discount->value, $cart_info[ 'currency' ] );
 				}
 
 				return $mail_tags;
@@ -484,26 +493,26 @@ final class Plugin {
 
 		add_filter(
 			'display_post_states',
-			function ($states, $post) {
+			function ( $states, $post ) {
 				if ( ! in_array( $post->post_type, array( 'page', WP_TRAVEL_ENGINE_POST_TYPE ) ) ) {
 					return $states;
 				}
-				$pages = wte_array_get( get_option( 'wp_travel_engine_settings', array() ), 'pages', array() );
-				$pages = is_array( $pages ) ? array_flip( $pages ) : array();
+				$pages  = wte_array_get( get_option( 'wp_travel_engine_settings', array() ), 'pages', array() );
+				$pages  = is_array( $pages ) ? array_flip( $pages ) : array();
 				$labels = array(
-					'wp_travel_engine_place_order' => __( 'WTE Checkout', 'wp-travel-engine' ),
+					'wp_travel_engine_place_order'          => __( 'WTE Checkout', 'wp-travel-engine' ),
 					'wp_travel_engine_terms_and_conditions' => __( 'WTE Terms and Conditions', 'wp-travel-engine' ),
-					'wp_travel_engine_thank_you' => __( 'WTE Thank You', 'wp-travel-engine' ),
-					'wp_travel_engine_confirmation_page' => __( 'WTE Travellers Information', 'wp-travel-engine' ),
-					'wp_travel_engine_dashboard_page' => __( 'My Account', 'wp-travel-engine' ),
-					'enquiry' => __( 'WTE Enquiry Thank You', 'wp-travel-engine' ),
-					'search' => __( 'WTE Search Results', 'wp-travel-engine' ),
-					'wp_travel_engine_wishlist' => __( 'WTE WishList', 'wp-travel-engine' ),
+					'wp_travel_engine_thank_you'            => __( 'WTE Thank You', 'wp-travel-engine' ),
+					'wp_travel_engine_confirmation_page'    => __( 'WTE Travellers Information', 'wp-travel-engine' ),
+					'wp_travel_engine_dashboard_page'       => __( 'My Account', 'wp-travel-engine' ),
+					'enquiry'                               => __( 'WTE Enquiry Thank You', 'wp-travel-engine' ),
+					'search'                                => __( 'WTE Search Results', 'wp-travel-engine' ),
+					'wp_travel_engine_wishlist'             => __( 'WTE WishList', 'wp-travel-engine' ),
 				);
 
 				if ( ! empty( $post->trip_version ) ) {
-					$version_parts = explode( '.', $post->trip_version );
-					$states[ $post->ID ] = $version_parts[0] . '.' . $version_parts[1];
+					$version_parts       = explode( '.', $post->trip_version );
+					$states[ $post->ID ] = $version_parts[ 0 ] . '.' . $version_parts[ 1 ];
 				}
 
 				if ( isset( $pages[ $post->ID ] ) ) {
@@ -518,7 +527,7 @@ final class Plugin {
 
 		add_filter(
 			'wp_kses_allowed_html',
-			function ($allowedtags, $context) {
+			function ( $allowedtags, $context ) {
 				if ( is_array( $context ) ) {
 					return $allowedtags;
 				}
@@ -526,41 +535,41 @@ final class Plugin {
 					case 'wte_iframe':
 						return array(
 							'iframe' => array(
-								'src' => array(),
-								'width' => array(),
-								'height' => array(),
-								'style' => array(),
+								'src'             => array(),
+								'width'           => array(),
+								'height'          => array(),
+								'style'           => array(),
 								'allowfullscreen' => array(),
-								'loading' => array(),
+								'loading'         => array(),
 							),
 						);
 					case 'wte_formats':
 						return array(
-							'a' => array(
-								'href' => array(),
+							'a'      => array(
+								'href'   => array(),
 								'target' => array(),
-								'class' => array(),
-								'title' => array(),
+								'class'  => array(),
+								'title'  => array(),
 							),
-							'p' => array(
-									'class' => array(),
-								),
-							'b' => array(),
-							'i' => array(),
-							'code' => array(),
-							'span' => array(),
-							'em' => array(),
+							'p'      => array(
+								'class' => array(),
+							),
+							'b'      => array(),
+							'i'      => array(),
+							'code'   => array(),
+							'span'   => array(),
+							'em'     => array(),
 							'strong' => array(),
 						);
 					case 'allowed_price_html':
 						return array(
-							'span' => array(
+							'span'   => array(
 								'class' => array(),
 							),
-							'del' => array(),
-							'em' => array(),
+							'del'    => array(),
+							'em'     => array(),
 							'strong' => array(),
-							'b' => array(),
+							'b'      => array(),
 						);
 					default;
 						return $allowedtags;
@@ -572,7 +581,7 @@ final class Plugin {
 
 		add_action(
 			'wp_trash_post',
-			function ($post_id) {
+			function ( $post_id ) {
 				$_post_type = get_post_type( $post_id );
 				if ( 'booking' === $_post_type ) {
 					Booking::trashing_booking( $post_id );
@@ -582,7 +591,7 @@ final class Plugin {
 
 		add_action(
 			'untrashed_post',
-			function ($post_id) {
+			function ( $post_id ) {
 				$_post_type = get_post_type( $post_id );
 				if ( 'booking' === $_post_type ) {
 					Booking::untrashing_booking( $post_id );
@@ -596,8 +605,8 @@ final class Plugin {
 		add_action(
 			'admin_init',
 			function () {
-				if ( isset( $_GET['wte_action'], $_GET['_nonce'] ) && 'download_system_info' === wp_unslash( $_GET['wte_action'] ) ) {
-					$nonce = sanitize_text_field( wp_unslash( $_GET['_nonce'] ) );
+				if ( isset( $_GET[ 'wte_action' ], $_GET[ '_nonce' ] ) && 'download_system_info' === wp_unslash( $_GET[ 'wte_action' ] ) ) {
+					$nonce = sanitize_text_field( wp_unslash( $_GET[ '_nonce' ] ) );
 					if ( wp_verify_nonce( $nonce, 'wte_download_system_info' ) ) {
 						ob_start();
 						$response = wptravelengine_system_info();
@@ -665,9 +674,9 @@ final class Plugin {
 		}
 
 		// phpcs:disable
-		if ( is_admin() && ! empty( $_REQUEST['action'] ) && 'activate' === $_REQUEST['action'] && isset( $_REQUEST['plugin'] ) ) {
-			$plugin = wte_clean( wp_unslash( $_REQUEST['plugin'] ) );
-			if ( strpos( $plugin, 'wte-advanced-search.php' ) > -1 ) {
+		if ( is_admin() && ! empty( $_REQUEST[ 'action' ] ) && 'activate' === $_REQUEST[ 'action' ] && isset( $_REQUEST[ 'plugin' ] ) ) {
+			$plugin = wte_clean( wp_unslash( $_REQUEST[ 'plugin' ] ) );
+			if ( strpos( $plugin, 'wte-advanced-search.php' ) > - 1 ) {
 				if ( headers_sent() ) {
 					echo "<meta http-equiv='refresh' content='" . esc_attr( '0;url=plugins.php?deactivate=true&plugin_status=all&paged=1' ) . "' />";
 				} else {
@@ -685,16 +694,16 @@ final class Plugin {
 		$trip_booking_data = apply_filters(
 			'wptravelengine_trip_booking_modal_data',
 			array(
-				'tripID' => is_singular( WP_TRAVEL_ENGINE_POST_TYPE ) ? $post->ID : null,
-				'nonce' => wp_create_nonce( 'wte_add_trip_to_cart' ),
-				'wpXHR' => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
+				'tripID'      => is_singular( WP_TRAVEL_ENGINE_POST_TYPE ) ? $post->ID : null,
+				'nonce'       => wp_create_nonce( 'wte_add_trip_to_cart' ),
+				'wpXHR'       => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
 				'cartVersion' => '2.0',
 				'buttonLabel' => esc_html__( 'Check Availability', 'wp-travel-engine' ),
 			)
 		);
 		?>
 		<div id="wptravelengine-trip-booking-modal"
-			data-trip-booking="<?php echo esc_attr( wp_json_encode( $trip_booking_data ) ); ?>"></div>
+			 data-trip-booking="<?php echo esc_attr( wp_json_encode( $trip_booking_data ) ); ?>"></div>
 		<?php
 	}
 
@@ -738,26 +747,26 @@ final class Plugin {
 				$slug = 'wptravelengine-admin-page';
 			}
 			$arg_array = array(
-				'id' => '5392',
-				'slug' => 'wp-travel-engine',
-				'type' => 'plugin',
-				'public_key' => 'pk_d9913f744dc4867caeec5b60fc76d',
-				'is_premium' => false,
-				'has_addons' => false,
+				'id'             => '5392',
+				'slug'           => 'wp-travel-engine',
+				'type'           => 'plugin',
+				'public_key'     => 'pk_d9913f744dc4867caeec5b60fc76d',
+				'is_premium'     => false,
+				'has_addons'     => false,
 				'has_paid_plans' => false,
-				'menu' => array(
-						'slug' => $slug, // Default: class-wp-travel-engine-admin.php.
-						'account' => false,
-						'contact' => false,
-						'support' => false,
-						'parent' => array(
-							'slug' => 'edit.php?post_type=booking',
-						),
+				'menu'           => array(
+					'slug'    => $slug, // Default: class-wp-travel-engine-admin.php.
+					'account' => false,
+					'contact' => false,
+					'support' => false,
+					'parent'  => array(
+						'slug' => 'edit.php?post_type=booking',
 					),
+				),
 			);
 			try {
 				$wte_fs = fs_dynamic_init( $arg_array );
-			} catch (\Freemius_Exception $e) {
+			} catch ( \Freemius_Exception $e ) {
 				// Catch Freemius Exception.
 			}
 		}
@@ -1108,7 +1117,7 @@ final class Plugin {
 		$this->loader->add_action( 'init', $plugin_admin, 'register_terms_for_tags_taxonomies' );
 		$this->loader->add_action( 'add_meta_boxes', $plugin_admin, 'add_custom_wte_metabox' );
 
-		if ( isset( $_GET['page'] ) && $_GET['page'] == 'class-wp-travel-engine-admin.php' ) { // phpcs:ignore
+		if ( isset( $_GET[ 'page' ] ) && $_GET[ 'page' ] == 'class-wp-travel-engine-admin.php' ) { // phpcs:ignore
 			$this->loader->add_action( 'admin_footer', $plugin_admin, 'trip_facts_template', 20 );
 		}
 
@@ -1200,12 +1209,12 @@ final class Plugin {
 		} else {
 			$should_update_title = get_post_meta( $post_id, '_update_title', true );
 			if ( 'true' === $should_update_title ) {
-				if ( isset( $_POST['wp_travel_engine_booking_setting']['place_order']['booking']['email'] ) ) {
+				if ( isset( $_POST[ 'wp_travel_engine_booking_setting' ][ 'place_order' ][ 'booking' ][ 'email' ] ) ) {
 					remove_action( 'save_post_customer', array( $this, 'save_post_customer' ), 11 );
 					$result = wp_update_post(
 						array(
-							'ID' => $post_id,
-							'post_title' => sanitize_text_field( wp_unslash( $_POST['wp_travel_engine_booking_setting']['place_order']['booking']['email'] ) ),
+							'ID'         => $post_id,
+							'post_title' => sanitize_text_field( wp_unslash( $_POST[ 'wp_travel_engine_booking_setting' ][ 'place_order' ][ 'booking' ][ 'email' ] ) ),
 						)
 					);
 					if ( is_numeric( $result ) ) {
@@ -1245,10 +1254,10 @@ final class Plugin {
 
 		$this->loader->add_action( 'init', $plugin_public, 'do_output_buffer' );
 		$wp_travel_engine_settings = get_option( 'wp_travel_engine_settings', true );
-		if ( isset( $wp_travel_engine_settings['paypal_payment'] ) ) {
+		if ( isset( $wp_travel_engine_settings[ 'paypal_payment' ] ) ) {
 			$this->loader->add_filter( 'wte_payment_gateways_dropdown_options', $plugin_public, 'wte_paypal_add_option' );
 		}
-		if ( isset( $wp_travel_engine_settings['test_payment'] ) ) {
+		if ( isset( $wp_travel_engine_settings[ 'test_payment' ] ) ) {
 			$this->loader->add_filter( 'wte_payment_gateways_dropdown_options', $plugin_public, 'wte_test_add_option' );
 		}
 		// $this->loader->add_action( 'wp_footer', $plugin_public, 'wpte_calendar_custom_code' );
@@ -1316,17 +1325,17 @@ final class Plugin {
 	 */
 	public function body_class( $classes ) {
 
-		$settings = get_option( 'wp_travel_engine_settings', array() );
-		$new_trip_listing = isset( $settings['display_new_trip_listing'] ) && $settings['display_new_trip_listing'] == 'yes';
-		$related_new_trip_listing = isset( $settings['related_display_new_trip_listing'] ) && $settings['related_display_new_trip_listing'] == 'yes';
+		$settings                 = get_option( 'wp_travel_engine_settings', array() );
+		$new_trip_listing         = isset( $settings[ 'display_new_trip_listing' ] ) && $settings[ 'display_new_trip_listing' ] == 'yes';
+		$related_new_trip_listing = isset( $settings[ 'related_display_new_trip_listing' ] ) && $settings[ 'related_display_new_trip_listing' ] == 'yes';
 
 		$c_themes = array(
-			'Travel Agency' => '1.4.5',
-			'Travel Agency Pro' => '2.6.6',
-			'Travel Booking' => '1.2.6',
+			'Travel Agency'      => '1.4.5',
+			'Travel Agency Pro'  => '2.6.6',
+			'Travel Booking'     => '1.2.6',
 			'Travel Booking Pro' => '2.2.8',
-			'travel-booking' => '1.2.6',
-			'travel-agency' => '1.4.5',
+			'travel-booking'     => '1.2.6',
+			'travel-agency'      => '1.4.5',
 		);
 
 		$theme = wp_get_theme();
@@ -1352,7 +1361,7 @@ final class Plugin {
 		}
 
 		if ( is_singular( WP_TRAVEL_ENGINE_POST_TYPE ) ) {
-			if ( isset( $settings['wte_sticky_booking_widget'] ) && 'yes' === $settings['wte_sticky_booking_widget'] ) {
+			if ( isset( $settings[ 'wte_sticky_booking_widget' ] ) && 'yes' === $settings[ 'wte_sticky_booking_widget' ] ) {
 				$classes[] = 'wpte_has-sticky-booking-widget';
 			}
 		}
@@ -1407,11 +1416,11 @@ final class Plugin {
 	 */
 	public function init_shortcodes() {
 		ShortcodeRegistry::make()
-			->register( CheckoutV2::class)
-			->register( ThankYou::class)
-			->register( TravelerInformation::class)
-			->register( General::class)
-			->register( TripCheckout::class);
+						 ->register( CheckoutV2::class )
+						 ->register( ThankYou::class )
+						 ->register( TravelerInformation::class )
+						 ->register( General::class )
+						 ->register( TripCheckout::class );
 	}
 
 	/**
@@ -1420,7 +1429,7 @@ final class Plugin {
 	 * @return void
 	 */
 	protected function set_cart() {
-		$GLOBALS['wte_cart'] = new Cart();
+		$GLOBALS[ 'wte_cart' ] = new Cart();
 	}
 
 	/**
@@ -1429,15 +1438,15 @@ final class Plugin {
 	 * @param string $class_name Class name.
 	 */
 	public function autoload( string $class_name ) {
-		$class_name = strtolower( $class_name );
+		$class_name     = strtolower( $class_name );
 		$class_mappings = array(
-			'wp_travel_engine' => WP_TRAVEL_ENGINE_BASE_PATH . '/includes/deprecated/class-wp-travel-engine.php',
-			'wp_travel_engine_emails' => WP_TRAVEL_ENGINE_BASE_PATH . '/includes/class-wp-travel-engine-emails.php',
-			'wte_booking_emails' => WP_TRAVEL_ENGINE_BASE_PATH . '/includes/class-wp-travel-engine-emails.php',
-			'wptravelengine\core\trip\booking' => WP_TRAVEL_ENGINE_BASE_PATH . '/includes/deprecated/class-booking.php',
-			'wte_cart' => WP_TRAVEL_ENGINE_BASE_PATH . '/includes/deprecated/class-wte-cart.php',
+			'wp_travel_engine'                      => WP_TRAVEL_ENGINE_BASE_PATH . '/includes/deprecated/class-wp-travel-engine.php',
+			'wp_travel_engine_emails'               => WP_TRAVEL_ENGINE_BASE_PATH . '/includes/class-wp-travel-engine-emails.php',
+			'wte_booking_emails'                    => WP_TRAVEL_ENGINE_BASE_PATH . '/includes/class-wp-travel-engine-emails.php',
+			'wptravelengine\core\trip\booking'      => WP_TRAVEL_ENGINE_BASE_PATH . '/includes/deprecated/class-booking.php',
+			'wte_cart'                              => WP_TRAVEL_ENGINE_BASE_PATH . '/includes/deprecated/class-wte-cart.php',
 			'wptravelengine\core\booking_inventory' => WP_TRAVEL_ENGINE_BASE_PATH . '/includes/deprecated/class-booking-inventory.php',
-			'wptravelengine\posttype\trip' => WP_TRAVEL_ENGINE_BASE_PATH . '/includes/deprecated/class-wte-trip.php',
+			'wptravelengine\posttype\trip'          => WP_TRAVEL_ENGINE_BASE_PATH . '/includes/deprecated/class-wte-trip.php',
 		);
 
 		if ( isset( $class_mappings[ $class_name ] ) ) {
@@ -1453,37 +1462,37 @@ final class Plugin {
 	 * @return array
 	 */
 	public function wte_extra_services_email_tags( $email_tags ) {
-		$active_extensions = apply_filters( 'wpte_get_global_extensions_tab', array() );
-		$extra_services_file_path = $active_extensions['wte_extra_services']['content_path'] ?? '';
-		$user_history_file_path = $active_extensions['wte_user_history']['content_path'] ?? '';
+		$active_extensions        = apply_filters( 'wpte_get_global_extensions_tab', array() );
+		$extra_services_file_path = $active_extensions[ 'wte_extra_services' ][ 'content_path' ] ?? '';
+		$user_history_file_path   = $active_extensions[ 'wte_user_history' ][ 'content_path' ] ?? '';
 
 		$extra_email_tags = array();
 
 		if ( file_exists( $extra_services_file_path ) ) {
 			$extra_email_tags[] = array(
 				'field_type' => 'TITLE',
-				'title' => __( 'Extra Services', 'wp-travel-engine' ),
+				'title'      => __( 'Extra Services', 'wp-travel-engine' ),
 			);
 			$extra_email_tags[] = array(
 				'field_type' => 'TEMPLATE_TAGS',
-				'value' => array(
+				'value'      => array(
 					'{extra_services}' => __( 'Extra services', 'wp-travel-engine' ),
 				),
-				'name' => 'emails.extra_services_email_tags',
+				'name'       => 'emails.extra_services_email_tags',
 			);
 		}
 
 		if ( file_exists( $user_history_file_path ) ) {
 			$extra_email_tags[] = array(
 				'field_type' => 'TITLE',
-				'title' => __( 'User History Addon E-mail Tags', 'wp-travel-engine' ),
+				'title'      => __( 'User History Addon E-mail Tags', 'wp-travel-engine' ),
 			);
 			$extra_email_tags[] = array(
 				'field_type' => 'TEMPLATE_TAGS',
-				'value' => array(
+				'value'      => array(
 					'{user_history}' => __( 'Show buyer\'s browsing history before making the booking', 'wp-travel-engine' ),
 				),
-				'name' => 'emails.user_history_email_tags',
+				'name'       => 'emails.user_history_email_tags',
 			);
 		}
 

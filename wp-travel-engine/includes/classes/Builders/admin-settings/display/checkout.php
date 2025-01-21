@@ -22,7 +22,7 @@ return apply_filters(
 			),
 			array(
 				'label'       => __( 'Template for Checkout Page', 'wp-travel-engine' ),
-				'description' => sprintf( __( 'To use the New template, create a new page and assign the "WP Travel Engine - Checkout" template in the Page Settings. For detailed instructions, refer to our documentation. <a href="%s" target="_blank">Click here</a> to know more about new template.', 'wp-travel-engine' ), 'https://docs.wptravelengine.com/article/how-to-configure-checkout-settings//?utm_source=free_plugin&utm_medium=dashboard&utm_campaign=docs' ),
+				'description' => sprintf( __( 'To use the New template, create a new page and assign the "WP Travel Engine - Checkout" template in the Page Settings. For detailed instructions, refer to our documentation. <a href="%s" target="_blank">Click here</a> to know more about new template.', 'wp-travel-engine' ), 'https://docs.wptravelengine.com/article/checkout-settings/?utm_source=free_plugin&utm_medium=dashboard&utm_campaign=docs' ),
 				'field_type'  => 'SELECT_BUTTON',
 				'options'     => array(
 					array(

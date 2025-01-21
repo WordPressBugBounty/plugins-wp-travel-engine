@@ -87,4 +87,4 @@ class StaticStrings {
 }
 
 // Register the hooks.
-add_action( 'init', [ __NAMESPACE__ . '\\StaticStrings', 'init' ] );
+//add_action( 'init', [ __NAMESPACE__ . '\\StaticStrings', 'init' ] );

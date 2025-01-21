@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 6.3.0
+Stable tag: 6.3.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -367,6 +367,11 @@ Yes. We have created WooCommerce Payments add-ons that supports all the payment 
 Please send us an email via [support ticket](https://wptravelengine.com/support-ticket/?utm_source=free_plugin&utm_medium=wporg&utm_campaign=support), and we will be happy to help you.
 
 == Changelog ==
+
+= 6.3.1 - 20th January 2025 =
+* Fix: Translation issues in new checkout page template.
+* Fix: Regular price not displaying in the pricing category list in booking modal.
+* Fix: Incorrect trip end date display in the checkout page and thank-you page.
 
 = 6.3.0 - 7th January 2025 =
 * New: Introduced a new, customizable checkout page template with an updated UI and collapsible card boxes for a cleaner, more organized layout.

@@ -223,7 +223,7 @@ class DefaultFormFields extends \WTE_Default_Form_Fields {
 		$checkbox_options = array(
 			'0' => sprintf(
 				!empty( $options['privacy_policy_msg'] ) ?
-				$options['privacy_policy_msg'] . ' <a href="%1$s" id="terms-and-conditions" target="_blank">Terms and Conditions</a> and <a href="%2$s" id="privacy-policy" target="_blank">Privacy Policy</a>.' :
+				$options['privacy_policy_msg'] . ' <a href="%1$s" id="terms-and-conditions" target="_blank">' . __( 'Terms and Conditions', 'wp-travel-engine' ) . '</a>'. __( ' and', 'wp-travel-engine' ) . '  <a href="%2$s" id="privacy-policy" target="_blank">' . __( 'Privacy Policy', 'wp-travel-engine' ) . '</a>.' :
 				$default_label,
 				esc_url( get_permalink($options['pages']['wp_travel_engine_terms_and_conditions'] ?? '' ) ),
 				esc_url( get_privacy_policy_url() )

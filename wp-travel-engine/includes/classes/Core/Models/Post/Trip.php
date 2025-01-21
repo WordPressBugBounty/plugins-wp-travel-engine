@@ -143,7 +143,7 @@ class Trip extends PostModel {
 		$settings = &$this->data[ '__changes' ][ $first_key ];
 
 		foreach ( $keys as $key ) {
-			if ( ! isset( $settings[ $key ] ) || ! is_array( $settings[ $key ] ) || ! is_object( $settings[ $key ] ) ) {
+			if ( ! isset( $settings[ $key ] ) ) {
 				$settings[ $key ] = array();
 			}
 			$settings = &$settings[ $key ];
@@ -448,7 +448,7 @@ class Trip extends PostModel {
 	 * @return boolean
 	 */
 	public function is_enabled_min_max_participants(): bool {
-		return $this->get_setting( 'minmax_pax_enable' ) ?? false;
+		return wptravelengine_toggled( $this->get_setting( 'minmax_pax_enable' ) ?? false );
 	}
 
 	/**
@@ -1100,18 +1100,22 @@ class Trip extends PostModel {
 	 * @return mixed The meta-value or null if not found.
 	 */
 	public function search_in_meta( string $dot_keys, $default = null ) {
-		$key_arr 		= explode( '.', $dot_keys );
-		$first_key 		= array_shift( $key_arr );
-		$meta_value 	= $this->get_meta( $first_key );
-		$data    		= (array) ( $this->data[ $first_key ] ?? $meta_value );
-		$is_available 	= $this->search( $data, $key_arr );
+		$key_arr   = explode( '.', $dot_keys );
+		$first_key = array_shift( $key_arr );
+		$data      = (array) ( $this->data[ $first_key ] ?? $this->get_meta( $first_key ) ?: array() );
 
-		if ( ! is_null( $default ) && ! isset( $meta_value[ $key_arr[ 0 ] ] ) && is_null( $is_available ) ) {
-			$this->set_nested_setting( $dot_keys, $default );
+		if ( $default !== null ) {
+			if ( ( empty( $key_arr ) && empty( $data ) && $default !== '' ) || ( ! empty( $key_arr ) && ! wptravelengine_key_exists( $data, $key_arr ) ) ) {
+				$this->set_nested_setting( $dot_keys, $default );
+				return $default;
+			}
+			if ( empty( $key_arr ) ) {
+				return $data[0];
+			}
 		}
 
-		return $is_available ?? $default;
-	}
+		return $this->search( $data, $key_arr ) ?? $default;
+	}	
 
 	/**
 	 * Recursive helper function to retrieve nested values from the settings array.

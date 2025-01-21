@@ -15,6 +15,7 @@ use WP_REST_Response;
 use WP_REST_Server;
 use WPTravelEngine\Core\Models\Settings\Options;
 use WPTravelEngine\Core\Models\Settings\PluginSettings;
+use WPTravelEngine\Core\Models\Settings\StaticStrings;
 use WPTravelEngine\PaymentGateways\PaymentGateways;
 
 /**
@@ -463,27 +464,28 @@ class Settings {
 
 		// Determine template version based on user status
 		$is_existing_user = version_compare(
-			get_option('wptravelengine_since', false), 
-			WP_TRAVEL_ENGINE_VERSION, 
+			get_option( 'wptravelengine_since', false ),
+			WP_TRAVEL_ENGINE_VERSION,
 			'<'
 		);
 
 		// Set checkout settings
-		$settings['checkout_page_template'] = (string) $this->plugin_settings->get(
+		$settings[ 'checkout_page_template' ] = (string) $this->plugin_settings->get(
 			'checkout_page_template',
 			$is_existing_user ? '1.0' : '2.0'
 		);
 
-		$settings[ 'display_header_footer' ] 			= wptravelengine_toggled( $this->plugin_settings->get( 'display_header_footer', 'no' ) );
-		$settings[ 'display_emergency_contact' ] 		= wptravelengine_toggled( $this->plugin_settings->get( 'display_emergency_contact', 'no' ) );
-		$settings[ 'display_travellers_info' ] 			= wptravelengine_toggled( $this->plugin_settings->get( 'display_travellers_info', 'no' ) );
+		$settings[ 'display_header_footer' ]            = wptravelengine_toggled( $this->plugin_settings->get( 'display_header_footer', 'no' ) );
+		$settings[ 'display_emergency_contact' ]        = wptravelengine_toggled( $this->plugin_settings->get( 'display_emergency_contact', 'no' ) );
+		$settings[ 'display_travellers_info' ]          = wptravelengine_toggled( $this->plugin_settings->get( 'display_travellers_info', 'no' ) );
 		$settings[ 'traveller_emergency_details_form' ] = (string) $this->plugin_settings->get( 'traveller_emergency_details_form', 'on_checkout' );
-		$settings[ 'travellers_details_type' ] 			= (string) $this->plugin_settings->get( 'travellers_details_type', 'all' );
-		$settings[ 'display_billing_details' ] 			= wptravelengine_toggled( $this->plugin_settings->get( 'display_billing_details', 'yes' ) );
-		$settings[ 'show_additional_note' ] 			= wptravelengine_toggled( $this->plugin_settings->get( 'show_additional_note', 'no' ) );
-		$settings[ 'show_discount' ] 					= wptravelengine_toggled( $this->plugin_settings->get( 'show_discount', 'yes' ) );
-		$settings['privacy_policy_msg'] 				= (string) $this->plugin_settings->get( 'privacy_policy_msg', __( 'Check the box to confirm you\'ve read and agree to our', 'wp-travel-engine' ) );
-		$settings[ 'footer_copyright' ] 				= (string) $this->plugin_settings->get( 'footer_copyright', sprintf( 'Copyright © %s %d. All Rights Reserved.', get_bloginfo('name') , date('Y') ) );
+		$settings[ 'travellers_details_type' ]          = (string) $this->plugin_settings->get( 'travellers_details_type', 'all' );
+		$settings[ 'display_billing_details' ]          = wptravelengine_toggled( $this->plugin_settings->get( 'display_billing_details', 'yes' ) );
+		$settings[ 'show_additional_note' ]             = wptravelengine_toggled( $this->plugin_settings->get( 'show_additional_note', 'no' ) );
+		$settings[ 'show_discount' ]                    = wptravelengine_toggled( $this->plugin_settings->get( 'show_discount', 'yes' ) );
+		$settings[ 'privacy_policy_msg' ]               = (string) $this->plugin_settings->get( 'privacy_policy_msg', __( 'Check the box to confirm you\'ve read and agree to our', 'wp-travel-engine' ) );
+		$settings[ 'footer_copyright' ]                 = (string) $this->plugin_settings->get( 'footer_copyright', sprintf( 'Copyright © %s %d. All Rights Reserved.', get_bloginfo( 'name' ), date( 'Y' ) ) );
+
 		return $settings;
 	}
 
@@ -589,7 +591,7 @@ class Settings {
 			'id'     => 'booking_only',
 			'name'   => 'Book Now Pay Later',
 			'enable' => wptravelengine_toggled( $plugin_settings->get( 'booking_only' ) ),
-			'icon'   =>  '',
+			'icon'   => '',
 		);
 		$settings[ 'booking_only' ]       = new \stdClass();
 
@@ -597,7 +599,7 @@ class Settings {
 			'id'     => 'paypal_payment',
 			'name'   => 'PayPal Standard',
 			'enable' => wptravelengine_toggled( $plugin_settings->get( 'paypal_payment' ) ),
-			'icon'   =>  '',
+			'icon'   => '',
 		);
 		$settings[ 'paypal' ]             = array(
 			'paypal_id' => (string) $plugin_settings->get( 'paypal_id' ),
@@ -607,7 +609,7 @@ class Settings {
 			'id'     => 'direct_bank_transfer',
 			'name'   => 'Direct Bank Transfer',
 			'enable' => wptravelengine_toggled( $plugin_settings->get( 'direct_bank_transfer' ) ),
-			'icon'   =>  '',
+			'icon'   => '',
 		);
 		$settings[ 'direct_bank_transfer' ] = array(
 			'title'           => (string) $plugin_settings->get( 'bank_transfer.title', 'Bank Transfer' ),
@@ -620,7 +622,7 @@ class Settings {
 			'id'     => 'check_payments',
 			'name'   => 'Check Payments',
 			'enable' => wptravelengine_toggled( $plugin_settings->get( 'check_payments' ) ),
-			'icon'   =>  '',
+			'icon'   => '',
 		);
 		$settings[ 'check_payments' ]     = array(
 			'title'        => (string) $plugin_settings->get( 'check_payment.title', 'Check payments' ),
@@ -633,9 +635,9 @@ class Settings {
 				'id'     => 'hbl_enable',
 				'name'   => 'HBL Payments',
 				'enable' => wptravelengine_toggled( $plugin_settings->get( 'hbl_enable' ) ),
-				'icon'   =>  WP_TRAVEL_ENGINE_FILE_URL . 'assets/images/paymentgateways/hbl.png',
+				'icon'   => WP_TRAVEL_ENGINE_FILE_URL . 'assets/images/paymentgateways/hbl.png',
 			);
-			$notification_url_base = home_url();
+			$notification_url_base            = home_url();
 			$settings[ 'hbl' ]                = array(
 				'office_id'             => (string) $plugin_settings->get( 'hbl_settings.office_id', 'DEMOOFFICE' ),
 				'api_key'               => (string) $plugin_settings->get( 'hbl_settings.api_key' ),
@@ -662,7 +664,7 @@ class Settings {
 				'id'     => 'payfast_enable',
 				'name'   => 'Payfast',
 				'enable' => wptravelengine_toggled( $plugin_settings->get( 'payfast_enable' ) ),
-				'icon'   =>  WP_TRAVEL_ENGINE_FILE_URL . 'assets/images/paymentgateways/payfast.png',
+				'icon'   => WP_TRAVEL_ENGINE_FILE_URL . 'assets/images/paymentgateways/payfast.png',
 			);
 			$settings[ 'payfast' ]            = array(
 				'merchant_id'  => (string) $plugin_settings->get( 'payfast_id' ),
@@ -675,13 +677,13 @@ class Settings {
 				'id'     => 'stripe_payment',
 				'name'   => 'Stripe',
 				'enable' => wptravelengine_toggled( $plugin_settings->get( 'stripe_payment' ) ),
-				'icon'   =>  WP_TRAVEL_ENGINE_FILE_URL . 'assets/images/paymentgateways/stripe.png',
+				'icon'   => WP_TRAVEL_ENGINE_FILE_URL . 'assets/images/paymentgateways/stripe.png',
 			);
 			$settings[ 'stripe' ]             = array(
 				'secret_key'         => (string) $plugin_settings->get( 'stripe_secret' ),
 				'publishable_key'    => (string) $plugin_settings->get( 'stripe_publishable' ),
 				'pay_btn_label'      => (string) $plugin_settings->get( 'stripe_btn_label' ),
-				'enable_postal_code' => ! wptravelengine_toggled( $plugin_settings->get( 'stripe_hide_postal_code' , 'yes' ) ),
+				'enable_postal_code' => ! wptravelengine_toggled( $plugin_settings->get( 'stripe_hide_postal_code', 'yes' ) ),
 			);
 		}
 
@@ -690,7 +692,7 @@ class Settings {
 				'id'     => 'paypalexpress_enable',
 				'name'   => 'PayPal Express',
 				'enable' => wptravelengine_toggled( $plugin_settings->get( 'paypalexpress_enable' ) ),
-				'icon'   =>  WP_TRAVEL_ENGINE_FILE_URL . 'assets/images/paymentgateways/paypalexpress.png',
+				'icon'   => WP_TRAVEL_ENGINE_FILE_URL . 'assets/images/paymentgateways/paypalexpress.png',
 			);
 			$settings[ 'paypal_express' ]     = array(
 				'client_id'       => (string) $plugin_settings->get( 'paypalexpress_client_id' ),
@@ -704,7 +706,7 @@ class Settings {
 				'id'     => 'authorize-net-payment',
 				'name'   => 'Authorize.Net',
 				'enable' => wptravelengine_toggled( $plugin_settings->get( 'authorize-net-payment' ) ),
-				'icon'   =>  WP_TRAVEL_ENGINE_FILE_URL . 'assets/images/paymentgateways/authorize.png',
+				'icon'   => WP_TRAVEL_ENGINE_FILE_URL . 'assets/images/paymentgateways/authorize.png',
 			);
 			$settings[ 'authorize_net' ]      = array(
 				'api_login_id'    => (string) $plugin_settings->get( 'authorizenet.api_login_id' ),
@@ -717,7 +719,7 @@ class Settings {
 				'id'     => 'midtrans_enable',
 				'name'   => 'Midtrans',
 				'enable' => wptravelengine_toggled( $plugin_settings->get( 'midtrans_enable' ) ),
-				'icon'   =>  WP_TRAVEL_ENGINE_FILE_URL . 'assets/images/paymentgateways/midtrans.png',
+				'icon'   => WP_TRAVEL_ENGINE_FILE_URL . 'assets/images/paymentgateways/midtrans.png',
 			);
 			$settings[ 'midtrans' ]           = array(
 				'enable_3Ds_secure' => wptravelengine_toggled( $plugin_settings->get( 'midtrans.3ds_enabled', '0' ) ),
@@ -733,7 +735,7 @@ class Settings {
 				'id'     => 'payhere_payment',
 				'name'   => 'Pay Here',
 				'enable' => wptravelengine_toggled( $plugin_settings->get( 'payhere_payment' ) ),
-				'icon'   =>  WP_TRAVEL_ENGINE_FILE_URL . 'assets/images/paymentgateways/payhere.png',
+				'icon'   => WP_TRAVEL_ENGINE_FILE_URL . 'assets/images/paymentgateways/payhere.png',
 			);
 			$settings[ 'payhere' ]            = array(
 				'merchant_id'            => (string) $plugin_settings->get( 'payhere_merchant_id' ),
@@ -747,7 +749,7 @@ class Settings {
 				'id'     => 'payu_money_enable',
 				'name'   => 'PayU Money',
 				'enable' => wptravelengine_toggled( $plugin_settings->get( 'payu_money_enable' ) ),
-				'icon'   =>  WP_TRAVEL_ENGINE_FILE_URL . 'assets/images/paymentgateways/payumoney.png',
+				'icon'   => WP_TRAVEL_ENGINE_FILE_URL . 'assets/images/paymentgateways/payumoney.png',
 			);
 			$settings[ 'payu_money' ]         = array(
 				'merchant_key'  => (string) $plugin_settings->get( 'payu_money_merchant_id' ),
@@ -760,7 +762,7 @@ class Settings {
 				'id'     => 'payu_enable',
 				'name'   => 'PayU Biz',
 				'enable' => wptravelengine_toggled( $plugin_settings->get( 'payu_enable' ) ),
-				'icon'   =>  WP_TRAVEL_ENGINE_FILE_URL . 'assets/images/paymentgateways/payubiz.png',
+				'icon'   => WP_TRAVEL_ENGINE_FILE_URL . 'assets/images/paymentgateways/payubiz.png',
 			);
 			$settings[ 'payu_biz' ]           = array(
 				'merchant_key'  => (string) $plugin_settings->get( 'payu_merchant_id' ),
@@ -768,24 +770,24 @@ class Settings {
 			);
 		}
 
-		$settings['payment_gateways'] = apply_filters('wptravelengine_rest_payment_gateways', $settings['payment_gateways'], $plugin_settings);
+		$settings[ 'payment_gateways' ] = apply_filters( 'wptravelengine_rest_payment_gateways', $settings[ 'payment_gateways' ], $plugin_settings );
 
 		$active_extensions = apply_filters( 'wpte_settings_get_global_tabs', array() );
-		$file_path         = $active_extensions['wpte-payment']['sub_tabs']['woocommerce']['content_path'] ?? '';
+		$file_path         = $active_extensions[ 'wpte-payment' ][ 'sub_tabs' ][ 'woocommerce' ][ 'content_path' ] ?? '';
 		if ( file_exists( $file_path ) ) {
-			$settings['enable_woocommerce_gateway'] = wptravelengine_toggled( $plugin_settings->get( 'use_woocommerce_payment_gateway', 'no' ) );
+			$settings[ 'enable_woocommerce_gateway' ] = wptravelengine_toggled( $plugin_settings->get( 'use_woocommerce_payment_gateway', 'no' ) );
 		}
 
 		$payments_order = Options::get( 'wptravelengine_payment_gateways', array() );
 
 		if ( ! empty( $payments_order ) ) {
 			$payments_order = array_column( $payments_order, 'id' );
-			usort( $settings['payment_gateways'], function( $a, $b ) use ( $payments_order ) {
-				$posA = array_search( $a['id'], $payments_order );
-				$posB = array_search( $b['id'], $payments_order );
+			usort( $settings[ 'payment_gateways' ], function ( $a, $b ) use ( $payments_order ) {
+				$posA = array_search( $a[ 'id' ], $payments_order );
+				$posB = array_search( $b[ 'id' ], $payments_order );
 
 				return $posA <=> $posB;
-			});
+			} );
 		}
 
 		$settings[ 'tax' ] = array(
@@ -1040,25 +1042,25 @@ class Settings {
 
 			foreach ( $request[ 'trip_info' ] as $trip_info ) {
 
-				if ( ! isset( $trip_info['id'] ) ) {
+				if ( ! isset( $trip_info[ 'id' ] ) ) {
 					continue;
 				}
 
-				if ( $trip_info['trashable'] ) {
-					$trashable_trip_info[ 'fid' ][ $trip_info[ 'id' ] ]					= $trip_info[ 'id' ] ?? '';
-					$trashable_trip_info[ 'field_id' ][ $trip_info[ 'id' ] ] 			= $trip_info[ 'name' ] ?? '';
-					$trashable_trip_info[ 'input_placeholder' ][ $trip_info[ 'id' ] ] 	= $trip_info[ 'placeholder' ] ?? '';
-					$trashable_trip_info[ 'field_type' ][ $trip_info[ 'id' ] ] 			= $trip_info[ 'type' ] ?? '';
-					$trashable_trip_info[ 'field_icon' ][ $trip_info[ 'id' ] ] 			= $trip_info[ 'icon' ] ?? '';
-					$trashable_trip_info[ 'enabled' ][ $trip_info[ 'id' ] ] 			= wptravelengine_replace( $trip_info[ 'enable' ] ?? false, true, 'yes', 'no' );
-					$trashable_trip_info[ 'select_options' ][ $trip_info[ 'id' ] ] 		= $trip_info[ 'options' ] ? implode( ',', $trip_info[ 'options' ] ) : null;
+				if ( $trip_info[ 'trashable' ] ) {
+					$trashable_trip_info[ 'fid' ][ $trip_info[ 'id' ] ]               = $trip_info[ 'id' ] ?? '';
+					$trashable_trip_info[ 'field_id' ][ $trip_info[ 'id' ] ]          = $trip_info[ 'name' ] ?? '';
+					$trashable_trip_info[ 'input_placeholder' ][ $trip_info[ 'id' ] ] = $trip_info[ 'placeholder' ] ?? '';
+					$trashable_trip_info[ 'field_type' ][ $trip_info[ 'id' ] ]        = $trip_info[ 'type' ] ?? '';
+					$trashable_trip_info[ 'field_icon' ][ $trip_info[ 'id' ] ]        = $trip_info[ 'icon' ] ?? '';
+					$trashable_trip_info[ 'enabled' ][ $trip_info[ 'id' ] ]           = wptravelengine_replace( $trip_info[ 'enable' ] ?? false, true, 'yes', 'no' );
+					$trashable_trip_info[ 'select_options' ][ $trip_info[ 'id' ] ]    = $trip_info[ 'options' ] ? implode( ',', $trip_info[ 'options' ] ) : null;
 				} else {
-					$default_trip_info[ $trip_info[ 'id' ] ][ 'fid' ] 					= $trip_info[ 'id' ] ?? '';
-					$default_trip_info[ $trip_info[ 'id' ] ][ 'field_id' ] 				= $trip_info[ 'name' ] ?? '';
-					$default_trip_info[ $trip_info[ 'id' ] ][ 'input_placeholder' ] 	= $trip_info[ 'placeholder' ] ?? '';
-					$default_trip_info[ $trip_info[ 'id' ] ][ 'field_type' ] 			= $trip_info[ 'type' ] ?? '';
-					$default_trip_info[ $trip_info[ 'id' ] ][ 'field_icon' ] 			= $trip_info[ 'icon' ] ?? '';
-					$default_trip_info[ $trip_info[ 'id' ] ][ 'enabled' ] 				= wptravelengine_replace( $trip_info[ 'enable' ] ?? false, true, 'yes', 'no' );
+					$default_trip_info[ $trip_info[ 'id' ] ][ 'fid' ]               = $trip_info[ 'id' ] ?? '';
+					$default_trip_info[ $trip_info[ 'id' ] ][ 'field_id' ]          = $trip_info[ 'name' ] ?? '';
+					$default_trip_info[ $trip_info[ 'id' ] ][ 'input_placeholder' ] = $trip_info[ 'placeholder' ] ?? '';
+					$default_trip_info[ $trip_info[ 'id' ] ][ 'field_type' ]        = $trip_info[ 'type' ] ?? '';
+					$default_trip_info[ $trip_info[ 'id' ] ][ 'field_icon' ]        = $trip_info[ 'icon' ] ?? '';
+					$default_trip_info[ $trip_info[ 'id' ] ][ 'enabled' ]           = wptravelengine_replace( $trip_info[ 'enable' ] ?? false, true, 'yes', 'no' );
 				}
 			}
 
@@ -1353,8 +1355,8 @@ class Settings {
 			$plugin_settings->set( 'gallery_autoplay', wptravelengine_replace( $request[ 'enable_image_autoplay' ], true, 'yes', 'no' ) );
 		}
 
-		if ( isset( $request['trip_duration_format'] ) ) {
-			$plugin_settings->set( 'trip_duration_format', $request['trip_duration_format'] );
+		if ( isset( $request[ 'trip_duration_format' ] ) ) {
+			$plugin_settings->set( 'trip_duration_format', $request[ 'trip_duration_format' ] );
 		}
 
 		if ( isset( $request[ 'enable_featured_image' ] ) ) {
@@ -1442,19 +1444,19 @@ class Settings {
 			$plugin_settings->set( 'gdpr_msg', $request[ 'gdpr_msg' ] );
 		}
 
-		if ( isset( $request['checkout_page_template'] ) ) {
-			$plugin_settings->set( 'checkout_page_template', $request['checkout_page_template'] );
+		if ( isset( $request[ 'checkout_page_template' ] ) ) {
+			$plugin_settings->set( 'checkout_page_template', $request[ 'checkout_page_template' ] );
 		}
 
 		if ( isset( $request[ 'display_header_footer' ] ) ) {
 			$plugin_settings->set( 'display_header_footer', wptravelengine_replace( $request[ 'display_header_footer' ], true, 'yes', 'no' ) );
 		}
 
-		if( isset( $request[ 'display_travellers_info' ] ) ) {
+		if ( isset( $request[ 'display_travellers_info' ] ) ) {
 			$plugin_settings->set( 'display_travellers_info', wptravelengine_replace( $request[ 'display_travellers_info' ], true, 'yes', 'no' ) );
 		}
 
-		if( isset( $request[ 'display_emergency_contact' ] ) ) {
+		if ( isset( $request[ 'display_emergency_contact' ] ) ) {
 			$plugin_settings->set( 'display_emergency_contact', wptravelengine_replace( $request[ 'display_emergency_contact' ], true, 'yes', 'no' ) );
 		}
 
@@ -1537,14 +1539,8 @@ class Settings {
 		$this->set_taxonomy( $request );
 
 		if ( isset( $request[ 'custom_strings' ] ) ) {
-			$custom_strings = array();
-			foreach ( $request[ 'custom_strings' ] as $string ) {
-				$custom_strings[ strtolower( preg_replace( '/\s+/', '', trim( $string[ 'initial_label' ] ) ) ) ] = array(
-					'initial_label'  => $string[ 'initial_label' ],
-					'modified_label' => $string[ 'modified_label' ],
-				);
-			}
-			Options::update( 'wptravelengine_custom_strings', $custom_strings );
+			$static_string = new StaticStrings();
+			$static_string->update( $request[ 'custom_strings' ] );
 		}
 	}
 
@@ -1806,8 +1802,8 @@ class Settings {
 			}
 		}
 
-		if ( isset( $request['enable_woocommerce_gateway'] ) ) {
-			$plugin_settings->set( 'use_woocommerce_payment_gateway', wptravelengine_replace( $request['enable_woocommerce_gateway'], true, 'yes', 'no' ) );
+		if ( isset( $request[ 'enable_woocommerce_gateway' ] ) ) {
+			$plugin_settings->set( 'use_woocommerce_payment_gateway', wptravelengine_replace( $request[ 'enable_woocommerce_gateway' ], true, 'yes', 'no' ) );
 		}
 
 		if ( ! isset( $request[ 'tax' ] ) ) {
@@ -2049,7 +2045,6 @@ class Settings {
 
 		if ( empty( $request->get_json_params() ) ) {
 			$this->set_bad_request( 'invalid_request', 'Invalid request' );
-
 			return;
 		}
 
@@ -2149,7 +2144,8 @@ class Settings {
 			}
 		};
 
-		$filter_recursive( $request->get_json_params(), $this->get_schema() );
+		$req_params = $request->get_json_params();
+		$filter_recursive( $req_params, $this->get_schema() );
 
 		return;
 	}
@@ -2165,25 +2161,25 @@ class Settings {
 	 */
 	private function sanitize_params_recursive( $params ) {
 		$sanitized_params = array();
-	
+
 		foreach ( $params as $key => $value ) {
 			if ( is_array( $value ) ) {
-				$sanitized_params[$key] = $this->sanitize_params_recursive( $value );
+				$sanitized_params[ $key ] = $this->sanitize_params_recursive( $value );
 			} else if ( is_int( $value ) ) {
-				$sanitized_params[$key] = intval( $value );
+				$sanitized_params[ $key ] = intval( $value );
 			} else if ( is_float( $value ) ) {
-				$sanitized_params[$key] = floatval( $value );
+				$sanitized_params[ $key ] = floatval( $value );
 			} else if ( is_bool( $value ) ) {
-				$sanitized_params[$key] = filter_var( $value, FILTER_VALIDATE_BOOLEAN );
+				$sanitized_params[ $key ] = filter_var( $value, FILTER_VALIDATE_BOOLEAN );
 			} else if ( is_email( $value ) ) {
-				$sanitized_params[$key] = sanitize_email( $value );
+				$sanitized_params[ $key ] = sanitize_email( $value );
 			} else if ( filter_var( $value, FILTER_VALIDATE_URL ) ) {
-				$sanitized_params[$key] = esc_url_raw( $value );
+				$sanitized_params[ $key ] = esc_url_raw( $value );
 			} else {
-				$sanitized_params[$key] = $value;
+				$sanitized_params[ $key ] = $value;
 			}
 		}
-	
+
 		return $sanitized_params;
 	}
 
@@ -2258,19 +2254,19 @@ class Settings {
 				'items'       => array(
 					'type'       => 'object',
 					'properties' => array(
-						'id'     => array(
+						'id'        => array(
 							'description' => __( 'Tab ID', 'wp-travel-engine' ),
 							'type'        => 'integer',
 						),
-						'name'   => array(
+						'name'      => array(
 							'description' => __( 'Tab Name', 'wp-travel-engine' ),
 							'type'        => 'string',
 						),
-						'field'  => array(
+						'field'     => array(
 							'description' => __( 'Tab Field', 'wp-travel-engine' ),
 							'type'        => 'string',
 						),
-						'icon'   => array(
+						'icon'      => array(
 							'description' => __( 'Tab Icon', 'wp-travel-engine' ),
 							'type'        => 'object',
 							'properties'  => array(
@@ -2288,7 +2284,7 @@ class Settings {
 								),
 							),
 						),
-						'enable' => array(
+						'enable'    => array(
 							'description' => __( 'Tab Enabled or Not', 'wp-travel-engine' ),
 							'type'        => 'boolean',
 						),
@@ -2702,7 +2698,7 @@ class Settings {
 				'description' => __( 'Image Gallery Autoplay Enabled or Not', 'wp-travel-engine' ),
 				'type'        => 'boolean',
 			),
-			'trip_duration_format'              => array(
+			'trip_duration_format'             => array(
 				'description' => __( 'Trip Duration Format', 'wp-travel-engine' ),
 				'type'        => 'string',
 				'enum'        => array( 'days', 'days_and_nights' ),
@@ -2859,20 +2855,20 @@ class Settings {
 				'description' => __( 'GDPR Message', 'wp-travel-engine' ),
 				'type'        => 'string',
 			),
-			'checkout_page_template'             => array(
+			'checkout_page_template'           => array(
 				'description' => __( 'Checkout Page Layout', 'wp-travel-engine' ),
 				'type'        => 'string',
 				'enum'        => array( '1.0', '2.0' ),
 			),
-			'display_header_footer'         => array(
+			'display_header_footer'            => array(
 				'description' => __( 'Show Theme Header and Footer', 'wp-travel-engine' ),
 				'type'        => 'boolean',
 			),
-			'display_travellers_info' => array(
+			'display_travellers_info'          => array(
 				'description' => __( 'Show Travellers Information', 'wp-travel-engine' ),
 				'type'        => 'boolean',
 			),
-			'display_emergency_contact' => array(
+			'display_emergency_contact'        => array(
 				'description' => __( 'Show Emergency Contact Details', 'wp-travel-engine' ),
 				'type'        => 'boolean',
 			),
@@ -2881,28 +2877,28 @@ class Settings {
 				'type'        => 'string',
 				'enum'        => array( 'on_checkout', 'after_checkout' ),
 			),
-			'travellers_details_type' => array(
+			'travellers_details_type'          => array(
 				'description' => __( 'Travellers Details Type', 'wp-travel-engine' ),
 				'type'        => 'string',
 				'enum'        => array( 'all', 'only_lead' ),
 			),
-			'display_billing_details' => array(
+			'display_billing_details'          => array(
 				'description' => __( 'Display Billing Details', 'wp-travel-engine' ),
 				'type'        => 'boolean',
 			),
-			'show_additional_note' => array(
+			'show_additional_note'             => array(
 				'description' => __( 'Show Additional Note', 'wp-travel-engine' ),
 				'type'        => 'boolean',
 			),
-			'show_discount' => array(
+			'show_discount'                    => array(
 				'description' => __( 'Show Discount', 'wp-travel-engine' ),
 				'type'        => 'boolean',
 			),
-			'privacy_policy_msg' => array(
+			'privacy_policy_msg'               => array(
 				'description' => __( 'Privacy Policy Message', 'wp-travel-engine' ),
 				'type'        => 'string',
 			),
-			'footer_copyright' => array(
+			'footer_copyright'                 => array(
 				'description' => __( 'Footer Copyright', 'wp-travel-engine' ),
 				'type'        => 'string',
 			),

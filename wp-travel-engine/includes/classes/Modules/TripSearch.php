@@ -501,9 +501,14 @@ class TripSearch {
 				$possible_queries[] = $queried_term->slug;
 			}
 			foreach ( $terms as $term ) {
-				if ( $term->parent && ! $children ) {
+				if ( isset( $term->parent ) && $term->parent && ! $children ) {
 					continue;
 				}
+				
+				if ( !isset( $term->taxonomy ) || !isset( $term->slug ) || !isset( $term->name ) ) {
+					continue;
+				}
+					
 				$possible_queries[] = wte_array_get( $_GET, $term->taxonomy, false );
 
 				ob_start();

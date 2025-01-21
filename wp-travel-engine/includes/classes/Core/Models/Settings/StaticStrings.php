@@ -48,7 +48,7 @@ class StaticStrings extends BaseSetting {
 			}
 			$custom_strings = array();
 			foreach ( $posted_data[ self::$option_key ] as $value ) {
-				$label_key = sanitize_key( $value[ 'initial_label' ] );
+				$label_key = wptravelengine_generate_key( $value[ 'initial_label' ] );
 
 				$custom_strings[ $label_key ] = array(
 					'initial_label'  => sanitize_text_field( $value[ 'initial_label' ] ),
@@ -68,9 +68,10 @@ class StaticStrings extends BaseSetting {
 	 */
 	public function update( $value ) {
 		$this->set( null, array() );
+
 		if ( is_array( $value ) ) {
 			foreach ( $value as $string ) {
-				$label_key = sanitize_key( $string[ 'initial_label' ] );
+				$label_key = wptravelengine_generate_key( $string[ 'initial_label' ] );
 
 				$this->set( $label_key, array(
 					'initial_label'  => sanitize_text_field( $string[ 'initial_label' ] ),
@@ -91,6 +92,23 @@ class StaticStrings extends BaseSetting {
 	 * @return string             Custom translation if available, otherwise the translated string.
 	 */
 	public static function translateString( string $translated, string $original, string $domain ): string {
-		return Options::get( static::$option_key, array() )[ sanitize_key( $translated ) ][ 'modified_label' ] ?? $translated;
+		$saved_strings = Options::get( static::$option_key, array() );
+		$key           = wptravelengine_generate_key( $translated );
+		if ( isset( $saved_strings[ $key ] ) ) {
+			return $saved_strings[ $key ][ 'modified_label' ];
+		}
+		$key = sanitize_key( $translated );
+
+		return $saved_strings[ $key ][ 'modified_label' ] ?? $translated;
+	}
+
+	/**
+	 * Register hooks.
+	 *
+	 * @since 6.3.2
+	 */
+	public function hooks() {
+		add_filter( 'gettext_wp-travel-engine', array( __CLASS__, 'translateString' ), 11, 3 );
+		add_action( 'wpte_after_save_global_settings_data', [ __CLASS__, 'save_custom_strings_settings' ] );
 	}
 }

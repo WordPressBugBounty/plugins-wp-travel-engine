@@ -72,6 +72,13 @@ class TripPackage extends PostModel {
 	public bool $has_group_discount = false;
 
 	/**
+	 * The default pricing.
+	 *
+	 * @var array
+	 */
+	public array $categories_pricings = array();
+
+	/**
 	 *
 	 * @param $package
 	 * @param Trip $trip
@@ -274,6 +281,7 @@ class TripPackage extends PostModel {
 					$dates[ $package_date->format( 'Y-m-d' ) ] = array(
 						'times' => $times,
 						'seats' => is_int( $available_seats ) ? array_sum( array_column( $times, 'seats' ) ) : '',
+						'pricing' => $this->get_default_pricings(),
 					);
 				}
 			}
@@ -295,6 +303,31 @@ class TripPackage extends PostModel {
 		}
 
 		return $dates;
+	}
+
+	/**
+	 * Returns the default traveler categories pricing.
+	 *
+	 * @return array
+	 * @since 6.3.1
+	 */
+	protected function get_default_pricings(): array {
+		if ( empty( $this->categories_pricings ) ) {
+			$this->categories_pricings 		= array();
+			$traveler_categories 			= $this->get_traveler_categories();
+			$primary_traveler_category_id 	= $traveler_categories->get_primary_traveler_category()->get( 'id' );
+			foreach ( $traveler_categories as $traveler_category ) {
+				/** @var TravelerCategory $traveler_category */
+				$this->categories_pricings[] = array(
+					'id' 			=> $traveler_category->get( 'id' ),
+					'label' 		=> $traveler_category->get( 'label' ),
+					'price' 		=> $traveler_category->get( 'has_sale' ) ? $traveler_category->get( 'sale_price' ) : $traveler_category->get( 'price' ),
+					'is_primary' 	=> $traveler_category->get( 'id' ) === $primary_traveler_category_id,
+				);
+			}
+		}
+
+		return $this->categories_pricings;
 	}
 
 	/**
@@ -320,6 +353,8 @@ class TripPackage extends PostModel {
 			case 'group-pricing':
 			case 'package-dates':
 				return $this->data[ $key ] ?? $this->get_meta( $key );
+			case 'default_pricings':
+				return $this->get_default_pricings();
 			default:
 				return null;
 		}

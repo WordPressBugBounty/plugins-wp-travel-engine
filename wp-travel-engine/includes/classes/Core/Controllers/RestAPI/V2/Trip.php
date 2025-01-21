@@ -795,7 +795,7 @@ class Trip extends WP_REST_Posts_Controller {
 		$data[ 'duration' ] = array(
 			'period' => (int) $trip->get_setting( 'trip_duration', 1 ),
 			'unit'   => (string) $trip->get_setting( 'trip_duration_unit', 'days' ),
-			'nights' => (int) ( 'hours' === $trip->get_setting( 'trip_duration_unit', 'days' ) ? 0 : $trip->get_setting( 'trip_duration_nights', 0 ) ),
+			'nights' => (int) $trip->get_setting( 'trip_duration_nights', 0 ),
 		);
 
 		$data[ 'age_limit' ] = [
