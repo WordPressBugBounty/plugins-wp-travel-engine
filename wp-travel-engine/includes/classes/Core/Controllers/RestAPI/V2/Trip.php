@@ -456,6 +456,7 @@ class Trip extends WP_REST_Posts_Controller {
 						'itinerary_image_max_count'        => array_combine( $itinerary_arr_range, array_map( 'count', $imgs ) ),
 					];
 
+					$chart_data = array();
 					foreach ( $itinerary_arr_range as $key => $val ) {
 						$advanced_itinerary[ 'itinerary_image' ][ $val ] = array_column( $imgs[ $key ] ?? [], 'id' );
 						$advanced_itinerary[ 'overnight' ][ $val ]       = [
@@ -2006,26 +2007,26 @@ class Trip extends WP_REST_Posts_Controller {
 	 */
 	private function sanitize_params_recursive( $params ) {
 		$sanitized_params = array();
-	
+
 		foreach ( $params as $key => $value ) {
 			if ( is_array( $value ) ) {
-				$sanitized_params[$key] = $this->sanitize_params_recursive( $value );
+				$sanitized_params[ $key ] = $this->sanitize_params_recursive( $value );
 			} else if ( is_int( $value ) ) {
-				$sanitized_params[$key] = intval( $value );
+				$sanitized_params[ $key ] = intval( $value );
 			} else if ( is_float( $value ) ) {
-				$sanitized_params[$key] = floatval( $value );
+				$sanitized_params[ $key ] = floatval( $value );
 			} else if ( is_bool( $value ) ) {
-				$sanitized_params[$key] = filter_var( $value, FILTER_VALIDATE_BOOLEAN );
+				$sanitized_params[ $key ] = filter_var( $value, FILTER_VALIDATE_BOOLEAN );
 			} else if ( is_email( $value ) ) {
-				$sanitized_params[$key] = sanitize_email( $value );
+				$sanitized_params[ $key ] = sanitize_email( $value );
 			} else if ( filter_var( $value, FILTER_VALIDATE_URL ) ) {
-				$sanitized_params[$key] = esc_url_raw( $value );
+				$sanitized_params[ $key ] = esc_url_raw( $value );
 			} else {
-				$sanitized_params[$key] = $value;
+				$sanitized_params[ $key ] = $value;
 			}
 		}
-	
+
 		return $sanitized_params;
-	}	
+	}
 
 }

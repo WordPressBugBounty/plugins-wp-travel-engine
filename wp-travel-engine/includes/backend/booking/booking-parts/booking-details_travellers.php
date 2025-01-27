@@ -231,6 +231,9 @@ global $post;
 													if ( array_key_exists( $key, $key_map ) ) {
 														$key = $key_map[ $key ];
 													}
+													if ( is_array( $data_value ) ) {
+														$data_value = implode( ',', $data_value );
+													}
 														?>
 														<li>
 															<b><?php echo esc_html(  $key ); ?></b>

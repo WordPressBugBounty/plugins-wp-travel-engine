@@ -15,6 +15,57 @@ use WPTravelEngine\Core\Models\Post\Trip;
 use WPTravelEngine\Core\Models\Post\TripPackage;
 use WPTravelEngine\Pages\Checkout;
 use WPTravelEngine\PaymentGateways\PaymentGateways;
+use WPTravelEngine\Utilities\RequestParser;
+
+
+/**
+ * @param $form_data
+ *
+ * @return void
+ * @since 6.3.3
+ */
+function wptravelengine_cache_form_data( $key, $form_data ) {
+	WTE()->session->set_json( $key, $form_data );
+}
+
+/**
+ * @param WP_REST_Request $request
+ *
+ * @since 6.3.3
+ */
+function wptravelengine_cache_checkout_form_data( RequestParser $request ) {
+
+	if ( $data = $request->get_param( 'emergency' ) ) {
+		wptravelengine_cache_form_data( 'emergency_form_data', $data );
+	}
+
+	if ( $data = $request->get_param( 'billing' ) ) {
+		wptravelengine_cache_form_data( 'billing_form_data', $data );
+	}
+
+	if ( $data = $request->get_param( 'travellers' ) ) {
+		wptravelengine_cache_form_data( 'travellers_form_data', $data );
+	}
+
+	if ( $data = $request->get_param( 'wptravelengine_additional_note' ) ) {
+		wptravelengine_cache_form_data( 'additional_note', $data );
+	}
+}
+
+/**
+ * Get the current template arg value.
+ *
+ * @param string $key
+ * @param mixed $default
+ *
+ * @return mixed|string
+ * @since 6.3.3
+ */
+function wptravelengine_get_template_arg( string $key, $default = '' ) {
+	global $wptravelengine_template_args;
+
+	return $wptravelengine_template_args[ $key ] ?? $default;
+}
 
 /**
  * @param string $date
@@ -113,41 +164,41 @@ function wptravelengine_get_checkout_template_args( array $args = array() ): arr
 	$show_additional_note    = $wptravelengine_settings[ 'show_additional_note' ] ?? 'yes';
 	$show_coupon_form        = $wptravelengine_settings[ 'show_discount' ] ?? 'yes';
 	$attributes              = array(
-		'version'          		=> $checkout_page_template,
-		'header'           		=> $checkout_page_template == '2.0' && $display_header_footer == 'yes' ? 'default' : 'none',
-		'footer'          		=> $checkout_page_template == '2.0' && $display_header_footer == 'yes' ? 'default' : 'none',
-		'checkout-steps'  		=> 'show',
-		'tour-details'    		=> 'show',
-		'tour-details-title' 	=> 'show',
-		'cart-summary'     		=> 'show',
-		'cart-summary-title' 	=> 'show',
-		'travellers'       		=> $show_travellers_info == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide',
-		'travellers-title' 		=> 'show',
-		'emergency'       		=> $show_emergency_contact == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide',
-		'emergency-title' 		=> 'show',
-		'billing'          		=> $display_billing_details == 'yes' ? 'show' : 'hide',
-		'billing-title' 		=> 'show',
-		'additional_note'  		=> $show_additional_note == 'yes' ? 'show' : 'hide',
-		'additional-note-title' 	=> 'show',
-		'payment'          		=> 'show',
-		'payment-title' 		=> 'show',
-		'coupon_form'      		=> $show_coupon_form == 'yes' && Coupons::is_coupon_available() && 'due' !== $wte_cart->get_payment_type() ? 'show' : 'hide',
-		'footer_copyright' 		=> $wptravelengine_settings[ 'footer_copyright' ] ?? '',
+		'version'               => $checkout_page_template,
+		'header'                => $checkout_page_template == '2.0' && $display_header_footer == 'yes' ? 'default' : 'none',
+		'footer'                => $checkout_page_template == '2.0' && $display_header_footer == 'yes' ? 'default' : 'none',
+		'checkout-steps'        => 'show',
+		'tour-details'          => 'show',
+		'tour-details-title'    => 'show',
+		'cart-summary'          => 'show',
+		'cart-summary-title'    => 'show',
+		'travellers'            => $show_travellers_info == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide',
+		'travellers-title'      => 'show',
+		'emergency'             => $show_emergency_contact == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide',
+		'emergency-title'       => 'show',
+		'billing'               => $display_billing_details == 'yes' ? 'show' : 'hide',
+		'billing-title'         => 'show',
+		'additional_note'       => $show_additional_note == 'yes' ? 'show' : 'hide',
+		'additional-note-title' => 'show',
+		'payment'               => 'show',
+		'payment-title'         => 'show',
+		'coupon_form'           => $show_coupon_form == 'yes' && Coupons::is_coupon_available() && 'due' !== $wte_cart->get_payment_type() ? 'show' : 'hide',
+		'footer_copyright'      => $wptravelengine_settings[ 'footer_copyright' ] ?? '',
 	);
 
 	$form_sections = array(
 //		'travellers'      => 'content-travellers-details',
 //		'emergency'       => 'content-emergency-details',
-		'billing'         => 'content-billing-details',
+'billing' => 'content-billing-details',
 //		'additional_note' => 'content-checkout-note',
-		'payment'         => 'content-payments',
+'payment' => 'content-payments',
 	);
 
 	$template_args[ 'form_sections' ] = apply_filters( 'wptravelengine_checkoutv2_form_templates', $form_sections );
 
 	$is_partial_payment_applicable = 'due' !== $wte_cart->get_payment_type() && 'booking_only' !== ( $wte_cart->payment_gateway ?? 'booking_only' );
 	if ( $is_partial_payment_applicable ) {
-		foreach ( $wte_cart->getItems(true) as $item ) {
+		foreach ( $wte_cart->getItems( true ) as $item ) {
 			$is_partial_payment_applicable = wp_travel_engine_is_trip_partially_payable( $item->trip_id );
 			if ( ! $is_partial_payment_applicable ) {
 				break;
@@ -181,17 +232,17 @@ function wptravelengine_get_checkout_template_args( array $args = array() ): arr
 
 	$emergency_contact_fields = new EmergencyFormFields();
 
-	$payment_options 		= $checkout_page->get_payment_options();
+	$payment_options = $checkout_page->get_payment_options();
 
-	$payment_type 			= $checkout_page->get_payment_type();
+	$payment_type = $checkout_page->get_payment_type();
 
-	$full_payment_enabled 	= $checkout_page->is_full_payment_enabled();
+	$full_payment_enabled = $checkout_page->is_full_payment_enabled();
 
-	$full_payment_amount 	= $checkout_page->get_full_payment_amount();
+	$full_payment_amount = $checkout_page->get_full_payment_amount();
 
-	$down_payment_amount 	= $checkout_page->get_down_payment_amount();
+	$down_payment_amount = $checkout_page->get_down_payment_amount();
 
-	$due_payment_amount 	= $checkout_page->get_due_payment_amount();
+	$due_payment_amount = $checkout_page->get_due_payment_amount();
 
 	$privacy_policy_fields = new PrivacyPolicyFields();
 
@@ -199,7 +250,7 @@ function wptravelengine_get_checkout_template_args( array $args = array() ): arr
 //		$template_args,
 		compact( 'note_form_fields' ),
 		compact( 'tour_details', 'cart_line_items', 'billing_form_fields', 'travellers_form_fields', 'privacy_policy_fields',
-		'emergency_contact_fields', 'payment_options', 'payment_type', 'full_payment_enabled', 'full_payment_amount', 'down_payment_amount', 'due_payment_amount' ),
+			'emergency_contact_fields', 'payment_options', 'payment_type', 'full_payment_enabled', 'full_payment_amount', 'down_payment_amount', 'due_payment_amount' ),
 		compact( 'attributes', 'form_sections', 'is_partial_payment_applicable', 'coupons' ),
 		$args
 	);
@@ -2629,4 +2680,49 @@ function wptravelengine_view( $template, array $args = array() ) {
 
 	include $template;
 
+}
+
+/**
+ * Get active theme version.
+ *
+ * @param string $theme_name Name of the theme
+ *
+ * @return boolean|string
+ * @since 6.3.3
+ *
+ */
+function wptravelengine_get_active_theme_version( $theme_name ){
+	$theme = wp_get_theme(); // gets the current theme
+	if ( $theme_name == $theme->name ) {
+		return $theme->version ?? false;
+	}
+	if( $theme_name == $theme->parent_theme ){
+		return $theme->parent()->version ?? false;
+	}
+	return false;
+}
+
+/**	
+ * Check if the active theme is compatible with new WPTE banner
+ * 
+ * @param $theme_name Name of the theme
+ * 
+ * @return boolean
+ * @since 6.3.3
+ */
+function wptravelengine_revert_to_old_banner( $theme_name ){
+
+	$conditions = [
+		'Travel Monster'  => '1.2.5',
+		'Travel Muni'     => '1.1.4',
+		'Travel Muni Pro' => '2.1.2'
+	];
+
+	$theme_version = wptravelengine_get_active_theme_version( $theme_name ) ?? false;
+
+	if( $theme_version && version_compare( $theme_version, $conditions[$theme_name], '<' ) ){
+		return true;
+	}
+
+	return false;
 }

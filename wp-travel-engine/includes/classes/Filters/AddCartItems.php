@@ -66,7 +66,7 @@ class AddCartItems {
 				foreach ( $extra_services as $service ) {
 					$key = array_search( $trip_extra[ 'id' ], array_column( $service[ 'options' ], 'key' ) );
 					if ( $key !== false ) {
-						$label = (string) ( $service[ 'title' ] ?? '' );
+						$label = (string) ( $service[ 'options' ][ $key ][ 'label' ] ?? ( $service[ 'title' ] ?? '' ) );
 						$price = (float) ( $service[ 'options' ][ $key ][ 'price' ] ?? 0.0 );
 						break;
 					}

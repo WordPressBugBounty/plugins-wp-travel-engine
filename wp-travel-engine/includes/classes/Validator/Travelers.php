@@ -362,9 +362,9 @@ class Travelers extends Validator {
 						$this->$mapped_key( $value, $key );
 					} elseif ( empty( $value[ $mapped_key ] ) && $is_required ) {
 							$this->errors[ $mapped_key ] = self::REQUIRED;
-							return;
+							continue;
 					}
-					$this->data['travelers'][ $key ][ $mapped_key ] = sanitize_text_field( $mapped_value ?? '' );
+					$this->data['travelers'][ $key ][ $mapped_key ] = is_array( $mapped_value ) ? array_map( 'sanitize_text_field', $mapped_value ) : sanitize_text_field( $mapped_value );
 				}
 			}
 		}

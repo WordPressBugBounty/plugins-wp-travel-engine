@@ -9,4 +9,5 @@
 namespace WPTravelEngine\Interfaces;
 
 interface CartItem {
+	public function data();
 }

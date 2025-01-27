@@ -90,4 +90,47 @@ class DirectBankTransfer extends BaseGateway {
 		$payment->set_status( 'voucher-awaiting' );
 		$payment->set_payment_gateway( $this->get_gateway_id() );
 	}
+
+	/**
+	 * Print bank details.
+	 *
+	 * @since 6.3.3
+	 */
+	public function print_instruction( int $payment_id ) {
+		$instruction  = $this->get_info();
+		$bank_details = wptravelengine_settings()->get( 'bank_transfer.accounts', [] );
+		if ( ! is_array( $bank_details ) ) {
+			return;
+		}
+
+		$keys = array(
+			'bank_name'      => __( 'Bank:', 'wp-travel-engine' ),
+			'account_name'   => __( 'Account Name:', 'wp-travel-engine' ),
+			'account_number' => __( 'Account Number:', 'wp-travel-engine' ),
+			'sort_code'      => __( 'Sort Code:', 'wp-travel-engine' ),
+			'iban'           => __( 'IBAN:', 'wp-travel-engine' ),
+			'swift'          => __( 'BIC/SWIFT:', 'wp-travel-engine' ),
+		);
+
+		$bank_details = array_map( function ( $bank_detail ) use ( $keys ) {
+			$_bank_detail = array();
+
+			foreach ( $keys as $key => $label ) {
+				if ( ! empty( $bank_detail[ $key ] ) ) {
+					$_bank_detail[ $key ] = array(
+						'label' => $label,
+						'value' => $bank_detail[ $key ],
+					);
+				}
+			}
+
+			return $_bank_detail;
+		}, $bank_details );
+
+
+		wptravelengine_get_template(
+			'template-checkout/content-bank-transfer-instruction.php',
+			compact( 'instruction', 'bank_details' )
+		);
+	}
 }

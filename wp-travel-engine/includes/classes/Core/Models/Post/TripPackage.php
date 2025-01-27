@@ -277,13 +277,11 @@ class TripPackage extends PostModel {
 						'seats' => $available_seats,
 					);
 				}
-				if( ! empty( $times ) ){
-					$dates[ $package_date->format( 'Y-m-d' ) ] = array(
-						'times' => $times,
-						'seats' => is_int( $available_seats ) ? array_sum( array_column( $times, 'seats' ) ) : '',
-						'pricing' => $this->get_default_pricings(),
-					);
-				}
+				$dates[ $package_date->format( 'Y-m-d' ) ] = array(
+					'times' => $times,
+					'seats' => is_int( $available_seats ) ? array_sum( array_column( $times, 'seats' ) ) : '',
+					'pricing' => $this->get_default_pricings(),
+				);
 			}
 		} else {
 			$package_date_parser = new PackageDateParser(

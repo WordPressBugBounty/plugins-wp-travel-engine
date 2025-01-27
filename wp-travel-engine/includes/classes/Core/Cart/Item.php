@@ -141,9 +141,41 @@ class Item {
 
 		$this->id = $this->generate_id();
 
-		$this->add_add_line_items();
-
 		$this->calculate_totals();
+	}
+
+	/**
+	 * Add attributes.
+	 *
+	 * @param array $attrs Attributes.
+	 *
+	 * @since 6.3.3
+	 */
+	public function add_attributes( array $attrs ) {
+		$this->attrs = array_merge( $this->attrs, $attrs );
+	}
+
+	/**
+	 * Remove additional line items.
+	 *
+	 * @param string $item_type
+	 *
+	 * @since 6.3.3
+	 */
+	public function remove_additional_line_items( string $item_type ) {
+		if ( isset( $this->additional_line_items[ $item_type ] ) ) {
+			$this->additional_line_items[ $item_type ] = array();
+		}
+	}
+
+	/**
+	 * Get attributes.
+	 *
+	 * @return array
+	 * @since 6.3.3
+	 */
+	public function get_attributes(): array {
+		return $this->attrs;
 	}
 
 	/**
@@ -159,11 +191,16 @@ class Item {
 		$order_item[ 'trip_id' ]    = $order_item[ 'ID' ];
 		$order_item[ 'trip_price' ] = $order_item[ 'cost' ] ?? 0;
 
+
 		if ( isset( $order_item[ '_cart_item_object' ] ) ) {
 			$order_item = $order_item[ '_cart_item_object' ];
 		}
 
-		return new static( $cart, $order_item );
+		$item = new static( $cart, $order_item );
+
+		$item->add_line_items_from_order_item( $order_item );
+
+		return $item;
 	}
 
 	/**
@@ -248,11 +285,15 @@ class Item {
 				'datetime'              => $cart_data->{'tripDate'},
 				'tax_amount'            => $tax->get_tax_percentage(),
 				'subtotal_reservations' => $cart_data->{'subtotalReservations'} ?? array(),
-				'travelers'             => $cart_data->{'travelers'}
+				'travelers'             => $cart_data->{'travelers'},
 			)
 		);
 
-		return new static( $cart, $attrs );
+		$item = new static( $cart, $attrs );
+
+		$item->add_add_line_items();
+
+		return $item;
 	}
 
 	/**
@@ -707,7 +748,75 @@ class Item {
 							'label'    => $package_traveler->label,
 							'quantity' => $pax,
 							'price'    => apply_filters( 'wptravelengine_package_traveler_price', $price, compact(
-								'item',
+									'item',
+									'package_traveler'
+								)
+							),
+						) )
+					);
+				}
+			}
+		}
+
+//		if ( $this->attrs[ 'additional_line_items' ] ?? false ) {
+//			foreach ( $this->attrs[ 'additional_line_items' ] as $class_name => $additional_line_items ) {
+//				foreach ( $additional_line_items as $additional_line_item ) {
+//					if ( class_exists( $class_name ) ) {
+//						$this->add_additional_line_items(
+//							new $class_name( $this->cart, $additional_line_item )
+//						);
+//					}
+//				}
+//			}
+//		}
+	}
+
+	/**
+	 * Add line items from order item.
+	 *
+	 * @param $order_item
+	 *
+	 * @since 6.3.3
+	 */
+	public function add_line_items_from_order_item( $order_item ) {
+
+		if ( isset( $this->pax ) && is_array( $this->pax ) ) {
+			$cart_pricing_options = $this->pax;
+
+			$package_travelers = $order_item[ 'category_info' ];
+
+			foreach ( $package_travelers as $pricing_category_id => $package_traveler ) {
+				$package_traveler[ 'id' ] = $pricing_category_id;
+				$package_traveler         = (object) $package_traveler;
+
+				if ( isset( $cart_pricing_options[ $package_traveler->id ] ) ) {
+					$pax = (int) ( $cart_pricing_options[ $package_traveler->id ] ?? 0 );
+
+					$applicable_price = isset( $package_traveler->enabledSale ) && $package_traveler->enabledSale ? $package_traveler->salePrice : $package_traveler->price;
+
+					$enable_group_discount = (bool) ( $package_traveler->enabledGroupDiscount ?? false );
+					$group_pricing         = $package_traveler->groupPricing ?? [];
+
+					$travelers[ 'pax' ][ $package_traveler->id ] = $pax;
+
+					if ( $enable_group_discount && ! empty( $group_pricing ) ) {
+						foreach ( $group_pricing as $pricing ) {
+							if ( $pricing[ 'from' ] <= $pax && ( empty( $pricing[ 'to' ] ) || ( $pricing[ 'to' ] >= $pax ) ) ) {
+								$applicable_price = $pricing[ 'price' ];
+								break;
+							}
+						}
+					}
+
+					$price = $package_traveler->pricingType === 'per-group' && $pax > 0 ? $applicable_price / $pax : $applicable_price;
+
+					$item = $this;
+					$this->add_additional_line_items(
+						new PricingCategory( $this->cart, array(
+							'label'    => $package_traveler->label,
+							'quantity' => $pax,
+							'price'    => apply_filters( 'wptravelengine_package_traveler_price', $price, compact(
+									'item',
 									'package_traveler'
 								)
 							),

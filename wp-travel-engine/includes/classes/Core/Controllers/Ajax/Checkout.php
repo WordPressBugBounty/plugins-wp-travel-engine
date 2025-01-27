@@ -11,6 +11,8 @@ namespace WPTravelEngine\Core\Controllers\Ajax;
 use Stripe\Exception\ApiErrorException;
 use WP_Error;
 use WPTravelEngine\Abstracts\AjaxController;
+use WPTravelEngine\Helpers\Functions;
+use WPTravelEngine\Utilities\RequestParser;
 use WTE_PayU_Money_Admin;
 
 /**
@@ -28,12 +30,22 @@ class Checkout extends AjaxController {
 
 		$cart_action = $this->request->get_param( '_action' );
 
+		do_action( "wptravelengine_page_checkout_{$cart_action}", $this->request );
+
 		switch ( $cart_action ) {
 			case 'update_cart':
 				wptravelengine_update_cart( array(
 					'payment_type'    => $this->request->get_param( 'payment_mode' ),
 					'payment_gateway' => $this->request->get_param( 'payment_method' ),
 				) );
+
+				if ( $formData = $this->request->get_param( 'formData' ) ) {
+					$request = new RequestParser( 'POST' );
+					foreach ( $formData as $key => $value ) {
+						$request->set_param( $key, $value );
+					}
+					wptravelengine_cache_checkout_form_data( $request );
+				}
 
 				ob_start();
 				do_action( 'wptravelengine_checkout_form_submit_button' );
@@ -48,15 +60,19 @@ class Checkout extends AjaxController {
 				$payment_modes = ob_get_clean();
 
 				global $wte_cart;
-				wp_send_json( array(
-					'success'   => true,
-					'message'   => __( 'Cart updated successfully.', 'wp-travel-engine' ),
-					'cart'      => $wte_cart,
-					'fragments' => array(
-						'[data-checkout-form-submit]'   => $submit_button,
-						'[data-cart-summary]'           => $cart_summary,
-						'[data-checkout-payment-modes]' => $payment_modes,
-					),
+
+				wp_send_json( apply_filters(
+					"wptravelengine_page_checkout_{$cart_action}_response",
+					array(
+						'success'   => true,
+						'message'   => __( 'Cart updated successfully.', 'wp-travel-engine' ),
+						'cart'      => $wte_cart,
+						'fragments' => array(
+							'[data-checkout-form-submit]'   => $submit_button,
+							'[data-cart-summary]'           => $cart_summary,
+							'[data-checkout-payment-modes]' => $payment_modes,
+						),
+					)
 				) );
 				break;
 			case 'stripe_create_session':
@@ -180,7 +196,7 @@ class Checkout extends AjaxController {
 					'return_url'    => get_bloginfo( 'url' ),
 					'amount'        => $order_amount,
 					'currency'      => $currency,
-					'payment_mode' => $wte_cart->get_payment_type(),
+					'payment_mode'  => $wte_cart->get_payment_type(),
 				),
 			) );
 		} catch ( ApiErrorException $e ) {

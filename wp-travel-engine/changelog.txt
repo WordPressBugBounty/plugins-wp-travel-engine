@@ -1,5 +1,13 @@
 == Changelog ==
 
+= 6.3.3 - 27th January 2025 =
+* Improvement: Enhanced the Extra Services Add-on for better usability and performance.
+* Improvement: Improvised thank you page template.
+* Feature: Introduced multiple banner options for single trips, providing more customization flexibility.
+* Fix: Resolved an issue where the Elevation Chart was displayed on trips even when no altitude data was added.
+* Fix: Improper calculation of partial payment in checkout page.
+* Update: Freemius SDK
+
 = 6.3.2 - 21st January 2025 =
 * Fix: Translation compatibility issues with translation plugins.
 

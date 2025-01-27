@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 6.3.2
+Stable tag: 6.3.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -367,6 +367,16 @@ Yes. We have created WooCommerce Payments add-ons that supports all the payment 
 Please send us an email via [support ticket](https://wptravelengine.com/support-ticket/?utm_source=free_plugin&utm_medium=wporg&utm_campaign=support), and we will be happy to help you.
 
 == Changelog ==
+
+= 6.3.3 - 27th January 2025 =
+* Improvement: Enhanced the Extra Services Add-on for better usability and performance.
+* Improvement: Improvised thank you page template.
+* Feature: Introduced multiple banner options for single trips, providing more customization flexibility.
+* Fix: Resolved an issue where the Elevation Chart was displayed on trips even when no altitude data was added.
+* Fix: Improper calculation of partial payment in checkout page.
+* Update: Freemius SDK
+
+**Check out the release note for version [6.3.3](https://wptravelengine.com/new-release-version-6-3-3/).**
 
 = 6.3.2 - 21st January 2025 =
 * Fix: Translation compatibility issues with translation plugins.

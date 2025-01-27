@@ -170,4 +170,14 @@ abstract class CartItem implements CartItemInterface {
 		return $this->totals;
 	}
 
+	/**
+	 * Get data.
+	 *
+	 * @return array
+	 * @since 6.3.0
+	 */
+	public function data(): array {
+		return $this->args;
+	}
+
 }

@@ -105,7 +105,7 @@ class StaticStrings extends BaseSetting {
 	/**
 	 * Register hooks.
 	 *
-	 * @since 6.3.2
+	 * @since 6.3.3
 	 */
 	public function hooks() {
 		add_filter( 'gettext_wp-travel-engine', array( __CLASS__, 'translateString' ), 11, 3 );

@@ -120,6 +120,20 @@ class TripAPISchema {
                             'type' => 'string',
                         ),
                     ),
+                    'descriptions' => array(
+                        'description' => __( 'Extra service descriptions.', 'wp-travel-engine' ),
+                        'type'        => 'array',
+                        'items'       => array(
+                            'type' => 'string',
+                        ),
+                    ),
+                    'prices' => array(
+                        'description' => __( 'Extra service prices.', 'wp-travel-engine' ),
+                        'type'        => 'array',
+                        'items'       => array(
+                            'type' => 'number',
+                        ),
+                    ),
                 ),
             ),
         );
@@ -210,33 +224,92 @@ class TripAPISchema {
      */
     protected function prepare_extra_services( array &$data, WP_REST_Request $request ): void {
 
-        if ( wptravelengine_is_addon_active( 'extra-services' ) ) {
-			$extra_services = $this->trip->get_setting( 'wte_services_ids' );
-			if ( ! is_null( $extra_services ) && ! empty( $extra_services ) ) {
-				$services = get_posts(
-					array(
-						'post_type'      => 'wte-services',
-						'post_status'    => 'publish',
-						'post__in'       => empty( $extra_services ) ? '' : explode( ',', $extra_services ),
-						'posts_per_page' => - 1,
-						'orderby'        => 'post__in',
-					)
-				);
-				foreach ( $services ?? [] as $service ) {
-					if ( $service_data = get_post_meta( $service->ID, 'wte_services', true ) ) {
-                        $service_data[ 'options' ]       = array_filter( $service_data[ 'options' ] ?? [], fn ( $val ) => ! empty( $val ) );
-                        $data[ 'trip_extra_services' ][] = [
-                            'id'      => (int) $service->ID,
-                            'label'   => (string) $service->post_title,
-                            'type'    => (string) $service_data[ 'service_type' ],
-                            'options' => (array) $service_data[ 'options' ],
-                        ];
-                    }
-				}
-			}
-		}
+        // Check if the addon is active.
+        if ( !wptravelengine_is_addon_active('extra-services') ) {
+            return;
+        }
+    
+        // Get the extra services ids.
+        $extra_services_ids = $this->trip->get_setting('wte_services_ids');
+        if ( empty( $extra_services_ids ) ) {
+            return;
+        }
+    
+        $services = get_posts([
+            'post_type'         => 'wte-services',
+            'post_status'       => 'publish',
+            'post__in'          => explode(',', $extra_services_ids),
+            'posts_per_page'    => -1,
+            'orderby'           => 'post__in',
+        ]);
+    
+        // Get the trip extra services.
+        $trip_extra_services = $this->trip->get_setting( 'trip_extra_services' ) ?? [];
+        
+        // Loop through the services.
+        foreach ( $services as $index => $service ) {
+            $service_data = get_post_meta($service->ID, 'wte_services', true);
 
+            // Skip if service data is empty.
+            if ( empty( $service_data ) ) {
+                continue;
+            }
+            
+            // Get extra service data saved in meta for current index.
+            $extra_service_data = $trip_extra_services[$index] ?? [];
+
+            // Handle Options.
+            $service_data['options'] = $extra_service_data['options'] ?? $service_data['options'] ?? [];
+            
+            // Handle Descriptions.
+            $service_data['descriptions'] = $extra_service_data['descriptions'] ?? $service_data['descriptions'] ?? [];
+            
+            // Handle Prices.
+            $service_data['prices'] = $extra_service_data['prices'] ?? $service_data['prices'] ?? [];
+
+            // Handle Compatibility with old data for Default Service Type.
+            if( $service_data['service_type'] != 'custom' ) {
+               // Set default price if not set or empty string.
+                if ( !isset( $service_data['prices'][0] ) || $service_data['prices'][0] === '' ) {
+                    $service_data['prices'] = [
+                        0 => $service_data['service_cost'] ?? 0
+                    ];
+                }
+                
+                // Set default description if not set or empty string.
+                if ( !isset( $service_data['descriptions'][0] ) || $service_data['descriptions'][0] === '' ) {
+                    $service_data['descriptions'] = [
+                        0 => get_the_content( '', false, $service->ID ) ?? ''
+                    ];
+                }
+            }
+            
+            // Handle Service Type.
+            $service_data['service_type'] = isset( $service_data['service_type'] ) 
+                ? ( $service_data['service_type'] == 'custom' ? 'Advanced' : 'Default' )
+                : 'Default';
+
+            $service_post_data = get_post_meta($service->ID, 'wte_services', true);
+            //Map options name to service_post_data options name.
+            foreach( $service_post_data['options'] as $key => $option ) {
+                if( isset( $service_data['options'][$key] ) ) {
+                    $service_data['options'][$key] = $option;
+                }
+            }
+
+            // Add service data to trip extra services.
+            $data['trip_extra_services'][] = [
+                'id'            => (int)$service->ID,
+                'label'         => (string)$service->post_title,
+                'type'          => (string)$service_data['service_type'],
+                'options'       => (array)$service_data['options'],
+                'descriptions'  => (array)$service_data['descriptions'],
+                'prices'        => (array) $service_data['prices'],
+            ];
+        }
     }
+    
+
 
     /**
      * Prepares the file downloads data.
@@ -364,6 +437,7 @@ class TripAPISchema {
      */
     protected function update_extra_services( WP_REST_Request $request ): void {
 		if ( isset( $request[ 'trip_extra_services' ] ) ) {
+            $this->trip_settings->set( 'trip_extra_services', $request[ 'trip_extra_services' ] );
 			$this->trip_settings->set( 'wte_services_ids', implode( ',', array_column( $request[ 'trip_extra_services' ], 'id' ) ) );
 		}
     }

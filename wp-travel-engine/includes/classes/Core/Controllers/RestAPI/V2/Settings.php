@@ -352,6 +352,10 @@ class Settings {
 
 		$settings = array();
 
+		$settings[ 'trip_banner_layout' ] = $this->plugin_settings->get( 'trip_banner_layout', 'banner-default' );
+
+		$settings[ 'display_banner_fullwidth' ] = wptravelengine_toggled( $this->plugin_settings->get( 'display_banner_fullwidth', 'no' ) );
+
 		$settings[ 'enable_booking_form' ] = ! wptravelengine_toggled( $this->plugin_settings->get( 'booking' ) );
 
 		$settings[ 'pricing_section_layout' ] = $this->plugin_settings->get( 'pricing_section_layout', 'layout-1' );
@@ -1242,6 +1246,14 @@ class Settings {
 	protected function set_single_trip( WP_REST_Request $request ) {
 
 		$plugin_settings = $this->plugin_settings;
+
+		if ( isset( $request[ 'trip_banner_layout' ] ) ) {
+			$plugin_settings->set( 'trip_banner_layout', $request[ 'trip_banner_layout' ] );
+		}
+
+		if( isset( $request[ 'display_banner_fullwidth' ] ) ) {
+			$plugin_settings->set( 'display_banner_fullwidth', wptravelengine_replace( $request[ 'display_banner_fullwidth' ], true, 'yes', 'no' ) );
+		}
 
 		if ( isset( $request[ 'enable_booking_form' ] ) ) {
 			$plugin_settings->set( 'booking', wptravelengine_replace( $request[ 'enable_booking_form' ], false, '1', '' ) );
@@ -2560,6 +2572,14 @@ class Settings {
 				'description' => __( 'Trip Duration Label', 'wp-travel-engine' ),
 				'type'        => 'string',
 				'enum'        => array( 'days', 'nights', 'both' ),
+			),
+			'trip_banner_layout' => array(
+				'description' => __( 'Trip Banner Layout', 'wp-travel-engine' ),
+				'type'        => 'string',
+			),
+			'display_banner_fullwidth' => array(
+				'description' => __( 'Display Banner in Full Width', 'wp-travel-engine' ),
+				'type'        => 'boolean',
 			),
 			'enable_booking_form'              => array(
 				'description' => __( 'Booking Form Enabled or Not', 'wp-travel-engine' ),

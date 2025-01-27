@@ -51,7 +51,7 @@ echo $new_trip_listing ? ' wpte_new-layout' : '';
 
 			// Trip thumbnail.
 			if ( $show_trip_carousel && $wpte_trip_images['enable'] == 1 && count( $wpte_trip_images ) > 1 ) {
-				wte_get_template( 'single-trip/gallery.php' );
+				wte_get_template( 'single-trip/gallery.php', array('related_query' => true) );
 			} else {
 				?>
 				<a href="<?php the_permalink(); ?>">

@@ -44,7 +44,10 @@ class WP_Travel_Engine_Template_Hooks {
 	private function init_single_trip_hooks() {
 		add_action( 'wp_travel_engine_before_trip_content', array( $this, 'trip_content_wrapper_start' ), 5 );
 		add_action( 'wte_single_trip_content', array( $this, 'display_single_trip_title' ), 5 );
-		add_action( 'wte_single_trip_content', array( $this, 'display_single_trip_gallery' ), 10 );
+		
+		// Implement single trip gallery action as per the layout.
+		$this->register_trip_gallery_action();
+
 		add_action( 'wte_single_trip_content', array( $this, 'display_single_trip_content' ), 15 );
 		add_action( 'wte_single_trip_content', array( $this, 'display_single_trip_facts' ), 15 );
 		add_action( 'wte_single_trip_content', array( $this, 'display_single_trip_tabs_nav' ), 20 );
@@ -78,6 +81,193 @@ class WP_Travel_Engine_Template_Hooks {
 
 		add_action( 'wp_travel_engine_related_posts', array( __CLASS__, 'trip_related_trips' ), 15 );
 
+		add_action( 'wptravelengine_trip_dynamic_banner', array( $this, 'trip_dynamic_banner' ) );
+		add_action( 'wptravelengine_trip_carousel', array( $this, 'trip_carousel' ), 10, 2 );
+		add_filter( 'wptravelengine_trip_dynamic_banner_list_images', array(
+			$this,
+			'generate_image_markup',
+		), 10, 2 );
+	}
+
+	/**
+	 * Register trip gallery action as per the layout.
+	 * @return void
+	 * @since 6.3.3
+	 */
+	private function register_trip_gallery_action() {
+		if (
+			wptravelengine_revert_to_old_banner( 'Travel Monster' ) ||
+			wptravelengine_revert_to_old_banner( 'Travel Muni' ) ||
+			wptravelengine_revert_to_old_banner( 'Travel Muni Pro' )
+		) {
+			return;
+		}
+
+		$settings = wptravelengine_settings();
+		$banner_layout = $settings->get( 'trip_banner_layout', 'banner-default' );
+		$action_hook = ( 'banner-layout-6' === $banner_layout ) 
+			? 'wte_single_trip_content' 
+			: 'wp_travel_engine_gallery_before_content';
+
+		add_action( $action_hook, array( $this, 'display_single_trip_gallery' ), 10 );
+	}
+
+	/**
+	 * @return void
+	 */
+	public function trip_carousel( $slide_images, $trip_id ) {
+		$carousel_slides = array();
+		foreach ( $slide_images as $slide ) {
+			if ( $slide_url = wp_get_attachment_image_url( $slide, 'full' ) ) {
+				$carousel_slides[] = array( 'src' => $slide_url );
+			}
+		}
+
+		if ( ! empty( $carousel_slides ) ) :
+			wp_enqueue_script( 'jquery-fancy-box' );
+			wp_enqueue_style( 'jquery-fancy-box' );
+			$random = wptravelengine_generate_key( maybe_serialize( $slide_images ) )
+			?>
+			<div class="wpte-gallery-container">
+				<?php if( wptravelengine_get_template_arg( 'show_image_gallery', true ) ) : ?>
+					<span class="wp-travel-engine-image-gal-popup">
+						<a data-galtarget="#wte-image-gallary-popup-<?php echo esc_attr( $trip_id . $random ); ?>"
+						data-variable="<?php echo esc_attr( 'wteimageGallery' . $random ); ?>"
+						href="#wte-image-gallary-popup-<?php echo esc_attr( $trip_id . $random ); ?>"
+						data-items="<?php echo esc_attr( wp_json_encode( array_values( $carousel_slides ) ) ); ?>"
+						class="wte-trip-image-gal-popup-trigger"><?php esc_html_e( 'Gallery', 'wp-travel-engine' ); ?>
+						</a>
+					</span>
+				<?php endif;
+				if ( wptravelengine_get_template_arg( 'show_video_gallery', true ) ) {
+					echo do_shortcode( '[wte_video_gallery label="Video"]' );
+				}
+				?>
+			</div>
+		<?php
+		endif;
+		$script = '
+		jQuery(document).ready(function() {
+			const galleryTriggers = document.querySelectorAll(".wte-trip-image-gal-popup-trigger");
+			galleryTriggers.forEach(trigger => {
+					trigger.addEventListener("click", () => {
+						jQuery.fancybox.open(JSON.parse(trigger.getAttribute("data-items") || "[]"), {
+							buttons: ["zoom", "slideShow", "fullScreen", "close"],
+						})
+					})
+				});
+		});';
+
+		wp_add_inline_script( 'single-trip', $script, 'before' );
+	}
+
+	/**
+	 * @param $list_images
+	 * @param $banner_layout
+	 *
+	 * @return array
+	 * @since 6.3.3
+	 */
+	public function generate_image_markup( $list_images, $banner_layout ): array {
+
+		$image_sizes = array(
+			'banner-layout-2' => array(
+				'large',
+				'activities-thumb-size',
+				'activities-thumb-size',
+				'activities-thumb-size',
+				'activities-thumb-size',
+			),
+			'banner-layout-3' => array(
+				'large',
+				'large',
+				'activities-thumb-size',
+				'activities-thumb-size',
+			),
+			'banner-layout-4' => array(
+				'large',
+				'activities-thumb-size',
+				'activities-thumb-size',
+			),
+			'banner-layout-5' => array(
+				'activities-thumb-size',
+				'activities-thumb-size',
+				'activities-thumb-size',
+				'activities-thumb-size',
+				'activities-thumb-size',
+			),
+		);
+
+		$image_sizes_by_layout = $image_sizes[ $banner_layout ] ?? array();
+
+		$_list_images = array();
+		foreach ( $list_images as $index => $image ) {
+			if ( ! $attachment_url = wp_get_attachment_image_url( $image, $image_sizes_by_layout[ $index ] ?? 'full' ) ) {
+				continue;
+			}
+			ob_start();
+			?>
+			<div class="wpte-multi-banner-image">
+				<a href="<?php echo esc_url( wp_get_attachment_image_url( $image, 'full' ) ); ?>"
+				   data-fancybox="gallery">
+					<img
+						src="<?php echo esc_url( $attachment_url ); ?>"
+						alt="<?php echo esc_attr( get_post_meta( $image, '_wp_attachment_image_alt', true ) ); ?>"
+					/>
+				</a>
+			</div>
+			<?php
+			$_list_images[] = ob_get_clean();
+		}
+
+		return $_list_images;
+	}
+
+	/**
+	 * Print Dynamic Gallery.
+	 *
+	 * @return void
+	 * @since 6.3.3
+	 */
+	public function trip_dynamic_banner( int $trip_id ) {
+		$settings = wptravelengine_settings();
+
+		$banner_layout = $settings->get( 'trip_banner_layout', 'banner-default' );
+		$banner_layout = wp_is_mobile() ? 'banner-layout-default' : $banner_layout;
+		$list_images   = get_post_meta( $trip_id, 'wpte_gallery_id', true );
+		if ( ! is_array( $list_images ) ) {
+			$list_images = array();
+		}
+		$show_image_gallery = ( $list_images[ 'enable' ] ?? '0' ) === '1';
+		if ( isset( $list_images[ 'enable' ] ) ) {
+			unset( $list_images[ 'enable' ] );
+		}
+
+		if ( $thumbnail_id = get_post_thumbnail_id( $trip_id ) ) {
+			if ( ! in_array( $thumbnail_id, $list_images, false ) ) {
+				array_unshift( $list_images, $thumbnail_id );
+			}
+		}
+
+		$show_video_gallery = get_post_meta( $trip_id, 'wp_travel_engine_setting', true )[ 'enable_video_gallery' ] ?? false;
+
+		wptravelengine_get_template(
+			'single-trip/dynamic-banner.php',
+			array_merge(
+				compact(
+					'trip_id',
+					'banner_layout',
+					'list_images',
+					'show_image_gallery',
+					'show_video_gallery',
+				),
+				array(
+					'is_mobile_view'    => wp_is_mobile() || 'banner-layout-1' === $banner_layout,
+					'full_width_banner' => $settings->get( 'display_banner_fullwidth', 'no' ) === 'yes',
+					'specific_layout'   => ! in_array( $banner_layout, array( 'banner-layout-1', 'banner-layout-5' ), true ),
+				)
+			)
+		);
 	}
 
 	/**
@@ -96,7 +286,7 @@ class WP_Travel_Engine_Template_Hooks {
 		$show_trip_by = ! empty( $settings[ 'related_trip_show_by' ] ) ? $settings[ 'related_trip_show_by' ] : 'activities';
 
 		global $post;
-		$terms = get_the_terms( $post->ID, $show_trip_by );
+		$terms         = get_the_terms( $post->ID, $show_trip_by );
 		$related_trips = new \WP_Query(
 			array(
 				'post_type'      => WP_TRAVEL_ENGINE_POST_TYPE,
@@ -512,7 +702,7 @@ class WP_Travel_Engine_Template_Hooks {
 	public function display_single_trip_title() {
 		global $post;
 
-		$post_meta = get_post_meta( $post->ID, 'wp_travel_engine_setting', true );
+		$post_meta   = get_post_meta( $post->ID, 'wp_travel_engine_setting', true );
 		$option_meta = get_option( 'wp_travel_engine_settings', true );
 
 		$duration      = isset( $post_meta[ 'trip_duration' ] ) && '' != $post_meta[ 'trip_duration' ]
@@ -523,7 +713,7 @@ class WP_Travel_Engine_Template_Hooks {
 		$nights = isset( $post_meta[ 'trip_duration_nights' ] ) && '' != $post_meta[ 'trip_duration_nights' ]
 			? $post_meta[ 'trip_duration_nights' ] : '';
 
-		$trip_duration_format = $option_meta[ 'trip_duration_format' ] ?? 'days';
+		$trip_duration_format           = $option_meta[ 'trip_duration_format' ] ?? 'days';
 		$show_trip_duration_days_nights = 'days_and_nights' === $trip_duration_format ? 'yes' : 'no';
 		wte_get_template( 'single-trip/title.php', compact( 'duration', 'duration_unit', 'nights', 'show_trip_duration_days_nights', 'trip_duration_format' ) );
 	}
@@ -535,11 +725,17 @@ class WP_Travel_Engine_Template_Hooks {
 	public function display_single_trip_gallery() {
 
 		do_action( 'wp_travel_engine_feat_img_trip_galleries' );
-		$global_settings     = get_option( 'wp_travel_engine_settings', true );
+		$global_settings     = get_option( 'wp_travel_engine_settings', array() );
 		$hide_featured_image = isset( $global_settings[ 'feat_img' ] ) && '1' == $global_settings[ 'feat_img' ];
 
 		if ( ! $hide_featured_image && ! has_action( 'wp_travel_engine_feat_img_trip_galleries' ) ) {
-			wte_get_template( 'single-trip/gallery.php', array( 'is_main_slider' => true ) );
+			wptravelengine_get_template(
+				'single-trip/gallery.php',
+				array(
+					'is_main_slider' => true,
+					'banner_layout'  => $global_settings[ 'trip_banner_layout' ] ?? 'banner-default',
+				)
+			);
 		}
 	}
 
@@ -601,6 +797,8 @@ class WP_Travel_Engine_Template_Hooks {
 		?>
 		</div>
 		<!-- .trip-content-area  -->
+		</div>
+		 <!-- wrapper with 100% width -->
 		<?php
 	}
 
@@ -1026,15 +1224,15 @@ class WP_Travel_Engine_Template_Hooks {
 		$trip = new Trip( $trip );
 
 		/* @var $package Package */
-		$package = $trip->default_package();
+		$package            = $trip->default_package();
 		$package_categories = $package->get_traveler_categories();
 
 		$primary_pricing_category = get_option( 'primary_pricing_category', 0 );
-		foreach( $package_categories as $pricing_category ) {
-			if( $pricing_category->id == $primary_pricing_category ) {
+		foreach ( $package_categories as $pricing_category ) {
+			if ( $pricing_category->id == $primary_pricing_category ) {
 				continue;
 			}
-			if( $pricing_category->price !== '' ) {
+			if ( $pricing_category->price !== '' ) {
 				return false;
 			}
 		}

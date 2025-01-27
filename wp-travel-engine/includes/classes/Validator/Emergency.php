@@ -180,6 +180,6 @@ class Emergency extends Validator {
 
 			return;
 		}
-		$this->data['emergency'][ $mapped_key ] = sanitize_text_field( $data[ $mapped_key ] ?? '' );
+		$this->data['emergency'][ $mapped_key ] = is_array( $data[ $mapped_key ] ) ? array_map( 'sanitize_text_field', $data[ $mapped_key ] ) : sanitize_text_field( $data[ $mapped_key ] ?? '' );
 	}
 }

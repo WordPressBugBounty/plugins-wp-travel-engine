@@ -8,6 +8,7 @@
 
 namespace WPTravelEngine\Core\Models\Post;
 
+use InvalidArgumentException;
 use WP_POST;
 use WPTravelEngine\Abstracts\PostModel;
 use WPTravelEngine\Core\Booking\Inventory;
@@ -35,11 +36,11 @@ class Booking extends PostModel {
 	protected ?array $payments = null;
 
 	/**
-     * Indicates if the booking is trashed.
-     *
-     * @var bool
-     */
-    protected $trashed = false;
+	 * Indicates if the booking is trashed.
+	 *
+	 * @var bool
+	 */
+	protected $trashed = false;
 
 	/**
 	 * Retrieves booking status.
@@ -81,7 +82,7 @@ class Booking extends PostModel {
 	public function get_trip_id() {
 		$order_trips = $this->get_order_items();
 
-		return $order_trips['trip_id'] ?? 0;
+		return $order_trips[ 'trip_id' ] ?? 0;
 	}
 
 	/**
@@ -103,7 +104,7 @@ class Booking extends PostModel {
 	public function get_trip_cost() {
 		$order_trips = $this->get_order_items();
 
-		return $order_trips['cost'] ?? 0;
+		return $order_trips[ 'cost' ] ?? 0;
 	}
 
 	/**
@@ -114,7 +115,7 @@ class Booking extends PostModel {
 	public function get_partial_cost() {
 		$order_trips = $this->get_order_items();
 
-		return $order_trips['partial_cost'] ?? 0;
+		return $order_trips[ 'partial_cost' ] ?? 0;
 	}
 
 	/**
@@ -125,7 +126,7 @@ class Booking extends PostModel {
 	public function get_trip_datetime() {
 		$order_trips = $this->get_order_items();
 
-		return $order_trips['datetime'] ?? gmdate( 'Y-m-d' );
+		return $order_trips[ 'datetime' ] ?? gmdate( 'Y-m-d' );
 	}
 
 	/**
@@ -136,7 +137,7 @@ class Booking extends PostModel {
 	public function get_trip_pax() {
 		$order_trips = $this->get_order_items();
 
-		return $order_trips['pax'] ?? array();
+		return $order_trips[ 'pax' ] ?? array();
 	}
 
 	/**
@@ -147,7 +148,7 @@ class Booking extends PostModel {
 	public function get_trip_pax_cost() {
 		$order_trips = $this->get_order_items();
 
-		return $order_trips['pax_cost'] ?? array();
+		return $order_trips[ 'pax_cost' ] ?? array();
 	}
 
 	/**
@@ -158,7 +159,7 @@ class Booking extends PostModel {
 	public function get_trip_extras() {
 		$order_trips = $this->get_order_items();
 
-		return $order_trips['trip_extras'] ?? array();
+		return $order_trips[ 'trip_extras' ] ?? array();
 	}
 
 	/**
@@ -169,7 +170,7 @@ class Booking extends PostModel {
 	public function get_trip_package_name() {
 		$order_trips = $this->get_order_items();
 
-		return $order_trips['package_name'] ?? '';
+		return $order_trips[ 'package_name' ] ?? '';
 	}
 
 	/**
@@ -180,7 +181,7 @@ class Booking extends PostModel {
 	public function get_trip_has_time() {
 		$order_trips = $this->get_order_items();
 
-		return $order_trips['has_time'] ?? false;
+		return $order_trips[ 'has_time' ] ?? false;
 	}
 
 	/**
@@ -224,7 +225,7 @@ class Booking extends PostModel {
 	public function get_currency() {
 		$cart_info = $this->get_cart_info();
 
-		return $cart_info['currency'] ?? '';
+		return $cart_info[ 'currency' ] ?? '';
 	}
 
 	/**
@@ -235,7 +236,7 @@ class Booking extends PostModel {
 	public function get_subtotal() {
 		$cart_info = $this->get_cart_info();
 
-		return $cart_info['subtotal'] ?? 0;
+		return $cart_info[ 'subtotal' ] ?? 0;
 	}
 
 	/**
@@ -246,7 +247,7 @@ class Booking extends PostModel {
 	public function get_total() {
 		$cart_info = $this->get_cart_info();
 
-		return $cart_info['total'] ?? 0;
+		return $cart_info[ 'total' ] ?? 0;
 	}
 
 	/**
@@ -257,7 +258,7 @@ class Booking extends PostModel {
 	public function get_cart_partial() {
 		$cart_info = $this->get_cart_info();
 
-		return $cart_info['cart_partial'] ?? 0;
+		return $cart_info[ 'cart_partial' ] ?? 0;
 	}
 
 	/**
@@ -268,7 +269,7 @@ class Booking extends PostModel {
 	public function get_discounts() {
 		$cart_info = $this->get_cart_info();
 
-		return $cart_info['discounts'] ?? array();
+		return $cart_info[ 'discounts' ] ?? array();
 	}
 
 	/**
@@ -279,7 +280,7 @@ class Booking extends PostModel {
 	public function get_tax_amount() {
 		$cart_info = $this->get_cart_info();
 
-		return $cart_info['tax_amount'] ?? 0;
+		return $cart_info[ 'tax_amount' ] ?? 0;
 	}
 
 	/**
@@ -341,7 +342,7 @@ class Booking extends PostModel {
 	public function get_billing_fname() {
 		$billing_info = $this->get_billing_info();
 
-		return $billing_info['fname'] ?? '';
+		return $billing_info[ 'fname' ] ?? '';
 	}
 
 	/**
@@ -352,7 +353,7 @@ class Booking extends PostModel {
 	public function get_billing_lname() {
 		$billing_info = $this->get_billing_info();
 
-		return $billing_info['lname'] ?? '';
+		return $billing_info[ 'lname' ] ?? '';
 	}
 
 	/**
@@ -409,7 +410,7 @@ class Booking extends PostModel {
 	public function get_billing_email() {
 		$billing_info = $this->get_billing_info();
 
-		return $billing_info['email'] ?? '';
+		return $billing_info[ 'email' ] ?? '';
 	}
 
 	/**
@@ -420,7 +421,7 @@ class Booking extends PostModel {
 	public function get_billing_address() {
 		$billing_info = $this->get_billing_info();
 
-		return $billing_info['address'] ?? '';
+		return $billing_info[ 'address' ] ?? '';
 	}
 
 	/**
@@ -431,7 +432,7 @@ class Booking extends PostModel {
 	public function get_billing_city() {
 		$billing_info = $this->get_billing_info();
 
-		return $billing_info['city'] ?? '';
+		return $billing_info[ 'city' ] ?? '';
 	}
 
 	/**
@@ -442,7 +443,7 @@ class Booking extends PostModel {
 	public function get_billing_country() {
 		$billing_info = $this->get_billing_info();
 
-		return $billing_info['country'] ?? '';
+		return $billing_info[ 'country' ] ?? '';
 	}
 
 	/**
@@ -471,7 +472,7 @@ class Booking extends PostModel {
 	public function get_travelers() {
 		$traveler_info = $this->get_traveler_info();
 
-		return $traveler_info['place_order']['travelers'] ?? array();
+		return $traveler_info[ 'place_order' ][ 'travelers' ] ?? array();
 	}
 
 	/**
@@ -482,7 +483,7 @@ class Booking extends PostModel {
 	public function get_emergency_contact() {
 		$traveler_info = $this->get_traveler_info();
 
-		return $traveler_info['place_order']['relation'] ?? array();
+		return $traveler_info[ 'place_order' ][ 'relation' ] ?? array();
 	}
 
 	/**
@@ -568,9 +569,9 @@ class Booking extends PostModel {
 	/**
 	 * Save Booking.
 	 *
-	 * @param int     $post_id Post ID.
+	 * @param int $post_id Post ID.
 	 * @param WP_POST $post Post Object.
-	 * @param bool    $update Update Flag.
+	 * @param bool $update Update Flag.
 	 */
 	public static function save_post_booking( int $post_id, WP_Post $post, bool $update = false ) {
 
@@ -608,20 +609,20 @@ class Booking extends PostModel {
 				foreach ( $payments as $payment_id => $payment_meta ) {
 					/* @var Payment $payment */
 					$payment = wptravelengine_get_payment( $payment_id );
-					if ( isset( $payment_meta['payment_status'] ) ) {
-						$payment->set_status( sanitize_text_field( wp_unslash( $payment_meta['payment_status'] ) ) );
+					if ( isset( $payment_meta[ 'payment_status' ] ) ) {
+						$payment->set_status( sanitize_text_field( wp_unslash( $payment_meta[ 'payment_status' ] ) ) );
 					}
-					if ( isset( $payment_meta['payment_gateway'] ) ) {
-						$payment->set_payment_gateway( sanitize_text_field( wp_unslash( $payment_meta['payment_gateway'] ) ) );
+					if ( isset( $payment_meta[ 'payment_gateway' ] ) ) {
+						$payment->set_payment_gateway( sanitize_text_field( wp_unslash( $payment_meta[ 'payment_gateway' ] ) ) );
 					}
 
-					if ( isset( $payment_meta['payable'] ) ) {
+					if ( isset( $payment_meta[ 'payable' ] ) ) {
 						$payable = $payment->get_meta( 'payable' ) ?? array();
-						if ( $payment_meta['payable']['amount'] ) {
-							$payable['amount'] = sanitize_text_field( wp_unslash( $payment_meta['payable']['amount'] ) );
+						if ( $payment_meta[ 'payable' ][ 'amount' ] ) {
+							$payable[ 'amount' ] = sanitize_text_field( wp_unslash( $payment_meta[ 'payable' ][ 'amount' ] ) );
 						}
-						if ( $payment_meta['payable']['currency'] ) {
-							$payable['currency'] = sanitize_text_field( wp_unslash( $payment_meta['payable']['currency'] ) );
+						if ( $payment_meta[ 'payable' ][ 'currency' ] ) {
+							$payable[ 'currency' ] = sanitize_text_field( wp_unslash( $payment_meta[ 'payable' ][ 'currency' ] ) );
 						}
 						$payment->set_meta( 'payable', $payable );
 					}
@@ -641,34 +642,34 @@ class Booking extends PostModel {
 				}
 				$cart_data = $order_trips[ $cart_id ];
 
-				if ( isset( $cart_data['ID'] ) ) {
-					$_data[ $cart_id ]['ID']    = sanitize_text_field( $cart_data['ID'] );
-					$_data[ $cart_id ]['title'] = get_the_title( $_data[ $cart_id ]['ID'] );
+				if ( isset( $cart_data[ 'ID' ] ) ) {
+					$_data[ $cart_id ][ 'ID' ]    = sanitize_text_field( $cart_data[ 'ID' ] );
+					$_data[ $cart_id ][ 'title' ] = get_the_title( $_data[ $cart_id ][ 'ID' ] );
 				}
-				if ( isset( $cart_data['datetime'] ) ) {
-					$_data[ $cart_id ]['datetime'] = sanitize_text_field( $cart_data['datetime'] );
-				}
-
-				if ( isset( $cart_data['end_datetime'] ) ) {
-					$_data[ $cart_id ]['end_datetime'] = sanitize_text_field( $cart_data['end_datetime'] );
+				if ( isset( $cart_data[ 'datetime' ] ) ) {
+					$_data[ $cart_id ][ 'datetime' ] = sanitize_text_field( $cart_data[ 'datetime' ] );
 				}
 
-				if ( isset( $cart_data['pax'] ) ) {
-					$_data[ $cart_id ]['pax'] = array_map( 'absint', $cart_data['pax'] );
+				if ( isset( $cart_data[ 'end_datetime' ] ) ) {
+					$_data[ $cart_id ][ 'end_datetime' ] = sanitize_text_field( $cart_data[ 'end_datetime' ] );
 				}
 
-				if ( isset( $cart_data['pax_cost'] ) ) {
-					foreach ( $cart_data['pax_cost'] as $_id => $pax_cost ) {
-						if ( ! isset( $_data[ $cart_id ]['pax'][ $_id ] ) ) {
+				if ( isset( $cart_data[ 'pax' ] ) ) {
+					$_data[ $cart_id ][ 'pax' ] = array_map( 'absint', $cart_data[ 'pax' ] );
+				}
+
+				if ( isset( $cart_data[ 'pax_cost' ] ) ) {
+					foreach ( $cart_data[ 'pax_cost' ] as $_id => $pax_cost ) {
+						if ( ! isset( $_data[ $cart_id ][ 'pax' ][ $_id ] ) ) {
 							continue;
 						}
-						$pax_count                             = (int) $_data[ $cart_id ]['pax'][ $_id ];
-						$_data[ $cart_id ]['pax_cost'][ $_id ] = $pax_count * (float) $pax_cost;
+						$pax_count                               = (int) $_data[ $cart_id ][ 'pax' ][ $_id ];
+						$_data[ $cart_id ][ 'pax_cost' ][ $_id ] = $pax_count * (float) $pax_cost;
 					}
 				}
 
-				if ( isset( $cart_data['cost'] ) ) {
-					$_data[ $cart_id ]['cost'] = sanitize_text_field( $cart_data['cost'] );
+				if ( isset( $cart_data[ 'cost' ] ) ) {
+					$_data[ $cart_id ][ 'cost' ] = sanitize_text_field( $cart_data[ 'cost' ] );
 				}
 
 				$_data[ $cart_id ] = wp_parse_args( $_data[ $cart_id ], $current_order_trips[ $cart_id ] );
@@ -690,22 +691,22 @@ class Booking extends PostModel {
 		}
 
 		// Sets Traveler's Information.
-		$traveler_info = $request->get_param( 'wp_travel_engine_placeorder_setting' )['place_order'] ?? false;
+		$traveler_info = $request->get_param( 'wp_travel_engine_placeorder_setting' )[ 'place_order' ] ?? false;
 		if ( ! $traveler_info ) {
-			$traveler_info = $request->get_param( 'wp_travel_engine_booking_setting' )['place_order'] ?? false;
+			$traveler_info = $request->get_param( 'wp_travel_engine_booking_setting' )[ 'place_order' ] ?? false;
 		}
 
 		if ( $traveler_info ) {
 			if ( is_array( $traveler_info ) ) {
 				$travelers = array();
-				if ( isset( $traveler_info['travelers'] ) && is_array( $traveler_info['travelers'] ) ) {
-					foreach ( $traveler_info['travelers'] as $key => $value ) {
-						$travelers['travelers'][ $key ] = array_map( 'sanitize_text_field', wp_unslash( $value ) );
+				if ( isset( $traveler_info[ 'travelers' ] ) && is_array( $traveler_info[ 'travelers' ] ) ) {
+					foreach ( $traveler_info[ 'travelers' ] as $key => $value ) {
+						$travelers[ 'travelers' ][ $key ] = array_map( 'sanitize_text_field', wp_unslash( $value ) );
 					}
 				}
-				if ( isset( $traveler_info['relation'] ) && is_array( $traveler_info['relation'] ) ) {
-					foreach ( $traveler_info['relation'] as $key => $value ) {
-						$travelers['relation'][ $key ] = array_map( 'sanitize_text_field', wp_unslash( $value ) );
+				if ( isset( $traveler_info[ 'relation' ] ) && is_array( $traveler_info[ 'relation' ] ) ) {
+					foreach ( $traveler_info[ 'relation' ] as $key => $value ) {
+						$travelers[ 'relation' ][ $key ] = array_map( 'sanitize_text_field', wp_unslash( $value ) );
 					}
 				}
 				$booking->set_meta(
@@ -785,27 +786,50 @@ class Booking extends PostModel {
 
 		if ( is_array( $order_trips ) ) {
 			foreach ( $order_trips as $cart_id => $order_trip ) {
-				$inventory = new Inventory( $order_trip['ID'] );
+				$inventory = new Inventory( $order_trip[ 'ID' ] );
 				$pax       = 0;
 
 				if ( $this->trashed === true || 'canceled' === $this->get_booking_status() ) {
-					$inventory->update_pax( $cart_id, 0, $order_trip['ID'], $this->ID );
+					$inventory->update_pax( $cart_id, 0, $order_trip[ 'ID' ], $this->ID );
 					continue;
 				}
-				if ( is_array( $order_trip['pax'] ) ) {
-					$pax = array_sum( $order_trip['pax'] );
+				if ( is_array( $order_trip[ 'pax' ] ) ) {
+					$pax = array_sum( $order_trip[ 'pax' ] );
 				}
 
 				$records = $inventory->get_inventory_record();
 				if ( isset( $records[ $cart_id ][ $this->ID ] ) ) {
 					$recorded_pax = $records[ $cart_id ][ $this->ID ];
 					if ( $recorded_pax !== $pax ) {
-						$inventory->update_pax( $cart_id, $pax, $order_trip['ID'], $this->ID );
+						$inventory->update_pax( $cart_id, $pax, $order_trip[ 'ID' ], $this->ID );
 					}
 				} else {
-					$inventory->update_pax( $cart_id, $pax, $order_trip['ID'], $this->ID );
+					$inventory->update_pax( $cart_id, $pax, $order_trip[ 'ID' ], $this->ID );
 				}
 			}
 		}
+	}
+
+	/**
+	 * Get Booking by Payment ID.
+	 *
+	 * @param int|Payment $payment Payment ID or Payment Modal object.
+	 *
+	 * @return Booking|null
+	 * @throws InvalidArgumentException If invalid Booking ID of Payment.
+	 */
+	public static function from_payment( $payment ): ?Booking {
+
+		if ( $payment instanceof Payment ) {
+			$payment = $payment->get_id();
+		}
+
+		$booking_id = get_post_meta( $payment, 'booking_id', true );
+
+		if ( ! $booking_id ) {
+			throw new InvalidArgumentException( 'Invalid Booking ID of Payment' );
+		}
+
+		return new static( $booking_id );
 	}
 }

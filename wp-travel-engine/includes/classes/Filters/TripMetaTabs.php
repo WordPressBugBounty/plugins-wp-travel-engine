@@ -300,14 +300,6 @@ class TripMetaTabs {
 	 */
 	public function extra_services_fields( array $fields, string $extension ): array {
 		if ( 'extra-services' === $extension ) {
-			$extra_services = array(
-                array(
-                    'label' => __( 'Select Extra Service', 'wp-travel-engine' ),
-                    'id' => '',
-                    'type' => '',
-                    'option' => array(),
-                )
-            );
 			$services = get_posts(
 				array(
 					'post_type'      => 'wte-services',
@@ -316,16 +308,30 @@ class TripMetaTabs {
 					'orderby'        => 'post__in',
 				)
 			);
+            
+			$extra_services = [];
 			foreach ( $services ?? [] as $service ) {
 				if ( $service_data = get_post_meta( $service->ID, 'wte_services', true ) ) {
+                    $service_data[ 'service_type' ] = $service_data[ 'service_type' ] == 'custom' ? __( 'Advanced', 'wp-travel-engine' ) : __( 'Default', 'wp-travel-engine' );
 					$extra_services[] = [
-					'id'      => (int) $service->ID ?? 0,
-					'label'   => (string) $service->post_title ?? '',
-					'type'    => (string) $service_data[ 'service_type' ] ?? '',
-					'options' => (array) $service_data[ 'options' ] ?? '',
+                        'id'            => (int) $service->ID ?? 0,
+                        'label'         => (string) $service->post_title ?? '',
+                        'type'          => (string) $service_data[ 'service_type' ] ?? '',
+                        'options'       => (array) ( $service_data[ 'options' ] ?? [] ),
+                        'prices'        => isset( $service_data[ 'service_cost' ] ) && $service_data[ 'service_cost' ] > 0 ? (array) floatval( $service_data[ 'service_cost' ] ) : (array) ( $service_data[ 'prices' ] ?? [] ),
+                        'descriptions'  => (array) (
+                            isset( $service_data['service_type'] ) && $service_data['service_type'] === 'Advanced'
+                                ? ( $service_data['descriptions'] ?? [] )
+                                : (
+                                    !empty( $service_data['default_descriptions'] )
+                                        ? $service_data['default_descriptions']
+                                        : apply_filters('the_content', get_the_content('', false, $service->ID))
+                                )
+                        ),
 					];
 				}
 			}
+            
 			$fields = array(
                 array(
                     'field'       	=> [
@@ -348,7 +354,7 @@ class TripMetaTabs {
 					'field'   		=> array(
 						'type'         => 'EXTRA_SERVICES',
 						'name'         => 'trip_extra_services',
-						'options'      => $extra_services,
+                        'options'      => $extra_services,
                     ),
 					'visibility'  	=> wptravelengine_is_addon_active( 'extra-services' ),
 				)

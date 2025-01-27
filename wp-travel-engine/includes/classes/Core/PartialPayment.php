@@ -69,7 +69,7 @@ class PartialPayment {
 
 		$trip = new Trip( $cart_item->trip_id );
 
-		$is_enable = $trip->get_setting( 'partial_payment_enable' ) == '1';
+		$is_enable = wptravelengine_toggled( $trip->get_setting( 'partial_payment_enable' ) );
 		if ( ! $is_enable || ! $this->is_enable ) {
 			return $partial_amount;
 		}

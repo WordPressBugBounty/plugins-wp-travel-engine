@@ -172,6 +172,11 @@ abstract class PostModel {
 	 * @return bool|int
 	 */
 	public function update_meta( $meta_key, $meta_value ) {
+		/**
+		 * @since 6.3.3 Filter for meta_value before updating.
+		 */
+		$meta_value = apply_filters( 'wptravelengine_update_post_meta', $meta_value, $meta_key, $this );
+
 		return update_post_meta( $this->ID, $meta_key, $meta_value );
 	}
 

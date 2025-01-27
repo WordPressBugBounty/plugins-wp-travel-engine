@@ -8,7 +8,12 @@
 
 namespace WPTravelEngine\Core\Shortcodes;
 
+use Exception;
 use WPTravelEngine\Abstracts\Shortcode;
+use WPTravelEngine\Assets;
+use WPTravelEngine\Core\Models\Post\Booking;
+use WPTravelEngine\Core\Models\Post\Payment;
+use WPTravelEngine\Filters\ThankYouPageTemplate;
 
 /**
  * Thank you Shortcode class.
@@ -29,6 +34,17 @@ class ThankYou extends Shortcode {
 	 */
 	public function __construct() {
 		add_filter( 'body_class', array( $this, 'body_class' ) );
+	}
+
+	/**
+	 * Get the default attributes for the shortcode.
+	 *
+	 * @return array The default attributes.
+	 */
+	protected function default_attributes(): array {
+		return array(
+			'legacy' => false,
+		);
 	}
 
 	/**
@@ -66,9 +82,12 @@ class ThankYou extends Shortcode {
 	/**
 	 * Place order form shortcode callback function.
 	 *
+	 * @param $atts
+	 *
 	 * @return string
 	 */
-	public function output(): string {
+	public function output( array $atts ): string {
+
 		if ( is_admin() ) {
 			return '';
 		}
@@ -76,9 +95,40 @@ class ThankYou extends Shortcode {
 		$booking_id = null;
 		$payment_id = null;
 		if ( isset( $_GET[ 'payment_key' ] ) ) {
+
 			$payment_key = sanitize_text_field( wp_unslash( $_GET[ 'payment_key' ] ) );
-			$payment_id  = get_transient( 'payment_key_' . $payment_key );
-			$booking_id  = get_post_meta( $payment_id, 'booking_id', true );
+
+			try {
+				$payment = Payment::from_payment_key( $payment_key );
+				$booking = Booking::from_payment( $payment );
+
+				if ( ! $atts[ 'legacy' ] ) {
+					$thank_you_page_template = new ThankYouPageTemplate( $booking, $payment );
+					$thank_you_page_template->hooks();
+
+					Assets::instance()->enqueue_script( 'wte-popper' )
+					      ->dequeue_script( 'wp-travel-engine' )
+					      ->dequeue_style( 'wp-travel-engine' )
+					      ->enqueue_script( 'wte-popper' )
+					      ->enqueue_script( 'wte-tippyjs' )
+					      ->enqueue_style( 'trip-thank-you' )
+					      ->enqueue_script( 'trip-thank-you' );
+
+					ob_start();
+					do_action( 'wptravelengine_thankyou_before_content' );
+					do_action( 'wptravelengine_thankyou_content' );
+					do_action( 'wptravelengine_thankyou_after_content' );
+
+					return ob_get_clean();
+				}
+				$booking_id = $booking->get_id();
+				$payment_id = $payment->get_id();
+
+			} catch ( Exception $e ) {
+				wp_safe_redirect( home_url( '/404' ) );
+				exit;
+			}
+
 		} else {
 			$data = \WTE_Booking::get_callback_token_payload( 'thankyou' );
 			if ( is_array( $data ) && isset( $data[ 'bid' ] ) ) {

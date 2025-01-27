@@ -7,6 +7,7 @@
 
 namespace WPTravelEngine\Filters;
 
+use WPTravelEngine\Abstracts\BookingProcessPageTemplate;
 use WPTravelEngine\Builders\FormFields\BillingFormFields;
 use WPTravelEngine\Builders\FormFields\EmergencyFormFields;
 use WPTravelEngine\Builders\FormFields\PrivacyPolicyFields;
@@ -20,7 +21,7 @@ use WPTravelEngine\Pages\Checkout;
  *
  * @since 6.3.0
  */
-class CheckoutPageTemplate {
+class CheckoutPageTemplate extends BookingProcessPageTemplate {
 
 	public function hooks() {
 		add_action(
@@ -510,9 +511,12 @@ class CheckoutPageTemplate {
 	 * @return void
 	 */
 	public function print_extra_service_line_items_title() {
+		$settings       = get_option( 'wp_travel_engine_settings' );
+		$title          = ! empty( $settings[ 'extra_service_title' ] ) ? $settings[ 'extra_service_title' ] : __( 'Extra Services', 'wp-travel-engine' );
+		$title          = apply_filters( 'wptravelengine_mini_cart_services_title', $title );
 		?>
 		<tr>
-			<td><strong><?php _e( 'Extra Service(s):', 'wp-travel-engine' ) ?></strong></td>
+			<td><strong><?php echo esc_html( $title ); ?></strong></td>
 			<td></td>
 		</tr>
 		<?php

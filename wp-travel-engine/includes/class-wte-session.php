@@ -66,10 +66,31 @@ class WTE_Session {
 	 *
 	 * @return mixed      session data.
 	 */
-	public function get( $key ) {
+	public function get( string $key ) {
 		$key = sanitize_key( $key );
 
-		return isset( $this->session[ $key ] ) ? maybe_unserialize( $this->session[ $key ] ) : false;
+		if ( isset( $this->session[ $key ] ) ) {
+			// Check if JSON encoded.
+			if ( is_string( $this->session[ $key ] ) && ( is_array( json_decode( $this->session[ $key ], true ) ) ) ) {
+				return json_decode( $this->session[ $key ], true );
+			}
+
+			return maybe_unserialize( $this->session[ $key ] );
+		}
+
+		return false;
+	}
+
+	/**
+	 * @since 6.3.3
+	 */
+	public function set_json( $key, $value ) {
+		$key = sanitize_key( $key );
+		if ( is_array( $value ) ) {
+			$this->session[ $key ] = wp_json_encode( wp_unslash( $value ) );
+		} else {
+			$this->session[ $key ] = $value;
+		}
 	}
 
 	/**

@@ -8,6 +8,8 @@
 
 namespace WPTravelEngine\Core\Models\Post;
 
+use Error;
+use InvalidArgumentException;
 use WPTravelEngine\Abstracts\PostModel;
 
 /**
@@ -30,7 +32,7 @@ class Payment extends PostModel {
 	 * @return float
 	 */
 	public function get_amount(): float {
-		return (float) ( $this->get_meta( 'payment_amount' )['value'] ?? 0 );
+		return (float) ( $this->get_meta( 'payment_amount' )[ 'value' ] ?? 0 );
 	}
 
 	/**
@@ -39,7 +41,7 @@ class Payment extends PostModel {
 	 * @return string
 	 */
 	public function get_currency(): string {
-		return $this->get_meta( 'payment_amount' )['currency'] ?? '';
+		return $this->get_meta( 'payment_amount' )[ 'currency' ] ?? '';
 	}
 
 	/**
@@ -84,7 +86,7 @@ class Payment extends PostModel {
 	 * @return string
 	 */
 	public function get_payable_amount(): float {
-		return (float) ( $this->get_meta( 'payable' )['amount'] ?? 0 );
+		return (float) ( $this->get_meta( 'payable' )[ 'amount' ] ?? 0 );
 	}
 
 	/**
@@ -93,14 +95,20 @@ class Payment extends PostModel {
 	 * @return string
 	 */
 	public function get_payable_currency(): string {
-		return $this->get_meta( 'payable' )['currency'] ?? '';
+		return $this->get_meta( 'payable' )[ 'currency' ] ?? '';
 	}
 
 	/**
 	 * @return bool
 	 */
 	public function is_completed(): bool {
-		return in_array( $this->get_payment_status(), array( 'completed', 'success', 'captured', 'complete', 'succeed' ) );
+		return in_array( $this->get_payment_status(), array(
+			'completed',
+			'success',
+			'captured',
+			'complete',
+			'succeed',
+		) );
 	}
 
 	/**
@@ -146,5 +154,27 @@ class Payment extends PostModel {
 	 */
 	public function set_payment_gateway( string $gateway ) {
 		$this->set_meta( 'payment_gateway', $gateway );
+	}
+
+	/**
+	 * Set Payment Gateway Response.
+	 *
+	 * @param string $payment_key
+	 *
+	 * @return ?Payment
+	 * @throws InvalidArgumentException
+	 */
+	public static function from_payment_key( string $payment_key ): ?Payment {
+		if ( empty( $payment_key ) ) {
+			throw new InvalidArgumentException( 'Invalid Payment Key' );
+		}
+
+		$payment_id = get_transient( 'payment_key_' . $payment_key );
+
+		if ( ! $payment_id ) {
+			throw new InvalidArgumentException( 'Invalid Payment Key' );
+		}
+
+		return new static( $payment_id );
 	}
 }

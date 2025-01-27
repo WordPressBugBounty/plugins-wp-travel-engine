@@ -27,6 +27,22 @@ foreach ( array(
 	);
 }
 
+//Banner Layouts
+foreach ( array(
+	'banner-default',
+	'banner-layout-1',
+	'banner-layout-2',
+	'banner-layout-3',
+	'banner-layout-4',
+	'banner-layout-5',
+	'banner-layout-6',
+) as $layout => $value) {
+	$trip_banner_layouts[] = array(
+		'value' => $value,
+		'image' => esc_url( WP_TRAVEL_ENGINE_FILE_URL . '/public/images/trip-banner/' . esc_attr( $value ) . '.svg' ),
+	);
+}
+
 $related_difficulty_tax_url = get_site_url() . '/wp-admin/edit-tags.php?taxonomy=difficulty&post_type=trip';
 $related_tag_tax_url        = get_site_url() . '/wp-admin/edit-tags.php?taxonomy=trip_tag&post_type=trip';
 $is_trip_reviews_active     = defined( 'WTE_TRIP_REVIEW_FILE_PATH' );
@@ -48,11 +64,33 @@ return apply_filters(
 				),
 			),
 			array(
-				'label'       => __( 'Show Booking Form', 'wp-travel-engine' ),
-				'description' => __( 'If checked, booking form in the trip detail page will be enabled.', 'wp-travel-engine' ),
-				'field_type'  => 'SWITCH',
-				'name'        => 'enable_booking_form',
+				'field_type' => 'TITLE',
+				'title'      => __( 'Banner Layouts', 'wp-travel-engine' ),
+			),
+			
+			array(
 				'divider'     => true,
+				'field_type'  => 'IMAGE_SELECTOR',
+				'name'        => 'trip_banner_layout',
+				'options'     => $trip_banner_layouts,
+				'label'       => __( 'Select The Banner Layout', 'wp-travel-engine'),
+				'isNew' 	  => WP_TRAVEL_ENGINE_VERSION === '6.3.3',
+				'direction'   => 'vertical'
+			),
+			array(
+				'label'      => __( 'Display Fullwidth', 'wp-travel-engine'),
+				'help'       => __( 'Stretch banner image to fit the screen width.', 'wp-travel-engine'),
+				'field_type' => 'SWITCH',
+				'name'       => 'display_banner_fullwidth',
+				'condition'  => 'trip_banner_layout === banner-layout-1',
+				'divider'    => true,
+			),
+			array(
+				'label'      => __( 'Show Booking Form', 'wp-travel-engine' ),
+				'help'       => __( 'If checked, booking form in the trip detail page will be enabled.', 'wp-travel-engine' ),
+				'field_type' => 'SWITCH',
+				'name'       => 'enable_booking_form',
+				'divider'    => true,
 			),
 			array(
 				'field_type' => 'TITLE',
@@ -71,7 +109,6 @@ return apply_filters(
 				'field_type'  => 'SWITCH',
 				'name'        => 'enable_compact_layout',
 				'divider'     => true,
-				'isNew'       => true,
 			),
 			array(
 				'label'       => __( 'Inquiry Info', 'wp-travel-engine' ),
@@ -79,7 +116,6 @@ return apply_filters(
 				'description' => __( 'Enable this option if you want to display the inquiry form. By default, it is linked to the inquiry form section on your single trip page.', 'wp-travel-engine' ),
 				'name'        => 'inquiry_form.enable',
 				'divider'     => true,
-				'isNew'       => true,
 			),
 			array(
 				'field_type' => 'GROUP',
@@ -117,7 +153,6 @@ return apply_filters(
 				'field_type'  => 'SWITCH',
 				'name'        => 'whatsapp.enable',
 				'divider'     => true,
-				'isNew'       => true,
 			),
 			array(
 				'field_type' => 'GROUP',

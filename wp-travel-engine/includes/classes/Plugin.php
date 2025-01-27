@@ -1067,7 +1067,6 @@ final class Plugin {
 	 * @access   private
 	 */
 	protected function set_locale() {
-
 		add_action( 'init', function () {
 
 			$locale = apply_filters( 'plugin_locale', determine_locale(), 'wp-travel-engine' );

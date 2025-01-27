@@ -151,7 +151,10 @@ class Trip extends PostModel {
 		$settings = $value;
 	}
 
+
 	/**
+	 * Get the services.
+	 *
 	 * @return array
 	 */
 	public function get_services(): array {
@@ -178,51 +181,64 @@ class Trip extends PostModel {
 			'unit'     => __( 'Unit', 'wp-travel-engine' ),
 			'traveler' => __( 'Traveler', 'wp-travel-engine' ),
 		] );
-
+	
+		$trip_services = $this->get_setting('trip_extra_services');
+	
 		foreach ( $services as $service ) {
-			$service_data = get_post_meta( $service->ID, 'wte_services', true );
-
-			$service_options = array();
-			if ( 'default' === $service_data[ 'service_type' ] ) {
-				$service_unit      = $service_data[ 'service_unit' ] ?? 'unit';
-				$service_options[] = array(
-					'key'         => wptravelengine_generate_key( $service->ID ),
-					'label'       => get_the_title( $service->ID ),
-					'price'       => is_numeric( $service_data[ 'service_cost' ] ) ? (float) $service_data[ 'service_cost' ] : 0,
-					'description' => apply_filters( 'the_content', get_the_content( '', false, $service->ID ) ),
-					'serviceUnit' => [ 'value' => $service_unit, 'label' => $unit_labels[ $service_unit ] ],
-					'attributes'  => array(),
-				);
+			$service_data = get_post_meta($service->ID, 'wte_services', true);
+		
+			$service_options = [];
+			$trip_service = current(array_filter( $trip_services ?? [], fn( $trip_service ) => $trip_service['id'] == $service->ID ) );
+		
+			$is_default_service = $service_data['service_type'] === 'default';
+			$service_unit = $service_data['service_unit'] ?? 'unit';
+			$default_description = $service_data['default_descriptions'] ?? apply_filters('the_content', get_the_content('', false, $service->ID));
+		
+			if ( $is_default_service ) {
+				$service_options[] = [
+					'key'           => wptravelengine_generate_key( $service->ID ?? 0),
+					'label'         => get_the_title( $service->ID ?? 0),
+					'price'         => !empty( $trip_service ) 
+										? $trip_service['prices'][0] 
+										: ( is_numeric($service_data['service_cost'] ) ? (float) $service_data['service_cost'] : 0 ),
+					'description'   => !empty( $trip_service ) 
+										? $trip_service['descriptions'][0] 
+										: $default_description,
+					'serviceUnit'   => [ 'value' => $service_unit, 'label' => $unit_labels[$service_unit] ],
+					'attributes'    => [],
+				];
 			} else {
-				$options = $service_data[ 'options' ] ?? array();
-
+				$options = !empty( $trip_service ) ? $trip_service['options'] : ( $service_data['options'] ?? [] );
 				foreach ( $options as $index => $option ) {
-					$price = $service_data[ 'prices' ][ $index ] ?? 0;
-
-					$service_unit      = 'unit';
-					$service_options[] = array(
-						'key'         => wptravelengine_generate_key( "$service->ID-$index" ),
-						'label'       => $option,
-						'price'       => is_numeric( $price ) ? (float) $price : 0,
-						'serviceUnit' => [ 'value' => $service_unit, 'label' => $unit_labels[ $service_unit ] ],
-						'description' => $service_data[ 'descriptions' ][ $index ] ?? '',
-						'attributes'  => $service_data[ 'attributes' ][ $index ] ?? array(),
-					);
+					$price = !empty( $trip_service ) 
+								? $trip_service['prices'][$index] 
+								: ( $service_data['prices'][$index] ?? 0 );
+		
+					$service_options[] = [
+						'key'           => wptravelengine_generate_key("$service->ID-$index"),
+						'label'         => $service_data['options'][$index] ?? $option,
+						'price'         => is_numeric( $price ) ? (float) $price : 0,
+						'serviceUnit'   => [ 'value' => 'unit', 'label' => $unit_labels['unit'] ],
+						'description'   => !empty( $trip_service ) 
+											? $trip_service['descriptions'][$index] 
+											: ( $service_data['descriptions'][$index] ?? '' ),
+						'attributes'    => $service_data['attributes'][$index] ?? [],
+					];
 				}
 			}
-
-			$data[] = array(
-				'id'       => $service->ID,
-				'title'    => get_the_title( $service->ID ),
-				'required' => (int) ( $service_data[ 'service_required' ] ?? 0 ) === 1,
-				'multiple' => $service_data[ 'field_type' ] === 'checkbox' && 'default' !== $service_data[ 'service_type' ],
-				'options'  => $service_options,
-			);
+		
+			$data[] = [
+				'id'        => $service->ID,
+				'title'     => get_the_title( $service->ID ),
+				'required'  => !empty( $service_data['service_required'] ),
+				'multiple'  => $service_data['field_type'] === 'checkbox' && !$is_default_service,
+				'options'   => $service_options,
+			];
 		}
-
+		
 		return $data;
+		
 	}
-
 	/**
 	 * Get the trip price.
 	 *
@@ -1016,7 +1032,7 @@ class Trip extends PostModel {
 	 * @return bool
 	 */
 	public function is_partially_payable(): bool {
-		$enabled          = in_array( $this->get_setting( 'partial_payment_enable', 'no' ), array( 'yes', '1' ) );
+		$enabled          = wptravelengine_toggled( $this->get_setting( 'partial_payment_enable', 'no' ) );
 		$enabled_globally = PluginSettings::make()->is( 'partial_payment_enable', 'yes' );
 
 		return class_exists( 'Wte_Partial_Payment_Admin' ) && $enabled_globally && $enabled;

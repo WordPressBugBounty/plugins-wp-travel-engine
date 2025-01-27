@@ -116,7 +116,7 @@ class TravellersFormFields extends TravellerFormFields {
 				$field[ 'id' ] = sprintf( 'travellers_%d_%s', $this->traveller_number, $name );;
 			}
 			$field[ 'field_label' ] = isset( $field[ 'placeholder' ] ) && $field[ 'placeholder' ] !== '' ? $field[ 'placeholder' ] : $field[ 'field_label' ];
-			$field[ 'default' ] = $form_data[ $this->traveller_number ][ $name ] ?? $field[ 'default' ] ?? '';
+			$field[ 'default' ]     = $form_data[ $this->traveller_number ][ $name ] ?? $field[ 'default' ] ?? '';
 
 			return $field;
 		}, $fields );
@@ -125,4 +125,5 @@ class TravellersFormFields extends TravellerFormFields {
 
 		return $fields;
 	}
+
 }

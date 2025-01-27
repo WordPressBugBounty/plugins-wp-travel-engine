@@ -294,10 +294,11 @@ class WP_Travel_Engine_Custom_Shortcodes {
 		}
 
 		if ( in_array( $attr['show'], array( 'both', 'image', 'iframe|image' ) ) && ! empty( $wp_travel_engine_setting['map']['image_url'] ) ) {
-			$src = wp_get_attachment_image_src( $wp_travel_engine_setting['map']['image_url'], 'full' );
+			$img_id = $wp_travel_engine_setting['map']['image_url'];	
+			$src = wp_get_attachment_image_src( $img_id, 'full' );
 			?>
 			<div class="trip-map image">
-				<img alt width="910" height="490" src="<?php echo esc_url( $src[0] ); ?>">
+				<img alt="<?php echo esc_attr( get_post_meta( $img_id, '_wp_attachment_image_alt', true ) ?? get_the_title( $img_id ) ); ?>" width="910" height="490" src="<?php echo esc_url( $src[0] ); ?>">
 			</div>
 			<?php
 		}

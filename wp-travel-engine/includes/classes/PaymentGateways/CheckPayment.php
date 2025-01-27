@@ -95,4 +95,13 @@ class CheckPayment extends BaseGateway {
 		$payment->set_payment_gateway( 'check_payments' );
 		$payment->save();
 	}
+
+	/**
+	 *
+	 * @since 6.3.3
+	 */
+	public function print_instruction() {
+		$instruction = $this->get_info();
+		wptravelengine_get_template( 'template-checkout/content-check-instruction.php', compact( 'instruction' ) );
+	}
 }

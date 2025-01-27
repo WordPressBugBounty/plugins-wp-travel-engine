@@ -140,15 +140,15 @@ class BookingProcess {
 			}
 
 			// Add new billing info to booking meta.
-			if ( $this->request->get_param('billing') ) {
+			if ( $this->request->get_param( 'billing' ) ) {
 				// Set billing form data to session.
-				WTE()->session->set('billing_form_data', $this->request->get_param('billing') );
+				WTE()->session->set( 'billing_form_data', $this->request->get_param( 'billing' ) );
 
 				// Get validated billing data.
 				$sanitized_billing = $this->validator->sanitized() ?? [];
 
 				// Set billing details to booking meta.
-				$this->booking->set_meta( 'wptravelengine_billing_details', $sanitized_billing['billing'] ?? [] );
+				$this->booking->set_meta( 'wptravelengine_billing_details', $sanitized_billing[ 'billing' ] ?? [] );
 			}
 
 			//Add new travelers info to booking meta.
@@ -158,13 +158,13 @@ class BookingProcess {
 
 				// Validate travelers data.
 				$travelers = new TravelersValidator();
-                $travelers->validate_data( $this->request->get_param( 'travellers' ) );
+				$travelers->validate_data( $this->request->get_param( 'travellers' ) );
 
 				// Sanitize travelers data.
 				$sanitized_travellers = $travelers->sanitized() ?? [];
 
 				// Set travelers details to booking meta.
-				$this->booking->set_meta( 'wptravelengine_travelers_details', $sanitized_travellers['travelers'] ?? [] );
+				$this->booking->set_meta( 'wptravelengine_travelers_details', $sanitized_travellers[ 'travelers' ] ?? [] );
 			}
 
 			//Add new emergency contacts info to booking meta.
@@ -174,13 +174,13 @@ class BookingProcess {
 
 				// Validate emergency data.
 				$emergency = new EmergencyValidator();
-                $emergency->validate( $this->request->get_param( 'emergency' ) );
+				$emergency->validate( $this->request->get_param( 'emergency' ) );
 
 				// Sanitize emergency data.
 				$sanitized_emergency = $emergency->sanitized() ?? [];
 
 				// Set emergency details to booking meta.
-				$this->booking->set_meta( 'wptravelengine_emergency_details', $sanitized_emergency['emergency'] ?? [] );
+				$this->booking->set_meta( 'wptravelengine_emergency_details', $sanitized_emergency[ 'emergency' ] ?? [] );
 			}
 
 			if ( $this->payment_method === 'booking_only' ) {
@@ -241,7 +241,7 @@ class BookingProcess {
 
 			$get_key = $this->payment->get_payment_key();
 
-			set_transient( 'payment_key_' . $get_key, $this->payment->get_id(), 60 * 5 );
+			set_transient( 'payment_key_' . $get_key, $this->payment->get_id(), 24 * HOUR_IN_SECONDS );
 
 			wp_safe_redirect( add_query_arg( array( 'payment_key' => $get_key ), $redirect_url ) );
 			exit;

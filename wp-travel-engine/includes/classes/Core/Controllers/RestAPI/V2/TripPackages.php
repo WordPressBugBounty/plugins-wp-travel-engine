@@ -188,7 +188,7 @@ class TripPackages extends WP_REST_Posts_Controller {
 			);
 		}
 
-		return $data;
+		return apply_filters( 'wptravelengine_rest_prepare_package_data', $data, $trip_package );
 	}
 
 }

@@ -218,6 +218,9 @@ class Assets extends AssetsAbstract {
 		$this->register_script( Asset::register( 'trip-checkout', 'public/trip-checkout.js' ) )
 		     ->localize( 'trip-checkout', 'wteL10n' );
 
+		$this->register_style( Asset::register( 'trip-thank-you', 'public/thank-you.css' ) );
+		$this->register_script( Asset::register( 'trip-thank-you', 'public/thank-you.js' ) );
+
 		// Enqueue checkout template version 2.0 script and style.
 		global $post;
 		if ( wp_travel_engine_is_checkout_page() && isset( $wte_cart ) ) {

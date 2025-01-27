@@ -112,7 +112,8 @@ class Checkout extends BasePage {
 
 			// Get display icon.
             $display_icon = $method['display_icon'] ?? '';
-            $icon_url = $display_icon ?: WP_TRAVEL_ENGINE_FILE_URL . 'assets/images/paymentgateways/frontend/' . $id . '.png';
+            $icon_dir = apply_filters( 'wptravelengine_payment_gateway_icon_dir', WP_TRAVEL_ENGINE_FILE_URL . 'assets/images/paymentgateways/frontend/', compact( 'id' ) );
+            $icon_url = $display_icon ?: $icon_dir . $id . '.png';
 
             $sorted_gateways[$id] = array_merge( $method, [
                 'icon_url'        => $this->prepare_icon_markup($icon_url),

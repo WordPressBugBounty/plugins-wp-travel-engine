@@ -14,11 +14,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 ?>
+<div style="width: 100%;"> <!-- Wrap to avoid design issue  -->
+
 <div id="wte-crumbs">
 	<?php
 	do_action( 'wp_travel_engine_breadcrumb_holder' );
 	?>
 </div>
+
+<?php
+	do_action( 'wp_travel_engine_gallery_before_content' );
+?>
 
 <div id="wp-travel-trip-wrapper" class="trip-content-area">
 	<div class="row">

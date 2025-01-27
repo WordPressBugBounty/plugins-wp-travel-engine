@@ -70,9 +70,14 @@ class Checkbox extends \WP_Travel_Engine_Form_Field_Checkbox {
 				} else {
 					$checked = ( $key === $this->field[ 'default' ] ) ? 'checked' : '';
 				}
-				$error_coontainer_id = sprintf( 'error_container-%s', $this->field[ 'id' ] );
+				$error_container_id = sprintf( 'error_container-%s', $this->field[ 'id' ] );
 				if ( count( $options_arr ) > 1 ) {
-					$validations .= 'data-parsley-multiple="checkbox" data-parsley-mincheck="1" data-parsley-required';
+					if ( !empty( $this->field['validations']['required'] ) ) {
+						$validations .= sprintf(' data-parsley-multiple="%s" data-parsley-mincheck="1" data-parsley-required="true" data-parsley-errors-container="#%s"',
+							$this->field['id'],
+							$error_container_id
+						);
+					}
 					$output  .= sprintf(
 						'<div class="wpte-bf-checkbox-wrap wpte-checkbox-wrap">
 						<input type="checkbox" name="%s[]" value="%s" id="%s" %s %s %s>
@@ -111,7 +116,7 @@ class Checkbox extends \WP_Travel_Engine_Form_Field_Checkbox {
 				$index ++;
 			}
 
-			$output .= sprintf( '<div id="%s"></div>', $error_coontainer_id );
+			$output .= sprintf( '<div id="%s"></div>', $error_container_id );
 		} else {
 			$output .= sprintf(
 				'<div class="wpte-checkbox-wrap">

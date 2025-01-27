@@ -13,6 +13,7 @@ use WPTravelEngine\Abstracts\CartAdjustment;
 use WPTravelEngine\Core\Tax;
 use WPTravelEngine\Filters\AddCartItems;
 use WPTravelEngine\Filters\CheckoutPageTemplate;
+use WPTravelEngine\Filters\ThankYouPageTemplate;
 use WPTravelEngine\Interfaces\CartItem;
 use WPTravelEngine\Interfaces\CartItem as CartItemInterface;
 
@@ -155,6 +156,7 @@ class Cart {
 
 		$checkout_page_template = new CheckoutPageTemplate();
 		$checkout_page_template->hooks();
+
 		$this->tax = new Tax();
 		// Read cart data on load.
 		add_action( 'init', array( $this, 'read_cart_onload' ), 11 );
@@ -496,7 +498,9 @@ class Cart {
 				if ( empty( $item ) || ! get_post( $item[ 'price_key' ] ) ) {
 					continue;
 				}
-				$this->items[ $id ] = new Item( $this, $item );
+				$_item = new Item( $this, $item );
+				$_item->add_add_line_items();
+				$this->items[ $id ] = $_item;
 			endforeach;
 		endif;
 
@@ -643,6 +647,23 @@ class Cart {
 		return $return_item_objects ? $this->items : $this->get_formated_items();
 	}
 
+	/**
+	 * Set items in the cart.
+	 *
+	 * @param array $items Items to set.
+	 *
+	 * @return void
+	 * @since 6.3.3
+	 */
+	public function setItems( array $items ) {
+		$this->items = $items;
+	}
+
+	/**
+	 * Empty cart message.
+	 *
+	 * @return void
+	 */
 	public function cart_empty_message() {
 		$url = get_post_type_archive_link( 'trip' );
 		printf(
@@ -663,6 +684,10 @@ class Cart {
 		$this->booking_ref  = null;
 		$this->payment_type = 'full';
 		$this->tax          = new Tax();
+		$this->discount_clear();
+		$this->deductible_items = array();
+		$this->fees             = array();
+		$this->reset_totals();
 
 		$this->write();
 	}

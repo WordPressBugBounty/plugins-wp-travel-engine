@@ -35,7 +35,7 @@ return apply_filters(
 					),
 				),
 				'name'        => 'checkout_page_template',
-				'isNew' 	  => true,
+				'isNew' 	  => WP_TRAVEL_ENGINE_VERSION === '6.3.0',
 			),
 			array(
 				'condition'  => 'checkout_page_template === 1.0',
@@ -70,7 +70,7 @@ return apply_filters(
 						'name'        => 'display_travellers_info',
 						'condition'   => 'checkout_page_template === 2.0',
 						'divider'     => true,
-						'isNew' 	  => true,
+						'isNew' 	  => WP_TRAVEL_ENGINE_VERSION === '6.3.0',
 					),
 					array(
 						'label'       => __( 'Show Emergency Contact Form', 'wp-travel-engine' ),
@@ -79,7 +79,7 @@ return apply_filters(
 						'name'        => 'display_emergency_contact',
 						'condition'   => 'display_travellers_info === true',
 						'divider'     => true,
-						'isNew' 	  => true,
+						'isNew' 	  => WP_TRAVEL_ENGINE_VERSION === '6.3.0',
 					),
 					array(
 						'label'       => __( 'Display Traveller and Emergency Details', 'wp-travel-engine' ),
@@ -97,7 +97,7 @@ return apply_filters(
 							),
 						),
 						'divider' 	=> true,
-						'isNew' 	  => true,
+						'isNew' 	  => WP_TRAVEL_ENGINE_VERSION === '6.3.0',
 					),
 					array(
 						'label' => __( 'Collect Traveller Information', 'wp-travel-engine'),
@@ -116,7 +116,7 @@ return apply_filters(
 							),
 						),
 						'divider' 	=> true,
-						'isNew' 	  => true,
+						'isNew' 	  => WP_TRAVEL_ENGINE_VERSION === '6.3.0',
 					),
 					array(
 						'label' 		=> __( 'Show Additional Note', 'wp-travel-engine'),
@@ -125,7 +125,7 @@ return apply_filters(
 						'name' 			=> 'show_additional_note',
 						'condition'   	=> 'checkout_page_template === 2.0',
 						'divider'     	=> true,
-						'isNew' 	  => true,
+						'isNew' 	  => WP_TRAVEL_ENGINE_VERSION === '6.3.0',
 					),
 					array(
 						'label' 		=> __( 'Show Coupon Code Field', 'wp-travel-engine'),
@@ -134,7 +134,7 @@ return apply_filters(
 						'name' 			=> 'show_discount',
 						'condition'   	=> 'checkout_page_template === 2.0',
 						'divider'     	=> true,
-						'isNew' 	  => true,
+						'isNew' 	  => WP_TRAVEL_ENGINE_VERSION === '6.3.0',
 					),
 					array(
 						'label'       => __( 'Privacy Policy Notice', 'wp-travel-engine' ),
@@ -142,7 +142,7 @@ return apply_filters(
 						'field_type'  => 'TEXTAREA',
 						'name'        => 'privacy_policy_msg',
 						'divider'     => true,
-						'isNew' 	  => true,
+						'isNew' 	  => WP_TRAVEL_ENGINE_VERSION === '6.3.0',
 					),
 					array(
 						'label' => __( 'Footer Copyright', 'wp-travel-engine'),
@@ -150,7 +150,7 @@ return apply_filters(
 						'condition'   => 'checkout_page_template === 2.0',
 						'field_type' => 'TEXTAREA',
 						'name' => 'footer_copyright',
-						'isNew' 	  => true,
+						'isNew' 	  => WP_TRAVEL_ENGINE_VERSION === '6.3.0',
 					),
 				),
 			),

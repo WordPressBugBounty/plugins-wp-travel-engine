@@ -311,9 +311,9 @@ function wp_travel_engine_is_trip_partially_payable( $trip_id ): bool {
 	$wte_options    = get_option( 'wp_travel_engine_settings', array() );
 	$wte_trip_metas = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
 
-	$enabled = in_array( ( $wte_trip_metas[ 'partial_payment_enable' ] ?? 'no' ), array( 'yes', '1' ) );
+	$enabled 		  = wptravelengine_toggled( $wte_trip_metas[ 'partial_payment_enable' ] ?? 'no' );
 
-	$enabled_globally = in_array( ( $wte_options[ 'partial_payment_enable' ] ?? 'no' ), array( 'yes', '1' ) );
+	$enabled_globally = wptravelengine_toggled( $wte_options[ 'partial_payment_enable' ] ?? 'no' );
 
 	return defined( 'WP_TRAVEL_ENGINE_PARTIAL_PAYMENT_FILE_PATH' ) && file_exists( WP_TRAVEL_ENGINE_PARTIAL_PAYMENT_FILE_PATH ) && $enabled_globally && $enabled;
 }
