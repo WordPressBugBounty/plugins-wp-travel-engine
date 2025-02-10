@@ -15,26 +15,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <?php do_action( 'wte_before_overview_content' ); ?>
 
-<div class="post-data overview">
-	<?php
-	/**
-	 * Hook - Display tab content title, left for themes.
-	 */
-	do_action( 'wte_overview_tab_title' );
-
-	/**
-	 * Hook - Display tab highlights, left for themes.
-	 */
-	do_action( 'wte_after_overview_tab_title' );
-	?>
-	<!-- Display Overview content -->
-	<?php if ( ! empty( $overview ) ) : ?>
+	<div class="post-data overview">
 		<?php
-		echo apply_filters( 'the_content', wp_kses_post ( $overview ) );
+		/**
+		 * Hook - Display tab content title, left for themes.
+		 */
+		do_action( 'wte_overview_tab_title' );
+
+		/**
+		 * Hook - Display tab highlights, left for themes.
+		 */
+		do_action( 'wte_after_overview_tab_title' );
 		?>
-	<?php endif; ?>
-	<!-- ./ Display Overview content -->
-</div>
+		<!-- Display Overview content -->
+		<?php if ( ! empty( $overview ) ) : ?>
+			<?php
+			echo apply_filters( 'the_content', wp_kses( $overview, 'wptravelengine_post' ) );
+			?>
+		<?php endif; ?>
+		<!-- ./ Display Overview content -->
+	</div>
 
 <?php
 do_action( 'wte_after_overview_content' );

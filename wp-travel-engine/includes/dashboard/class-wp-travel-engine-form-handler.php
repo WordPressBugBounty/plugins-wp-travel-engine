@@ -4,6 +4,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+use WPTravelEngine\Core\Models\Post\Customer;
+
 /**
  * Handle frontend forms.
  *
@@ -157,6 +159,12 @@ class Wp_Travel_Engine_Form_Handler {
 					wp_travel_engine_set_customer_auth_cookie( $new_customer );
 				}
 
+				// Update user meta if bookings have been made before registration.
+				if ( $customer_id = Customer::is_exists( $email ) ) {
+					$customer_bookings = get_post_meta( $customer_id, 'wp_travel_engine_bookings', true );
+					update_user_meta( $new_customer, 'wp_travel_engine_user_bookings', $customer_bookings );
+				}
+				
 				if ( ! empty( $_POST[ 'redirect' ] ) ) {
 					$redirect = wp_sanitize_redirect( wp_unslash( $_POST[ 'redirect' ] ) );
 				} else if ( wp_travel_engine_get_raw_referer() ) {

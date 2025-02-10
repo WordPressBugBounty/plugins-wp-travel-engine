@@ -86,7 +86,7 @@ class WP_Travel_Engine_Template_Hooks {
 		add_filter( 'wptravelengine_trip_dynamic_banner_list_images', array(
 			$this,
 			'generate_image_markup',
-		), 10, 2 );
+		), 10, 4 );
 	}
 
 	/**
@@ -168,7 +168,7 @@ class WP_Travel_Engine_Template_Hooks {
 	 * @return array
 	 * @since 6.3.3
 	 */
-	public function generate_image_markup( $list_images, $banner_layout ): array {
+	public function generate_image_markup( $list_images, $banner_layout, $show_image_gallery, $show_video_gallery ): array {
 
 		$image_sizes = array(
 			'banner-layout-2' => array(
@@ -202,19 +202,25 @@ class WP_Travel_Engine_Template_Hooks {
 
 		$_list_images = array();
 		foreach ( $list_images as $index => $image ) {
-			if ( ! $attachment_url = wp_get_attachment_image_url( $image, $image_sizes_by_layout[ $index ] ?? 'full' ) ) {
+			$attachment_url = wp_get_attachment_image_url( $image, $image_sizes_by_layout[ $index ] ?? 'full' );
+			if ( ! $attachment_url || ! array_key_exists( $index, $image_sizes_by_layout ) ) {
 				continue;
 			}
+			$open_lightbox = $show_image_gallery || $show_video_gallery;
+			$lightbox_url  = wp_get_attachment_image_url( $image, 'full' );
 			ob_start();
 			?>
 			<div class="wpte-multi-banner-image">
-				<a href="<?php echo esc_url( wp_get_attachment_image_url( $image, 'full' ) ); ?>"
-				   data-fancybox="gallery">
+				<?php if( $open_lightbox ){ ?>
+					<a href="<?php echo esc_url( $lightbox_url ); ?>" data-fancybox="gallery">
+				<?php } ?>
 					<img
 						src="<?php echo esc_url( $attachment_url ); ?>"
 						alt="<?php echo esc_attr( get_post_meta( $image, '_wp_attachment_image_alt', true ) ); ?>"
 					/>
-				</a>
+				<?php if( $open_lightbox ){ ?>
+					</a>
+				<?php } ?>
 			</div>
 			<?php
 			$_list_images[] = ob_get_clean();

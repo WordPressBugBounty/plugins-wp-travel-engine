@@ -39,12 +39,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 				?>
 				<div id="faq-tabs<?php echo esc_attr( $value ); ?>"
 					data-id="<?php echo esc_attr( $value ); ?>" class="faq-row">
-					<a class="accordion-tabs-toggle" href="javascript:void(0);">
+					<span class="accordion-tabs-toggle">
 						<span class="dashicons dashicons-arrow-down custom-toggle-tabs rotator"></span>
 						<div class="faq-title">
 							<?php echo ( isset( $faq['faq_title'][ $value ] ) ? esc_attr( $faq['faq_title'][ $value ] ) : '' ); ?>
 						</div>
-					</a>
+					</span>
 					<div class="faq-content">
 						<p>
 							<?php

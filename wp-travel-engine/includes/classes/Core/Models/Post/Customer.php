@@ -234,11 +234,14 @@ class Customer extends PostModel {
 	}
 
 	/**
-	 * Save the post-metadata.
+	 * Update customer user meta for bookings.
 	 *
-	 * @return object
+	 * @param int $booking_id
+	 *
+	 * @return void
 	 */
-	public function save(): object {
+	public function update_customer_meta( int $booking_id ): void {
+		
 		$meta_mappings = [
 			'wp_travel_engine_bookings' => 'wp_travel_engine_user_bookings',
 		];
@@ -246,7 +249,8 @@ class Customer extends PostModel {
 		if ( is_user_logged_in() ) {
 			$user = wp_get_current_user();
 		} else {
-			$user = get_user_by( 'email', $this->get_customer_email() );
+			$billing_info = get_post_meta( $booking_id, 'wptravelengine_billing_details', true );
+			$user = isset($billing_info[ 'email' ]) ? get_user_by( 'email', $billing_info[ 'email' ] ) : get_user_by( 'email', $this->get_customer_email() );
 		}
 
 		if ( $user instanceof \WP_User ) {
@@ -256,8 +260,6 @@ class Customer extends PostModel {
 				}
 			}
 		}
-
-		return parent::save();
 	}
 
 	/**

@@ -11,6 +11,27 @@ class WP_Kses {
 		add_filter( 'wp_kses_allowed_html', array( $this, 'allowed_html' ), 10, 2 );
 	}
 
+	/**
+	 * @return array
+	 * @since 6.3.4
+	 */
+	public function wptravelengine_post() {
+		global $allowedposttags;
+
+		$allowedposttags[ 'iframe' ] = array(
+			'src'             => true,
+			'width'           => true,
+			'height'          => true,
+			'frameborder'     => true,
+			'loading'         => true,
+			'style'           => true,
+			'allowfullscreen' => true,
+			'referrerpolicy'  => true,
+		);
+
+		return $allowedposttags;
+	}
+
 	public function allowed_html( $allowed_tags, $context ) {
 
 		if ( method_exists( $this, $context ) ) {

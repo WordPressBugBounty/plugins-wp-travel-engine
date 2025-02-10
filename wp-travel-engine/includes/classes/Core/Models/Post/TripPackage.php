@@ -317,15 +317,17 @@ class TripPackage extends PostModel {
 			foreach ( $traveler_categories as $traveler_category ) {
 				/** @var TravelerCategory $traveler_category */
 				$this->categories_pricings[] = array(
-					'id' 			=> $traveler_category->get( 'id' ),
-					'label' 		=> $traveler_category->get( 'label' ),
-					'price' 		=> $traveler_category->get( 'has_sale' ) ? $traveler_category->get( 'sale_price' ) : $traveler_category->get( 'price' ),
-					'is_primary' 	=> $traveler_category->get( 'id' ) === $primary_traveler_category_id,
+					'id' 				=> $traveler_category->get( 'id' ),
+					'label' 			=> $traveler_category->get( 'label' ),
+					'price' 			=> $traveler_category->get( 'has_sale' ) ? $traveler_category->get( 'sale_price' ) : $traveler_category->get( 'price' ),
+					'is_primary' 		=> $traveler_category->get( 'id' ) === $primary_traveler_category_id,
+					'has_group_pricing' => $traveler_category->get( 'enabled_group_discount' ),
+					'group_pricing' 	=> $traveler_category->get( 'group_pricing' ),
 				);
 			}
 		}
 
-		return $this->categories_pricings;
+		return apply_filters( 'wptravelengine_trip_package_default_pricings', $this->categories_pricings, $this );
 	}
 
 	/**

@@ -46,11 +46,16 @@ class CouponAdjustment extends CartAdjustment {
 	public function apply( float $total, Item $cart_item ): float {
 		if ( ! $this->coupon->is_valid_for_trip( $cart_item->trip_id ) ) {
 			return 0;
-		};
+		}
+
 		if ( 'percentage' === $this->adjustment_type ) {
 			return $total * $this->percentage / 100;
 		}
 
-		return (float) $this->percentage / count( $cart_item->get_additional_line_items() );
+		$total_line_items = array_reduce( $cart_item->get_additional_line_items(), function( $carry, $items ) {
+			return $carry + count( $items );
+		}, 0 );
+
+		return $total_line_items > 0 ? (float) ($this->percentage / $total_line_items) : 0;
 	}
 }

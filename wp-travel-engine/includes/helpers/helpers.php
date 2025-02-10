@@ -98,8 +98,9 @@ function wptravelengine_format_trip_end_datetime( string $start_date, Trip $trip
 		$date_format = get_option( 'date_format', 'j M, Y' );
 		$date_format .= strpos( $start_date, 'T' ) !== false ? ' \a\t ' . get_option( 'time_format', 'g:i a' ) : '';
 	}
-	$trip_duration      = intval( $trip->get_trip_duration() ) - 1;
+
 	$trip_duration_type = $trip->get_trip_duration_unit() ?? 'days';
+	$trip_duration      = 'days' === $trip_duration_type ? ( intval( $trip->get_trip_duration() ) - 1 ) : intval( $trip->get_trip_duration() );
 
 	return wp_date( $date_format, strtotime( "+$trip_duration {$trip_duration_type}", strtotime( $start_date ) ) );
 }

@@ -18,6 +18,13 @@ namespace WPTravelEngine\Core\Models\Post;
 class TravelerCategory {
 
 	/**
+	 * The traveler category id.
+	 *
+	 * @var int
+	 */
+	public int $id;
+
+	/**
 	 * The trip object.
 	 *
 	 * @var Trip
@@ -92,6 +99,9 @@ class TravelerCategory {
 		switch ( $key ) {
 			case 'group_pricing':
 				$value = $this->package->get_group_pricing()[ $this->{'id'} ] ?? [];
+				break;
+			case 'description':
+				$value = get_term_by( 'id', $this->id, 'trip-packages-categories' )->{$key};
 				break;
 			default:
 				$value = $this->{$key} ?? $default;

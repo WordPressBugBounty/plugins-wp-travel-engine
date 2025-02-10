@@ -52,11 +52,6 @@ function wte_number_format( $num, $decimals = '', $decimal_separator = '', $thou
 	$settings = get_option( 'wp_travel_engine_settings', array() );
 	if ( $decimals === '' ) {
 		$decimals = (int) wte_array_get( $settings, 'decimal_digits', 0 );
-		if ( $num !== floor( $num ) ) {
-			$num          = (string) $num;
-			$num_decimals = strlen( substr( $num, strpos( $num, '.' ) + 1 ) );
-			$decimals     = max( $decimals, min( $num_decimals, 2 ) );
-		}
 	}
 
 	if ( empty( $decimal_separator ) ) {

@@ -23,7 +23,7 @@ $fullwidth_class = $full_width_banner && 'banner-layout-1' === $banner_layout ? 
 		 *
 		 * @param $list_images List of attachment IDs.
 		 */
-		$list_images = apply_filters( 'wptravelengine_trip_dynamic_banner_list_images', $list_images, $banner_layout );
+		$list_images = apply_filters( 'wptravelengine_trip_dynamic_banner_list_images', $list_images, $banner_layout, $show_image_gallery, $show_video_gallery );
 		foreach ( $list_images as $image ) {
 			if ( is_numeric( $image ) ) {
 				continue;

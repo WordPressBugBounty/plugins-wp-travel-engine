@@ -608,7 +608,7 @@ class Trip extends WP_REST_Posts_Controller {
 					$group_pricing[ $id ] = array_map( fn ( $gp ) => [
 						'from'  => $gp[ 'from' ],
 						'to'    => $gp[ 'to' ],
-						'price' => $gp[ 'rate' ],
+						'price' => $gp[ 'price' ],
 					], $group_princings );
 				}
 
@@ -1149,9 +1149,9 @@ class Trip extends WP_REST_Posts_Controller {
 
 			$group_pricing = array_map( function ( $gp ) {
 				return array(
-					'from' => is_numeric( $gp[ 'from' ] ) ? (int) $gp[ 'from' ] : 0,
-					'to'   => is_numeric( $gp[ 'to' ] ) ? (int) $gp[ 'to' ] : '',
-					'rate' => is_numeric( $gp[ 'price' ] ) ? (float) $gp[ 'price' ] : 0,
+					'from'  => is_numeric( $gp[ 'from' ] ) ? (int) $gp[ 'from' ] : 0,
+					'to'    => is_numeric( $gp[ 'to' ] ) ? (int) $gp[ 'to' ] : '',
+					'price' => is_numeric( $gp[ 'price' ] ) ? (float) $gp[ 'price' ] : 0,
 				);
 			}, $group_pricing );
 
@@ -1177,6 +1177,7 @@ class Trip extends WP_REST_Posts_Controller {
 				'group_pricing'     => $group_pricing,
 				'min_pax'           => $min_pax,
 				'max_pax'           => $max_pax,
+				'description'       => $category->get( 'description', '' ),
 			);
 		}
 
@@ -1667,16 +1668,16 @@ class Trip extends WP_REST_Posts_Controller {
 										'items'       => array(
 											'type'       => 'object',
 											'properties' => array(
-												'form' => array(
-													'description' => __( 'Group pricing form.', 'wp-travel-engine' ),
+												'from'  => array(
+													'description' => __( 'Group pricing from.', 'wp-travel-engine' ),
 													'type'        => 'integer',
 												),
-												'to'   => array(
+												'to'    => array(
 													'description' => __( 'Group pricing to.', 'wp-travel-engine' ),
 													'type'        => array( 'integer', 'string' ),
 												),
-												'rate' => array(
-													'description' => __( 'Group pricing rate.', 'wp-travel-engine' ),
+												'price' => array(
+													'description' => __( 'Group pricing price.', 'wp-travel-engine' ),
 													'type'        => 'float',
 												),
 											),

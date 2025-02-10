@@ -159,7 +159,7 @@ class TripPackages extends WP_REST_Posts_Controller {
 				return array(
 					'from' => is_numeric( $gp[ 'from' ] ) ? (int) $gp[ 'from' ] : 0,
 					'to'   => is_numeric( $gp[ 'to' ] ) ? (int) $gp[ 'to' ] : '',
-					'rate' => is_numeric( $gp[ 'price' ] ) ? (float) $gp[ 'price' ] : 0,
+					'price' => is_numeric( $gp[ 'price' ] ) ? (float) $gp[ 'price' ] : 0,
 				);
 			}, $group_pricing );
 
@@ -185,6 +185,7 @@ class TripPackages extends WP_REST_Posts_Controller {
 				'group_pricing'     => $group_pricing,
 				'min_pax'           => $min_pax,
 				'max_pax'           => $max_pax,
+				'description'       => $category->get( 'description', '' ),
 			);
 		}
 

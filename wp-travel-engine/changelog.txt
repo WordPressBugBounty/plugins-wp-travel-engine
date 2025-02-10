@@ -1,5 +1,19 @@
 == Changelog ==
 
+= 6.3.4 - 10th February 2025 =
+* Fix: FSD addon date selection now works on mobile devices.
+* Fix: Theme font family no longer overridden by plugins.
+* Fix: Map image can now be removed in trip edit.
+* Fix: Months list in trip search form is now translation-ready.
+* Fix: 'Requires Registration for booking' feature fixed.
+* Enhancement: Added HTML block and table to custom editor fields.
+* Enhancement: Form validation errors are now translatable.
+* Enhancement: Added filter for FSD availability select options.
+* Enhancement: Updated icons in Itinerary and FAQs accordion.
+* Enhancement: Replaced trip search block/widget icon.
+* Enhancement: Lightbox URL removed when gallery is disabled.
+* Enhancement: Removed unnecessary banner image printing for better performance.
+
 = 6.3.3 - 27th January 2025 =
 * Improvement: Enhanced the Extra Services Add-on for better usability and performance.
 * Improvement: Improvised thank you page template.
@@ -7,6 +21,8 @@
 * Fix: Resolved an issue where the Elevation Chart was displayed on trips even when no altitude data was added.
 * Fix: Improper calculation of partial payment in checkout page.
 * Update: Freemius SDK
+
+**Check out the release note for version [6.3.3](https://wptravelengine.com/new-release-version-6-3-3/).**
 
 = 6.3.2 - 21st January 2025 =
 * Fix: Translation compatibility issues with translation plugins.
@@ -31,6 +47,8 @@
 * Fix: Corrected sorting issue for departure dates on custom-created trip listing pages.
 * Fix: Addressed styling conflicts caused by trip search shortcode affecting other widgets.
 
+**Check out the release note for version [6.3.0](https://wptravelengine.com/new-release-version-6-3-0/).**
+
 = 6.2.4 - 1st January 2025 =
 * Fix: Primary package is now set correctly when duplicating a trip package.
 
@@ -47,6 +65,8 @@
 * Fix: Resolved issue with the Extra Service title option not working.
 * Fix: Resolved issue with saving "Expert Email" in the Itinerary Downloader Addon.
 * Fix: Resolved unable to disable chart toggle switch in global setting
+
+**Check out the release note for version [6.2.3](https://wptravelengine.com/new-release-version-6-2-3/).**
 
 = 6.2.2 - 21st November 2024 =
 * New: Introduced filter hooks to enable seamless support for upcoming add-ons.
@@ -71,6 +91,8 @@
 * Fix: Addressed an issue where custom tags for fields such as checkboxes and radio buttons were not being parsed correctly in email templates.
 * Fix: Resolved an issue where selecting 'Sort Trips by Departure Dates' caused new trips to not appear on the archive page.
 * Fix: Fixed the issue where double options for the 'Difficulty' taxonomy were appearing in the trip edit page.
+
+**Check out the release note for version [6.2.0](https://wptravelengine.com/new-release-version-6-2-0/).**
 
 = 6.1.3 - 9th October 2024 =
 * Fix: Resolved a fatal error that occurred when retrieving the primary package ID.
@@ -101,6 +123,8 @@
 * Fix: Resolved the issue with the date format not functioning correctly in the booking modal.
 * Fix: Resolved the issue with deleting taxonomy thumbnail images in quick edit.
 
+**Check out the release note for version [6.1.0](https://wptravelengine.com/new-release-version-6-1-0/).**
+
 = 6.0.5 - 4th September 2024 =
 * Feature: Added optimized loading for assets to improve loading speed.
 * Feature: Introduced map lazy loading to delay the loading of the map iframe until user interaction.
@@ -108,6 +132,8 @@
 * Update: Removed Owl Carousel and replaced it with Splide for better performance and page speed.
 * Update: Made payment method title and instructions dynamic for Check Payment and Direct Bank Transfer methods.
 * Fix: Resolved issue with custom tags not working correctly.
+
+**Check out the release note for version [6.0.5](https://wptravelengine.com/new-release-version-6-0-5/).**
 
 = 6.0.4 - 13th August 2024 =
 * Fix: Cut-off time for bookings now works correctly.
@@ -167,6 +193,8 @@
 * Notice: Temporarily disabled the 'Edit This Trip Info' section and added new bookings from the dashboard. In existing bookings, the 'Trip Info' section cannot be edited. Recommendation: Create new bookings through the standard trip booking process and cancel existing bookings if necessary.
 * Upcoming Deprecations: Planning to deprecate other classes and methods in consecutive releases leading to version 7.0.0. Implementing PHP autoload features; all autoload classes are placed inside the includes/classes directory with the namespace WPTravelEngine.
 
+**Check out the release note for version [6.0.0](https://wptravelengine.com/new-release-version-6-0-0/).**
+
 = 5.9.4 - 12th July 2024 =
 * Fix: Resolved the issue with rich text editor content rendering.
 * Fix: Addressed incorrect escaping.
@@ -187,6 +215,8 @@
 * Enhancement: Added 'Exclude Current Trip' Setting to Trip Block. This enhancement allows users to exclude the current trip while listing trips using the trips block, providing more control over displayed content.
 * Enhancement: Added 'Show All Taxonomies' Setting to Terms and Taxonomies Block. Enabling this setting will list all available terms, offering more comprehensive taxonomy display options.
 
+**Check out the release note for version [5.9.0](https://wptravelengine.com/new-release-version-5-9-0/).**
+
 = 5.8.5 - 9th May 2024 =
 * Feature: Added Toggle Criteria Filter Display option. Enabling this feature will display each filter option as a requirement on the archive page, allowing users to toggle the visibility of criteria filters.
 * Fix: Resolved issue with Incorrect End Date caused by incorrect date format provided.
@@ -194,6 +224,8 @@
 * Fix: Fixed styling issues when the Booking form is sticky for a better user experience.
 * Fix: Addressed the issue where only 10 Extra services options were listed in the booking modal pop-up on the Trip Page.
 * Fix: Corrected the issue related to the usage of encoded slug by ensuring the correct usage of printf function.
+
+**Check out the release note for version [5.8.5](https://wptravelengine.com/new-release-version-5-8-5/).**
 
 = 5.8.4 - 18th April 2024 =
 * Fix: Trip booking widget can now fetch data for draft trips, resolving the issue where it wouldn't work for them due to an API restriction.
@@ -205,6 +237,8 @@
 * Internal: Introduced a new class `WPTravelEngine\Core\Cart\Item` to represent individual cart items. (Improves data structure and clarity for cart items.)
 * Internal: Added a new class `WPTravelEngine\Core\Tax` to manage tax calculations. (Provides dedicated functionality for handling taxes.)
 
+**Check out the release note for version [5.8.4](https://wptravelengine.com/new-release-version-5-8-4/).**
+
 = 5.8.3 - 10th April 2024 =
 * Compatibility: Improved compatibility with the Rank Math plugin. Scores are now generated based on trip overview, itinerary, FAQs, and cost sections.
 * Improvement: Added support for translating the form validation warning message using common translation plugins.
@@ -213,6 +247,8 @@
 * Fix: Fixed the issue in the Elementor trip listing widget where the entire page content was shown in the description section due to`the_content`hook conflict.
 * Fix: Ensured proper setting of trip metas during the trip cloning process.
 * Fix: Implemented scroll feature on terms listings (destinations, trip types, etc.) to prevent child terms from being hidden on hover.
+
+**Check out the release note for version [5.8.3](https://wptravelengine.com/new-release-version-5-8-3/).**
 
 = 5.8.2 - 28th March 2024 =
 * Feature: Automatically create a new user when a trip is booked

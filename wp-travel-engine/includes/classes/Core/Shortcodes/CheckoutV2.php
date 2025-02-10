@@ -64,7 +64,18 @@ class CheckoutV2 extends Checkout {
 	public function output( $atts ): string {
 		global $wte_cart;
 
-		$wptravelengine_settings = get_option( 'wp_travel_engine_settings', array() );
+		$wptravelengine_settings   = get_option( 'wp_travel_engine_settings', array() );
+		$generate_user_account     = $wptravelengine_settings[ 'generate_user_account' ] ?? 'no';
+		$require_login_to_checkout = $wptravelengine_settings[ 'enable_checkout_customer_registration' ] ?? 'no';
+
+		if ( 'no' === $generate_user_account && 'yes' === $require_login_to_checkout && ! is_user_logged_in() ) {
+			ob_start();
+
+			wte_get_template( 'account/form-login.php' );
+
+			return ob_get_clean();
+		}
+
 		$checkout_page_template  = $wptravelengine_settings[ 'checkout_page_template' ] ?? '1.0';
 		// Simplified conditional check for outputting based on version
 		if ($atts['version'] === '1.0' || ($atts['version'] !== '2.0' && $checkout_page_template == '1.0')) {

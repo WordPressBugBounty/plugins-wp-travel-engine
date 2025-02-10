@@ -178,6 +178,7 @@ class Gateway extends BaseGateway {
 
 			$payment->save();
 			$booking->save();
+			wptravelengine_send_booking_emails( $payment->get_id(), 'order_confirmation', 'all' );
 
 			// Delete the saved key for generated JWT, sent in notification url.
 			do_action( 'wte_booking_cleanup', $payment->get_id(), 'notification' );

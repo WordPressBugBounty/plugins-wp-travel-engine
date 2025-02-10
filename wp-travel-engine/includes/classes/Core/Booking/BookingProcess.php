@@ -200,6 +200,7 @@ class BookingProcess {
 			$this->booking->add_payment( $this->payment->get_id() );
 
 			$this->booking->save();
+			$this->customer->update_customer_meta( $this->booking->get_id() );
 			$this->customer->save();
 			$this->payment->save();
 

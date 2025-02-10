@@ -14,7 +14,7 @@ use WPTravelEngine\Abstracts\Shortcode;
 /**
  * Class Conformation.
  *
- * Responsible for creating shortcodes for trip conformaion and maintain it.
+ * Responsible for creating shortcodes for trip conformation and maintaining it.
  *
  * @since 6.0.0
  */
@@ -31,8 +31,13 @@ class TravelerInformation extends Shortcode {
 	 * @return string
 	 */
 	public function output(): string {
-		$confirmation = new \Wp_Travel_Engine_Order_Confirmation();
+		if ( is_admin() ) {
+			return '';
+		}
 
-		return $confirmation->wp_travel_engine_confirmation_shortcodes_callback();
+		ob_start();
+		wte_get_template( 'traveller-information/template-traveler-info.php' );
+
+		return ob_get_clean();
 	}
 }

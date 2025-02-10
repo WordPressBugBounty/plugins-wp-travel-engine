@@ -172,6 +172,35 @@ class WP_Travel_Engine_Form_Field {
 	}
 
 	/**
+	 * @param array $fields
+	 *
+	 * @return array
+	 * @since 6.3.4
+	 */
+	protected function add_error_messages( array $fields ): array {
+		foreach ( $fields as &$field ) {
+			if ( ! isset( $field[ 'attributes' ] ) ) {
+				$fields[ 'attributes' ] = array();
+			}
+
+			if ( isset( $field[ 'validations' ][ 'required' ] ) && true === $field[ 'validations' ][ 'required' ] ) {
+				$field[ 'attributes' ][ 'data-parsley-required' ]         = 'true';
+				$field[ 'attributes' ][ 'data-parsley-required-message' ] = __( 'This value is required', 'wp-travel-engine' );
+			}
+		}
+
+		return $fields;
+	}
+
+	/**
+	 * @return array
+	 * @since 6.3.4
+	 */
+	public function get_fields(): array {
+		return $this->add_error_messages( $this->fields );
+	}
+
+	/**
 	 * Process form field before render.
 	 *
 	 * @return void
@@ -180,7 +209,7 @@ class WP_Travel_Engine_Form_Field {
 
 		$output = '';
 
-		if ( ! empty( $this->fields ) ) :
+		if ( ! empty( $this->get_fields() ) ) :
 
 			foreach ( $this->fields as $field ) :
 
@@ -189,7 +218,7 @@ class WP_Travel_Engine_Form_Field {
 				if ( $field ) :
 
 					$content = $this->process_single( $field );
-					$output .= ( in_array( $field[ 'type' ], array(
+					$output  .= ( in_array( $field[ 'type' ], array(
 						'hidden',
 						'heading',
 					), true ) ) ? $content : $this->template( $field, $content );
@@ -285,8 +314,6 @@ class WP_Travel_Engine_Form_Field {
 			return $field_init->init( $field )->render( false );
 
 		}
-
-		return;
 	}
 
 	/**
