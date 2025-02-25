@@ -201,7 +201,7 @@ class WP_Travel_Engine_Template_Hooks {
 		$image_sizes_by_layout = $image_sizes[ $banner_layout ] ?? array();
 
 		$_list_images = array();
-		foreach ( $list_images as $index => $image ) {
+		foreach ( array_values( $list_images ) as $index => $image ) {
 			$attachment_url = wp_get_attachment_image_url( $image, $image_sizes_by_layout[ $index ] ?? 'full' );
 			if ( ! $attachment_url || ! array_key_exists( $index, $image_sizes_by_layout ) ) {
 				continue;
@@ -244,7 +244,7 @@ class WP_Travel_Engine_Template_Hooks {
 		if ( ! is_array( $list_images ) ) {
 			$list_images = array();
 		}
-		$show_image_gallery = ( $list_images[ 'enable' ] ?? '0' ) === '1';
+		$show_image_gallery = wptravelengine_toggled( $list_images[ 'enable' ] ?? false );
 		if ( isset( $list_images[ 'enable' ] ) ) {
 			unset( $list_images[ 'enable' ] );
 		}
@@ -1131,24 +1131,25 @@ class WP_Travel_Engine_Template_Hooks {
 		$tab_title                 = isset( $trip_settings[ 'trip_itinerary_title' ] ) && ! empty( $trip_settings[ 'trip_itinerary_title' ] ) ? $trip_settings[ 'trip_itinerary_title' ] : false;
 		$wp_travel_engine_settings = get_option( 'wp_travel_engine_settings' );
 		$enabled_expand_all        = ! isset( $wp_travel_engine_settings[ 'wte_advance_itinerary' ][ 'enable_expand_all' ] ) || 'yes' == $wp_travel_engine_settings[ 'wte_advance_itinerary' ][ 'enable_expand_all' ] ? 'enabled' : '';
-		if ( $tab_title ) {
-			if ( defined( 'WTEAI_VERSION' ) ) {
-				echo "<h2 class='wpte-itinerary-title'>" . esc_html( $tab_title ) . '</h2>';
-			} else {
-				?>
-				<div class="wte-itinerary-header-wrapper">
-					<div class="wp-travel-engine-itinerary-header">
+		
+		if ( $tab_title && defined( 'WTEAI_VERSION' ) ) {
+			echo "<h2 class='wpte-itinerary-title'>" . esc_html( $tab_title ) . '</h2>';
+		} else {
+			?>
+			<div class="wte-itinerary-header-wrapper">
+				<div class="wp-travel-engine-itinerary-header">
+					<?php if ( $tab_title ) : ?>
 						<h2 class='wpte-itinerary-title'><?php echo esc_html( $tab_title ); ?></h2>
-						<div class="aib-button-toggle toggle-button expand-all-button">
-							<label for="itinerary-toggle-button"
-								   class="aib-button-label"><?php echo esc_html__( 'Expand all', 'wp-travel-engine' ); ?></label>
-							<input id="itinerary-toggle-button" type="checkbox"
-								   class="checkbox" <?php echo $enabled_expand_all != '' ? 'checked' : ''; ?>>
-						</div>
+					<?php endif; ?>
+					<div class="aib-button-toggle toggle-button expand-all-button">
+						<label for="itinerary-toggle-button"
+								class="aib-button-label"><?php echo esc_html__( 'Expand all', 'wp-travel-engine' ); ?></label>
+						<input id="itinerary-toggle-button" type="checkbox"
+								class="checkbox" <?php echo $enabled_expand_all != '' ? 'checked' : ''; ?>>
 					</div>
 				</div>
-				<?php
-			}
+			</div>
+			<?php
 		}
 	}
 

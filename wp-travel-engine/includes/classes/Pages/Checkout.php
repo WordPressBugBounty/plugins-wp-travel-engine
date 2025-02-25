@@ -16,7 +16,6 @@ use WPTravelEngine\Core\Models\Settings\Options;
 use WPTravelEngine\Core\Models\Post\Booking;
 use WPTravelEngine\Traits\Singleton;
 
-
 /**
  * Checkout page class.
  */
@@ -85,9 +84,9 @@ class Checkout extends BasePage {
 		// Retrieve and filter enabled payment gateways.
 		$payment_gateways = Options::get( 'wptravelengine_payment_gateways', array_map( function ( $gateway ) {
 			return [
-				'id' => $gateway['gateway_id'] ?? '',
-				'name' => $gateway['label'] ?? '',
-				'enable' => true
+				'id'     => $gateway[ 'gateway_id' ] ?? '',
+				'name'   => $gateway[ 'label' ] ?? '',
+				'enable' => true,
 			];
 		}, $active_payment_methods ) );
 
@@ -103,24 +102,27 @@ class Checkout extends BasePage {
 		// Sort and prepare gateway details.
 		$sorted_gateways = [];
 
-        foreach ( $gateway_details as $id => $details ) {
-            if ( ! isset( $active_payment_methods[$id] ) ) {
-                continue;
-            }
+		foreach ( $gateway_details as $id => $details ) {
+			if ( ! isset( $active_payment_methods[ $id ] ) ) {
+				continue;
+			}
 
-            $method = $active_payment_methods[$id];
+			$method = $active_payment_methods[ $id ];
 
 			// Get display icon.
-            $display_icon = $method['display_icon'] ?? '';
-            $icon_dir = apply_filters( 'wptravelengine_payment_gateway_icon_dir', WP_TRAVEL_ENGINE_FILE_URL . 'assets/images/paymentgateways/frontend/', compact( 'id' ) );
-            $icon_url = $display_icon ?: $icon_dir . $id . '.png';
+			$display_icon = $method[ 'display_icon' ] ?? '';
+			$icon_dir     = apply_filters( 'wptravelengine_payment_gateway_icon_dir', WP_TRAVEL_ENGINE_FILE_URL . 'assets/images/paymentgateways/frontend/', compact( 'id' ) );
+			$icon_url     = $display_icon ?: $icon_dir . $id . '.png';
 
-            $sorted_gateways[$id] = array_merge( $method, [
-                'icon_url'        => $this->prepare_icon_markup($icon_url),
-                'default_gateway' => $default_gateway === $id,
-                'description'     => in_array( $id, ['check_payments', 'direct_bank_transfer']) ? ($method['description'] ?? '' ) : '',
-            ]);
-        }
+			$sorted_gateways[ $id ] = array_merge( $method, [
+				'icon_url'        => $this->prepare_icon_markup( $icon_url ),
+				'default_gateway' => $default_gateway === $id,
+				'description'     => in_array( $id, [
+					'check_payments',
+					'direct_bank_transfer',
+				] ) ? ( $method[ 'description' ] ?? '' ) : '',
+			] );
+		}
 
 		return $sorted_gateways;
 	}
@@ -141,6 +143,7 @@ class Checkout extends BasePage {
 	 */
 	public function is_full_payment_enabled(): bool {
 		$down_payment_settings = $this->get_down_payment_settings();
+
 		return ( $down_payment_settings[ 'global_full_payment' ] ?? true );
 	}
 
@@ -268,12 +271,9 @@ class Checkout extends BasePage {
 				if ( $item instanceof CartItem ) {
 					$item = array( $item->item_type => $item );
 				}
+				/** @var \WPTravelEngine\Abstracts\CartItem $_item */
 				foreach ( $item as $_item ) {
-					$_rows[ $_item->item_type ][] = sprintf(
-						'<tr><td>%s</td><td><strong>%s</strong></td></tr>',
-						sprintf( '%s: %s x %s', $_item->label, $_item->quantity, wptravelengine_the_price( $_item->price, false ) ),
-						wptravelengine_the_price( $_item->get_subtotal(), false )
-					);
+					$_rows[ $_item->item_type ][] = $_item->render();
 				}
 			}
 			$rows[ 'line_items' ][] = $_rows;
@@ -296,15 +296,9 @@ class Checkout extends BasePage {
 	public function get_fee_rows() {
 		$fees  = $this->cart->get_fees();
 		$items = array();
+		/** @var \WPTravelEngine\Abstracts\CartAdjustment $fee */
 		foreach ( $fees as $fee ) {
-			$description = $fee->description;
-			$items[ $fee->name ] = sprintf(
-				'<tr class="wpte-checkout__booking-summary-%s"><td>%s%s</td><td><strong>+ %s</strong></td></tr>',
-				$fee->name,
-				"{$fee->label}",
-				! empty( $description ) ? "<span id='{$fee->name}-tooltip' class='wpte-checkout__tooltip' data-content='{$description}'><svg><use xlink:href='#help' /></svg></span>" : '',
-				wptravelengine_the_price( $this->cart->get_totals()[ "total_{$fee->name}" ], false )
-			);
+			$items[ $fee->name ] = $fee->render();
 		}
 
 		return apply_filters( 'wptravelengine_checkout_page_' . __FUNCTION__, $items, $this->cart );
@@ -314,12 +308,9 @@ class Checkout extends BasePage {
 		$deductible_items = $this->cart->get_deductible_items();
 
 		$rows = array();
+		/** @var \WPTravelEngine\Abstracts\CartAdjustment $item */
 		foreach ( $deductible_items as $item ) {
-			$rows[ $item->name ][] = sprintf(
-				'<tr class="wpte-checkout__booking-summary-discount"><td>%s</td><td><strong>- %s</strong></td></tr>',
-				$item->label,
-				wptravelengine_the_price( $this->cart->get_totals()[ "total_{$item->name}" ], false )
-			);
+			$rows[ $item->name ][] = $item->render();
 		}
 
 		return apply_filters( 'wptravelengine_checkout_page_' . __FUNCTION__, $rows, $this->cart );
@@ -342,8 +333,8 @@ class Checkout extends BasePage {
 	public function get_tour_details() {
 		$cart_items = $this->cart->getItems();
 
-
 		$item_details = array();
+
 		foreach ( $cart_items as $cart_item ) {
 			/** @var array $cart_item */
 			$trip            = new Trip( $cart_item[ 'trip_id' ] );
@@ -385,7 +376,7 @@ class Checkout extends BasePage {
 	}
 
 	public function get_note_form_fields() {
-		$field = DefaultFormFields::additional_note();
+		$field     = DefaultFormFields::additional_note();
 		$form_data = WTE()->session->get( 'additional_note' );
 		if ( ! empty( $form_data ) && isset( $field[ 'traveller_additional_note' ] ) ) {
 			$field[ 'traveller_additional_note' ][ 'default' ] = $form_data;

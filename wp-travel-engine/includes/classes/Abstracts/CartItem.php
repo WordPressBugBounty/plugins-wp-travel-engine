@@ -180,4 +180,17 @@ abstract class CartItem implements CartItemInterface {
 		return $this->args;
 	}
 
+	/**
+	 * Render.
+	 *
+	 * @return string
+	 * @since 6.3.5
+	 */
+	public function render(): string {
+		return sprintf(
+			'<tr><td>%s</td><td><strong>%s</strong></td></tr>',
+			sprintf( '%s: %s x %s', $this->label, $this->quantity, wptravelengine_the_price( $this->price, false ) ),
+			wptravelengine_the_price( $this->get_subtotal(), false )
+		);
+	}
 }

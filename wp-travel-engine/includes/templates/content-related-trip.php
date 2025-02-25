@@ -130,11 +130,11 @@ echo $related_new_trip_listing ? ' wpte_new-layout' : '';
 			<?php endif; ?>
 		</figure>
 
-		<div class="category-trip-content-wrap">
+		<div class="category-trip-content-wrap ok">
 			<div class="category-trip-prc-title-wrap">
-				<h2 class="category-trip-title" itemprop="name">
+				<h3 class="category-trip-title" itemprop="name">
 					<a itemprop="url" href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
-				</h2>
+				</h3>
 				<?php
 				if ( $show_related_wishlist ) {
 					$active_class    = '';

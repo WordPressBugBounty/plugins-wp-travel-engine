@@ -273,7 +273,7 @@ class TripMetaTabs {
                 array(
                     'field'       	=> [
                         'type'     	=> 'ALERT',
-                        'content'	=> __('<p>You can add, edit and delete the global files via <strong>WP Travel Engine > Settings > Extensions > File Downloads.</strong> <a href="'.admin_url().'edit.php?post_type=booking&page=class-wp-travel-engine-admin.php" target="_blank">Go To Settings</a></p>', 'wp-travel-engine'),
+                        'content'	=> __('<p>You can add, edit and delete the global files via <strong>WP Travel Engine > Settings > Extensions > File Downloads.</strong> <a href="'.admin_url().'edit.php?post_type=booking&page=class-wp-travel-engine-admin.php#extension-file-downloads">Go To Settings</a></p>', 'wp-travel-engine'),
                     ],
                     'visibility'	=> wptravelengine_is_addon_active( 'file-downloads' ),
                 ),

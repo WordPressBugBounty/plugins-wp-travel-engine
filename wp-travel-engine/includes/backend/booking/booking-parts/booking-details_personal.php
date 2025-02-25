@@ -315,4 +315,3 @@ endif;
 			</div>
 		</div> <!-- .wpte-block -->
 	</div> <!-- .wpte-block-wrap -->
-<?php

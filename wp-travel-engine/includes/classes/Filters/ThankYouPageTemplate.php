@@ -159,12 +159,41 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 	}
 
 	/**
+	 * @return mixed|null
+	 * @since 6.3.5
+	 */
+	public function get_tour_details() {
+		$cart_items = $this->cart->getItems();
+
+		$item_details = array();
+
+		foreach ( $cart_items as $cart_item ) {
+			/** @var array $cart_item */
+			$trip            = new Trip( $cart_item[ 'trip_id' ] );
+			$trip_start_date = ! empty( $cart_item[ 'trip_time' ] ) ? $cart_item[ 'trip_time' ] : $cart_item[ 'trip_date' ];
+			$item            = array(
+				sprintf( '<tr><td colspan="2">%s</td></tr>', sprintf( '<a href="%s" class="wpte-checkout__trip-name">%s</a>', $trip->get_permalink(), $trip->get_title() ) ),
+				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Booking ID:', 'wp-travel-engine' ), $this->booking->get_id() ),
+				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Package:', 'wp-travel-engine' ), get_the_title( $cart_item[ 'price_key' ] ) ),
+				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Trip Code:', 'wp-travel-engine' ), $trip->get_trip_code() ),
+				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Starts on:', 'wp-travel-engine' ), wptravelengine_format_trip_datetime( $trip_start_date ) ),
+				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Ends on:', 'wp-travel-engine' ), wptravelengine_format_trip_end_datetime( $trip_start_date, $trip ) ),
+				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'No. of Travellers:', 'wp-travel-engine' ), array_sum( $cart_item[ 'pax' ] ?? [] ) ),
+			);
+
+			$item_details[] = apply_filters( 'wptravelengine_checkout_page_item_' . __FUNCTION__, $item, $trip, $cart_item );
+		}
+
+		return apply_filters( 'wptravelengine_checkout_page_' . __FUNCTION__, $item_details, $cart_items, $this );
+	}
+
+	/**
 	 * Tour Details.
 	 *
 	 * @since 6.3.3
 	 */
 	public function tour_details() {
-		$tour_details = Checkout::instance( $this->get_cart() )->get_tour_details();
+		$tour_details = $this->get_tour_details();
 		wptravelengine_get_template(
 			'template-checkout/content-tour-details.php',
 			array_merge( compact( 'tour_details' ), array(

@@ -122,4 +122,31 @@ abstract class CartAdjustment implements CartAdjustmentInterface {
 		return (float) $this->percentage / count( $cart_item->get_additional_line_items() );
 	}
 
+	/**
+	 * Render.
+	 *
+	 * @return string
+	 * @since 6.3.5
+	 */
+	public function render(): string {
+		return sprintf(
+		'<tr class="wpte-checkout__booking-summary-%s">
+				<td>%s%s</td>
+				<td><strong>%s %s</strong></td>
+			</tr>',
+			'coupon' === $this->name ? 'discount' : $this->name,
+			$this->label,
+			! empty( $this->description ) 
+				? sprintf(
+					'<span id="%s-tooltip" class="wpte-checkout__tooltip" data-content="%s">
+						<svg><use xlink:href="#help"></use></svg>
+					</span>',
+					$this->name,
+					$this->description
+				)
+				: '',
+			'coupon' === $this->name ? '-' : '+',
+			wptravelengine_the_price( $this->cart->get_totals()[ "total_{$this->name}" ], false )
+		);
+	}
 }

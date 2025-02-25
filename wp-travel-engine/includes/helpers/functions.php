@@ -115,15 +115,24 @@ function wptravelengine_key_exists( array $data, array $keys ): bool {
  * @updated 6.2.3
  *
  */
-
 function wptravelengine_replace( $data, $target_value, $by, $else = null, $target_key = null ) {
 
 	if ( is_array( $data ) ) {
+
 		foreach ( $data as $key => $value ) {
 			if ( is_null( $target_key ) ) {
 				$data[ $key ] = ( $target_value === $value ) ? $by : $else;
-			} else if ( array_key_exists( $target_key, $value ) ) {
+				continue;
+			} 
+
+			if ( is_array( $value ) && array_key_exists( $target_key, $value ) ) {
 				$data[ $key ][ $target_key ] = ( $target_value === $value[ $target_key ] ) ? $by : $else;
+				continue;
+			}
+
+			if ( ! is_array( $value ) && $target_key === $key ) {
+				$data[ $key ] = ( $target_value === $value ) ? $by : $else;
+				break;
 			}
 		}
 
@@ -1659,19 +1668,19 @@ function wptravelengine_svg_by_fa_icon( $icon, $echo = true, $class_names = arra
 
 	if ( is_array( $icon ) ) {
 		$new_icon = $icon[ 'icon' ] ?? '';
-		$path     = $icon[ 'path' ] ?: ( $data[ $new_icon ][ 'path' ] ?? '' );
+		$path     = ( $icon[ 'path' ] ?? '' ) ?: ( $data[ $new_icon ][ 'path' ] ?? '' );
 		if ( empty( $path ) ) {
 			return $path;
 		}
-		$view_box = $icon[ 'view_box' ] ?: ( $data[ $new_icon ][ 'viewBox' ] ?? '' );
+		$view_box = ( $icon[ 'view_box' ] ?? '' ) ?: ( $data[ $new_icon ][ 'viewBox' ] ?? '' );
 		$icon     = $new_icon;
 	} else {
 		$path = $data[ $icon ] ?? '';
 		if ( empty( $path ) ) {
 			return $path;
 		}
-		$view_box = $path[ 'viewBox' ];
-		$path     = $path[ 'path' ];
+		$view_box = $path[ 'viewBox' ] ?? '';
+		$path     = $path[ 'path' ] ?? '';
 	}
 
 	$attr       = array(
