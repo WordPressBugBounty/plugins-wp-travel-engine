@@ -186,6 +186,12 @@ class TripSearch {
 
 	public static function filter_trips_html( $post_data ) {
 
+		$view_mode  = ! empty( $post_data[ 'mode' ] ) ? wte_clean( wp_unslash( $post_data[ 'mode' ] ) ) : wp_travel_engine_get_archive_view_mode(); // phpcs:ignore
+
+		if ( ! in_array( $view_mode, array( 'grid', 'list' ) ) ) {
+			return '<h1>' . sprintf( __( 'Layout not found: %s', 'wp-travel-engine' ), $view_mode ) . '</h1>';
+		}
+
 		$query_args = self::get_query_args( true );
 
 		$query = new \WP_query( $query_args );
@@ -199,10 +205,9 @@ class TripSearch {
 			);
 		}
 
-		ob_start();
-
-		$view_mode  = ! empty( $post_data[ 'mode' ] ) ? wte_clean( wp_unslash( $post_data[ 'mode' ] ) ) : wp_travel_engine_get_archive_view_mode(); // phpcs:ignore
 		$view_class = 'grid' === $view_mode ? 'wte-col-2 category-grid' : 'category-list';
+
+		ob_start();
 
 		echo '<div class="category-main-wrap ' . esc_attr( $view_class ) . '">';
 

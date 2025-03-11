@@ -1,5 +1,11 @@
 == Changelog ==
 
+= 6.3.6 - 11th March 2025 =
+* Fix: Corrected group discount pricing issue when modifying the traveler count.
+* Fix: Resolved an unauthenticated Local File Inclusion (LFI) vulnerability.
+* Fix: Unexpected behavior with Continue option in booking modal due to available times.
+* Enhancement: Optimized global settings search for better efficiency.
+
 = 6.3.5 - 25th February 2025 =
 * Fix: Resolved banner layout display issue on the single trip page.
 * Fix: Corrected an issue causing erroneous booking modal calculations and unexpected closures in certain scenarios.

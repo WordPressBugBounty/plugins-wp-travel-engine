@@ -321,6 +321,10 @@ class WP_Travel_Engine_Custom_Shortcodes {
 			'wte_trip'
 		);
 
+		if ( ! in_array( $attr['layout'], array( 'grid', 'list' ) ) ) {
+			return '<h1>' . sprintf( __( 'Layout not found: %s', 'wp-travel-engine' ), $attr['layout'] ) . '</h1>';
+		}
+
 		if ( ! empty( $attr['ids'] ) ) {
 			$ids         = array();
 			$ids         = explode( ',', $attr['ids'] );
