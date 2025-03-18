@@ -29,7 +29,12 @@ class AddToCart extends AjaxController {
 		 * Maybe using a new cart.
 		 */
 		if ( $this->request->get_param( 'cart_version' ) ) { // phpcs:ignore
-			$this->add_to_cart();
+			$result = $this->add_to_cart();
+			if ( is_wp_error( $result ) ) {
+				wp_send_json_error( new WP_Error( 'ADD_TO_CART_ERROR', __( 'Invalid data structure.', 'wp-travel-engine' ) ) );
+			} else {
+				wp_send_json_success( $result );
+			}
 		}
 
 		$post = $this->request->get_body_params();
@@ -185,16 +190,15 @@ class AddToCart extends AjaxController {
 	/**
 	 * Add to cart.
 	 *
-	 * @return void
+	 * @return WP_Error|array
 	 * @since 5.0.0
 	 */
-	protected function add_to_cart() {
+	public function add_to_cart() {
 
 		$cart_data = $this->request->get_json_params();
 
 		if ( is_null( $cart_data ) ) {
-			wp_send_json_error( new WP_Error( 'ADD_TO_CART_ERROR', __( 'Invalid data structure.', 'wp-travel-engine' ) ) );
-			exit;
+			return new WP_Error( 'ADD_TO_CART_ERROR', __( 'Invalid data structure.', 'wp-travel-engine' ) );
 		}
 
 		$cart_data = (object) $cart_data;
@@ -202,8 +206,7 @@ class AddToCart extends AjaxController {
 		global $wte_cart;
 
 		if ( empty( $cart_data->booking_id ) && empty( $cart_data->{'tripID'} ) ) {
-			wp_send_json_error( new WP_Error( 'ADD_TO_CART_ERROR', __( 'Invalid Trip ID.', 'wp-travel-engine' ) ) );
-			exit;
+			return new WP_Error( 'ADD_TO_CART_ERROR', __( 'Invalid Trip ID.', 'wp-travel-engine' ) );
 		}
 
 		if ( ! apply_filters( 'wp_travel_engine_allow_multiple_cart_items', false ) ) {
@@ -214,14 +217,12 @@ class AddToCart extends AjaxController {
 
 		do_action( 'wptravelengine_after_add_to_cart', $wte_cart );
 
-		wp_send_json_success(
-			array(
-				'code'     => 'ADD_TO_CART_SUCCESS',
-				'message'  => __( 'Trip added to cart successfully.', 'wp-travel-engine' ),
-				'items'    => $wte_cart->getItems(),
-				'redirect' => add_query_arg( 'wte_id', time(), wptravelengine_get_checkout_url() ),
-			)
+		return array(
+			'code'     => 'ADD_TO_CART_SUCCESS',
+			'message'  => __( 'Trip added to cart successfully.', 'wp-travel-engine' ),
+			'items'    => $wte_cart->getItems(),
+			'redirect' => add_query_arg( 'wte_id', time(), wptravelengine_get_checkout_url() ),
 		);
-		exit;
 	}
+
 }

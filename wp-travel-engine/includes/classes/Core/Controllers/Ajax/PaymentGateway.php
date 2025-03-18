@@ -62,7 +62,7 @@ class PaymentGateway extends AjaxController {
 								<?php
 								$options = Functions::get_countries();
 								foreach ( $options as $key => $val ) {
-									echo '<option value="' . ( ! empty( $val ) ? esc_attr( $val ) : 'Please select' ) . '">' . esc_html( $val ) . '</option>';
+									echo '<option value="' . ( ! empty( $key ) ? esc_attr( $key ) : 'Please select' ) . '">' . esc_html( $val ) . '</option>';
 								}
 								?>
 							</select>

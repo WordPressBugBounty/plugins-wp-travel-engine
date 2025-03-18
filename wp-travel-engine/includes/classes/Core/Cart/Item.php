@@ -196,9 +196,14 @@ class Item {
 			$order_item = $order_item[ '_cart_item_object' ];
 		}
 
+		$cart_data = $booking->get_cart_info();
+
 		$item = new static( $cart, $order_item );
 
-		$item->add_line_items_from_order_item( $order_item );
+		// $item->add_line_items_from_order_item( $order_item );
+
+		$item->add_line_items_from_order_item( $cart_data );
+
 
 		return $item;
 	}
@@ -397,8 +402,8 @@ class Item {
 			if ( ! isset( $this->totals[ "total_{$item->name}" ] ) ) {
 				$this->totals[ "total_{$item->name}" ] = 0;
 			}
-
 			$this->totals[ "total_{$item->name}" ] += $deduct_value;
+
 
 			if ( $type === 'discount' ) {
 				$_subtotal = $_subtotal - $deduct_value;
@@ -534,6 +539,16 @@ class Item {
 			unset( $data[ 'trip_price' ] );
 			unset( $data[ 'trip_price_partial' ] );
 		}
+		$data['id'] = $this->id();
+
+		$line_items = array();
+		foreach( $this->get_additional_line_items() as $type => $items ) {
+			foreach( $items as $item ) {
+				$line_items[$type][] = $item->data();
+			}
+		}
+
+		$data['line_items'] = $line_items;
 
 		return $data;
 	}
@@ -720,7 +735,7 @@ class Item {
 		if ( isset( $this->pax ) && is_array( $this->pax ) ) {
 			$package_travelers    = $package->get_traveler_categories();
 			$cart_pricing_options = $this->pax;
-
+			
 			foreach ( $package_travelers as $package_traveler ) {
 				if ( isset( $cart_pricing_options[ $package_traveler->id ] ) ) {
 					$pax = (int) ( $cart_pricing_options[ $package_traveler->id ] ?? 0 );
@@ -780,50 +795,68 @@ class Item {
 	 */
 	public function add_line_items_from_order_item( $order_item ) {
 
-		if ( isset( $this->pax ) && is_array( $this->pax ) ) {
-			$cart_pricing_options = $this->pax;
+		$pricing_categories = $order_item['items'][0]['line_items']['pricing_category'] ?? [];
+		
 
-			$package_travelers = $order_item[ 'category_info' ];
-
-			foreach ( $package_travelers as $pricing_category_id => $package_traveler ) {
-				$package_traveler[ 'id' ] = $pricing_category_id;
-				$package_traveler         = (object) $package_traveler;
-
-				if ( isset( $cart_pricing_options[ $package_traveler->id ] ) ) {
-					$pax = (int) ( $cart_pricing_options[ $package_traveler->id ] ?? 0 );
-
-					$applicable_price = isset( $package_traveler->enabledSale ) && $package_traveler->enabledSale ? $package_traveler->salePrice : $package_traveler->price;
-
-					$enable_group_discount = (bool) ( $package_traveler->enabledGroupDiscount ?? false );
-					$group_pricing         = $package_traveler->groupPricing ?? [];
-
-					$travelers[ 'pax' ][ $package_traveler->id ] = $pax;
-
-					if ( $enable_group_discount && ! empty( $group_pricing ) ) {
-						foreach ( $group_pricing as $pricing ) {
-							if ( $pricing[ 'from' ] <= $pax && ( empty( $pricing[ 'to' ] ) || ( $pricing[ 'to' ] >= $pax ) ) ) {
-								$applicable_price = $pricing[ 'price' ];
-								break;
-							}
-						}
-					}
-
-					$price = $package_traveler->pricingType === 'per-group' && $pax > 0 ? $applicable_price / $pax : $applicable_price;
-
-					$item = $this;
-					$this->add_additional_line_items(
-						new PricingCategory( $this->cart, array(
-							'label'    => $package_traveler->label,
-							'quantity' => $pax,
-							'price'    => apply_filters( 'wptravelengine_package_traveler_price', $price, compact(
-									'item',
-									'package_traveler'
-								)
-							),
-						) )
-					);
-				}
-			}
+		foreach ( $pricing_categories as $pricing_category ) {
+			$this->add_additional_line_items(
+				new PricingCategory( $this->cart, array(
+					'label'    => $pricing_category['label'],
+					'quantity' => $pricing_category['quantity'],
+					'price'    => $pricing_category['price'],
+					'total'    => $pricing_category['total'],
+				) )
+			);
 		}
+
+		// TODO: Commented out code if for package travelers, once finalized above code works fine need to remove this.
+		// if ( isset( $this->pax ) && is_array( $this->pax ) ) {
+		// 	$cart_pricing_options = $this->pax;
+
+		// 	$package_travelers = $order_item[ 'category_info' ];
+
+		// 	foreach ( $package_travelers as $pricing_category_id => $package_traveler ) {
+		// 		$package_traveler[ 'id' ] = $pricing_category_id;
+		// 		$package_traveler         = (object) $package_traveler;
+
+		// 		if ( isset( $cart_pricing_options[ $package_traveler->id ] ) ) {
+		// 			$pax = (int) ( $cart_pricing_options[ $package_traveler->id ] ?? 0 );
+
+		// 			$applicable_price = isset( $package_traveler->enabledSale ) && $package_traveler->enabledSale ? $package_traveler->salePrice : $package_traveler->price;
+
+		// 			$enable_group_discount = (bool) ( $package_traveler->enabledGroupDiscount ?? false );
+		// 			$group_pricing         = $package_traveler->groupPricing ?? [];
+
+		// 			$travelers[ 'pax' ][ $package_traveler->id ] = $pax;
+
+		// 			if ( $enable_group_discount && ! empty( $group_pricing ) ) {
+		// 				foreach ( $group_pricing as $pricing ) {
+		// 					if ( $pricing[ 'from' ] <= $pax && ( empty( $pricing[ 'to' ] ) || ( $pricing[ 'to' ] >= $pax ) ) ) {
+		// 						$applicable_price = $pricing[ 'price' ];
+		// 						break;
+		// 					}
+		// 				}
+		// 			}
+
+		// 			$price = $package_traveler->pricingType === 'per-group' && $pax > 0 ? $applicable_price / $pax : $applicable_price;
+
+		// 			$total = $package_traveler->total ?? 0;
+
+		// 			$item = $this;
+		// 			$this->add_additional_line_items(
+		// 				new PricingCategory( $this->cart, array(
+		// 					'label'    => $package_traveler->label,
+		// 					'quantity' => $pax,
+		// 					'price'    => apply_filters( 'wptravelengine_package_traveler_price', $price, compact(
+		// 							'item',
+		// 							'package_traveler'
+		// 						)
+		// 					),
+		// 					'total'    => $total,
+		// 				) )
+		// 			);
+		// 		}
+		// 	}
+		// }
 	}
 }

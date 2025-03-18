@@ -103,7 +103,7 @@ class CheckoutPageTemplate extends BookingProcessPageTemplate {
 
 		$template_instance = Checkout::instance( $wte_cart );
 		$args              = array(
-			'billing_form_fields'      => BillingFormFields::instance(),
+			'billing_form_fields'      => new BillingFormFields(),
 			'travellers_form_fields'   => new TravellersFormFields(),
 			'emergency_contact_fields' => new EmergencyFormFields(),
 			'note_form_fields'         => wptravelengine_form_field( false )->init( $template_instance->get_note_form_fields() ),
@@ -148,7 +148,7 @@ class CheckoutPageTemplate extends BookingProcessPageTemplate {
 	 */
 	public function print_billing_details() {
 		if ( ! isset( $billing_form_fields ) ) {
-			$billing_form_fields = BillingFormFields::instance();
+			$billing_form_fields = new BillingFormFields();
 		}
 		$args = compact( 'billing_form_fields' );
 		wptravelengine_get_template( 'template-checkout/content-billing-details.php', $args );
@@ -204,11 +204,14 @@ class CheckoutPageTemplate extends BookingProcessPageTemplate {
 
 	/**
 	 * Print the Cart Summary.
+	 * 
+	 * @param array $args Arguments to be passed in cart summary template.
 	 *
 	 * @return void
 	 */
 	public function print_cart_summary( $args ) {
 		global $wte_cart;
+		/**  @var \WPTravelEngine\Pages\Checkout $template_instance */
 		$template_instance  = Checkout::instance( $wte_cart );
 		$cart_line_items    = $template_instance->get_cart_line_items();
 		$deposit_amount     = $template_instance->cart->get_total_partial();
@@ -319,8 +322,8 @@ class CheckoutPageTemplate extends BookingProcessPageTemplate {
 		}
 
 		$instance             = Checkout::instance( $wte_cart );
-		$payment_mode         = $instance->get_payment_type();
 		$full_payment_enabled = $instance->is_full_payment_enabled();
+		$payment_mode         = $full_payment_enabled ? $instance->get_payment_type() : 'partial';
 		$down_payment_amount  = $instance->cart->get_totals()[ 'partial_total' ];
 		$full_payment_amount  = $instance->cart->get_totals()[ 'total' ];
 

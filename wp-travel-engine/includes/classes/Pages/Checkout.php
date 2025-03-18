@@ -298,6 +298,9 @@ class Checkout extends BasePage {
 		$items = array();
 		/** @var \WPTravelEngine\Abstracts\CartAdjustment $fee */
 		foreach ( $fees as $fee ) {
+			if ( $fee instanceof CouponAdjustment && ! isset( $this->cart->get_totals()[ "total_{$fee->name}" ] ) ) {
+				continue;
+			}
 			$items[ $fee->name ] = $fee->render();
 		}
 
@@ -310,6 +313,9 @@ class Checkout extends BasePage {
 		$rows = array();
 		/** @var \WPTravelEngine\Abstracts\CartAdjustment $item */
 		foreach ( $deductible_items as $item ) {
+			if ( $item instanceof CouponAdjustment && ! isset( $this->cart->get_totals()[ "total_{$item->name}" ] ) ) {
+				continue;
+			}
 			$rows[ $item->name ][] = $item->render();
 		}
 

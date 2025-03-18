@@ -132,7 +132,7 @@ $relation_options = $wp_travel_engine_settings[ 'place_order' ];
 									$value   = $value[ $i ];
 
 									foreach ( $options as $key => $val ) {
-										echo '<option value="' . ( ! empty( $val ) ? esc_attr( $val ) : 'Please select' ) . '"' . selected( $value, $key, false ) . '>' . esc_html( $val ) . '</option>';
+										echo '<option value="' . ( ! empty( $key ) ? esc_attr( $key ) : 'Please select' ) . '"' . selected( $value, $key, false ) . '>' . esc_html( $val ) . '</option>';
 									}
 									?>
 								</select>

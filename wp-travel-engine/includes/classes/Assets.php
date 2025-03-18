@@ -144,6 +144,8 @@ class Assets extends AssetsAbstract {
 	public function plugin_admin_scripts() {
 		$this->register_script( Asset::register( 'wptravelengine-settings', 'admin/global-settings.js' ) );
 		$this->register_script( Asset::register( 'wptravelengine-trip-edit', 'admin/trip-edit.js' ) );
+		$this->register_script( Asset::register( 'wptravelengine-booking-edit', 'admin/booking-edit.js' ) );
+		$this->register_script( Asset::register( 'wptravelengine-customer-edit', 'admin/customer-edit.js' ) );
 		$this->register_script( Asset::register( 'wptravelengine-exports', 'admin/exports.js' ) )
 			     ->localize( 'wptravelengine-exports', 'wteL10n' );
 	}
@@ -735,7 +737,7 @@ class Assets extends AssetsAbstract {
 					// Translators: Required Extra Services.
 					'invalidCartExtra'     => __( 'Extra Services marked with * is essential. Please specify a number.', 'wp-travel-engine' ),
 
-					'extraServicesTitle' => $settings[ 'extra_service_title' ] ?? __( 'Extra Servicess', 'wp-travel-engine' ),
+					'extraServicesTitle' => $settings[ 'extra_service_title' ] ?? __( 'Extra Services', 'wp-travel-engine' ),
 				)
 			),
 			'layout'             => array(

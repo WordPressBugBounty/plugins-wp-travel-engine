@@ -9,6 +9,14 @@
  * @subpackage Wp_Travel_Engine/includes
  * @author
  */
+
+use WPTravelEngine\Builders\FormFields\EmergencyFormFields;
+use WPTravelEngine\Builders\FormFields\TravellerFormFields;
+use WPTravelEngine\Core\Models\Post\Booking;
+use WPTravelEngine\Core\Cart\Cart;
+use WPTravelEngine\Core\Cart\Item;
+use WPTravelEngine\Core\Models\Post\TravelerCategories;
+
 class Wp_Travel_Engine_Order_Meta {
 
 	public function __construct() {
@@ -16,9 +24,9 @@ class Wp_Travel_Engine_Order_Meta {
 	}
 
 	function init() {
-		add_action( 'add_meta_boxes_booking', array( $this, 'wpte_booking_details_add_meta_boxes' ) );
-		add_action( 'add_meta_boxes', array( $this, 'wpte_customer_add_meta_boxes' ) );
-		add_action( 'add_meta_boxes', array( $this, 'wpte_customer_history_add_meta_boxes' ) );
+//		add_action( 'add_meta_boxes_booking', array( $this, 'wpte_booking_details_add_meta_boxes' ) );
+		// add_action( 'add_meta_boxes', array( $this, 'wpte_customer_add_meta_boxes' ) );
+		// add_action( 'add_meta_boxes', array( $this, 'wpte_customer_history_add_meta_boxes' ) );
 
 		// Combined to update wp-travel-engine default meta.
 		add_action( 'save_post', array( __CLASS__, 'save_post' ), 11, 3 );
@@ -28,10 +36,11 @@ class Wp_Travel_Engine_Order_Meta {
 
 		if ( ! $post || ! in_array( $post->post_type, array(
 				WP_TRAVEL_ENGINE_POST_TYPE,
-				'booking',
-				'customer',
+				//				'booking',
+				// 'customer',
 				'enquiry',
-			), ! 0 ) ) {
+			),
+		                            ! 0 ) ) {
 			return;
 		}
 
@@ -74,20 +83,20 @@ class Wp_Travel_Engine_Order_Meta {
 		}
 
 		//Add additional note from new checkout page template.
-		if ( isset( $_POST['wptravelengine_additional_note'] ) ) {
-			$additional_note = wte_clean( wp_unslash( $_POST['wptravelengine_additional_note'] ) ); // phpcs:ignore
+		if ( isset( $_POST[ 'wptravelengine_additional_note' ] ) ) {
+			$additional_note = wte_clean( wp_unslash( $_POST[ 'wptravelengine_additional_note' ] ) ); // phpcs:ignore
 			update_post_meta( $post_id, 'wptravelengine_additional_note', $additional_note );
 		}
 
 		//Add new billing info to booking meta.
-		if ( isset( $_POST['wptravelengine_billing_details'] ) ) {
-			$billing_details = wte_clean( wp_unslash( $_POST['wptravelengine_billing_details'] ) ); // phpcs:ignore
+		if ( isset( $_POST[ 'wptravelengine_billing_details' ] ) ) {
+			$billing_details = wte_clean( wp_unslash( $_POST[ 'wptravelengine_billing_details' ] ) ); // phpcs:ignore
 			update_post_meta( $post_id, 'wptravelengine_billing_details', $billing_details );
 		}
 
 		//Add new travelers info to booking meta.
-		if ( isset( $_POST['travelers'] ) && is_array( $_POST['travelers'] ) ) {
-			$travelers_data = $_POST['travelers'];
+		if ( isset( $_POST[ 'travelers' ] ) && is_array( $_POST[ 'travelers' ] ) ) {
+			$travelers_data    = $_POST[ 'travelers' ];
 			$travelers_details = [];
 
 			// Define a mapping from form keys to database keys
@@ -95,34 +104,34 @@ class Wp_Travel_Engine_Order_Meta {
 
 			// Find the maximum count of any attribute to determine the number of travelers
 			$max_count = 0;
-			foreach ($travelers_data as $values) {
-				if (is_array($values)) {
-					$max_count = max($max_count, count($values));
+			foreach ( $travelers_data as $values ) {
+				if ( is_array( $values ) ) {
+					$max_count = max( $max_count, count( $values ) );
 				}
 			}
 
-			for ( $i = 0; $i <= $max_count; $i++ ) {
+			for ( $i = 0; $i <= $max_count; $i ++ ) {
 				$traveler = [];
-				foreach ($travelers_data as $key => $values) {
-					if (is_array($values) && array_key_exists($i, $values)) {
+				foreach ( $travelers_data as $key => $values ) {
+					if ( is_array( $values ) && array_key_exists( $i, $values ) ) {
 						// Use the mapped key if it exists, otherwise use the original key
-						$normalized_key = $key_mapping[$key] ?? $key;
-						$traveler[$normalized_key] = $values[$i];
+						$normalized_key              = $key_mapping[ $key ] ?? $key;
+						$traveler[ $normalized_key ] = $values[ $i ];
 					}
 				}
-				if ( !empty( $traveler ) ) {
+				if ( ! empty( $traveler ) ) {
 					$travelers_details[] = $traveler;
 				}
 			}
 
 			//Sanitize the travelers data.
 			$travelers_details = wte_clean( wp_unslash( $travelers_details ) );
-			update_post_meta($post_id, 'wptravelengine_travelers_details', $travelers_details);
+			update_post_meta( $post_id, 'wptravelengine_travelers_details', $travelers_details );
 		}
 
 		// Add new emergency details info to booking meta.
-		if ( isset( $_POST['emergency'] ) && is_array( $_POST['emergency'] ) ) {
-			$emergency_data = $_POST['emergency'];
+		if ( isset( $_POST[ 'emergency' ] ) && is_array( $_POST[ 'emergency' ] ) ) {
+			$emergency_data    = $_POST[ 'emergency' ];
 			$emergency_details = [];
 
 			// Define a mapping from form keys to database keys
@@ -130,23 +139,23 @@ class Wp_Travel_Engine_Order_Meta {
 
 
 			// Map the emergency data to the database keys
-			foreach ($emergency_data as $key => $value) {
-				$normalized_key = $key_mapping[$key] ?? $key;
-				$emergency_details[$normalized_key] = $value[1];
+			foreach ( $emergency_data as $key => $value ) {
+				$normalized_key                       = $key_mapping[ $key ] ?? $key;
+				$emergency_details[ $normalized_key ] = $value[ 1 ];
 			}
 
 			//Sanitize the emergency data.
 			$emergency_details = wte_clean( wp_unslash( $emergency_details ) );
-			update_post_meta($post_id, 'wptravelengine_emergency_details', $emergency_details);
+			update_post_meta( $post_id, 'wptravelengine_emergency_details', $emergency_details );
 		}
 
 		//Add new billing info to booking meta.
-		if( isset( $_POST['billing_info'] ) ) {
-			$billing_info = $_POST['billing_info'];
+		if ( isset( $_POST[ 'billing_info' ] ) ) {
+			$billing_info = $_POST[ 'billing_info' ];
 
 			//Sanitize the billing info.
 			$billing_info = wte_clean( wp_unslash( $billing_info ) );
-			update_post_meta($post_id, 'wptravelengine_billing_details', $billing_info);
+			update_post_meta( $post_id, 'wptravelengine_billing_details', $billing_info );
 		}
 
 	}
@@ -162,7 +171,7 @@ class Wp_Travel_Engine_Order_Meta {
 			'Last Name'  => 'lname',
 			'Email'      => 'email',
 			'Phone'      => 'phone',
-			'Country'    => 'country'
+			'Country'    => 'country',
 		];
 	}
 
@@ -182,11 +191,15 @@ class Wp_Travel_Engine_Order_Meta {
 		);
 	}
 
-	// Tab for notice listing and settings
+	/**
+	 * Booking details metabox callback.
+	 *
+	 * @return void
+	 */
 	public function wp_travel_engine_booking_details_metabox_callback() {
 		global $post;
-		$booking_status = get_post_meta( $post->ID, 'wp_travel_engine_booking_status', true );
-		$_order_trips   = get_post_meta( $post->ID, 'order_trips', true );
+
+		$_order_trips = get_post_meta( $post->ID, 'order_trips', true );
 		if ( ! empty( $booking_status ) && ( ! isset( $_order_trips ) || ! is_array( $_order_trips ) ) ) {
 			include WP_TRAVEL_ENGINE_BASE_PATH . '/includes/backend/booking/booking-details.php';
 		} else {

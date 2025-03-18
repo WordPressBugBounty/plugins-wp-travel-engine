@@ -8,9 +8,8 @@
 
 namespace WPTravelEngine\Core\Models\Post;
 
-use WP_Error;
 use WPTravelEngine\Abstracts\PostModel;
-use WPTravelEngine\Core\Models\Settings\PluginSettings;
+use WPTravelEngine\Utilities\ArrayUtility;
 
 /**
  * Class Customer.
@@ -31,6 +30,13 @@ class Customer extends PostModel {
 	 * @var string
 	 */
 	protected string $post_type = 'customer';
+
+	/**
+	 * Customer data.
+	 *
+	 * @var ?ArrayUtility
+	 */
+	protected $my_data = null;
 
 	/**
 	 * Retrieves customer meta.
@@ -129,12 +135,66 @@ class Customer extends PostModel {
 	}
 
 	/**
+	 * Retrieves customer avatar.
+	 *
+	 * @since 6.4.0
+	 * @return string Customer Avatar
+	 */
+	public function get_customer_avatar() {
+		return get_avatar_url( $this->get_customer_email(), [ 'default' => 'mm' ] );
+	}
+
+	/**
+	 * Retrieves customer phone.
+	 *
+	 * @since 6.4.0
+	 * @return string Customer Phone
+	 */
+	public function get_customer_phone() {
+		$customer_details = $this->get_customer_details();
+
+		return $customer_details[ 'phone' ] ?? '';
+	}
+
+	/**
+	 * Retrieves customer state.
+	 *
+	 * @since 6.4.0
+	 * @return string Customer State
+	 */
+	public function get_customer_state() {
+		$customer_details = $this->get_customer_details();
+
+		return $customer_details[ 'state' ] ?? '';
+	}
+
+	/**
+	 * Retrieves customer notes.
+	 *
+	 * @return string Customer Notes
+	 */
+	public function get_customer_notes() {
+		$customer_details = $this->get_customer_details();
+
+		return $customer_details[ 'notes' ] ?? '';
+	}
+
+	/**
 	 * Retrieves the IDs of the customer's booked trip.
 	 *
 	 * @return array Customer Booked Trip IDs
 	 */
 	public function get_customer_bookings() {
-		return $this->get_meta( 'wp_travel_engine_bookings' ) ?? array();
+		$bookings_ids = $this->get_meta( 'wp_travel_engine_bookings' );
+		$bookings     = array();
+		try {
+			foreach ( is_array( $bookings_ids ) ? $bookings_ids : array() as $booking_id ) {
+				$bookings[] = new Booking( $booking_id );
+			}
+		} catch ( \Exception $e ) {
+			// Do nothing.
+		}
+		return $bookings;
 	}
 
 	/**
@@ -147,39 +207,46 @@ class Customer extends PostModel {
 	}
 
 	/**
-	 * Customer detail fields.
+	 * Customer detail info.
 	 *
-	 * @return array Customer Detail Fields
+	 * @since 6.4.0
+	 *
+	 * @return array Customer Detail Info
 	 */
-	public function customer_detail_fields() {
-		$customer_email          = $this->get_customer_email();
-		$customer_details_fields = array(
-			'fname'    => array(
-				'label' => __( 'First Name', 'wp-travel-engine' ),
-			),
-			'lname'    => array(
-				'label' => __( 'Last Name', 'wp-travel-engine' ),
-			),
-			'email'    => array(
-				'label'      => __( 'Email', 'wp-travel-engine' ),
-				'field_type' => 'email',
-				'readonly'   => isset( $customer_email ) && ! empty( $customer_email ),
-			),
-			'address'  => array(
-				'label' => __( 'Address', 'wp-travel-engine' ),
-			),
-			'city'     => array(
-				'label' => __( 'City', 'wp-travel-engine' ),
-			),
-			'country'  => array(
-				'label' => __( 'Country', 'wp-travel-engine' ),
-			),
-			'postcode' => array(
-				'label' => __( 'Post Code', 'wp-travel-engine' ),
-			),
-		);
+	public function get_customer_info() {
+		$user = get_user_by( 'email', $this->get_customer_email() );
+		$data = [];
+		if ( $user instanceof \WP_User ) {
+			$data = get_user_meta( $user->ID, 'wp_travel_engine_customer_billing_details', true );
+		}
+		return [
+			'fname'    => $user->first_name ?? $this->get_customer_fname(),
+			'lname'    => $user->last_name ?? $this->get_customer_lname(),
+			'email'    => $user->user_email ?? $this->get_customer_email(),
+			'phone'    => $data['billing_phone'] ?? $this->get_customer_phone(),
+		];
+	}
 
-		return $customer_details_fields;
+	/**
+	 * Retrieves customer all address info.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @return array Customer Address Info
+	 */
+	public function get_customer_addresses() {
+		$user = get_user_by( 'email', $this->get_customer_email() );
+		$data = [];
+		if ( $user instanceof \WP_User ) {
+			$data = get_user_meta( $user->ID, 'wp_travel_engine_customer_billing_details', true );
+		}
+		return [
+			'address'  => $data['billing_address'] ?? $this->get_customer_address(),
+			'city'     => $data['billing_city'] ?? $this->get_customer_city(),
+			'state'    => $data['billing_state'] ?? $this->get_customer_state(),
+			'postcode' => $data['billing_zip_code'] ?? $this->get_customer_postcode(),
+			'country'  => $data['billing_country'] ?? $this->get_customer_country(),
+		];
 	}
 
 	/**
@@ -197,11 +264,21 @@ class Customer extends PostModel {
 						'user_pass'  => wp_generate_password(),
 						'user_email' => $email_address,
 						'role'       => static::USER_ROLE,
+						'first_name' => $this->get_customer_fname(),
+						'last_name'  => $this->get_customer_lname(),
 					)
 				);
 
 				$user_id = wp_insert_user( $userdata );
 				update_user_meta( $user_id, 'customer_id', $this->get_id() );
+				$data_array = array(
+					'billing_address'  => $this->get_customer_address(),
+					'billing_city'     => $this->get_customer_city(),
+					'billing_zip_code' => $this->get_customer_postcode(),
+					'billing_country'  => $this->get_customer_country(),
+					'billing_phone'    => $this->get_customer_phone(),
+				);
+				update_user_meta( $user_id, 'wp_travel_engine_customer_billing_details', $data_array );
 				do_action( 'wp_travel_engine_created_customer', $user_id, $userdata, true, 'emails/customer-new-account.php' );
 			}
 		}
@@ -241,7 +318,7 @@ class Customer extends PostModel {
 	 * @return void
 	 */
 	public function update_customer_meta( int $booking_id ): void {
-		
+
 		$meta_mappings = [
 			'wp_travel_engine_bookings' => 'wp_travel_engine_user_bookings',
 		];
@@ -250,7 +327,7 @@ class Customer extends PostModel {
 			$user = wp_get_current_user();
 		} else {
 			$billing_info = get_post_meta( $booking_id, 'wptravelengine_billing_details', true );
-			$user = isset($billing_info[ 'email' ]) ? get_user_by( 'email', $billing_info[ 'email' ] ) : get_user_by( 'email', $this->get_customer_email() );
+			$user 		  = get_user_by( 'email', $billing_info[ 'email' ] ?? $this->get_customer_email() );
 		}
 
 		if ( $user instanceof \WP_User ) {
@@ -277,5 +354,47 @@ class Customer extends PostModel {
 		$prepared_statement = $wpdb->prepare( "SELECT `ID` FROM {$wpdb->posts} WHERE `post_title` LIKE %s AND `post_type` = %s", '%' . $wpdb->esc_like( sanitize_email( $email ) ) . '%', 'customer' );
 
 		return $wpdb->get_row( $prepared_statement )->ID ?? false;
+	}
+
+	/**
+	 * @param $meta_key
+	 * @param $meta_value
+	 *
+	 * @return $this
+	 * @since 6.4.0
+	 */
+	public function set_my_meta( $meta_key, $meta_value ): Customer {
+
+		$this->my_data ??= ArrayUtility::make( $this->get_customer_meta() );
+
+		$this->my_data->set( $meta_key, $meta_value );
+
+		return parent::set_meta( 'wp_travel_engine_booking_setting', $this->my_data->value() );
+	}
+
+	/**
+	 * Set customer details.
+	 *
+	 * @param array $customer_details
+	 *
+	 * @return void
+	 * @since 6.4.0
+	 */
+	public function set_customer_details( array $customer_details ): void {
+		foreach ( $customer_details as $key => $value ) {
+			$this->set_my_meta( 'place_order.booking.' . $key, $value );
+		}
+	}
+
+	/**
+	 * Retrieves the user ID for a given email.
+	 *
+	 * @param string $email The email address to search for.
+	 * @return int|false The user ID if found, false otherwise.
+	 * @since 6.4.0
+	 */
+	public function get_user_id( string $email ) {
+		$user = get_user_by( 'email', $email );
+		return $user->ID ?? false;
 	}
 }

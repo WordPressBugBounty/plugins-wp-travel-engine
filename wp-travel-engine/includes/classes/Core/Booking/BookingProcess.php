@@ -8,10 +8,9 @@
 
 namespace WPTravelEngine\Core\Booking;
 
-use A\B;
 use WPTravelEngine\Abstracts\PaymentGateway;
 use WPTravelEngine\Core\Cart\Cart;
-use WPTravelEngine\Core\Cart\Item;
+use WPTravelEngine\Helpers\CartInfoParser;
 use WPTravelEngine\Core\Models\Post\Booking;
 use WPTravelEngine\Core\Models\Post\Customer;
 use WPTravelEngine\Core\Models\Post\Payment;
@@ -208,7 +207,7 @@ class BookingProcess {
 			$this->payment_gateway_process();
 			$this->send_notification_emails();
 
-			if ( $this->payment_type === 'due' ) {
+			if ( in_array( $this->payment_type, array( 'due', 'partial' ) ) ) {
 				do_action( 'wp_travel_engine_after_remaining_payment_process_completed', $this->booking->get_id() );
 			} else {
 				/**
@@ -351,14 +350,18 @@ class BookingProcess {
 		return $booking->set_meta( 'paid_amount', (float) $booking->get_meta( 'paid_amount' ) )
 					   ->set_meta( 'due_amount', $this->cart->get_cart_total() - (float) $booking->get_meta( 'paid_amount' ) ?? 0 )
 					   ->set_cart_info(
-						   apply_filters( 'wptravelengine_before_setting_cart_info', array(
-							   'currency'     => wptravelengine_settings()->get( 'currency_code', 'USD' ),
-							   'subtotal'     => $this->cart->get_subtotal(),
-							   'totals'       => $this->cart->get_totals(),
-							   'total'        => $this->cart->get_cart_total(),
-							   'cart_partial' => $this->cart->get_total_partial(),
-							   'discounts'    => $this->cart->get_discounts(),
-							   'tax_amount'   => $this->cart->tax()->is_taxable() && $this->cart->tax()->is_exclusive() ? $this->cart->tax()->get_tax_percentage() : 0,
+						   apply_filters( 'wptravelengine_before_setting_cart_info', array_merge(
+							   array(
+								   'currency'     => wptravelengine_settings()->get( 'currency_code', 'USD' ),
+								   'subtotal'     => $this->cart->get_subtotal(),
+								   'totals'       => $this->cart->get_totals(),
+								   'total'        => $this->cart->get_cart_total(),
+								   'cart_partial' => $this->cart->get_total_partial(),
+								   'discounts'    => $this->cart->get_discounts(),
+								   'tax_amount'   => $this->cart->tax()->is_taxable() && $this->cart->tax()->is_exclusive() ? $this->cart->tax()->get_tax_percentage() : 0,
+								   'payment_type' => $this->cart->get_payment_type(), // @since 6.4.0 For Thank You page
+							   ),
+							   $this->cart->data(),
 						   ), $this->cart )
 					   )
 					   ->set_meta( 'wp_travel_engine_booking_setting', $_items )->save();
@@ -406,10 +409,12 @@ class BookingProcess {
 	 */
 	protected function create_payment(): Payment {
 
+		$cart_info = new CartInfoParser( $this->booking->get_cart_info() );
+
 		$amounts = array(
-			'partial'      => $this->cart->get_total_partial(),
-			'full_payment' => $this->cart->get_cart_total(),
-			'due'          => $this->booking->get_due_amount(),
+			'partial'      => $cart_info->get_totals( 'partial_total' ),
+			'full_payment' => $cart_info->get_totals( 'total' ),
+			'due'          => $cart_info->get_totals( 'due_total' ),
 		);
 
 		$payable_amount = $amounts[ $this->payment_type ];
@@ -826,68 +831,6 @@ class BookingProcess {
 					<?php echo wp_kses_post( $instructions ); ?>
 				</div>
 				<?php
-			}
-		);
-
-		add_action(
-			'restrict_manage_posts',
-			function ( $post_type ) {
-				if ( 'booking' !== $post_type ) {
-					return;
-				}
-
-				// Booking status
-				$status = wp_travel_engine_get_booking_status();
-
-				$selected = isset( $_REQUEST[ 'booking_status' ] ) ? sanitize_text_field( wp_unslash( $_REQUEST[ 'booking_status' ] ) ) : 'all';
-				?>
-				<select id="booking_status_filter" name="booking_status">
-					<option value="all"> <?php esc_html_e( 'Booking Status', 'wp-travel-engine' ); ?> </option>
-					<?php
-					foreach ( $status as $key => $value ) :
-						?>
-						<option value="<?php echo esc_html( $key ); ?>" <?php selected( $selected, $key ); ?>>
-							<?php echo esc_html( $status[ $key ][ 'text' ] ); ?>
-						</option>
-					<?php endforeach; ?>
-				</select>
-				<?php
-			}
-		);
-
-		add_action(
-			'parse_query',
-			function ( $query ) {
-				// Modify the query only if it is admin and main query.
-				if ( ! is_admin() || ! $query->is_main_query() ) {
-					return $query;
-				}
-
-				$current_screen = get_current_screen();
-
-				$booking_status = 'all';
-				if ( isset( $_REQUEST[ 'booking_status' ] ) ) {
-					$booking_status = sanitize_text_field( wp_unslash( $_REQUEST[ 'booking_status' ] ) );
-				}
-
-				// Modify the query for the targeted screen and filter option.
-				if ( ( 'edit-booking' !== $current_screen->id ) || 'all' == $booking_status ) {
-					return $query;
-				}
-
-				$query->set(
-					'meta_query',
-					array(
-						array(
-							'key'     => 'wp_travel_engine_booking_status',
-							'compare' => '=',
-							'value'   => $booking_status,
-							'type'    => 'string',
-						),
-					)
-				);
-
-				return $query;
 			}
 		);
 

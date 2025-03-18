@@ -115,6 +115,26 @@ function wptravelengine_get_template( string $template_name, array $args = array
 }
 
 /**
+ * Get admin template.
+ *
+ * @param string $template_name
+ * @param array $args
+ * @param string $template_path
+ * @param string $default_path
+ *
+ * @return void
+ * @since 6.4.0
+ */
+function wptravelengine_get_admin_template( string $template_name, array $args = array(), string $template_path = '', string $default_path = '' ) {
+	wptravelengine_get_template(
+		$template_name,
+		wptravelengine_set_template_args( $args ),
+		$template_path,
+		WP_TRAVEL_ENGINE_BASE_PATH . '/includes/backend/templates/'
+	);
+}
+
+/**
  * Add arguments to be used by templates.
  *
  * @param array $args Additional arguments.
@@ -221,7 +241,7 @@ function wptravelengine_get_checkout_template_args( array $args = array() ): arr
 	$checkout_page          = new Checkout( $wte_cart );
 	$tour_details           = $checkout_page->get_tour_details();
 	$cart_line_items        = $checkout_page->get_cart_line_items();
-	$billing_form_fields    = BillingFormFields::instance();
+	$billing_form_fields    = new BillingFormFields();
 	$travellers_form_fields = array();
 	foreach ( $wte_cart->getItems( true ) as $cart_item ) {
 		$travellers_form_fields[] = new TravellersFormFields( array(
@@ -2251,6 +2271,71 @@ function wp_travel_engine_get_booking_status() {
 }
 
 /**
+ * Get all Booking IDs that have the given trip ID.
+ *
+ * @param int $trip_id Trip ID
+ * @since 6.3.5
+ * 
+ * @return array
+ */
+function wptravelengine_get_booking_ids( $trip_id ) {
+    global $wpdb;
+
+    // Get bookings with matching trip_id.
+    $booking_list = $wpdb->get_col( $wpdb->prepare("
+        SELECT DISTINCT p.ID 
+        FROM {$wpdb->posts} p 
+        JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id 
+        WHERE p.post_type = 'booking' 
+        AND pm.meta_key = 'cart_info'
+    ") );
+
+    if ( ! empty( $booking_list ) ) {
+        $filtered_bookings = array();
+        foreach ( $booking_list as $booking_id ) {
+            $cart_info = get_post_meta($booking_id, 'cart_info', true);
+            if ( !empty( $cart_info ) ) {
+                $cart_data = maybe_unserialize( $cart_info );
+                if ( isset( $cart_data['items'] ) && is_array( $cart_data['items'] ) ) {
+                    foreach ( $cart_data['items'] as $item ) {
+                        if ( isset( $item['trip_id'] ) && $item['trip_id'] == $trip_id ) {
+                            $filtered_bookings[] = $booking_id;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        $booking_list = $filtered_bookings;
+    } else {
+		$bookings = array_reduce( get_posts( array(
+			'post_type'      => 'booking',
+			'posts_per_page' => -1
+		) ), function( $result, $item ) {
+			$order_trips = $item->order_trips ?? [];
+			if ( ! empty( $order_trips ) ) {
+				$order_trip  = (object) array_shift( $order_trips );
+				$order_trip_id = $order_trip->ID ?? null;
+
+				if ( $order_trip_id !== null ) {
+					$result[ $item->ID ] = $order_trip_id;  // Only store if valid
+				}
+			}
+			return $result;
+		}, [] );
+
+		$booking_list = [];
+		foreach ( $bookings as $key => $value ) {
+			if ( $value === $trip_id ) {
+				$booking_list[] = $key;
+			}
+		}
+	}
+
+	return apply_filters( 'wp_travel_engine_booking_ids_list', $booking_list );
+}
+
+/**
  * Check if currency is supported by the Paypal Gateway
  * Currently supports 26 currencies
  *
@@ -2703,11 +2788,11 @@ function wptravelengine_get_active_theme_version( $theme_name ){
 	return false;
 }
 
-/**	
+/**
  * Check if the active theme is compatible with new WPTE banner
- * 
+ *
  * @param $theme_name Name of the theme
- * 
+ *
  * @return boolean
  * @since 6.3.3
  */

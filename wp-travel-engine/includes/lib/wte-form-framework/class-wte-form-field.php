@@ -20,7 +20,7 @@ class WP_Travel_Engine_Form_Field {
 	 *
 	 * @var array
 	 */
-	private $field_types;
+	protected array $field_types;
 
 	/**
 	 * Initialize WP_Travel_Engine_Form_Field class
@@ -30,7 +30,7 @@ class WP_Travel_Engine_Form_Field {
 	 *
 	 * @return WP_Travel_Engine_Form_Field
 	 */
-	function init( $fields = array(), $args = array() ) {
+	public function init( array $fields = array(), array $args = array() ): WP_Travel_Engine_Form_Field {
 
 		$this->includes();
 
@@ -44,7 +44,6 @@ class WP_Travel_Engine_Form_Field {
 
 		$this->field_types = $this->field_types();
 
-		// Return WP_Travel_Engine_Form_Field Object.
 		return $this;
 	}
 
@@ -54,7 +53,7 @@ class WP_Travel_Engine_Form_Field {
 	 * @return void
 	 */
 	private function includes() {
-
+		
 		$field_types = $this->register_field_types();
 
 		foreach ( $field_types as $type => $field ) :
@@ -74,9 +73,9 @@ class WP_Travel_Engine_Form_Field {
 	/**
 	 * Register form field types.
 	 *
-	 * @return void
+	 * @return array
 	 */
-	public function register_field_types() {
+	public function register_field_types(): array {
 
 		$field_types = array(
 			'text'             => array(
@@ -147,23 +146,21 @@ class WP_Travel_Engine_Form_Field {
 				'field_label' => __( 'Trips List', 'wp-travel-engine' ),
 				'field_class' => 'WP_Travel_Engine_Form_Field_Trips_List',
 			),
-			'radio'            => array(
-				'field_label' => __( 'Trips List', 'wp-travel-engine' ),
-				'field_class' => 'WP_Travel_Engine_Form_Field_Radio',
+			'currency_picker'  => array(
+				'field_label' => __( 'Currency Picker', 'wp-travel-engine' ),
+				'field_class' => 'WP_Travel_Engine_Form_Field_Currency_Picker',
 			),
 		);
 
-		$field_types = apply_filters( 'wp_travel_engine_form_field_types', $field_types );
-
-		return $field_types;
+		return apply_filters( 'wp_travel_engine_form_field_types', $field_types );
 	}
 
 	/**
 	 * Load field types classes.
 	 *
-	 * @return void
+	 * @return array
 	 */
-	private function field_types() {
+	private function field_types(): array {
 
 		$fields        = $this->register_field_types();
 		$field_classes = wp_list_pluck( $fields, 'field_class' );
@@ -205,7 +202,7 @@ class WP_Travel_Engine_Form_Field {
 	 *
 	 * @return void
 	 */
-	private function process() {
+	protected function process() {
 
 		$output = '';
 

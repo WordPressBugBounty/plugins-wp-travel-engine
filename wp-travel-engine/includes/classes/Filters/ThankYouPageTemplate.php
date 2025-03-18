@@ -9,10 +9,11 @@ namespace WPTravelEngine\Filters;
 
 use WPTravelEngine\Builders\FormFields\TravellerFormFields;
 use WPTravelEngine\Core\Cart\Cart;
-use WPTravelEngine\Core\Cart\Item;
 use WPTravelEngine\Core\Models\Post\Booking;
+use WPTravelEngine\Core\Coupons;
 use WPTravelEngine\Core\Models\Post\Payment;
 use WPTravelEngine\Core\Models\Post\Trip;
+use WPTravelEngine\Helpers\CartInfoParser;
 use WPTravelEngine\Pages\Checkout;
 use WPTravelEngine\PaymentGateways\CheckPayment;
 use WPTravelEngine\PaymentGateways\DirectBankTransfer;
@@ -135,24 +136,9 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 	protected function set_cart() {
 		if ( ! $this->cart ) {
 			global $wte_cart;
-			$this->cart  = $wte_cart;
-			$order_items = $this->booking->get_meta( 'order_trips' );
-			$cart_info   = $this->booking->get_meta( 'cart_info' );
-			if ( isset( $cart_info[ 'discounts' ] ) ) {
-				foreach ( $cart_info[ 'discounts' ] as $discount_id => $discount ) {
-					$this->cart->add_discount_values( $discount_id, $discount[ 'name' ], $discount[ 'type' ], $discount[ 'value' ], );
-				}
-			}
+			$this->cart = clone $wte_cart;
 
-			$items = array();
-
-			foreach ( $order_items as $order_item ) {
-				$items[] = Item::from_order_item( $order_item, $this->booking, $wte_cart );
-			}
-			$this->cart->setItems( $items );
-			$this->cart->set_payment_gateway( $this->payment->get_meta( 'payment_gateway' ) );
-
-			$this->cart->calculate_totals();
+			$this->cart->load( $this->booking->get_cart_info() );
 		}
 
 		return $this->cart;
@@ -199,6 +185,53 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 			array_merge( compact( 'tour_details' ), array(
 				'content_only' => true,
 			) )
+		);
+	}
+
+	/**
+	 * Print the Cart Summary.
+	 *
+	 * @return void
+	 * @since 6.4.0
+	 */
+	public function print_cart_summary( $args ) {
+		$template_instance  = Checkout::instance( $this->cart );
+
+		$cart_info = new CartInfoParser( $this->booking->get_cart_info() );
+
+		$cart_line_items    = $template_instance->get_cart_line_items();
+	
+		$deposit_amount     = $cart_info->get_totals( 'partial_total' );
+		$due_amount         = $cart_info->get_totals( 'due_total' );
+		$is_partial_payment = in_array( $template_instance->cart->get_payment_type(), [
+			'partial',
+			'due',
+			'remaining_payment',
+		], true );
+
+		$show_coupon_form   = wptravelengine_settings()->get( 'show_discount' ) === 'yes' && Coupons::is_coupon_available() && 'due' !== $this->cart->get_payment_type() ? 'show' : 'hide';
+
+		$coupons = array();
+
+		foreach ( $this->cart->get_deductible_items() as $coupon_item ) {
+			if ( 'coupon' !== $coupon_item->name ) {
+				continue;
+			}
+			$coupons[] = array(
+				'label'  => $coupon_item->label,
+				'amount' => $this->cart->get_totals()[ "total_coupon" ] ?? 0,
+			);
+		}
+
+		$args = array_merge(
+			compact( 'cart_line_items', 'deposit_amount', 'due_amount', 'is_partial_payment', 'coupons' ),
+			[ 'show_coupon_form' => $show_coupon_form === 'show' ],
+			$args
+		);
+
+		wptravelengine_get_template(
+			'template-checkout/content-cart-summary.php',
+			$args
 		);
 	}
 

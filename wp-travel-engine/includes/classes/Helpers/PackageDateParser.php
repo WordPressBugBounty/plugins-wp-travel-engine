@@ -58,6 +58,11 @@ class PackageDateParser {
 	protected array $booked_seats = array();
 
 	/**
+	 * @var array
+	 */
+	protected array $default_pricing = array();
+
+	/**
 	 * Constructor.
 	 *
 	 * @param TripPackage $trip_package Trip package object.

@@ -59,9 +59,10 @@ abstract class CartItem implements CartItemInterface {
 			)
 		);
 
-		$this->label    = $this->args[ 'label' ];
-		$this->quantity = $this->args[ 'quantity' ];
-		$this->price    = $this->args[ 'price' ];
+		$this->label    = (string) $this->args[ 'label' ];
+		$this->quantity = (int) $this->args[ 'quantity' ];
+		$this->price    = (float) $this->args[ 'price' ];
+		$this->total    = $this->args['total'] = $this->quantity * $this->price;
 	}
 
 	/**
@@ -151,7 +152,7 @@ abstract class CartItem implements CartItemInterface {
 //	}
 
 	public function calculate_subtotal(): float {
-		return (float) $this->price * $this->quantity;
+		return (float) $this->total && $this->total > 0 ? (float) $this->total : (float) $this->price * $this->quantity;
 	}
 
 	/**
@@ -177,7 +178,10 @@ abstract class CartItem implements CartItemInterface {
 	 * @since 6.3.0
 	 */
 	public function data(): array {
-		return $this->args;
+		return array_merge(
+			$this->args,
+			[ '_class_name' => get_class( $this ) ]
+		);
 	}
 
 	/**

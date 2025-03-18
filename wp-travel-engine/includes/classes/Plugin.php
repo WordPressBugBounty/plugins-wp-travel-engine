@@ -9,12 +9,12 @@ use WP_Travel_Engine_Enquiry_Forms;
 use Wp_Travel_Engine_Loader;
 use Wp_Travel_Engine_Public;
 use WPTravelEngine\Core\Booking\BookingProcess;
+use WPTravelEngine\Core\Booking\ExternalPayment;
 use WPTravelEngine\Core\Cart\Cart;
 use WPTravelEngine\Core\Controllers\RestAPI\V2\Settings;
 use WPTravelEngine\Core\Controllers\RestAPI\V2\Trip;
 use WPTravelEngine\Core\Models\Post\Booking;
 use WPTravelEngine\Core\Shortcodes\CheckoutV2;
-use WPTravelEngine\Core\Shortcodes\Emergency;
 use WPTravelEngine\Core\Shortcodes\General;
 use WPTravelEngine\Core\Shortcodes\ThankYou;
 use WPTravelEngine\Core\Shortcodes\TravelerInformation;
@@ -35,6 +35,8 @@ use WPTravelEngine\Traits\Singleton;
 use WTE_Booking_Emails;
 use function WTE\Upgrade500\wte_process_migration;
 use const WP_TRAVEL_ENGINE_FILE_PATH;
+use WPTravelEngine\Core\Models\Post\TripPackages;
+use WPTravelEngine\Helpers\Countries;
 
 /**
  * The file that defines the core plugin class
@@ -228,7 +230,7 @@ final class Plugin {
 
 		add_action( 'admin_init', array( \WTE_Ajax::class, 'ajax_request_middleware' ) );
 		add_action( 'admin_init', array( $this, 'plugin_inline_update_notices' ) );
-		add_action( 'admin_notices', array( $this, 'booking_feature_disabled_message' ) );
+		add_action( 'admin_notices', array( $this, 'booking_dashboard_notice' ), 99 );
 	}
 
 	/**
@@ -243,20 +245,20 @@ final class Plugin {
 	}
 
 	/**
+	 * Prints booking dashboard notice.
 	 *
 	 * @return void
-	 * @since 6.0.0
+	 * @since 6.4.0
 	 */
-	public function booking_feature_disabled_message() {
+	public function booking_dashboard_notice() {
 		$screen = get_current_screen();
 		if ( 'booking' !== $screen->id ) {
 			return;
 		}
 		$class   = 'notice notice-info is-dismissible';
-		$message = __(
-			'<p><strong>Notice:Trip Info Section and New Booking from Dashboard Disabled</strong></p>
-    <p>We have disabled the option to add new bookings and the ability to edit the "Trip Info" section due to bugs and the complexity of handling all possible scenarios.<br/>To avoid issues, please create a new booking through the standard process and cancel the existing one.</p>',
-			'wp-travel-engine'
+		$message = sprintf(
+			'<p><strong>%1$s</strong></p>',
+			__( 'Notice: Please be aware that you are responsible for any mistakes, payment issues, or customer concerns that may arise when editing the booking summary. Double-check your changes, update payment settings, and contact support if you need assistance.', 'wp-travel-engine' )
 		);
 
 		printf(
@@ -277,7 +279,9 @@ final class Plugin {
 	 * @return void
 	 */
 	public function process_booking() {
-		if ( BookingProcess::is_booking_request() ) {
+		if ( ExternalPayment::is_request() ) {
+			new ExternalPayment( Functions::create_request( 'GET' ) );
+		} else if ( BookingProcess::is_booking_request() ) {
 			global $wte_cart;
 			new BookingProcess( Functions::create_request( 'POST' ), $wte_cart );
 		} else if ( BookingProcess::is_gateway_callback() ) {
@@ -320,6 +324,16 @@ final class Plugin {
 		add_filter( 'meta_content', 'do_shortcode' );
 		add_filter( 'term_description', 'wpautop' );
 
+		/**
+		 * Filter for resend purchase receipt to send modified post meta data to the email template.
+		 *
+		 * @param array $mail_tags
+		 * @param int $payment_id
+		 * @param int $booking_id
+		 *
+		 * @return array
+		 * @since enhancement/bookin-details
+		 */
 		add_action( 'plugins_loaded', array( $this, 'plugins_loaded' ), 20 );
 
 		add_action(
@@ -452,6 +466,12 @@ final class Plugin {
 				$additional_fields = wte_array_get( get_post_meta( $booking->ID, 'billing_info', ! 0 ), null, array() );
 
 				foreach ( $additional_fields as $field_name => $field_value ) {
+					$countries_list = Countries::list();
+					if ( is_array( $field_value ) ) {
+						$field_value = implode( ',', $field_value );
+					} else if ( isset( $countries_list[ $field_value ] ) ) {
+						$field_value = $countries_list[ $field_value ];
+					}
 					$mail_tags[ '{' . $field_name . '}' ] = is_array( $field_value ) ? implode( ',', $field_value ) : $field_value;
 				}
 
@@ -627,6 +647,203 @@ final class Plugin {
 		 * @since 6.2.0
 		 */
 		add_filter( 'emails-admin-fields', array( $this, 'wte_extra_services_email_tags' ) );
+
+		/**
+		 * Modify the display name of the WTE Customer role
+		 *
+		 * @since 6.4.0
+		 */
+		add_filter( 'editable_roles', array( $this, 'modify_role_display' ) );
+	}
+
+	/**
+	 * Modify the display name of the WTE Customer role
+	 *
+	 * @param array $roles The array of editable roles
+	 * @return array The modified array of editable roles
+	 * @since 6.4.0
+	 */
+	public function modify_role_display( $roles ) {
+		if ( isset( $roles['wp-travel-engine-customer'] ) ) {
+			$roles[ 'wp-travel-engine-customer' ][ 'name' ] = __( 'WTE-Customer', 'wp-travel-engine' );
+		}
+
+		return $roles;
+	}
+
+	/**
+	 * Get formatted package name
+	 */
+	private function get_package_name( $booking_id, $trip ) {
+		$package_name = get_post_meta( $booking_id, 'package_name', true );
+		if ( empty( $package_name ) ) {
+			return '';
+		}
+
+		$trip_packages = new TripPackages( $trip );
+		foreach ( $trip_packages as $package ) {
+			if ( $package_name == $package->ID ) {
+				return $package->post->post_title;
+			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * Render trip dates section
+	 */
+	private function render_trip_dates( $trip_dates ) {
+		if ( empty( $trip_dates ) ) {
+			return;
+		}
+		?>
+		<tr>
+			<td><?php esc_html_e( 'Trip Date', 'wp-travel-engine' ); ?></td>
+			<td class="alignright"><?php echo esc_html( $trip_dates[ 'start_date' ] ?? '' ); ?></td>
+		</tr>
+		<?php
+		if ( ! empty( $trip_dates[ 'end_date' ] ) ) :
+			?>
+			<tr>
+				<td><?php esc_html_e( 'Trip End Date', 'wp-travel-engine' ); ?></td>
+				<td class="alignright"><?php echo esc_html( $trip_dates[ 'end_date' ] ); ?></td>
+			</tr>
+		<?php
+		endif;
+	}
+
+	/**
+	 * Render traveller pricing details
+	 */
+	private function render_traveller_pricing( $pricing_data, $currency ) {
+		if ( ! is_array( $pricing_data ) ) {
+			return;
+		}
+
+		foreach ( $pricing_data as $detail ) {
+			$price    = $detail[ 'price' ] ?? 0;
+			$quantity = intval( $detail[ 'quantity' ] ?? 0 );
+			$sum      = $detail[ 'sum' ] ?? 0;
+			?>
+			<tr>
+				<td>
+					<?php
+					printf(
+						'%s: %d x $%s = %s',
+						esc_html( $detail[ 'label' ] ?? '' ),
+						$quantity,
+						number_format( $price, 2 ),
+						esc_html( $currency ) . number_format( $sum, 2 )
+					);
+					?>
+				</td>
+			</tr>
+			<?php
+		}
+	}
+
+	/**
+	 * Render extra services section
+	 */
+	private function render_extra_services( $extra_data, $currency ) {
+		if ( ! is_array( $extra_data ) ) {
+			return;
+		}
+
+		foreach ( $extra_data as $extra ) {
+			$price    = $extra[ 'price' ] ?? 0;
+			$quantity = intval( $extra[ 'qty' ] ?? 0 );
+			$total    = $price * $quantity;
+			?>
+			<tr>
+				<td>
+					<?php
+					printf(
+						'%s: %d x $%s = %s',
+						esc_html( $extra[ 'extra_service' ] ?? '' ),
+						$quantity,
+						number_format( $price, 2 ),
+						esc_html( $currency ) . number_format( $total, 2 )
+					);
+					?>
+				</td>
+			</tr>
+			<?php
+		}
+	}
+
+	/**
+	 * Render cost summary section
+	 */
+	private function render_cost_summary( $line_items, $currency ) {
+		// Subtotal
+		?>
+		<tr class="title wpte-booking-subtotal">
+			<td colspan="1"><?php esc_html_e( 'Subtotal', 'wp-travel-engine' ); ?></td>
+			<td><?php echo esc_html( $currency ) . number_format( $line_items[ 'totals' ][ 'subtotal' ] ?? 0, 2 ); ?></td>
+		</tr>
+
+		<?php
+		// Discounts
+		if ( ! empty( $line_items[ 'discounts' ] ) ) {
+			foreach ( $line_items[ 'discounts' ] as $discount ) {
+				?>
+				<tr class="wpte-booking-discount">
+					<td><?php printf( esc_html__( 'Discount (%s)', 'wp-travel-engine' ), esc_html( $discount[ 'name' ] ?? '' ) ); ?></td>
+					<td>-<?php echo esc_html( $currency ) . number_format( $discount[ 'value' ] ?? 0, 2 ); ?></td>
+				</tr>
+				<?php
+			}
+		}
+
+		// Tax
+		if ( ! empty( $line_items[ 'tax_amount' ] ) && $line_items[ 'tax_amount' ] > 0 ) {
+			?>
+			<tr class="wpte-booking-tax">
+				<td><?php printf( esc_html__( 'Tax (%s%%)', 'wp-travel-engine' ), $line_items[ 'tax_amount' ] ); ?></td>
+				<td><?php echo esc_html( $currency ) . number_format( $line_items[ 'totals' ][ 'total_tax' ] ?? 0, 2 ); ?></td>
+			</tr>
+			<?php
+		}
+
+		// Total amounts
+		$this->render_total_amounts( $line_items, $currency );
+	}
+
+	/**
+	 * Render total amounts section
+	 */
+	private function render_total_amounts( $line_items, $currency ) {
+		// Total
+		if ( ! empty( $line_items[ 'total' ] ) ) {
+			?>
+			<tr class="wpte-booking-total">
+				<td><?php esc_html_e( 'Total', 'wp-travel-engine' ); ?></td>
+				<td><?php echo esc_html( $currency ) . number_format( $line_items[ 'total' ], 2 ); ?></td>
+			</tr>
+			<?php
+		}
+
+		// Deposit
+		if ( ! empty( $line_items[ 'cart_partial' ] ) ) {
+			?>
+			<tr>
+				<td><?php esc_html_e( 'Deposit Today', 'wp-travel-engine' ); ?></td>
+				<td><?php echo esc_html( $currency ) . number_format( $line_items[ 'cart_partial' ], 2 ); ?></td>
+			</tr>
+			<?php
+		}
+
+		// Amount Due
+		if ( ! empty( $line_items[ 'totals' ][ 'due_total' ] ) ) {
+			?>
+			<tr>
+				<td><?php esc_html_e( 'Amount Due', 'wp-travel-engine' ); ?></td>
+				<td><?php echo esc_html( $currency ) . number_format( $line_items[ 'totals' ][ 'due_total' ], 2 ); ?></td>
+			</tr>
+			<?php
+		}
 	}
 
 	/**
@@ -1198,6 +1415,28 @@ final class Plugin {
 		 * @since 5.7.2
 		 */
 		add_action( 'save_post_customer', array( $this, 'save_post_customer' ), 11, 3 );
+
+		/**
+		 * Sets default columns order and hides some columns in trip list table.
+		 * @since 6.3.5
+		 */
+		$this->loader->add_filter( 'manage_edit-trip_columns', $plugin_admin, 'set_trip_columns_order' );
+		$this->loader->add_filter('get_user_option_manageedit-tripcolumnshidden', $plugin_admin, 'set_default_hidden_trip_columns', 10, 1);
+
+		add_action( 'load-post.php', array( $this, 'load_post_type' ) );
+	}
+
+	/**
+	 * Triggers when the post type is edited.
+	 *
+	 * @return void
+	 * @since 6.4.0
+	 * TODO: Use this to add actions while post type is loaded.
+	 */
+	public function load_post_type() {
+
+		global $typenow;
+
 	}
 
 	/**

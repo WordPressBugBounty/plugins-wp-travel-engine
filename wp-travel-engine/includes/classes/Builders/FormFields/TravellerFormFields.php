@@ -6,6 +6,9 @@
  */
 
 namespace WPTravelEngine\Builders\FormFields;
+use WPTravelEngine\Helpers\Countries;
+
+use WTE_Default_Form_Fields;
 
 /**
  * Form field class to render billing form fields.
@@ -18,8 +21,12 @@ class TravellerFormFields extends FormField {
 		parent::__construct( false );
 	}
 
-
 	public function render() {
+		if ( $this->use_legacy_template ) {
+			parent::render();
+
+			return;
+		}
 		echo '<div class="wpte-checkout__form-row">';
 		parent::render();
 		echo '</div>';
@@ -32,19 +39,22 @@ class TravellerFormFields extends FormField {
 	 * @since 6.3.3
 	 */
 	public function with_values( array $form_data ): array {
-		$this->fields = DefaultFormFields::traveller_form_fields();
-
+		$this->fields = WTE_Default_Form_Fields::traveller_information();
 		return array_map( function ( $field ) use ( $form_data ) {
 			$name = preg_match( "#\[([^\[]+)]$#", $field[ 'name' ], $matches ) ? $matches[ 1 ] : $field[ 'name' ];
 			if ( $name ) {
 				$field[ 'class' ]         = 'wpte-checkout__input';
 				$field[ 'wrapper_class' ] = 'wpte-checkout__form-col';
 				$field[ 'name' ]          = sprintf( 'travellers[%s]', $name );;
-				$field[ 'id' ] = sprintf( 'travellers_%s', $name );;
+				$field[ 'id' ] = sprintf( 'travellers_%s', $name );
 			}
 			$field[ 'field_label' ] = isset( $field[ 'placeholder' ] ) && $field[ 'placeholder' ] !== '' ? $field[ 'placeholder' ] : $field[ 'field_label' ];
-			$field[ 'value' ]     = $form_data[ $name ] ?? $field[ 'default' ] ?? '';
-
+			$field[ 'value' ]       = $form_data[ $name ] ?? $field[ 'default' ] ?? '';
+			// Convert country code to country name to show in the traveller form.
+			$countries_list = Countries::list();
+			if ( isset( $countries_list[ $field[ 'value' ] ] ) ) {
+				$field[ 'value' ] = $countries_list[ $field[ 'value' ] ];
+			}
 			return $field;
 		}, $this->fields );
 	}

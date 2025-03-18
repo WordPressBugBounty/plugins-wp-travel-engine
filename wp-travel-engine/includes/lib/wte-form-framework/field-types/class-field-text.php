@@ -59,8 +59,15 @@ class WP_Travel_Engine_Form_Field_Text {
 		if ( isset( $this->field['attributes'] ) ) :
 
 			foreach ( $this->field['attributes'] as $attribute => $attribute_val ) :
-
-				$attributes .= sprintf( ' %1$s="%2$s" ', $attribute, $attribute_val );
+				/* Added to handle data-options attribute
+				* @since 6.4.0
+				*/
+				if ( $attribute === 'data-options' ) {
+					$attribute_val = htmlspecialchars(json_encode($attribute_val, JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8');
+					$attributes .= sprintf(' %1$s=\'%2$s\'', $attribute, $attribute_val);
+				} else {
+					$attributes .= sprintf(' %1$s="%2$s"', $attribute, $attribute_val);
+				}
 
 			endforeach;
 

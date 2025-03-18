@@ -2,6 +2,8 @@
 
 namespace WPTravelEngine\Builders\FormFields;
 
+use WPTravelEngine\Utilities\FormBuilder\Fields\CurrencyPicker;
+
 if ( ! class_exists( '\WP_Travel_Engine_Form_Field' ) ) {
 	require_once WP_TRAVEL_ENGINE_ABSPATH . 'includes/lib/wte-form-framework/class-wte-form-field.php';
 }
@@ -29,6 +31,18 @@ class FormField extends \WP_Travel_Engine_Form_Field {
 			add_filter( 'wp_travel_engine_form_field_types', [ $this, 'modify_form_fields' ] );
 			add_filter( 'wptravelengine_form_field_options', [ $this, 'modify_form_field_options' ] );
 		}
+	}
+
+	/**
+	 * @param $use_legacy_template
+	 *
+	 * @return $this
+	 * @since 6.4.0
+	 */
+	public function use_legacy_template( $use_legacy_template ): FormField {
+		$this->use_legacy_template = $use_legacy_template;
+
+		return $this;
 	}
 
 	/**
@@ -60,6 +74,7 @@ class FormField extends \WP_Travel_Engine_Form_Field {
 		if ( ! empty( $options ) && ! array_key_exists( '', $options ) ) {
 			$options = array_merge( array( '' => __( 'None', 'wp-travel-engine' ) ), $options );
 		}
+
 		return $options;
 	}
 
@@ -80,49 +95,73 @@ class FormField extends \WP_Travel_Engine_Form_Field {
 		ob_start();
 
 		$is_required = wptravelengine_toggled( $field[ 'validations' ][ 'required' ] ?? false );
-		$is_checkbox = in_array( $field['type'], array( 'checkbox', 'radio', 'file' ) );
+		$is_checkbox = in_array( $field[ 'type' ], array( 'checkbox', 'radio', 'file' ) );
 		?>
-		<?php if ( '' != ( $field[ 'wrapper_parent_class' ] ?? '' ) ):?>
+		<?php if ( '' != ( $field[ 'wrapper_parent_class' ] ?? '' ) ): ?>
 			<div class="<?php echo esc_attr( $field[ 'wrapper_parent_class' ] ); ?>">
 		<?php endif; ?>
 
-			<div class="<?php echo esc_attr( $field[ 'wrapper_class' ] ?? '' ) . ( $field['type'] == 'file' ? ' full' : ''	); ?>">
-				<div class="wpte-checkout__form-control <?php echo ! $is_checkbox ? 'wpte-material-ui-input-control' : ''; ?>">
+		<div
+			class="<?php echo esc_attr( $field[ 'wrapper_class' ] ?? '' ) . ( $field[ 'type' ] == 'file' ? ' full' : '' ); ?>">
+			<div
+				class="wpte-checkout__form-control <?php echo ! $is_checkbox ? 'wpte-material-ui-input-control' : ''; ?>">
 
-					<?php if ( $is_checkbox ): ?>
-						<div class="<?php echo "wpte-checkout__{$field['type']}-control"; ?>">
+				<?php if ( $is_checkbox ): ?>
+				<div class="<?php echo "wpte-checkout__{$field['type']}-control"; ?>">
 					<?php endif; ?>
 
-							<?php if ( ( $field[ 'name' ] != 'wp_travel_engine_booking_setting[terms_conditions]' ) ): ?>
-								<label for="<?php echo esc_attr( $field[ 'id' ] ); ?>"><?php echo esc_html( $field[ 'field_label' ] ) . ( $is_required ? '<span class="wpte-checkout__field-required">*</span>' : '' ); ?></label>
-							<?php endif; ?>
+					<?php if ( ( $field[ 'name' ] != 'wp_travel_engine_booking_setting[terms_conditions]' ) ): ?>
+						<label
+							for="<?php echo esc_attr( $field[ 'id' ] ); ?>"><?php echo esc_html( $field[ 'field_label' ] ) . ( $is_required ? '<span class="wpte-checkout__field-required">*</span>' : '' ); ?></label>
+					<?php endif; ?>
 
-							<?php if ( $field['type'] == 'file' ): ?>
-								<div class="wpte-checkout__file-description">
-									<?php echo esc_html__( 'Max. file size 5MB Supports: JPG, PNG, WebP images', 'wp-travel-engine' ); ?>
-								</div>
-							<?php endif; ?>
-
-							<?php echo $content; // Render field content dynamically. ?>
-
-							<?php if ( ! $is_checkbox && ( $field[ 'name' ] != 'wp_travel_engine_booking_setting[terms_conditions]' ) ): ?>
-								<fieldset>
-									<legend><span><?php echo esc_html( $field[ 'field_label' ] ) . ( $is_required ? '<span class="wpte-checkout__field-required">*</span>' : '' ); ?></span></legend>
-								</fieldset>
-							<?php endif; ?>
-
-					<?php if ( $is_checkbox ): ?>
+					<?php if ( $field[ 'type' ] == 'file' ): ?>
+						<div class="wpte-checkout__file-description">
+							<?php echo esc_html__( 'Max. file size 5MB Supports: JPG, PNG, WebP images', 'wp-travel-engine' ); ?>
 						</div>
 					<?php endif; ?>
 
-				</div>
-			</div>
+					<?php echo $content; // Render field content dynamically. ?>
 
-		<?php if ( '' != ( $field[ 'wrapper_parent_class' ] ?? '' ) ):?>
+					<?php if ( ! $is_checkbox && ( $field[ 'name' ] != 'wp_travel_engine_booking_setting[terms_conditions]' ) ): ?>
+						<fieldset>
+							<legend>
+								<span><?php echo esc_html( $field[ 'field_label' ] ) . ( $is_required ? '<span class="wpte-checkout__field-required">*</span>' : '' ); ?></span>
+							</legend>
+						</fieldset>
+					<?php endif; ?>
+
+					<?php if ( $is_checkbox ): ?>
+				</div>
+			<?php endif; ?>
+
+			</div>
+		</div>
+
+		<?php if ( '' != ( $field[ 'wrapper_parent_class' ] ?? '' ) ): ?>
 			</div>
 		<?php endif;
 
 		// Capture and return the generated content.
 		return ob_get_clean();
+	}
+
+	/**
+	 * @return $this
+	 * @since 6.4.0
+	 */
+	public function set_default_value( array $form_data ): FormField {
+
+		$this->fields = array_map( function ( $field ) use ( $form_data ) {
+			$name = preg_match( "#\[([^\[]+)]$#", $field[ 'name' ], $matches ) ? $matches[ 1 ] : $field[ 'name' ];
+
+			$field[ 'field_label' ] = isset( $field[ 'placeholder' ] ) && $field[ 'placeholder' ] !== '' ? $field[ 'placeholder' ] : $field[ 'field_label' ];
+			$field[ 'default' ]     = $form_data[ $name ] ?? $field[ 'default' ] ?? '';
+			$field[ 'value' ]       = $field[ 'default' ];
+
+			return $field;
+		}, $this->fields );
+
+		return $this;
 	}
 }

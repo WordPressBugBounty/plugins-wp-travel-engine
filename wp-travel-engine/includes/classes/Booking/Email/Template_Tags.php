@@ -6,6 +6,8 @@
  */
 
 namespace WPTravelEngine\Booking\Email;
+use WPTravelEngine\Helpers\Countries;
+use WPTravelEngine\Helpers\CartInfoParser;
 
 class Template_Tags {
 
@@ -13,24 +15,32 @@ class Template_Tags {
 		$this->booking = get_post( $booking_id );
 		$this->payment = get_post( $payment_id );
 
-		$this->order_trips = $this->booking->order_trips;
+		$this->order_trips = (array) ($this->booking->order_trips ?? []);
 
-		$this->billing_info = $this->booking->billing_info;
+		$this->billing_info = (array) ($this->booking->billing_info ?? []);
 
-		$this->cart_info = (object) $this->booking->cart_info;
+		$this->cart_info = (array) ($this->booking->cart_info ?? []);
 
-		$this->trip = (object) array_values( $this->order_trips )[ 0 ];
+		$this->trip = !empty( $this->order_trips ) ? (object) ( array_values( $this->order_trips )[ 0 ] ?? [] ): (object) [];
 
-		$this->billing_details = $this->booking->wptravelengine_billing_details ?? [];
+		$this->billing_details = (array) ($this->booking->wptravelengine_billing_details ?? []);
 
-		$this->traveller_details = $this->booking->wptravelengine_travelers_details ?? [];
+		$this->traveller_details = (array) ($this->booking->wptravelengine_travelers_details ?? []);
 
-		$this->emergency_details = $this->booking->wptravelengine_emergency_details ?? [];
+		$this->emergency_details = (array) ($this->booking->wptravelengine_emergency_details ?? []);
 
 		$this->additional_notes = $this->booking->wptravelengine_additional_note ?? '';
+
+		$this->cart_info_parser = new CartInfoParser( (array) $this->cart_info) ;
+
 	}
 
 	public function get_trip_url() {
+		$order_trip = $this->cart_info_parser->get_item();
+
+		if( empty( !$order_trip ) ) {
+			return '<a href=' . esc_url( get_permalink( $order_trip->get_trip_id() ) ) . '>' . get_the_title( $order_trip->get_trip_title() ) . '</a>';
+		}
 		return '<a href=' . esc_url( get_permalink( $this->trip->ID ) ) . '>' . esc_html( $this->trip->title ) . '</a>';
 	}
 
@@ -79,6 +89,11 @@ class Template_Tags {
 	}
 
 	public function get_billing_country() {
+		
+		$countries_list = Countries::list();
+		if ( isset( $countries_list[ $this->billing_info[ 'country' ] ] ) ) {
+			return $countries_list[ $this->billing_info[ 'country' ] ];
+		}
 		if ( isset( $this->billing_info[ 'country' ] ) ) {
 			return $this->billing_info[ 'country' ];
 		}
@@ -87,7 +102,7 @@ class Template_Tags {
 	}
 
 	public function get_due_amount() {
-		$currency = $this->cart_info->currency;
+		$currency = $this->cart_info->currency ?? 'USD';
 
 		return wte_get_formated_price( $this->booking->due_amount, $currency, '', true );
 	}
@@ -168,7 +183,7 @@ class Template_Tags {
 		$order_trips = $this->order_trips;
 		$cart_info   = (array) $this->cart_info;
 
-		$currency = $cart_info[ 'currency' ];
+		$currency = $cart_info[ 'currency' ] ?? 'USD';
 		if ( is_array( $order_trips ) ) :
 			ob_start();
 			$count              = 1;
@@ -341,7 +356,7 @@ class Template_Tags {
 	public function discount_amount() {
 		$cart_info = (object) $this->cart_info;
 
-		if ( is_array( $cart_info->discounts ) ) {
+		if ( isset( $cart_info->discounts ) && is_array( $cart_info->discounts ) ) {
 			$discounts = $cart_info->discounts;
 			$discount  = array_shift( $discounts );
 			if ( ! is_array( $discount ) ) {
@@ -393,7 +408,7 @@ class Template_Tags {
 
 		$trip = $this->trip;
 
-		$currency = $this->cart_info->currency;
+		$currency = $this->cart_info->currency ?? 'USD';
 
 		$traveler_data    = get_post_meta( $this->booking->ID, 'wp_travel_engine_placeorder_setting', true );
 		$personal_options = isset( $traveler_data[ 'place_order' ] ) ? $traveler_data[ 'place_order' ] : array();
@@ -421,12 +436,12 @@ class Template_Tags {
 				'{billing_address}'           => $this->get_billing_address(),
 				'{city}'                      => $this->get_billing_city(),
 				'{country}'                   => $this->get_billing_country(),
-				'{tdate}'                     => $trip->has_time ? wp_date( 'Y-m-d H:i', strtotime( $trip->datetime ) ) : wp_date( get_option( 'date-format', 'Y-m-d' ), strtotime( $trip->datetime ) ),
-				'{traveler}'                  => array_sum( $trip->pax ),
+				'{tdate}'			 		  => ( isset( $trip->has_time ) && $trip->has_time && isset( $trip->datetime ) ) ? wp_date('Y-m-d H:i', strtotime( $trip->datetime ) ) : wp_date( get_option('date-format', 'Y-m-d'), strtotime( isset( $trip->datetime ) ? $trip->datetime : '' ) ),
+				'{traveler}'                  => isset( $trip->pax ) ? array_sum( $trip->pax ) : 0,
 				// '{child-traveler}'            => $trip->pax['child'],
-				'{tprice}'                    => wte_get_formated_price( $trip->cost, $currency, '', ! 0 ),
+				'{tprice}'                    => isset( $trip->cost ) ? wte_get_formated_price( $trip->cost, $currency, '', ! 0 ) : 0,
 				'{price}'                     => ( ! empty( $this->payment->payment_amount[ 'value' ] ) ) ? wte_get_formated_price( $this->payment->payment_amount[ 'value' ], $this->payment->payment_amount[ 'currency' ], '', ! 0 ) : 0,
-				'{total_cost}'                => wte_get_formated_price( $this->cart_info->total, $currency, '', ! 0 ),
+				'{total_cost}'                => wte_get_formated_price( $this->cart_info->total ?? 0, $currency, '', ! 0 ),
 				'{due}'                       => $this->get_due_amount(),
 				'{sitename}'                  => get_bloginfo( 'name' ),
 				'{booking_url}'               => $edit_booking_link,
@@ -436,7 +451,7 @@ class Template_Tags {
 				'{bank_details}'              => $this->get_bank_details(),
 				'{check_payment_instruction}' => $this->get_check_payment_details(),
 				'{booking_details}'           => $this->get_booking_details(),
-				'{booking_trips_count}'       => count( $this->booking->order_trips ),
+				'{booking_trips_count}'       => isset( $this->booking->order_trips ) ? count( $this->booking->order_trips ) : 1,
 				'{payment_id}'                => $this->payment->ID,
 				'{subtotal}'                  => wte_get_formated_price( $this->booking->cart_info[ 'subtotal' ], $currency, '', ! 0 ),
 				'{total}'                     => wte_get_formated_price( $this->booking->cart_info[ 'total' ], $currency, '', ! 0 ),
@@ -449,7 +464,8 @@ class Template_Tags {
 				'{traveller_details}'         => $this->get_traveller_details(),
 				'{emergency_details}'         => $this->get_emergency_details(),
 			),
-			$this->payment->ID
+			$this->payment->ID,
+			$this->booking->ID
 		);
 	}
 
@@ -509,6 +525,10 @@ class Template_Tags {
 				if ( is_array( $value ) ) {
 					$value = implode( ', ', $value );
 				}
+				$countries_list = Countries::list();
+				if ( isset( $countries_list[ $value ] ) ) {
+					$value = $countries_list[ $value ];
+				}
 				 ?>
 				<tr>
 					<td><?php echo esc_html( ucfirst( $key ) ); ?></td>
@@ -555,11 +575,19 @@ class Template_Tags {
 					'country' 	=> 'Country',
 					'relation' 	=> 'Relation',
 				];
+
 				if ( array_key_exists( $key, $key_map ) ) {
 					$key = $key_map[ $key ];
 				}
-				if ( is_array( $value ) ) {
-					$value = implode( ',', $value );
+				if ( isset( $value ) && is_array( $value)  ) {
+					$flat_value = array_map(function( $item ) {
+						return is_array( $item ) ? implode(', ', $item) : strval($item ?? '');
+					}, $value );
+					$value = implode( ', ', $flat_value );
+				}
+				$countries_list = Countries::list();
+				if ( isset( $countries_list[ $value ] ) ) {
+					$value = $countries_list[ $value ];
 				}
 				?>
 				<tr>
@@ -617,11 +645,16 @@ class Template_Tags {
 						'dob'     	=> 'Date of Birth',
 						'passport' 	=> 'Passport Number',
 					];
+
 					if ( array_key_exists( $key, $key_map ) ) {
 						$key = $key_map[ $key ];
 					}
 					if ( is_array( $value ) ) {
 						$value = implode( ',', $value );
+					}
+					$countries_list = Countries::list();
+					if ( isset( $countries_list[ $value ] ) ) {
+						$value = $countries_list[ $value ];
 					}
 					?>
 					<tr>

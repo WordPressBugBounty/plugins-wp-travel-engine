@@ -20,6 +20,8 @@ abstract class CartAdjustment implements CartAdjustmentInterface {
 	 */
 	public int $order;
 
+	public array $args;
+
 	/**
 	 * A unique identifier for the item.
 	 *
@@ -66,6 +68,17 @@ abstract class CartAdjustment implements CartAdjustmentInterface {
 	 */
 	public bool $apply_to_actual_subtotal;
 
+
+	/**
+	 * @var float
+	 */
+	public float $value;
+
+	/**
+	 * @var string
+	 */
+	public string $type;
+
 	/**
 	 * Constructor.
 	 *
@@ -86,17 +99,21 @@ abstract class CartAdjustment implements CartAdjustmentInterface {
 				'applies_to'               => array(),
 				'order'                    => - 1,
 				'apply_to_actual_subtotal' => false,
+				'value'                    => 0,
+				'type'                     => '',
 			)
 		);
 
-		$this->name                     = $args[ 'name' ];
-		$this->label                    = $args[ 'label' ];
-		$this->description              = $args[ 'description' ] ?? '';
-		$this->percentage               = $args[ 'percentage' ];
-		$this->adjustment_type          = $args[ 'adjustment_type' ];
-		$this->applies_to               = $args[ 'applies_to' ];
-		$this->order                    = $args[ 'order' ];
-		$this->apply_to_actual_subtotal = $args[ 'apply_to_actual_subtotal' ];
+		$this->name                     = (string) $args[ 'name' ];
+		$this->label                    = (string) $args[ 'label' ];
+		$this->description              = (string) $args[ 'description' ] ?? '';
+		$this->percentage               = (float) $args[ 'percentage' ];
+		$this->adjustment_type          = (string) $args[ 'adjustment_type' ];
+		$this->applies_to               = (array) $args[ 'applies_to' ];
+		$this->order                    = (int) $args[ 'order' ];
+		$this->apply_to_actual_subtotal = (bool) $args[ 'apply_to_actual_subtotal' ];
+		$this->value                    = (float) $args['value'] ?? 0;
+		$this->type                     = (string) $args['type'] ?? '';
 	}
 
 	/**
@@ -123,30 +140,50 @@ abstract class CartAdjustment implements CartAdjustmentInterface {
 	}
 
 	/**
-	 * Render.
-	 *
-	 * @return string
-	 * @since 6.3.5
+	 * @return array
+	 * @since 6.4.0
 	 */
+	public function data(): array {
+		return array(
+			'name'                     => $this->name,
+			'order'                    => $this->order,
+			'label'                    => $this->label,
+			'description'              => $this->description,
+			'adjustment_type'          => $this->adjustment_type,
+			'apply_to_actual_subtotal' => $this->apply_to_actual_subtotal,
+			'percentage'               => $this->percentage,
+			'applies_to'               => $this->applies_to,
+			'value'                    => $this->value,
+			'type'                     => $this->type,
+		);
+	}
+
+	/*
+	   * Render.
+	   *
+	   * @return string
+	   * @since 6.3.5
+	   */
 	public function render(): string {
 		return sprintf(
-		'<tr class="wpte-checkout__booking-summary-%s">
+			'<tr class="wpte-checkout__booking-summary-%s">
 				<td>%s%s</td>
 				<td><strong>%s %s</strong></td>
 			</tr>',
-			'coupon' === $this->name ? 'discount' : $this->name,
+			'coupon' === $this->name ? 'discount' : ( $this->type === 'fee' ? 'tax' : ( $this->type === 'deductible' ? 'discount' : $this->name ) ),
 			$this->label,
-			! empty( $this->description ) 
+			! empty( $this->description )
 				? sprintf(
-					'<span id="%s-tooltip" class="wpte-checkout__tooltip" data-content="%s">
+				'<span id="%s-tooltip" class="wpte-checkout__tooltip" data-content="%s">
 						<svg><use xlink:href="#help"></use></svg>
 					</span>',
-					$this->name,
-					$this->description
-				)
+				$this->name,
+				$this->description
+			)
 				: '',
 			'coupon' === $this->name ? '-' : '+',
 			wptravelengine_the_price( $this->cart->get_totals()[ "total_{$this->name}" ], false )
 		);
 	}
+
 }

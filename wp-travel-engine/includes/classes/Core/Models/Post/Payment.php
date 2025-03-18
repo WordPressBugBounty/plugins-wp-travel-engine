@@ -177,4 +177,40 @@ class Payment extends PostModel {
 
 		return new static( $payment_id );
 	}
+
+	/**
+	 * @return string
+	 * @since 6.4.0
+	 */
+	public function get_transaction_id(): string {
+		return $this->get_meta( 'transaction_id' );
+	}
+
+	/**
+	 * @param string $data
+	 *
+	 * @return void
+	 * @since 6.4.0
+	 */
+	public function set_transaction_id( string $data ) {
+		$this->set_meta( 'transaction_id', $data );
+	}
+
+	/**
+	 * @return string
+	 * @since 6.4.0
+	 */
+	public function get_transaction_date(): string {
+		return $this->get_meta( 'transaction_date' );
+	}
+
+	/**
+	 * @param string $data
+	 *
+	 * @return void
+	 * @since 6.4.0
+	 */
+	public function set_transaction_date( string $data ) {
+		$this->set_meta( 'transaction_date', $data );
+	}
 }

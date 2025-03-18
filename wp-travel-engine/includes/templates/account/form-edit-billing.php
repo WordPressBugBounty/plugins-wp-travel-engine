@@ -63,7 +63,6 @@ $billing_phone   = isset( $biling_data[ 'billing_phone' ] ) ? $biling_data[ 'bil
 				<option value=""><?php esc_html_e( 'Select a Country', 'wp-travel-engine' ); ?></option>
 				<?php
 				$country_list = Functions::get_countries();
-				$country_list = array_combine( $country_list, $country_list );
 				foreach ( $country_list as $key => $value ) :
 					?>
 					<option value="<?php echo esc_html( $key ); ?>" <?php selected( $key, $billing_country ); ?>>

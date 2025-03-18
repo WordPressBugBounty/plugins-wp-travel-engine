@@ -81,7 +81,7 @@ endif;
 
 	<div class="wpte-lrf-field lrf-email">
 		<label class="lrf-field-label" for="lrf-email"><?php esc_html_e( 'Email:', 'wp-travel-engine' ); ?><span class="required">*</span></label>
-		<input type="email" name="account_email" id="lrf-email" required="1"  data-msg="Please enter your email address" data-parsley-required-message="Please enter your email address" value="<?php echo esc_attr( $user->user_email ); ?>" />
+		<input type="email" readonly name="account_email" id="lrf-email" required="1"  data-msg="Please enter your email address" data-parsley-required-message="Please enter your email address" value="<?php echo esc_attr( $user->user_email ); ?>" />
 	</div>
 
 	<div class="wpte-lrf-field lrf-toggle">

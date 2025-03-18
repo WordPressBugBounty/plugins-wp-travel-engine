@@ -5,6 +5,8 @@
  * @package WP_Travel_Engine
  */
 
+use WPTravelEngine\Builders\FormFields\DefaultFormFields;
+
 /**
  * WP Travel Engine default form fields.
  *
@@ -156,170 +158,26 @@ class WTE_Default_Form_Fields {
 	}
 
 	/**
+	 * @param string $mode
+	 *
 	 * @return array
 	 * @since 6.3.0
+	 * @deprecated enhancement/booking-details
 	 */
-	public static function billing_form_fields(): array {
-		return static::booking();
+	public static function billing_form_fields( string $mode = 'edit' ): array {
+		return DefaultFormFields::billing( $mode );
 	}
 
 	/**
 	 * Booking form default fields for display and modifications.
 	 *
+	 * @param string $mode
+	 *
 	 * @return array
+	 * @deprecated enhancement/booking-details
 	 */
-	public static function booking(): array {
-
-		// Booking form defaults
-		$booking_fname = '';
-		$booking_lname = '';
-		$booking_email = '';
-
-		$booking_address = '';
-		$booking_city    = '';
-		$booking_country = '';
-
-		// Get user values.
-		if ( is_user_logged_in() ) {
-
-			$user = wp_get_current_user();
-			if ( in_array( 'wp-travel-engine-customer', (array) $user->roles ) ) {
-
-				$booking_fname = isset( $user->first_name ) ? $user->first_name : '';
-				$booking_lname = isset( $user->last_name ) ? $user->last_name : '';
-				$booking_email = isset( $user->user_email ) ? $user->user_email : '';
-
-				$user_data = get_user_meta( $user->ID, 'wp_travel_engine_customer_billing_details', true );
-
-				$booking_address = isset( $user_data[ 'billing_address' ] ) ? $user_data[ 'billing_address' ] : '';
-				$booking_city    = isset( $user_data[ 'billing_city' ] ) ? $user_data[ 'billing_city' ] : '';
-
-				$booking_country = isset( $user_data[ 'billing_country' ] ) ? $user_data[ 'billing_country' ] : '';
-			}
-		}
-
-		$fields = array(
-			'booking_first_name' => array(
-				'type'           => 'text',
-				'wrapper_class'  => 'wp-travel-engine-billing-details-field-wrap',
-				'field_label'    => __( 'First Name', 'wp-travel-engine' ),
-				'label_class'    => 'wpte-bf-label',
-				'name'           => 'wp_travel_engine_booking_setting[place_order][booking][fname]',
-				'id'             => 'wp_travel_engine_booking_setting[place_order][booking][fname]',
-				'validations'    => array(
-					'required'  => true,
-					'maxlength' => '50',
-					'type'      => 'alphanum',
-				),
-				'attributes'     => array(
-					'data-msg'                      => __( 'Please enter your first name', 'wp-travel-engine' ),
-					'data-parsley-required-message' => __( 'Please enter your first name', 'wp-travel-engine' ),
-				),
-				'default'        => $booking_fname,
-				'priority'       => 10,
-				'default_field'  => true,
-				'required_field' => true,
-			),
-			'booking_last_name'  => array(
-				'type'           => 'text',
-				'wrapper_class'  => 'wp-travel-engine-billing-details-field-wrap',
-				'field_label'    => __( 'Last Name', 'wp-travel-engine' ),
-				'label_class'    => 'wpte-bf-label',
-				'name'           => 'wp_travel_engine_booking_setting[place_order][booking][lname]',
-				'id'             => 'wp_travel_engine_booking_setting[place_order][booking][lname]',
-				'validations'    => array(
-					'required'  => true,
-					'maxlength' => '50',
-					'type'      => 'alphanum',
-				),
-				'attributes'     => array(
-					'data-msg'                      => __( 'Please enter your last name', 'wp-travel-engine' ),
-					'data-parsley-required-message' => __( 'Please enter your last name', 'wp-travel-engine' ),
-				),
-				'default'        => $booking_lname,
-				'priority'       => 20,
-				'default_field'  => true,
-				'required_field' => true,
-			),
-			'booking_email'      => array(
-				'type'           => 'email',
-				'wrapper_class'  => 'wp-travel-engine-billing-details-field-wrap',
-				'field_label'    => __( 'Email', 'wp-travel-engine' ),
-				'label_class'    => 'wpte-bf-label',
-				'name'           => 'wp_travel_engine_booking_setting[place_order][booking][email]',
-				'id'             => 'wp_travel_engine_booking_setting[place_order][booking][email]',
-				'validations'    => array(
-					'required' => true,
-				),
-				'attributes'     => array(
-					'data-msg'                      => __( 'Please enter a valid email address', 'wp-travel-engine' ),
-					'data-parsley-required-message' => __( 'Please enter a valid email address', 'wp-travel-engine' ),
-				),
-				'default'        => $booking_email,
-				'priority'       => 30,
-				'default_field'  => true,
-				'required_field' => true,
-			),
-			'booking_address'    => array(
-				'type'          => 'text',
-				'wrapper_class' => 'wp-travel-engine-billing-details-field-wrap',
-				'field_label'   => __( 'Address', 'wp-travel-engine' ),
-				'label_class'   => 'wpte-bf-label',
-				'name'          => 'wp_travel_engine_booking_setting[place_order][booking][address]',
-				'id'            => 'wp_travel_engine_booking_setting[place_order][booking][address]',
-				'validations'   => array(
-					'required'  => true,
-					'maxlength' => '100',
-					'type'      => 'alphanum',
-				),
-				'attributes'    => array(
-					'data-msg'                      => __( 'Please enter your address details', 'wp-travel-engine' ),
-					'data-parsley-required-message' => __( 'Please enter your address details', 'wp-travel-engine' ),
-				),
-				'default'       => $booking_address,
-				'priority'      => 40,
-				'default_field' => true,
-			),
-			'booking_city'       => array(
-				'type'          => 'text',
-				'wrapper_class' => 'wp-travel-engine-billing-details-field-wrap',
-				'field_label'   => __( 'City', 'wp-travel-engine' ),
-				'label_class'   => 'wpte-bf-label',
-				'name'          => 'wp_travel_engine_booking_setting[place_order][booking][city]',
-				'id'            => 'wp_travel_engine_booking_setting[place_order][booking][city]',
-				'validations'   => array(
-					'required' => true,
-				),
-				'attributes'    => array(
-					'data-msg'                      => __( 'Please enter your city name', 'wp-travel-engine' ),
-					'data-parsley-required-message' => __( 'Please enter your city name', 'wp-travel-engine' ),
-				),
-				'default'       => $booking_city,
-				'priority'      => 50,
-				'default_field' => true,
-			),
-			'booking_country'    => array(
-				'type'          => 'country_dropdown',
-				'field_label'   => __( 'Country', 'wp-travel-engine' ),
-				'label_class'   => 'wpte-bf-label',
-				'wrapper_class' => 'wp-travel-engine-billing-details-field-wrap',
-				'name'          => 'wp_travel_engine_booking_setting[place_order][booking][country]',
-				'id'            => 'wp_travel_engine_booking_setting[place_order][booking][country]',
-				'validations'   => array(
-					'required' => true,
-				),
-				'attributes'    => array(
-					'data-msg'                      => __( 'Please choose your country from the list', 'wp-travel-engine' ),
-					'data-parsley-required-message' => __( 'Please choose your country from the list', 'wp-travel-engine' ),
-				),
-				'default'       => $booking_country,
-				'priority'      => 60,
-				'default_field' => true,
-			),
-		);
-
-		return apply_filters( 'wp_travel_engine_booking_fields_display', $fields );
-
+	public static function booking( string $mode = 'edit' ): array {
+		return DefaultFormFields::billing( $mode );
 	}
 
 	/**

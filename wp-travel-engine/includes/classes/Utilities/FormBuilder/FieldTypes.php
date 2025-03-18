@@ -77,4 +77,8 @@ return array(
 		'field_label' => __( 'Trips List', 'wp-travel-engine' ),
 		'field_class' => Fields\TripSelector::class,
 	),
+	'currency_picker'  => array(
+		'field_label' => __( 'Currency Picker', 'wp-travel-engine' ),
+		'field_class' => Fields\CurrencyPicker::class,
+	),
 );

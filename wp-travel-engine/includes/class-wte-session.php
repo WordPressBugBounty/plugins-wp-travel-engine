@@ -25,7 +25,7 @@ class WTE_Session {
 	public function __construct() {
 		// Let users change the session cookie name.
 		if ( ! defined( 'WP_TRAVEL_ENGINE_SESSION_COOKIE' ) ) {
-			define( 'WP_TRAVEL_ENGINE_SESSION_COOKIE', '_wp_travel_engine_session' );
+			define( 'WP_TRAVEL_ENGINE_SESSION_COOKIE', 'wordpress_wp_travel_engine_session' );
 		}
 
 		if ( ! class_exists( 'Recursive_ArrayAccess' ) ) {
@@ -87,7 +87,7 @@ class WTE_Session {
 	public function set_json( $key, $value ) {
 		$key = sanitize_key( $key );
 		if ( is_array( $value ) ) {
-			$this->session[ $key ] = wp_json_encode( wp_unslash( $value ) );
+			$this->session[ $key ] = wp_json_encode( $value );
 		} else {
 			$this->session[ $key ] = $value;
 		}

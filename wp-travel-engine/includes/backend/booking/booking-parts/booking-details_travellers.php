@@ -91,8 +91,8 @@ global $post;
 																		<?php
 																		$country_options = Functions::get_countries();
 																		foreach ( $country_options as $key => $country ) {
-																			$selected = selected( $value, $country, false );
-																			echo '<option ' . $selected . " value='" . esc_attr( $country ) . "'>" . esc_html( $country ) . "</option>"; // phpcs:ignore
+																			$selected = selected( $value, $key, false );
+																			echo '<option ' . $selected . " value='" . esc_attr( $key ) . "'>" . esc_html( $country ) . "</option>"; // phpcs:ignore
 																		}
 																		?>
 																		</select>
@@ -171,8 +171,8 @@ global $post;
 																		<?php
 																		$country_options = Functions::get_countries();
 																		foreach ( $country_options as $key => $country ) {
-																			$selected = selected( $data_value, $country, false );
-																			echo '<option ' . $selected . " value='" . esc_attr( $country ) . "'>" . esc_html( $country ) . "</option>"; // phpcs:ignore
+																			$selected = selected( $data_value, $key, false );
+																			echo '<option ' . $selected . " value='" . esc_attr( $key ) . "'>" . esc_html( $country ) . "</option>"; // phpcs:ignore
 																		}
 																		?>
 																		</select>
@@ -281,8 +281,8 @@ global $post;
 																		<?php
 																		$country_options = Functions::get_countries();
 																		foreach ( $country_options as $key => $country ) {
-																			$selected = selected( $data_value, $country, false );
-																			echo '<option ' . $selected . " value='" . esc_attr( $country ) . "'>" . esc_html( $country ) . "</option>"; // phpcs:ignore
+																			$selected = selected( $data_value, $key, false );
+																			echo '<option ' . $selected . " value='" . esc_attr( $key ) . "'>" . esc_html( $country ) . "</option>"; // phpcs:ignore
 																		}
 																		?>
 																		</select>
@@ -299,8 +299,8 @@ global $post;
 																		<?php
 																		$country_options = Functions::get_countries();
 																		foreach ( $country_options as $key => $country ) {
-																			$selected = selected( $data_value, $country, false );
-																			echo '<option ' . $selected . " value='" . esc_attr( $country ) . "'>" . esc_html( $country ) . "</option>"; // phpcs:ignore
+																			$selected = selected( $data_value, $key, false );
+																			echo '<option ' . $selected . " value='" . esc_attr( $key ) . "'>" . esc_html( $country ) . "</option>"; // phpcs:ignore
 																		}
 																		?>
 																		</select>

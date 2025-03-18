@@ -1,7 +1,11 @@
 <?php
 
 use WPTravelEngine\Builders\AdminSettings;
-
+use WPTravelEngine\Core\PostTypes\Booking;
+use WPTravelEngine\Core\PostTypes\Customer;
+use WPTravelEngine\Helpers\CartInfoParser;
+use WPTravelEngine\Core\Models\Post\Booking as BookingModel;
+use WPTravelEngine\Core\Models\Post\Payment as PaymentModel;
 /**
  * The admin-specific functionality of the plugin.
  *
@@ -124,61 +128,12 @@ class Wp_Travel_Engine_Admin {
 		 */
 		add_action( 'wp_dashboard_setup', array( $this, 'wte_add_dashboard_widget' ) );
 
-		add_action( 'admin_head', array( $this, 'add_booking_export_button' ) );
-
-		add_action( 'admin_init', array( $this, 'export_bookings' ) );
-
 		/**
 		 * Filters the archive title.
 		 *
 		 * @since 5.7.9
 		 */
 		add_filter( 'get_the_archive_title', array( $this, 'trip_archive_title' ), 10, 3 );
-	}
-
-	/**
-	 * Add Booking export button.
-	 *
-	 * @since 5.7.4
-	 */
-	public function add_booking_export_button() {
-		global $post_type;
-
-		$current_screen = get_current_screen();
-
-		if ( 'edit-booking' !== $current_screen->id ) {
-			return;
-		}
-
-		if ( isset( $_GET[ 'post_type' ] ) && 'booking' === $_GET[ 'post_type' ] && 'booking' == $post_type ) {
-			// Remove admin notices.
-			remove_all_actions( 'admin_notices' );
-			?>
-			<form id="wpte-booking-export-form" class="wpte-export-form" method="post">
-				<?php wp_nonce_field( 'booking_export_nonce_action', 'booking_export_nonce' ); ?>
-				<input type="text" name="wte_booking_range" data-fpconfig='{"mode":"range","showMonths":"2"}'
-					   name="wte-flatpickr__date"
-					   value="<?php echo esc_attr( isset( $_POST[ 'wte_booking_range' ] ) ? $_POST[ 'wte_booking_range' ] : '' ); ?>"
-					   class="wte-flatpickr">
-				<input type="submit" name="booking_export_submit" class="button button-primary"
-					   value="<?php esc_html_e( 'Export Bookings', 'wp-travel-engine' ); ?>">
-			</form>
-			<?php
-		}
-		?>
-		<?php
-	}
-
-
-	/**
-	 * Export bookings.
-	 *
-	 * @since 5.7.4
-	 */
-	public function export_bookings() {
-		require_once plugin_dir_path( WP_TRAVEL_ENGINE_FILE_PATH ) . '/admin/class-wp-travel-engine-booking-export.php';
-		$booking_export = new WP_Travel_Engine_Booking_Export();
-		$booking_export->init();
 	}
 
 	/**
@@ -720,45 +675,12 @@ class Wp_Travel_Engine_Admin {
 	 * @link https://codex.wordpress.org/Function_Reference/register_post_type
 	 */
 	function wp_travel_engine_register_booking() {
-		$labels = array(
-			'name'               => _x( 'Bookings', 'post type general name', 'wp-travel-engine' ),
-			'singular_name'      => _x( 'Booking', 'post type singular name', 'wp-travel-engine' ),
-			'menu_name'          => _x( 'WP Travel Engine', 'admin menu', 'wp-travel-engine' ),
-			'name_admin_bar'     => _x( 'Booking', 'add new on admin bar', 'wp-travel-engine' ),
-			'add_new'            => _x( 'Add New', 'Booking', 'wp-travel-engine' ),
-			'add_new_item'       => esc_html__( 'Add New Booking', 'wp-travel-engine' ),
-			'new_item'           => esc_html__( 'New Booking', 'wp-travel-engine' ),
-			'edit_item'          => esc_html__( 'Edit Booking', 'wp-travel-engine' ),
-			'view_item'          => esc_html__( 'View Booking', 'wp-travel-engine' ),
-			'all_items'          => esc_html__( 'Bookings', 'wp-travel-engine' ),
-			'search_items'       => esc_html__( 'Search Bookings', 'wp-travel-engine' ),
-			'parent_item_colon'  => esc_html__( 'Parent Bookings:', 'wp-travel-engine' ),
-			'not_found'          => esc_html__( 'No Bookings found.', 'wp-travel-engine' ),
-			'not_found_in_trash' => esc_html__( 'No Bookings found in Trash.', 'wp-travel-engine' ),
+		$booking_post_type = new Booking();
+
+		register_post_type(
+			$booking_post_type->get_post_type(),
+			$booking_post_type->get_args()
 		);
-
-		$wte_svg = base64_encode( '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_60_548)"><path d="M22.8963 12.1856C23.1956 11.7415 22.7501 11.3673 22.7501 11.3673C22.7501 11.3673 22.2301 11.1051 21.9322 11.5491C21.633 11.9932 20.8789 13.1159 20.8789 13.1159L17.8029 13.1871L17.287 13.954L19.8988 14.572L18.7272 15.9741C19.0916 16.1151 19.4014 16.3747 19.7525 16.5486L20.863 15.2085L22.4442 17.359L22.9602 16.5921L21.8418 13.7524C21.8431 13.7524 22.5984 12.6297 22.8963 12.1856Z" fill="white"></path><path d="M11.9222 11.5544C12.8513 11.5544 13.6045 10.8081 13.6045 9.88745C13.6045 8.96683 12.8513 8.22052 11.9222 8.22052C10.9931 8.22052 10.2399 8.96683 10.2399 9.88745C10.2399 10.8081 10.9931 11.5544 11.9222 11.5544Z" fill="white"></path><path d="M21.2379 13.4954C20.9587 13.3215 20.589 13.4045 20.4134 13.6825C18.7032 16.3733 16.9172 17.8439 15.2482 17.9335C13.1351 18.0495 11.744 16.011 10.5299 14.6498C9.8862 13.9276 9.30105 13.1568 8.79038 12.3371C8.3861 11.6901 7.93927 10.9166 7.93927 10.1339C7.93794 7.95699 9.72528 6.18596 11.9222 6.18596C14.1178 6.18596 15.9052 7.95699 15.9052 10.1339C15.9052 11.4371 14.3226 13.5244 12.9635 15.0477C12.7494 15.2875 12.7733 15.6525 13.0114 15.87C13.0154 15.8726 13.018 15.8766 13.022 15.8792C13.2641 16.1006 13.6444 16.0795 13.8625 15.8357C15.2668 14.2716 17.1034 11.8904 17.1034 10.1326C17.1021 7.30208 14.7788 5 11.9222 5C9.06567 5 6.74106 7.30208 6.74106 10.1339C6.74106 11.7876 8.36749 13.9935 9.73326 15.555L9.72927 15.5511C10.091 15.8897 10.4022 16.2996 10.744 16.6593C11.4076 17.3551 12.0858 18.0969 12.9382 18.5634C12.9396 18.5647 12.9422 18.5647 12.9475 18.5687C13.5181 18.877 14.2375 19.1235 15.0807 19.1235C15.1511 19.1235 15.223 19.1221 15.2961 19.1182C17.4039 19.0141 19.4666 17.3972 21.4255 14.3137C21.6023 14.037 21.5172 13.6707 21.2379 13.4954Z" fill="white"></path><path d="M10.6349 17.7979C10.4607 17.6345 10.2054 17.5937 9.98463 17.6859C9.58567 17.852 9.11889 17.9626 8.59625 17.9337C6.92727 17.844 5.14126 16.3735 3.4377 13.6919L2.11049 11.5137C1.94027 11.233 1.57189 11.1434 1.28996 11.312C1.0067 11.482 0.914938 11.8457 1.08649 12.1264L2.41902 14.3138C4.37791 17.3973 6.44054 19.0142 8.54838 19.1183C8.62152 19.1222 8.69333 19.1236 8.76381 19.1236C9.40082 19.1236 9.96867 18.9826 10.4541 18.7796C10.8544 18.6123 10.9528 18.0957 10.6376 17.7992L10.6349 17.7979Z" fill="white"></path></g></svg>' );
-
-		$args = array(
-			'labels'             => $labels,
-			'description'        => esc_html__( 'Description.', 'wp-travel-engine' ),
-			'public'             => false,
-			'publicly_queryable' => false,
-			'show_ui'            => true,
-			// 'show_in_menu'       => 'edit.php?post_type=trip',
-			'menu_icon'          => 'data:image/svg+xml;base64,' . $wte_svg,
-			'query_var'          => true,
-			'rewrite'            => array( 'slug' => 'booking' ),
-			'capability_type'    => 'post',
-			'capabilities'       => $this->get_capabilities(),
-			'map_meta_cap'       => true, // Set to `false`, if users are not allowed to edit/delete existing posts
-			'has_archive'        => true,
-			'hierarchical'       => false,
-			'menu_position'      => 31,
-			'supports'           => array( 'title' ),
-		);
-
-		register_post_type( 'booking', $args );
 	}
 
 	/**
@@ -767,47 +689,12 @@ class Wp_Travel_Engine_Admin {
 	 * @link https://codex.wordpress.org/Function_Reference/register_post_type
 	 */
 	function wp_travel_engine_register_customer() {
-		$labels = array(
-			'name'               => _x( 'Customers', 'post type general name', 'wp-travel-engine' ),
-			'singular_name'      => _x( 'Customer', 'post type singular name', 'wp-travel-engine' ),
-			'menu_name'          => _x( 'Customers', 'admin menu', 'wp-travel-engine' ),
-			'name_admin_bar'     => _x( 'Customer', 'add new on admin bar', 'wp-travel-engine' ),
-			'add_new'            => _x( 'Add New', 'Customer', 'wp-travel-engine' ),
-			'add_new_item'       => esc_html__( 'Add New Customer', 'wp-travel-engine' ),
-			'new_item'           => esc_html__( 'New Customer', 'wp-travel-engine' ),
-			'edit_item'          => esc_html__( 'Edit Customer', 'wp-travel-engine' ),
-			'view_item'          => esc_html__( 'View Customer', 'wp-travel-engine' ),
-			'all_items'          => esc_html__( 'Customers', 'wp-travel-engine' ),
-			'search_items'       => esc_html__( 'Search Customers', 'wp-travel-engine' ),
-			'parent_item_colon'  => esc_html__( 'Parent Customers:', 'wp-travel-engine' ),
-			'not_found'          => esc_html__( 'No Customers found.', 'wp-travel-engine' ),
-			'not_found_in_trash' => esc_html__( 'No Customers found in Trash.', 'wp-travel-engine' ),
-		);
+		$customer_post_type = new Customer();
 
-		$args = array(
-			'labels'             => $labels,
-			'description'        => esc_html__( 'Description.', 'wp-travel-engine' ),
-			'public'             => false,
-			'menu_icon'          => 'dashicons-location-alt',
-			'publicly_queryable' => false,
-			'show_ui'            => true,
-			'show_in_menu'       => 'edit.php?post_type=booking',
-			'query_var'          => true,
-			'rewrite'            => array( 'slug' => 'customer' ),
-			'capability_type'    => 'post',
-			// 'capabilities'       => array(
-			// 'create_posts' => 'do_not_allow', // false < WP 4.5, credit @Ewout
-			// ),
-			'capabilities'       => $this->get_capabilities(),
-			'capabilities'       => $this->get_capabilities(),
-			'map_meta_cap'       => true, // Set to `false`, if users are not allowed to edit/delete existing posts
-			'has_archive'        => true,
-			'hierarchical'       => false,
-			'menu_position'      => 50,
-			'supports'           => array( 'title' ),
+		register_post_type(
+			$customer_post_type->get_post_type(),
+			$customer_post_type->get_args()
 		);
-
-		register_post_type( 'customer', $args );
 	}
 
 	/**
@@ -909,9 +796,39 @@ class Wp_Travel_Engine_Admin {
 
 		$wp_travel_engine_setting_option_setting = get_option( 'wp_travel_engine_settings', true );
 		$screen                                  = get_current_screen();
+		$_booking_meta = get_post_meta( $booking->ID, 'cart_info', true ) ?? [];
+
+		$_booking_modal = null;
+		$_paid_amount = 0;
+		$_due_amount = 0;
+		$totals = [];
+		$currency = 'USD';
+		$pricing_arguments = array(
+			'currency_code' => $currency,
+		);
+
+		if ( 'booking' === $booking->post_type ) {
+			$_booking_modal = BookingModel::make( $booking->ID );
+			$_paid_amount= $_booking_modal->get_total_paid_amount() ?? 0;
+			$_due_amount = $_booking_modal->get_total_due_amount() ?? 0;
+			$totals = $_booking_modal->get_total() ?? [];
+			$_booking_meta = is_array($_booking_meta) ? $_booking_meta : [];
+			$cart_info = new CartInfoParser( $_booking_meta ?? [] );
+			$currency = $cart_info->get_currency() ?? 'USD';
+			$pricing_arguments = array(
+				'currency_code' => $currency,
+			);
+		}
+
+		$trip_id = $_booking_meta['items'][0]['trip_id'] ?? '';
+		$travelers_count = $_booking_meta['items'][0]['travelers_count'] ?? 0;
+		$trip_date = $_booking_meta['items'][0]['trip_date'] ?? '';
 
 		$column_actions = array(
-			'cost'           => function ( $booking ) use ( $wp_travel_engine_setting_option_setting ) {
+			'cost'           => function ( $booking ) use ( $wp_travel_engine_setting_option_setting, $totals, $pricing_arguments ) {
+				if( isset( $totals ) ){
+					wptravelengine_the_price( $totals ?? 0, true, $pricing_arguments );
+				} else {
 				if ( empty( $booking->payments ) ) { // legacy.
 					$terms = get_post_meta( $booking->ID, 'wp_travel_engine_booking_setting', true );
 					$code  = 'USD';
@@ -926,59 +843,70 @@ class Wp_Travel_Engine_Admin {
 						echo floatval( $terms[ 'place_order' ][ 'cost' ] ) + floatval( $terms[ 'place_order' ][ 'due' ] );
 					}
 				} else { // booking_version 2.0.0
-					wte_the_formated_price( $booking->cart_info[ 'total' ], $booking->cart_info[ 'currency' ], '', true );
+						wte_the_formated_price( $booking->cart_info[ 'total' ] ?? 0, $booking->cart_info[ 'currency' ] ?? 'USD', '', true );
+					}
 				}
 			},
-			'remaining'      => function ( $booking ) use ( $wp_travel_engine_setting_option_setting ) {
-				if ( ! empty( $booking->payments ) ) {
-					wte_the_formated_price( $booking->due_amount, $booking->cart_info[ 'currency' ], '', true );
-
+			'remaining'      => function ( $booking ) use ( $wp_travel_engine_setting_option_setting,  $pricing_arguments, $_due_amount ) {
+				if( isset( $_due_amount ) && is_numeric( $_due_amount ) ){
+					wptravelengine_the_price( $_due_amount, true, $pricing_arguments );
 					return;
-				}
-				$terms = get_post_meta( $booking->ID, 'wp_travel_engine_booking_setting', true );
+				} else {
+				if ( ! empty( $booking->payments ) ) {
+						wte_the_formated_price( $booking->due_amount ?? 0, $booking->cart_info[ 'currency' ] ?? 'USD', '', true );
 
-				if ( isset( $terms[ 'place_order' ][ 'due' ] ) && '' !== $terms[ 'place_order' ][ 'due' ] ) {
-					$code = 'USD';
-					if ( isset( $wp_travel_engine_setting_option_setting[ 'currency_code' ] ) && '' !== $wp_travel_engine_setting_option_setting[ 'currency_code' ] ) {
-						$code = $wp_travel_engine_setting_option_setting[ 'currency_code' ];
+						return;
 					}
-					$obj      = \wte_functions();
-					$currency = $obj->wp_travel_engine_currencies_symbol( $code );
-					echo esc_attr( $currency ) . ' ';
-					echo esc_attr( $terms[ 'place_order' ][ 'due' ] );
+					$terms = get_post_meta( $booking->ID, 'wp_travel_engine_booking_setting', true );
+
+					if ( isset( $terms[ 'place_order' ][ 'due' ] ) && '' !== $terms[ 'place_order' ][ 'due' ] ) {
+						$code = 'USD';
+						if ( isset( $wp_travel_engine_setting_option_setting[ 'currency_code' ] ) && '' !== $wp_travel_engine_setting_option_setting[ 'currency_code' ] ) {
+							$code = $wp_travel_engine_setting_option_setting[ 'currency_code' ];
+						}
+						$obj      = \wte_functions();
+						$currency = $obj->wp_travel_engine_currencies_symbol( $code );
+						echo esc_attr( $currency ) . ' ';
+						echo esc_attr( $terms[ 'place_order' ][ 'due' ] );
 
 					return;
 				}
 				echo '-';
+				}
 			},
-			'paid'           => function ( $booking ) use ( $wp_travel_engine_setting_option_setting ) {
-				if ( ! empty( $booking->payments ) ) {
-					wte_the_formated_price( $booking->paid_amount, $booking->cart_info[ 'currency' ], '', true );
-
+			'paid'           => function ( $booking ) use ( $wp_travel_engine_setting_option_setting, $pricing_arguments, $_paid_amount ) {
+				if( isset( $_paid_amount ) && is_numeric( $_paid_amount ) ){
+					wptravelengine_the_price( $_paid_amount, true, $pricing_arguments );
 					return;
-				}
-				$terms = get_post_meta( $booking->ID, 'wp_travel_engine_booking_setting', true );
-
-				if ( isset( $terms[ 'place_order' ][ 'due' ] ) && '' !== $terms[ 'place_order' ][ 'due' ] ) {
-					$code = 'USD';
-					if ( isset( $wp_travel_engine_setting_option_setting[ 'currency_code' ] ) && '' !== $wp_travel_engine_setting_option_setting[ 'currency_code' ] ) {
-						$code = $wp_travel_engine_setting_option_setting[ 'currency_code' ];
-					}
-					$obj      = \wte_functions();
-					$currency = $obj->wp_travel_engine_currencies_symbol( $code );
-					echo esc_attr( $currency ) . ' ';
-					echo floatval( $terms[ 'place_order' ][ 'cost' ] ) + floatval( $terms[ 'place_order' ][ 'due' ] ) - floatval( $terms[ 'place_order' ][ 'due' ] );
 				} else {
-					$code = 'USD';
-					if ( isset( $wp_travel_engine_setting_option_setting[ 'currency_code' ] ) && '' !== $wp_travel_engine_setting_option_setting[ 'currency_code' ] ) {
-						$code = $wp_travel_engine_setting_option_setting[ 'currency_code' ];
+					if ( ! empty( $booking->payments ) ) {
+						wte_the_formated_price( $booking->paid_amount ?? 0, $booking->cart_info[ 'currency' ] ?? 'USD', '', true );
+
+						return;
 					}
-					$obj      = \wte_functions();
-					$currency = $obj->wp_travel_engine_currencies_symbol( $code );
-					echo esc_attr( $currency ) . ' ';
-					$place_order_cost = isset( $terms[ 'place_order' ][ 'cost' ] ) ? $terms[ 'place_order' ][ 'cost' ] : '';
-					echo esc_html( $place_order_cost );
-				}
+					$terms = get_post_meta( $booking->ID, 'wp_travel_engine_booking_setting', true );
+
+					if ( isset( $terms[ 'place_order' ][ 'due' ] ) && '' !== $terms[ 'place_order' ][ 'due' ] ) {
+						$code = 'USD';
+						if ( isset( $wp_travel_engine_setting_option_setting[ 'currency_code' ] ) && '' !== $wp_travel_engine_setting_option_setting[ 'currency_code' ] ) {
+							$code = $wp_travel_engine_setting_option_setting[ 'currency_code' ];
+						}
+						$obj      = \wte_functions();
+						$currency = $obj->wp_travel_engine_currencies_symbol( $code );
+						echo esc_attr( $currency ) . ' ';
+						echo floatval( $terms[ 'place_order' ][ 'cost' ] ) + floatval( $terms[ 'place_order' ][ 'due' ] ) - floatval( $terms[ 'place_order' ][ 'due' ] );
+					} else {
+						$code = 'USD';
+						if ( isset( $wp_travel_engine_setting_option_setting[ 'currency_code' ] ) && '' !== $wp_travel_engine_setting_option_setting[ 'currency_code' ] ) {
+							$code = $wp_travel_engine_setting_option_setting[ 'currency_code' ];
+						}
+						$obj      = \wte_functions();
+						$currency = $obj->wp_travel_engine_currencies_symbol( $code );
+						echo esc_attr( $currency ) . ' ';
+						$place_order_cost = isset( $terms[ 'place_order' ][ 'cost' ] ) ? $terms[ 'place_order' ][ 'cost' ] : '';
+						echo esc_html( $place_order_cost );
+						}
+					}
 			},
 			'booking_status' => function ( $booking ) {
 				$status    = wp_travel_engine_get_booking_status();
@@ -989,17 +917,26 @@ class Wp_Travel_Engine_Admin {
 					style="margin:10px;padding:10px;font-weight:700;color:#ffffff;background-color:<?php echo esc_attr( $status[ $label_key ][ 'color' ] ); ?>"><?php echo esc_html( $status[ $label_key ][ 'text' ] ); ?></span>
 				<?php
 			},
-			'travelers'      => function ( $booking ) use ( $order_trip ) {
+			'travelers'      => function ( $booking ) use ( $order_trip, $travelers_count ) {
 				$terms = get_post_meta( $booking->ID, 'wp_travel_engine_booking_setting', true );
-
+				if( isset( $travelers_count ) && is_numeric( $travelers_count ) && $travelers_count > 0 ){
+					echo esc_attr( $travelers_count );
+				} else {
 				if ( isset( $terms[ 'place_order' ][ 'traveler' ] ) ) {
 					echo esc_attr( $terms[ 'place_order' ][ 'traveler' ] );
 				} else {
 					$total_pax = ! is_null( $order_trip ) && isset( $order_trip->pax ) && is_array( $order_trip->pax ) ? array_sum( $order_trip->pax ) : 0;
 					echo (float) $total_pax;
+					}
 				}
 			},
-			'tname'          => function ( $booking ) use ( $order_trip ) {
+			'tname'          => function ( $booking ) use ( $order_trip, $trip_id ) {
+				$trip_title = $trip_id ?? '';
+				if( $trip_title ){
+					$trip_title = get_the_title( $trip_title );
+					echo '<a href="' . esc_html( get_edit_post_link( $trip_title, 'display' ) ) . '">' . esc_html( $trip_title ) . '</a>';
+					return;
+				}
 				if ( ! is_null( $order_trip ) && isset( $order_trip->ID ) ) {
 					$trip_title = get_the_title( $order_trip->ID );
 					echo '<a href="' . esc_url( get_edit_post_link( $order_trip->ID, 'display' ) ) . '">' . esc_html( $trip_title ) . '</a>';
@@ -1016,8 +953,12 @@ class Wp_Travel_Engine_Admin {
 			'booking_date'   => function ( $booking ) {
 				echo wp_kses( wte_get_human_readable_diff_post_published_date( $booking->ID ), array( 'time' => array( 'datetime' => array() ) ) );
 			},
-			'trip_date'      => function ( $booking ) {
+			'trip_date'      => function ( $booking ) use ( $trip_date ) {
+				if( $trip_date ){
+					echo wp_kses( $trip_date, array( 'time' => array( 'datetime' => array() ) ) );
+				} else {
 				echo wp_kses( wptravelengine_trip_date( $booking->ID ), array( 'time' => array( 'datetime' => array() ) ) );
+				}
 			},
 
 		);
@@ -1168,16 +1109,15 @@ class Wp_Travel_Engine_Admin {
 			$terms = get_post_meta( $post_id, 'wp_travel_engine_booking_setting', true );
 			$var   = get_post( $post_id );
 
-			$size = 0;
+			$booking_count = 0;
 			if ( $var && isset( $var->ID ) ) {
-				$wp_travel_engine_booked_settings = get_post_meta( $var->ID, 'wp_travel_engine_booked_trip_setting', true );
-				$size                             = isset( $wp_travel_engine_booked_settings[ 'traveler' ] ) ? sizeof( $wp_travel_engine_booked_settings[ 'traveler' ] ) : '';
+				$wp_travel_engine_booked_settings = get_post_meta( $var->ID, 'wp_travel_engine_bookings', true );
+				$booking_count                    = is_array( $wp_travel_engine_booked_settings ) ? count( $wp_travel_engine_booked_settings ) : 0;
 			}
 
 			if ( ! is_array( $wp_travel_engine_booked_settings ) ) {
 				$wp_travel_engine_booked_settings = array();
 			}
-			$wp_travel_engine_setting_option_setting = get_option( 'wp_travel_engine_settings', array() );
 
 			switch ( $column ) {
 				case 'cid':
@@ -1191,7 +1131,7 @@ class Wp_Travel_Engine_Admin {
 					break;
 
 				case 'bookings':
-					echo (int) $size;
+					echo (int) $booking_count;
 					break;
 
 				case 'spent':
@@ -1201,19 +1141,19 @@ class Wp_Travel_Engine_Admin {
 						echo esc_html__( 'N/A', 'wp-travel-engine' );
 						break;
 					}
-					if ( isset( $wp_travel_engine_booked_settings[ 'cost' ] ) ) {
-						foreach ( $wp_travel_engine_booked_settings[ 'cost' ] as $key => $value ) {
-							$value = str_replace( ',', '', $value );
-							$tot   = $tot + floatval( $value );
+					if ( is_array( $wp_travel_engine_booked_settings ) ) {
+						try {
+							foreach ( $wp_travel_engine_booked_settings as $value ) {
+								$booking = BookingModel::make( $value );
+								$value = $booking->get_total_paid_amount();
+								$value = str_replace( ',', '', $value );
+								$tot   = $tot + floatval( $value );
+							}
+						} catch ( \Exception $e ) {
+
 						}
+						wptravelengine_the_price( $tot, true );
 					}
-					$code = 'USD';
-					if ( isset( $wp_travel_engine_setting_option_setting[ 'currency_code' ] ) && '' !== $wp_travel_engine_setting_option_setting[ 'currency_code' ] ) {
-						$code = $wp_travel_engine_setting_option_setting[ 'currency_code' ];
-					}
-					$obj      = \wte_functions();
-					$currency = $obj->wp_travel_engine_currencies_symbol( $code );
-					echo esc_attr( $currency . $obj->wp_travel_engine_price_format( $tot ) . ' ' . $code );
 					break;
 
 				case 'created':
@@ -2028,7 +1968,7 @@ class Wp_Travel_Engine_Admin {
 		$templates[ 'templates/template-activities.php' ]   = esc_html__( 'Activities Template', 'wp-travel-engine' );
 		$templates[ 'templates/template-trip_types.php' ]   = esc_html__( 'Trip Types Template', 'wp-travel-engine' );
 		$templates[ 'templates/template-trip-listing.php' ] = esc_html__( 'Trip Listing Template', 'wp-travel-engine' );
-		$templates[ 'template-checkout.php' ]     = esc_html__( 'WP Travel Engine - Checkout', 'wp-travel-engine' );
+		$templates[ 'template-checkout.php' ]               = esc_html__( 'WP Travel Engine - Checkout', 'wp-travel-engine' );
 
 		return $templates;
 	}
@@ -2255,8 +2195,14 @@ class Wp_Travel_Engine_Admin {
 	 */
 	function wp_travel_engine_trip_cpt_columns( $columns ) {
 		$new_columns = array(
-			'tid'       => esc_html__( 'Trip ID', 'wp-travel-engine' ),
-			'tduration' => esc_html__( 'Trip Duration', 'wp-travel-engine' ),
+            'tid'       		=> esc_html__( 'Trip ID', 'wp-travel-engine' ),
+            'tduration' 		=> esc_html__( 'Trip Duration', 'wp-travel-engine' ),
+			/*
+			* Adds new columns to the trip list table.
+			* @since 6.4.0
+			*/
+            'numberofbookings' 	=> esc_html__( 'Trip Booked', 'wp-travel-engine' ),
+            'revenue' 			=> esc_html__( 'Revenue', 'wp-travel-engine' ),
 		);
 
 		return array_merge( $columns, $new_columns );
@@ -2268,21 +2214,21 @@ class Wp_Travel_Engine_Admin {
 	 * @since    1.0.0
 	 */
 	function wp_travel_engine_trip_custom_columns( $column, $post_id ) {
-		$wp_travel_engine_setting = get_post_meta( $post_id, 'wp_travel_engine_setting', true );
+        $wp_travel_engine_setting = get_post_meta( $post_id, 'wp_travel_engine_setting', true );
 
-		// Retrive duration and duration unit.
-		$results               = array();
-		$duration_mapping      = array(
-			'days'   => array( __( 'Day', 'wp-travel-engine' ), __( 'Days', 'wp-travel-engine' ) ),
-			'nights' => array( __( 'Night', 'wp-travel-engine' ), __( 'Nights', 'wp-travel-engine' ) ),
-			'hours'  => array( __( 'Hour', 'wp-travel-engine' ), __( 'Hours', 'wp-travel-engine' ) ),
-		);
-		$results[ 'duration' ] = $duration_mapping;
+        // Retrive duration and duration unit.
+        $results               = array();
+        $duration_mapping      = array(
+            'days'   => array( __( 'Day', 'wp-travel-engine' ), __( 'Days', 'wp-travel-engine' ) ),
+            'nights' => array( __( 'Night', 'wp-travel-engine' ), __( 'Nights', 'wp-travel-engine' ) ),
+            'hours'  => array( __( 'Hour', 'wp-travel-engine' ), __( 'Hours', 'wp-travel-engine' ) ),
+        );
+        $results[ 'duration' ] = $duration_mapping;
 
-		$meta                 = \wte_trip_get_trip_rest_metadata( $post_id );
-		$trip_duration_unit   = $meta->duration[ 'duration_unit' ];
-		$trip_duration_days   = (int) $meta->duration[ 'days' ];
-		$trip_duration_nights = (int) $meta->duration[ 'nights' ];
+        $meta                 = \wte_trip_get_trip_rest_metadata( $post_id );
+        $trip_duration_unit   = $meta->duration[ 'duration_unit' ];
+        $trip_duration_days   = (int) $meta->duration[ 'days' ];
+        $trip_duration_nights = (int) $meta->duration[ 'nights' ];
 
 		$duration_label = array();
 		if ( isset( $trip_duration_unit ) && ( $trip_duration_unit == 'days' || 'hours' ) && isset( $trip_duration_days ) && $trip_duration_days > 0 ) {
@@ -2297,16 +2243,28 @@ class Wp_Travel_Engine_Admin {
 			$duration_label[] = sprintf( _nx( '%1$d Night', '%1$d Nights', (int) $trip_duration_nights, 'trip duration night', 'wp-travel-engine' ), (int) $trip_duration_nights );
 		}
 
+		// Gets booking stats for the trip.
+		$trip_booking_stats = $this->get_trip_booking_stats( $post_id );
+
 		$screen = get_current_screen();
 		if ( $screen && 'trip' === $screen->post_type ) {
 			switch ( $column ) {
-
 				case 'tid':
 					echo (int) $post_id;
 					break;
 				case 'tduration':
 					echo esc_html( implode( ' - ', $duration_label ) );
 					break;
+				/**
+				 * Displays number of bookings and total revenue for the trip.
+				 * @since 6.4.0
+				 */
+                case 'numberofbookings':
+                    echo esc_html( $trip_booking_stats[ 'booking_count' ] ?? 0 );
+                    break;
+                case 'revenue':
+                    echo esc_html( wte_get_formated_price( $trip_booking_stats[ 'total_paid' ] ?? 0 ) );
+                    break;
 			}
 		}
 	}
@@ -3551,5 +3509,105 @@ class Wp_Travel_Engine_Admin {
 		}
 
 		return $title;
+	}
+
+	/**
+	 * Gets booking stats for a specific trip.
+	 * @since 6.4.0
+	 */
+	function get_trip_booking_stats( $post_id ) {
+		// Fetch all bookings for the trip with meta key 'order_trips' containing the trip ID.
+		$trip_bookings = get_posts(array(
+			'post_type'      => 'booking',
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+			'meta_query'     => array(
+				array(
+					'key'     => 'order_trips',
+					'value'   => sprintf(':%s;', $post_id),
+					'compare' => 'REGEXP'
+				)
+			)
+		));
+
+		// Calculate total paid amount.
+		$total_paid = array_reduce($trip_bookings, function( $sum, $booking_id ) {
+			$cart_info = get_post_meta( $booking_id, 'cart_info', true );
+			
+			if ( !isset( $cart_info['totals'] ) || !is_array( $cart_info['totals'] ) ) {
+				return $sum;
+			}
+			
+			$totals = $cart_info['totals'];
+			$payment_type = isset( $cart_info['payment_type'] ) ? $cart_info['payment_type'] : 'full';
+			$total_tax = isset( $totals['total_tax'] ) ? floatval( $totals['total_tax'] ) : 0;
+			
+			if ( $payment_type === 'full' ) {
+				$total = isset( $totals['total'] ) ? floatval( $totals['total'] ) : 0;
+				$booking_subtotal = $total - $total_tax;
+			} else {
+				$partial_total = isset( $totals['partial_total'] ) ? floatval( $totals['partial_total'] ) : 0;
+				$booking_subtotal = $partial_total - $total_tax;
+			}
+			
+			return $sum + ( $booking_subtotal > 0 ? $booking_subtotal : 0 );
+		}, 0);
+
+		return array(
+			'booking_count' => count( $trip_bookings ),
+			'total_paid'    => $total_paid
+		);
+	}
+
+	/**
+	 * Reorders columns in the trip post type list table.
+	 * @since 6.4.0
+	 */
+	function set_trip_columns_order( $columns ) {
+		$ordered_columns = array(
+			'cb'                     => $columns['cb'],
+			'title'                  => $columns['title'],
+			'tduration'              => $columns['tduration'],
+			'taxonomy-destination'   => $columns['taxonomy-destination'],
+			'taxonomy-activities'    => $columns['taxonomy-activities'],
+			'taxonomy-difficulty'    => $columns['taxonomy-difficulty'],
+			'numberofbookings'       => $columns['numberofbookings'],
+			'revenue'                => $columns['revenue'],
+			'date'                   => $columns['date'],
+			'featured'               => $columns['featured']
+		);
+
+		// Append remaining columns.
+		$remaining_columns = array_diff_key( $columns, $ordered_columns );
+
+		return array_merge( $ordered_columns, $remaining_columns );
+	}
+
+	/**
+	 * Sets default hidden columns in the trip post type list table.
+	 * @since 6.4.0
+	 */
+	function set_default_hidden_trip_columns( $result ) {
+		// Get current user ID
+		$user_id = get_current_user_id();
+
+		// Get user's saved preferences
+		$user_hidden = get_user_meta($user_id, 'manageedit-tripcolumnshidden', true);
+
+		// If user has preferences, use them
+		if ( !empty( $user_hidden ) && is_array( $user_hidden ) ) {
+			return $user_hidden;
+		}
+
+		// Otherwise, set default hidden columns for new users
+		return array(
+			'author',
+			'taxonomy-trip_types',
+			'taxonomy-trip_tag',
+			'comments',
+			'tid'
+		);
+
 	}
 }

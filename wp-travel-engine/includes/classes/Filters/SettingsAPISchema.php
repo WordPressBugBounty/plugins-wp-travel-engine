@@ -182,7 +182,7 @@ class SettingsAPISchema {
 		$settings = array();
 
 		$settings['extra_services'] = array(
-			'title' => (string) $this->plugin_settings->get( 'extra_service_title', '' ),
+			'title' => (string) $this->plugin_settings->get( 'extra_service_title', __( 'Extra Services', 'wp-travel-engine' ) ),
 		);
 
 		return $settings;

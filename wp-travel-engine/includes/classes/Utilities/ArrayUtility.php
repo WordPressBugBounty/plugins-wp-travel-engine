@@ -130,4 +130,39 @@ class ArrayUtility {
 		return $result;
 	}
 
+	/**
+	 * @param array $data
+	 * @param null $base_index
+	 *
+	 * @return array
+	 * @since 6.4.0
+	 */
+	public static function normalize( array $data, $base_index = null ): array {
+		$result = [];
+
+		// Get the first key to determine the number of elements
+		$keys = array_keys( $data );
+		if ( empty( $keys ) ) {
+			return $result; // Return empty if no data
+		}
+
+		if ( ! $base_index ) {
+			$base_index = $keys[ 0 ];
+		}
+
+		if ( count( $data[ $base_index ] ?? [] ) < 1 ) {
+			return $result;
+		}
+
+		foreach ( array_keys( $data[ $base_index ] ) as $_key ) {
+			$temp = [];
+			foreach ( $keys as $key ) {
+				$temp[ $key ] = $data[ $key ][ $_key ] ?? null; // Use null if index is missing
+			}
+			$result[] = $temp;
+		}
+
+		return $result;
+	}
+
 }

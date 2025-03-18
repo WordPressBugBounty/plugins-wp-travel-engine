@@ -40,6 +40,7 @@ use WPTravelEngine\Helpers\Functions;
 						if ( 'survey' === $key ) {
 							continue;
 						}
+
 						$data_label = wp_travel_engine_get_booking_field_label_by_name( $booking_key );
 						?>
 						<li>
@@ -108,8 +109,8 @@ use WPTravelEngine\Helpers\Functions;
 									<?php
 									$country_options = Functions::get_countries();
 									foreach ( $country_options as $key => $country ) {
-										$selected = selected( $value, $country, false );
-										echo '<option ' . $selected . " value='" . esc_attr( $country ) . "'>" . esc_html( $country ) . "</option>"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+										$selected = selected( $value, $key, false );
+										echo '<option ' . $selected . " value='" . esc_attr( $key ) . "'>" . esc_html( $country ) . "</option>"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 									}
 									?>
 								</select>

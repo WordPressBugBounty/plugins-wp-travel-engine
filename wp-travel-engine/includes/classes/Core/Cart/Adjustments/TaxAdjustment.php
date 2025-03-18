@@ -12,7 +12,7 @@ use WPTravelEngine\Core\Cart\Cart;
 use WPTravelEngine\Core\Cart\Item;
 use WPTravelEngine\Core\Tax;
 
-class TaxAdjustment extends CartAdjustment {
+class TaxAdjustment extends BaseCartAdjustment {
 
 	/**
 	 * Tax instance.
@@ -24,12 +24,13 @@ class TaxAdjustment extends CartAdjustment {
 	public function __construct( Cart $cart, array $args = array() ) {
 		$this->tax = new Tax();
 
-		$args      = wp_parse_args(
+		$args = wp_parse_args(
 			$args,
 			array(
 				'name'       => 'tax',
 				'label'      => $this->tax->get_tax_label(),
 				'percentage' => $this->tax->get_tax_percentage(),
+				'item_type'  => 'fee',
 			)
 		);
 		parent::__construct( $cart, $args );

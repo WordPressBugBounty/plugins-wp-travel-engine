@@ -2,6 +2,7 @@
 /**
  * Booking notification emails.
  */
+use WPTravelEngine\Helpers\Countries;
 $trip_details    = array(
 	'{tdate}'    => __( 'Trip Start Date', 'wp-travel-engine' ),
 	'{traveler}' => __( 'Total Traveller(s)', 'wp-travel-engine' ),
@@ -76,7 +77,12 @@ $payment_details = array(
 												<h3 class="alignleft"><?php echo esc_html__( 'Billing Details', 'wp-travel-engine' ); ?></h3>
 											</td>
 										</tr>
-										<?php foreach ( $billing_details as $tag => $label ) : ?>
+										<?php foreach ( $billing_details as $tag => $label ) :
+												$countries_list = Countries::list();
+												if ( isset( $countries_list[ $tag ] ) ) {
+													$tag = $countries_list[ $tag ];
+												}
+											?>
 											<tr>
 												<td><?php echo esc_html( $label ); ?></td>
 												<td class="alignright"><?php echo esc_html( $tag ); ?></td>

@@ -7,6 +7,7 @@
  */
 
 use WPTravelEngine\Core\Models\Post\Booking;
+use WPTravelEngine\Core\Models\Post\Payment as PaymentModel;
 
 $booking_details = [];
 foreach ( $args['bookings'] ?? [] as $booking ) {
@@ -17,6 +18,7 @@ foreach ( $args['bookings'] ?? [] as $booking ) {
 
     $booking_instance   = new Booking( $booking );
     $booking_metas      = $booking_instance->get_meta( 'wp_travel_engine_booking_setting' );
+    $_booking_meta = get_post_meta( $booking, 'cart_info', true );
     if ( 'publish' !== $booking_instance->post->post_status || empty( $booking_metas ) ) {
         continue;
     }
@@ -32,7 +34,7 @@ foreach ( $args['bookings'] ?? [] as $booking ) {
     $booking_payments       = (array) $booking_instance->get_payment_detail();
 	if ( empty( $booking_payments ) ) {
         $payment_status   = $booking_instance->get_payment_status();
-        $total_paid       = (float) ( $booking_metas['place_order']['cost'] ?? 0 );
+        $total_paid       = ( float ) ( $booking_metas['place_order']['cost'] ?? 0 );
         $due              = (float) ( $booking_metas['place_order']['due'] ?? 0 );
         $due              = $due < 1 ? 0 : $due;
         $show_pay_now_btn = ( 'partially-paid' === $payment_status || $due > 0 ) && ! empty( $active_payment_methods );
@@ -49,6 +51,11 @@ foreach ( $args['bookings'] ?? [] as $booking ) {
 
         $payment_status = implode( '/', $payment_status );
     }
+
+    $total_paid = $booking_instance->get_total_paid_amount() ?? 0;
+    $due = $booking_instance->get_total_due_amount() ?? 0;
+    $show_pay_now_btn = $due > 0;
+
 
     if ( 'active' !== $type && ! $payment_status ) {
         $payment_status = __( 'pending', 'wp-travel-engine' );

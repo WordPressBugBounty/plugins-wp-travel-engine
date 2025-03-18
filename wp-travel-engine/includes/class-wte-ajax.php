@@ -7,6 +7,7 @@ use WPTravelEngine\Core\Controllers\Ajax\Checkout;
 use WPTravelEngine\Core\Models\Post\Booking;
 use WPTravelEngine\Helpers\Functions;
 use WPTravelEngine\Registers\AjaxRequestRegistry;
+use WPTravelEngine\Core\Controllers\Ajax\ResendPurchaseReceipt;
 
 /**
  * WP Travel Engine AJAX
@@ -26,6 +27,11 @@ class WTE_Ajax {
 		$ajax_registry->register( Checkout::class );
 		$ajax_registry->register( ApplyCoupon::class );
 		$ajax_registry->register( Cart::class );
+		/**
+		 * Adds resend purchase receipt action
+		 * @since 6.4.0
+		 */
+		$ajax_registry->register( ResendPurchaseReceipt::class );
 
 		add_action( 'wp_ajax_nopriv_email_test', function () {
 

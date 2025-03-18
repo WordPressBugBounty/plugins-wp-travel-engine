@@ -18,20 +18,25 @@ class WP_Travel_Engine_Booking_Export {
 	 * @return void
 	 */
 	public function init() {
-		if ( isset( $_POST[ 'booking_export_submit' ] ) && wp_verify_nonce( $_POST[ 'booking_export_nonce' ], 'booking_export_nonce_action' ) ) {
-
-			$date_range = isset( $_POST[ 'wte_booking_range' ] ) ? sanitize_text_field( $_POST[ 'wte_booking_range' ] ) : '';
-			$dates      = explode( ' to ', $date_range );
-
-			// Store the dates in separate variables.
-			$start_date = isset( $dates[ 0 ] ) ? $dates[ 0 ] : '';
-			$end_date   = isset( $dates[ 1 ] ) ? $dates[ 1 ] : '';
-
-			$queries_data = self::export_query( $start_date, $end_date );
-
-			self::data_export( $queries_data );
-			exit;
+		// Early return if not exporting or invalid nonce.
+		if ( ! isset( $_REQUEST['booking_export_submit'] ) ||
+			! wp_verify_nonce( $_REQUEST['booking_export_nonce'], 'booking_export_nonce_action' ) ) {
+			return;
 		}
+
+		// Extract and validate date range.
+		$date_range                    = sanitize_text_field( $_REQUEST['wte_booking_range'] ?? '' );
+		$dates                         = array_pad( explode( ' to ', $date_range ), 2, '' );
+		list( $start_date, $end_date ) = $dates;
+		// Get filters.
+		$booking_status = sanitize_text_field( $_REQUEST['wptravelengine_booking_status'] ?? 'all' );
+		$trip_id        = sanitize_text_field( $_REQUEST['wptravelengine_trip_id'] ?? 'all' );
+		$filter_ids     = $trip_id == 'all' ? array() : wptravelengine_get_booking_ids( (int) $trip_id );
+
+		// Process export.
+		$queries_data = self::export_query( $start_date, $end_date, $booking_status, $filter_ids );
+		self::data_export( $queries_data );
+		exit;
 	}
 
 	/**
@@ -39,12 +44,17 @@ class WP_Travel_Engine_Booking_Export {
 	 *
 	 * @param string $start_date Start Date.
 	 * @param string $end_date End Date.
+	 * @param string $booking_status Booking Status.
+	 * @param array  $filter_ids Booking IDs.
 	 *
 	 * @since 5.7.4
+	 *
+	 * @modified_since 6.3.5 - Trip Name and booking status filter added.
 	 */
-	public function export_query( $start_date, $end_date ) {
+	public function export_query( $start_date, $end_date, $booking_status, $filter_ids ) {
 		global $wpdb;
-		$meta_keys = [
+
+		$meta_keys = array(
 			'wp_travel_engine_booking_status',
 			'wp_travel_engine_booking_setting',
 			'billing_info',
@@ -52,9 +62,9 @@ class WP_Travel_Engine_Booking_Export {
 			'wp_travel_engine_booking_payment_gateway',
 			'_wte_wc_order_id',
 			'due_amount',
-		];
+		);
 
-		$post_status = [ 'publish', 'draft' ];
+		$post_status = array( 'publish', 'draft' );
 
 		$sql = "
 		    SELECT
@@ -120,20 +130,36 @@ class WP_Travel_Engine_Booking_Export {
 		array_pop( $meta_keys );
 		$meta_keys[] = 'booking';
 
-		if ( ! empty( $start_date ) ) {
-			$sql         .= ' AND p.post_date >= %s';
+		if ( ! empty( $start_date ) && ! empty( $end_date ) ) {
+			// Date range: both start and end dates are provided.
+			$sql        .= ' AND DATE(p.post_date) >= %s AND DATE(p.post_date) <= %s';
+			$meta_keys[] = $start_date;
+			$meta_keys[] = $end_date;
+		} elseif ( ! empty( $start_date ) ) {
+			// Date range: only one date is provided.
+			$sql        .= ' AND DATE(p.post_date) = %s';
 			$meta_keys[] = $start_date;
 		}
 
-		if ( ! empty( $end_date ) ) {
-			$sql         .= ' AND p.post_date <= %s';
-			$meta_keys[] = $end_date;
+		if ( ( 'all' !== $booking_status ) ) {
+			$sql        .= " AND 
+						EXISTS (
+							SELECT 1
+							FROM $wpdb->postmeta pm_status
+							WHERE pm_status.post_id = p.ID
+							AND pm_status.meta_key = 'wp_travel_engine_booking_status'
+							AND pm_status.meta_value = %s
+						)";
+			$meta_keys[] = $booking_status;
+		}
+
+		if ( ! empty( $filter_ids ) ) {
+			$sql .= ' AND p.ID IN (' . implode( ', ', $filter_ids ) . ')';
 		}
 
 		$sql .= ' GROUP BY BookingID, BookingDate, BookingStatus ORDER BY BookingID DESC';
 
 		return $wpdb->get_results( $wpdb->prepare( $sql, $meta_keys ) );
-
 	}
 
 	/**
@@ -144,7 +170,14 @@ class WP_Travel_Engine_Booking_Export {
 	 * @since 5.7.4
 	 */
 	public function data_export( $queries_data ) {
-		// Set HTTP headers for CSV file download
+		if ( !is_array( $queries_data ) ) {
+			return;
+		}
+	
+		$file = fopen( 'php://output', 'w' );
+		if ( !$file ) {
+			return;
+		}
 		header( 'Content-Type: text/csv' );
 		header( 'Content-Disposition: attachment; filename="wptravelengine-booking-export.csv"' );
 		header( 'Pragma: no-cache' );
@@ -152,7 +185,70 @@ class WP_Travel_Engine_Booking_Export {
 
 		$file = fopen( 'php://output', 'w' );
 
-		// Define CSV header row
+		// Get all possible traveler fields and max counts
+		$traveler_fields        = array();
+		$emergency_fields       = array();
+		$max_travelers          = 0;
+		$max_emergency_contacts = 0;
+		$billing_fields         = array();
+
+		foreach ( $queries_data as $data ) {
+			$billing_details = get_post_meta( $data->BookingID, 'wptravelengine_billing_details', true );
+			if ( ! empty( $billing_details ) ) {
+				$billing_data = maybe_unserialize( $billing_details );
+				if ( is_array( $billing_data ) ) {
+					foreach ( $billing_data as $field => $value ) {
+						if ( ! in_array( $field, $billing_fields ) ) {
+							$billing_fields[] = $field;
+						}
+					}
+				}
+			}
+
+			$traveler_details = get_post_meta( $data->BookingID, 'wptravelengine_travelers_details', true );
+			if ( ! empty( $traveler_details ) ) {
+				$travelers = maybe_unserialize( $traveler_details );
+				if ( is_array( $travelers ) ) {
+					$max_travelers  = max( $max_travelers, count( $travelers ) );
+					$first_traveler = reset( $travelers );
+					if ( is_array( $first_traveler ) ) {
+						foreach ( $first_traveler as $field => $value ) {
+							if ( ! in_array( $field, $traveler_fields ) ) {
+								$traveler_fields[] = $field;
+							}
+						}
+					}
+				}
+			}
+
+			// Get max emergency contacts and fields
+			$emergency_details = get_post_meta( $data->BookingID, 'wptravelengine_emergency_details', true );
+			if ( ! empty( $emergency_details ) ) {
+				$emergency_data = maybe_unserialize( $emergency_details );
+				if ( is_array( $emergency_data ) ) {
+					if ( isset( $emergency_data['fname'] ) || isset( $emergency_data['first_name'] ) ) {
+						$max_emergency_contacts = max( $max_emergency_contacts, 1 );
+						foreach ( $emergency_data as $field => $value ) {
+							if ( ! in_array( $field, $emergency_fields ) ) {
+								$emergency_fields[] = $field;
+							}
+						}
+					} else {
+						$max_emergency_contacts = max( $max_emergency_contacts, count( $emergency_data ) );
+						$first_contact          = reset( $emergency_data );
+						if ( is_array( $first_contact ) ) {
+							foreach ( $first_contact as $field => $value ) {
+								if ( ! in_array( $field, $emergency_fields ) ) {
+									$emergency_fields[] = $field;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// Base headers
 		$header = array(
 			__( 'Booking ID', 'wp-travel-engine' ),
 			__( 'Booking Status', 'wp-travel-engine' ),
@@ -162,19 +258,59 @@ class WP_Travel_Engine_Booking_Export {
 			__( 'Payment Gateway', 'wp-travel-engine' ),
 			__( 'No. of Travellers', 'wp-travel-engine' ),
 			__( 'Booking Date', 'wp-travel-engine' ),
-			__( 'First Name', 'wp-travel-engine' ),
-			__( 'Last Name', 'wp-travel-engine' ),
-			__( 'Email', 'wp-travel-engine' ),
-			__( 'Address', 'wp-travel-engine' ),
 			__( 'Trip Date', 'wp-travel-engine' ),
 		);
 
-		// Write the header row to the CSV file
+		// Add billing headers after the basic headers.
+		foreach ( $billing_fields as $field ) {
+			$field_label = ucwords( str_replace( '_', ' ', $field ) );
+			$header[]    = sprintf( __( 'Billing - %s', 'wp-travel-engine' ), $field_label );
+		}
+
+		// Add headers for each traveler.
+		for ( $i = 1; $i <= $max_travelers; $i++ ) {
+			foreach ( $traveler_fields as $field ) {
+				$field_label = ucwords( str_replace( '_', ' ', $field ) );
+				$header[]    = sprintf( __( 'Traveler %1$d - %2$s', 'wp-travel-engine' ), $i, $field_label );
+			}
+		}
+
+		// Add headers for each emergency contact.
+		for ( $i = 1; $i <= $max_emergency_contacts; $i++ ) {
+			foreach ( $emergency_fields as $field ) {
+				$field_label = ucwords( str_replace( '_', ' ', $field ) );
+				$header[]    = sprintf( __( 'Emergency Contact %1$d - %2$s', 'wp-travel-engine' ), $i, $field_label );
+			}
+		}
+
+		// Only add these basic fields if billing details are not present.
+		$has_billing_data = false;
+		foreach ( $queries_data as $data ) {
+			$billing_details = get_post_meta( $data->BookingID, 'wptravelengine_billing_details', true );
+			if ( ! empty( $billing_details ) ) {
+				$has_billing_data = true;
+				break;
+			}
+		}
+
+		if ( ! $has_billing_data ) {
+			$basic_fields = array(
+				__( 'First Name', 'wp-travel-engine' ),
+				__( 'Last Name', 'wp-travel-engine' ),
+				__( 'Email', 'wp-travel-engine' ),
+				__( 'Address', 'wp-travel-engine' ),
+			);
+			$header       = array_merge( $header, $basic_fields );
+		}
+
+		// Add additional notes header
+		$header[] = __( 'Additional Notes', 'wp-travel-engine' );
+
+		// Write headers
 		fputcsv( $file, $header );
 
-		// Iterate over each data row and write to the CSV file
+		// Process each booking
 		foreach ( $queries_data as $data ) {
-
 			$tripname         = '';
 			$traveler         = '';
 			$tripstartingdate = '';
@@ -183,50 +319,155 @@ class WP_Travel_Engine_Booking_Export {
 			$lastname         = '';
 			$email            = '';
 			$address          = '';
+			$booking_date     = ( new DateTime( $data->BookingDate ) );
+
+			// Process place order data.
 			if ( isset( $data->placeorder ) ) {
-				// Unserialize the place order data.
 				$unserializedOrderData = unserialize( $data->placeorder );
-
-				// Accessing the values.
-				$tripname         = isset( $unserializedOrderData[ 'place_order' ][ 'tname' ] ) ? $unserializedOrderData[ 'place_order' ][ 'tname' ] : '';
-				$traveler         = isset( $unserializedOrderData[ 'place_order' ][ 'traveler' ] ) ? $unserializedOrderData[ 'place_order' ][ 'traveler' ] : '';
-				$tripstartingdate = isset( $unserializedOrderData[ 'place_order' ][ 'datetime' ] ) ? $unserializedOrderData[ 'place_order' ][ 'datetime' ] : '';
+				$tripname              = isset( $unserializedOrderData['place_order']['tname'] ) ? $unserializedOrderData['place_order']['tname'] : '';
+				$traveler              = isset( $unserializedOrderData['place_order']['traveler'] ) ? $unserializedOrderData['place_order']['traveler'] : '';
+				$tripstartingdate      = isset( $unserializedOrderData['place_order']['datetime'] ) ? $unserializedOrderData['place_order']['datetime'] : '';
 			}
+
+			// Process billing info.
 			if ( isset( $data->billinginfo ) ) {
-				// Unserialize the billing data.
 				$unserializedBillingData = unserialize( $data->billinginfo );
-
-				// Accessing the values.
-				$firstname = isset( $unserializedBillingData[ 'fname' ] ) ? $unserializedBillingData[ 'fname' ] : '';
-				$lastname  = isset( $unserializedBillingData[ 'lname' ] ) ? $unserializedBillingData[ 'lname' ] : '';
-				$email     = isset( $unserializedBillingData[ 'email' ] ) ? $unserializedBillingData[ 'email' ] : '';
-				$address   = isset( $unserializedBillingData[ 'address' ] ) ? $unserializedBillingData[ 'address' ] : '';
+				$firstname               = isset( $unserializedBillingData['fname'] ) ? $unserializedBillingData['fname'] : '';
+				$lastname                = isset( $unserializedBillingData['lname'] ) ? $unserializedBillingData['lname'] : '';
+				$email                   = isset( $unserializedBillingData['email'] ) ? $unserializedBillingData['email'] : '';
+				$address                 = isset( $unserializedBillingData['address'] ) ? $unserializedBillingData['address'] : '';
 			}
+
+			// Process payment gateway.
 			if ( isset( $data->PaymentGateway ) ) {
-				$paymentgateway = isset( $data->PaymentGateway ) && $data->PaymentGateway != 'N/A' ? $data->PaymentGateway : '';
+				$paymentgateway = $data->PaymentGateway != 'N/A' ? $data->PaymentGateway : '';
 			}
 			if ( isset( $data->wc_id ) && $data->wc_id != '(NULL)' ) {
 				$paymentgateway = 'woocommerce';
 			}
-			$booking_date = ( new DateTime( $data->BookingDate ) );
-			fputcsv(
-				$file,
-				array(
-					$data->BookingID,
-					$data->BookingStatus,
-					$tripname,
-					$data->TotalCost,
-					$data->TotalPaid,
-					$paymentgateway,
-					$traveler,
-					$booking_date->format( 'Y-m-d' ),
-					$firstname,
-					$lastname,
-					$email,
-					$address,
-					$tripstartingdate,
-				)
+
+			// Prepare base row data.
+			$row_data = array(
+				$data->BookingID,
+				$data->BookingStatus,
+				$tripname,
+				$data->TotalCost,
+				$data->TotalPaid,
+				$paymentgateway,
+				$traveler,
+				$booking_date->format( 'Y-m-d' ),
+				$tripstartingdate,
 			);
+
+			// Add billing data before traveler details.
+			$billing_details = get_post_meta( $data->BookingID, 'wptravelengine_billing_details', true );
+			if ( empty( $billing_details ) ) {
+				$row_data = array_merge(
+					$row_data,
+					array(
+						$firstname,
+						$lastname,
+						$email,
+						$address,
+					)
+				);
+			}
+			$billing_data = ! empty( $billing_details ) ? maybe_unserialize( $billing_details ) : array();
+
+			foreach ( $billing_fields as $field ) {
+				if ( isset( $billing_data[ $field ] ) ) {
+					$value = $billing_data[ $field ];
+					if ( is_array( $value ) && ! empty( $value ) ) {
+						// Handle array values and ensure they're all strings
+						$clean_values = array_map(
+							function ( $item ) {
+								return is_array( $item ) ? implode( ', ', $item ) : strval( $item );
+							},
+							$value
+						);
+						$row_data[]   = implode( ', ', $clean_values );
+					} else {
+						$row_data[] = $value;
+					}
+				} else {
+					$row_data[] = ''; // Empty string for missing fields
+				}
+			}
+
+			// Add traveler details.
+			$traveler_details = get_post_meta( $data->BookingID, 'wptravelengine_travelers_details', true );
+			$travelers        = ! empty( $traveler_details ) ? maybe_unserialize( $traveler_details ) : array();
+
+			for ( $i = 0; $i < $max_travelers; $i++ ) {
+				$current_traveler = isset( $travelers[ $i ] ) ? $travelers[ $i ] : array();
+
+				// Process each field for the current traveler.
+				foreach ( $traveler_fields as $field ) {
+					if ( isset( $current_traveler[ $field ] ) ) {
+						$value = $current_traveler[ $field ];
+						if ( is_array( $value ) && ! empty( $value ) ) {
+							// Handle array values and ensure they're all strings.
+							$clean_values = array_map(
+								function ( $item ) {
+									return is_array( $item ) ? implode( ', ', $item ) : strval( $item );
+								},
+								$value
+							);
+							$row_data[]   = implode( ', ', $clean_values );
+						} else {
+							$row_data[] = $value;
+						}
+					} else {
+						$row_data[] = '';
+					}
+				}
+			}
+
+			// Add emergency contact details.
+			$emergency_details  = get_post_meta( $data->BookingID, 'wptravelengine_emergency_details', true );
+			$emergency_contacts = array();
+
+			if ( ! empty( $emergency_details ) ) {
+				$emergency_data = maybe_unserialize( $emergency_details );
+				if ( is_array( $emergency_data ) ) {
+					if ( isset( $emergency_data['fname'] ) || isset( $emergency_data['first_name'] ) ) {
+						$emergency_contacts = array( $emergency_data );
+					} else {
+						$emergency_contacts = $emergency_data;
+					}
+				}
+			}
+
+			// Add data for each possible emergency contact.
+			for ( $i = 0; $i < $max_emergency_contacts; $i++ ) {
+				$current_contact = isset( $emergency_contacts[ $i ] ) ? $emergency_contacts[ $i ] : array();
+				foreach ( $emergency_fields as $field ) {
+					if ( isset( $current_contact[ $field ] ) ) {
+						$value = $current_contact[ $field ];
+						if ( is_array( $value ) && ! empty( $value ) ) {
+							// Handle array values and ensure they're all strings.
+							$clean_values = array_map(
+								function ( $item ) {
+									return is_array( $item ) ? implode( ', ', $item ) : strval( $item );
+								},
+								$value
+							);
+							$row_data[]   = implode( ', ', $clean_values );
+						} else {
+							$row_data[] = $value;
+						}
+					} else {
+						$row_data[] = ''; // Empty string for missing fields.
+					}
+				}
+			}
+
+			// Get and add additional note.
+			$additional_note = get_post_meta( $data->BookingID, 'wptravelengine_additional_note', true );
+			$row_data[]      = $additional_note ? $additional_note : '';
+
+			// Write the row to CSV.
+			fputcsv( $file, $row_data );
 		}
 
 		fclose( $file );

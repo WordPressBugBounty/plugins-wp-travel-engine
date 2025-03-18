@@ -153,6 +153,17 @@ abstract class PostModel {
 	}
 
 	/**
+	 * @param string $meta_key
+	 *
+	 * @return mixed
+	 * @since 6.4.0
+	 */
+	public function has_meta( string $meta_key ): bool {
+		$meta_value = get_post_meta( $this->ID, $meta_key );
+		return count($meta_value) > 0;
+	}
+
+	/**
 	 * @param $meta_key
 	 * @param $meta_value
 	 *

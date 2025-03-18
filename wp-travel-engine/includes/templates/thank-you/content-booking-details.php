@@ -28,20 +28,21 @@
 			</svg>
 		</span>
 		<div class="wpte-thankyou__end-date">
-			<span class="wpte-thankyou__date-label">Ends on:</span>
+			<span class="wpte-thankyou__date-label"><?php echo esc_html__( 'Ends on:', 'wp-travel-engine' ); ?></span>
 			<div><strong><?php echo esc_html__( $trip_end_date, 'wp-travel-engine' ); ?></strong></div>
 		</div>
 	</div>
 	<?php
 	if ( is_array( $traveller_details ) ) :
 		foreach ( $traveller_details as $index => $traveller_detail ) :
-			$traveller_label = sprintf( 'Traveller %d%s', $index + 1, $index === 0 ? __( ' (Lead Traveller)', 'wp-travel-engine' ) : '' );
+			$traveller_label = sprintf( __( 'Traveller %d%s', 'wp-travel-engine' ), $index + 1, $index === 0 ? __( ' (Lead Traveller)', 'wp-travel-engine' ) : '' );
 			?>
 			<div class="wpte-thankyou__block">
 				<div class="wpte-thankyou__block-title"><?php echo esc_html( $traveller_label ); ?></div>
 				<div class="wpte-thankyou__block-content">
 					<div class="wpte-thankyou__grid">
 						<?php foreach ( $traveller_detail as $name => $field ) : ?>
+							<?php if( empty( $field[ 'value' ] ) ) continue; ?>
 							<div>
 								<span
 									class="wpte-thankyou__label"><?php echo esc_html( $field[ 'field_label' ] ); ?></span>

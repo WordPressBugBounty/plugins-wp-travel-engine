@@ -41,6 +41,22 @@ class TravellersFormFields extends TravellerFormFields {
 	}
 
 	/**
+	 * @return TravellerFormFields[]
+	 * @since 6.4.0
+	 */
+	public function get_traveller_form_fields( $traveller_data = array() ): array {
+		$instances = array();
+
+		for( $i = 1; $i <= $this->number_of_travellers; $i++ ) {
+			$instance = new parent();
+			$fields   = $this->map_fields( $this->fields );
+			$instances[] = $instance->init( $fields );
+		}
+
+		return $instances;
+	}
+
+	/**
 	 * Render the form fields.
 	 *
 	 * @return void

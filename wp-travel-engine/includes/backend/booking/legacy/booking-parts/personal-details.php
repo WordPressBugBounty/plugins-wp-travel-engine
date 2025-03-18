@@ -118,8 +118,8 @@ wp_enqueue_script( 'jquery-ui-datepicker' );
 															<?php
 															$country_options = Functions::get_countries();
 															foreach ( $country_options as $key => $country ) {
-																$selected = selected( $data_value, $country, false );
-																echo '<option ' . esc_attr( $selected ) . " value='" . esc_attr( $country ) . "'>" . esc_html( $country ) . '</option>';
+																$selected = selected( $data_value, $key, false );
+																echo '<option ' . esc_attr( $selected ) . " value='" . esc_attr( $key ) . "'>" . esc_html( $country ) . '</option>';
 															}
 															?>
 												</select>
@@ -242,8 +242,8 @@ wp_enqueue_script( 'jquery-ui-datepicker' );
 																			<?php
 																			$country_options = Functions::get_countries();
 																			foreach ( $country_options as $key => $country ) {
-																				$selected = selected( $data_value, $country, false );
-																				echo '<option ' . esc_attr( $selected ) . " value='" . esc_attr( $country ) . "'>" . esc_html( $country ) . '</option>';
+																				$selected = selected( $data_value, $key, false );
+																				echo '<option ' . esc_attr( $selected ) . " value='" . esc_attr( $key ) . "'>" . esc_html( $country ) . '</option>';
 																			}
 																			?>
 																		</select>

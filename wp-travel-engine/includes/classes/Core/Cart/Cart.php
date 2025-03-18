@@ -10,6 +10,8 @@ namespace WPTravelEngine\Core\Cart;
 // Exit if accessed directly.
 use WP_REST_Request;
 use WPTravelEngine\Abstracts\CartAdjustment;
+use WPTravelEngine\Core\Cart\Adjustments\CouponAdjustment;
+use WPTravelEngine\Core\Coupon;
 use WPTravelEngine\Core\Tax;
 use WPTravelEngine\Filters\AddCartItems;
 use WPTravelEngine\Filters\CheckoutPageTemplate;
@@ -25,6 +27,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WP Travel Engine Cart Shortcode Class.
  */
 class Cart {
+
+	public string $version = '3.0';
+
+	public array $cart_info = array();
 
 	/**
 	 * Session key to hold cart data.
@@ -146,6 +152,11 @@ class Cart {
 	public string $payment_gateway;
 
 	/**
+	 * @var bool
+	 */
+	protected bool $static_cart = false;
+
+	/**
 	 * Initialize shopping cart.
 	 *
 	 * @return void
@@ -200,6 +211,16 @@ class Cart {
 		} );
 
 		return apply_filters( 'wptravelengine_cart_' . __FUNCTION__, $fees, $this );
+    }
+
+	/**
+	 * @param array $fees
+	 *
+	 * @return void
+	 * @since 6.4.0
+	 */
+	public function set_fees( array $fees ): void {
+		$this->fees = $fees;
 	}
 
 	/**
@@ -232,6 +253,16 @@ class Cart {
 			$this->deductible_items[ $item->order ] = $item;
 		}
 	}
+
+	/**
+	 * Get cart items.
+	 *
+	 * @return CartItem[]
+	 * @since 6.4.0
+	 */
+	public function get_cart_items(): array {
+        return $this->items;
+    }
 
 	/**
 	 * Add additional line items.
@@ -297,8 +328,9 @@ class Cart {
 		$this->cart_key = wptravelengine_generate_key( time() );
 
 		if ( ! is_null( $request->get_param( 'booking_id' ) ) ) {
-			$booking         = wptravelengine_get_booking( $request->get_param( 'booking_id' ) );
-			$cart_info       = $booking->get_cart_info();
+			$booking   = wptravelengine_get_booking( $request->get_param( 'booking_id' ) );
+			$cart_info = $booking->get_cart_info();
+
 			$this->discounts = $cart_info[ 'discounts' ] ?? array();
 
 			$order_items = $booking->get_order_items();
@@ -323,9 +355,15 @@ class Cart {
 		foreach ( $cart_items as $item ) {
 			$attributes = $item->data();
 			do_action( 'wte_before_add_to_cart', $item->trip_id, $attributes );
+			do_action( 'wptravelengine_before_add_item_to_cart', $item, $attributes, $this );
 			$this->items[ $item->id() ] = $item;
 		}
 
+		/**
+		 * @since 6.4.0
+		 */
+		do_action( 'wptravelengine_after_items_added_to_cart', $this->items, $this );
+	
 		$this->calculate_totals();
 
 		$this->write();
@@ -342,6 +380,10 @@ class Cart {
 	 * Write changes to cart session.
 	 */
 	protected function write() {
+
+		if ( $this->static_cart ) {
+			return;
+		}
 
 		$cart_attributes_session_name = $this->cart_id . '_attributes';
 		$items                        = array();
@@ -362,12 +404,7 @@ class Cart {
 		$cart[ 'booking_ref' ]     = $this->booking_ref;
 		$cart[ 'tax' ]             = $this->tax->get_tax_percentage();
 
-		WTE()->session->set( $this->cart_id, $cart );
-
-		// Cookie data to enable data info in js.
-		// ob_start();
-		// setcookie( 'wpte_trip_cart', wp_json_encode( $cart ), time() + 604800, '/SameSite=Lax' );
-		// ob_end_flush();
+		WTE()->session->set_json( $this->cart_id, array_merge( $cart, $this->data() ) );
 	}
 
 	/**
@@ -378,8 +415,8 @@ class Cart {
 	 */
 	public function calculate_totals() {
 		$this->reset_totals();
-		$this->fees             = array();
-		$this->deductible_items = array();
+//		$this->fees             = array();
+//		$this->deductible_items = array();
 
 		do_action( 'wptravelengine_before_calculate_totals', $this );
 
@@ -413,35 +450,6 @@ class Cart {
 		$totals[ 'due_total' ] = $totals[ 'total' ] - $totals[ 'partial_total' ];
 
 
-//		foreach ( $this->additional_line_items as $item ) {
-//			$item_subtotal        = $item->get_totals( 'subtotal' );
-//			$totals[ 'subtotal' ] += $item_subtotal;
-//
-//			foreach ( $this->get_deductible_items() as $deductible_item ) {
-//				$totals[ "total_{$deductible_item->name}" ] += $item->get_totals( "total_{$deductible_item->name}" );
-//			}
-//
-//			foreach ( $this->get_fees() as $fee ) {
-//				$totals[ "total_{$fee->name}" ] += $item->get_totals( "total_{$fee->name}" );
-//			}
-//
-//			$totals[ 'partial_total' ] += $item->get_totals( 'total_partial' );
-//
-//			$totals[ 'total' ] += $item->get_totals( 'total' );
-//		}
-
-
-//		foreach ( $this->items as $item ) {
-//			$totals[ 'subtotal' ]       += $item->subtotal();
-//			$totals[ 'subtotal_tax' ]   += $item->tax()[ 'subtotal' ] ?? 0;
-//			$totals[ 'discount_total' ] += $item->discount();
-//			$totals[ 'discount_tax' ]   += $item->tax()[ 'discount' ] ?? 0;
-//			$totals[ 'total_tax' ]      += $item->tax()[ 'total' ] ?? 0;
-//			$totals[ 'total' ]          += $item->total();
-//			$totals[ 'partial_total' ]  += $item->partial_total();
-//			$totals[ 'due_total' ]      += $item->due_total();
-//		}
-
 		$this->totals = apply_filters( 'wptravelengine_cart_calculate_totals', $totals, $this );
 
 		do_action( 'wptravelengine_after_calculate_totals', $this );
@@ -455,56 +463,112 @@ class Cart {
 	}
 
 	/**
+	 * Loads line items to the cart.
+	 *
+	 * @return void
+	 * @since 6.4.0
+	 */
+	protected function load_line_items( $items ) {
+		foreach ( $items as $item_key => $item_data ) {
+			$cart_item = new Item( $this, $item_data );
+			if ( isset( $item_data[ 'line_items' ] ) ) {
+				foreach ( $item_data[ 'line_items' ] as $line_items ) {
+					foreach ( $line_items as $line_item ) {
+						$class = $line_item[ '_class_name' ] ?? null;
+						if ( class_exists( $class ) ) {
+							$cart_item->add_additional_line_items( new $class( $this, $line_item ) );
+							$this->items[ $item_key ] = $cart_item;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Loads deductible items to the cart.
+	 *
+	 * @return void
+	 * @since 6.4.0
+	 */
+	protected function load_deductible_items( $items ) {
+		foreach ( $items as $item ) {
+			$class = $item[ '_class_name' ] ?? null;
+			if ( class_exists( $class ) ) {
+				$this->add_deductible_items( new $class( $this, $item ) );
+			}
+		}
+	}
+
+	/**
+	 * Loads fee items to the cart.
+	 *
+	 * @return void
+	 * @since 6.4.0
+	 */
+	protected function load_fees( $items ) {
+		foreach ( $items as $item ) {
+			$class = $item[ '_class_name' ] ?? null;
+			if ( class_exists( $class ) ) {
+				$this->add_fee( new $class( $this, $item ) );
+			}
+		}
+	}
+
+	/**
+	 * Loads Cart.
+	 *
+	 * @return void
+	 * @since 6.4.0
+	 */
+	public function load( $data ) {
+		if ( ! empty( $data[ 'items' ] ) ) {
+			$this->load_line_items( $data[ 'items' ] );
+		}
+
+		if ( ! empty( $data[ 'deductible_items' ] ) ) {
+			$this->load_deductible_items( $data[ 'deductible_items' ] );
+		}
+
+		if ( ! empty( $data[ 'fees' ] ) ) {
+			$this->load_fees( $data[ 'fees' ] );
+		}
+
+		if ( ! empty( $data[ 'payment_type' ] ) ) {
+			$this->set_payment_type( $data[ 'payment_type' ] );
+		}
+
+		$this->totals = $data[ 'totals' ] ?? $this->default_totals;
+
+		$this->set_attributes( $data[ 'attributes' ] ?? array() );
+	}
+
+	/**
 	 * Read items from cart session.
 	 *
 	 * @return void
 	 */
 	protected function read() {
 
-		$cart = WTE()->session->get( $this->cart_id );
+		$_cart = WTE()->session->get( $this->cart_id );
 
-		// Bail if no cart components are set.
-		if ( ! $cart ) {
+		if ( ! $_cart ) {
 			$this->reset_totals();
 
 			return;
 		}
 
-		if ( $this->booking_ref ) {
-			$booking = wptravelengine_get_booking( $this->booking_ref );
+		$this->load( $_cart );
 
-			if ( is_null( $booking ) ) {
-				WTE()->session->delete( $this->cart_id );
-
-				return;
-			}
-
-			$tax_amount = $booking->get_cart_info( 'tax_amount' );
-			$this->tax->set_tax_percentage( $tax_amount ?? $this->tax->get_tax_percentage() );
-		}
-
-		$this->set_payment_type( $cart[ 'payment_type' ] ?? 'full_payment' );
-		$this->set_payment_gateway( $cart[ 'payment_gateway' ] ?? 'booking_only' );
-		$this->booking_ref = $cart[ 'booking_ref' ] ?? null;
-		$this->discounts   = $cart[ 'discounts' ] ?? array();
-		$this->attributes  = $cart[ 'attributes' ] ?? array();
-		$this->cart_key    = $cart[ 'id' ] ?? '';
-
-		$cart_items = $cart[ 'cart_items' ];
-
-		if ( ! empty( $cart_items ) ) :
-			foreach ( $cart_items as $id => $item ) :
-				// Continue the loop if item is empty or package is not found.
-				if ( empty( $item ) || ! get_post( $item[ 'price_key' ] ) ) {
-					continue;
-				}
-				$_item = new Item( $this, $item );
-				$_item->add_add_line_items();
-				$this->items[ $id ] = $_item;
-			endforeach;
-		endif;
+		$this->set_payment_type( $_cart[ 'payment_type' ] ?? 'full_payment' );
+		$this->set_payment_gateway( $_cart[ 'payment_gateway' ] ?? 'booking_only' );
+		$this->booking_ref = $_cart[ 'booking_ref' ] ?? null;
+		$this->discounts   = $_cart[ 'discounts' ] ?? array();
+		$this->attributes  = $_cart[ 'attributes' ] ?? array();
+		$this->cart_key    = $_cart[ 'id' ] ?? '';
 
 		$this->calculate_totals();
+
 	}
 
 	/**
@@ -538,6 +602,17 @@ class Cart {
 	 */
 	public function set_booking_ref( ?int $booking_id = null ) {
 		$this->booking_ref = $booking_id;
+	}
+
+	/**
+	 * Set Cart Key.
+	 *
+	 * @param string|null $cart_key Currently processing cart key.
+	 *
+	 * @return void
+	 */
+	public function set_cart_key( ?string $cart_key = null ) {
+		$this->cart_key = $cart_key;
 	}
 
 	/**
@@ -598,6 +673,25 @@ class Cart {
 		$this->discounts[ $discount_id ][ 'name' ]  = $discount_name;
 		$this->discounts[ $discount_id ][ 'type' ]  = $discount_type;
 		$this->discounts[ $discount_id ][ 'value' ] = $discount_value;
+
+		$coupon = Coupon::by_code( $discount_name );
+		if ( $coupon instanceof Coupon ) {
+			$this->add_deductible_items(
+				new CouponAdjustment(
+					$this,
+					array(
+						'name'            => "coupon",
+						'label'           => sprintf(
+							__( '%s (%s)', 'wp-travel-engine' ),
+							$coupon->code(),
+							$coupon->type() === 'percentage' ? $coupon->value() . '%' : wptravelengine_the_price( $coupon->value(), false, false ),
+						),
+						'adjustment_type' => $coupon->type(),
+						'percentage'      => $coupon->value(),
+					)
+				)
+			);
+		}
 
 		$this->write();
 
@@ -714,7 +808,7 @@ class Cart {
 	 */
 	public function set_attributes( $attributes ) {
 		$this->attributes = $attributes;
-		$this->write();
+		// $this->write();
 	}
 
 	/**
@@ -999,7 +1093,8 @@ class Cart {
 	}
 
 	public function discount_clear() {
-		$this->discounts = array();
+		$this->discounts        = array();
+		$this->deductible_items = array();
 		$this->write();
 	}
 
@@ -1042,4 +1137,38 @@ class Cart {
 		return ! is_null( $this->booking_ref );
 	}
 
+	/**
+	 * @return array
+	 * @since 6.4.0
+	 */
+	public function data(): array {
+		$data = array(
+			'currency'         => wptravelengine_settings()->get( 'currency_code', 'USD' ),
+			'totals'           => $this->get_totals(),
+			'deductible_items' => array_map( function ( $item ) {
+				return array_merge(
+					$item->data(),
+					[ '_class_name' => get_class( $item ) ]
+				);
+			}, $this->get_deductible_items() ),
+			'fees'             => array_map( function ( $item ) {
+				return array_merge(
+					$item->data(),
+					[ '_class_name' => get_class( $item ) ]
+				);
+			}, $this->get_fees() ),
+		);
+		foreach ( $this->getItems( true ) as $item ) {
+			$data[ 'items' ][] = $item->data() ?? array();
+		}
+
+		return $data;
+	}
+
+	/**
+	 * @since 6.4.0
+	 */
+	public function __clone() {
+		$this->static_cart = true;
+	}
 }
