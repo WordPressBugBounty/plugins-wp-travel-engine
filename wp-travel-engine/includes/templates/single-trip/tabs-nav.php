@@ -25,8 +25,10 @@ if (! empty($tabs['id'])) : ?>
 		<div class="nav-tab-wrapper">
 			<?php if ($make_tabs_sticky) : ?>
 				<div class="wpte-sticky-tab-mobile">
-					<?php foreach (array_values($tabs['id']) as $index => $values) : ?>
-						<div class="tab-anchor-wrapper">
+					<?php 
+					$order = 1;
+					foreach (array_values($tabs['id']) as $index => $values) : ?>
+						<div class="tab-anchor-wrapper" style="order: <?php echo esc_attr($order); ?>;">
 							<a href="#"
 								class="nav-tab nb-tab-trigger <?php echo esc_attr($index === 0 ? 'nav-tab-active' : ''); ?>"
 								data-configuration="<?php echo esc_attr($values); ?>" 
@@ -34,18 +36,23 @@ if (! empty($tabs['id'])) : ?>
 								aria-selected="<?php echo esc_attr($index === 0 ? 'true' : 'false'); ?>">
 								<?php
 								if (isset($tabs['icon'][$values]) && $tabs['icon'][$values] !== '') {
-									echo '<span class="tab-icon">' . wptravelengine_svg_by_fa_icon($tabs['icon'][$values], false) . '</span>';
+									$icon_data = isset($tabs['icon'][$values]['id']) ? wp_get_attachment_image($tabs['icon'][$values]['id'], 'thumbnail', true ) : wptravelengine_svg_by_fa_icon( $tabs['icon'][$values], false );
+									echo '<span class="tab-icon">' . $icon_data . '</span>';
 								}
 								echo esc_html($tabs['name'][$values]);
 								?>
 							</a>
 						</div>
-					<?php endforeach; ?>
+					<?php 
+					$order+=2;
+					endforeach; ?>
 				</div>
 			<?php endif; ?>
 			<div class="tab-inner-wrapper">
-				<?php foreach (array_values($tabs['id']) as $index => $values) : ?>
-					<div class="tab-anchor-wrapper">
+				<?php 
+				$order = 1;
+				foreach (array_values($tabs['id']) as $index => $values) : ?>
+					<div class="tab-anchor-wrapper" style="order: <?php echo esc_attr($order); ?>;">
 						<h2 class="wte-tab-title">
 							<a href="#"
 								class="nav-tab nb-tab-trigger <?php echo esc_attr($index === 0 ? 'nav-tab-active' : ''); ?>"
@@ -54,14 +61,17 @@ if (! empty($tabs['id'])) : ?>
 								aria-selected="<?php echo esc_attr($index === 0 ? 'true' : 'false'); ?>">
 								<?php
 								if (isset($tabs['icon'][$values]) && $tabs['icon'][$values] !== '') {
-									echo '<span class="tab-icon">' . wptravelengine_svg_by_fa_icon($tabs['icon'][$values], false) . '</span>';
+									$icon_data = isset($tabs['icon'][$values]['id']) ? wp_get_attachment_image($tabs['icon'][$values]['id'], 'thumbnail', true ) : wptravelengine_svg_by_fa_icon( $tabs['icon'][$values], false );
+									echo '<span class="tab-icon">' . $icon_data . '</span>';
 								}
 								echo esc_html($tabs['name'][$values]);
 								?>
 							</a>
 						</h2>
 					</div>
-				<?php endforeach; ?>
+				<?php 
+				$order+=2;
+			endforeach; ?>
 			</div>
 		</div>
 		<!-- ./nav-tab-wrapper -->

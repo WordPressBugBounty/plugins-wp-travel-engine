@@ -39,3 +39,12 @@ wp_enqueue_script( 'wptravelengine-booking-edit' );
 			</div> <!-- end .wpte-booking-summary-area -->
 		</div>
 	</div> <!-- end .wpte-form-container -->
+
+	<?php
+	/**
+	 * Hooks for Addons.
+	 *
+	 */
+	do_action('wp_travel_engine_booking_screen_after_personal_details', $booking->ID);
+	?>
+</div>

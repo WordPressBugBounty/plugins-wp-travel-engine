@@ -70,7 +70,6 @@ $trip_meta_tabs = array(
 			array(
 				'description' => __('Enter the duration ( number ) for the trip and choose desired unit.', 'wp-travel-engine'),
 				'label'       => __('Duration', 'wp-travel-engine'),
-				'divider'    => true,
 				'field'       => [
 					'type' => 'GROUP',
 				],
@@ -121,6 +120,18 @@ $trip_meta_tabs = array(
 						],
 					),
 				),
+			),
+			array(
+				'visibility'  	=> ! wptravelengine_is_addon_active( 'activity-tour' ),
+				'field'       	=> [
+					'type'      => 'ALERT',
+					'content'  	=> __('<p>Do you offer activity-based or single-day tours? The Activity Tour Booking extension makes it easy to create and showcase these experiences with detailed itineraries, real-time availability, and seamless booking. <a href="https://wptravelengine.com/plugins/activity-tour-booking/" target="_blank"><strong>Get Activity Tour extension now!</strong></a></p>', 'wp-travel-engine'),
+				],
+			),
+			array(
+				'field'		=> [
+					'type'		=> 'DIVIDER'
+				]
 			),
 			array(
 				'label'       => __('Enable Cut-off Time', 'wp-travel-engine'),

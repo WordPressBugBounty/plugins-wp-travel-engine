@@ -582,6 +582,26 @@ class Trip extends PostModel {
 	}
 
 	/**
+	 * Get the trip itinerary chart labels.
+	 * 
+	 * @return array
+	 * @since 6.4.1
+	 */
+	public function get_itinerary_chart_labels(): array {
+
+		$unit  	= wptravelengine_get_label_by_slug( $this->get_trip_duration_unit() );
+		$labels	= array_values( $this->get_setting( 'itinerary.itinerary_days_label', array() ) );
+
+		return array_map( 
+			function( $label, $key ) use ( $unit ) {
+				return $label ?: ( 'days' === $this->get_trip_duration_unit() ? $unit . ' ' . ( $key + 1 ) : '' );
+			}, 
+			$labels, 
+			array_keys( $labels )
+		);
+	}
+
+	/**
 	 * Get the trip itinerary data.
 	 *
 	 * @return array

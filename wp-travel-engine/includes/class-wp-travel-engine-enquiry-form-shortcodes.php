@@ -84,7 +84,6 @@ class WP_Travel_Engine_Enquiry_Form_Shortcodes {
 	 */
 	public static function get_enquiry_form_fields( $post_id, $args = array() ) {
 		$enquiry_form_fields = WTE_Default_Form_Fields::enquiry();
-
 		if ( ( isset( $args['use_current'] ) && 'yes' === $args['use_current'] && WP_TRAVEL_ENGINE_POST_TYPE === get_post_type( $post_id ) ) || ( ! isset( $args['shortcode'] ) || ! $args['shortcode'] ) ) {
 			$package_fields = self::get_package_detail_fields( $post_id );
 		} else {
@@ -99,9 +98,7 @@ class WP_Travel_Engine_Enquiry_Form_Shortcodes {
 				'post_title',
 				'ID'
 			);
-
-			$trip_select_options = [ '' => __( 'Select Trip*', 'wp-travel-engine' ) ] + $trip_select_options;
-
+			$trip_select_options = [ '' => __( 'Select Trip', 'wp-travel-engine' ) ] + $trip_select_options;
 			$attributes          = array();
 			if ( ! empty( $args['trip_id'] ) ) {
 				$attributes['disabled'] = true;
@@ -116,9 +113,6 @@ class WP_Travel_Engine_Enquiry_Form_Shortcodes {
 					'options'       => $trip_select_options,
 					'priority'      => 7,
 					'default'       => ! empty( $args['trip_id'] ) ? $args['trip_id'] : '',
-					'validations'   => array(
-						'required' => true,
-					),
 					'attributes'    => $attributes,
 				),
 			);

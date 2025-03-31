@@ -20,6 +20,44 @@ require_once __DIR__ . '/wp-travel-engine-form-fields.php';
 require_once __DIR__ . '/cart.php';
 
 /**
+ * Get the label of provided slug and count.
+ * 
+ * @param string $slug Slug of the label to get.
+ * @param int $count Count of the label to get.
+ * 
+ * @return string Label of the provided slug.
+ * @since 6.4.1
+ */
+function wptravelengine_get_label_by_slug( string $slug, int $count = 1 ): string {
+
+	$default_labels = array(
+		'Day'    => array( 'day', 'days' ),
+		'Night'  => array( 'night', 'nights' ),
+		'Hour'   => array( 'hour', 'hours' ),
+		'Minute' => array( 'minute', 'minutes' ),
+	);
+
+	$slug_array = array();
+	foreach ( $default_labels as $label => $labels ) {
+		$slug_array += array_fill_keys( 
+			$labels, 
+			array( 
+				'single' => $label, 
+				'plural' => $label . 's' 
+			) 
+		);
+	}
+
+	$slug_array = apply_filters( 'wptravelengine_get_label_by_slug', $slug_array );
+
+	if ( ! array_key_exists( $slug, $slug_array ) ) {
+		return '';
+	}
+
+	return $slug_array[ $slug ][ 1 === $count ? 'single' : 'plural' ];
+}
+
+/**
  * Checks if a WP Travel Engine add-on is active.
  *
  * @param string $addon Addon slug to check. Accepts:
@@ -39,6 +77,7 @@ require_once __DIR__ . '/cart.php';
  *                     - zapier
  *                     - custom-booking-link
  *                     - booking-fee
+ *                     - activity-tour
  *
  * @return ?bool Returns true if addon is active, false if inactive, null if invalid addon
  * @since 6.2.2
@@ -67,6 +106,7 @@ function wptravelengine_is_addon_active( string $addon ) {
 		'zapier'               => 'WTE_ZAPIER_PLUGIN_FILE',
 		'custom-booking-link'  => 'WTE_CBL_FILE_PATH',
 		'booking-fee'          => 'WPTRAVELENGINE_BOOKING_FEE_FILE',
+		'activity-tour' 	   => 'WPTRAVELENGINE_ACTIVITY_TOUR_BOOKING_PATH',
 	);
 
 	if ( ! isset( $addon_files[ $addon ] ) ) {
@@ -1392,8 +1432,22 @@ function wte_esc_svg( $value ) {
 				'fill'      => array(),
 				'data-name' => array(),
 				'transform' => array(),
+				'stroke'    => array(),
+				'stroke-width' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
 			),
 			'i'     => array(),
+			'circle' => array(
+				'cx' => array(),
+				'cy' => array(),
+				'r' => array(),
+				'fill' => array(),
+				'stroke' => array(),
+				'stroke-width' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+			),
 		)
 	);
 }

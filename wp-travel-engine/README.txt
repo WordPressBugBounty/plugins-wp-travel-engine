@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 6.4.0
+Stable tag: 6.4.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -367,6 +367,13 @@ Yes. We have created WooCommerce Payments add-ons that supports all the payment 
 Please send us an email via [support ticket](https://wptravelengine.com/support-ticket/?utm_source=free_plugin&utm_medium=wporg&utm_campaign=support), and we will be happy to help you.
 
 == Changelog ==
+
+= 6.4.1 - 31st March 2025 =
+* Enhancement: Revamped the single trip page design for a better user experience.
+* Enhancement: Added a dedicated archive page for trip tags.
+* Fix: Fixed an issue with invalid taxonomy slugs in custom filters.
+* Fix: Resolved the booking inventory update issue.
+* Fix: Made the Trip Name field optional in the enquiry form.
 
 = 6.4.0 - 18th March 2025 =
 * Fix: Resolved issue with custom cookies being stripped by the CDN.

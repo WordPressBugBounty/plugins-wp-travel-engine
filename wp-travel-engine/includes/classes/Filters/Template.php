@@ -82,7 +82,7 @@ class Template {
 		} else if ( is_post_type_archive( WP_TRAVEL_ENGINE_POST_TYPE ) ) {
 			$template_path = wte_locate_template( 'archive-trip.php' );
 		} else {
-			foreach ( array( 'trip_types', 'destination', 'activities' ) as $tax ) {
+			foreach ( array( 'trip_types', 'trip_tag', 'destination', 'activities' ) as $tax ) {
 				if ( is_tax( $tax ) ) {
 					$template_path = wte_locate_template( 'taxonomy-' . $tax . '.php' );
 					break;

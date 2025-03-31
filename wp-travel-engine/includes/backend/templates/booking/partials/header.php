@@ -35,7 +35,7 @@ use WPTravelEngine\Core\Models\Post\Booking;
 	$admin_edited_tag = wptravelengine_toggled( $booking->get_meta( '_user_edited' ) ) ? sprintf( '<span class="wpte-tag %1$s">%1$s</span>', __( 'Customized Reservation', 'wp-travel-engine' ) ) : '';
 	?>
 	<div class="wpte-page-header-content">
-		<?php
+		<?php 
 		printf(
 			'<div class="wpte-tags-wrap">%1$s%2$s</div>',
 			$admin_edited_tag,

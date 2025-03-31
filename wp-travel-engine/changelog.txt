@@ -1,5 +1,12 @@
 == Changelog ==
 
+= 6.4.1 - 31st March 2025 =
+* Enhancement: Revamped the single trip page design for a better user experience.
+* Enhancement: Added a dedicated archive page for trip tags.
+* Fix: Fixed an issue with invalid taxonomy slugs in custom filters.
+* Fix: Resolved the booking inventory update issue.
+* Fix: Made the Trip Name field optional in the enquiry form.
+
 = 6.4.0 - 18th March 2025 =
 * Fix: Resolved issue with custom cookies being stripped by the CDN.
 * Fix: Resolved incorrect package selection in the booking modal.

@@ -33,16 +33,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php } ?>
 	</span>
 
-	<span class="wte-title-duration wte-duration-night">
-		<?php if( 'days_and_nights' === $trip_duration_format && ! empty( $nights ) && 'hours' !== $duration_unit ) { ?>
-				<span class="duration">
-					<?php echo esc_html( number_format_i18n( $nights) ); ?>
-				</span>
-				<span class="days">
-					<?php printf( esc_html( _nx( 'Night', 'Nights', $nights , 'nights', 'wp-travel-engine' ) ) ); ?>
-				</span>
-			<?php } ?>
-	</span>
+	<?php if( 'days_and_nights' === $trip_duration_format && ! empty( $nights ) && 'hours' !== $duration_unit ) { ?>
+		<span class="wte-title-duration wte-duration-night">
+			<span class="duration">
+				<?php echo esc_html( number_format_i18n( $nights) ); ?>
+			</span>
+			<span class="days">
+				<?php printf( esc_html( _nx( 'Night', 'Nights', $nights , 'nights', 'wp-travel-engine' ) ) ); ?>
+			</span>
+		</span>
+	<?php } ?>
 
 	<!-- ./ Display duraiton -->
 	<?php do_action( 'wp_travel_engine_header_hook' ); ?>

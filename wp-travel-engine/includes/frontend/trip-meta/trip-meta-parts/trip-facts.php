@@ -47,11 +47,13 @@ $additional_trip_facts 	= wptravelengine_get_trip_facts_default_options();
 							}
 							?>
 							<li>
-								<?php if ( ! empty( $icon ) ) : ?>
-									<span class="icon-holder"><?php echo wptravelengine_svg_by_fa_icon( $icon, false ); ?></span>
+								<?php if ( ! empty( $icon ) ) : 
+									$icon_data = isset($icon['id']) ? wp_get_attachment_image($icon['id'], 'thumbnail', true ) : wptravelengine_svg_by_fa_icon( $icon, false );
+									?>
+									<span class="icon-holder"><?php echo $icon_data; ?></span>
 								<?php endif; ?>
-								<label><?php echo esc_html( $id ); ?></label>
 								<div class="trip-facts-<?php echo esc_attr( $field_type ); ?>">
+									<label><?php echo esc_html( $id ); ?></label>
 									<div class="value"><?php echo wp_kses_post( $field_value ); ?></div>
 								</div>
 							</li>
@@ -75,9 +77,12 @@ $additional_trip_facts 	= wptravelengine_get_trip_facts_default_options();
 						}
 						?>
 						<li>
-							<span class="icon-holder"><?php echo wptravelengine_svg_by_fa_icon( $fact['field_icon'] ); ?></span>
-							<label><?php echo esc_html( $fact['field_id'] ); ?></label>
+							<?php
+							$icon_data = isset($fact['field_icon']['id']) ? wp_get_attachment_image($fact['field_icon']['id'], 'thumbnail', true ) : wptravelengine_svg_by_fa_icon( $fact['field_icon'], false );
+							?>
+							<span class="icon-holder"><?php echo $icon_data; ?></span>
 							<div class="trip-facts-text <?php echo isset( $fact_class ) ? esc_attr( $fact_class ) : ''; ?>">
+								<label><?php echo esc_html( $fact['field_id'] ); ?></label>
 								<div class="value"><?php echo wp_kses( $fact_value, array( 'a' => array( 'href' => array() ) ) ); ?></div>
 							</div>
 						</li>

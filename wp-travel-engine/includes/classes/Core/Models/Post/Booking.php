@@ -805,7 +805,7 @@ class Booking extends PostModel {
 				if ( is_array( $order_trip['pax'] ) ) {
 					$pax = array_sum( $order_trip['pax'] );
 				}
-				if ( isset( $pricing_line_items ) && is_array( $pricing_line_items ) ) {
+				if ( isset( $pricing_line_items ) && ! empty( $pricing_line_items ) && is_array( $pricing_line_items ) ) {
 					$pax = array_sum( array_column( $pricing_line_items, 'quantity' ) );
 				}
 

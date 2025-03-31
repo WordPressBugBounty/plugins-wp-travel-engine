@@ -51,7 +51,7 @@ class Filters {
 				array(
 					'labels'       => array(
 						'name' => $filter[ 'label' ],
-					),
+        ),
 					'show_in_rest' => true,
 					'hierarchical' => $filter[ 'hierarchical' ],
 					'sort'         => true,
@@ -145,7 +145,7 @@ class Filters {
 			$label           = wp_kses( wp_unslash( $request[ 'filter_label' ] ), array() );
 			$is_hierarchical = isset( $request[ 'filter_is_hierarchical' ] ) && 'yes' === $request[ 'filter_is_hierarchical' ];
 			$show            = isset( $request[ 'show_in_filters' ] ) && 'yes' === $request[ 'show_in_filters' ];
-			$slug            = ! empty( $request[ 'filter_slug' ] ) ? untrailingslashit( $request[ 'filter_slug' ], '', 'save' ) : untrailingslashit( $label, '', 'save' );
+			$slug 			 = ! empty( $request['filter_slug'] ) ? sanitize_key( $request['filter_slug'] ) : sanitize_key( $label );
 
 			if ( strlen( $slug ) > 32 ) {
 				wp_die( esc_html__( 'Taxonomy names must be between 1 and 32 characters in length.', 'wp-travel-engine' ), 'wp-travel-engine' );

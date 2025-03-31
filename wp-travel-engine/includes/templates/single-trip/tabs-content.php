@@ -18,6 +18,7 @@ $show_all_tabs = apply_filters( 'wte_single_trip_show_all_tabs', false );
 if ( isset( $tabs['id'] ) ) : ?>
 	<div class="tab-content delay_me" >
 		<?php
+		$order = 2;
 		foreach ( array_values( $tabs['id'] ) as $index => $id ) :
 			$field = $tabs['field'][ $id ];
 			$icon  = isset( $tabs['icon'][ $id ] ) ? $tabs['icon'][ $id ] : '';
@@ -28,10 +29,8 @@ if ( isset( $tabs['id'] ) ) : ?>
 			do_action( "wte_single_before_trip_tab_{$field}" );
 			?>
 			<div id="nb-<?php echo esc_attr( $id ); ?>-configurations" class="nb-<?php echo esc_attr( $id ); ?>-configurations nb-configurations"
-					<?php
-					echo ( 0 !== $index && ! $show_all_tabs ) ? 'style="display:none;" >' : '>';
-					do_action( "wte_single_trip_tab_content_{$field}", $id, $field, $tabs['name'][ $id ], $icon );
-					?>
+					style="order: <?php echo esc_attr($order); ?>;<?php echo ( 0 !== $index && ! $show_all_tabs ) ? 'display:none;' : ''; ?>" >
+					<?php do_action( "wte_single_trip_tab_content_{$field}", $id, $field, $tabs['name'][ $id ], $icon ); ?>
 			</div>
 			<?php
 			/**
@@ -39,6 +38,7 @@ if ( isset( $tabs['id'] ) ) : ?>
 			 * Dynamic hooks after Tab wrapper - for themes to hook content into.
 			 */
 			do_action( "wte_single_after_trip_tab_{$field}" );
+			$order+=2;
 		endforeach;
 		?>
 	</div>
