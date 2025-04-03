@@ -1,5 +1,8 @@
 == Changelog ==
 
+= 6.4.2 - 3rd April 2025 =
+* Fix: Resolve react-hook-form package compatibility issue with addons
+
 = 6.4.1 - 31st March 2025 =
 * Enhancement: Revamped the single trip page design for a better user experience.
 * Enhancement: Added a dedicated archive page for trip tags.
