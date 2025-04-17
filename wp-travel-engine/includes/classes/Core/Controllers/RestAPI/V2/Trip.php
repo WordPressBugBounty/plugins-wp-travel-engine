@@ -18,6 +18,8 @@ use WP_REST_Server;
 use WPTravelEngine\Core\Models\Post;
 use WPTravelEngine\Core\Models\Settings\Options;
 use WPTravelEngine\Utilities\ArrayUtility;
+use WPTravelEngine\Core\Models\Post\TripPackage;
+use WPTravelEngine\Helpers\PackageDateParser;
 
 /**
  * REST API: Trip Post Controller class
@@ -267,9 +269,9 @@ class Trip extends WP_REST_Posts_Controller {
 		$this->trip          = new Post\Trip( $request->get_param( 'id' ) );
 		$this->trip_settings = ArrayUtility::make( $this->trip->{'settings'} );
 
-		do_action( 'wptravelengine_api_update_trip', $request, $this );
-
 		$this->set_core_settings( $request );
+
+		do_action( 'wptravelengine_api_update_trip', $request, $this );
 
 		if ( isset( $this->errors ) ) {
 			return $this->errors;
@@ -710,9 +712,19 @@ class Trip extends WP_REST_Posts_Controller {
 			if ( ! isset( $this->errors ) ) {
 				$trip->set_meta( 'packages_ids', $trip_package_ids );
 				foreach ( $meta_inputs ?? [] as $meta_input ) {
-					$available_months = array_map( function ( $string ) {
-						return substr( $string, 2, 4 );
-					}, array_keys( $meta_input[ 'package-dates' ] ) );
+
+					$available_months = array_values( array_unique(
+						call_user_func_array(
+							'array_merge',
+							array_map( function ( $string ) use ( $meta_input, $trip ) {
+								return ( new PackageDateParser(
+									new TripPackage( $meta_input['package_id'], $trip ),
+									$meta_input['package-dates'][ $string ]
+								) )->get_unique_dates( false, array(), 'ym' );
+							}, array_keys( $meta_input['package-dates'] ) )
+						)
+					) );
+
 					wp_update_post( [
 						'ID'           => array_shift( $meta_input ),
 						'post_title'   => array_shift( $meta_input ),
@@ -798,6 +810,8 @@ class Trip extends WP_REST_Posts_Controller {
 			'unit'   => (string) $trip->get_setting( 'trip_duration_unit', 'days' ),
 			'nights' => (int) $trip->get_setting( 'trip_duration_nights', 0 ),
 		);
+		$duration = ( 'days' === ( $data[ 'duration' ][ 'unit' ] ?? 'days' ) ) ? $data[ 'duration' ][ 'period' ] * 24 : $data[ 'duration' ][ 'period' ];
+		$data[ '_s_duration' ]          = $trip->search_in_meta( '_s_duration', $duration );
 
 		$data[ 'age_limit' ] = [
 			'enable' => wptravelengine_toggled( $trip->get_setting( 'min_max_age_enable', false ) ),

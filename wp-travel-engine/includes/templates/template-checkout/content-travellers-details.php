@@ -8,6 +8,15 @@
 if ( 'hide' === ( $args['attributes']['travellers'] ?? '' ) ) {
     return;
 }
+$wptravelengine_settings = get_option( 'wp_travel_engine_settings', [] );
+$travellers_details_type = $wptravelengine_settings['travellers_details_type'] ?? 'all';
+$number_of_travellers = $travellers_form_fields[0]->number_of_travellers ?? 1;
+
+// Early return if only lead traveller details needed or when there is only one traveller.
+if ( 'only_lead' === $travellers_details_type || $number_of_travellers <= 1 ) {
+    return;
+}
+
 ?>
 <!-- Traveller's Details Form -->
 <div class="wpte-checkout__box collapsible <?php echo $show_title ? 'open' : ''; ?>">

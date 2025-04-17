@@ -12,6 +12,7 @@ use WPTravelEngine\Builders\FormFields\BillingFormFields;
 use WPTravelEngine\Builders\FormFields\EmergencyFormFields;
 use WPTravelEngine\Builders\FormFields\PrivacyPolicyFields;
 use WPTravelEngine\Builders\FormFields\TravellersFormFields;
+use WPTravelEngine\Builders\FormFields\LeadTravellersFormFields;
 use WPTravelEngine\Core\Coupons;
 use WPTravelEngine\Core\Models\Settings\PluginSettings;
 use WPTravelEngine\Pages\Checkout;
@@ -65,16 +66,17 @@ class CheckoutPageTemplate extends BookingProcessPageTemplate {
 		add_action( 'wptravelengine_stripe_payment_payment_cc', array( $this, 'print_stripe_payment_cc' ) );
 
 		$checkout_templates = array(
-			'wptravelengine_checkout_payment_modes'      => 'print_payment_modes',
-			'wptravelengine_checkout_payment_methods'    => 'print_payment_methods',
-			'checkout_template_parts_tour-details'       => 'print_tour_details',
-			'checkout_template_parts_cart-summary'       => 'print_cart_summary',
-			'checkout_template_parts_payments'           => 'print_payments_methods',
-			'checkout_template_parts_travellers-details' => 'print_travellers_details',
-			'checkout_template_parts_billing-details'    => 'print_billing_details',
-			'checkout_template_parts_checkout-note'      => 'print_checkout_note',
-			'checkout_template_parts_emergency-details'  => 'print_emergency_details',
-			'checkout_template_parts_checkout-form'      => 'print_checkout_form',
+			'wptravelengine_checkout_payment_modes'      		=> 'print_payment_modes',
+			'wptravelengine_checkout_payment_methods'    		=> 'print_payment_methods',
+			'checkout_template_parts_tour-details'       		=> 'print_tour_details',
+			'checkout_template_parts_cart-summary'       		=> 'print_cart_summary',
+			'checkout_template_parts_payments'           		=> 'print_payments_methods',
+			'checkout_template_parts_lead-travellers-details'	=> 'print_lead_travellers_details',
+			'checkout_template_parts_travellers-details' 		=> 'print_travellers_details',
+			'checkout_template_parts_billing-details'    		=> 'print_billing_details',
+			'checkout_template_parts_checkout-note'      		=> 'print_checkout_note',
+			'checkout_template_parts_emergency-details'  		=> 'print_emergency_details',
+			'checkout_template_parts_checkout-form'      		=> 'print_checkout_form',
 		);
 
 		foreach ( $checkout_templates as $template_part => $callback ) {
@@ -103,11 +105,12 @@ class CheckoutPageTemplate extends BookingProcessPageTemplate {
 
 		$template_instance = Checkout::instance( $wte_cart );
 		$args              = array(
-			'billing_form_fields'      => new BillingFormFields(),
-			'travellers_form_fields'   => new TravellersFormFields(),
-			'emergency_contact_fields' => new EmergencyFormFields(),
-			'note_form_fields'         => wptravelengine_form_field( false )->init( $template_instance->get_note_form_fields() ),
-			'privacy_policy_fields'    => new PrivacyPolicyFields(),
+			'billing_form_fields'      		=> new BillingFormFields(),
+			'lead_travellers_form_fields' 	=> new LeadTravellersFormFields(),
+			'travellers_form_fields'  		=> new TravellersFormFields(),
+			'emergency_contact_fields' 		=> new EmergencyFormFields(),
+			'note_form_fields'         		=> wptravelengine_form_field( false )->init( $template_instance->get_note_form_fields() ),
+			'privacy_policy_fields'    		=> new PrivacyPolicyFields(),
 		);
 		?>
 		<form class="wpte-checkout__content" method="POST" id="wptravelengine-checkout__form"
@@ -119,6 +122,25 @@ class CheckoutPageTemplate extends BookingProcessPageTemplate {
 			?>
 		</form>
 		<?php
+	}
+
+	/**
+	 * Print the Lead Travellers Details.
+	 *
+	 * @param array $args Arguments.
+	 * @since 6.4.3
+	 * @return void
+	 */
+	public function print_lead_travellers_details( array $args ) {
+		global $wte_cart;
+		if ( ! isset( $lead_travellers_form_fields ) ) {
+			$lead_travellers_form_fields = array();
+			foreach ( $wte_cart->getItems( true ) as $cart_item ) {
+				$lead_travellers_form_fields[] = new LeadTravellersFormFields( array() );
+			}
+		}
+		$args = array_merge( compact( 'lead_travellers_form_fields' ), $args );
+		wptravelengine_get_template( 'template-checkout/content-lead-travellers-details.php', $args );
 	}
 
 	/**

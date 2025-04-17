@@ -56,7 +56,6 @@ final class WP_Session extends Recursive_ArrayAccess {
 		if ( ! self::$instance ) {
 			self::$instance = new self();
 		}
-
 		return self::$instance;
 	}
 
@@ -148,10 +147,8 @@ final class WP_Session extends Recursive_ArrayAccess {
 	 * Write the data from the current session to the data storage system.
 	 */
 	public function write_data() {
-		$option_key = "_wp_session_{$this->session_id}";
-
 		update_option( "_wp_session_{$this->session_id}", $this->container, '', 'no' );
-		if ( false === get_option( $option_key ) ) {
+		if ( false === get_option( "_wp_session_expires_{$this->session_id}" ) ) {
 			update_option( "_wp_session_expires_{$this->session_id}", $this->expires, '', 'no' );
 		}
 	}

@@ -8,6 +8,7 @@
 
 use WPTravelEngine\Builders\FormFields\BillingFormFields;
 use WPTravelEngine\Builders\FormFields\EmergencyFormFields;
+use WPTravelEngine\Builders\FormFields\LeadTravellersFormFields;
 use WPTravelEngine\Builders\FormFields\PrivacyPolicyFields;
 use WPTravelEngine\Builders\FormFields\TravellersFormFields;
 use WPTravelEngine\Core\Coupons;
@@ -81,7 +82,7 @@ function wptravelengine_format_trip_datetime( string $date, string $format = '' 
 		$date_format .= strpos( $date, 'T' ) !== false ? ' \a\t ' . get_option( 'time_format', 'g:i a' ) : '';
 	}
 
-	return wp_date( $date_format, strtotime( $date ) );
+	return wp_date( $date_format, strtotime( $date ), new DateTimeZone( 'UTC' ) );
 }
 
 /**
@@ -102,7 +103,7 @@ function wptravelengine_format_trip_end_datetime( string $start_date, Trip $trip
 	$trip_duration_type = $trip->get_trip_duration_unit() ?? 'days';
 	$trip_duration      = 'days' === $trip_duration_type ? ( intval( $trip->get_trip_duration() ) - 1 ) : intval( $trip->get_trip_duration() );
 
-	return wp_date( $date_format, strtotime( "+$trip_duration {$trip_duration_type}", strtotime( $start_date ) ) );
+	return wp_date( $date_format, strtotime( "+$trip_duration {$trip_duration_type}", strtotime( $start_date ) ), new DateTimeZone( 'UTC' ) );
 }
 
 /**
@@ -193,6 +194,8 @@ function wptravelengine_get_checkout_template_args( array $args = array() ): arr
 		'tour-details-title'    => 'show',
 		'cart-summary'          => 'show',
 		'cart-summary-title'    => 'show',
+		'lead-travellers'       => $show_travellers_info == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide',
+		'lead-travellers-title' => 'show',
 		'travellers'            => $show_travellers_info == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide',
 		'travellers-title'      => 'show',
 		'emergency'             => $show_emergency_contact == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide',
@@ -208,11 +211,8 @@ function wptravelengine_get_checkout_template_args( array $args = array() ): arr
 	);
 
 	$form_sections = array(
-//		'travellers'      => 'content-travellers-details',
-//		'emergency'       => 'content-emergency-details',
-'billing' => 'content-billing-details',
-//		'additional_note' => 'content-checkout-note',
-'payment' => 'content-payments',
+		'billing' => 'content-billing-details',
+		'payment' => 'content-payments',
 	);
 
 	$template_args[ 'form_sections' ] = apply_filters( 'wptravelengine_checkoutv2_form_templates', $form_sections );
@@ -242,6 +242,11 @@ function wptravelengine_get_checkout_template_args( array $args = array() ): arr
 	$tour_details           = $checkout_page->get_tour_details();
 	$cart_line_items        = $checkout_page->get_cart_line_items();
 	$billing_form_fields    = new BillingFormFields();
+	$lead_travellers_form_fields = array();
+	foreach ( $wte_cart->getItems( true ) as $cart_item ) {
+		$lead_travellers_form_fields[] = new LeadTravellersFormFields();
+	}
+
 	$travellers_form_fields = array();
 	foreach ( $wte_cart->getItems( true ) as $cart_item ) {
 		$travellers_form_fields[] = new TravellersFormFields( array(
@@ -270,7 +275,7 @@ function wptravelengine_get_checkout_template_args( array $args = array() ): arr
 	return array_merge(
 //		$template_args,
 		compact( 'note_form_fields' ),
-		compact( 'tour_details', 'cart_line_items', 'billing_form_fields', 'travellers_form_fields', 'privacy_policy_fields',
+		compact( 'tour_details', 'cart_line_items', 'billing_form_fields', 'lead_travellers_form_fields', 'travellers_form_fields', 'privacy_policy_fields',
 			'emergency_contact_fields', 'payment_options', 'payment_type', 'full_payment_enabled', 'full_payment_amount', 'down_payment_amount', 'due_payment_amount' ),
 		compact( 'attributes', 'form_sections', 'is_partial_payment_applicable', 'coupons' ),
 		$args
@@ -2275,7 +2280,7 @@ function wp_travel_engine_get_booking_status() {
  *
  * @param int $trip_id Trip ID
  * @since 6.3.5
- * 
+ *
  * @return array
  */
 function wptravelengine_get_booking_ids( $trip_id ) {
@@ -2283,10 +2288,10 @@ function wptravelengine_get_booking_ids( $trip_id ) {
 
     // Get bookings with matching trip_id.
     $booking_list = $wpdb->get_col( $wpdb->prepare("
-        SELECT DISTINCT p.ID 
-        FROM {$wpdb->posts} p 
-        JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id 
-        WHERE p.post_type = 'booking' 
+        SELECT DISTINCT p.ID
+        FROM {$wpdb->posts} p
+        JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+        WHERE p.post_type = 'booking'
         AND pm.meta_key = 'cart_info'
     ") );
 

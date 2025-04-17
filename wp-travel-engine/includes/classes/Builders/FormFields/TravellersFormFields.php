@@ -14,12 +14,12 @@ namespace WPTravelEngine\Builders\FormFields;
  */
 class TravellersFormFields extends TravellerFormFields {
 
-	protected int $traveller_number = 0;
+	protected int $traveller_number = 1;
 
 	/**
 	 * @var int
 	 */
-	protected int $number_of_travellers;
+	public int $number_of_travellers;
 
 	/**
 	 * @var int
@@ -62,12 +62,6 @@ class TravellersFormFields extends TravellerFormFields {
 	 * @return void
 	 */
 	public function render() {
-		$this->lead_traveller_form_fields();
-		$wptravelengine_settings = get_option( 'wp_travel_engine_settings', array() );
-		$travellers_details_type = $wptravelengine_settings[ 'travellers_details_type' ] ?? 'all';
-		if ( $travellers_details_type === 'only_lead' ) {
-			return;
-		}
 		$this->fellow_traveller_form_fields();
 	}
 
@@ -82,21 +76,6 @@ class TravellersFormFields extends TravellerFormFields {
 		$instance->init( $fields )->render();
 	}
 
-	/**
-	 * Render the lead traveller form fields.
-	 */
-	public function lead_traveller_form_fields() {
-		for ( $i = 0; $i < $this->number_of_lead_travellers; $i ++ ) :
-			?>
-			<div class="wpte-checkout__form-section">
-				<h5 class="wpte-checkout__form-title"><?php echo sprintf( __( 'Lead Traveller %d', 'wp-travel-engine' ), $i + 1 ); ?></h5>
-				<?php
-				$this->render_traveler_fields( $this->fields );
-				?>
-			</div>
-		<?php
-		endfor;
-	}
 
 	/**
 	 * @return void

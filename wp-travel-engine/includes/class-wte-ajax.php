@@ -8,6 +8,8 @@ use WPTravelEngine\Core\Models\Post\Booking;
 use WPTravelEngine\Helpers\Functions;
 use WPTravelEngine\Registers\AjaxRequestRegistry;
 use WPTravelEngine\Core\Controllers\Ajax\ResendPurchaseReceipt;
+use WPTravelEngine\Core\Controllers\Ajax\UpcomingToursFilter;
+use WPTravelEngine\Core\Controllers\Ajax\UpcomingToursDetails;
 
 /**
  * WP Travel Engine AJAX
@@ -32,6 +34,13 @@ class WTE_Ajax {
 		 * @since 6.4.0
 		 */
 		$ajax_registry->register( ResendPurchaseReceipt::class );
+
+		/**
+		 * Adds upcoming tours ajax actions
+		 * @since 6.4.1
+		 */
+		$ajax_registry->register( UpcomingToursFilter::class );
+		$ajax_registry->register( UpcomingToursDetails::class );
 
 		add_action( 'wp_ajax_nopriv_email_test', function () {
 

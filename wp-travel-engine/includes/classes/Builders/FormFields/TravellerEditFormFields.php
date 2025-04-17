@@ -22,7 +22,7 @@ class TravellerEditFormFields extends BookingEditFormFields {
 		parent::__construct( $defaults, $mode );
 		static::$mode = $mode;
 		$this->count = $defaults['index'] ?? $defaults['total_count'] + 1;
-		$this->init( $this->map_fields( static::structure( $mode ) ) );
+		$this->init( $this->map_fields( static::structure( $mode, $defaults['index'] ?? 'new_traveller' ) ) );
 	}
 
 	protected function map_field( $field ) {
@@ -39,13 +39,8 @@ class TravellerEditFormFields extends BookingEditFormFields {
 
 		// If a name was found, set field attributes.
 		if ( $name ) {
-			if ( $field[ 'type' ] === 'file' ) {
-				$field[ 'name' ] = sprintf( '%s', $name );
-				$field[ 'id' ]   = sprintf( '%s', $name );
-			} else {
-				$field[ 'name' ] = sprintf( 'travellers[%s][]', $name );
-				$field[ 'id' ]   = '';
-			}
+			$field[ 'name' ] = sprintf( 'travellers[%s][]', $name );
+			$field[ 'id' ]   =  sprintf( 'travellers[%s][]', $name );
 			$field[ 'field_label' ] = isset( $field[ 'placeholder' ] ) && $field[ 'placeholder' ] !== '' ? $field[ 'placeholder' ] : $field[ 'field_label' ];
 
 			$field[ 'default' ]     = $this->defaults[ $name ] ?? $field[ 'default' ] ?? '';
@@ -86,8 +81,22 @@ class TravellerEditFormFields extends BookingEditFormFields {
 		return $field;
 	}
 
-	public static function structure( string $mode = 'edit' ): array {
-		return DefaultFormFields::traveller( $mode );
+	/**
+	 * Structure the fields.
+	 * Passed second parameter @since 6.4.3 to handle lead traveller form fields.
+	 *
+	 * @param string $mode Mode.
+	 * @param mixed $count Count.
+	 * 
+	 * @return array
+	 */
+	public static function structure( string $mode = 'edit', string $count = 'new_traveller' ): array {
+		if( $mode == 'edit' && $count == 'new_traveller' ) {
+			return DefaultFormFields::traveller($mode);
+		}
+		return $count == 0
+			? DefaultFormFields::lead_traveller($mode)
+			: DefaultFormFields::traveller($mode);
 	}
 
 	public static function create( ...$args ): TravellerEditFormFields {

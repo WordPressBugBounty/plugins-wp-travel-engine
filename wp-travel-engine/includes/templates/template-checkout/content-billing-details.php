@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var WPTravelEngine\Builders\FormFields\BillingFormFields $billing_form_fields
  * @var bool $show_title
@@ -6,10 +7,10 @@
  */
 ?>
 <!-- Billing Details Form -->
-<div class="wpte-checkout__box collapsible <?php echo esc_attr( $show_title ? 'open' : '' ); ?>">
-	<?php if ( $show_title ) : ?>
+<div class="wpte-checkout__box collapsible <?php echo esc_attr($show_title ? 'open' : ''); ?>">
+	<?php if ($show_title) : ?>
 		<h3 class="wpte-checkout__box-title">
-			<?php echo esc_html( apply_filters( 'wpte_billings_details_title', esc_html__( 'Billing Details', 'wp-travel-engine' ) ) ); ?>
+			<?php echo esc_html(apply_filters('wpte_billings_details_title', esc_html__('Billing Details', 'wp-travel-engine'))); ?>
 			<button type="button" class="wpte-checkout__box-toggle-button">
 				<svg>
 					<use xlink:href="#chevron-down"></use>
@@ -18,6 +19,14 @@
 		</h3>
 	<?php endif; ?>
 	<div class="wpte-checkout__box-content">
+		<?php if ( wptravelengine_settings()->get( 'display_travellers_info' ) === 'yes' && wptravelengine_settings()->get( 'traveller_emergency_details_form' ) === 'on_checkout' ) : ?>
+		<div class="wpte-copy-from-lead-travelers" style="margin: 0 0 24px;">
+			<input type="checkbox" id="wpte-copy-from-lead-travelers" name="wpte-copy-from-lead-travelers" value="1">
+			<label for="wpte-copy-from-lead-travelers">
+				<?php esc_html_e('Same as Lead Traveller', 'wp-travel-engine'); ?>
+			</label>
+			</div>
+		<?php endif; ?>
 		<?php $billing_form_fields->render(); ?>
 	</div>
 </div>

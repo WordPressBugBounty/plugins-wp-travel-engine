@@ -107,7 +107,6 @@ $personal_options = $args['data'];
         <?php
     }
     ?>
-</table>    
+</table>
 <?php
 echo '<hr/>';
-

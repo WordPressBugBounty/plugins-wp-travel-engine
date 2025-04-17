@@ -140,7 +140,7 @@ class Booking extends PostModel {
 	public function get_trip_pax() {
 		$order_trips = $this->get_order_items();
 
-		return $order_trips['pax'] ?? array();
+		return $order_trips['pax'] ?? $order_trips[0]['pax'] ?? array();
 	}
 
 	/**

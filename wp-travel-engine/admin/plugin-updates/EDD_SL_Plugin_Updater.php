@@ -20,6 +20,7 @@ class EDD_SL_Plugin_Updater {
 	private $version     = '';
 	private $wp_override = false;
 	private $cache_key   = '';
+	public bool $beta         = false;
 
 	private $health_check_timeout = 5;
 

@@ -327,6 +327,22 @@ class Travelers extends Validator {
 
 		$traveler_fields = apply_filters( 'wp_travel_engine_traveller_info_fields_display', TravelersFields::traveller_form_fields() );
 
+		$lead_traveler_fields = apply_filters( 'wp_travel_engine_lead_traveller_info_fields_display', TravelersFields::lead_traveller_form_fields() );
+
+		$this->process_traveler_fields( $lead_traveler_fields, $data, $field_name_mapping );
+		$this->process_traveler_fields( $traveler_fields, $data, $field_name_mapping );
+
+	}
+
+	/**
+	 * Process the traveler fields and set the data to travelers array.
+	 *
+	 * @param array $traveler_fields Traveler fields.
+	 * @param array $data Data.	
+	 * @param array $field_name_mapping Field name mapping.
+	 * @since 6.4.3
+	 */
+	protected function process_traveler_fields( array $traveler_fields, array $data, array $field_name_mapping ) {
 		if ( ! empty( $traveler_fields ) ) {
 			foreach ( $traveler_fields as $field_key => $field ) {
 				foreach ( $data as $key => $value ) {

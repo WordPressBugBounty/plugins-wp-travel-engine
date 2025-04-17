@@ -6,6 +6,12 @@
  */
 
 namespace WPTravelEngine\Booking\Email;
+use WPTravelEngine\Builders\FormFields\DefaultFormFields;
+use WPTravelEngine\Builders\FormFields\FormField;
+use WPTravelEngine\Builders\FormFields\TravellerEditFormFields;
+
+use DateTimeZone;
+
 use WPTravelEngine\Helpers\Countries;
 use WPTravelEngine\Helpers\CartInfoParser;
 
@@ -15,32 +21,33 @@ class Template_Tags {
 		$this->booking = get_post( $booking_id );
 		$this->payment = get_post( $payment_id );
 
-		$this->order_trips = (array) ($this->booking->order_trips ?? []);
+		$this->order_trips = (array) ( $this->booking->order_trips ?? [] );
 
-		$this->billing_info = (array) ($this->booking->billing_info ?? []);
+		$this->billing_info = (array) ( $this->booking->billing_info ?? [] );
 
-		$this->cart_info = (array) ($this->booking->cart_info ?? []);
+		$this->cart_info = (array) ( $this->booking->cart_info ?? [] );
 
-		$this->trip = !empty( $this->order_trips ) ? (object) ( array_values( $this->order_trips )[ 0 ] ?? [] ): (object) [];
+		$this->trip = ! empty( $this->order_trips ) ? (object) ( array_values( $this->order_trips )[ 0 ] ?? [] ) : (object) [];
 
-		$this->billing_details = (array) ($this->booking->wptravelengine_billing_details ?? []);
+		$this->billing_details = (array) ( $this->booking->wptravelengine_billing_details ?? [] );
 
-		$this->traveller_details = (array) ($this->booking->wptravelengine_travelers_details ?? []);
+		$this->traveller_details = (array) ( $this->booking->wptravelengine_travelers_details ?? [] );
 
-		$this->emergency_details = (array) ($this->booking->wptravelengine_emergency_details ?? []);
+		$this->emergency_details = (array) ( $this->booking->wptravelengine_emergency_details ?? [] );
 
 		$this->additional_notes = $this->booking->wptravelengine_additional_note ?? '';
 
-		$this->cart_info_parser = new CartInfoParser( (array) $this->cart_info) ;
+		$this->cart_info_parser = new CartInfoParser( (array) $this->cart_info );
 
 	}
 
 	public function get_trip_url() {
 		$order_trip = $this->cart_info_parser->get_item();
 
-		if( empty( !$order_trip ) ) {
+		if ( empty( ! $order_trip ) ) {
 			return '<a href=' . esc_url( get_permalink( $order_trip->get_trip_id() ) ) . '>' . get_the_title( $order_trip->get_trip_title() ) . '</a>';
 		}
+
 		return '<a href=' . esc_url( get_permalink( $this->trip->ID ) ) . '>' . esc_html( $this->trip->title ) . '</a>';
 	}
 
@@ -89,7 +96,7 @@ class Template_Tags {
 	}
 
 	public function get_billing_country() {
-		
+
 		$countries_list = Countries::list();
 		if ( isset( $countries_list[ $this->billing_info[ 'country' ] ] ) ) {
 			return $countries_list[ $this->billing_info[ 'country' ] ];
@@ -102,7 +109,7 @@ class Template_Tags {
 	}
 
 	public function get_due_amount() {
-		$currency = $this->cart_info->currency ?? 'USD';
+		$currency = $this->cart_info->currency ?? $this->cart_info['currency'] ?? 'USD';
 
 		return wte_get_formated_price( $this->booking->due_amount, $currency, '', true );
 	}
@@ -141,10 +148,10 @@ class Template_Tags {
 				echo '</tr>';
 				foreach ( $bank_details_labels as $key => $label ) {
 					?>
-                    <tr>
-                        <td><?php echo esc_html( $label ); ?></td>
-                        <td class="alignright"><?php echo isset( $account[ $key ] ) ? esc_html( $account[ $key ] ) : ''; ?></td>
-                    </tr>
+					<tr>
+						<td><?php echo esc_html( $label ); ?></td>
+						<td class="alignright"><?php echo isset( $account[ $key ] ) ? esc_html( $account[ $key ] ) : ''; ?></td>
+					</tr>
 					<?php
 				}
 			}
@@ -160,18 +167,18 @@ class Template_Tags {
 		if ( $this->payment && 'check_payments' === $this->payment->payment_gateway ) {
 			ob_start();
 			?>
-            <table class="invoice-items">
-                <tr>
-                    <td colspan="2">
-                        <h3><?php echo esc_html__( 'Check Payment Instructions:', 'wp-travel-engine' ); ?></h3>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2">
+			<table class="invoice-items">
+				<tr>
+					<td colspan="2">
+						<h3><?php echo esc_html__( 'Check Payment Instructions:', 'wp-travel-engine' ); ?></h3>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
 						<?php echo wp_kses_post( wte_array_get( get_option( 'wp_travel_engine_settings', array() ), 'check_payment.instruction', '' ) ); ?>
-                    </td>
-                </tr>
-            </table>
+					</td>
+				</tr>
+			</table>
 			<?php
 			return ob_get_clean();
 		}
@@ -208,25 +215,26 @@ class Template_Tags {
                     </tr>
                     <tr>
                         <td><?php esc_html_e( 'Trip Date', 'wp-travel-engine' ); ?></td>
-                        <td class="alignright"><?php echo esc_html( $trip->has_time ? wp_date( 'Y-m-d H:i', strtotime( $trip->datetime ) ) : wp_date( get_option( 'date-format', 'Y-m-d' ), strtotime( $trip->datetime ) ) ); ?></td>
+                        <td class="alignright"><?php echo esc_html( $trip->has_time ? wp_date( 'Y-m-d H:i', strtotime( $trip->datetime ), new \DateTimeZone('utc') ) : wp_date( get_option( 'date-format', 'Y-m-d' ), strtotime( $trip->datetime ), new \DateTimeZone('utc') ) ); ?></td>
                     </tr>
 					<?php if ( isset( $trip->end_datetime ) ) : ?>
                         <tr>
                             <td><?php esc_html_e( 'Trip End Date', 'wp-travel-engine' ); ?></td>
-                            <td class="alignright"><?php echo esc_html( $trip->has_time ? wp_date( 'Y-m-d H:i', strtotime( $trip->end_datetime ) ) : wp_date( get_option( 'date-format', 'Y-m-d' ), strtotime( $trip->end_datetime ) ) ); ?></td>
+                            <td class="alignright"><?php echo esc_html( $trip->has_time ? wp_date( 'Y-m-d H:i', strtotime( $trip->end_datetime ), new \DateTimeZone('utc') ) : wp_date( get_option( 'date-format', 'Y-m-d' ), strtotime( $trip->end_datetime ), new DateTimeZone('utc') ) ); ?></td>
                         </tr>
+
 					<?php endif; ?>
-                    <tr>
-                        <td><?php esc_html_e( 'Travellers', 'wp-travel-engine' ); ?></td>
-                        <td class="alignright"><?php echo esc_html( array_sum( $trip->pax ) ); ?></td>
-                    </tr>
-                    <tr>
-                        <td><?php esc_html_e( 'Trip Cost', 'wp-travel-engine' ); ?></td>
-                    </tr>
-                    <tr>
-                        <td>&nbsp;</td>
-                        <td class="alignright">
-                            <table width="100%" cellpadding="0" cellspacing="0">
+					<tr>
+						<td><?php esc_html_e( 'Travellers', 'wp-travel-engine' ); ?></td>
+						<td class="alignright"><?php echo esc_html( array_sum( $trip->pax ) ); ?></td>
+					</tr>
+					<tr>
+						<td><?php esc_html_e( 'Trip Cost', 'wp-travel-engine' ); ?></td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td class="alignright">
+							<table width="100%" cellpadding="0" cellspacing="0">
 								<?php
 								$sum = 0;
 
@@ -239,67 +247,67 @@ class Template_Tags {
 
 									$label = isset( $pricing_categories[ $pricing_category_id ] ) ? $pricing_categories[ $pricing_category_id ] : $pricing_category_id;
 									?>
-                                    <tr>
-                                        <td class="alignright"><?php echo esc_html( $label ); ?></td>
-                                        <td><?php echo (int) $tcount . ' X ' . wte_esc_price( wte_get_formated_price( $pax_cost, $currency, '', ! 0 ) ) . ' = ' . wte_esc_price( wte_get_formated_price( $trip->pax_cost[ $pricing_category_id ], $currency, '', ! 0 ) ); ?></td>
-                                    </tr>
+									<tr>
+										<td class="alignright"><?php echo esc_html( $label ); ?></td>
+										<td><?php echo (int) $tcount . ' X ' . wte_esc_price( wte_get_formated_price( $pax_cost, $currency, '', ! 0 ) ) . ' = ' . wte_esc_price( wte_get_formated_price( $trip->pax_cost[ $pricing_category_id ], $currency, '', ! 0 ) ); ?></td>
+									</tr>
 									<?php
 								}
 								?>
-                                <tr>
-                                    <td width="50%"><?php esc_html_e( 'Subtotal', 'wp-travel-engine' ); ?></td>
-                                    <td width="50%"><?php echo wte_esc_price( wte_get_formated_price( + $sum, $currency, '', ! 0 ) ); ?></td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-					<?php do_action('wptravelengine_email_template_before_extra_services', $cart_info ); ?>
+								<tr>
+									<td width="50%"><?php esc_html_e( 'Subtotal', 'wp-travel-engine' ); ?></td>
+									<td width="50%"><?php echo wte_esc_price( wte_get_formated_price( + $sum, $currency, '', ! 0 ) ); ?></td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+					<?php do_action( 'wptravelengine_email_template_before_extra_services', $cart_info ); ?>
 					<?php if ( $trip->trip_extras && is_array( $trip->trip_extras ) ) : ?>
-                        <tr>
-                            <td colspan="2"><?php esc_html_e( 'Extra Services', 'wp-travel-engine' ); ?></td>
-                        </tr>
-                        <tr>
-                            <td>&nbsp;</td>
-                            <td class="alignright">
-                                <table width="100%" cellpadding="0" cellspacing="0">
+						<tr>
+							<td colspan="2"><?php esc_html_e( 'Extra Services', 'wp-travel-engine' ); ?></td>
+						</tr>
+						<tr>
+							<td>&nbsp;</td>
+							<td class="alignright">
+								<table width="100%" cellpadding="0" cellspacing="0">
 									<?php
 									$sum = 0;
 									foreach ( $trip->trip_extras as $index => $tx ) {
 										$tx_total = + $tx[ 'qty' ] * + $tx[ 'price' ];
 										$sum      += $tx_total;
 										?>
-                                        <tr>
-                                            <td><?php echo esc_html( $tx[ 'extra_service' ] ); ?></td>
-                                            <td><?php echo (int) $tx[ 'qty' ] . ' X ' . wte_esc_price( wte_get_formated_price( + $tx[ 'price' ], $currency, '', ! 0 ) ) . ' = ' . wte_esc_price( wte_get_formated_price( + $tx_total, $currency, '', ! 0 ) ); ?></td>
-                                        </tr>
+										<tr>
+											<td><?php echo esc_html( $tx[ 'extra_service' ] ); ?></td>
+											<td><?php echo (int) $tx[ 'qty' ] . ' X ' . wte_esc_price( wte_get_formated_price( + $tx[ 'price' ], $currency, '', ! 0 ) ) . ' = ' . wte_esc_price( wte_get_formated_price( + $tx_total, $currency, '', ! 0 ) ); ?></td>
+										</tr>
 										<?php
 									}
 									?>
-                                    <tr>
-                                        <td width="50%"><?php esc_html_e( 'Subtotal', 'wp-travel-engine' ); ?></td>
-                                        <td widht="50%"><?php echo wte_esc_price( wte_get_formated_price( + $sum, $currency, '', ! 0 ) ); ?></td>
-                                    </tr>
-                                </table>
-                            </td>
-                        </tr>
+									<tr>
+										<td width="50%"><?php esc_html_e( 'Subtotal', 'wp-travel-engine' ); ?></td>
+										<td widht="50%"><?php echo wte_esc_price( wte_get_formated_price( + $sum, $currency, '', ! 0 ) ); ?></td>
+									</tr>
+								</table>
+							</td>
+						</tr>
 					<?php endif; ?>
-                </table>
+				</table>
 				<?php
 				$count ++;
 			endforeach;
 			echo '<hr/>';
 			?>
-            <table width="100%">
-                <tr>
-                    <td width="50%">&nbsp;</td>
-                    <td width="50%">
-                        <table width="100%">
-                            <tr>
-                                <td><?php esc_html_e( 'Subtotal', 'wp-travel-engine' ); ?></td>
-                                <td class="alignright"><?php echo wte_esc_price( wte_get_formated_price( + $cart_info[ 'subtotal' ], $currency, '', ! 0 ) ); ?></td>
-                            </tr>
-                            <tr>
-                                <td><?php esc_html_e( 'Discount', 'wp-travel-engine' ); ?></td>
+			<table width="100%">
+				<tr>
+					<td width="50%">&nbsp;</td>
+					<td width="50%">
+						<table width="100%">
+							<tr>
+								<td><?php esc_html_e( 'Subtotal', 'wp-travel-engine' ); ?></td>
+								<td class="alignright"><?php echo wte_esc_price( wte_get_formated_price( + $cart_info[ 'subtotal' ], $currency, '', ! 0 ) ); ?></td>
+							</tr>
+							<tr>
+								<td><?php esc_html_e( 'Discount', 'wp-travel-engine' ); ?></td>
 								<?php
 								$discount_figure = 0;
 								if ( ! empty( $cart_info[ 'discounts' ] ) ) {
@@ -308,30 +316,30 @@ class Template_Tags {
 									$discount_figure = 'percentage' === $discount[ 'type' ] ? + $cart_info[ 'subtotal' ] * ( + $discount[ 'value' ] / 100 ) : $discount[ 'value' ];
 								}
 								?>
-                                <td class="alignright">
+								<td class="alignright">
 									<?php echo wte_esc_price( wte_get_formated_price( + $discount_figure, $currency, '', ! 0 ) ); ?>
-                                </td>
-                            </tr>
-							<?php do_action('wptravelengine_email_template_before_tax_amount', $cart_info ); ?>
+								</td>
+							</tr>
+							<?php do_action( 'wptravelengine_email_template_before_tax_amount', $cart_info ); ?>
 							<?php if ( ! empty( $cart_info[ 'tax_amount' ] ) ) { ?>
-                                <tr>
-                                    <td><?php echo esc_html( wptravelengine_get_tax_label( $cart_info[ 'tax_amount' ] ) ); ?></td>
+								<tr>
+									<td><?php echo esc_html( wptravelengine_get_tax_label( $cart_info[ 'tax_amount' ] ) ); ?></td>
 									<?php
 									$tax_figure = 0;
 									$tax_amount = wp_travel_engine_get_tax_detail( $cart_info );
 									?>
-                                    <td class="alignright">
+									<td class="alignright">
 										<?php echo wte_esc_price( wte_get_formated_price( + $tax_amount[ 'tax_actual' ], $currency, '', ! 0 ) ); ?>
-                                    </td>
-                                </tr>
+									</td>
+								</tr>
 							<?php } ?>
 							<?php
-								// Add new row before total amount calculation on email template.
-								do_action('wptravelengine_email_template_trip_cost_rows', $cart_info );
+							// Add new row before total amount calculation on email template.
+							do_action( 'wptravelengine_email_template_trip_cost_rows', $cart_info );
 							?>
-                            <tr>
-                                <td><?php esc_html_e( 'Total', 'wp-travel-engine' ); ?></td>
-                                <td class="alignright">
+							<tr>
+								<td><?php esc_html_e( 'Total', 'wp-travel-engine' ); ?></td>
+								<td class="alignright">
 									<?php echo wte_esc_price( wte_get_formated_price( $cart_info[ 'total' ], $currency, '', ! 0 ) ); ?>
 									<?php
 									$global_settings = get_option( 'wp_travel_engine_settings', array() );
@@ -341,12 +349,12 @@ class Template_Tags {
 										printf( '<span class="wpte-inclusive-tax-label">%s</span>', sprintf( __( '(%s%% Incl. tax)', 'wp-travel-engine' ), esc_html( $tax_percentage ) ) );
 									}
 									?>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-            </table>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
 		<?php
 		endif;
 
@@ -408,7 +416,7 @@ class Template_Tags {
 
 		$trip = $this->trip;
 
-		$currency = $this->cart_info->currency ?? 'USD';
+		$currency = $this->cart_info->currency ?? $this->cart_info['currency'] ?? 'USD';
 
 		$traveler_data    = get_post_meta( $this->booking->ID, 'wp_travel_engine_placeorder_setting', true );
 		$personal_options = isset( $traveler_data[ 'place_order' ] ) ? $traveler_data[ 'place_order' ] : array();
@@ -436,12 +444,12 @@ class Template_Tags {
 				'{billing_address}'           => $this->get_billing_address(),
 				'{city}'                      => $this->get_billing_city(),
 				'{country}'                   => $this->get_billing_country(),
-				'{tdate}'			 		  => ( isset( $trip->has_time ) && $trip->has_time && isset( $trip->datetime ) ) ? wp_date('Y-m-d H:i', strtotime( $trip->datetime ) ) : wp_date( get_option('date-format', 'Y-m-d'), strtotime( isset( $trip->datetime ) ? $trip->datetime : '' ) ),
+				'{tdate}'                     => ( isset( $trip->has_time ) && $trip->has_time && isset( $trip->datetime ) ) ? wp_date( 'Y-m-d H:i', strtotime( $trip->datetime ) ) : wp_date( get_option( 'date-format', 'Y-m-d' ), strtotime( isset( $trip->datetime ) ? $trip->datetime : '' ) ),
 				'{traveler}'                  => isset( $trip->pax ) ? array_sum( $trip->pax ) : 0,
 				// '{child-traveler}'            => $trip->pax['child'],
 				'{tprice}'                    => isset( $trip->cost ) ? wte_get_formated_price( $trip->cost, $currency, '', ! 0 ) : 0,
-				'{price}'                     => ( ! empty( $this->payment->payment_amount[ 'value' ] ) ) ? wte_get_formated_price( $this->payment->payment_amount[ 'value' ], $this->payment->payment_amount[ 'currency' ], '', ! 0 ) : 0,
-				'{total_cost}'                => wte_get_formated_price( $this->cart_info->total ?? 0, $currency, '', ! 0 ),
+				'{price}'                     => wte_get_formated_price( $this->payment->payable[ 'amount' ] ?? 0, $this->payment->payable[ 'currency' ] ?? $currency, '', ! 0 ),
+				'{total_cost}'                => wte_get_formated_price( $this->cart_info->total ?? $this->cart_info['total'] ?? 0, $currency, '', ! 0 ),
 				'{due}'                       => $this->get_due_amount(),
 				'{sitename}'                  => get_bloginfo( 'name' ),
 				'{booking_url}'               => $edit_booking_link,
@@ -455,7 +463,7 @@ class Template_Tags {
 				'{payment_id}'                => $this->payment->ID,
 				'{subtotal}'                  => wte_get_formated_price( $this->booking->cart_info[ 'subtotal' ], $currency, '', ! 0 ),
 				'{total}'                     => wte_get_formated_price( $this->booking->cart_info[ 'total' ], $currency, '', ! 0 ),
-				'{paid_amount}'               => ( ! empty( $this->payment->payment_amount[ 'value' ] ) ) ? wte_get_formated_price( $this->payment->payment_amount[ 'value' ], $this->payment->payment_amount[ 'currency' ], '', ! 0 ) : 0,
+				'{paid_amount}'               => wte_get_formated_price( $this->payment->payable[ 'amount' ] ?? 0, $this->payment->payable[ 'currency' ] ?? $currency, '', ! 0 ),
 				'{discount_amount}'           => wte_get_formated_price( $this->discount_amount(), $currency, '', ! 0 ),
 				'{traveler_data}'             => $traveller_email_template_content,
 				'{payment_method}'            => $this->get_payment_method( $this->payment->ID ),
@@ -475,7 +483,7 @@ class Template_Tags {
 	 * @return string
 	 */
 	public function get_additional_note() {
-		if( empty( $this->additional_notes ) ) {
+		if ( empty( $this->additional_notes ) ) {
 			return '';
 		}
 		ob_start();
@@ -495,7 +503,7 @@ class Template_Tags {
 	}
 
 	public function get_billing_details() {
-		if( empty( $this->billing_details ) ) {
+		if ( empty( $this->billing_details ) ) {
 			return '';
 		}
 		ob_start();
@@ -516,7 +524,7 @@ class Template_Tags {
 					'phone'   => 'Phone',
 					'address' => 'Address',
 					'city'    => 'City',
-					'country' => 'Country'
+					'country' => 'Country',
 				];
 
 				if ( array_key_exists( $key, $key_map ) ) {
@@ -529,13 +537,14 @@ class Template_Tags {
 				if ( isset( $countries_list[ $value ] ) ) {
 					$value = $countries_list[ $value ];
 				}
-				 ?>
+				?>
 				<tr>
 					<td><?php echo esc_html( ucfirst( $key ) ); ?></td>
 					<td>
 						<?php
 						if ( filter_var( $value, FILTER_VALIDATE_URL ) ) : ?>
-							<a href="<?php echo esc_url( $value ); ?>" target="_blank"><?php echo esc_html( basename( $value ) ); ?></a>
+							<a href="<?php echo esc_url( $value ); ?>"
+							   target="_blank"><?php echo esc_html( basename( $value ) ); ?></a>
 						<?php else: ?>
 							<?php echo esc_html( $value ); ?>
 						<?php endif; ?>
@@ -550,7 +559,7 @@ class Template_Tags {
 	}
 
 	public function get_emergency_details() {
-		if( empty( $this->emergency_details ) ) {
+		if ( empty( $this->emergency_details ) ) {
 			return '';
 		}
 		ob_start();
@@ -565,25 +574,25 @@ class Template_Tags {
 			foreach ( $this->emergency_details as $key => $value ) {
 				// Map keys to more readable formats
 				$key_map = [
-					'title' 	=> 'Title',
-					'fname'   	=> 'First Name',
-					'lname'   	=> 'Last Name',
-					'email'   	=> 'Email',
-					'phone'   	=> 'Phone',
-					'address' 	=> 'Address',
-					'city'    	=> 'City',
-					'country' 	=> 'Country',
-					'relation' 	=> 'Relation',
+					'title'    => 'Title',
+					'fname'    => 'First Name',
+					'lname'    => 'Last Name',
+					'email'    => 'Email',
+					'phone'    => 'Phone',
+					'address'  => 'Address',
+					'city'     => 'City',
+					'country'  => 'Country',
+					'relation' => 'Relation',
 				];
 
 				if ( array_key_exists( $key, $key_map ) ) {
 					$key = $key_map[ $key ];
 				}
-				if ( isset( $value ) && is_array( $value)  ) {
-					$flat_value = array_map(function( $item ) {
-						return is_array( $item ) ? implode(', ', $item) : strval($item ?? '');
+				if ( isset( $value ) && is_array( $value ) ) {
+					$flat_value = array_map( function ( $item ) {
+						return is_array( $item ) ? implode( ', ', $item ) : strval( $item ?? '' );
 					}, $value );
-					$value = implode( ', ', $flat_value );
+					$value      = implode( ', ', $flat_value );
 				}
 				$countries_list = Countries::list();
 				if ( isset( $countries_list[ $value ] ) ) {
@@ -595,7 +604,8 @@ class Template_Tags {
 					<td>
 						<?php
 						if ( filter_var( $value, FILTER_VALIDATE_URL ) ) : ?>
-							<a href="<?php echo esc_url( $value ); ?>" target="_blank"><?php echo esc_html( basename( $value ) ); ?></a>
+							<a href="<?php echo esc_url( $value ); ?>"
+							   target="_blank"><?php echo esc_html( basename( $value ) ); ?></a>
 						<?php else: ?>
 							<?php echo esc_html( $value ); ?>
 						<?php endif; ?>
@@ -610,7 +620,7 @@ class Template_Tags {
 	}
 
 	public function get_traveller_details() {
-		if( empty( $this->traveller_details ) ) {
+		if ( empty( $this->traveller_details ) ) {
 			return '';
 		}
 		ob_start();
@@ -622,33 +632,28 @@ class Template_Tags {
 				</td>
 			</tr>
 			<?php
+			$traveller_form_fields = DefaultFormFields::traveller();
 			foreach ( $this->traveller_details as $traveler => $details ) {
 				?>
 				<tr>
 					<td class="title-holder" style="margin: 0;" valign="top">
-						<h3 class="alignleft"><?php echo esc_html( sprintf( 'Traveller %s', $traveler + 1) ); ?></h3>
+						<h3 class="alignleft"><?php echo esc_html( sprintf( 'Traveller %s', $traveler + 1 ) ); ?></h3>
 					</td>
 				</tr>
 				<?php
-				foreach( $details as $key => $value ) {
-					// Map keys to more readable formats
-					$key_map = [
-						'title' 	=> 'Title',
-						'fname'   	=> 'First Name',
-						'lname'   	=> 'Last Name',
-						'email'   	=> 'Email',
-						'phone'   	=> 'Phone',
-						'address' 	=> 'Address',
-						'city'    	=> 'City',
-						'country' 	=> 'Country',
-						'postcode'	=> 'Postcode',
-						'dob'     	=> 'Date of Birth',
-						'passport' 	=> 'Passport Number',
-					];
-
-					if ( array_key_exists( $key, $key_map ) ) {
-						$key = $key_map[ $key ];
+				foreach ( $traveller_form_fields as $field_id => $field_args ) {
+					$field_name = $field_args[ 'name' ];
+					if ( preg_match( "#\[([^\[]+)]$#", $field_args[ 'name' ], $matches ) ) {
+						$field_name = $matches[ 1 ];
 					}
+
+					if ( ! isset( $details[ $field_name ] ) ) {
+						continue;
+					}
+
+					$key   = $field_args[ 'field_label' ] ?? $field_name;
+					$value = $details[ $field_name ];
+
 					if ( is_array( $value ) ) {
 						$value = implode( ',', $value );
 					}
@@ -662,7 +667,8 @@ class Template_Tags {
 						<td>
 							<?php
 							if ( filter_var( $value, FILTER_VALIDATE_URL ) ) : ?>
-								<a href="<?php echo esc_url( $value ); ?>" target="_blank"><?php echo esc_html( basename( $value ) ); ?></a>
+								<a href="<?php echo esc_url( $value ); ?>"
+								   target="_blank"><?php echo esc_html( basename( $value ) ); ?></a>
 							<?php else: ?>
 								<?php echo esc_html( $value ); ?>
 							<?php endif; ?>

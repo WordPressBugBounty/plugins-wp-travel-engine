@@ -11,7 +11,6 @@ namespace WPTravelEngine;
 
 use WPTravelEngine\Abstracts\AssetsAbstract;
 use WPTravelEngine\Helpers\Functions;
-use WPTravelEngine\Core\Models\Settings\PluginSettings;
 use WPTravelEngine\Helpers\Asset;
 use WPTravelEngine\Helpers\AssetLib;
 use WPTravelEngine\Traits\Singleton;
@@ -146,8 +145,8 @@ class Assets extends AssetsAbstract {
 		$this->register_script( Asset::register( 'wptravelengine-trip-edit', 'admin/trip-edit.js' ) );
 		$this->register_script( Asset::register( 'wptravelengine-booking-edit', 'admin/booking-edit.js' ) );
 		$this->register_script( Asset::register( 'wptravelengine-customer-edit', 'admin/customer-edit.js' ) );
-		$this->register_script( Asset::register( 'wptravelengine-exports', 'admin/exports.js' ) )
-			     ->localize( 'wptravelengine-exports', 'wteL10n' );
+		$this->register_script( Asset::register( 'wptravelengine-upcoming-tours', 'admin/upcoming-tours.js' ) );
+		$this->register_script( Asset::register( 'wptravelengine-exports', 'admin/exports.js' ) );
 	}
 
 	/**

@@ -20,11 +20,13 @@ use WPTravelEngine\Core\Shortcodes\ThankYou;
 use WPTravelEngine\Core\Shortcodes\TravelerInformation;
 use WPTravelEngine\Core\Shortcodes\TripCheckout;
 use WPTravelEngine\Core\Updates;
+use WPTravelEngine\Core\SEO;
 use WPTravelEngine\Filters\SettingsAPISchema;
 use WPTravelEngine\Filters\Template;
 use WPTravelEngine\Filters\TripAPISchema;
 use WPTravelEngine\Filters\TripMetaTabs;
 use WPTravelEngine\Helpers\Functions;
+use WPTravelEngine\Helpers\Translators;
 use WPTravelEngine\Modules\CouponCode;
 use WPTravelEngine\Modules\Filters as CustomFilters;
 use WPTravelEngine\Modules\TripCode;
@@ -134,6 +136,8 @@ final class Plugin {
 		new TripCode();
 		new TripSearch();
 
+		new Translators();
+
 		$this->set_cart();
 		$this->run();
 
@@ -142,6 +146,9 @@ final class Plugin {
 
 		$static_strings = new Core\Models\Settings\StaticStrings();
 		$static_strings->hooks();
+
+		// SEO.
+		new SEO();
 
 		/*
 		 * Initialize CLI Commands.
@@ -463,7 +470,7 @@ final class Plugin {
 					return $mail_tags;
 				}
 
-				$additional_fields = wte_array_get( get_post_meta( $booking->ID, 'billing_info', ! 0 ), null, array() );
+				$additional_fields = wte_array_get( get_post_meta( $booking->ID, 'wptravelengine_billing_details', ! 0 ), null, array() );
 
 				foreach ( $additional_fields as $field_name => $field_value ) {
 					$countries_list = Countries::list();
@@ -1183,7 +1190,7 @@ final class Plugin {
 		include WP_TRAVEL_ENGINE_BASE_PATH . '/includes/class-wp-travel-engine-reorder-trips.php';
 		include WP_TRAVEL_ENGINE_BASE_PATH . '/includes/class-wp-travel-engine-custom-shortcodes.php';
 
-		include WP_TRAVEL_ENGINE_BASE_PATH . '/includes/class-wp-travel-engine-seo.php';
+		// include WP_TRAVEL_ENGINE_BASE_PATH . '/includes/class-wp-travel-engine-seo.php';
 
 		// require WP_TRAVEL_ENGINE_BASE_PATH . '/includes/cart/class-wte-cart.php';
 

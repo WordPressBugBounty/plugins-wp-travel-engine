@@ -670,7 +670,7 @@ class WTE_Booking_Emails extends WP_Travel_Engine_Emails {
 							<?php esc_html_e( 'Trip Date', 'wp-travel-engine' ); ?>
 						</td>
 						<td class="alignright">
-							<?php echo esc_html( $trip->has_time ? wp_date( 'Y-m-d H:i', strtotime( $trip->datetime ) ) : wp_date( get_option( 'date-format', 'Y-m-d' ), strtotime( $trip->datetime ) ) ); ?>
+							<?php echo esc_html( $trip->has_time ? wp_date( 'Y-m-d H:i', strtotime( $trip->datetime ), new DateTimeZone( 'utc' ) ) : wp_date( get_option( 'date-format', 'Y-m-d' ), strtotime( $trip->datetime ), new DateTimeZone('utc') ) ); ?>
 						</td>
 					</tr>
 					<tr>

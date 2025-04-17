@@ -7,6 +7,8 @@
 
 do_action( 'wptravelengine_checkout_before_form' );
 
+do_action( 'checkout_template_parts_lead-travellers-details' );
+
 do_action( 'checkout_template_parts_travellers-details' );
 
 do_action( 'checkout_template_parts_emergency-details' );

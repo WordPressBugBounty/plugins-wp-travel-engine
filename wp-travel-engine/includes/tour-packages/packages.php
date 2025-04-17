@@ -8,6 +8,7 @@
 
 namespace WPTravelEngine;
 
+use WPTravelEngine\Helpers\Translators;
 use WPTravelEngine\Traits\Singleton;
 
 /**
@@ -223,11 +224,11 @@ class TourPackages {
 					</td>
 				</tr>
 				<?php
-				if ( function_exists( 'pll_current_language' ) ) {
-					$language        = \pll_current_language();
-					$translated_name = get_term_meta( $tag->term_id, 'pll_category_name', true );
-					$translated_name = ! empty( $translated_name[ $language ] ) ? $translated_name[ $language ] : $tag->name;
-					if ( $language ) {
+				$languages        = Translators::get_current_language();
+				$translated_names = get_term_meta( $tag->term_id, 'pll_category_name', true );
+				if ( $languages ) :
+					foreach ( $languages as $language => $language_args ) :
+						$translated_name = ! empty( $translated_names[ $language ] ) ? $translated_names[ $language ] : $tag->name;
 						?>
 						<tr class="form-field">
 							<th class="row">
@@ -240,9 +241,9 @@ class TourPackages {
 								<p><?php esc_html_e( 'Translated name for the category.', 'wp-travel-engine' ); ?></p>
 							</td>
 						</tr>
-						<?php
-					}
-				}
+					<?php
+					endforeach;
+				endif;
 			},
 			999999,
 			2
@@ -693,87 +694,87 @@ class TourPackages {
 			)
 		);
 
-		register_post_meta( 
-			$post_type, 
-			'trip_ID', 
-			array( 
+		register_post_meta(
+			$post_type,
+			'trip_ID',
+			array(
 				'show_in_rest' => true,
-				'single' => true,
-				'type' => 'number'
+				'single'       => true,
+				'type'         => 'number',
 			)
 		);
 
-		register_post_meta( 
-			$post_type, 
-			'enable_weekly_time_slots', 
-			array( 
+		register_post_meta(
+			$post_type,
+			'enable_weekly_time_slots',
+			array(
 				'show_in_rest' => true,
-				'single' => true,
-				'type' => 'string'
+				'single'       => true,
+				'type'         => 'string',
 			)
 		);
 
-		register_post_meta( 
-			$post_type, 
-			'weekly_time_slots', 
-			array( 
+		register_post_meta(
+			$post_type,
+			'weekly_time_slots',
+			array(
 				'show_in_rest' => true,
-				'single' => true, 
-				'type' => 'object' 
+				'single'       => true,
+				'type'         => 'object',
 			)
 		);
 
-		register_post_meta( 
-			$post_type, 
-			'enable_week_days', 
-			array( 
+		register_post_meta(
+			$post_type,
+			'enable_week_days',
+			array(
 				'show_in_rest' => array(
 					'schema' => array(
-						'type' => 'array',
+						'type'  => 'array',
 						'items' => array(
 							'type' => 'boolean',
 						),
 					),
 				),
-				'single' => true,
-				'type' => 'array'
+				'single'       => true,
+				'type'         => 'array',
 			)
 		);
 
-		register_post_meta( 
-			$post_type, 
-			'package-categories', 
-			array( 
+		register_post_meta(
+			$post_type,
+			'package-categories',
+			array(
 				'show_in_rest' => true,
-				'single' => true,
-				'type' => 'object'
+				'single'       => true,
+				'type'         => 'object',
 			)
 		);
 
-		register_post_meta( 
-			$post_type, 
-			'group-pricing', 
-			array( 
+		register_post_meta(
+			$post_type,
+			'group-pricing',
+			array(
 				'show_in_rest' => array(
 					'schema' => array(
-						'type' => 'array',
+						'type'  => 'array',
 						'items' => array(
 							'type' => 'object',
 						),
 					),
 				),
-				'single' => true,
-				'type' => 'array'
+				'single'       => true,
+				'type'         => 'array',
 			)
 		);
 
-		register_post_meta( 
-			$post_type, 
+		register_post_meta(
+			$post_type,
 			'package-dates',
 			array(
 				'show_in_rest' => true,
-				'single' => false,
-				'type' => 'object'
+				'single'       => false,
+				'type'         => 'object',
 			)
 		);
 
@@ -849,7 +850,7 @@ class TourPackages {
 				'type'              => wte_array_get( $args, 'type', 'string' ),
 				'sanitize_callback' => wte_array_get( $args, 'callback', 'wte_default_sanitize_callback' ),
 				'single'            => wte_array_get( $args, 'type', true ),
-				'show_in_rest' 		=> wte_array_get( $args, 'show_in_rest', true ),
+				'show_in_rest'      => wte_array_get( $args, 'show_in_rest', true ),
 			);
 			if ( isset( $args[ 'default' ] ) ) {
 				$_args[ 'default' ] = $args[ 'default' ];

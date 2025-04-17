@@ -85,15 +85,14 @@ class BookedItem {
 	}
 
 	protected function parse( $data ) {
-		
 		$this->id              = $data[ 'id' ] ?? '';
 		$this->trip_id         = $data[ 'trip_id' ] ?? $data[ 'ID' ] ?? 0;
 		$this->trip_package_id = $data[ 'price_key' ] ?? 0;
-		$this->trip_date       = $data[ 'trip_date' ] ?? $data[ 'datetime' ] ?? wp_date( 'Y-m-d H:i:s' );
+		$this->trip_date       = empty( $data[ 'trip_time' ] ?? '' ) ? ( $data[ 'trip_date' ] ?? $data[ 'datetime' ] ?? wp_date( 'Y-m-d H:i:s' ) ) : $data['trip_time'];
 		$this->package_name    = $data['trip_package'] ?? $data[ 'package_name' ] ?? '';
 		$this->line_items      = $this->parse_line_items( $data );
 		$this->travelers_count = $data[ 'travelers_count' ] ?? array_sum( $data[ 'travelers' ] ?? $data[ 'pax' ] ?? array() );
-		
+
 		try {
 			$trip            = new Trip( (int) $this->trip_id );
 			$this->trip_code = $trip->get_trip_code();

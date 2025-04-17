@@ -240,6 +240,16 @@ class DefaultFormFields extends \WTE_Default_Form_Fields {
 	/**
 	 * @param string $mode
 	 *
+	 * @since 6.4.3
+	 * @return array
+	 */
+	public static function lead_traveller( string $mode = 'edit' ): array {
+		return static::lead_traveller_form_fields( $mode );
+	}
+
+	/**
+	 * @param string $mode
+	 *
 	 * @return array
 	 * @since 6.4.0
 	 */
@@ -369,6 +379,99 @@ class DefaultFormFields extends \WTE_Default_Form_Fields {
 						),
 					),
 				),
+			),
+		) );
+
+		return static::by_mode( $fields, $mode );
+	}
+
+	/**
+	 * Lead Traveller Information form fields.
+	 *
+	 * @param string $mode
+	 *
+	 * @since 6.4.3
+	 * @return array
+	 */
+	public static function lead_traveller_form_fields( string $mode = 'edit' ): array {
+
+		$fields = apply_filters( 'wp_travel_engine_lead_traveller_info_fields_display', array(
+			'lead_traveller_first_name' => array(
+				'type'          => 'text',
+				'wrapper_class' => 'wpte-checkout__form-col',
+				'class'         => 'wpte-checkout__input',
+				'field_label'   => __( 'First Name', 'wp-travel-engine' ),
+				'name'          => 'wp_travel_engine_placeorder_setting[place_order][travelers][fname]',
+				'id'            => 'wp_travel_engine_placeorder_setting[place_order][travelers][fname]',
+				'validations'   => array(
+					'required'  => true,
+					'maxlength' => '50',
+					'type'      => 'alphanum',
+				),
+				'priority'      => 20,
+				'default_field' => true,
+			),
+
+			'lead_traveller_last_name' => array(
+				'type'          => 'text',
+				'wrapper_class' => 'wpte-checkout__form-col',
+				'field_label'   => __( 'Last Name', 'wp-travel-engine' ),
+				'name'          => 'wp_travel_engine_placeorder_setting[place_order][travelers][lname]',
+				'id'            => 'wp_travel_engine_placeorder_setting[place_order][travelers][lname]',
+				'validations'   => array(
+					'required'  => true,
+					'maxlength' => '50',
+					'type'      => 'alphanum',
+				),
+				'default'       => '',
+				'priority'      => 30,
+				'default_field' => true,
+			),
+
+			'lead_traveller_email' => array(
+				'type'          => 'email',
+				'wrapper_class' => 'wpte-checkout__form-col',
+				'class'         => 'input',
+				'field_label'   => __( 'Email', 'wp-travel-engine' ),
+				'name'          => 'wp_travel_engine_placeorder_setting[place_order][travelers][email]',
+				'id'            => 'wp_travel_engine_placeorder_setting[place_order][travelers][email]',
+				'validations'   => array(
+					'required' => true,
+				),
+				'default'       => '',
+				'priority'      => 50,
+				'default_field' => true,
+			),
+
+			'lead_traveller_phone' => array(
+				'type'          => 'tel',
+				'wrapper_class' => 'wpte-checkout__form-col',
+				'field_label'   => __( 'Phone', 'wp-travel-engine' ),
+				'name'          => 'wp_travel_engine_placeorder_setting[place_order][travelers][phone]',
+				'id'            => 'wp_travel_engine_placeorder_setting[place_order][travelers][phone]',
+				'validations'   => array(
+					'required'  => true,
+					'maxlength' => '50',
+					'type'      => 'alphanum',
+				),
+				'default'       => '',
+				'priority'      => 100,
+				'default_field' => true,
+			),
+
+			'lead_traveller_country' => array(
+				'type'          => 'country_dropdown',
+				'field_label'   => __( 'Country', 'wp-travel-engine' ),
+				'wrapper_class' => 'wpte-checkout__form-col',
+				'name'          => 'wp_travel_engine_placeorder_setting[place_order][travelers][country]',
+				'class'         => 'wc-enhanced-select',
+				'id'            => 'wp_travel_engine_placeorder_setting[place_order][travelers][country]',
+				'validations'   => array(
+					'required' => true,
+				),
+				'default'       => '',
+				'priority'      => 80,
+				'default_field' => true,
 			),
 		) );
 

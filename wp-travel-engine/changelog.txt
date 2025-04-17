@@ -1,7 +1,18 @@
 == Changelog ==
 
+= 6.4.3 - 17th April 2025 =
+* Feature: Introduced a new sub-menu labeled 'Upcoming Tours' to display the list of upcoming trips.
+* Enhancement: Added an option to copy lead traveler details to billing details on the checkout page.
+* Fix: Email tags for custom fields in billing details now work correctly with the New Checkout.
+* Fix: Resolved the incorrect currency format issue for the paid amount in Payment Details.
+* Fix: Recurring dates now display correctly on the trip archive page.
+* Fix: Trips now appear in the Trip Archive page even if the duration is not updated.
+* Fix: Error in Trips block caused by Trip Fixed Starting Date.
+* Fix: Time slot selection in the booking modal is now working as expected.
+* Enhancement: Added a method to clear leftover cache data in WP_Session_Utils and integrated it into the delete_old_sessions method. Updated write_data method to check session expiration correctly.
+
 = 6.4.2 - 3rd April 2025 =
-* Fix: Resolve react-hook-form package compatibility issue with addons
+* Fix: Resolve react-hook-form package compatibility issue with addons.
 
 = 6.4.1 - 31st March 2025 =
 * Enhancement: Revamped the single trip page design for a better user experience.

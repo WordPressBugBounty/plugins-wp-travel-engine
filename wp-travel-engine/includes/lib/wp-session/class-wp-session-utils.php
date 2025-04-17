@@ -65,6 +65,42 @@ class WP_Session_Utils {
 	}
 
 	/**
+	 * @return void
+	 * @since 6.4.3
+	 */
+	public static function clear_leftover_cache_data() {
+		global $wpdb;
+
+		$prefix      = '_wp_session_';
+		$batch_size  = 1000;
+		$loop_count  = 0;
+		$max_loops   = 1000;
+
+		do {
+			$option_names = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s LIMIT %d",
+					$prefix . '%',
+					$batch_size
+				)
+			);
+
+			if ( ! empty( $option_names ) ) {
+				$placeholders = implode( ',', array_fill( 0, count( $option_names ), '%s' ) );
+				$query        = $wpdb->prepare(
+					"DELETE FROM {$wpdb->options} WHERE option_name IN ($placeholders)",
+					...$option_names
+				);
+				$wpdb->query( $query );
+			} else {
+				update_option( '_wptravelengine_leftover_cached_cleared', 'yes' );
+			}
+
+			$loop_count++;
+		} while ( ! empty( $option_names ) && $loop_count < $max_loops );
+	}
+
+	/**
 	 * Delete old sessions from the database.
 	 *
 	 * @param int $limit Maximum number of sessions to delete.
@@ -75,6 +111,10 @@ class WP_Session_Utils {
 	 */
 	public static function delete_old_sessions( $limit = 1000 ) {
 		global $wpdb;
+
+		if ( 'yes' !== get_option( '_wptravelengine_leftover_cached_cleared', 'no' ) ) {
+			static::clear_leftover_cache_data();
+		}
 
 		$limit = absint( $limit );
 		$keys  = $wpdb->get_results( "SELECT option_name, option_value FROM $wpdb->options WHERE option_name LIKE '_wp_session_expires_%' ORDER BY option_value ASC LIMIT 0, {$limit}" );

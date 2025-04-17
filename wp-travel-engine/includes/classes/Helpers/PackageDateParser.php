@@ -253,4 +253,19 @@ class PackageDateParser {
 
 		return $this->get_dates_from_rrule( $rrule, $args );
 	}
+
+	/**
+	 * Get the unique dates.
+	 * 
+	 * @param bool $object Whether to return the dates as an object.
+	 * @param array $args Arguments.
+	 * @param string $format The format of the dates.
+	 *
+	 * @return array
+	 */
+	public function get_unique_dates( bool $object = true, $args = array(), string $format = 'Y-m-d' ): array {
+		return array_unique( array_map( function( $date ) use ( $format ) {
+			return wp_date( $format, strtotime( $date ) );
+		}, array_keys( $this->get_dates( $object, $args ) ) ) );
+	}
 }

@@ -134,7 +134,7 @@ return apply_filters(
 						'name' 			=> 'show_discount',
 						'condition'   	=> 'checkout_page_template === 2.0',
 						'divider'     	=> true,
-						'isNew' 	  => WP_TRAVEL_ENGINE_VERSION === '6.3.0',
+						'isNew' 	  	=> WP_TRAVEL_ENGINE_VERSION === '6.3.0',
 					),
 					array(
 						'label'       => __( 'Privacy Policy Notice', 'wp-travel-engine' ),

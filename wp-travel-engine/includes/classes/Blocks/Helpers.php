@@ -60,6 +60,7 @@ class Helpers {
 		$keys       = 0;
 		$today      = gmdate( 'Y-m-d' );
 		$dates_data = array();
+		$availability_options = \WTE_Fixed_Starting_Dates_Functions::availability();
 		foreach ( $sorted_fsd as $key => $fsd ) {
 			if ( strtotime( $today ) <= strtotime( $fsd['start_date'] ) ) {
 				$content_id = isset( $fsd['content_id'] ) ? $fsd['content_id'] : '';

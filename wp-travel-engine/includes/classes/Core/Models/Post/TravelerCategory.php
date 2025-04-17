@@ -53,6 +53,12 @@ class TravelerCategory {
 	public $sale_price;
 
 	/**
+	 * @var string
+	 * @since 6.4.3
+	 */
+	public string $label;
+
+	/**
 	 * Traveler Category Model Constructor.
 	 *
 	 * @param Trip $trip The trip object.
@@ -88,6 +94,21 @@ class TravelerCategory {
 	}
 
 	/**
+	 * @return string
+	 * @since 6.4.3
+	 */
+	public function get_label() : string {
+		$language = '';
+
+		if ( isset( $_GET['lang'] ) ) {
+			$language = substr( $_GET['lang'], 0, 2 );
+		}
+
+		$category_term_meta = get_term_meta( $this->id, 'pll_category_name', true );
+		return $category_term_meta[ $language ] ?? $this->label;
+	}
+
+	/**
 	 * Get category value.
 	 *
 	 * @param mixed $key The key to get.
@@ -102,6 +123,9 @@ class TravelerCategory {
 				break;
 			case 'description':
 				$value = get_term_by( 'id', $this->id, 'trip-packages-categories' )->{$key};
+				break;
+			case 'label' :
+				$value = $this->get_label();
 				break;
 			default:
 				$value = $this->{$key} ?? $default;
