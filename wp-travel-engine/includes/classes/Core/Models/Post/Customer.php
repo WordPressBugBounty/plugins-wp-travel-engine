@@ -261,7 +261,7 @@ class Customer extends PostModel {
 					'wp_travel_engine_new_customer_data',
 					array(
 						'user_login' => $email_address,
-						'user_pass'  => wp_generate_password(),
+						'user_pass'  => '',
 						'user_email' => $email_address,
 						'role'       => static::USER_ROLE,
 						'first_name' => $this->get_customer_fname(),

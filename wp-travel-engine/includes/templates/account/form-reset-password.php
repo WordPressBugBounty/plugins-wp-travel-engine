@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Customer Lost Password Reset Form.
  *
@@ -15,44 +16,53 @@
  * @since       1.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
+if (! defined('ABSPATH')) {
 	exit;
 }
 
-wp_enqueue_script( "parsely" );
+wp_enqueue_script("parsely");
+
+$user_account_page_id    = wp_travel_engine_get_dashboard_page_id();
+$settings = wptravelengine_settings()->get();
+$set_password_page_label = $settings['set_password_page_label'] ?? __('Set New Password', 'wp-travel-engine');
 
 // Print Errors / Notices.
 wp_travel_engine_print_notices(); ?>
 <div class="wpte-lrf-wrap wpte-reset-pass">
 	<div class="wpte-lrf-top">
 		<div class="wpte-lrf-head">
-			<?php if ( has_custom_logo() ) : ?>
-				<div class="wpte-lrf-logo">
-					<?php the_custom_logo(); ?>
-				</div>
-			<?php endif; ?>
-			<div class="wpte-lrf-desc">
-				<p><?php echo apply_filters( 'wp_travel_engine_reset_password_message', esc_html__( 'Enter your new password below.', 'wp-travel-engine' ) ); ?></p><?php // @codingStandardsIgnoreLine ?>
-			</div>
+			<h2 class="wpte-lrf-title"><?php echo apply_filters('wp_travel_engine_reset_password_message', esc_html($set_password_page_label)); ?></h2>
 		</div>
 		<form method="post" class="wpte-lrf">
-			<div class="wpte-lrf-field lrf-email">
-				<input required name="password_1" id="password_1" type="password" placeholder="<?php esc_html_e( 'New password', 'wp-travel-engine' ); ?>">
+			<div class="wpte-form-field wpte-material-ui-input-control">
+				<label for="password_1"><?php echo esc_attr__('Enter new password', 'wp-travel-engine'); ?><span class="required">*</span></label>
+				<input required name="password_1" id="password_1" type="password" placeholder="<?php esc_html_e('New password', 'wp-travel-engine'); ?>">
+				<fieldset>
+					<legend>
+						<span><?php echo esc_attr__('Enter new password', 'wp-travel-engine'); ?><span class="required">*</span></span>
+					</legend>
+				</fieldset>
 			</div>
-			<div class="wpte-lrf-field lrf-email">
-				<input required name="password_2" id="password_2" type="password" placeholder="<?php esc_html_e( 'Re-enter new password', 'wp-travel-engine' ); ?>">
+			<div class="wpte-form-field wpte-material-ui-input-control">
+				<label for="password_2"><?php echo esc_attr__('Re-enter new password', 'wp-travel-engine'); ?><span class="required">*</span></label>
+				<input required name="password_2" id="password_2" type="password" placeholder="<?php esc_html_e('Re-enter new password', 'wp-travel-engine'); ?>">
+				<fieldset>
+					<legend>
+						<span><?php echo esc_attr__('Re-enter new password', 'wp-travel-engine'); ?><span class="required">*</span></span>
+					</legend>
+				</fieldset>
 			</div>
 
-			<input type="hidden" name="reset_key" value="<?php echo esc_attr( $args['key'] ); ?>" />
-			<input type="hidden" name="reset_login" value="<?php echo esc_attr( $args['login'] ); ?>" />
+			<input type="hidden" name="reset_key" value="<?php echo esc_attr($args['key']); ?>" />
+			<input type="hidden" name="reset_login" value="<?php echo esc_attr($args['login']); ?>" />
 
-			<?php do_action( 'wp_travel_resetpassword_form' ); ?>
+			<?php do_action('wp_travel_resetpassword_form'); ?>
 
-			<div class="wpte-lrf-field lrf-submit">
+			<div class="wpte-form-field wpte-form-submit">
 				<input type="hidden" name="wp_travel_engine_reset_password" value="true" />
-				<input type="submit" name="wp_travel_engine_reset_password_submit"value="<?php esc_attr_e( 'Save', 'wp-travel-engine' ); ?>">
+				<input type="submit" name="wp_travel_engine_reset_password_submit" value="<?php esc_attr_e('Set Password', 'wp-travel-engine'); ?>">
 			</div>
-			<?php wp_nonce_field( 'wp_travel_engine_reset_password_nonce' ); ?>
+			<?php wp_nonce_field('wp_travel_engine_reset_password_nonce'); ?>
 		</form>
 	</div>
 </div>

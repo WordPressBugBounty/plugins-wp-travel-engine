@@ -6,6 +6,9 @@
  */
 namespace WPTravelEngine\Dashboard;
 
+use WPTravelEngine\Core\Models\Settings\Options;
+use WPTravelEngine\Email\UserEmail;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -36,13 +39,13 @@ abstract class Account {
 				'priority'        => 20,
 			),
 			'address'  => array(
-				'menu_title'      => __( 'Address', 'wp-travel-engine' ),
+				'menu_title'      => __( 'Billing Info', 'wp-travel-engine' ),
 				'menu_class'      => 'lrf-address',
 				'menu_content_cb' => array( __CLASS__, 'dashboard_menu_address_tab' ),
 				'priority'        => 30,
 			),
 			'account'  => array(
-				'menu_title'      => __( 'Account', 'wp-travel-engine' ),
+				'menu_title'      => __( 'Account Details', 'wp-travel-engine' ),
 				'menu_class'      => 'lrf-account',
 				'menu_content_cb' => array( __CLASS__, 'dashboard_menu_account_tab' ),
 				'priority'        => 40,
@@ -59,16 +62,10 @@ abstract class Account {
 	private static function bookings_dashboard_menus() {
 		$bookings_dashboard_menus        = array(
 			'active'  => array(
-				'menu_title'      => __( 'Active Booking', 'wp-travel-engine' ),
+				'menu_title'      => __( 'Upcoming Trips', 'wp-travel-engine' ),
 				'menu_class'      => 'wpte-active-bookings',
 				'menu_content_cb' => array( __CLASS__, 'bookings_menu_active_tab' ),
 				'priority'        => 10,
-			),
-			'recent'  => array(
-				'menu_title'      => __( 'Recent Booking', 'wp-travel-engine' ),
-				'menu_class'      => 'wpte-recent-bookings',
-				'menu_content_cb' => array( __CLASS__, 'bookings_menu_recent_tab' ),
-				'priority'        => 20,
 			),
 			'history' => array(
 				'menu_title'      => __( 'Booking History', 'wp-travel-engine' ),
@@ -78,10 +75,6 @@ abstract class Account {
 			),
 		);
 		return $bookings_dashboard_menus = apply_filters( 'wp_travel_engine_user_dashboard_booking_menus', $bookings_dashboard_menus );
-	}
-
-	public static function dashboard_menu_dashboard_tab( $args ) {
-		wte_get_template( 'account/tab-content/dashboard.php', $args );
 	}
 
 	public static function dashboard_menu_bookings_tab( $args ) {
@@ -99,11 +92,7 @@ abstract class Account {
 	public static function bookings_menu_active_tab( $args ) {
 		wte_get_template( 'account/tab-content/bookings/bookings-manager.php', array_merge( $args, array( 'type' => 'active' ) ) );
 	}
-	
-	public static function bookings_menu_recent_tab( $args ) {
-		wte_get_template( 'account/tab-content/bookings/bookings-manager.php', array_merge( $args, array( 'type' => 'recent' ) ) );
-	}
-	
+
 	public static function bookings_menu_history_tab( $args ) {
 		wte_get_template( 'account/tab-content/bookings/bookings-manager.php', array_merge( $args, array( 'type' => 'history' ) ) );
 	}
@@ -115,16 +104,11 @@ abstract class Account {
 	 */
 	public static function output() {
 
-		global $wp;
-
 		if ( ! is_user_logged_in() ) {
 			// phpcs:disable
 			// After password reset, add confirmation message.
-			if ( ! empty( $_GET['password-reset'] ) ) { ?>
-				<p class="col-xs-12 wp-travel-notice-success wp-travel-notice"><?php esc_html_e( 'Your Password has been updated successfully. Please Log in to continue.', 'wp-travel-engine' ); ?></p>
-
-			<?php
-
+			if ( ! empty( $_GET['password-reset'] ) ) {
+				WTE()->notices->add( __( 'Your Password has been updated successfully. Please Log in to continue.', 'wp-travel-engine' ), 'success' );
 			}
 			if ( isset( $_GET['action'] ) && 'lost-pass' == $_GET['action'] ) {
 				self::lost_password();
@@ -274,40 +258,14 @@ abstract class Account {
 			return false;
 		}
 
-		// Get password reset key (function introduced in WordPress 4.4).
-		$key = get_password_reset_key( $user_data );
-
-		// Send email notification.
-		$email_content = wte_get_template_html(
-			'emails/customer-lost-password.php',
-			array(
-				'user_login' => $user_login,
-				'reset_key'  => $key,
-			)
-		);
-
-		// To send HTML mail, the Content-type header must be set.
-		$headers  = 'MIME-Version: 1.0' . "\r\n";
-		$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-
-		$from = get_option( 'admin_email' );
-			// Create email headers.
-			$headers .= 'From: ' . $from . "\r\n";
-			$headers .= 'Reply-To: ' . $from . "\r\n" .
-			'X-Mailer: PHP/' . phpversion();
-
-		if ( $user_login && $key ) {
-
-			$user_object     = get_user_by( 'login', $user_login );
-			$user_user_login = $user_login;
-			$user_reset_key  = $key;
-			$user_user_email = stripslashes( $user_object->user_email );
-			$user_recipient  = $user_user_email;
-			$user_subject    = __( 'Password Reset Request', 'wp-travel-engine' );
-
-			if ( ! wp_mail( $user_recipient, $user_subject, $email_content, $headers ) ) {
-				return false;
-			}
+		$settings = wptravelengine_settings();
+		$forgot_password_settings = $settings->get( 'email.customer_email_notify_tabs.forgot_password', [] );
+		if ( $forgot_password_settings['enabled'] && $user_login ) {
+			$email = new UserEmail( $user_data->ID );
+			$email->set( 'to', $user_data->user_email )
+				  ->set( 'my_subject', $forgot_password_settings[ 'subject' ] )
+				  ->set( 'content', $forgot_password_settings[ 'content' ] )
+				  ->send();
 		}
 
 		return true;

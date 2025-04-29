@@ -2,6 +2,7 @@
 /**
  * Email footer template.
  */
+
 $settings        = get_option( 'wp_travel_engine_settings' );
 $hide_powered_by = ! empty( $settings['hide_powered_by'] ) && 'yes' === $settings['hide_powered_by'];
 ?>
@@ -23,4 +24,3 @@ $hide_powered_by = ! empty( $settings['hide_powered_by'] ) && 'yes' === $setting
 		</table>
 	</body>
 </html>
-<?php

@@ -60,7 +60,7 @@ class WP_Travel_Engine_Form_Field_Heading {
 
 		endif;
 
-		$output = sprintf( '%1$s<%2$s class="%3$s">%4$s</%2$s>%5$s', $before_field, $this->field['tag'], $this->field['class'], $this->field['title'], $after_field );
+		$output = sprintf( '%1$s<%2$s class="%3$s">%4$s</%2$s>%5$s', $before_field, esc_attr( $this->field['tag'] ), esc_attr( $this->field['class'] ), esc_html( $this->field['title'] ), $after_field );
 
 		if ( ! $display ) {
 

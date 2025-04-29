@@ -8,6 +8,7 @@ namespace WPTravelEngine\Builders\FormFields;
 
 use WPTravelEngine\Abstracts\BookingEditFormFields;
 use WPTravelEngine\Helpers\Countries;
+use WTE_Default_Form_Fields;
 /**
  * Form field class to render billing form fields.
  *
@@ -21,11 +22,11 @@ class EmergencyEditFormFields extends BookingEditFormFields {
 	 */
 	protected $count;
 
-	public function __construct( array $defaults = array(), string $mode = 'edit' ) {
+	public function __construct( array $defaults = array(), string $mode = 'edit', $booking = null ) {
 		parent::__construct( $defaults, $mode );
 		$this->count = $defaults['index'] ?? $defaults['total_count'] + 1;
 		static::$mode = $mode;
-		$this->init( $this->map_fields( static::structure( $mode ) ) );
+		$this->init( $this->map_fields( static::structure( $mode, $booking ) ) );
 	}
 
 	public static function create( ...$args ): EmergencyEditFormFields {
@@ -87,7 +88,18 @@ class EmergencyEditFormFields extends BookingEditFormFields {
 		return $field;
 	}
 
-	static function structure( string $mode = 'edit' ): array {
-		return DefaultFormFields::emergency( $mode );
+	/**
+ 	 * Structure the form fields.
+ 	 *
+ 	 * @param string $mode
+ 	 * @param object $booking
+ 	 * @return array
+ 	 */
+	static function structure( string $mode = 'edit', $booking = null ): array {
+		if ($booking && $booking->get_meta('traveller_page_type') == 'old') {
+			return WTE_Default_Form_Fields::emergency_contact();
+		} else {
+			return DefaultFormFields::emergency($mode);
+		}
 	}
 }

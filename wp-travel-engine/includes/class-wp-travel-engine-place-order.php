@@ -43,7 +43,7 @@ class Wp_Travel_Engine_Place_Order {
 		// Check if login is required for checkout.
 		$settings = wptravelengine_settings()->get();
 
-		$generate_user_account     = $settings[ 'generate_user_account' ] ?? 'no';
+		$generate_user_account     = $settings[ 'generate_user_account' ] ?? 'yes';
 		$require_login_to_checkout = isset( $settings[ 'enable_checkout_customer_registration' ] ) ? $settings[ 'enable_checkout_customer_registration' ] : 'no';
 
 		if ( 'no' === $generate_user_account && 'yes' === $require_login_to_checkout && ! is_user_logged_in() ) {

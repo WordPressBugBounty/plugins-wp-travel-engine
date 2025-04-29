@@ -205,7 +205,7 @@ class Booking extends PostModel {
 	public function get_due_amount(): float {
 		$amount = $this->get_meta( 'due_amount' ) ?? 0;
 
-		return (float) number_format( ! $amount ? 0 : $amount, 2 );
+		return (float) number_format( ! $amount ? 0 : $amount, 2, '.', '' );
 	}
 
 	/**
@@ -216,7 +216,7 @@ class Booking extends PostModel {
 	public function get_paid_amount(): float {
 		$amount = $this->get_meta( 'paid_amount' ) ?? 0;
 
-		return (float) number_format( ! $amount ? 0 : $amount, 2 );
+		return (float) number_format( ! $amount ? 0 : $amount, 2, '.', '' );
 	}
 
 	/**
@@ -641,11 +641,11 @@ class Booking extends PostModel {
 		}
 
 		if ( $traveler_info ) {
-			if ( is_array( $traveler_info ) ) {
+			if ( is_array( $traveler_info ) && !empty( $traveler_info ) ) {
 				$travelers = array();
 				if ( isset( $traveler_info['travelers'] ) && is_array( $traveler_info['travelers'] ) ) {
 					foreach ( $traveler_info['travelers'] as $key => $value ) {
-						$travelers['travelers'][ $key ] = array_map( 'sanitize_text_field', wp_unslash( $value ) );
+					$travelers['travelers'][ $key ] = array_map( 'sanitize_text_field', wp_unslash( $value ) );
 					}
 				}
 				if ( isset( $traveler_info['relation'] ) && is_array( $traveler_info['relation'] ) ) {
@@ -653,6 +653,20 @@ class Booking extends PostModel {
 						$travelers['relation'][ $key ] = array_map( 'sanitize_text_field', wp_unslash( $value ) );
 					}
 				}
+
+				// Backward Compatibility with Old Travelers Information Page.
+				$travelers_detail = $traveler_info['travelers'] ?? [];
+				$emergency_contacts = $traveler_info['relation'] ?? [];
+
+				if( !empty( $travelers_detail ) ) {
+					$travelers_detail = static::sanitize_data_array( $travelers_detail );
+					$booking->set_meta( 'wptravelengine_travelers_details', $travelers_detail );
+				}
+				if( !empty( $emergency_contacts ) ) {
+					$emergency_contacts = static::sanitize_data_array( $emergency_contacts );
+					$booking->set_meta( 'wptravelengine_emergency_details', $emergency_contacts );
+				}
+
 				$booking->set_meta(
 					'wp_travel_engine_placeorder_setting',
 					array( 'place_order' => $travelers )
@@ -725,6 +739,28 @@ class Booking extends PostModel {
 		$booking->maybe_update_inventory();
 
 		return;
+	}
+
+
+	/**
+	 * Sanitize Data Array.
+	 *
+	 * @param array $form_data
+	 * @since 6.5.0
+	 * @return array
+	 */
+	public static function sanitize_data_array(array $form_data): array {
+		$sanitized = [];
+		foreach ( $form_data as $key => $value ) {
+			if ( is_array( $value ) && !empty( $value ) ) {
+				foreach ( array_values( $value ) as $i => $data ) {
+					$sanitized[$i][$key] = is_array( $data )
+						? array_map( 'sanitize_text_field', wp_unslash( $data ) )
+						: sanitize_text_field( $data );
+				}
+			}
+		}
+		return $sanitized;
 	}
 
 	/**

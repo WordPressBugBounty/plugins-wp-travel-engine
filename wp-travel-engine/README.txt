@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 6.4.3
+Stable tag: 6.5.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -367,6 +367,21 @@ Yes. We have created WooCommerce Payments add-ons that supports all the payment 
 Please send us an email via [support ticket](https://wptravelengine.com/support-ticket/?utm_source=free_plugin&utm_medium=wporg&utm_campaign=support), and we will be happy to help you.
 
 == Changelog ==
+
+= 6.5.0 - 28th April 2025 =
+* Enhancement: Improved email management by adding Notifications and Settings tabs and introducing a new tag `{trip_booking_details}`.
+* Enhancement: Revamped user dashboard with new design and improved account management mechanism.
+* Enhancement: Skips the Traveler’s Information form from checkout during subsequent payments.
+* Fix: Resolved layout issues affecting single trip pages.
+* Fix: Corrected minimum passenger settings after updates.
+* Fix: Ensured booked-out dates are hidden in the trip front end.
+* Fix: Addressed UI breaks caused by the WPTE Elementor widget.
+* Fix: Displayed Traveler's Information on the Thank You page correctly after checkout.
+* Fix: Ensured Traveler's Information is included in the exported CSV file of bookings.
+* Fix: Adjusted the display of the booking modal when all seats for a specific date are booked.
+* Fix: Fixed the duration range slider to correctly show the minimum number of days based on trip data.
+
+**Check out the release note for version [6.5.0](https://wptravelengine.com/new-release-version-6-5-0/).**
 
 = 6.4.3 - 17th April 2025 =
 * Feature: Introduced a new sub-menu labeled 'Upcoming Tours' to display the list of upcoming trips.

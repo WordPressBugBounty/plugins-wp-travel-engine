@@ -11,14 +11,14 @@ $enable_checkout_customer_registration = $wp_travel_engine_settings[ 'enable_che
 $disable_my_account_customer_registration = $wp_travel_engine_settings[ 'disable_my_account_customer_registration' ] ?? 'no';
 $generate_username_from_email = $wp_travel_engine_settings[ 'generate_username_from_email' ] ?? 'no';
 $generate_user_password = $wp_travel_engine_settings[ 'generate_user_password' ] ?? 'no';
-$generate_user_account = $wp_travel_engine_settings[ 'generate_user_account' ] ?? 'no';
+$generate_user_account = $wp_travel_engine_settings[ 'generate_user_account' ] ?? 'yes';
 ?>
 
 <div class="wpte-field wpte-checkbox advance-checkbox">
 	<label class="wpte-field-label"
 		   for="wp_travel_engine_settings[generate_user_account]"><?php esc_html_e( 'Automatically Generate User Account', 'wp-travel-engine' ); ?></label>
 	<div class="wpte-checkbox-wrap">
-		<input type="hidden" name="wp_travel_engine_settings[generate_user_account]" value="no">
+		<input type="hidden" name="wp_travel_engine_settings[generate_user_account]" value="yes">
 		<input type="checkbox"
 			   data-onchange
 			   data-onchange-toggle-target="[data-generate-account-section]"

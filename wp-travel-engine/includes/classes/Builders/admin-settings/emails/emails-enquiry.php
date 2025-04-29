@@ -4,7 +4,7 @@
  *
  * @since 6.2.0
  */
-
+return;
 return apply_filters(
 	'emails-enquiry',
 	array(
@@ -32,33 +32,6 @@ return apply_filters(
 				'description' => __( 'Enable this to send enquiry notification emails to the customer.', 'wp-travel-engine' ),
 				'field_type'  => 'SWITCH',
 				'name'        => 'enquiry_form.notify_customer',
-				'divider'     => true,
-			),
-			array(
-				'label'       => __( 'Custom Enquiry Form', 'wp-travel-engine' ),
-				'description' => __( 'Enable this feature to utilize a custom form. Please ensure that a notification email is included within the custom form.', 'wp-travel-engine' ),
-				'field_type'  => 'SWITCH',
-				'name'        => 'enquiry_form.custom_form.enable',
-				'divider'     => true,
-			),
-			array(
-				'field_type' => 'GROUP',
-				'condition'  => 'enquiry_form.custom_form.enable === true',
-				'fields'     => array(
-					array(
-						'label'       => __( 'Form Shortcode', 'wp-travel-engine' ),
-						'description' => __( 'Add the custom form shortcode. We have made WP Travel Engine compatible with popular forms likes Gravity Form, Ninja Forms and WPForms.', 'wp-travel-engine' ),
-						'field_type'  => 'TEXT',
-						'name'        => 'enquiry_form.custom_form.shortcode',
-						'divider'     => true,
-					),
-				),
-			),
-			array(
-				'label'       => __( 'Show Enquiry Form', 'wp-travel-engine' ),
-				'description' => __( 'Turn this off to hide the enquiry form on Trip Page.', 'wp-travel-engine' ),
-				'field_type'  => 'SWITCH',
-				'name'        => 'enquiry_form.enable',
 				'divider'     => true,
 			),
 			array(

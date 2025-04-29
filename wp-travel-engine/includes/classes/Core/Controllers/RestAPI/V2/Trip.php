@@ -311,24 +311,16 @@ class Trip extends WP_REST_Posts_Controller {
 			}
 		}
 
-		if ( empty( $trip->get_setting( 'trip_duration' ) ) || isset( $request[ 'duration' ][ 'period' ] ) ) {
-			if ( empty( $trip->get_setting( 'trip_duration' ) ) || $request[ 'duration' ][ 'period' ] >= 0 ) {
-				$duration = $request[ 'duration' ][ 'period' ] ?? 1;
-				$trip_settings->set( 'trip_duration', $duration );
-				$duration = ( 'days' === ( $request[ 'duration' ][ 'unit' ] ?? 'days' ) ) ? $duration * 24 : $duration;
-				$trip->set_meta( 'wp_travel_engine_setting_trip_duration', $duration );
-				$trip->set_meta( '_s_duration', $duration );
-			} else {
-				$this->set_bad_request( 'invalid_trip_duration', sprintf( __( '%sTrip Duration%s must be greater than or equal to 0.', 'wp-travel-engine' ), '<strong>', '</strong>' ) );
+		if ( isset( $request['duration'] ) ) {
+			$duration_unit = $request[ 'duration' ][ 'unit' ] ?? $trip_settings->get( 'trip_duration_unit', 'days' );
+			if ( in_array( $duration_unit, array( 'days', 'hours' ) ) ) {
+				$trip_settings->set( 'trip_duration_unit', $duration_unit );
 			}
-		}
-
-		if ( isset( $request[ 'duration' ][ 'unit' ] ) ) {
-			if ( in_array( $request[ 'duration' ][ 'unit' ], array( 'days', 'hours' ) ) ) {
-				$trip_settings->set( 'trip_duration_unit', $request[ 'duration' ][ 'unit' ] );
-			} else {
-				$this->set_bad_request( 'invalid_trip_duration_unit', sprintf( __( '%sTrip Duration Unit%s must be either \'days\' or \'hours\'.', 'wp-travel-engine' ), '<strong>', '</strong>' ) );
-			}
+			$duration_period = $request[ 'duration' ][ 'period' ] ?? $trip_settings->get( 'trip_duration' );
+			$trip_settings->set( 'trip_duration', $duration_period );
+			$duration = $duration_unit === 'days' ? $duration_period * 24 : $duration_period;
+			$trip->set_meta( 'wp_travel_engine_setting_trip_duration', $duration );
+			$trip->set_meta( '_s_duration', $duration );
 		}
 
 		if ( isset( $request[ 'duration' ][ 'nights' ] ) ) {
@@ -712,25 +704,25 @@ class Trip extends WP_REST_Posts_Controller {
 			if ( ! isset( $this->errors ) ) {
 				$trip->set_meta( 'packages_ids', $trip_package_ids );
 				foreach ( $meta_inputs ?? [] as $meta_input ) {
+					$ID 			= array_shift( $meta_input );
+					$post_title 	= array_shift( $meta_input );
+					$post_content 	= array_shift( $meta_input );
+					$package_dates 	= $meta_input['package-dates'];
+					$meta_input 	= array_filter( $meta_input, fn ( $v ) => $v !== null );
+
+					wp_update_post( compact( 'ID', 'post_title', 'post_content', 'meta_input' ) );
 
 					$available_months = array_values( array_unique(
 						call_user_func_array(
 							'array_merge',
-							array_map( function ( $string ) use ( $meta_input, $trip ) {
+							array_map( function ( $string ) use ( $ID, $trip, $package_dates ) {
 								return ( new PackageDateParser(
-									new TripPackage( $meta_input['package_id'], $trip ),
-									$meta_input['package-dates'][ $string ]
+									new TripPackage( $ID, $trip ),
+									$package_dates[ $string ]
 								) )->get_unique_dates( false, array(), 'ym' );
-							}, array_keys( $meta_input['package-dates'] ) )
+							}, array_keys( $package_dates ) )
 						)
 					) );
-
-					wp_update_post( [
-						'ID'           => array_shift( $meta_input ),
-						'post_title'   => array_shift( $meta_input ),
-						'post_content' => array_shift( $meta_input ),
-						'meta_input'   => array_filter( $meta_input, fn ( $v ) => $v !== null ),
-					] );
 				}
 
 				if ( isset( $available_months ) ) {

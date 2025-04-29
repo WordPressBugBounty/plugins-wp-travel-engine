@@ -43,7 +43,7 @@ class WP_Travel_Engine_Form_Field_Textarea {
 			}
 		}
 
-		$output  = sprintf( '<textarea id="%s" name="%s" %s %s>', $this->field['id'], $this->field['name'], $validations, $attributes );
+		$output  = sprintf( '<textarea id="%s" name="%s" %s %s>', esc_attr( $this->field['id'] ), esc_attr( $this->field['name'] ), $validations, $attributes );
 		$output .= $this->field['default'];
 		$output .= sprintf( '</textarea>' );
 

@@ -16,6 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use WPTravelEngine\Core\Models\Post\Trip;
 
+global $post;
 $trip_data = new Trip( get_the_ID() );
 $is_featured = wte_is_trip_featured( get_the_ID() );
 
@@ -95,6 +96,7 @@ if ( class_exists( 'Wte_Trip_Review_Init' ) ) {
 				endif;
 				?>
 			</div>
+            <?php do_action( 'wptravelengine_trip_archive_map', $post ); ?>
 		</figure>
 
 		<!-- Trip Content -->

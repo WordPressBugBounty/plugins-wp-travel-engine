@@ -189,7 +189,7 @@ class WTE_Default_Form_Fields {
 
 		wp_enqueue_script( "jquery-ui-datepicker" );
 
-		$fields = array(
+		$fields = apply_filters( 'wp_travel_engine_traveller_info_fields_display', array(
 			'traveller_title' => array(
 				'type'          => 'select',
 				'field_label'   => __( 'Title', 'wp-travel-engine' ),
@@ -375,7 +375,7 @@ class WTE_Default_Form_Fields {
 				'default_field' => true,
 			),
 
-		);
+		) );
 
 		return $fields;
 	}
@@ -383,7 +383,7 @@ class WTE_Default_Form_Fields {
 	/**
 	 * Emergency Contact Field.
 	 *
-	 * @return void
+	 * @return array[]
 	 */
 	public static function emergency_contact() {
 		$fields = array(

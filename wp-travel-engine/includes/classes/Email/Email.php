@@ -12,21 +12,24 @@ namespace WPTravelEngine\Email;
  *
  * @since 6.0.0
  */
-class Email {
+class Email extends TemplateTags {
 
 	/**
 	 * Email from.
 	 *
 	 * @var array
 	 */
-	protected array $from = array( 'name' => '', 'email' => '' );
+	protected array $from = array(
+		'name'  => '',
+		'email' => '',
+	);
 
 	/**
-	 * Email to.
+	 * Email to send with comma separated values.
 	 *
-	 * @var string[]
+	 * @var string
 	 */
-	protected array $to = array();
+	protected string $to;
 
 	/**
 	 * Email Subject.
@@ -39,15 +42,16 @@ class Email {
 	 * Email message.
 	 *
 	 * @var string
+	 * @since 6.5.0
 	 */
-	protected string $body = '';
+	protected string $content = '';
 
 	/**
 	 * Email headers.
 	 *
-	 * @var string|string[]
+	 * @var array
 	 */
-	protected $headers = array( 'Content-Type: text/html; charset=UTF-8; MIME-Version:1.0' );
+	protected $headers = null;
 
 	/**
 	 * Email attachments.
@@ -60,8 +64,17 @@ class Email {
 	 * Email should use template if available.
 	 *
 	 * @var ?string Template Name.
+	 * @since 6.5.0
 	 */
 	protected ?string $template = null;
+
+	/**
+	 * Email settings.
+	 *
+	 * @var null|array
+	 * @since 6.5.0
+	 */
+	protected ?array $settings = null;
 
 	/**
 	 * Email content.
@@ -77,18 +90,32 @@ class Email {
 	/**
 	 * Add Headers.
 	 *
-	 * @param string|array $header Headers
+	 * @param array $header Headers
 	 *
 	 * @return $this
 	 */
-	public function add_headers( $header ): Email {
-		if ( is_array( $header ) ) {
-			$this->headers = array_merge( $this->headers, $header );
-		} else {
-			$this->headers[] = $header;
+	public function add_headers( array $header = array() ): Email {
+
+		if ( is_null( $this->headers ) ) {
+			$this->headers = $this->get_headers();
 		}
 
+		$this->headers = array_merge( $this->headers, $header );
 		return $this;
+	}
+
+	/**
+	 * Get email headers.
+	 *
+	 * @return array
+	 * @since 6.5.0
+	 */
+	public function get_headers(): array {
+		return $this->headers ??= array(
+			'charset'  => apply_filters( 'wp_travel_engine_mail_charset', 'Content-Type: text/html; charset=UTF-8; MIME-Version:1.0' ),
+			'from'     => 'From: ' . $this->get_settings( 'name' ) . ' <' . $this->get_settings( 'from' ) . '>',
+			'reply_to' => 'Reply-To: ' . $this->get_settings( 'reply_to' ),
+		);
 	}
 
 	/**
@@ -108,21 +135,87 @@ class Email {
 	}
 
 	/**
+	 * Get email body.
+	 *
+	 * @param ?string $content Content.
+	 * @param ?string $template Template.
+	 *
+	 * @return string
+	 * @since 6.5.0
+	 */
+	protected function get_body( $content = null, $template = null ): string {
+
+		$update_mail_template = wptravelengine_toggled( get_option( 'wte_update_mail_template', false ) );
+		$use_new_header_footer = ! in_array( $template ?? $this->template, array( 'booking_confirmation', 'payment_confirmation' ) ) || $update_mail_template;
+
+		$body  = '';
+		$body .= $use_new_header_footer ? wte_get_template_html( 'template-emails/email-header.php' ) : wte_get_template_html( 'emails/email-header.php' );
+		$body .= $content ?? $this->content;
+		$body .= $use_new_header_footer ? wte_get_template_html( 'template-emails/email-footer.php' ) : wte_get_template_html( 'emails/email-footer.php' );
+
+		return $body;
+	}
+
+	/**
 	 * Send email.
 	 *
-	 * @return bool
+	 * @return mixed
+	 * @updated 6.5.0
 	 */
 	public function send() {
-		$to          = $this->get( 'to' );
-		$subject     = $this->get( 'subject' );
-		$body        = $this->get( 'body' );
+
+		if ( empty( $this->content ) ) {
+			return false;
+		}
+
+		$to          = array_map( 'trim', explode( ',', $this->get( 'to' ) ) );
+		$subject     = $this->apply_tags( $this->get( 'my_subject' ) );
+		$body        = $this->apply_tags( $this->get( 'body' ) );
 		$headers     = $this->get( 'headers' );
 		$attachments = $this->get( 'attachments' );
 
-		// Send email.
-		$result = wp_mail( $to, $subject, $body, $headers, $attachments );
+		foreach ( $to as $email ) {
+			$result = wp_mail( $email, $subject, $body, $headers, $attachments );
+		}
 
-		return compact( 'to', 'subject', 'body', 'headers', 'attachments', 'result' );
+		return $result;
 	}
 
+	/**
+	 * Get email settings.
+	 *
+	 * @param string|null $key Key.
+	 *
+	 * @return array|string|null
+	 * @since 6.5.0
+	 */
+	public function get_settings( $key = null ) {
+		$this->settings ??= wptravelengine_settings()->get( 'email', array() );
+
+		return is_null( $key ) ? $this->settings : ( $this->settings[ $key ] ?? null );
+	}
+
+	/**
+	 * Template preview.
+	 *
+	 * @param int    $payment_id Payment ID.
+	 * @param string $email_template_type Email template type.
+	 * @param string $to Recipient.
+	 *
+	 * @return void
+	 * @since 6.5.0
+	 */
+	public function template_preview( $payment_id, $email_template_type = 'order', $to = 'customer' ) {
+
+		! defined( 'WTE_EMAIL_TEMPLATE_PREVIEW' ) || define( 'WTE_EMAIL_TEMPLATE_PREVIEW', ! 0 );
+
+		if ( + $payment_id === 0 ) {
+			$settings = wptravelengine_settings();
+			header( $_SERVER[ 'SERVER_PROTOCOL' ] . ' 200 OK' ); // phpcs:ignore
+			$this->set( 'content', $settings->get( $to . '_email_notify_tabs.' . $email_template_type . '.content' ) );
+			echo $this->get_body();
+			exit;
+		}
+
+	}
 }

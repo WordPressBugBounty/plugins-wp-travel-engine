@@ -90,6 +90,14 @@ class Template {
 			}
 		}
 
+		if( wp_travel_engine_is_account_page() ) {
+			Assets::instance()
+				->dequeue_script( 'wp-travel-engine' )
+				->dequeue_style( 'wp-travel-engine' )
+				->enqueue_script( 'my-account' )
+				->enqueue_style( 'my-account' );
+		}
+
 		$this->enqueue_elementor_assets();
 
 		return $template_path;

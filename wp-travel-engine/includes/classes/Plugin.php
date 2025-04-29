@@ -19,6 +19,7 @@ use WPTravelEngine\Core\Shortcodes\General;
 use WPTravelEngine\Core\Shortcodes\ThankYou;
 use WPTravelEngine\Core\Shortcodes\TravelerInformation;
 use WPTravelEngine\Core\Shortcodes\TripCheckout;
+use WPTravelEngine\Core\Shortcodes\UserAccount;
 use WPTravelEngine\Core\Updates;
 use WPTravelEngine\Core\SEO;
 use WPTravelEngine\Filters\SettingsAPISchema;
@@ -34,7 +35,7 @@ use WPTravelEngine\Modules\TripSearch;
 use WPTravelEngine\Optimizer\Optimizer;
 use WPTravelEngine\Registers\ShortcodeRegistry;
 use WPTravelEngine\Traits\Singleton;
-use WTE_Booking_Emails;
+use WPTravelEngine\Email\Email;
 use function WTE\Upgrade500\wte_process_migration;
 use const WP_TRAVEL_ENGINE_FILE_PATH;
 use WPTravelEngine\Core\Models\Post\TripPackages;
@@ -160,6 +161,8 @@ final class Plugin {
 			\WP_CLI::add_command( 'wptravelengine settings', \WPTravelEngine\CLI\Settings::class );
 			\WP_CLI::add_command( 'wptravelengine extensions', \WPTravelEngine\CLI\Extensions::class );
 		}
+
+		$this->set_class_aliases();
 	}
 
 	/**
@@ -434,7 +437,7 @@ final class Plugin {
 					// Mail class.
 					require_once plugin_dir_path( WP_TRAVEL_ENGINE_FILE_PATH ) . 'includes/class-wp-travel-engine-emails.php';
 
-					WTE_Booking_Emails::template_preview( wte_clean( wp_unslash( $_REQUEST[ 'pid' ] ) ), wte_clean( wp_unslash( wte_array_get( $_REQUEST, 'template_type', 'order' ) ) ), wte_clean( wp_unslash( wte_array_get( $_REQUEST, 'to', 'customer' ) ) ) );
+					( new Email() )->template_preview( wte_clean( wp_unslash( $_REQUEST[ 'pid' ] ) ), wte_clean( wp_unslash( wte_array_get( $_REQUEST, 'template_type', 'order' ) ) ), wte_clean( wp_unslash( wte_array_get( $_REQUEST, 'to', 'customer' ) ) ) );
 				}
 
 				if ( wte_array_get( $_REQUEST, '_action', '' ) == 'wte-email-template-update' ) {
@@ -1221,7 +1224,7 @@ final class Plugin {
 
 		// User Modules.
 		include sprintf( '%s/includes/dashboard/wp-travel-engine-user-functions.php', WP_TRAVEL_ENGINE_ABSPATH );
-		include sprintf( '%s/includes/dashboard/class-wp-travel-engine-user-account.php', WP_TRAVEL_ENGINE_ABSPATH );
+		// include sprintf( '%s/includes/dashboard/class-wp-travel-engine-user-account.php', WP_TRAVEL_ENGINE_ABSPATH );
 		include sprintf( '%s/includes/dashboard/class-wp-travel-engine-form-handler.php', WP_TRAVEL_ENGINE_ABSPATH );
 
 		// WP Travel Engine Neo.
@@ -1618,6 +1621,10 @@ final class Plugin {
 			}
 		}
 
+		if( get_queried_object_id() == wp_travel_engine_get_dashboard_page_id() ){
+			$classes[] = 'wpte-user-account';
+		}
+
 		return $classes;
 	}
 
@@ -1672,7 +1679,8 @@ final class Plugin {
 						 ->register( ThankYou::class )
 						 ->register( TravelerInformation::class )
 						 ->register( General::class )
-						 ->register( TripCheckout::class );
+						 ->register( TripCheckout::class )
+						 ->register( UserAccount::class );
 	}
 
 	/**
@@ -1749,5 +1757,21 @@ final class Plugin {
 		}
 
 		return array_merge( $email_tags, $extra_email_tags );
+	}
+
+	/**
+	 * Set class aliases.
+	 *
+	 * @since 6.5.0
+	 * @return void
+	 */
+	public function set_class_aliases() {
+
+		/**
+		 * WTE_Booking_Emails class's functionality has been moved to \WPTravelEngine\Email\Booking.
+		 *
+		 * For backward compatibility, \WPTravelEngine\Email\Booking is aliased as WTE_Booking_Email.
+		 */
+		class_alias( '\WPTravelEngine\Email\BookingEmail', 'WTE_Booking_Emails' );
 	}
 }

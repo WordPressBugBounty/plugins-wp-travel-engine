@@ -233,6 +233,16 @@ class BookingProcess {
 	 * @return void
 	 */
 	protected function maybe_redirect() {
+		$booking_ref = $this->cart->get_booking_ref();
+ 		$payment_key = $this->payment->get_payment_key();
+
+ 		/**
+ 		 * If booking reference and payment key are set, redirect to thank you page.
+ 		 * @since 6.5.0
+ 		 */
+ 		if ( $booking_ref && $payment_key ) {
+ 			wptravelengine_redirect_to_thank_you_page( $booking_ref, $payment_key );
+ 		}
 
 		$this->cart->clear();
 		// Redirect if not redirected till this point.

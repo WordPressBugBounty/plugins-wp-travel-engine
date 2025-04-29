@@ -4,12 +4,14 @@ use WPTravelEngine\Core\Controllers\Ajax\AddToCart;
 use WPTravelEngine\Core\Controllers\Ajax\ApplyCoupon;
 use WPTravelEngine\Core\Controllers\Ajax\Cart;
 use WPTravelEngine\Core\Controllers\Ajax\Checkout;
+use WPTravelEngine\Core\Controllers\Ajax\UpdateMailTemplate;
 use WPTravelEngine\Core\Models\Post\Booking;
 use WPTravelEngine\Helpers\Functions;
 use WPTravelEngine\Registers\AjaxRequestRegistry;
 use WPTravelEngine\Core\Controllers\Ajax\ResendPurchaseReceipt;
 use WPTravelEngine\Core\Controllers\Ajax\UpcomingToursFilter;
 use WPTravelEngine\Core\Controllers\Ajax\UpcomingToursDetails;
+use WPTravelEngine\Email\Email;
 
 /**
  * WP Travel Engine AJAX
@@ -41,6 +43,11 @@ class WTE_Ajax {
 		 */
 		$ajax_registry->register( UpcomingToursFilter::class );
 		$ajax_registry->register( UpcomingToursDetails::class );
+		/**
+		 * Adds update mail template ajax action
+		 * @since 6.5.0
+		 */
+		$ajax_registry->register( UpdateMailTemplate::class );
 
 		add_action( 'wp_ajax_nopriv_email_test', function () {
 
@@ -295,7 +302,7 @@ class WTE_Ajax {
 	 * Sends test email.
 	 */
 	public function send_test_email() {
-		if ( ! isset( $_POST[ 'nonce' ] ) || ! isset( $_POST[ 'email' ] ) ) {
+		if ( ! isset( $_POST[ 'nonce' ] ) ){
 			wp_send_json_error( array( 'message' => __( 'Missing required parameters.', 'wp-travel-engine' ) ) );
 		}
 
@@ -303,17 +310,23 @@ class WTE_Ajax {
 			wp_send_json_error( array( 'message' => __( 'Security Error! Nonce verification failed', 'wp-travel-engine' ) ) );
 			die;
 		}
+		if( isset( $_POST[ 'id' ] ) && isset( $_POST[ 'tab' ] ) ) {
+			$global_settings = wptravelengine_settings();
+			$subject = $global_settings->get( $_POST[ 'tab' ] .'_email_notify_tabs' )[ $_POST[ 'id' ] ][ 'subject' ];
+			$content = $global_settings->get( $_POST[ 'tab' ] .'_email_notify_tabs' )[ $_POST[ 'id' ] ][ 'content' ];
+		} else {
+			$subject   = get_bloginfo( 'name' ) . " Test Email: Confirming Server Configuration";
+			$content   = "This is a test email to confirm that your email server configuration is set up correctly. You should have received this email shortly after initiating the test from our system.\n\nIf you are reading this message, it means that your server is properly configured for email sending. Congratulations!";
+		}
+		$to        = sanitize_email( $_POST[ 'email' ] ?? wp_get_current_user()->user_email );
 
-		$content   = "This is a test email to confirm that your email server configuration is set up correctly. You should have received this email shortly after initiating the test from our system.\n\nIf you are reading this message, it means that your server is properly configured for email sending. Congratulations!";
-		$to        = sanitize_email( $_POST[ 'email' ] );
-		$site_name = get_bloginfo( 'name' );
-		$subject   = "[$site_name] Test Email: Confirming Server Configuration";
+		$email = new Email();
+		$email->set( 'to', $to )
+			  ->set( 'my_subject', $subject )
+			  ->set( 'template', $_POST[ 'id' ] ?? '' )
+			  ->set( 'content', $content );
 
-		$from    = "test-email@" . parse_url( get_bloginfo( 'url' ) )[ 'host' ];
-		$headers = "From: $from\r\n";
-		$headers .= "Content-Type: text/plain\r\n";
-
-		if ( wp_mail( $to, $subject, $content, $headers ) ) {
+		if ( $email->send() ) {
 			wp_send_json_success( array( 'message' => 'Test Email Sent Successfully. Please check your inbox.' ) );
 		} else {
 			wp_send_json_error( array( 'message' => 'Failed to send the test email. Something went wrong.' ) );

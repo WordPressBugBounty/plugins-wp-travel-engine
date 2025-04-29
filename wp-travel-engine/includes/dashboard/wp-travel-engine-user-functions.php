@@ -34,11 +34,6 @@ if ( ! function_exists( 'wp_travel_engine_create_new_customer' ) ) {
 	 */
 	function wp_travel_engine_create_new_customer( $email, $username = '', $password = '' ) {
 
-		$settings = wptravelengine_settings()->get();
-
-		$generate_username_from_email = isset( $settings['generate_username_from_email'] ) ? $settings['generate_username_from_email'] : 'no';
-		$generate_user_password       = isset( $settings['generate_user_password'] ) ? $settings['generate_user_password'] : 'no';
-
 		// Check the email address.
 		if ( empty( $email ) || ! is_email( $email ) ) {
 			return new WP_Error( 'registration-error-invalid-email', __( 'Please provide a valid email address.', 'wp-travel-engine' ) );
@@ -49,7 +44,7 @@ if ( ! function_exists( 'wp_travel_engine_create_new_customer' ) ) {
 		}
 
 		// Handle username creation.
-		if ( 'no' === $generate_username_from_email || ! empty( $username ) ) {
+		if ( ! empty( $username ) ) {
 			$username = sanitize_user( $username );
 
 			if ( empty( $username ) || ! validate_username( $username ) ) {
@@ -73,13 +68,10 @@ if ( ! function_exists( 'wp_travel_engine_create_new_customer' ) ) {
 		}
 
 		// Handle password creation.
-		if ( 'yes' === $generate_user_password && empty( $password ) ) {
-			$password           = wp_generate_password();
-			$password_generated = true;
-		} elseif ( empty( $password ) ) {
+		if ( empty( $password ) ) {
 			return new WP_Error( 'registration-error-missing-password', __( 'Please enter an account password.', 'wp-travel-engine' ) );
 		} else {
-			$password_generated = false;
+			$password_generated = true;
 		}
 
 		// Use WP_Error to handle registration errors.

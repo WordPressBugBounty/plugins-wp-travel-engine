@@ -19,7 +19,7 @@
 		</h3>
 	<?php endif; ?>
 	<div class="wpte-checkout__box-content">
-		<?php if ( wptravelengine_settings()->get( 'display_travellers_info' ) === 'yes' && wptravelengine_settings()->get( 'traveller_emergency_details_form' ) === 'on_checkout' ) : ?>
+	<?php if ( wptravelengine_settings()->get( 'display_travellers_info' ) === 'yes' && wptravelengine_settings()->get( 'traveller_emergency_details_form' ) === 'on_checkout' && $payment_type !== 'due' ) : ?>
 		<div class="wpte-copy-from-lead-travelers" style="margin: 0 0 24px;">
 			<input type="checkbox" id="wpte-copy-from-lead-travelers" name="wpte-copy-from-lead-travelers" value="1">
 			<label for="wpte-copy-from-lead-travelers">

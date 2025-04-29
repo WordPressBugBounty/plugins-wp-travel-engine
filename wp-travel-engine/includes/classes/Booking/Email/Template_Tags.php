@@ -6,16 +6,25 @@
  */
 
 namespace WPTravelEngine\Booking\Email;
-use WPTravelEngine\Builders\FormFields\DefaultFormFields;
+use WPTravelEngine\Core\Models\Post\Trip;
+use WPTravelEngine\Core\Models\Settings\Options;
 use WPTravelEngine\Builders\FormFields\FormField;
+use WPTravelEngine\Builders\FormFields\DefaultFormFields;
 use WPTravelEngine\Builders\FormFields\TravellerEditFormFields;
 
-use DateTimeZone;
-
+use WPTravelEngine\Email\TemplateTags;
 use WPTravelEngine\Helpers\Countries;
 use WPTravelEngine\Helpers\CartInfoParser;
 
-class Template_Tags {
+#[AllowDynamicProperties]
+class Template_Tags extends TemplateTags {
+
+	/**
+	 * Currency code.
+	 *
+	 * @var string
+	 */
+	protected $currency;
 
 	public function __construct( $booking_id, $payment_id ) {
 		$this->booking = get_post( $booking_id );
@@ -39,13 +48,16 @@ class Template_Tags {
 
 		$this->cart_info_parser = new CartInfoParser( (array) $this->cart_info );
 
+		$this->currency = $this->payment->payable[ 'currency' ] ?? $this->cart_info['currency'] ?? $this->cart_info->currency  ?? 'USD';
+
+		parent::__construct();
 	}
 
 	public function get_trip_url() {
 		$order_trip = $this->cart_info_parser->get_item();
 
 		if ( empty( ! $order_trip ) ) {
-			return '<a href=' . esc_url( get_permalink( $order_trip->get_trip_id() ) ) . '>' . get_the_title( $order_trip->get_trip_title() ) . '</a>';
+			return '<a href=' . esc_url( get_permalink( $order_trip->get_trip_id() ) ) . '>' . esc_html( $order_trip->get_trip_title() ) . '</a>';
 		}
 
 		return '<a href=' . esc_url( get_permalink( $this->trip->ID ) ) . '>' . esc_html( $this->trip->title ) . '</a>';
@@ -109,9 +121,47 @@ class Template_Tags {
 	}
 
 	public function get_due_amount() {
-		$currency = $this->cart_info->currency ?? $this->cart_info['currency'] ?? 'USD';
+		return wte_esc_price( wte_get_formated_price( $this->booking->due_amount, $this->currency ) );
+	}
 
-		return wte_get_formated_price( $this->booking->due_amount, $currency, '', true );
+	/**
+	 * Get the current date.
+	 *
+	 * @since 6.5.0
+	 * @return string
+	 */
+	public function get_current_date() {
+		return wp_date( get_option( 'date_format', 'Y-m-d' ) . ' ' . get_option( 'time_format', 'H:i:s' ) );
+	}
+
+	/**
+	 * Get the total amount.
+	 *
+	 * @since 6.5.0
+	 * @return string
+	 */
+	public function get_total_amount() {
+		return wte_esc_price( wte_get_formated_price( $this->cart_info[ 'total' ], $this->currency ) );
+	}
+
+	/**
+	 * Get the subtotal amount.
+	 *
+	 * @since 6.5.0
+	 * @return string
+	 */
+	public function get_subtotal() {
+		return wte_esc_price( wte_get_formated_price( $this->cart_info[ 'subtotal' ], $this->currency ) );
+	}
+
+	/**
+	 * Get the paid amount.
+	 *
+	 * @since 6.5.0
+	 * @return string
+	 */
+	public function get_paid_amount() {
+		return wte_esc_price( wte_get_formated_price( $this->payment->paid_amount, $this->currency ) );
 	}
 
 	public function get_bank_details() {
@@ -190,7 +240,6 @@ class Template_Tags {
 		$order_trips = $this->order_trips;
 		$cart_info   = (array) $this->cart_info;
 
-		$currency = $cart_info[ 'currency' ] ?? 'USD';
 		if ( is_array( $order_trips ) ) :
 			ob_start();
 			$count              = 1;
@@ -220,7 +269,7 @@ class Template_Tags {
 					<?php if ( isset( $trip->end_datetime ) ) : ?>
                         <tr>
                             <td><?php esc_html_e( 'Trip End Date', 'wp-travel-engine' ); ?></td>
-                            <td class="alignright"><?php echo esc_html( $trip->has_time ? wp_date( 'Y-m-d H:i', strtotime( $trip->end_datetime ), new \DateTimeZone('utc') ) : wp_date( get_option( 'date-format', 'Y-m-d' ), strtotime( $trip->end_datetime ), new DateTimeZone('utc') ) ); ?></td>
+                            <td class="alignright"><?php echo esc_html( $trip->has_time ? wp_date( 'Y-m-d H:i', strtotime( $trip->end_datetime ), new \DateTimeZone('utc') ) : wp_date( get_option( 'date-format', 'Y-m-d' ), strtotime( $trip->end_datetime ), new \DateTimeZone('utc') ) ); ?></td>
                         </tr>
 
 					<?php endif; ?>
@@ -249,14 +298,14 @@ class Template_Tags {
 									?>
 									<tr>
 										<td class="alignright"><?php echo esc_html( $label ); ?></td>
-										<td><?php echo (int) $tcount . ' X ' . wte_esc_price( wte_get_formated_price( $pax_cost, $currency, '', ! 0 ) ) . ' = ' . wte_esc_price( wte_get_formated_price( $trip->pax_cost[ $pricing_category_id ], $currency, '', ! 0 ) ); ?></td>
+										<td><?php echo (int) $tcount . ' X ' . wte_esc_price( wte_get_formated_price( $pax_cost, $this->currency, '', ! 0 ) ) . ' = ' . wte_esc_price( wte_get_formated_price( $trip->pax_cost[ $pricing_category_id ], $this->currency, '', ! 0 ) ); ?></td>
 									</tr>
 									<?php
 								}
 								?>
 								<tr>
 									<td width="50%"><?php esc_html_e( 'Subtotal', 'wp-travel-engine' ); ?></td>
-									<td width="50%"><?php echo wte_esc_price( wte_get_formated_price( + $sum, $currency, '', ! 0 ) ); ?></td>
+									<td width="50%"><?php echo wte_esc_price( wte_get_formated_price( + $sum, $this->currency, '', ! 0 ) ); ?></td>
 								</tr>
 							</table>
 						</td>
@@ -278,14 +327,14 @@ class Template_Tags {
 										?>
 										<tr>
 											<td><?php echo esc_html( $tx[ 'extra_service' ] ); ?></td>
-											<td><?php echo (int) $tx[ 'qty' ] . ' X ' . wte_esc_price( wte_get_formated_price( + $tx[ 'price' ], $currency, '', ! 0 ) ) . ' = ' . wte_esc_price( wte_get_formated_price( + $tx_total, $currency, '', ! 0 ) ); ?></td>
+											<td><?php echo (int) $tx[ 'qty' ] . ' X ' . wte_esc_price( wte_get_formated_price( + $tx[ 'price' ], $this->currency, '', ! 0 ) ) . ' = ' . wte_esc_price( wte_get_formated_price( + $tx_total, $this->currency, '', ! 0 ) ); ?></td>
 										</tr>
 										<?php
 									}
 									?>
 									<tr>
 										<td width="50%"><?php esc_html_e( 'Subtotal', 'wp-travel-engine' ); ?></td>
-										<td widht="50%"><?php echo wte_esc_price( wte_get_formated_price( + $sum, $currency, '', ! 0 ) ); ?></td>
+										<td widht="50%"><?php echo wte_esc_price( wte_get_formated_price( + $sum, $this->currency, '', ! 0 ) ); ?></td>
 									</tr>
 								</table>
 							</td>
@@ -304,7 +353,7 @@ class Template_Tags {
 						<table width="100%">
 							<tr>
 								<td><?php esc_html_e( 'Subtotal', 'wp-travel-engine' ); ?></td>
-								<td class="alignright"><?php echo wte_esc_price( wte_get_formated_price( + $cart_info[ 'subtotal' ], $currency, '', ! 0 ) ); ?></td>
+								<td class="alignright"><?php echo wte_esc_price( wte_get_formated_price( + $cart_info[ 'subtotal' ], $this->currency, '', ! 0 ) ); ?></td>
 							</tr>
 							<tr>
 								<td><?php esc_html_e( 'Discount', 'wp-travel-engine' ); ?></td>
@@ -317,7 +366,7 @@ class Template_Tags {
 								}
 								?>
 								<td class="alignright">
-									<?php echo wte_esc_price( wte_get_formated_price( + $discount_figure, $currency, '', ! 0 ) ); ?>
+									<?php echo wte_esc_price( wte_get_formated_price( + $discount_figure, $this->currency, '', ! 0 ) ); ?>
 								</td>
 							</tr>
 							<?php do_action( 'wptravelengine_email_template_before_tax_amount', $cart_info ); ?>
@@ -329,7 +378,7 @@ class Template_Tags {
 									$tax_amount = wp_travel_engine_get_tax_detail( $cart_info );
 									?>
 									<td class="alignright">
-										<?php echo wte_esc_price( wte_get_formated_price( + $tax_amount[ 'tax_actual' ], $currency, '', ! 0 ) ); ?>
+										<?php echo wte_esc_price( wte_get_formated_price( + $tax_amount[ 'tax_actual' ], $this->currency, '', ! 0 ) ); ?>
 									</td>
 								</tr>
 							<?php } ?>
@@ -340,7 +389,7 @@ class Template_Tags {
 							<tr>
 								<td><?php esc_html_e( 'Total', 'wp-travel-engine' ); ?></td>
 								<td class="alignright">
-									<?php echo wte_esc_price( wte_get_formated_price( $cart_info[ 'total' ], $currency, '', ! 0 ) ); ?>
+									<?php echo wte_esc_price( wte_get_formated_price( $cart_info[ 'total' ], $this->currency, '', ! 0 ) ); ?>
 									<?php
 									$global_settings = get_option( 'wp_travel_engine_settings', array() );
 									$tax_enable      = isset( $global_settings[ 'tax_enable' ] ) && 'yes' === $global_settings[ 'tax_enable' ];
@@ -358,6 +407,275 @@ class Template_Tags {
 		<?php
 		endif;
 
+		return ob_get_clean();
+	}
+
+	/**
+	 * Get trip booking Summary details.
+	 *
+	 * @since 6.5.0
+	 *
+	 * @return string
+	 */
+	public function get_trip_booking_summary(){
+		ob_start();
+		$pricing_categories = get_terms(
+			array(
+				'taxonomy'   => 'trip-packages-categories',
+				'hide_empty' => false,
+				'orderby'    => 'term_id',
+				'fields'     => 'id=>name',
+			)
+		);
+		foreach ( $this->order_trips as $trip ) :
+			$trip = (object) $trip;
+			$trip_modal = new Trip( $trip->ID );
+		?>
+			<tr>
+				<td colspan="2" style="font-size: 16px;line-height: 1.75;font-weight: bold;padding: 8px 0 4px;"><?php esc_html_e( 'Booking Details:', 'wp-travel-engine' ); ?></td>
+			</tr>
+			<tr>
+				<td style="color: #566267;"><?php esc_html_e( 'Package Name', 'wp-travel-engine' ); ?>:</td>
+				<td style="width: 50%;text-align: right;"><strong><?php echo esc_html( $trip->package_name ); ?></strong></td>
+			</tr>
+			<tr>
+				<td style="color: #566267;"><?php esc_html_e( 'Trip Date', 'wp-travel-engine' ); ?>:</td>
+				<td style="width: 50%;text-align: right;"><strong><?php echo wptravelengine_format_trip_datetime( $trip->datetime ); ?></strong></td>
+			</tr>
+			<tr>
+				<td style="color: #566267;"><?php esc_html_e( 'Trip End Date', 'wp-travel-engine' ); ?>:</td>
+				<td style="width: 50%;text-align: right;"><strong><?php echo wptravelengine_format_trip_end_datetime( $trip->datetime, $trip_modal ); ?></strong></td>
+			</tr>
+			<tr>
+				<td style="color: #566267;"><?php esc_html_e( 'Travellers', 'wp-travel-engine' ); ?>:</td>
+				<td style="width: 50%;text-align: right;"><strong><?php echo esc_html( array_sum( $trip->pax ) ); ?></strong></td>
+			</tr>
+			<tr>
+				<td colspan="2"><strong><?php esc_html_e( 'Traveller(s):', 'wp-travel-engine' ); ?></strong></td>
+			</tr>
+			<?php
+			$sum = 0;
+			foreach ( $trip->pax as $pricing_category_id => $tcount ) :
+				if ( + $tcount < 1 ) {
+					continue;
+				}
+				$pax_cost = + $trip->pax_cost[ $pricing_category_id ] / + $tcount;
+				$sum      += + $trip->pax_cost[ $pricing_category_id ];
+				$label = isset( $pricing_categories[ $pricing_category_id ] ) ? $pricing_categories[ $pricing_category_id ] : $pricing_category_id;
+			?>
+			<tr>
+				<td style="color: #566267;"><?php echo esc_html( $label ) . ': ' . $tcount . ' x ' . wte_esc_price( wte_get_formated_price( $pax_cost, $this->currency ) ); ?></td>
+				<td style="width: 50%;text-align: right;"><strong><?php echo wte_esc_price( wte_get_formated_price( + $trip->pax_cost[ $pricing_category_id ], $this->currency ) ); ?></strong></td>
+			</tr>
+			<?php endforeach;
+			do_action( 'wptravelengine_email_template_before_extra_services', (array) $this->cart_info );
+
+			if ( $trip->trip_extras && is_array( $trip->trip_extras ) ) : ?>
+				<tr>
+					<td colspan="2"><strong><?php esc_html_e( 'Extra Services:', 'wp-travel-engine' ); ?></strong></td>
+				</tr>
+				<tr>
+					<?php
+						$sum = 0;
+						foreach ( $trip->trip_extras as $index => $tx ) {
+							$tx_total = + $tx[ 'qty' ] * + $tx[ 'price' ];
+							$sum      += $tx_total;
+							?>
+							<tr>
+								<td style="color: #566267;"><?php echo esc_html( $tx[ 'extra_service' ] . ': ' ); echo (int) $tx[ 'qty' ] . ' x ' . wte_esc_price( wte_get_formated_price( + $tx[ 'price' ], $this->currency ) ); ?></td>
+								<td style="width: 50%;text-align: right;"><strong><?php echo wte_esc_price( wte_get_formated_price( + $tx_total, $this->currency ) ); ?></strong></td>
+							</tr>
+							<?php
+						}
+					?>
+				</tr>
+			<?php endif;
+			do_action( 'wptravelengine_email_template_after_extra_services', (array) $this->cart_info );
+		endforeach;
+		return ob_get_clean();
+	}
+
+	/**
+	 * Get trip booking Payment details.
+	 *
+	 * @since 6.5.0
+	 *
+	 * @return string
+	 */
+	public function get_trip_booking_payment(){
+		ob_start();
+		$cart_info   = (array) $this->cart_info;
+
+		$global_settings = Options::get( 'wp_travel_engine_settings', array() );
+		$tax_enable      = isset( $global_settings[ 'tax_enable' ] ) && 'yes' === $global_settings[ 'tax_enable' ];
+		?>
+		<tr>
+			<td colspan="2" style="font-size: 16px;line-height: 1.75;font-weight: bold;padding: 8px 0 4px;"><?php esc_html_e( 'Payment Details:', 'wp-travel-engine' ); ?></td>
+		</tr>
+		<tr>
+			<td><strong><?php esc_html_e( 'Subtotal', 'wp-travel-engine' ); ?></strong></td>
+			<td style="text-align: right;"><strong><?php echo $this->get_subtotal(); ?></strong></td>
+		</tr>
+		<?php
+			$discount_figure = 0;
+			if ( ! empty( $cart_info[ 'discounts' ] ) ) {
+				$discounts       = $cart_info[ 'discounts' ];
+				$discount        = array_shift( $discounts );
+				$discount_figure = 'percentage' === $discount[ 'type' ] ? + $cart_info[ 'subtotal' ] * ( + $discount[ 'value' ] / 100 ) : $discount[ 'value' ];
+				?>
+				<tr style="color: #12B76A;">
+					<td><?php esc_html_e( 'Discount', 'wp-travel-engine' ); ?> <?php echo 'percentage' === $discount[ 'type' ] ? esc_html( '('. $discount[ 'name' ]. ' ' . $discount[ 'value' ] ) . '%)' : esc_html( '(' . $discount[ 'name' ] . ')' ); ?></td>
+					<td style="text-align: right;"><strong>-<?php echo wte_esc_price( wte_get_formated_price( + $discount_figure, $this->currency ) ); ?></strong></td>
+				</tr>
+		<?php }
+		//Hooks for addon.
+		do_action('wptravelengine_email_template_before_tax_amount', $cart_info );
+
+		if( isset( $cart_info[ 'tax_amount' ] ) && $cart_info[ 'tax_amount' ] > 0 ) { ?>
+		<tr style="color: #F79009;">
+			<?php $tax_amount = wp_travel_engine_get_tax_detail( $cart_info ); ?>
+			<td><?php echo esc_html( wptravelengine_get_tax_label( $cart_info[ 'tax_amount' ] ) ); ?></td>
+			<td style="text-align: right;"><strong><?php echo wte_esc_price( wte_get_formated_price( + $tax_amount[ 'tax_actual' ], $this->currency ) ); ?></strong></td>
+		</tr>
+		<?php }
+			// Add new row before total amount calculation on email template.
+			do_action( 'wptravelengine_email_template_trip_cost_rows', $cart_info );
+		?>
+		<tr style="font-size: 16px;">
+			<td colspan="2">
+				<span style="display: block;padding: 8px 16px;background-color: rgba(15, 29, 35, 0.04);border-radius: 4px;margin: 0 -16px;">
+					<strong style="width: 50%;display: inline-block;"><?php esc_html_e( 'Total', 'wp-travel-engine' ); ?></strong>
+					<strong style="width: 49%;text-align: right;display: inline-block;"><?php echo wte_esc_price( wte_get_formated_price( $cart_info[ 'total' ], $this->currency ) );
+					if ( $tax_enable == 'yes' && isset( $global_settings[ 'tax_type_option' ] ) && 'inclusive' === $global_settings[ 'tax_type_option' ] ) {
+						$tax_percentage = $global_settings[ 'tax_percentage' ];
+						printf( '<span class="wpte-inclusive-tax-label">%s</span>', sprintf( __( '(%s%% Incl. tax)', 'wp-travel-engine' ), esc_html( $tax_percentage ) ) );
+					}
+					?></strong>
+				</span>
+			</td>
+		</tr>
+		<?php if( $cart_info[ 'payment_type' ] === "due" ) { ?>
+			<tr>
+				<td><strong><?php esc_html_e( 'Paid Amount', 'wp-travel-engine' ); ?></strong></td>
+				<td style="text-align: right;font-size: 16px;"><strong>-<?php echo wte_esc_price( wte_get_formated_price( $cart_info[ 'totals' ][ 'partial_total' ], $this->currency ) ); ?></strong></td>
+			</tr>
+		<?php } ?>
+		<tr>
+			<td><strong><?php esc_html_e( 'Deposit Today', 'wp-travel-engine' ); ?></strong></td>
+			<td style="text-align: right;font-size: 16px;"><strong>-<?php echo wte_esc_price( wte_get_formated_price( $cart_info[ 'payment_type' ] === "due" ? $this->payment->payable[ 'amount' ] : $this->booking->paid_amount, $this->currency ) ); ?></strong></td>
+		</tr>
+		<tr>
+			<td><strong><?php esc_html_e( 'Due Amount', 'wp-travel-engine' ); ?></strong></td>
+			<td style="text-align: right;font-size: 16px;"><strong><?php echo $this->get_due_amount(); ?></strong></td>
+		</tr>
+		<tr>
+			<td colspan="2" style="font-size: 16px;line-height: 1.75;font-weight: bold;padding: 8px 0 4px;"><?php esc_html_e( 'Billing Details:', 'wp-travel-engine' ); ?></td>
+		</tr>
+		<tr>
+			<td style="color: #566267;"><?php esc_html_e( 'Booking Name:', 'wp-travel-engine' ); ?></td>
+			<td style="width: 50%;text-align: right;"><strong><?php esc_html_e( $this->get_billing_fullname(), 'wp-travel-engine' ); ?></strong></td>
+		</tr>
+		<tr>
+			<td style="color: #566267;"><?php esc_html_e( 'Booking Email:', 'wp-travel-engine' ); ?></td>
+			<td style="width: 50%;text-align: right;"><strong><?php esc_html_e( $this->get_billing_email(), 'wp-travel-engine' ); ?></strong></td>
+		</tr>
+		<tr>
+			<td style="color: #566267;"><?php esc_html_e( 'Booking Address:', 'wp-travel-engine' ); ?></td>
+			<td style="width: 50%;text-align: right;"><strong><?php esc_html_e( $this->get_billing_address(), 'wp-travel-engine' ); ?></strong></td>
+		</tr>
+		<tr>
+			<td style="color: #566267;"><?php esc_html_e( 'City:', 'wp-travel-engine' ); ?></td>
+			<td style="width: 50%;text-align: right;"><strong><?php esc_html_e( $this->get_billing_city(), 'wp-travel-engine' ); ?></strong></td>
+		</tr>
+		<tr>
+			<td style="color: #566267;"><?php esc_html_e( 'Country:', 'wp-travel-engine' ); ?></td>
+			<td style="width: 50%;text-align: right;"><strong><?php esc_html_e( $this->get_billing_country(), 'wp-travel-engine' ); ?></strong></td>
+		</tr>
+		<?php
+		do_action( 'wptravelengine_email_template_after_billing_details', $cart_info );
+		return ob_get_clean();
+	}
+
+	/**
+	 * Get trip booking details.
+	 *
+	 * @since 6.5.0
+	 *
+	 * @return string
+	 */
+	public function get_trip_booking_details(){
+		ob_start();
+		if ( is_array( $this->order_trips ) ) :
+			//Trip Booking Summary.
+			echo $this->get_trip_booking_summary();
+			?>
+			<tr>
+				<td colspan="2"><hr style="border: none;border-top: 1px solid #DCDFEA;"></td>
+			</tr>
+			<?php
+			// Trip Booking Payment Details.
+			echo $this->get_trip_booking_payment();
+
+			// Bank Details.
+			if ( $this->payment && 'direct_bank_transfer' === $this->payment->payment_gateway ) :
+				$bank_details_labels = array(
+					'account_name'   => __( 'Account Name', 'wp-travel-engine' ),
+					'account_number' => __( 'Account Number', 'wp-travel-engine' ),
+					'bank_name'      => __( 'Bank Name', 'wp-travel-engine' ),
+					'sort_code'      => __( 'Sort Code', 'wp-travel-engine' ),
+					'iban'           => __( 'IBAN', 'wp-travel-engine' ),
+					'swift'          => __( 'BIC/Swift', 'wp-travel-engine' ),
+				);
+
+				$settings = get_option( 'wp_travel_engine_settings', array() );
+
+				$bank_accounts = wte_array_get( $settings, 'bank_transfer.accounts', array() ); ?>
+				<tr>
+					<td colspan="2"><hr style="border: none;border-top: 1px solid #DCDFEA;"></td>
+				</tr>
+				<tr>
+					<td colspan="2" style="font-size: 16px;line-height: 1.75;font-weight: bold;padding: 8px 0 4px;"><?php esc_html_e( 'Bank Details:', 'wp-travel-engine' ); ?></td>
+				</tr>
+				<?php foreach ( $bank_accounts as $account ) :
+					foreach ( $bank_details_labels as $key => $label ) :
+						?>
+						<tr>
+							<td style="color: #566267;"><?php esc_html_e( $label, 'wp-travel-engine' ); ?></td>
+							<td style="width: 50%;text-align: right;"><strong><?php isset( $account[ $key ] ) ? esc_html_e( $account[ $key ], 'wp-travel-engine' ) : ''; ?></strong></td>
+						</tr>
+						<?php
+					endforeach;
+					?>
+				<?php endforeach;
+			endif;
+
+			// Check Payment Details.
+			if ( $this->payment && 'check_payments' === $this->payment->payment_gateway ) :
+				?>
+				<tr>
+					<td colspan="2"><hr style="border: none;border-top: 1px solid #DCDFEA;"></td>
+				</tr>
+				<tr>
+					<td colspan="2" style="font-size: 16px;line-height: 1.75;font-weight: bold;padding: 8px 0 4px;"><?php esc_html_e( 'Check Payment Instructions:', 'wp-travel-engine' ); ?></td>
+				</tr>
+				<tr>
+					<td colspan="2" style="color: #566267;"><?php esc_html_e( wptravelengine_settings()->get( 'check_payment.instruction', '' ), 'wp-travel-engine' ); ?></td>
+				</tr>
+			<?php endif;
+
+			// Additional Notes.
+			if( ! empty( $this->additional_notes ) ) : ?>
+				<tr>
+					<td colspan="2"><hr style="border: none;border-top: 1px solid #DCDFEA;"></td>
+				</tr>
+				<tr>
+					<td colspan="2" style="font-size: 16px;line-height: 1.75;font-weight: bold;padding: 8px 0 4px;"><?php esc_html_e( 'Additional Notes:', 'wp-travel-engine' ); ?></td>
+				</tr>
+				<tr>
+					<td colspan="2" style="color: #566267;"><?php echo esc_html( $this->additional_notes ); ?></td>
+				</tr>
+			<?php endif;
+		endif;
 		return ob_get_clean();
 	}
 
@@ -416,8 +734,6 @@ class Template_Tags {
 
 		$trip = $this->trip;
 
-		$currency = $this->cart_info->currency ?? $this->cart_info['currency'] ?? 'USD';
-
 		$traveler_data    = get_post_meta( $this->booking->ID, 'wp_travel_engine_placeorder_setting', true );
 		$personal_options = isset( $traveler_data[ 'place_order' ] ) ? $traveler_data[ 'place_order' ] : array();
 
@@ -430,11 +746,9 @@ class Template_Tags {
 		endif;
 
 		$booking_id        = $this->booking->ID;
-		$admin_url         = admin_url();
-		$booking_url       = $admin_url . 'post.php?post=' . $booking_id . '&action=edit';
-		$edit_booking_link = $booking_url;
+		$edit_booking_link = admin_url() . 'post.php?post=' . $booking_id . '&action=edit';
 
-		return apply_filters(
+		parent::set_tags( apply_filters(
 			'wte_booking_mail_tags',
 			array(
 				'{trip_url}'                  => $this->get_trip_url(),
@@ -447,34 +761,63 @@ class Template_Tags {
 				'{tdate}'                     => ( isset( $trip->has_time ) && $trip->has_time && isset( $trip->datetime ) ) ? wp_date( 'Y-m-d H:i', strtotime( $trip->datetime ) ) : wp_date( get_option( 'date-format', 'Y-m-d' ), strtotime( isset( $trip->datetime ) ? $trip->datetime : '' ) ),
 				'{traveler}'                  => isset( $trip->pax ) ? array_sum( $trip->pax ) : 0,
 				// '{child-traveler}'            => $trip->pax['child'],
-				'{tprice}'                    => isset( $trip->cost ) ? wte_get_formated_price( $trip->cost, $currency, '', ! 0 ) : 0,
-				'{price}'                     => wte_get_formated_price( $this->payment->payable[ 'amount' ] ?? 0, $this->payment->payable[ 'currency' ] ?? $currency, '', ! 0 ),
-				'{total_cost}'                => wte_get_formated_price( $this->cart_info->total ?? $this->cart_info['total'] ?? 0, $currency, '', ! 0 ),
+				'{tprice}'                    => isset( $trip->cost ) ? wte_get_formated_price( $trip->cost, $this->currency ) : 0,
+				'{price}'                     => wte_get_formated_price( $this->payment->payable[ 'amount' ] ?? 0, $this->currency ),
+				'{total_cost}'                => wte_get_formated_price( $this->cart_info->total ?? $this->cart_info['total'] ?? 0, $this->currency ),
 				'{due}'                       => $this->get_due_amount(),
-				'{sitename}'                  => get_bloginfo( 'name' ),
 				'{booking_url}'               => $edit_booking_link,
-				'{ip_address}'                => '',
-				'{date}'                      => date( 'Y-m-d H:i:s' ),
+				'{date}'                      => $this->get_current_date(),
 				'{booking_id}'                => sprintf( __( 'Booking #%1$s', 'wp-travel-engine' ), $this->booking->ID ),
 				'{bank_details}'              => $this->get_bank_details(),
 				'{check_payment_instruction}' => $this->get_check_payment_details(),
 				'{booking_details}'           => $this->get_booking_details(),
 				'{booking_trips_count}'       => isset( $this->booking->order_trips ) ? count( $this->booking->order_trips ) : 1,
 				'{payment_id}'                => $this->payment->ID,
-				'{subtotal}'                  => wte_get_formated_price( $this->booking->cart_info[ 'subtotal' ], $currency, '', ! 0 ),
-				'{total}'                     => wte_get_formated_price( $this->booking->cart_info[ 'total' ], $currency, '', ! 0 ),
-				'{paid_amount}'               => wte_get_formated_price( $this->payment->payable[ 'amount' ] ?? 0, $this->payment->payable[ 'currency' ] ?? $currency, '', ! 0 ),
-				'{discount_amount}'           => wte_get_formated_price( $this->discount_amount(), $currency, '', ! 0 ),
+				'{subtotal}'                  => $this->get_subtotal(),
+				'{total}'                     => $this->get_total_amount(),
+				'{paid_amount}'               => $this->get_paid_amount(),
+				'{discount_amount}'           => wte_esc_price( wte_get_formated_price( $this->discount_amount(), $this->currency ) ),
 				'{traveler_data}'             => $traveller_email_template_content,
 				'{payment_method}'            => $this->get_payment_method( $this->payment->ID ),
 				'{billing_details}'           => $this->get_billing_details(),
 				'{additional_note}'           => $this->get_additional_note(),
 				'{traveller_details}'         => $this->get_traveller_details(),
 				'{emergency_details}'         => $this->get_emergency_details(),
+				'{trip_booking_summary}'      => $this->get_trip_booking_summary(),
+				'{trip_payment_details}'      => $this->get_trip_booking_payment(),
+				'{trip_booking_details}'      => $this->get_trip_booking_details(),
+				'{booked_trip_name}'      	  => get_the_title( $this->trip->ID ),
+				'{customer_first_name}'       => $this->get_billing_first_name(),
+				'{customer_last_name}'        => $this->get_billing_last_name(),
+				'{customer_full_name}'        => $this->get_billing_fullname(),
+				'{customer_email}'            => $this->get_billing_email(),
+				'{trip_booked_date}'          => $this->get_current_date(),
+				'{trip_start_date}' 		  => wptravelengine_format_trip_datetime( $trip->datetime ),
+				'{trip_end_date}' 			  => wptravelengine_format_trip_end_datetime( $trip->datetime, new Trip( $trip->ID ) ),
+				'{no_of_travellers}' 		  => isset( $trip->pax ) ? array_sum( $trip->pax ) : 0,
+				'{trip_total_price}' 		  => $this->get_total_amount(),
+				'{trip_paid_amount}' 		  => $this->get_paid_amount(),
+				'{trip_due_amount}' 		  => $this->get_due_amount(),
 			),
 			$this->payment->ID,
 			$this->booking->ID
-		);
+		));
+
+		return $this->tags;
+	}
+
+	/**
+	 * Set default tags.
+	 *
+	 * @param array $tags The tags.
+	 *
+	 * @return $this
+	 * @since 6.5.0
+	 */
+	public function set_tags( array $tags = array() ) {
+		$this->get_email_tags();
+		parent::set_tags( $tags );
+		return $this;
 	}
 
 	/**

@@ -84,6 +84,10 @@
 			<key name="person_format"/>
 			<key name="gdpr_msg"/>
 			<key name="related_trips_section_title"/>
+			<key name="set_password_page_label"/>
+			<key name="forgot_page_label"/>
+			<key name="forgot_page_description"/>
+			<key name="login_page_label"/>
 			<key name="tax_type_option"/>
 			<key name="extra_service_title"/>
 			<key name="discount_guide_open_title"/>

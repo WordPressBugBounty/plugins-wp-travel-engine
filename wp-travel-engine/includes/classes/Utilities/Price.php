@@ -35,6 +35,11 @@ class Price {
 	private function replacer( $num = false ) {
 		$num = ! $num ? $this->number : $num;
 
+		if ( $num < 0 && ( strpos($this->format, '%AMOUNT%') !== false || strpos( $this->format, '%FORMATED_AMOUNT%' ) !== false ) ) {
+			$num = abs( $num );
+			$this->format = '-' . $this->format;
+		}
+
 		$replacer = array(
 			'%CURRENCY_CODE%'   => $this->use_html ? '<span class="wpte-currency-code">' . $this->currency_code . '</span>' : $this->currency_code,
 			'%CURRENCY_SYMBOL%' => $this->use_html ? '<span class="wpte-currency-code">' . $this->currency_symbol . '</span>' : $this->currency_symbol,

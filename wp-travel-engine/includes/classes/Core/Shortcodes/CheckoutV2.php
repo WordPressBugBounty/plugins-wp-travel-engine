@@ -29,6 +29,7 @@ class CheckoutV2 extends Checkout {
 		$display_billing_details = $wptravelengine_settings[ 'display_billing_details' ] ?? 'yes';
 		$show_additional_note    = $wptravelengine_settings[ 'show_additional_note' ] ?? 'yes';
 		$show_coupon_form        = $wptravelengine_settings[ 'show_discount' ] ?? 'yes';
+		$is_payment_due 		 = $wte_cart->get_booking_ref() ?? false;
 		return array(
 			'version'            	=> $checkout_page_template,
 			'header'             	=> $checkout_page_template == '2.0' && $display_header_footer == 'yes' ? 'default' : 'none',
@@ -38,11 +39,11 @@ class CheckoutV2 extends Checkout {
 			'tour-details-title' 	=> 'show',
 			'cart-summary'       	=> 'show',
 			'cart-summary-title' 	=> 'show',
-			'lead-travellers'    	=> $show_travellers_info == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide',
+			'lead-travellers'    	=> $is_payment_due ? 'hide' : ( $show_travellers_info == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide' ),
 			'lead-travellers-title' => 'show',
-			'travellers'         	=> $show_travellers_info == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide',
+			'travellers'         	=> $is_payment_due ? 'hide' : ( $show_travellers_info == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide' ),
 			'travellers-title'   	=> 'show',
-			'emergency'          	=> $show_emergency_contact == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide',
+			'emergency'          	=> $is_payment_due ? 'hide' : ( $show_emergency_contact == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide' ),
 			'emergency-title'    	=> 'show',
 			'billing'            	=> $display_billing_details == 'yes' ? 'show' : 'hide',
 			'billing-title'      	=> 'show',
@@ -67,11 +68,15 @@ class CheckoutV2 extends Checkout {
 		global $wte_cart;
 
 		$wptravelengine_settings   = get_option( 'wp_travel_engine_settings', array() );
-		$generate_user_account     = $wptravelengine_settings[ 'generate_user_account' ] ?? 'no';
+		$generate_user_account     = $wptravelengine_settings[ 'generate_user_account' ] ?? 'yes';
 		$require_login_to_checkout = $wptravelengine_settings[ 'enable_checkout_customer_registration' ] ?? 'no';
 
 		if ( 'no' === $generate_user_account && 'yes' === $require_login_to_checkout && ! is_user_logged_in() ) {
 			ob_start();
+
+			Assets::instance()
+			->enqueue_style( 'my-account' )
+			->enqueue_script( 'my-account' );
 
 			wte_get_template( 'account/form-login.php' );
 

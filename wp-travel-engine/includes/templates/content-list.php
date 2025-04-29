@@ -127,6 +127,7 @@ echo $new_trip_listing ? ' wpte_new-layout' : '';
 					</i>
 				</button>
 			<?php endif; ?>
+			<?php do_action( 'wptravelengine_trip_archive_map', $post ); ?>
 		</figure>
 		<div class="category-trip-content-wrap">
 			<div class="category-trip-prc-title-wrap">

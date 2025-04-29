@@ -54,7 +54,7 @@ class WP_Travel_Engine_Form_Field_Text_Info {
 			$output .= sprintf( '<span>%s</span>', $before_field );
 		}
 
-		$output .= sprintf( '<span class="wp-travel-engine-info" id="%s">%s</span>', $this->field['id'], $this->field['default'] );
+		$output .= sprintf( '<span class="wp-travel-engine-info" id="%s">%s</span>', esc_attr( $this->field['id'] ), esc_html( $this->field['default'] ) );
 
 		if ( ! $this->field['remove_wrap'] ) :
 

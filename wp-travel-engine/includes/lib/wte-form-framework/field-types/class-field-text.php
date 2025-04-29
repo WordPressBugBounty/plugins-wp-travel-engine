@@ -91,7 +91,7 @@ class WP_Travel_Engine_Form_Field_Text {
 
 		endif;
 
-		$output = sprintf( '%1$s<input type="%2$s" id="%3$s" name="%4$s" value="%5$s" %6$s class="%7$s" %8$s>%9$s', $before_field, $this->field_type, $this->field['id'], $this->field['name'], $this->field['default'], $validations, $this->field['class'], $attributes, $after_field );
+		$output = sprintf( '%1$s<input type="%2$s" id="%3$s" name="%4$s" value="%5$s" %6$s class="%7$s" %8$s>%9$s', $before_field, esc_attr( $this->field_type ), esc_attr( $this->field['id'] ), esc_attr( $this->field['name'] ), esc_attr( $this->field['default'] ), $validations, esc_attr( $this->field['class'] ), $attributes, $after_field );
 
 		if ( ! $display ) {
 

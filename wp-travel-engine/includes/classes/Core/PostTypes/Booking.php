@@ -747,6 +747,16 @@ class Booking extends PostType {
 					);
 				}
 
+				if( is_numeric( $due_amount = $request->get_param( 'due_amount' ) ) ){
+					$payment_model->set_meta(
+						'payable',
+						array(
+							'currency' => sanitize_text_field( $payment_data['currency'] ?? '' ),
+							'amount' => (float) $due_amount,
+						)
+					);
+				}
+
 				if ( $transaction_id = $payment_data['transaction_id'] ?? null ) {
 					$payment_model->set_transaction_id( sanitize_text_field( $transaction_id ) );
 				}
@@ -856,17 +866,17 @@ class Booking extends PostType {
 				$mode
 			),
 			'travellers_form_fields'         => array_map(
-				function ( array $traveller, $index ) use ( $mode ) {
+				function ( array $traveller, $index ) use ( $mode, $booking ) {
 					$traveller['index'] = $index;
-					return new TravellerEditFormFields( $traveller, $mode );
+					return new TravellerEditFormFields( $traveller, $mode, $booking );
 				},
 				$booking->get_travelers(),
 				array_keys( $booking->get_travelers() )
 			),
 			'emergency_contacts_form_fields' => array_map(
-				function ( array $emergency_contact, $index ) use ( $mode ) {
+				function ( array $emergency_contact, $index ) use ( $mode, $booking ) {
 					$emergency_contact['index'] = $index;
-					return new EmergencyEditFormFields( $emergency_contact, $mode );
+					return new EmergencyEditFormFields( $emergency_contact, $mode, $booking );
 				},
 				$booking->get_emergency_contacts(),
 				array_keys( $booking->get_emergency_contacts() )

@@ -5,7 +5,7 @@
  *
  * @since 6.2.0
  */
-
+return;
 return apply_filters(
 	'emails-test',
 	array(

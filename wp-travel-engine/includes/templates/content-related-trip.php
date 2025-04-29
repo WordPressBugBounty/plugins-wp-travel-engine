@@ -120,9 +120,10 @@ echo $is_featured ? ' __featured-trip' : '';
 					</i>
 				</button>
 			<?php endif; ?>
+			<?php do_action( 'wptravelengine_trip_archive_map', $post ); ?>
 		</figure>
 
-		<div class="category-trip-content-wrap ok">
+		<div class="category-trip-content-wrap">
 			<div class="category-trip-prc-title-wrap">
 				<h3 class="category-trip-title" itemprop="name">
 					<a itemprop="url" href="<?php the_permalink(); ?>"><?php the_title(); ?></a>

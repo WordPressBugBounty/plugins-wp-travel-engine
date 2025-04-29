@@ -2,8 +2,12 @@
 /**
  * Enquiry notification emails.
  */
-$formdata = $args['form_data'];
+use WPTravelEngine\Core\Models\Settings\Options;
 
+$formdata = $args['formdata'];
+if( wptravelengine_toggled( Options::get( 'wte_update_mail_template', false ) ) ) {
+	wte_get_template( 'template-emails/enquiry-admin.php', $formdata );
+} else {
 ?>
 <table class="main" width="100%" cellpadding="0" cellspacing="0">
 	<tr>
@@ -60,3 +64,4 @@ $formdata = $args['form_data'];
 	</tr>
 </table>
 <?php
+}

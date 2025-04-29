@@ -11,26 +11,6 @@ global $wp, $wte_cart;
 $settings                      = wptravelengine_settings()->get();
 $wp_travel_engine_dashboard_id = isset( $settings[ 'pages' ][ 'wp_travel_engine_dashboard_page' ] ) ? esc_attr( $settings[ 'pages' ][ 'wp_travel_engine_dashboard_page' ] ) : wp_travel_engine_get_page_id( 'my-account' );
 ?>
-	<header class="wpte-lrf-header">
-		<?php
-		if ( ! empty( $bookings ) && isset( $_GET[ 'action' ] ) && wte_clean( wp_unslash( $_GET[ 'action' ] ) ) == 'partial-payment' ) : // phpcs:ignore
-			?>
-			<a href="<?php echo esc_url( get_permalink( $wp_travel_engine_dashboard_id ) ); ?>" class="wpte-back-btn">
-				<?php wptravelengine_svg_by_fa_icon( "fas fa-arrow-left" ); ?><?php esc_html_e( 'View all bookings', 'wp-travel-engine' ); ?>
-			</a>
-			<h2 class="wpte-lrf-title"><?php esc_html_e( 'Remaining Booking Payment', 'wp-travel-engine' ); ?></h2>
-			<div class="wpte-lrf-description">
-				<p><?php esc_html_e( 'Please pay the remaining amount from below. If there is any issue, please contact us.', 'wp-travel-engine' ); ?>
-				</p>
-			</div>
-		<?php else : ?>
-			<h2 class="wpte-lrf-title"><?php esc_html_e( 'Booking', 'wp-travel-engine' ); ?></h2>
-			<div class="wpte-lrf-description">
-				<p><?php esc_html_e( 'Here is the list of bookings successfully made.', 'wp-travel-engine' ); ?>
-				</p>
-			</div>
-		<?php endif; ?>
-	</header>
 	<div class="wpte-lrf-block-wrap">
 		<div class="wpte-lrf-block">
 			<?php
@@ -92,7 +72,7 @@ $wp_travel_engine_dashboard_id = isset( $settings[ 'pages' ][ 'wp_travel_engine_
 				</div>
 			<?php
 			else :
-				esc_html_e( 'You have not made any bookings yet.', 'wp-travel-engine' );
+				esc_html_e( 'You haven\'t booked any trip yet.', 'wp-travel-engine' );
 			endif;
 			?>
 		</div>

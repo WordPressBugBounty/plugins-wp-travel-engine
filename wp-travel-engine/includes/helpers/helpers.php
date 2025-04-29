@@ -14,6 +14,8 @@ use WPTravelEngine\Builders\FormFields\TravellersFormFields;
 use WPTravelEngine\Core\Coupons;
 use WPTravelEngine\Core\Models\Post\Trip;
 use WPTravelEngine\Core\Models\Post\TripPackage;
+use WPTravelEngine\Core\Models\Settings\Options;
+use WPTravelEngine\Email\UserEmail;
 use WPTravelEngine\Pages\Checkout;
 use WPTravelEngine\PaymentGateways\PaymentGateways;
 use WPTravelEngine\Utilities\RequestParser;
@@ -185,6 +187,7 @@ function wptravelengine_get_checkout_template_args( array $args = array() ): arr
 	$display_billing_details = $wptravelengine_settings[ 'display_billing_details' ] ?? 'yes';
 	$show_additional_note    = $wptravelengine_settings[ 'show_additional_note' ] ?? 'yes';
 	$show_coupon_form        = $wptravelengine_settings[ 'show_discount' ] ?? 'yes';
+	$is_payment_due 		 = $wte_cart->get_booking_ref();
 	$attributes              = array(
 		'version'               => $checkout_page_template,
 		'header'                => $checkout_page_template == '2.0' && $display_header_footer == 'yes' ? 'default' : 'none',
@@ -194,11 +197,11 @@ function wptravelengine_get_checkout_template_args( array $args = array() ): arr
 		'tour-details-title'    => 'show',
 		'cart-summary'          => 'show',
 		'cart-summary-title'    => 'show',
-		'lead-travellers'       => $show_travellers_info == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide',
+		'lead-travellers'       => $is_payment_due ? 'hide' : ( $show_travellers_info == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide' ),
 		'lead-travellers-title' => 'show',
-		'travellers'            => $show_travellers_info == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide',
+		'travellers'            => $is_payment_due ? 'hide' :  ($show_travellers_info == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide' ),
 		'travellers-title'      => 'show',
-		'emergency'             => $show_emergency_contact == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide',
+		'emergency'             => $is_payment_due ? 'hide' : ( $show_emergency_contact == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide' ),
 		'emergency-title'       => 'show',
 		'billing'               => $display_billing_details == 'yes' ? 'show' : 'hide',
 		'billing-title'         => 'show',
@@ -1665,43 +1668,17 @@ function wte_get_discount_percent( $trip_id ) {
  */
 function wp_travel_engine_user_new_account_created( $customer_id, $new_customer_data, $password_generated, $template ) {
 
-	// Send email notification.
-	$email_content = wte_get_template_html(
-		$template,
-		array(
-			'user_login'         => $new_customer_data[ 'user_login' ],
-			'user_pass'          => $new_customer_data[ 'user_pass' ],
-			'blogname'           => get_bloginfo( 'name' ),
-			'password_generated' => $password_generated,
-		)
-	);
-
-	// To send HTML mail, the Content-type header must be set.
-	$headers = 'MIME-Version: 1.0' . "\r\n";
-	$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-
-	$from_email = get_option( 'admin_email' );
-	$from_name  = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
-	$from       = $from_name . ' <' . $from_email . '>';
-	// Create email headers.
-	$headers .= 'From: ' . $from . "\r\n";
-	$headers .= 'Reply-To: ' . $from . "\r\n" .
-				'X-Mailer: PHP/' . phpversion();
-
-	if ( $new_customer_data[ 'user_login' ] ) {
-		$user_object     = get_user_by( 'login', $new_customer_data[ 'user_login' ] );
-		$user_user_login = $new_customer_data[ 'user_login' ];
-		$user_user_email = stripslashes( $user_object->user_email );
-		$user_recipient  = $user_user_email;
-		$site_title      = get_bloginfo( 'name' );
-		$user_subject    = __( '[' . $site_title . '] Login Details', 'wp-travel-engine' );
-
-		$mail_sent = wp_mail( $user_recipient, $user_subject, $email_content, $headers );
-
-		if ( ! $mail_sent ) {
-			return false;
+	$account_settings = Options::get( 'wp_travel_engine_settings' )['customer_email_notify_tabs']['account_registration'];
+	if ( $account_settings['enabled'] && $new_customer_data ) {
+		$email = new UserEmail( $customer_id );
+		$email->set( 'to', $new_customer_data[ 'user_email' ] );
+		$email->set( 'my_subject', $account_settings[ 'subject' ] );
+		$email->set( 'content', $account_settings[ 'content' ] );
+		if ( $email->send() ) {
+			return true;
 		}
 	}
+	return false;
 }
 
 add_action( 'wp_travel_engine_created_customer', 'wp_travel_engine_user_new_account_created', 20, 4 );
@@ -2816,4 +2793,32 @@ function wptravelengine_revert_to_old_banner( $theme_name ){
 	}
 
 	return false;
+}
+
+/**
+ * If booking reference is set, redirect to thank you page instead of redirecting to the travellers information page.
+ * This is to avoid redirecting to the travellers information page when the user is trying to pay for due amount.
+ * This supports backward compatibility with old travellers information page.
+ *
+ * @param string $booking_ref The booking reference.
+ * @param string $payment_key The payment key.
+ *
+ * @since 6.5.0
+ * @return void
+ */
+function wptravelengine_redirect_to_thank_you_page( $booking_ref, $payment_key ) {
+    if ( !$booking_ref || !$payment_key ) {
+        return;
+    }
+
+    $wptravelengine_settings = get_option( 'wp_travel_engine_settings', array() );
+    $thank_you_page_id = wte_array_get( $wptravelengine_settings, 'pages.wp_travel_engine_thank_you', '' );
+    $thank_you_page_url = $thank_you_page_id ? get_permalink( $thank_you_page_id) : esc_url(home_url('/') );
+
+    if( empty( $thank_you_page_url ) ){
+        return;
+    }
+
+    wp_safe_redirect( add_query_arg( 'payment_key', $payment_key, $thank_you_page_url)  );
+    exit;
 }

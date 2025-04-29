@@ -9,10 +9,11 @@
 namespace WPTravelEngine\Dashboard;
 
 use Hybridauth\Hybridauth;
+use WPTravelEngine\Core\Shortcodes\UserAccount;
 /**
  * WPTravelEngine\Dashboard\Login
  */
-class Login extends Account {
+class Login extends UserAccount {
 
 	/**
 	 * Constructor.

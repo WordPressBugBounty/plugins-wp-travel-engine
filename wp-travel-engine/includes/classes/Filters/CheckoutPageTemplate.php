@@ -169,8 +169,9 @@ class CheckoutPageTemplate extends BookingProcessPageTemplate {
 	 * @return void
 	 */
 	public function print_billing_details() {
+		global $wte_cart;
 		if ( ! isset( $billing_form_fields ) ) {
-			$billing_form_fields = new BillingFormFields();
+			$billing_form_fields = new BillingFormFields( array( 'booking_ref' => $wte_cart->get_booking_ref() ) );
 		}
 		$args = compact( 'billing_form_fields' );
 		wptravelengine_get_template( 'template-checkout/content-billing-details.php', $args );

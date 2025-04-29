@@ -13,13 +13,14 @@
  */
 class Wp_Travel_Engine_Archive_Hooks {
 
-	function __construct() {
-		add_action( 'wp_travel_engine_trip_archive_outer_wrapper', array( $this, 'wp_travel_engine_trip_archive_wrapper' ) );
-		add_action( 'wp_travel_engine_trip_archive_wrap', array( $this, 'wp_travel_engine_trip_archive_wrap' ) );
-		add_action( 'wp_travel_engine_trip_archive_outer_wrapper_close', array( $this, 'wp_travel_engine_trip_archive_outer_wrapper_close' ) );
-		add_action( 'wp_travel_engine_header_filters', array( $this, 'wp_travel_engine_header_filters_template' ) );
-		add_action( 'wp_travel_engine_archive_header_block', array( $this, 'wp_travel_engine_archive_header_block' ) );
-		add_action( 'wp_travel_engine_featured_trips_sticky', array( $this, 'wte_featured_trips_sticky' ), 10, 1 );
+	public function __construct()
+	{
+		add_action('wp_travel_engine_trip_archive_outer_wrapper', array($this, 'wp_travel_engine_trip_archive_wrapper'));
+		add_action('wp_travel_engine_trip_archive_wrap', array($this, 'wp_travel_engine_trip_archive_wrap'));
+		add_action('wp_travel_engine_trip_archive_outer_wrapper_close', array($this, 'wp_travel_engine_trip_archive_outer_wrapper_close'));
+		add_action('wp_travel_engine_header_filters', array($this, 'wp_travel_engine_header_filters_template'));
+		add_action('wp_travel_engine_archive_header_block', array($this, 'wp_travel_engine_archive_header_block'));
+		add_action('wp_travel_engine_featured_trips_sticky', array($this, 'wte_featured_trips_sticky'), 10, 1);
 
 		add_action( 'pre_get_posts', array( $this, 'archive_pre_get_posts' ), 11 );
 	}

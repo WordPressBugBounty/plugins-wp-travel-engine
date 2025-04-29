@@ -63,8 +63,12 @@ class EmergencyFormFields extends FormField {
 	 * @return array
 	 * @since 6.4.0
 	 */
-	public function with_values( $form_data, $type = 'new' ): array {
-		$this->fields = WTE_Default_Form_Fields::emergency_contact();
+	public function with_values( $form_data, $booking = null ): array {
+		if( $booking && $booking->get_meta( 'traveller_page_type' ) == 'old' ){
+			$this->fields = WTE_Default_Form_Fields::emergency_contact();
+		} else {
+			$this->fields = DefaultFormFields::emergency();
+		}
 		
 		return array_map( function ( $field ) use ( $form_data ) {
 			$name = preg_match( "#\[([^\[]+)]$#", $field[ 'name' ], $matches ) ? $matches[ 1 ] : $field[ 'name' ];

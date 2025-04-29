@@ -23,27 +23,54 @@ if ( ! defined( 'ABSPATH' ) ) {
 $user_login = $args['user_login'];
 $reset_key  = $args['reset_key'];
 ?>
-<p><?php esc_html_e( 'Someone requested that the password be reset for the following account:', 'wp-travel-engine' ); ?></p>
-<p><?php printf( esc_html__( 'Username: %s', 'wp-travel-engine' ), esc_html( $user_login ) ); ?></p>
-<p><?php esc_html_e( 'If this was a mistake, just ignore this email and nothing will happen.', 'wp-travel-engine' ); ?></p>
-<p><?php esc_html_e( 'To reset your password, visit the following address:', 'wp-travel-engine' ); ?></p>
-<p>
-	<a class="link" href="
-	<?php
-	echo esc_url(
-		add_query_arg(
-			array(
-				'key'   => $reset_key,
-				'login' => rawurlencode( $user_login ),
-			),
-			wp_travel_engine_lostpassword_url()
-		)
-	);
-	?>
-	">
-	<?php esc_html_e( 'Click here to reset your password', 'wp-travel-engine' ); ?></a>
-</p>
-<p><?php esc_html_e( 'Powered by', 'wp-travel-engine' ); ?><a href="https://wptravelengine.com"
-															  target="_blank"> <?php esc_html_e( 'WP Travel Engine', 'wp-travel-engine' ); ?></a>
-</p>
-<p></p>
+<table style="width:100%;">
+	<tr>
+		<td colspan="2" style="font-size: 24px;line-height: 1.5;font-weight: bold;">
+			<?php echo esc_html__( 'Hi', 'wp-travel-engine' ) . ' ' . esc_html( $first_name ); ?>,
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2" style="padding: 16px 0 8px;">
+			<?php echo esc_html__( 'Welcome to', 'wp-travel-engine' ); ?> <strong><?php bloginfo( 'name' ) . esc_html( '!' ); ?></strong>
+		<p style="margin: 8px 0 0;"><?php echo sprintf( __( 'We received a request to reset your password for your %s account.', 'wp-travel-engine' ), $user_login ); ?></p>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<?php echo esc_html__( 'Click the link below to set a new password:', 'wp-travel-engine' ); ?>
+			<a target="_blank" class="link" href="
+				<?php
+				echo esc_url(
+					add_query_arg(
+						array(
+							'key'   => $reset_key,
+							'login' => rawurlencode( $user_login ),
+						),
+						wp_travel_engine_lostpassword_url()
+					)
+				);
+				?>
+				">
+				<?php esc_html_e( 'Reset Password', 'wp-travel-engine' ); ?>
+			</a>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2" style="padding: 16px 0;">
+			<?php echo esc_html__( 'This link will expire in 24 hours for your security.', 'wp-travel-engine' ); ?>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2" style="padding: 16px 0;">
+			<?php echo esc_html__( 'If you didn\'t request this, please ignore this email or contact us.', 'wp-travel-engine' ); ?>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<?php echo esc_html__( 'Thanks,', 'wp-travel-engine' ); ?>
+			<br>
+			<?php bloginfo( 'name' ); ?>
+			<?php echo esc_html__( 'Team', 'wp-travel-engine' ); ?>
+		</td>
+	</tr>
+</table>

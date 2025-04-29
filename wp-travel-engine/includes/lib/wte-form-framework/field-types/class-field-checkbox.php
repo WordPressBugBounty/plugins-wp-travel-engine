@@ -77,14 +77,14 @@ class WP_Travel_Engine_Form_Field_Checkbox {
 								%s
 							</label>
 						</div>',
-							$this->field['name'],
-							$key,
-							$this->field['id'] . '_' . $index,
+							esc_attr( $this->field['name'] ),
+							esc_attr( $key ),
+							esc_attr( $this->field['id'] . '_' . $index ),
 							$option_attributes,
 							$checked,
 							$validations,
-							$this->field['id'] . '_' . $index,
-							$value
+							esc_attr( $this->field['id'] . '_' . $index ),
+							esc_html( $value )
 						);
 				} else {
 					$output .= sprintf(
@@ -94,14 +94,14 @@ class WP_Travel_Engine_Form_Field_Checkbox {
 								%s
 							</label>
 						</div>',
-						$this->field['name'],
-						$key,
-						$this->field['id'],
+						esc_attr( $this->field['name'] ),
+						esc_attr( $key ),
+						esc_attr( $this->field['id'] ),
 						$option_attributes,
 						$checked,
 						$validations,
-						$this->field['id'],
-						$value
+						esc_attr( $this->field['id'] ),
+						esc_html( $value )
 					);
 				}
 
@@ -115,13 +115,13 @@ class WP_Travel_Engine_Form_Field_Checkbox {
 				<input type="checkbox" name="%s" value="%s" id="%s" %s %s %s>
 				<label for="%s"></label>
 			</div>',
-				$this->field['name'],
+				esc_attr( $this->field['name'] ),
 				'1',
-				$this->field['id'],
+				esc_attr( $this->field['id'] ),
 				'',
 				$this->field['default'] === '1' ? 'checked' : '',
 				$validations,
-				$this->field['id'],
+				esc_attr( $this->field['id'] ),
 				''
 			);
 		}

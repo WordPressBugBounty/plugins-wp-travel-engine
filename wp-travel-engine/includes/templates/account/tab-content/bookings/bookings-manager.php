@@ -7,7 +7,6 @@
  */
 
 use WPTravelEngine\Core\Models\Post\Booking;
-use WPTravelEngine\Core\Models\Post\Payment as PaymentModel;
 
 $booking_details = [];
 foreach ( $args['bookings'] ?? [] as $booking ) {
@@ -23,17 +22,18 @@ foreach ( $args['bookings'] ?? [] as $booking ) {
         continue;
     }
 
+    $trip_date = $booking_instance->get_trip_datetime();
+  
     $order_items = $booking_instance->get_order_items();
     $booked_trip = is_array( $order_items ) ? array_pop( $order_items ) : '';
     $booked_trip = is_null( $booked_trip ) || empty( $booked_trip ) ? '' : (object) $booked_trip;
-    if ( ( empty( $booked_trip ) ) || ( ( $booked_trip->datetime <= gmdate( 'Y-m-d' ) ) && 'active' === $type ) ) {
+    if ( ( empty( $trip_date ) ) || ( ( $trip_date < gmdate( 'Y-m-d' ) ) && 'active' === $type ) ) {
         continue;
     }
 
     $active_payment_methods = wp_travel_engine_get_active_payment_gateways();
     $booking_payments       = (array) $booking_instance->get_payment_detail();
 	if ( empty( $booking_payments ) ) {
-        $payment_status   = $booking_instance->get_payment_status();
         $total_paid       = ( float ) ( $booking_metas['place_order']['cost'] ?? 0 );
         $due              = (float) ( $booking_metas['place_order']['due'] ?? 0 );
         $due              = $due < 1 ? 0 : $due;
@@ -43,22 +43,15 @@ foreach ( $args['bookings'] ?? [] as $booking ) {
         $due              = (float) $booking_instance->get_due_amount();
         $due              = $due < 1 ? 0 : $due;
         $show_pay_now_btn = $due > 0;
-
-        $payment_status   = [];
-        foreach ( $booking_payments as $payment_id ) {
-            $payment_status[] = get_post_meta( $payment_id, 'payment_status', true );
-        }
-
-        $payment_status = implode( '/', $payment_status );
     }
 
-    $total_paid = $booking_instance->get_total_paid_amount() ?? 0;
-    $due = $booking_instance->get_total_due_amount() ?? 0;
+    $total_paid = $booking_instance->get_paid_amount() ?? 0;
+    $due = $booking_instance->get_due_amount() ?? 0;
     $show_pay_now_btn = $due > 0;
-
+    $payment_status = $show_pay_now_btn && $total_paid > 0 ? __( 'Partially Paid', 'wp-travel-engine' ) : ( $show_pay_now_btn ? __( 'Pending', 'wp-travel-engine' ) : __( 'Paid', 'wp-travel-engine' ) );
 
     if ( 'active' !== $type && ! $payment_status ) {
-        $payment_status = __( 'pending', 'wp-travel-engine' );
+        $payment_status = __( 'Pending', 'wp-travel-engine' );
     }
 
 	$currency_code = $booking_instance->get_cart_info( 'currency' ) ?? '';
@@ -66,6 +59,7 @@ foreach ( $args['bookings'] ?? [] as $booking ) {
 	$booking_details[] = compact(
 		'active_payment_methods',
 		'booked_trip',
+        'trip_date',
 		'payment_status',
 		'total_paid',
 		'due',
@@ -79,8 +73,12 @@ foreach ( $args['bookings'] ?? [] as $booking ) {
 ?>
 <div class="wpte-bookings-contents">
 <?php
-foreach ( $booking_details as $details ) :
-    wte_get_template( "account/tab-content/bookings/bookings-html.php", array_merge( $details, [ 'type' => $type ] ) );
-endforeach;
+if ( ! empty( $booking_details ) ) :
+    foreach ( $booking_details as $details ) :
+        wte_get_template( "account/tab-content/bookings/bookings-html.php", array_merge( $details, [ 'type' => $type ] ) );
+    endforeach;
+else :
+    esc_html_e( 'You haven\'t booked any trip yet.', 'wp-travel-engine' );
+endif;
 ?>
 </div>

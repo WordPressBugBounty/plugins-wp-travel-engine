@@ -4,6 +4,8 @@
  */
 use Elementor\Plugin;
 use Firebase\JWT\JWT;
+use WPTravelEngine\Email;
+use WPTravelEngine\Booking\Email\Template_Tags;
 use WPTravelEngine\Builders\FormFields\FormField;
 use WPTravelEngine\Core\Cart\Cart;
 use WPTravelEngine\Core\Functions;
@@ -21,10 +23,10 @@ require_once __DIR__ . '/cart.php';
 
 /**
  * Get the label of provided slug and count.
- * 
+ *
  * @param string $slug Slug of the label to get.
  * @param int $count Count of the label to get.
- * 
+ *
  * @return string Label of the provided slug.
  * @since 6.4.1
  */
@@ -39,12 +41,12 @@ function wptravelengine_get_label_by_slug( string $slug, int $count = 1 ): strin
 
 	$slug_array = array();
 	foreach ( $default_labels as $label => $labels ) {
-		$slug_array += array_fill_keys( 
-			$labels, 
-			array( 
-				'single' => $label, 
-				'plural' => $label . 's' 
-			) 
+		$slug_array += array_fill_keys(
+			$labels,
+			array(
+				'single' => $label,
+				'plural' => $label . 's'
+			)
 		);
 	}
 
@@ -78,6 +80,7 @@ function wptravelengine_get_label_by_slug( string $slug, int $count = 1 ): strin
  *                     - custom-booking-link
  *                     - booking-fee
  *                     - activity-tour
+ *                     - email-automator
  *
  * @return ?bool Returns true if addon is active, false if inactive, null if invalid addon
  * @since 6.2.2
@@ -107,6 +110,7 @@ function wptravelengine_is_addon_active( string $addon ) {
 		'custom-booking-link'  => 'WTE_CBL_FILE_PATH',
 		'booking-fee'          => 'WPTRAVELENGINE_BOOKING_FEE_FILE',
 		'activity-tour' 	   => 'WPTRAVELENGINE_ACTIVITY_TOUR_BOOKING_PATH',
+		'email-automator'      => 'WPTRAVELENGINE_EMAIL_AUTOMATOR_PATH',
 	);
 
 	if ( ! isset( $addon_files[ $addon ] ) ) {
@@ -163,7 +167,7 @@ function wptravelengine_replace( $data, $target_value, $by, $else = null, $targe
 			if ( is_null( $target_key ) ) {
 				$data[ $key ] = ( $target_value === $value ) ? $by : $else;
 				continue;
-			} 
+			}
 
 			if ( is_array( $value ) && array_key_exists( $target_key, $value ) ) {
 				$data[ $key ][ $target_key ] = ( $target_value === $value[ $target_key ] ) ? $by : $else;
@@ -376,6 +380,32 @@ function wptravelengine_get_page_url( string $page, string $default = null ) {
 }
 
 /**
+ * Get WP Travel Engine Email Instance.
+ *
+ * @return Email\Email
+ *
+ * @since 6.5.0
+ */
+function wptravelengine_get_email(): Email\Email {
+	return new Email\Email();
+}
+
+/**
+ * Set booking email tags.
+ *
+ * @param int $booking_id The booking ID.
+ * @param int $payment_id The payment ID.
+ *
+ * @return Template_Tags
+ * @since 6.5.0
+ */
+function wptravelengine_set_booking_email_tags( int $booking_id, int $payment_id ): Template_Tags {
+	$template_tags = new Template_Tags( $booking_id, $payment_id );
+	$template_tags->set_tags();
+	return $template_tags;
+}
+
+/**
  * Send booking email.
  *
  * @param int|Payment $payment Payment Object or ID.
@@ -398,15 +428,38 @@ function wptravelengine_send_booking_emails( $payment, string $template = 'order
 
 	$settings = wptravelengine_settings();
 	foreach ( $to as $recipient ) {
-		if ( 'admin' === $recipient && '1' === $settings->get( 'email.disable_notif', false ) ) {
-			continue;
-		}
-		if ( 'customer' === $recipient && 'yes' !== $settings->get( 'email.enable_cust_notif', 'yes' ) ) {
+		$enable = $settings->get( $recipient . '_email_notify_tabs.' . wptravelengine_map_email_template( $template ) . '.enabled', 1 );
+
+		if ( ( 'admin' === $recipient || 'customer' === $recipient ) && ! $enable ) {
 			continue;
 		}
 
-		wte_booking_email()->prepare( $payment, $template )->to( $recipient )->send();
+		$email = new Email\BookingEmail();
+		$email->prepare( $payment, $template )
+			->to( $recipient )
+			->set_headers()
+			->set( 'my_subject', $email->get_my_subject() )
+			->set_content()
+			->send();
 	}
+}
+
+/**
+ * Get email template name.
+ *
+ * @param string $template_name
+ *
+ * @return string
+ *
+ * @since 6.5.0
+ */
+function wptravelengine_map_email_template( string $template_name = 'order' ): string {
+	$map = array(
+		'order' 			 => 'booking_confirmation',
+		'order_confirmation' => 'payment_confirmation',
+	);
+
+	return $map[ $template_name ] ?? $template_name;
 }
 
 /**

@@ -227,6 +227,130 @@ class Settings {
 	}
 
 	/**
+	 * Prepare Emails Configuration.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return array
+	 * @since 6.5.0
+	 */
+	protected function prepare_emails_configuration( WP_REST_Request $request ): array {
+
+		$temp_admin_email_notifi_tabs = $this->plugin_settings->get( 'admin_email_notify_tabs', array(
+			'booking_confirmation' => array(
+				'id' 		 => 'booking_confirmation',
+				'name' 		 => __( 'Booking Confirmation', 'wp-travel-engine' ),
+				'subject' 	 => (string) $this->plugin_settings->get( 'email.booking_notification_subject_admin' ),
+				'content' 	 => (string) $this->plugin_settings->get( 'email.booking_notification_template_admin' ),
+				'enabled' 	 => wptravelengine_replace( ! wptravelengine_toggled( $this->plugin_settings->get( 'email.disable_booking_notification' ) ), true, 'yes', 'no' ),
+				'is_default' => 'yes',
+			),
+			'payment_confirmation' => array(
+				'id' 		 => 'payment_confirmation',
+				'name' 		 => __( 'Payment Confirmation', 'wp-travel-engine' ),
+				'subject' 	 => (string) $this->plugin_settings->get( 'email.sale_subject' ),
+				'content' 	 => (string) $this->plugin_settings->get( 'email.sales_wpeditor' ),
+				'enabled' 	 => 'yes',
+				'is_default' => 'yes',
+			)
+		) );
+
+		$admin_email_notifi_tabs = array();
+		foreach ( $temp_admin_email_notifi_tabs as $key => $value ) {
+			$value[ 'enabled' ] = wptravelengine_toggled( $value[ 'enabled' ] );
+			$value[ 'is_default' ] = wptravelengine_toggled( $value[ 'is_default' ] );
+			if ( wptravelengine_is_addon_active( 'email-automator' ) || $value[ 'is_default' ] ) {
+				$admin_email_notifi_tabs[] = $value;
+			}
+		}
+
+		$temp_customer_email_notifi_tabs = $this->plugin_settings->get( 'customer_email_notify_tabs', array(
+			'booking_confirmation' => array(
+				'id' 		 => 'booking_confirmation',
+				'name' 		 => __( 'Booking Confirmation', 'wp-travel-engine' ),
+				'subject' 	 => (string) $this->plugin_settings->get( 'email.booking_notification_subject_customer' ),
+				'content' 	 => (string) $this->plugin_settings->get( 'email.booking_notification_template_customer' ),
+				'enabled' 	 => wptravelengine_replace( wptravelengine_toggled( $this->plugin_settings->get( 'email.enable_cust_notif', 'yes' ) ), true, 'yes', 'no' ),
+				'is_default' => 'yes',
+			),
+			'payment_confirmation' => array(
+				'id' 		 => 'payment_confirmation',
+				'name' 		 => __( 'Payment Confirmation', 'wp-travel-engine' ),
+				'subject' 	 => (string) $this->plugin_settings->get( 'email.subject' ),
+				'content' 	 => (string) $this->plugin_settings->get( 'email.purchase_wpeditor' ),
+				'enabled' 	 => 'yes',
+				'is_default' => 'yes',
+			),
+			'account_registration' => array(
+				'id' 		 => 'account_registration',
+				'name' 		 => __( 'Account Registration', 'wp-travel-engine' ),
+				'subject' 	 => 'Your account has been created on {sitename}',
+				'content' 	 => wte_get_template_html( 'template-emails/customer/account-registration.php' ),
+				'enabled' 	 => 'yes',
+				'is_default' => 'yes',
+			),
+			'forgot_password' => array(
+				'id' 		 => 'forgot_password',
+				'name' 		 => __( 'Forgot Password', 'wp-travel-engine' ),
+				'subject' 	 => 'Reset Your Password – {sitename}',
+				'content' 	 => wte_get_template_html( 'template-emails/customer/forgot-password.php' ),
+				'enabled' 	 => 'yes',
+				'is_default' => 'yes',
+			),
+			'enquiry' => array(
+				'id' 		 => 'enquiry',
+				'name' 		 => __( 'Enquiry', 'wp-travel-engine' ),
+				'subject' 	 => (string) $this->plugin_settings->get( 'email.enquiry_subject', 'Enquiry received' ),
+				'content' 	 => wte_get_template_html( 'template-emails/enquiry.php' ),
+				'enabled' 	 => wptravelengine_replace( wptravelengine_toggled( $this->plugin_settings->get( 'email.cust_notif', '1' ) ), true, '1', '0' ),
+				'is_default' => 'yes',
+			)
+		) );
+
+		$customer_email_notifi_tabs = array();
+		foreach ( $temp_customer_email_notifi_tabs as $key => $value ) {
+			$value[ 'enabled' ] 	= wptravelengine_toggled( $value[ 'enabled' ] );
+			$value[ 'is_default' ] 	= wptravelengine_toggled( $value[ 'is_default' ] );
+			if ( wptravelengine_is_addon_active( 'email-automator' ) || $value[ 'is_default' ] ) {
+				$customer_email_notifi_tabs[] = $value;
+			}
+		}
+
+		return array( 'email_notification' => array(
+			'admin' 	=> $admin_email_notifi_tabs,
+			'customer' 	=> $customer_email_notifi_tabs,
+		) );
+	}
+
+	/**
+	 * Prepare Emails Settings.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return array
+	 * @since 6.5.0
+	 */
+	protected function prepare_emails_settings( WP_REST_Request $request ): array {
+
+		$settings = array();
+
+		$settings['email_settings'] = array(
+			'enquiry_emails' => (array) explode( ',', $this->plugin_settings->get( 'email.enquiry_emailaddress', Options::get( 'admin_email' ) ) ),
+			'sale_emails' => (array) explode( ',', $this->plugin_settings->get( 'email.emails', Options::get( 'admin_email' ) ) ),
+			'from_name' => (string) $this->plugin_settings->get( 'email.name', get_bloginfo( 'name' ) ),
+			'from'      => (string) $this->plugin_settings->get( 'email.from', Options::get( 'admin_email' ) ),
+			'reply_to'  => (string) $this->plugin_settings->get( 'email.reply_to', Options::get( 'admin_email' ) ),
+			'logo'      => array(
+				'id'  => (string) $this->plugin_settings->get( 'email.logo.id', Options::get( 'site_icon' ) ),
+				'url' => (string) $this->plugin_settings->get( 'email.logo.url', wp_get_attachment_image_url( Options::get( 'site_icon' ) ) ? wp_get_attachment_image_url( Options::get( 'site_icon' ) ) : '' )
+			),
+			'footer'    => (string) $this->plugin_settings->get( 'email.footer', 'Copyright © ' . date( 'Y' ) . ' | ' . get_bloginfo( 'name' ) . '. All rights reserved.' ),
+		);
+
+		return $settings;
+	}
+
+	/**
 	 * Prepare Admin Emails Configuration.
 	 *
 	 * @param WP_REST_Request $request Request object.
@@ -300,11 +424,6 @@ class Settings {
 			'email_addresses' => (array) explode( ',', $this->plugin_settings->get( 'email.enquiry_emailaddress', Options::get( 'admin_email' ) ) ),
 			'email_subject'   => (string) $this->plugin_settings->get( 'query_subject', 'Enquiry received' ),
 			'notify_customer' => wptravelengine_toggled( $this->plugin_settings->get( 'email.cust_notif' ) ),
-			'custom_form'     => array(
-				'shortcode' => (string) $this->plugin_settings->get( 'enquiry_shortcode' ),
-				'enable'    => wptravelengine_toggled( $this->plugin_settings->get( 'custom_enquiry' ) ),
-			),
-			'enable'          => ! wptravelengine_toggled( $this->plugin_settings->get( 'enquiry' ) ),
 			'powered_by_link' => ! wptravelengine_toggled( $this->plugin_settings->get( 'hide_powered_by' ) ),
 		);
 
@@ -341,7 +460,7 @@ class Settings {
 	}
 
 	/**
-	 * Prepare Single Trip of Display Tabs.
+	 * Prepare Single Trip of Display Tab.
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 *
@@ -412,6 +531,13 @@ class Settings {
 		$settings[ 'enable_image_in_gallery' ] = wptravelengine_toggled( $this->plugin_settings->get( 'show_featured_image_in_gallery', 'yes' ) );
 
 		$settings[ 'enable_fse' ] = wptravelengine_toggled( $this->plugin_settings->get( 'enable_fse_template' ) );
+
+		$settings[ 'enquiry_enable' ] = ! wptravelengine_toggled( $this->plugin_settings->get( 'enquiry' ) );
+
+		$settings[ 'enquiry_custom_form' ] = array(
+			'shortcode' => (string) $this->plugin_settings->get( 'enquiry_shortcode' ),
+			'enable'    => wptravelengine_toggled( $this->plugin_settings->get( 'custom_enquiry' ) ),
+		);
 
 		return $settings;
 	}
@@ -818,16 +944,16 @@ class Settings {
 
 		$settings = array();
 
-		$settings[ 'generate_user_account' ] = wptravelengine_toggled( $plugin_settings->get( 'generate_user_account', 'no' ) );
+		$settings[ 'generate_user_account' ] = wptravelengine_toggled( $plugin_settings->get( 'generate_user_account', 'yes' ) );
 
 		$settings[ 'enable_booking_registration' ] = wptravelengine_toggled( $plugin_settings->get( 'enable_checkout_customer_registration', 'no' ) );
 
 		$settings[ 'enable_account_registration' ] = ! wptravelengine_toggled( $plugin_settings->get( 'disable_my_account_customer_registration', 'yes' ) );
 
-		$settings[ 'generate' ] = array(
-			'user_name'       => wptravelengine_toggled( $plugin_settings->get( 'generate_username_from_email', 'no' ) ),
-			'secure_password' => wptravelengine_toggled( $plugin_settings->get( 'generate_user_password', 'no' ) ),
-		);
+		$settings[ 'login_page_label' ] = $plugin_settings->get( 'login_page_label', 'Log into Your Account' );
+		$settings[ 'forgot_page_label' ] = $plugin_settings->get( 'forgot_page_label', 'Reset Your Password' );
+		$settings[ 'forgot_page_description' ] = $plugin_settings->get( 'forgot_page_description', 'If an account with that email exist, we\'ll send you a link to reset your password. Please check your inbox including spam/junk folder.' );
+		$settings[ 'set_password_page_label' ] = $plugin_settings->get( 'set_password_page_label', 'Set New Password' );
 
 		$settings[ 'social_login' ] = array(
 			'enable' => wptravelengine_toggled( $plugin_settings->get( 'enable_social_login', 'no' ) ),
@@ -917,8 +1043,10 @@ class Settings {
 				$this->prepare_trip_tabs( $request ),
 				$this->prepare_trip_infos( $request ),
 				$this->prepare_highlights( $request ),
-				$this->prepare_admin_emails_configuration( $request ),
-				$this->prepare_customer_emails_configuration( $request ),
+				// $this->prepare_admin_emails_configuration( $request ),
+				// $this->prepare_customer_emails_configuration( $request ),
+				$this->prepare_emails_configuration( $request ),
+				$this->prepare_emails_settings( $request ),
 				$this->prepare_enquiry_form_configuration( $request ),
 				$this->prepare_display_tabs( $request ),
 				$this->prepare_currency_settings( $request ),
@@ -1157,20 +1285,154 @@ class Settings {
 			$plugin_settings->set( 'email.cust_notif', wptravelengine_replace( $request[ 'enquiry_form' ][ 'notify_customer' ], true, '1' ) );
 		}
 
-		if ( isset( $request[ 'enquiry_form' ][ 'custom_form' ][ 'shortcode' ] ) ) {
-			$plugin_settings->set( 'enquiry_shortcode', $request[ 'enquiry_form' ][ 'custom_form' ][ 'shortcode' ] );
-		}
-
-		if ( isset( $request[ 'enquiry_form' ][ 'custom_form' ][ 'enable' ] ) ) {
-			$plugin_settings->set( 'custom_enquiry', wptravelengine_replace( $request[ 'enquiry_form' ][ 'custom_form' ][ 'enable' ], true, 'yes', '' ) );
-		}
-
-		if ( isset( $request[ 'enquiry_form' ][ 'enable' ] ) ) {
-			$plugin_settings->set( 'enquiry', wptravelengine_replace( $request[ 'enquiry_form' ][ 'enable' ], false, '1', '' ) );
-		}
-
 		if ( isset( $request[ 'enquiry_form' ][ 'powered_by_link' ] ) ) {
 			$plugin_settings->set( 'hide_powered_by', wptravelengine_replace( $request[ 'enquiry_form' ][ 'powered_by_link' ], false, 'yes', 'no' ) );
+		}
+	}
+
+	/**
+	 * Process Email Notification Details.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return void
+	 * @since 6.2.0
+	 */
+	protected function set_email_notification_details( WP_REST_Request $request ) {
+
+		$plugin_settings = $this->plugin_settings;
+
+		if ( ! isset( $request[ 'email_notification' ] ) ) {
+			return;
+		}
+
+		if ( isset( $request[ 'email_notification' ][ 'admin' ] ) ) :
+
+			$admin_value = array();
+			$admin = $request[ 'email_notification' ][ 'admin' ];
+
+			foreach ( $admin as $value ) :
+
+				switch ( $value[ 'id' ] ) :
+					case 'booking_confirmation':
+						$plugin_settings->set( 'email.disable_booking_notification', wptravelengine_replace( $value[ 'enabled' ], false, '1' ) );
+						$plugin_settings->set( 'email.booking_notification_subject_admin', $value[ 'subject' ] );
+						$plugin_settings->set( 'email.booking_notification_template_admin', $value[ 'content' ] );
+						break;
+
+					case 'payment_confirmation':
+						$plugin_settings->set( 'email.sale_subject', $value[ 'subject' ] );
+						$plugin_settings->set( 'email.sales_wpeditor', $value[ 'content' ] );
+						break;
+
+				endswitch;
+
+				$value['enabled'] = wptravelengine_replace( $value['enabled'], true, 'yes', 'no' );
+				$value['is_default'] = wptravelengine_replace( $value['is_default'], true, 'yes', 'no' );
+
+				$admin_value[ $value[ 'id' ] ] = $value;
+
+			endforeach;
+
+			$plugin_settings->set( 'admin_email_notify_tabs', $admin_value );
+
+		endif;
+
+		if ( isset( $request[ 'email_notification' ][ 'customer' ] ) ) :
+
+			$customer_value = array();
+			$customer = $request[ 'email_notification' ][ 'customer' ];
+
+			foreach ( $customer as $value ) :
+
+				switch ( $value[ 'id' ] ) :
+					case 'booking_confirmation':
+						$plugin_settings->set( 'email.enable_cust_notif', wptravelengine_replace( $value[ 'enabled' ], true, 'yes', 'no' ) );
+						$plugin_settings->set( 'email.booking_notification_subject_customer', $value[ 'subject' ] );
+						$plugin_settings->set( 'email.booking_notification_template_customer', $value[ 'content' ] );
+						break;
+
+					case 'payment_confirmation':
+						$plugin_settings->set( 'email.subject', $value[ 'subject' ] );
+						$plugin_settings->set( 'email.purchase_wpeditor', $value[ 'content' ] );
+						break;
+
+					case 'enquiry':
+						$plugin_settings->set( 'email.enquiry_subject', $value[ 'subject' ] );
+						$plugin_settings->set( 'email.cust_notif', wptravelengine_replace( $value[ 'enabled' ], true, '1' ) );
+						break;
+
+				endswitch;
+
+				$value['enabled'] = wptravelengine_replace( $value['enabled'], true, 'yes', 'no' );
+				$value['is_default'] = wptravelengine_replace( $value['is_default'], true, 'yes', 'no' );
+
+				$customer_value[ $value[ 'id' ] ] = $value;
+
+			endforeach;
+
+			$plugin_settings->set( 'customer_email_notify_tabs', $customer_value );
+
+		endif;
+
+	}
+
+	/**
+	 * Process Email Settings.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return void
+	 * @since 6.5.0
+	 */
+	protected function set_email_settings( WP_REST_Request $request ) {
+		$plugin_settings = $this->plugin_settings;
+
+		if ( isset( $request[ 'email_settings' ] ) ) {
+
+			if ( isset( $request[ 'email_settings' ][ 'enquiry_emails' ] ) ) {
+				$plugin_settings->set( 'email.enquiry_emailaddress', implode( ',', $request[ 'email_settings' ][ 'enquiry_emails' ] ) );
+			}
+
+			if ( isset( $request[ 'email_settings' ][ 'sale_emails' ] ) ) {
+				$plugin_settings->set( 'email.emails', implode( ',', $request[ 'email_settings' ][ 'sale_emails' ] ) );
+			}
+
+			if ( isset( $request[ 'email_settings' ][ 'from_name' ] ) ) {
+				$plugin_settings->set( 'email.name', $request[ 'email_settings' ][ 'from_name' ] );
+			}
+
+			if ( isset( $request[ 'email_settings' ][ 'from' ] ) ) {
+				if (  is_email( $request[ 'email_settings' ][ 'from' ] ) ) {
+					$plugin_settings->set( 'email.from', $request[ 'email_settings' ][ 'from' ] );
+				} else {
+					$this->set_bad_request( 'invalid_parameter', __( 'Invalid email address', 'wp-travel-engine' ) );
+					return;
+				}
+			}
+
+			if ( isset( $request[ 'email_settings' ][ 'reply_to' ] ) ) {
+				if (  is_email( $request[ 'email_settings' ][ 'reply_to' ] ) ) {
+					$plugin_settings->set( 'email.reply_to', $request[ 'email_settings' ][ 'reply_to' ] );
+				} else {
+					$this->set_bad_request( 'invalid_parameter', __( 'Invalid email address', 'wp-travel-engine' ) );
+					return;
+				}
+				$plugin_settings->set( 'email.reply_to', $request[ 'email_settings' ][ 'reply_to' ] );
+			}
+
+			if ( isset( $request[ 'email_settings' ][ 'logo' ] ) ) {
+				if ( ! empty( $request[ 'email_settings' ][ 'logo' ] ) ) {
+					$plugin_settings->set( 'email.logo', $request[ 'email_settings' ][ 'logo' ] );
+				} else {
+					$plugin_settings->set( 'email.logo.id', null );
+					$plugin_settings->set( 'email.logo.url', '' );
+				}
+			}
+
+			if ( isset( $request[ 'email_settings' ][ 'footer' ] ) ) {
+				$plugin_settings->set( 'email.footer', $request[ 'email_settings' ][ 'footer' ] );
+			}
 		}
 	}
 
@@ -1382,6 +1644,19 @@ class Settings {
 		if ( isset( $request[ 'enable_fse' ] ) ) {
 			$plugin_settings->set( 'enable_fse_template', wptravelengine_replace( $request[ 'enable_fse' ], true, 'yes', 'no' ) );
 		}
+
+		if ( isset( $request[ 'enquiry_enable' ] ) ) {
+			$plugin_settings->set( 'enquiry', wptravelengine_replace( $request[ 'enquiry_enable' ], false, '1', '' ) );
+		}
+
+		if ( isset( $request[ 'enquiry_custom_form' ][ 'shortcode' ] ) ) {
+			$plugin_settings->set( 'enquiry_shortcode', $request[ 'enquiry_custom_form' ][ 'shortcode' ] );
+		}
+
+		if ( isset( $request[ 'enquiry_custom_form' ][ 'enable' ] ) ) {
+			$plugin_settings->set( 'custom_enquiry', wptravelengine_replace( $request[ 'enquiry_custom_form' ][ 'enable' ], true, 'yes', '' ) );
+		}
+
 	}
 
 	/**
@@ -1863,12 +2138,20 @@ class Settings {
 			$plugin_settings->set( 'disable_my_account_customer_registration', wptravelengine_replace( $request[ 'enable_account_registration' ], false, 'yes', 'no' ) );
 		}
 
-		if ( isset( $request[ 'generate' ][ 'user_name' ] ) ) {
-			$plugin_settings->set( 'generate_username_from_email', wptravelengine_replace( $request[ 'generate' ][ 'user_name' ], true, 'yes', 'no' ) );
+		if ( isset( $request[ 'login_page_label' ] ) ) {
+			$plugin_settings->set( 'login_page_label', $request[ 'login_page_label' ] );
 		}
 
-		if ( isset( $request[ 'generate' ][ 'secure_password' ] ) ) {
-			$plugin_settings->set( 'generate_user_password', wptravelengine_replace( $request[ 'generate' ][ 'secure_password' ], true, 'yes', 'no' ) );
+		if ( isset( $request[ 'forgot_page_label' ] ) ) {
+			$plugin_settings->set( 'forgot_page_label', $request[ 'forgot_page_label' ] );
+		}
+
+		if ( isset( $request[ 'forgot_page_description' ] ) ) {
+			$plugin_settings->set( 'forgot_page_description', $request[ 'forgot_page_description' ] );
+		}
+
+		if ( isset( $request[ 'set_password_page_label' ] ) ) {
+			$plugin_settings->set( 'set_password_page_label', $request[ 'set_password_page_label' ] );
 		}
 
 		if ( ! isset( $request[ 'social_login' ] ) ) {
@@ -2026,7 +2309,9 @@ class Settings {
 		$this->set_trip_tabs( $request );
 		$this->set_trip_highlights( $request );
 		$this->set_trip_infos( $request );
-		$this->set_admin_tabs( $request );
+		// $this->set_admin_tabs( $request );
+		$this->set_email_notification_details( $request );
+		$this->set_email_settings( $request );
 		$this->set_display_tabs( $request );
 		$this->set_currency_details( $request );
 		$this->set_payment_gateway( $request );
@@ -2037,6 +2322,10 @@ class Settings {
 		$plugin_settings = $this->plugin_settings;
 
 		do_action( 'wptravelengine_api_update_settings', $request, $this );
+
+		if ( isset( $this->errors ) ) {
+			return $this->errors;
+		}
 
 		$plugin_settings->save();
 
@@ -2384,98 +2673,184 @@ class Settings {
 					),
 				),
 			),
-			'admin_email'                      => array(
-				'description' => __( 'Admin Email', 'wp-travel-engine' ),
+			'email_notification' => array(
+				'description' => __( 'Email Notification', 'wp-travel-engine' ),
 				'type'        => 'object',
 				'properties'  => array(
-					'email_addresses' => array(
-						'description' => __( 'Admin Email Addresses', 'wp-travel-engine' ),
+					'admin' => array(
+						'description' => __( 'Admin Email Notification', 'wp-travel-engine' ),
+						'type'        => 'object',
+					),
+					'customer' => array(
+						'description' => __( 'Customer Email Notification', 'wp-travel-engine' ),
+						'type'        => 'object',
+					),
+				),
+			),
+			'email_settings' => array(
+				'description' => __( 'Email Settings', 'wp-travel-engine' ),
+				'type'        => 'object',
+				'properties'  => array(
+					'enquiry_emails' => array(
+						'description' => __( 'Enquiry Emails', 'wp-travel-engine' ),
 						'type'        => 'array',
 						'items'       => array(
 							'type' => 'string',
 						),
 					),
-					'enable'          => array(
-						'description' => __( 'Admin Email Notification Enabled or Not', 'wp-travel-engine' ),
+					'sale_emails' => array(
+						'description' => __( 'Sale Emails', 'wp-travel-engine' ),
+						'type'        => 'array',
+						'items'       => array(
+							'type' => 'string',
+						),
+					),
+					'from_name' => array(
+						'description' => __( 'From Name', 'wp-travel-engine' ),
+						'type'        => 'string',
+					),
+					'from' => array(
+						'description' => __( 'From Email', 'wp-travel-engine' ),
+						'type'        => 'string',
+					),
+					'reply_to' => array(
+						'description' => __( 'Reply To Email', 'wp-travel-engine' ),
+						'type'        => 'string',
+					),
+					'logo' => array(
+						'description' => __( 'Header Logo', 'wp-travel-engine' ),
+						'type'        => 'object',
+						'properties' => array(
+							'id'   => array(
+								'description' => __( 'Attachment ID', 'wp-travel-engine' ),
+								'type'        => 'integer',
+							),
+							'url' => array(
+								'description' => __( 'Logo URL', 'wp-travel-engine' ),
+								'type'        => 'string',
+							),
+							'alt' => array(
+								'description' => __( 'Logo Alt Text', 'wp-travel-engine' ),
+								'type'        => 'string',
+							),
+						),
+					),
+					'footer' => array(
+						'description' => __( 'Footer Text', 'wp-travel-engine' ),
+						'type'        => 'string',
+					),
+				),
+			),
+			// 'admin_email'                      => array(
+			// 	'description' => __( 'Admin Email', 'wp-travel-engine' ),
+			// 	'type'        => 'object',
+			// 	'properties'  => array(
+			// 		'email_addresses' => array(
+			// 			'description' => __( 'Admin Email Addresses', 'wp-travel-engine' ),
+			// 			'type'        => 'array',
+			// 			'items'       => array(
+			// 				'type' => 'string',
+			// 			),
+			// 		),
+			// 		'enable'          => array(
+			// 			'description' => __( 'Admin Email Notification Enabled or Not', 'wp-travel-engine' ),
+			// 			'type'        => 'boolean',
+			// 		),
+			// 	),
+			// ),
+			// 'admin_booking_notification'       => array(
+			// 	'description' => __( 'Admin Booking Email Notification', 'wp-travel-engine' ),
+			// 	'type'        => 'object',
+			// 	'properties'  => array(
+			// 		'subject'  => array(
+			// 			'description' => __( 'Admin Booking Email Subject', 'wp-travel-engine' ),
+			// 			'type'        => 'string',
+			// 		),
+			// 		'template' => array(
+			// 			'description' => __( 'Admin Booking Email Template', 'wp-travel-engine' ),
+			// 			'type'        => 'string',
+			// 		),
+			// 		'enable'   => array(
+			// 			'description' => __( 'Admin Booking Email Enabled or Not', 'wp-travel-engine' ),
+			// 			'type'        => 'boolean',
+			// 		),
+			// 	),
+			// ),
+			// 'admin_payment_notification'       => array(
+			// 	'description' => __( 'Admin Payment Email Notification', 'wp-travel-engine' ),
+			// 	'type'        => 'object',
+			// 	'properties'  => array(
+			// 		'subject'  => array(
+			// 			'description' => __( 'Admin Payment Email Subject', 'wp-travel-engine' ),
+			// 			'type'        => 'string',
+			// 		),
+			// 		'template' => array(
+			// 			'description' => __( 'Admin Payment Email Template', 'wp-travel-engine' ),
+			// 			'type'        => 'string',
+			// 		),
+			// 	),
+			// ),
+			// 'customer_receipt_details'         => array(
+			// 	'description' => __( 'Customer Receipt Details', 'wp-travel-engine' ),
+			// 	'type'        => 'object',
+			// 	'properties'  => array(
+			// 		'admin_name'          => array(
+			// 			'description' => __( 'Admin Name For Customer Receipt', 'wp-travel-engine' ),
+			// 			'type'        => 'string',
+			// 		),
+			// 		'admin_email_address' => array(
+			// 			'description' => __( 'Admin Email Address For Customer Receipt', 'wp-travel-engine' ),
+			// 			'type'        => 'string',
+			// 		),
+			// 	),
+			// ),
+			// 'customer_booking_notification'    => array(
+			// 	'description' => __( 'Customer Email Notification', 'wp-travel-engine' ),
+			// 	'type'        => 'object',
+			// 	'properties'  => array(
+			// 		'subject'  => array(
+			// 			'description' => __( 'Customer Email Subject', 'wp-travel-engine' ),
+			// 			'type'        => 'string',
+			// 		),
+			// 		'template' => array(
+			// 			'description' => __( 'Customer Email Template', 'wp-travel-engine' ),
+			// 			'type'        => 'string',
+			// 		),
+			// 		'enable'   => array(
+			// 			'description' => __( 'Customer Email Enabled or Not', 'wp-travel-engine' ),
+			// 			'type'        => 'boolean',
+			// 		),
+			// 	),
+			// ),
+			// 'customer_purchase_notification'   => array(
+			// 	'description' => __( 'Customer Purchase Email Notification', 'wp-travel-engine' ),
+			// 	'type'        => 'object',
+			// 	'properties'  => array(
+			// 		'subject'  => array(
+			// 			'description' => __( 'Customer Purchase Email Subject', 'wp-travel-engine' ),
+			// 			'type'        => 'string',
+			// 		),
+			// 		'template' => array(
+			// 			'description' => __( 'Customer Purchase Email Template', 'wp-travel-engine' ),
+			// 			'type'        => 'string',
+			// 		),
+			// 	),
+			// ),
+			'enquiry_enable'	=> array(
+				'description' => __( 'Enquiry Form Enabled or Not', 'wp-travel-engine' ),
+				'type'        => 'boolean',
+			),
+			'enquiry_custom_form'     => array(
+				'description' => __( 'Custom Enquiry Form Enabled', 'wp-travel-engine' ),
+				'type'        => 'object',
+				'properties'  => array(
+					'shortcode' => array(
+						'description' => __( 'Custom Enquiry Form Shortcode', 'wp-travel-engine' ),
+						'type'        => 'string',
+					),
+					'enable'    => array(
+						'description' => __( 'Enquiry Form Enabled or Not', 'wp-travel-engine' ),
 						'type'        => 'boolean',
-					),
-				),
-			),
-			'admin_booking_notification'       => array(
-				'description' => __( 'Admin Booking Email Notification', 'wp-travel-engine' ),
-				'type'        => 'object',
-				'properties'  => array(
-					'subject'  => array(
-						'description' => __( 'Admin Booking Email Subject', 'wp-travel-engine' ),
-						'type'        => 'string',
-					),
-					'template' => array(
-						'description' => __( 'Admin Booking Email Template', 'wp-travel-engine' ),
-						'type'        => 'string',
-					),
-					'enable'   => array(
-						'description' => __( 'Admin Booking Email Enabled or Not', 'wp-travel-engine' ),
-						'type'        => 'boolean',
-					),
-				),
-			),
-			'admin_payment_notification'       => array(
-				'description' => __( 'Admin Payment Email Notification', 'wp-travel-engine' ),
-				'type'        => 'object',
-				'properties'  => array(
-					'subject'  => array(
-						'description' => __( 'Admin Payment Email Subject', 'wp-travel-engine' ),
-						'type'        => 'string',
-					),
-					'template' => array(
-						'description' => __( 'Admin Payment Email Template', 'wp-travel-engine' ),
-						'type'        => 'string',
-					),
-				),
-			),
-			'customer_receipt_details'         => array(
-				'description' => __( 'Customer Receipt Details', 'wp-travel-engine' ),
-				'type'        => 'object',
-				'properties'  => array(
-					'admin_name'          => array(
-						'description' => __( 'Admin Name For Customer Receipt', 'wp-travel-engine' ),
-						'type'        => 'string',
-					),
-					'admin_email_address' => array(
-						'description' => __( 'Admin Email Address For Customer Receipt', 'wp-travel-engine' ),
-						'type'        => 'string',
-					),
-				),
-			),
-			'customer_booking_notification'    => array(
-				'description' => __( 'Customer Email Notification', 'wp-travel-engine' ),
-				'type'        => 'object',
-				'properties'  => array(
-					'subject'  => array(
-						'description' => __( 'Customer Email Subject', 'wp-travel-engine' ),
-						'type'        => 'string',
-					),
-					'template' => array(
-						'description' => __( 'Customer Email Template', 'wp-travel-engine' ),
-						'type'        => 'string',
-					),
-					'enable'   => array(
-						'description' => __( 'Customer Email Enabled or Not', 'wp-travel-engine' ),
-						'type'        => 'boolean',
-					),
-				),
-			),
-			'customer_purchase_notification'   => array(
-				'description' => __( 'Customer Purchase Email Notification', 'wp-travel-engine' ),
-				'type'        => 'object',
-				'properties'  => array(
-					'subject'  => array(
-						'description' => __( 'Customer Purchase Email Subject', 'wp-travel-engine' ),
-						'type'        => 'string',
-					),
-					'template' => array(
-						'description' => __( 'Customer Purchase Email Template', 'wp-travel-engine' ),
-						'type'        => 'string',
 					),
 				),
 			),
@@ -2498,24 +2873,24 @@ class Settings {
 						'description' => __( 'Customer Enquiry Notification Enabled', 'wp-travel-engine' ),
 						'type'        => 'boolean',
 					),
-					'custom_form'     => array(
-						'description' => __( 'Custom Enquiry Form Enabled', 'wp-travel-engine' ),
-						'type'        => 'object',
-						'properties'  => array(
-							'shortcode' => array(
-								'description' => __( 'Custom Enquiry Form Shortcode', 'wp-travel-engine' ),
-								'type'        => 'string',
-							),
-							'enable'    => array(
-								'description' => __( 'Enquiry Form Enabled or Not', 'wp-travel-engine' ),
-								'type'        => 'boolean',
-							),
-						),
-					),
-					'enable'          => array(
-						'description' => __( 'Enquiry Form Enabled or Not', 'wp-travel-engine' ),
-						'type'        => 'boolean',
-					),
+					// 'custom_form'     => array(
+					// 	'description' => __( 'Custom Enquiry Form Enabled', 'wp-travel-engine' ),
+					// 	'type'        => 'object',
+					// 	'properties'  => array(
+					// 		'shortcode' => array(
+					// 			'description' => __( 'Custom Enquiry Form Shortcode', 'wp-travel-engine' ),
+					// 			'type'        => 'string',
+					// 		),
+					// 		'enable'    => array(
+					// 			'description' => __( 'Enquiry Form Enabled or Not', 'wp-travel-engine' ),
+					// 			'type'        => 'boolean',
+					// 		),
+					// 	),
+					// ),
+					// 'enable'          => array(
+					// 	'description' => __( 'Enquiry Form Enabled or Not', 'wp-travel-engine' ),
+					// 	'type'        => 'boolean',
+					// ),
 					'powered_by_link' => array(
 						'description' => __( 'Powered By Link Enabled or Not', 'wp-travel-engine' ),
 						'type'        => 'boolean',
@@ -3064,6 +3439,22 @@ class Settings {
 			'enable_booking_registration'      => array(
 				'description' => __( 'Enable Registration for Booking', 'wp-travel-engine' ),
 				'type'        => 'boolean',
+			),
+			'login_page_label'  => array(
+				'description' => __( 'Login Page Label', 'wp-travel-engine' ),
+				'type'        => 'string',
+			),
+			'forgot_page_label'  => array(
+				'description' => __( 'Forgot Page Label', 'wp-travel-engine' ),
+				'type'        => 'string',
+			),
+			'forgot_page_description'  => array(
+				'description' => __( 'Forgot Page Description', 'wp-travel-engine' ),
+				'type'        => 'string',
+			),
+			'set_password_page_label'  => array(
+				'description' => __( 'Set Password Page Label', 'wp-travel-engine' ),
+				'type'        => 'string',
 			),
 			'generate'                         => array(
 				'description' => __( 'User Account', 'wp-travel-engine' ),

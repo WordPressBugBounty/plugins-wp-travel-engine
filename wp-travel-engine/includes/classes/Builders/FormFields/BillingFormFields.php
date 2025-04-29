@@ -15,10 +15,10 @@ use WPTravelEngine\Helpers\Countries;
  */
 class BillingFormFields extends FormField {
 
-	public function __construct() {
+	public function __construct( array $args = [] ) {
 		parent::__construct( false );
 
-		$this->init( $this->map_fields( \WTE_Default_Form_Fields::billing_form_fields() ) );
+		$this->init( $this->map_fields( \WTE_Default_Form_Fields::billing_form_fields(), $args['booking_ref'] ?? null ) );
 	}
 
 	/**
@@ -34,8 +34,11 @@ class BillingFormFields extends FormField {
 		<?php
 	}
 
-	protected function map_fields( $fields ) {
+	protected function map_fields( $fields, $booking_ref ) {
 		$billing_form_data = WTE()->session->get( 'billing_form_data' );
+		if( $booking_ref ) {
+			$billing_form_data = get_post_meta( $booking_ref, 'wptravelengine_billing_details', true );
+		}
 		if ( ! $billing_form_data ) {
 			$billing_form_data = [];
 		}

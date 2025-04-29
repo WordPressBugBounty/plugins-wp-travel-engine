@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Booking Details Page
  *
@@ -16,359 +17,186 @@
  * @version 1.3.7
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
+use WPTravelEngine\Core\Models\Post\Trip;
+use WPTravelEngine\Core\Models\Post\Booking;
+use WPTravelEngine\Builders\FormFields\TravellerFormFields;
+use WPTravelEngine\Helpers\CartInfoParser;
+
+if (! defined('ABSPATH')) {
 	exit;
 }
 
-$booking_details 				= get_post( $booking );
-$settings                      	= wptravelengine_settings()->get();
-$wp_travel_engine_dashboard_id 	= isset( $settings['pages']['wp_travel_engine_dashboard_page'] ) ? esc_attr( $settings['pages']['wp_travel_engine_dashboard_page'] ) : wp_travel_engine_get_page_id( 'my-account' );
-$set_duration_type    			= ! empty( $settings['set_duration_type'] ?? '' ) ? $settings['set_duration_type'] : 'days';
-$billing_info 					= $booking_details->billing_info;
-$booking_payments 				= $booking_details->payments ?? false;
-$cart_info 						= $booking_details->cart_info;
-$currency_code    				= $cart_info['currency'] ?? '';
-$order_trip 					= array_shift( $booking_details->order_trips );
-$trip_id 						= $order_trip['ID'] ?? '';
-$trip_name 						= $order_trip['title'] ?? '';
-$trip_start_date 				= $order_trip['datetime'] ?? '';
-$trip_end_date 					= $order_trip['end_datetime'] ?? '';
-$trip_metas           			= get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
-$trip_duration_unit   			= $trip_metas['trip_duration_unit'] ?? 'days';
-$trip_duration        			= $trip_metas['trip_duration'] ?? 1;
-$trip_duration_nights 			= $trip_metas['trip_duration_nights'] ?? 'nights';
-$is_booking_detail    			= true;
-$time_format              		= get_option( 'time_format' );
-$date_format			  		= get_option( 'date_format' );
-$trip_start_date_with_time 		= "";
-$trip_end_date_with_time 		= "";
+$booking_instance = new Booking($booking);
+$booking_payments = $booking_instance->get_payments() ?? [];
+$cart_info        = new CartInfoParser($booking_instance->get_cart_info() ?? []);
+$settings         = wptravelengine_settings()->get();
+$dashboard_id     = isset($settings['pages']['wp_travel_engine_dashboard_page']) ? esc_attr($settings['pages']['wp_travel_engine_dashboard_page']) : wp_travel_engine_get_page_id('my-account');
 
-if ( ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $trip_start_date ) ) {
-    $trip_start_date_with_time = $trip_start_date;
-    $trip_start_date = substr( $trip_start_date, 0, 10 );
+$due = (float) $booking_instance->get_due_amount() < 1 ? 0 : (float) $booking_instance->get_due_amount();
+
+$currency_code = $cart_info->get_currency() ?? '';
+$order_trips   = $booking_instance->get_meta('order_trips');
+$order_trip    = reset($order_trips);
+$trip_id       = $order_trip['ID'] ?? '';
+
+$additional_note    = $booking_instance->get_meta('wptravelengine_additional_note');
+$_traveller_details = $booking_instance->get_meta('wptravelengine_travelers_details');
+
+$trip = new Trip($trip_id);
+$cart = $booking_instance->get_cart_info();
+
+$start_datetime  = $order_trip['datetime'];
+$trip_start_date = wptravelengine_format_trip_datetime($start_datetime);
+$trip_end_date   = wptravelengine_format_trip_end_datetime($start_datetime, $trip);
+
+if (isset($cart['items'][0]) && is_array($cart['items'][0])) {
+	/** @var array $cart_item */
+	$trip_start_date = wptravelengine_format_trip_datetime($cart['items'][0]['trip_date']) ?? $trip_start_date;
+	$trip_end_date = isset($cart['items'][0]['end_date']) ? wptravelengine_format_trip_datetime($cart['items'][0]['end_date']) : $trip_end_date;
 }
 
-if ( ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $trip_end_date ) ) {
-    $trip_end_date_with_time = $trip_end_date;
-    $trip_end_date = substr( $trip_end_date, 0, 10 );
-}
-
-if ( '' !== $trip_start_date_with_time && '' === $trip_end_date_with_time ) {
-    $start_date_time = new \DateTime( $trip_start_date_with_time );
-    $start_date_time->modify( "+{$trip_duration} hours" );
-    $trip_end_date_with_time = $start_date_time->format( $time_format );
-}
-
-if ( '' !== $trip_start_date && '' === $trip_end_date ) {
-    $start_date = new \DateTime( $trip_start_date );
-    $start_date->modify( "+{$trip_duration} {$trip_duration_unit}" );
-    $trip_end_date = $start_date->format( $date_format );
+$traveller_details = array();
+if (is_array($_traveller_details)) {
+	foreach ($_traveller_details as $traveller) {
+		$traveller_form_fields = new TravellerFormFields();
+		$traveller_details[]   = $traveller_form_fields->with_values($traveller);
+	}
 }
 
 ?>
-<a href="<?php echo esc_url( get_permalink( $wp_travel_engine_dashboard_id ) ); ?>" class="wpte-back-btn">
-	<?php wptravelengine_svg_by_fa_icon( 'fas fa-arrow-left' ); ?><?php esc_html_e( 'Go back', 'wp-travel-engine' ); ?>
-</a>
-<div class="wpte-booking-details-wrapper">
-	<div class="wpte-booking-detail-left-section">
-		<div class="wpte-trip-info">
-			<div class="wpte-trip-image">
-				<?php echo get_the_post_thumbnail( $trip_id ); ?>
+<div class="wpte-full">
+	<div class="wpte-container container">
+		<a href="<?php echo esc_url(get_permalink($dashboard_id)); ?>" class="wpte-back-btn">
+			<?php wptravelengine_svg_by_fa_icon('fas fa-arrow-left'); ?><?php esc_html_e('Back to Booking', 'wp-travel-engine'); ?>
+		</a>
+		<?php if( $due > 0 ){ ?>
+			<div class="wpte-ud-message wpte-warning" style="margin: 0 0 32px;">
+				<p><?php printf(
+					/* translators: %s: amount of money */
+					esc_html__('Due %1$s needs to be paid.', 'wp-travel-engine'), 
+					'<strong>' . wptravelengine_the_price($due, false, compact('currency_code')) . '</strong>'
+				); ?>
+				<a href="<?php echo esc_url( $booking_instance->get_due_payment_link() ); ?>"><?php esc_html_e('Pay Now', 'wp-travel-engine'); ?></a>
+				</p>
 			</div>
-			<div class="wpte-trip-description">
-				<h5 class="wpte-trip-heading">
-					<?php echo esc_html( $trip_name ); ?>
-				</h5>
-				<?php
-				if ( class_exists( 'Wte_Trip_Review_Init' ) ) {
-					$review_obj              = new Wte_Trip_Review_Init();
-					$comment_datas           = $review_obj->pull_comment_data( $trip_id );
-					$icon_type               = '';
-					$icon_fill_color         = '#F39C12';
-					$review_icon_type        = apply_filters( 'trip_rating_icon_type', $icon_type );
-					$review_icon_fill_colors = apply_filters( 'trip_rating_icon_fill_color', $icon_fill_color );
-					if ( ! empty( $comment_datas ) ) {
+		<?php } ?>
+		<div class="wpte-booking-details-wrapper">
+			<div class="wpte-booking-detail-left-section">
+				<?php wptravelengine_get_template('thank-you/content-booking-details.php', compact(
+					'trip_start_date',
+					'trip_end_date',
+					'additional_note',
+					'traveller_details'
+				)); ?>
+
+				<div class="wpte-payment-details">
+					<h5 class="wpte-payment-heading"><?php esc_html_e('Payment Details', 'wp-travel-engine'); ?></h5>
+					<div class="wpte-payment-data">
+						<?php
+						if (is_array($booking_payments)) {
+							foreach ($booking_payments as $index => $booking_payment) {
+
+								$payment_status = get_post_meta($booking_payment->ID, 'payment_status', true);
 						?>
-						<span class="review">
-						<div
-							class="agg-rating trip-review-stars <?php echo ! empty( $review_icon_type ) ? 'svg-trip-adv' : 'trip-review-default'; ?>"
-							data-icon-type='<?php echo esc_attr( $review_icon_type ); ?>'
-							data-rating-value="<?php echo esc_attr( $comment_datas['aggregate'] ); ?>"
-							data-rateyo-rated-fill="<?php echo esc_attr( $review_icon_fill_colors ); ?>"
-							data-rateyo-read-only="true"
-						>
-						</div>
-						<div class="aggregate-rating reviw-txt-wrap">
-							<span><?php printf( esc_html( _nx( '%s review', '%s reviews', absint( $comment_datas['i'] ), 'review count', 'wp-travel-engine' ) ), esc_html( number_format_i18n( $comment_datas['i'] ) ) ); ?></span>
-						</div>
-					</span>
-
+								<h6>
+									<?php
+									// Translators: %s: Payment number.
+									printf(__('Payment #%s', 'wp-travel-engine'), $index + 1);
+									?>
+								</h6>
+								<ul>
+									<li>
+										<span><?php esc_html_e('Payment ID:', 'wp-travel-engine'); ?></span>
+										<span><?php echo esc_html($booking_payment->ID); ?></span>
+									</li>
+									<li>
+										<span><?php esc_html_e('Payment Status:', 'wp-travel-engine'); ?></span>
+										<span
+											class="wpte-status <?php echo esc_attr( $payment_status ); ?>">
+											<?php
+											$payment_status_labels = wptravelengine_payment_status();
+											$payment_status        = $payment_status_labels[$payment_status] ?? $payment_status;
+											echo esc_html($payment_status);
+											?>
+										</span>
+									</li>
+									<li>
+										<span><?php esc_html_e('Amount:', 'wp-travel-engine'); ?></span>
+										<span>
+											<?php
+											$payable = get_post_meta($booking_payment->ID, 'payable', true) ?? 0;
+											wptravelengine_the_price($payable['amount'] ?? 0, true, compact('currency_code'));
+											?>
+										</span>
+									</li>
+									<?php
+									$wc_order_id = get_post_meta($booking, '_wte_wc_order_id', true);
+									if (! empty($wc_order_id)) :
+									?>
+										<li>
+											<?php
+											printf(
+												__('This booking was made using WooCommerce payments, view detail payment information %1$shere%2$s', 'wp-travel-engine'),
+												'<a href="' . admin_url("/post.php?post={$wc_order_id}&action=edit") . '">',
+												'</a>'
+											);
+											?>
+										</li>
+									<?php endif; ?>
+								</ul>
 						<?php
-					}
-				}
-				?>
-				<a class="wpte-trip-link"
-					href="<?php echo get_permalink( $trip_id ); ?>"><?php echo esc_html_e( 'View Trip', 'wp-travel-engine' ); ?></a>
-			</div>
-		</div>
-		<div class="wpte-billing-info">
-			<h6 class="wpte-billing-heading"><?php esc_html_e( 'Billing Information', 'wp-travel-engine' ); ?></h6>
-			<div class="wpte-billing-content">
-				<ul>
-					<li>
-						<span>
-						<?php esc_html_e( 'First Name:', 'wp-travel-engine' ); ?>
-						</span>
-						<span>
-						<?php echo esc_html( $billing_info['fname'] ?? '' ); ?>
-						</span>
-					</li>
-					<li>
-					<span>
-					<?php esc_html_e( 'Email:', 'wp-travel-engine' ); ?>
-					</span>
-						<span>
-					<?php echo esc_html( $billing_info['email'] ?? '' ); ?>
-					</span>
-					</li>
-					<li>
-					<span>
-					<?php esc_html_e( 'Last Name:', 'wp-travel-engine' ); ?>
-					</span>
-						<span>
-					<?php echo esc_html( $billing_info['lname'] ?? '' ); ?>
-					</span>
-					</li>
-					<li>
-					<span>
-					<?php esc_html_e( 'Address:', 'wp-travel-engine' ); ?>
-					</span>
-						<span>
-					<?php echo esc_html( $billing_info['address'] ?? '' ); ?>
-					</span>
-					</li>
-					<li>
-					<span>
-					<?php esc_html_e( 'Country:', 'wp-travel-engine' ); ?>
-					</span>
-						<span>
-					<?php echo esc_html( $billing_info['country'] ?? '' ); ?>
-					</span>
-					</li>
-					<li>
-					<span>
-					<?php esc_html_e( 'City:', 'wp-travel-engine' ); ?>
-					</span>
-						<span>
-					<?php echo esc_html( $billing_info['city'] ?? '' ); ?>
-					</span>
-					</li>
-				</ul>
-
-			</div>
-		</div>
-	</div>
-	<div class="wte-booking-detail-right-section">
-		<div class="wpte-booking-details">
-			<h5 class="wpte-booking-heading"><?php echo esc_html( sprintf( __( 'Booking Details #%1$s', 'wp-travel-engine' ), $booking ) ); ?></h5>
-			<div class="wpte-trip-booking-info">
-				<h6><?php esc_html_e( 'Trip Information', 'wp-travel-engine' ); ?></h6>
-				<ul>
-					<li>
-						<span>
-							<?php esc_html_e( 'Trip Code:', 'wp-travel-engine' ); ?>
-						</span>
-						<span>
-							<?php echo esc_html( $trip_metas['trip_code'] ?? '' ); ?>
-						</span>
-					</li>
-				</ul>
-				<div class="wpte-trip-booking-date">
-					<div class="wpte-trip-start-date">
-						<span class="wpte-info-title">
-							<?php esc_html_e( 'Trip Start Date:', 'wp-travel-engine' ); ?>
-						</span>
-						<span class="wpte-info-value">
-							<?php
-							echo esc_html( date_i18n( $date_format, strtotime( $trip_start_date ) ) );
-							?>
-						</span>
-						<?php if ( !empty( $trip_start_date_with_time ) ) { ?>
-							<span class="wpte-info-time">
-							<?php
-							$modified_start_date_time = date( $time_format, strtotime( $trip_start_date_with_time ) );
-							echo esc_html( sprintf( __( 'From %s', 'wp-travel-engine' ), $modified_start_date_time ) );
-							?>
-						</span>
-						<?php } ?>
-					</div>
-					<div class="wpte-trip-end-date">
-						<span class="wpte-info-title">
-							<?php esc_html_e( 'Trip End Date:', 'wp-travel-engine' ); ?>
-						</span>
-						<span class="wpte-info-value">
-							<?php
-							echo esc_html( date_i18n( $date_format, strtotime( $trip_end_date ) ) );
-							?>
-						</span>
-						<?php if ( !empty( $trip_end_date_with_time ) ) { ?>
-							<span class="wpte-info-time">
-							<?php
-							$modified_end_date_time = date( $time_format, strtotime( $trip_end_date_with_time ) );
-							echo esc_html( sprintf( __( 'To %s', 'wp-travel-engine' ), $modified_end_date_time ) );
-							?>
-						</span>
-						<?php } ?>
-					</div>
-				</div>
-				<ul>
-					<li>
-						<span>
-							<?php esc_html_e( 'Total length of travel:', 'wp-travel-engine' ); ?>
-						</span>
-						<span>
-							<?php
-							wte_get_template( 'components/content-trip-card-duration.php', compact( 'trip_duration_unit', 'trip_duration', 'trip_duration_nights', 'set_duration_type', 'is_booking_detail' ) );
-							?>
-						</span>
-					</li>
-				</ul>
-			</div>
-			<div class="wpte-travellers-info">
-				<h6><?php esc_html_e( 'Travellers', 'wp-travel-engine' ); ?></h6>
-				<ul>
-					<?php
-					$pricing_categories = get_terms(
-						array(
-							'taxonomy'   => 'trip-packages-categories',
-							'hide_empty' => false,
-							'orderby'    => 'term_id',
-							'fields'     => 'id=>name',
-						)
-					);
-					if ( is_wp_error( $pricing_categories ) ) {
-						$pricing_categories = array();
-					}
-					foreach ( $order_trip['pax'] as $category => $number ) {
-						$label = isset( $pricing_categories[ $category ] ) ? $pricing_categories[ $category ] : $category;
-						?>
-						<li>
-							<span>
-								<?php echo esc_html( $label ); ?>:
-							</span>
-							<span>
-								<?php echo esc_attr( $number ); ?>
-							</span>
-						</li>
-						<?php
-					}
-					?>
-				</ul>
-
-			</div>
-			<?php
-			if ( ! empty( $order_trip['trip_extras']) ) {
-				?>
-				<div class="wpte-extra-services-info">
-					<h6><?php esc_html_e( 'Extra Services', 'wp-travel-engine' ); ?></h6>
-					<ul>
-						<?php
-						foreach ( $order_trip['trip_extras']as $index => $tx ) {
-							?>
-							<li>
-									<span>
-										<?php echo esc_html( $tx['extra_service'] ); ?>:
-									</span>
-								<span>
-										<?php echo esc_html( $tx['qty'] ); ?>
-									</span>
-							</li>
-							<?php
+							}
 						}
 						?>
-					</ul>
+					</div>
 				</div>
-			<?php } ?>
-		</div>
-		<div class="wpte-payment-details">
-			<h5 class="wpte-payment-heading"><?php esc_html_e( 'Payment Details', 'wp-travel-engine' ); ?></h5>
-			<div class="wpte-payment-data">
-				<?php
-				if ( is_array( $booking_payments ) ) {
-					foreach ( $booking_payments as $index => $booking_payment ) {
-						$payment_status = get_post_meta( $booking_payment, 'payment_status', true );
-						?>
-						<h6>
-							<?php
-							// Translators: %s: Payment number.
-							printf( __( 'Payment #%s', 'wp-travel-engine' ), $index + 1 );
-							?>
-						</h6>
-						<ul>
-							<li>
-								<span><?php esc_html_e( 'Payment ID:', 'wp-travel-engine' ); ?></span>
-								<span><?php echo esc_html( $booking_payment ); ?></span>
-							</li>
-							<li>
-								<span><?php esc_html_e( 'Package:', 'wp-travel-engine' ); ?></span>
-								<span><?php echo esc_html( $order_trip['package_name'] ); ?></span>
-							</li>
-							<li>
-								<span><?php esc_html_e( 'Payment Status:', 'wp-travel-engine' ); ?></span>
-								<span
-									class="wpte-status <?php echo $payment_status == 'completed' ? 'completed' : 'pending'; ?>">
-									<?php
-									$payment_status_labels = wptravelengine_payment_status();
-									$payment_status        = $payment_status_labels[ $payment_status ] ?? $payment_status;
-									echo esc_html( $payment_status );
-									?>
-								</span>
-							</li>
-							<li>
-								<span><?php esc_html_e( 'Amount:', 'wp-travel-engine' ); ?></span>
-								<span>
-									<?php
-									$payable = get_post_meta( $booking_payment, 'payable', true ) ?? 0;
-									wptravelengine_the_price( $payable['amount'] ?? 0, true, compact( 'currency_code' ) );
-									?>
-								</span>
-							</li>
-							<?php
-							$wc_order_id = get_post_meta( $booking, '_wte_wc_order_id', true );
-							if ( ! empty( $wc_order_id ) ) :
-								?>
-								<li>
-									<?php
-									printf(
-										__( 'This booking was made using WooCommerce payments, view detail payment information %1$shere%2$s', 'wp-travel-engine' ),
-										'<a href="' . admin_url( "/post.php?post={$wc_order_id}&action=edit" ) . '">',
-										'</a>'
-									);
-									?>
-								</li>
-							<?php endif; ?>
-						</ul>
-						<?php
-					}
-				}
-				?>
+
 			</div>
-			<div class="wpte-payment-info">
-				<h6><?php esc_html_e( 'Payment Info', 'wp-travel-engine' ); ?></h6>
-				<ul>
-					<li>
-						<span><?php esc_html_e( 'Total Cost:', 'wp-travel-engine' ); ?></span>
-						<span><?php wptravelengine_the_price( $cart_info['total'] ?? 0, true, compact( 'currency_code' ) ); ?></span>
-					</li>
-					<li>
-						<span><?php esc_html_e( 'Paid Amount:', 'wp-travel-engine' ); ?></span>
-						<span> <?php wptravelengine_the_price( $booking_details->paid_amount ?? 0, true, compact( 'currency_code' ) ); ?></span>
-					</li>
-					<li>
-						<span><?php esc_html_e( 'Due Amount:', 'wp-travel-engine' ); ?></span>
-						<span><?php wptravelengine_the_price( $booking_details->due_amount ?? 0, true, compact( 'currency_code' ) ); ?></span>
-					</li>
-				</ul>
+			<div class="wte-booking-detail-right-section">
+				<div class="wpte-booking-details">
+					<?php
+					$tour_details = array();
+
+					foreach ($cart['items'] ?? [] as $cart_item) {
+						/** @var array $cart_item */
+						
+						$trip = new Trip($cart_item['trip_id']);
+						$end_date = isset($cart_item['end_date']) ? wptravelengine_format_trip_datetime($cart_item['end_date']) : $trip_end_date;
+						$start_date = isset($cart_item['trip_date']) ? wptravelengine_format_trip_datetime($cart_item['trip_date']) : $trip_start_date;
+						$trip_package = $cart_item['trip_package'] ?? get_the_title($cart_item['price_key']);
+						$travelers_count = $cart_item['travelers_count'] ?? array_sum($cart_item['pax'] ?? []);
+						$item = array(
+							sprintf('<tr><td colspan="2">%s</td></tr>', sprintf('<a href="%s" class="wpte-checkout__trip-name">%s</a>', $trip->get_permalink(), $trip->get_title())),
+							sprintf('<tr><td>%s</td><td><strong>%s</strong></td></tr>', __('Booking ID:', 'wp-travel-engine'), $booking),
+							sprintf('<tr><td>%s</td><td><strong>%s</strong></td></tr>', __('Package:', 'wp-travel-engine'), $trip_package),
+							sprintf('<tr><td>%s</td><td><strong>%s</strong></td></tr>', __('Trip Code:', 'wp-travel-engine'), $trip->get_trip_code()),
+							sprintf('<tr><td>%s</td><td><strong>%s</strong></td></tr>', __('Starts on:', 'wp-travel-engine'), $start_date),
+							sprintf('<tr><td>%s</td><td><strong>%s</strong></td></tr>', __('Ends on:', 'wp-travel-engine'), $end_date),
+							sprintf('<tr><td>%s</td><td><strong>%s</strong></td></tr>', __('No. of Travellers:', 'wp-travel-engine'), $travelers_count ),
+						);
+
+						$tour_details[] = $item;
+					}
+
+					wptravelengine_get_template(
+						'template-checkout/content-tour-details.php',
+						array_merge(compact('tour_details'), array(
+							'content_only' => true,
+						))
+					);
+
+					wptravelengine_get_admin_template(
+						'booking/partials/booking-summary.php',
+						[
+							'cart_info' => $cart_info,
+							'pricing_arguments' => array(
+								'currency_code' => $currency_code,
+							),
+							'booking' => $booking_instance
+						]
+					);
+					?>
+				</div>
 			</div>
 		</div>
 	</div>

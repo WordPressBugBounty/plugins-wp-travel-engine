@@ -415,7 +415,18 @@ class WP_Travel_Engine_Emails {
 	}
 }
 
-class WTE_Booking_Emails extends WP_Travel_Engine_Emails {
+/**
+ * @deprecated since 6.5.0
+ *
+ * This class's functionality has been moved to \WPTravelEngine\Email\Booking.
+ *
+ * For backward compatibility:
+ * - \WPTravelEngine\Email\Booking is aliased as WTE_Booking_Email.
+ * - This class has been renamed to WPTE_Booking_Emails.
+ *
+ * Please update all references to use \WPTravelEngine\Email\Booking.
+ */
+class WPTE_Booking_Emails extends WP_Travel_Engine_Emails {
 
 	/**
 	 * Payment Object.

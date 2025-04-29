@@ -36,8 +36,12 @@ class LeadTravellerFormFields extends FormField {
 	 *
 	 * @return array
 	 */
-	public function with_values( array $form_data ): array {
-		$this->fields = DefaultFormFields::lead_traveller();
+	public function with_values( array $form_data, $booking = null ): array {
+		if( $booking && $booking->get_meta( 'traveller_page_type' ) == 'old' ){
+			$this->fields = WTE_Default_Form_Fields::traveller_information();
+		} else{
+			$this->fields = DefaultFormFields::lead_traveller();
+		}
 		return array_map( function ( $field ) use ( $form_data ) {
 			$name = preg_match( "#\[([^\[]+)]$#", $field[ 'name' ], $matches ) ? $matches[ 1 ] : $field[ 'name' ];
 			if ( $name ) {

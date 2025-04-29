@@ -67,7 +67,7 @@ return apply_filters(
 				'field_type' => 'TITLE',
 				'title'      => __( 'Banner Layouts', 'wp-travel-engine' ),
 			),
-			
+
 			array(
 				'divider'     => true,
 				'field_type'  => 'IMAGE_SELECTOR',
@@ -368,11 +368,38 @@ return apply_filters(
 				'divider'     => true,
 			),
 			array(
+				'label'       => __( 'Show Enquiry Form', 'wp-travel-engine' ),
+				'description' => __( 'Turn this off to hide the enquiry form on Trip Page.', 'wp-travel-engine' ),
+				'field_type'  => 'SWITCH',
+				'name'        => 'enquiry_enable',
+				'divider'     => true,
+			),
+			array(
 				'label'       => __( 'GDPR Message', 'wp-travel-engine' ),
 				'description' => __( 'Enter the GDPR message for the trip enquiry form.', 'wp-travel-engine' ),
 				'field_type'  => 'TEXTAREA',
 				'name'        => 'gdpr_msg',
 				'divider'     => true,
+			),
+			array(
+				'label'       => __( 'Custom Enquiry Form', 'wp-travel-engine' ),
+				'description' => __( 'Enable this feature to utilize a custom form. Please ensure that a notification email is included within the custom form.', 'wp-travel-engine' ),
+				'field_type'  => 'SWITCH',
+				'name'        => 'enquiry_custom_form.enable',
+				'divider'     => true,
+			),
+			array(
+				'field_type' => 'GROUP',
+				'condition'  => 'enquiry_custom_form.enable === true',
+				'fields'     => array(
+					array(
+						'label'       => __( 'Form Shortcode', 'wp-travel-engine' ),
+						'description' => __( 'Add the custom form shortcode. We have made WP Travel Engine compatible with popular forms likes Gravity Form, Ninja Forms and WPForms.', 'wp-travel-engine' ),
+						'field_type'  => 'TEXT',
+						'name'        => 'enquiry_custom_form.shortcode',
+						'divider'     => true,
+					),
+				),
 			),
 		),
 	),

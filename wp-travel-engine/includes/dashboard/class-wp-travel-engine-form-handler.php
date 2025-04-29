@@ -5,6 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use WPTravelEngine\Core\Models\Post\Customer;
+use WPTravelEngine\Core\Shortcodes\UserAccount;
 
 /**
  * Handle frontend forms.
@@ -126,15 +127,11 @@ class Wp_Travel_Engine_Form_Handler {
 		}
 
 		if ( ! empty( $_POST[ 'register' ] ) && wp_verify_nonce( $nonce_value, 'wp-travel-engine-register' ) ) {
-			$settings = wptravelengine_settings()->get();
 
-			$generate_username_from_email = isset( $settings[ 'generate_username_from_email' ] ) ? $settings[ 'generate_username_from_email' ] : 'no';
-			$generate_user_password       = isset( $settings[ 'generate_user_password' ] ) ? $settings[ 'generate_user_password' ] : 'no';
-
-			if ( 'no' === $generate_username_from_email && isset( $_POST[ 'username' ] ) ) {
+			if ( isset( $_POST[ 'username' ] ) ) {
 				$username = sanitize_text_field( wp_unslash( $_POST[ 'username' ] ) );
 			}
-			if ( 'no' === $generate_user_password && isset( $_POST[ 'password' ] ) ) {
+			if ( isset( $_POST[ 'password' ] ) ) {
 				$password = sanitize_text_field( wp_unslash( $_POST[ 'password' ] ) );
 			}
 			if ( isset( $_POST[ 'email' ] ) ) {
@@ -164,7 +161,7 @@ class Wp_Travel_Engine_Form_Handler {
 					$customer_bookings = get_post_meta( $customer_id, 'wp_travel_engine_bookings', true );
 					update_user_meta( $new_customer, 'wp_travel_engine_user_bookings', $customer_bookings );
 				}
-				
+
 				if ( ! empty( $_POST[ 'redirect' ] ) ) {
 					$redirect = wp_sanitize_redirect( wp_unslash( $_POST[ 'redirect' ] ) );
 				} else if ( wp_travel_engine_get_raw_referer() ) {
@@ -188,7 +185,7 @@ class Wp_Travel_Engine_Form_Handler {
 	public static function process_lost_password() {
 		if ( isset( $_POST[ '_wpnonce' ] ) ) {
 			if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST[ '_wpnonce' ] ) ), 'wp_travel_engine_lost_password' ) && isset( $_POST[ 'wp_travel_engine_reset_password' ] ) && isset( $_POST[ 'user_login' ] ) ) {
-				$success = Wp_Travel_Engine_User_Account::retrieve_password();
+				$success = UserAccount::retrieve_password();
 
 				// If successful, redirect to my account with query arg set.
 				if ( $success ) {
@@ -223,7 +220,7 @@ class Wp_Travel_Engine_Form_Handler {
 			return;
 		}
 
-		$user = Wp_Travel_Engine_User_Account::check_password_reset_key( $posted_fields[ 'reset_key' ], $posted_fields[ 'reset_login' ] );
+		$user = UserAccount::check_password_reset_key( $posted_fields[ 'reset_key' ], $posted_fields[ 'reset_login' ] );
 
 		if ( $user instanceof WP_User ) {
 			if ( empty( $posted_fields[ 'password_1' ] ) ) {
@@ -241,7 +238,7 @@ class Wp_Travel_Engine_Form_Handler {
 			wp_travel_engine_add_wp_error_notices( $errors );
 
 			if ( 0 === wp_travel_engine_get_notice_count( 'error' ) ) {
-				Wp_Travel_Engine_User_Account::reset_password( $user, $posted_fields[ 'password_1' ] );
+				UserAccount::reset_password( $user, $posted_fields[ 'password_1' ] );
 
 				do_action( 'wp_travel_customer_reset_password', $user );
 
@@ -260,7 +257,7 @@ class Wp_Travel_Engine_Form_Handler {
 
 			$value = sprintf( '%s:%s', sanitize_text_field( wp_unslash( $_GET[ 'login' ] ) ), sanitize_text_field( wp_unslash( $_GET[ 'key' ] ) ) );
 
-			Wp_Travel_Engine_User_Account::set_reset_password_cookie( $value );
+			UserAccount::set_reset_password_cookie( $value );
 
 			wp_safe_redirect( add_query_arg( 'show-reset-form', 'true', wp_travel_engine_lostpassword_url() ) );
 			exit;
@@ -294,6 +291,7 @@ class Wp_Travel_Engine_Form_Handler {
 		$billing_address  = ! empty( $_POST[ 'customer_billing_address' ] ) ? wp_travel_engine_clean_vars( $_POST[ 'customer_billing_address' ] ) : '';
 		$billing_city     = ! empty( $_POST[ 'customer_billing_city' ] ) ? wp_travel_engine_clean_vars( $_POST[ 'customer_billing_city' ] ) : '';
 		$billing_company  = ! empty( $_POST[ 'customer_billing_company' ] ) ? wp_travel_engine_clean_vars( $_POST[ 'customer_billing_company' ] ) : '';
+		$billing_state    = ! empty( $_POST[ 'customer_billing_state' ] ) ? wp_travel_engine_clean_vars( $_POST[ 'customer_billing_state' ] ) : '';
 		$billing_zip_code = ! empty( $_POST[ 'customer_zip_code' ] ) ? wp_travel_engine_clean_vars( $_POST[ 'customer_zip_code' ] ) : '';
 		$billing_country  = ! empty( $_POST[ 'customer_country' ] ) ? wp_travel_engine_clean_vars( $_POST[ 'customer_country' ] ) : '';
 		$billing_phone    = ! empty( $_POST[ 'customer_phone' ] ) ? wp_travel_engine_clean_vars( $_POST[ 'customer_phone' ] ) : '';
@@ -303,7 +301,6 @@ class Wp_Travel_Engine_Form_Handler {
 			'wp_travel_engine_save_customer_billing_details_required_fields',
 			array(
 				'customer_billing_address' => __( 'Billing Address', 'wp-travel-engine' ),
-				'customer_zip_code'        => __( 'ZIP Code', 'wp-travel-engine' ),
 				'customer_country'         => __( 'Country', 'wp-travel-engine' ),
 				'customer_phone'           => __( 'Phone', 'wp-travel-engine' ),
 			)
@@ -320,9 +317,11 @@ class Wp_Travel_Engine_Form_Handler {
 			$data_array = array(
 				'billing_address'  => $billing_address,
 				'billing_city'     => $billing_city,
+				'billing_state'    => $billing_state,
 				'billing_zip_code' => $billing_zip_code,
 				'billing_country'  => $billing_country,
 				'billing_phone'    => $billing_phone,
+				'billing_company'  => $billing_company,
 			);
 
 			update_user_meta( $user_id, 'wp_travel_engine_customer_billing_details', $data_array );

@@ -10,6 +10,7 @@ namespace WPTravelEngine\Builders\FormFields;
 use WPTravelEngine\Abstracts\BookingEditFormFields;
 use WPTravelEngine\Builders\FormFields\DefaultFormFields;
 use WPTravelEngine\Helpers\Countries;
+use WTE_Default_Form_Fields;
 class TravellerEditFormFields extends BookingEditFormFields {
 
 	/**
@@ -18,11 +19,11 @@ class TravellerEditFormFields extends BookingEditFormFields {
 	 */
 	protected $count;
 
-	public function __construct( array $defaults = array(), string $mode = 'edit' ) {
+	public function __construct( array $defaults = array(), string $mode = 'edit', $booking = null ) {
 		parent::__construct( $defaults, $mode );
 		static::$mode = $mode;
 		$this->count = $defaults['index'] ?? $defaults['total_count'] + 1;
-		$this->init( $this->map_fields( static::structure( $mode, $defaults['index'] ?? 'new_traveller' ) ) );
+		$this->init( $this->map_fields( static::structure( $mode, $defaults['index'] ?? 'new_traveller', $booking ) ) );
 	}
 
 	protected function map_field( $field ) {
@@ -90,13 +91,17 @@ class TravellerEditFormFields extends BookingEditFormFields {
 	 * 
 	 * @return array
 	 */
-	public static function structure( string $mode = 'edit', string $count = 'new_traveller' ): array {
-		if( $mode == 'edit' && $count == 'new_traveller' ) {
+	public static function structure( string $mode = 'edit', string $count = 'new_traveller', $booking = null ): array {
+		if( $booking && $booking->get_meta( 'traveller_page_type' ) == 'old' ){
+			return WTE_Default_Form_Fields::traveller_information();
+		} else if( $mode == 'edit' && $count == 'new_traveller' ) {
 			return DefaultFormFields::traveller($mode);
 		}
-		return $count == 0
-			? DefaultFormFields::lead_traveller($mode)
-			: DefaultFormFields::traveller($mode);
+		else {
+			return $count == 0
+				? DefaultFormFields::lead_traveller($mode)
+				: DefaultFormFields::traveller($mode);
+		}
 	}
 
 	public static function create( ...$args ): TravellerEditFormFields {

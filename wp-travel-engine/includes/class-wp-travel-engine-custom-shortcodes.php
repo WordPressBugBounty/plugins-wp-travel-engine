@@ -24,7 +24,7 @@ class WP_Travel_Engine_Custom_Shortcodes {
 		$shortcodes = array(
 			'wp_travel_engine_cart'      => __CLASS__ . '::cart',
 			'wp_travel_engine_checkout'  => __CLASS__ . '::checkout',
-			'wp_travel_engine_dashboard' => __CLASS__ . '::user_account',
+			// 'wp_travel_engine_dashboard' => __CLASS__ . '::user_account',
 		);
 
 		$shortcode = apply_filters( 'wp_travel_engine_cart_shortcodes', $shortcodes );

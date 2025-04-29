@@ -136,6 +136,9 @@ if ( isset( $booking_id ) ) {
 
 		$wp_travel_engine_settings_options = get_option( 'wp_travel_engine_settings', true );
 
+		// Update the booking meta to indicate that the traveller page is old.
+		update_post_meta( $booking_id, 'traveller_page_type', 'old' );
+
 		for ( $i = 1; $i <= $total_pax; $i ++ ) {
 			echo '<div class="relation-options-title">' . sprintf( esc_html__( 'Personal details for Traveller: #%1$s', 'wp-travel-engine' ), (int) $i ) . '</div>';
 

@@ -75,14 +75,14 @@ class WP_Travel_Engine_Form_Field_Radio {
 						%s
 					</label>
 				</div>',
-						$this->field['name'],
-						$key,
-						$this->field['id'] . '_' . $index,
+						esc_attr( $this->field['name'] ),
+						esc_attr( $key ),
+						esc_attr( $this->field['id'] . '_' . $index ),
 						$option_attributes,
 						$checked,
 						$validations,
-						$this->field['id'] . '_' . $index,
-						$value
+						esc_attr( $this->field['id'] . '_' . $index ),
+						esc_html( $value )
 					);
 
 				$index++;

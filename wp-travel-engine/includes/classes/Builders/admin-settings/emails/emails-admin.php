@@ -4,6 +4,7 @@
  *
  * @since 6.2.0
  */
+return;
 
 $email_tags = apply_filters( 'wptravelengine_admin_email_template_tags', array(
 	'{trip_url}'                  => __( 'The trip URL for each booked trip', 'wp-travel-engine' ),

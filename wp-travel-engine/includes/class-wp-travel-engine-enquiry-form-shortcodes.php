@@ -1,4 +1,8 @@
 <?php
+
+use WPTravelEngine\Email\Email;
+use WPTravelEngine\Email\UserEmail;
+
 /**
  * Class for enquiry form shortcodes.
  */
@@ -270,7 +274,8 @@ class WP_Travel_Engine_Enquiry_Form_Shortcodes {
 			$to = array_map( 'sanitize_email', $explode_email );
 
 		} else {
-			$to = sanitize_email( $admin_email );
+			$emails = array_filter( array_map( 'sanitize_email', explode( ',', $wp_travel_engine_settings['email']['emails'] ) ) );
+			$to = ! empty( $emails ) ? $emails : array( sanitize_email( $admin_email ) );
 		}
 
 		$ipaddress = '';
@@ -289,17 +294,6 @@ class WP_Travel_Engine_Enquiry_Form_Shortcodes {
 		} else {
 			$ipaddress = 'UNKNOWN';
 		}
-
-		$from_email = wte_get_from_email();
-		$blogname   = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
-		$sender     = $blogname . ' <' . $from_email . '>';
-
-		$headers  = 'MIME-Version: 1.0' . "\r\n";
-		$headers .= 'Content-type: text/html; charset=UTF-8' . "\r\n";
-		$headers .= 'From: ' . $sender . "\r\n";
-		$headers .= 'Reply-To: ' . $email . "\r\n";
-		// Create email headers.
-		$headers .= 'X-Mailer: PHP/' . phpversion();
 
 		$remove_keys = array(
 			'package_id',
@@ -330,13 +324,7 @@ class WP_Travel_Engine_Enquiry_Form_Shortcodes {
 		require_once plugin_dir_path( WP_TRAVEL_ENGINE_FILE_PATH ) . 'includes/class-wp-travel-engine-emails.php';
 
 		// Prepare enquiry emails.
-		$mail_obj                     = new WP_Travel_Engine_Emails();
-		$admin_email_template_content = $mail_obj->get_email_template( 'enquiry', 'admin', true, $formdata );
-
-		// Prepare admin email template.
-		$admin_email_template  = $mail_obj->get_email_header();
-		$admin_email_template .= $admin_email_template_content;
-		$admin_email_template .= $mail_obj->get_email_footer();
+		$admin_email_template_content = wte_get_template_html( 'emails/enquiry.php', compact( 'formdata' ) );
 
 		if ( ! function_exists( 'wp_handle_upload' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -350,29 +338,28 @@ class WP_Travel_Engine_Enquiry_Form_Shortcodes {
 			}
 		}
 
-		if ( ! empty( $wp_travel_engine_settings['email']['enquiry_emailaddress'] ) ){
-			$admin_sent = wp_mail( $to, esc_html( $subject ), $admin_email_template, $headers, $attachments );
-		} elseif ( strpos( $wp_travel_engine_settings['email']['emails'], ',' ) !== false ) {
-			$wp_travel_engine_settings['email']['emails'] = str_replace( ' ', '', $wp_travel_engine_settings['email']['emails'] );
-			$admin_emails                                 = explode( ',', $wp_travel_engine_settings['email']['emails'] );
-			$to = array_map( 'sanitize_email', $admin_emails );
-
-			$admin_sent = wp_mail( $to, esc_html( $subject ), $admin_email_template, $headers, $attachments );
-		} else {
-			$wp_travel_engine_settings['email']['emails'] = str_replace( ' ', '', $wp_travel_engine_settings['email']['emails'] );
-			$admin_sent                                   = wp_mail( $to, esc_html( $subject ), $admin_email_template, $headers, $attachments );
+		foreach ( $to as $val ) {
+			$admin_sent = new Email();
+			$admin_sent->add_headers( array( "from" => "From: {$name}<{$email}>" ) )
+					   ->set( 'to', $val )
+					   ->set( 'my_subject', esc_html( $subject ) )
+					   ->set( 'attachments', $attachments )
+					   ->set( 'content', $admin_email_template_content )
+					   ->send();
 		}
 
 		if ( isset( $wp_travel_engine_settings['email']['cust_notif'] ) && $wp_travel_engine_settings['email']['cust_notif'] == '1' ) {
-			$headers  = 'MIME-Version: 1.0' . "\r\n";
-			$headers .= 'Content-type: text/html; charset=UTF-8' . "\r\n";
-			$headers .= 'Reply-To: ' . $to . "\r\n";
 
-			// Create email headers.
-			$headers .= 'X-Mailer: PHP/' . phpversion();
-			$subject  = apply_filters( 'customer_enquiry_subject', __( 'Enquiry Sent.', 'wp-travel-engine' ) );
-
-			wp_mail( $email, $subject, $admin_email_template, $headers );
+			$user = (object) array(
+				'user_login' => $name,
+				'user_email' => $email,
+			);
+			$mail = new UserEmail( $user );
+			$mail->add_headers( array( "reply_to" => "Reply-To: {$to[0]}" ) )
+				 ->set( 'to', $email )
+				 ->set( 'my_subject', wptravelengine_settings()->get( 'customer_email_notify_tabs.enquiry.subject', __( 'Enquiry Sent.', 'wp-travel-engine' ) ) )
+				 ->set( 'content', wptravelengine_settings()->get( 'customer_email_notify_tabs.enquiry.content', '' ) )
+				 ->send();
 		}
 
 		if ( $admin_sent == 1 ) {
