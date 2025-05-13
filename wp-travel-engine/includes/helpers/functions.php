@@ -1209,7 +1209,7 @@ function wte_trip_get_trip_rest_metadata( $trip_id ) {
 
 	$lowest_package = WPTravelEngine\Packages\get_trip_lowest_price_package( $trip_id );
 
-	$primary_category_id = get_option( 'primary_pricing_category', 0 );
+	$primary_category_id = (int) get_post_meta( $trip_id, 'primary_category', true ) ?: get_option( 'primary_pricing_category', 0 );
 	$primary_category    = new \stdClass();
 	if ( isset( $lowest_package->{'package-categories'} ) && $primary_category_id ) {
 		$package_categories = $lowest_package->{'package-categories'};

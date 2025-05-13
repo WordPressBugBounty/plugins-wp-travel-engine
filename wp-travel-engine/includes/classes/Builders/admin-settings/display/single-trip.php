@@ -348,14 +348,14 @@ return apply_filters(
 			),
 			array(
 				'label'       => __( 'Show Trip Featured Image', 'wp-travel-engine' ),
-				'description' => __( 'If checked, featured image in the trip detail page will be enabled.', 'wp-travel-engine' ),
+				'description' => __( 'Only works for a legacy trip gallery. If checked, the featured image in the trip detail page will be enabled.', 'wp-travel-engine' ),
 				'field_type'  => 'SWITCH',
 				'name'        => 'enable_featured_image',
 				'divider'     => true,
 			),
 			array(
 				'label'       => __( 'Show Featured Image in Image Gallery', 'wp-travel-engine' ),
-				'description' => __( 'If checked, featured image will be added to image gallery in single trip page and trip card.', 'wp-travel-engine' ),
+				'description' => __( 'Only works for a legacy trip page. If checked, featured image will be added to image gallery in single trip page and trip card.', 'wp-travel-engine' ),
 				'field_type'  => 'SWITCH',
 				'name'        => 'enable_image_in_gallery',
 				'divider'     => true,

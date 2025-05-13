@@ -108,6 +108,11 @@ class TravelerCategories extends Iterator {
 			}
 			$_categories[ $id ][ 'age_group' ] = (string) ( get_term_meta( $id )[ 'age_group' ][ 0 ] ?? '' );
 		}
+		$primary_category =  (int) ( $this->trip->get_meta( 'primary_category' ) ?: Options::get( 'primary_pricing_category', 0 ) );
+
+		if ( isset( $_categories[ $primary_category ] ) ) {
+			$_categories = [ $primary_category => $_categories[ $primary_category ] ] + array_diff_key( $_categories, [ $primary_category => true ] );
+		}
 
 		$data = array_map(
 			function ( $category ) {
@@ -147,10 +152,13 @@ class TravelerCategories extends Iterator {
 	 * @return TravelerCategory
 	 */
 	public function get_primary_traveler_category(): TravelerCategory {
-		$traveler_term = wptravelengine_settings()->get_primary_pricing_category();
+		$traveler_term = (int) $this->trip->get_meta( 'primary_category' ) ?: wptravelengine_settings()->get_primary_pricing_category();
+		if ( ! is_numeric( $traveler_term ) ) {
+			$traveler_term = $traveler_term->term_id;
+		}
 
 		foreach ( $this->data as $category ) {
-			if ( isset( $category->id ) && $category->id === $traveler_term->term_id ) {
+			if ( isset( $category->id ) && $category->id === $traveler_term ) {
 				return $category;
 			}
 		}

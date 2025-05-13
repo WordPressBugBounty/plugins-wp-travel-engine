@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 6.5.0
+Stable tag: 6.5.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -367,6 +367,15 @@ Yes. We have created WooCommerce Payments add-ons that supports all the payment 
 Please send us an email via [support ticket](https://wptravelengine.com/support-ticket/?utm_source=free_plugin&utm_medium=wporg&utm_campaign=support), and we will be happy to help you.
 
 == Changelog ==
+
+= 6.5.1 - 13th May 2025 =
+* Feature: Allow users to display pricing from any category independently, improving flexibility in booking forms.
+* Fix: Resolved an issue with the 'Load More' button not appearing when displaying trips using shortcodes.
+* Fix: Corrected due balance showing as 0 in payment confirmation email for partial payments.
+* Fix: Fixed incorrect payable and paid amounts displayed in the old checkout flow.
+* Fix: Deprecated 'Show Trip Featured Image' and 'Show Featured Image in Image Gallery' options for proper functionality.
+* Fix: Resolved visibility issues with disabled Trip Info fields still appearing in the backend interface.
+* Fix: Show Trip Featured Image and Show Featured Image in Image Gallery options not working correctly.
 
 = 6.5.0 - 28th April 2025 =
 * Enhancement: Improved email management by adding Notifications and Settings tabs and introducing a new tag `{trip_booking_details}`.

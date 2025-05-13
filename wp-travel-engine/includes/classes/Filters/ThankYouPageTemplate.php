@@ -203,6 +203,12 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 	
 		$deposit_amount     = $cart_info->get_totals( 'partial_total' );
 		$due_amount         = $cart_info->get_totals( 'due_total' );
+		// Check if payment is due or partial payment.
+		$is_payment_due 	= $this->cart->get_booking_ref();
+		if ( $is_payment_due ) {
+			$deposit_amount = $this->booking->get_total_paid_amount();
+			$due_amount 	= $this->booking->get_total_due_amount();
+		}
 		$is_partial_payment = in_array( $template_instance->cart->get_payment_type(), [
 			'partial',
 			'due',

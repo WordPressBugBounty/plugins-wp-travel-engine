@@ -915,7 +915,7 @@ class Booking extends PostModel {
 		if ( $paid_amount !== null && $paid_amount !== false && is_numeric( $paid_amount ) ) {
 			return (float) $paid_amount;
 		}
-		$payments    = $this->get_payment_detail();
+		$payments	 = get_post_meta( $this->ID, 'payments', true );
 		$paid_amount = 0;
 		if ( is_array( $payments ) && count( $payments ) > 0 ) {
 			foreach ( $payments as $payment ) {

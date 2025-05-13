@@ -100,7 +100,7 @@ function get_trip_lowest_price( $trip_id ) {
 	}
 	$package_categories = (object) $lowest_cost_package->{'package-categories'};
 
-	$primary_pricing_category = get_option( 'primary_pricing_category', 0 );
+	$primary_pricing_category = (int) get_post_meta( $trip_id, 'primary_category', true ) ?: get_option( 'primary_pricing_category', 0 );
 
 	$category_price = isset( $package_categories->prices[ $primary_pricing_category ] ) ? $package_categories->prices[ $primary_pricing_category ] : 0;
 	if ( isset( $package_categories->enabled_sale[ $primary_pricing_category ] ) && '1' === $package_categories->enabled_sale[ $primary_pricing_category ] ) {
@@ -119,7 +119,7 @@ function get_trip_lowest_price_by_package_id( $package_id ) {
 	}
 	$package_categories = (object) $lowest_cost_package->{'package-categories'};
 
-	$primary_pricing_category = get_option( 'primary_pricing_category', 0 );
+	$primary_pricing_category = (int) get_post_meta( $package_id, 'primary_category', true ) ?: get_option( 'primary_pricing_category', 0 );
 
 	$category_price = isset( $package_categories->prices[ $primary_pricing_category ] ) ? $package_categories->prices[ $primary_pricing_category ] : 0;
 	if ( isset( $package_categories->enabled_sale[ $primary_pricing_category ] ) && '1' === $package_categories->enabled_sale[ $primary_pricing_category ] ) {

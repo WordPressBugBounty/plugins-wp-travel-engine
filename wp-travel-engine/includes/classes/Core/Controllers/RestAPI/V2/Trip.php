@@ -571,6 +571,10 @@ class Trip extends WP_REST_Posts_Controller {
 			) );
 		}
 
+		if ( isset( $request[ 'primary_category' ] ) ) {
+			$trip->set_meta( 'primary_category', $request[ 'primary_category' ] );
+		}
+
 		if ( isset( $request[ 'packages' ] ) ) {
 
 			$primary_package_id = $trip->get_meta( 'primary_package' );
@@ -656,6 +660,17 @@ class Trip extends WP_REST_Posts_Controller {
 				$last_meta_input   = end( $meta_inputs );
 				$common_plain_text = sprintf( __( 'must be greater than or equal to 0 in \'%s Package\'.', 'wp-travel-engine' ), $package[ 'name' ] );
 
+				$primary_category = (int) ( $request[ 'primary_category' ] ?? $trip->get_meta( 'primary_category' ) );
+				if ( $last_meta_input[ 'package-categories' ][ 'prices' ][ $primary_category ] === '' ) {
+					$this->set_bad_request( 'invalid_param', sprintf( __( 'The %s category in the %s%s%s Package requires a valid price.', 'wp-travel-engine' ), $last_meta_input[ 'package-categories' ][ 'labels' ][ $primary_category ], '<strong>', $package[ 'name' ], '</strong>' ) );
+				}
+
+				if ( $last_meta_input[ 'package-categories' ][ 'enabled_sale' ][ $primary_category ] === '1' ) {
+					$sale = $last_meta_input[ 'package-categories' ][ 'sale_prices' ][ $primary_category ] ?? '';
+					if ( empty( $sale ) ) {
+						$this->set_bad_request( 'invalid_param', sprintf( __( 'The %s category in the %s%s%s Package requires a valid sale price.', 'wp-travel-engine' ), $last_meta_input[ 'package-categories' ][ 'labels' ][ $primary_category ], '<strong>', $package[ 'name' ], '</strong>' ) );
+					}
+				}
 				$regular_vs_sale_prices = ! ! array_filter( $last_meta_input[ 'package-categories' ][ 'prices' ] ?? [], fn ( $val, $key ) => '' !== $val ? ( $val > 0 && ( $val <= $last_meta_input[ 'package-categories' ][ 'sale_prices' ][ $key ] ?? 0 ) ) : false, ARRAY_FILTER_USE_BOTH );
 				if ( $regular_vs_sale_prices ) {
 					$this->set_bad_request( 'invalid_param', sprintf( __( '%sSale price%s must be less than %sRegular price%s in \'%s Package\'.', 'wp-travel-engine' ), '<strong>', '</strong>', '<strong>', '</strong>', $package[ 'name' ] ), "{$package['name']}_sale_price" );
@@ -973,6 +988,8 @@ class Trip extends WP_REST_Posts_Controller {
 		$data[ 'trip_extra_services' ] = array();
 
 		$primary_package    = (int) $trip->get_meta( 'primary_package' );
+		$primary_category	= $trip->get_meta( 'primary_category' ) ?: Options::get( 'primary_pricing_category' );
+		$data[ 'primary_category' ]   = (int) $trip->search_in_meta( 'primary_category', $primary_category );
 		$trip_packages      = new Post\TripPackages( $trip );
 		$data[ 'packages' ] = [];
 		foreach ( $trip_packages as $key => $trip_package ) {
@@ -1592,6 +1609,10 @@ class Trip extends WP_REST_Posts_Controller {
 						),
 					),
 				),
+			),
+			'primary_category'     => array(
+				'description' => __( 'Trip primary category.', 'wp-travel-engine' ),
+				'type'        => 'string',
 			),
 			'packages'             => array(
 				'description' => __( 'Trip packages.', 'wp-travel-engine' ),

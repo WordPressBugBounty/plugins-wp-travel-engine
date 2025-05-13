@@ -112,7 +112,7 @@ class FormField extends \WP_Travel_Engine_Form_Field {
 
 					<?php if ( ( $field[ 'name' ] != 'wp_travel_engine_booking_setting[terms_conditions]' ) ): ?>
 						<label
-							for="<?php echo esc_attr( $field[ 'id' ] ); ?>"><?php echo esc_html( $field[ 'field_label' ] ) . ( $is_required ? '<span class="wpte-checkout__field-required">*</span>' : '' ); ?></label>
+							for="<?php echo esc_attr( $field[ 'id' ] ); ?>"><?php echo wp_kses_post( $field[ 'field_label' ] ) . ( $is_required ? '<span class="wpte-checkout__field-required">*</span>' : '' ); ?></label>
 					<?php endif; ?>
 
 					<?php if ( $field[ 'type' ] == 'file' ): ?>
@@ -126,7 +126,7 @@ class FormField extends \WP_Travel_Engine_Form_Field {
 					<?php if ( ! $is_checkbox && ( $field[ 'name' ] != 'wp_travel_engine_booking_setting[terms_conditions]' ) ): ?>
 						<fieldset>
 							<legend>
-								<span><?php echo esc_html( $field[ 'field_label' ] ) . ( $is_required ? '<span class="wpte-checkout__field-required">*</span>' : '' ); ?></span>
+								<span><?php echo wp_kses_post( $field[ 'field_label' ] ) . ( $is_required ? '<span class="wpte-checkout__field-required">*</span>' : '' ); ?></span>
 							</legend>
 						</fieldset>
 					<?php endif; ?>

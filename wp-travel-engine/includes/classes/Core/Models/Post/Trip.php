@@ -218,7 +218,7 @@ class Trip extends PostModel {
 						'key'           => wptravelengine_generate_key("$service->ID-$index"),
 						'label'         => $service_data['options'][$index] ?? $option,
 						'price'         => is_numeric( $price ) ? (float) $price : 0,
-						'serviceUnit'   => [ 'value' => 'unit', 'label' => $unit_labels['unit'] ],
+						'serviceUnit'   => [ 'value' => 'unit', 'label' => isset( $service_data['unit'][$index] ) && !empty( $service_data['unit'][$index] ) ? $service_data['unit'][$index] : $unit_labels['unit'] ],
 						'description'   => !empty( $trip_service ) 
 											? $trip_service['descriptions'][$index] 
 											: ( $service_data['descriptions'][$index] ?? '' ),

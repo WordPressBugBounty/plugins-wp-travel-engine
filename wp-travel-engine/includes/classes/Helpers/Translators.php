@@ -2,7 +2,7 @@
 /**
  * Translation helper class.
  *
- * @since next
+ * @since 6.5.1
  * @package WPTravelEngine
  */
 

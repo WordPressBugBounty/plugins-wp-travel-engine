@@ -222,7 +222,7 @@ class TripAPISchema {
      *
      * @return void
      */
-    protected function prepare_extra_services( array &$data, WP_REST_Request $request ): void {
+    public function prepare_extra_services( array &$data, WP_REST_Request $request ): void {
 
         // Check if the addon is active.
         if ( !wptravelengine_is_addon_active('extra-services') ) {
@@ -435,7 +435,7 @@ class TripAPISchema {
      *
      * @return void
      */
-    protected function update_extra_services( WP_REST_Request $request ): void {
+    public function update_extra_services( WP_REST_Request $request ): void {
 		if ( isset( $request[ 'trip_extra_services' ] ) ) {
             $this->trip_settings->set( 'trip_extra_services', $request[ 'trip_extra_services' ] );
 			$this->trip_settings->set( 'wte_services_ids', implode( ',', array_column( $request[ 'trip_extra_services' ], 'id' ) ) );

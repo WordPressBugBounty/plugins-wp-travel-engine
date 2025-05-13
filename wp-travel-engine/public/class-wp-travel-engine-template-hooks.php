@@ -44,7 +44,7 @@ class WP_Travel_Engine_Template_Hooks {
 	private function init_single_trip_hooks() {
 		add_action( 'wp_travel_engine_before_trip_content', array( $this, 'trip_content_wrapper_start' ), 5 );
 		add_action( 'wte_single_trip_content', array( $this, 'display_single_trip_title' ), 5 );
-		
+
 		// Implement single trip gallery action as per the layout.
 		$this->register_trip_gallery_action();
 
@@ -105,8 +105,8 @@ class WP_Travel_Engine_Template_Hooks {
 
 		$settings = wptravelengine_settings();
 		$banner_layout = $settings->get( 'trip_banner_layout', 'banner-default' );
-		$action_hook = ( 'banner-layout-6' === $banner_layout ) 
-			? 'wte_single_trip_content' 
+		$action_hook = ( 'banner-layout-6' === $banner_layout )
+			? 'wte_single_trip_content'
 			: 'wp_travel_engine_gallery_before_content';
 
 		add_action( $action_hook, array( $this, 'display_single_trip_gallery' ), 10 );
@@ -353,7 +353,7 @@ class WP_Travel_Engine_Template_Hooks {
 			)
 		);
 
-		$primary_pricing_category = get_option( 'primary_pricing_category', 0 );
+		$primary_pricing_category = get_post_meta( $trip->ID, 'primary_category', true ) ?: get_option( 'primary_pricing_category' );
 
 		$categories_in_package = $package_categories->c_ids;
 		if ( in_array( $primary_pricing_category, $categories_in_package ) ) {
@@ -362,6 +362,8 @@ class WP_Travel_Engine_Template_Hooks {
 			$categories_in_package = array_keys( $ids_as_key );
 			array_unshift( $categories_in_package, $primary_pricing_category );
 		}
+
+		$today_prices = self::get_today_prices( $post->ID );
 
 		foreach ( $categories_in_package as $c_id ) {
 			if ( ! isset( $pricing_categories[ $c_id ] ) ) {
@@ -381,6 +383,15 @@ class WP_Travel_Engine_Template_Hooks {
 			), '5.0', 'wte_before_formatting_price_figure', __( 'Replacing multiple filters with single filter', 'wp-travel-engine' ) );
 			$price      = apply_filters( 'wp_travel_engine_trip_prev_price', $price, $trip->ID );
 			$per_label  = ! empty( $pricing_categories[ $c_id ]->name ) ? $pricing_categories[ $c_id ]->name : $package_categories->labels[ $c_id ];
+
+			if( $today_prices ) {
+				foreach( $today_prices['pricing'] as $today_price ) {
+					if( $c_id == $today_price['id'] && $price !== $today_price['price'] ) {
+						$sale_price = $today_price['price'];
+						$has_sale = ( $price > $sale_price ) ? '1' : false;
+					}
+				}
+			}
 
 			$category_term_meta = get_term_meta( $c_id, 'pll_category_name', true );
 			$locale             = get_locale();
@@ -475,9 +486,38 @@ class WP_Travel_Engine_Template_Hooks {
 		if ( ( isset( $wte_settings[ 'booking' ] ) && ! empty( $wte_settings[ 'booking' ] ) ) || empty( $price ) ) {
 			return;
 		}
+
+		global $wtetrip;
+
+		$today_prices = self::get_today_prices( $post->ID );
+
+		if( $today_prices && $wtetrip->price !== $today_prices[ 'pricing' ][0][ 'price' ] ) {
+			$new_price = $today_prices[ 'pricing' ][0][ 'price' ];
+			if( $wtetrip->price < $new_price ) {
+				$wtetrip->has_sale = false;
+				$wtetrip->sale_price = $new_price;
+			}else {
+				$wtetrip->has_sale = true;
+				$wtetrip->sale_price = $new_price;
+				$wtetrip->sale_percentage = round( ( ( $wtetrip->price - $wtetrip->sale_price ) / $wtetrip->price ) * 100 );
+			}
+		}
+
 		do_action( 'wp_travel_engine_before_trip_price' );
 		require WP_TRAVEL_ENGINE_BASE_PATH . '/includes/frontend/trip-meta/trip-meta-parts/trip-prices-sidebar-widget.php';
 		do_action( 'wp_travel_engine_after_trip_price' );
+	}
+
+	/**
+	 * Get today prices.
+	 *
+	 * @param int $trip_id
+	 * @return array|null
+	 */
+	private static function get_today_prices( $trip_id ) {
+		$trip_modal      = new Trip( $trip_id );
+		$primary_package = $trip_modal->default_package()->get_package_dates();
+		return $primary_package[ date( 'Y-m-d' ) ] ?? null;
 	}
 
 	/**
@@ -1131,7 +1171,7 @@ class WP_Travel_Engine_Template_Hooks {
 		$tab_title                 = isset( $trip_settings[ 'trip_itinerary_title' ] ) && ! empty( $trip_settings[ 'trip_itinerary_title' ] ) ? $trip_settings[ 'trip_itinerary_title' ] : false;
 		$wp_travel_engine_settings = get_option( 'wp_travel_engine_settings' );
 		$enabled_expand_all        = ! isset( $wp_travel_engine_settings[ 'wte_advance_itinerary' ][ 'enable_expand_all' ] ) || 'yes' == $wp_travel_engine_settings[ 'wte_advance_itinerary' ][ 'enable_expand_all' ] ? 'enabled' : '';
-		
+
 		if ( $tab_title && defined( 'WTEAI_VERSION' ) ) {
 			echo "<h2 class='wpte-itinerary-title'>" . esc_html( $tab_title ) . '</h2>';
 		} else {

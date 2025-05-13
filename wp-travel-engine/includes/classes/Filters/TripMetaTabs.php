@@ -318,7 +318,7 @@ class TripMetaTabs {
                         'label'         => (string) $service->post_title ?? '',
                         'type'          => (string) $service_data[ 'service_type' ] ?? '',
                         'options'       => (array) ( $service_data[ 'options' ] ?? [] ),
-                        'prices'        => isset( $service_data[ 'service_cost' ] ) && $service_data[ 'service_cost' ] > 0 ? (array) floatval( $service_data[ 'service_cost' ] ) : (array) ( $service_data[ 'prices' ] ?? [] ),
+                        'prices'        => isset( $service_data[ 'service_cost' ] ) && $service_data[ 'service_cost' ] > 0 && $service_data[ 'service_type' ] === 'Default' ? (array) floatval( $service_data[ 'service_cost' ] ) : (array) ( $service_data[ 'prices' ] ?? [] ),
                         'descriptions'  => (array) (
                             isset( $service_data['service_type'] ) && $service_data['service_type'] === 'Advanced'
                                 ? ( $service_data['descriptions'] ?? [] )

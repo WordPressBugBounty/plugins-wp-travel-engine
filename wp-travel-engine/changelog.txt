@@ -1,5 +1,14 @@
 == Changelog ==
 
+= 6.5.1 - 13th May 2025 =
+* Feature: Allow users to display pricing from any category independently, improving flexibility in booking forms.
+* Fix: Resolved an issue with the 'Load More' button not appearing when displaying trips using shortcodes.
+* Fix: Corrected due balance showing as 0 in payment confirmation email for partial payments.
+* Fix: Fixed incorrect payable and paid amounts displayed in the old checkout flow.
+* Fix: Deprecated 'Show Trip Featured Image' and 'Show Featured Image in Image Gallery' options for proper functionality.
+* Fix: Resolved visibility issues with disabled Trip Info fields still appearing in the backend interface.
+* Fix: Show Trip Featured Image and Show Featured Image in Image Gallery options not working correctly.
+
 = 6.5.0 - 28th April 2025 =
 * Enhancement: Improved email management by adding Notifications and Settings tabs and introducing a new tag `{trip_booking_details}`.
 * Enhancement: Revamped user dashboard with new design and improved account management mechanism.

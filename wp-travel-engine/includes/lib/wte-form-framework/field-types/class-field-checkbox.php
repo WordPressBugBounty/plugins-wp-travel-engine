@@ -101,7 +101,7 @@ class WP_Travel_Engine_Form_Field_Checkbox {
 						$checked,
 						$validations,
 						esc_attr( $this->field['id'] ),
-						esc_html( $value )
+						wp_kses_post( $value )
 					);
 				}
 

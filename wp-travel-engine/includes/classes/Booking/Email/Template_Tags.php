@@ -15,6 +15,7 @@ use WPTravelEngine\Builders\FormFields\TravellerEditFormFields;
 use WPTravelEngine\Email\TemplateTags;
 use WPTravelEngine\Helpers\Countries;
 use WPTravelEngine\Helpers\CartInfoParser;
+use WPTravelEngine\Core\Models\Post\Booking;
 
 #[AllowDynamicProperties]
 class Template_Tags extends TemplateTags {
@@ -121,7 +122,21 @@ class Template_Tags extends TemplateTags {
 	}
 
 	public function get_due_amount() {
-		return wte_esc_price( wte_get_formated_price( $this->booking->due_amount, $this->currency ) );
+		$cart_info   = (array) $this->cart_info ?? [];
+		$payment_type = $cart_info['payment_type'] ?? '';
+		$is_due_payment = $payment_type === 'partial' || $payment_type === 'due' || $payment_type === 'remaining_payment';
+		/**
+		 * Check if payment is due.
+		 * @since 6.5.1
+		 */
+		if ( $is_due_payment ) {
+			$booking_id = $this->booking->ID;
+			$booking_post = Booking::make( $booking_id );
+			$due_amount = $booking_post->get_total_due_amount();
+		} else {
+			$due_amount = $this->booking->due_amount;
+		}
+		return wte_esc_price( wte_get_formated_price( $due_amount, $this->currency ) );
 	}
 
 	/**
@@ -161,7 +176,21 @@ class Template_Tags extends TemplateTags {
 	 * @return string
 	 */
 	public function get_paid_amount() {
-		return wte_esc_price( wte_get_formated_price( $this->payment->paid_amount, $this->currency ) );
+		$cart_info   	= (array) $this->cart_info ?? [];
+		$payment_type 	= $cart_info['payment_type'] ?? '';
+		$is_due_payment = $payment_type === 'partial' || $payment_type === 'due' || $payment_type === 'remaining_payment';
+		/**
+		 * Check if payment is due.
+		 * @since 6.5.1
+		 */
+		if ( $is_due_payment ) {
+			$booking_id 	= $this->booking->ID;
+			$booking_post 	= Booking::make( $booking_id );
+			$paid_amount 	= $booking_post->get_total_paid_amount();
+		} else {
+			$paid_amount 	= $this->payment->paid_amount;
+		}
+		return wte_esc_price( wte_get_formated_price( $paid_amount, $this->currency ) );
 	}
 
 	public function get_bank_details() {
