@@ -16,13 +16,14 @@ class AdminSettings {
 
 		$tabs = array();
 		foreach ( $iterator as $directory ) {
-			if ( $directory->isDot() || $directory->isDir() ) {
+
+			if ( $directory->isDot() || $directory->isDir() || $directory->getExtension() !== 'php' ) {
 				continue;
 			}
 
 			$tab_settings = include $directory->getPathname();
 
-			if( ! isset( $tab_settings[ 'id' ] ) ) {
+			if( ! is_array( $tab_settings ) || ! isset( $tab_settings[ 'id' ] ) ) {
 				continue;
 			}
 
@@ -60,11 +61,13 @@ class AdminSettings {
 		$tabs = array();
 		foreach ( $iterator as $directory ) {
 
-			if ( $directory->isDot() || ! $directory->isFile() || ! $tab_settings = include $directory->getPathname() ) {
+			if ( $directory->isDot() || ! $directory->isFile() || $directory->getExtension() !== 'php' ) {
 				continue;
 			}
 
-			if( ! isset( $tab_settings[ 'id' ] ) ) {
+			$tab_settings = include $directory->getPathname();
+
+			if ( ! is_array( $tab_settings ) || ! isset( $tab_settings['id'] ) ) {
 				continue;
 			}
 

@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<!-- Display wp_editor content -->
 	<?php if ( ! empty( $editor ) ) : ?>
 		<?php
-		echo apply_filters( 'the_content', wp_kses_post( $editor ) );
+		echo apply_filters( 'the_content', $editor );
 		?>
 	<?php endif; ?>
 	<!-- ./ Display wp_editor content -->

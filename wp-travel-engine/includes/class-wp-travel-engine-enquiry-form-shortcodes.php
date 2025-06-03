@@ -265,7 +265,6 @@ class WP_Travel_Engine_Enquiry_Form_Shortcodes {
 		$enquirer_replace_tags = array( $name, $email );
 		$subject               = str_replace( $enquirer_tags, $enquirer_replace_tags, $subject );
 		$admin_email           = get_option( 'admin_email' );
-		$wp_travel_engine_settings = get_option( 'wp_travel_engine_settings' );
 
 		if ( ! empty ( $wp_travel_engine_settings['email']['enquiry_emailaddress'] ) ) {
 			$enquiry_emailaddress = $wp_travel_engine_settings['email']['enquiry_emailaddress'];
@@ -340,7 +339,7 @@ class WP_Travel_Engine_Enquiry_Form_Shortcodes {
 
 		foreach ( $to as $val ) {
 			$admin_sent = new Email();
-			$admin_sent->add_headers( array( "from" => "From: {$name}<{$email}>" ) )
+			$admin_sent->add_headers( array( "from" => "From: {$name}<{$email}>", "reply_to" => "Reply-To: {$email}" ) )
 					   ->set( 'to', $val )
 					   ->set( 'my_subject', esc_html( $subject ) )
 					   ->set( 'attachments', $attachments )
@@ -355,8 +354,7 @@ class WP_Travel_Engine_Enquiry_Form_Shortcodes {
 				'user_email' => $email,
 			);
 			$mail = new UserEmail( $user );
-			$mail->add_headers( array( "reply_to" => "Reply-To: {$to[0]}" ) )
-				 ->set( 'to', $email )
+			$mail->set( 'to', $email )
 				 ->set( 'my_subject', wptravelengine_settings()->get( 'customer_email_notify_tabs.enquiry.subject', __( 'Enquiry Sent.', 'wp-travel-engine' ) ) )
 				 ->set( 'content', wptravelengine_settings()->get( 'customer_email_notify_tabs.enquiry.content', '' ) )
 				 ->send();

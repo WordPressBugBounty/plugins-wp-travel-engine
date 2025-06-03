@@ -157,7 +157,7 @@ class Trip extends WP_REST_Posts_Controller {
 				array(
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_package' ),
-					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'permission_callback' => array( $this, 'delete_package_permissions_check' ),
 					'args'                => $this->get_collection_params(),
 				),
 			)
@@ -204,6 +204,35 @@ class Trip extends WP_REST_Posts_Controller {
 				'details' => strip_tags( $error_message ),
 			]
 		);
+	}
+
+	/**
+	 * Checks if a given request has access to delete a package.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return bool|WP_Error True if the request has access to delete the package, WP_Error object otherwise.
+	 * @since 6.5.2
+	 */
+	public function delete_package_permissions_check( $request ) {
+		$post = get_post( $request['id'] );
+
+		if ( ! current_user_can( 'edit_post', $post->ID ) ) {
+			return new WP_Error(
+				'rest_cannot_delete',
+				__( 'Sorry, you are not allowed to delete packages for this trip.', 'wp-travel-engine' ),
+				array( 'status' => rest_authorization_required_code() )
+			);
+		}
+		
+		if ( ! $post ) {
+			return new WP_Error(
+				'rest_post_not_found',
+				__( 'Trip not found.', 'wp-travel-engine' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		return true;
 	}
 
 	/**
@@ -465,7 +494,7 @@ class Trip extends WP_REST_Posts_Controller {
 					$trip->set_meta( 'wte_advanced_itinerary', [ 'advanced_itinerary' => $advanced_itinerary ] );
 
 					if ( isset( $chart_data ) ) {
-						$trip->set_meta( 'trip_itinerary_chart_data', wp_unslash( wp_json_encode( $chart_data ) ) );
+						$trip->set_meta( 'trip_itinerary_chart_data', wp_unslash( wp_json_encode( $chart_data, JSON_UNESCAPED_UNICODE ) ) );
 					}
 
 					unset( $itineraries, $itinerary_arr_range, $basic_itinerary, $advanced_itinerary, $imgs, $sleep_modes, $overnights, $chart_data );
@@ -667,7 +696,7 @@ class Trip extends WP_REST_Posts_Controller {
 
 				if ( $last_meta_input[ 'package-categories' ][ 'enabled_sale' ][ $primary_category ] === '1' ) {
 					$sale = $last_meta_input[ 'package-categories' ][ 'sale_prices' ][ $primary_category ] ?? '';
-					if ( empty( $sale ) ) {
+					if ( $sale === "" ) {
 						$this->set_bad_request( 'invalid_param', sprintf( __( 'The %s category in the %s%s%s Package requires a valid sale price.', 'wp-travel-engine' ), $last_meta_input[ 'package-categories' ][ 'labels' ][ $primary_category ], '<strong>', $package[ 'name' ], '</strong>' ) );
 					}
 				}

@@ -9,6 +9,7 @@ namespace WPTravelEngine\Core\Shortcodes;
 
 use WPTravelEngine\Assets;
 use WPTravelEngine\Core\Coupons;
+use WPTravelEngine\Core\Models\Post\Coupons as CouponsModel;
 
 class CheckoutV2 extends Checkout {
 
@@ -122,6 +123,10 @@ class CheckoutV2 extends Checkout {
 					unset( $template_args[ 'form_sections' ][ $section ] );
 				}
 			}
+			$show_coupon_form	= $wptravelengine_settings[ 'show_discount' ] ?? 'yes';
+			if ( 'yes' === $show_coupon_form ) {
+				$this->maybe_apply_discount( $wte_cart );
+			}
 
 			wptravelengine_get_template(
 				'template-checkout/content-checkout.php',
@@ -144,5 +149,42 @@ class CheckoutV2 extends Checkout {
 		return ob_get_clean();
 	}
 
+	/**
+	 * Apply discount to the cart from the URL.
+	 *
+	 * @since 6.5.2
+	 * @param \WPTravelEngine\Core\Cart\Cart $wte_cart The cart object.
+	 */
+	protected function maybe_apply_discount( $wte_cart ) {
+		if ( ! isset( $_GET['discount'] ) || $wte_cart->has_discounts() ) {
+			return;
+		}
+
+		$code = $_GET['discount'];
+		$trip_ids = $wte_cart->get_cart_trip_ids();
+		if ( empty( $trip_ids ) ) {
+			return;
+		}
+
+		$coupon = CouponsModel::by_code( $code );
+		if ( ! $coupon || $coupon->is_valid() ) {
+			return;
+		}
+
+		$trip_id = is_array( $trip_ids ) ? array_shift( $trip_ids ) : 0;
+		if ( ! $trip_id || $coupon->is_valid( $trip_id ) ) {
+			return;
+		}
+
+		$limit = $coupon->get_coupon_limit_number();
+		if ( (bool) $limit && ( (int) $limit <= $coupon->get_coupon_usage_count() ) ) {
+			return;
+		}
+
+		$type  = $coupon->get_coupon_type();
+		$value = $coupon->get_coupon_value();
+
+		$wte_cart->add_discount_values( 'coupon', $code, $type, $value );
+	}
 
 }

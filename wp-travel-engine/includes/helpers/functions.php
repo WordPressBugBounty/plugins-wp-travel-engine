@@ -25,44 +25,44 @@ require_once __DIR__ . '/cart.php';
  * Get the label of provided slug and count.
  *
  * @param string $slug Slug of the label to get.
- * @param int $count Count of the label to get.
+ * @param int|string $count Count of the label to get.
  *
  * @return string Label of the provided slug.
  * @since 6.4.1
+ * @updated 6.5.2
  */
-function wptravelengine_get_label_by_slug( string $slug, int $count = 1 ): string {
+function wptravelengine_get_label_by_slug( string $slug, $count = 1 ): string {
 
-	$default_labels = array(
-		'Day'    => array( 'day', 'days' ),
-		'Night'  => array( 'night', 'nights' ),
-		'Hour'   => array( 'hour', 'hours' ),
-		'Minute' => array( 'minute', 'minutes' ),
+	$slug_array = apply_filters( 'wptravelengine_get_label_by_slug', array(
+		'day'    => array( 'single' => __( 'Day', 'wp-travel-engine' ), 'plural' => __( 'Days', 'wp-travel-engine' ) ),
+		'night'  => array( 'single' => __( 'Night', 'wp-travel-engine' ), 'plural' => __( 'Nights', 'wp-travel-engine' ) ),
+		'hour'   => array( 'single' => __( 'Hour', 'wp-travel-engine' ), 'plural' => __( 'Hours', 'wp-travel-engine' ) ),
+		'minute' => array( 'single' => __( 'Minute', 'wp-travel-engine' ), 'plural' => __( 'Minutes', 'wp-travel-engine' ) ),
+	) );
+
+	$singular_map = array(
+		'days'    => 'day',
+		'nights'  => 'night',
+		'hours'   => 'hour',
+		'minutes' => 'minute',
 	);
 
-	$slug_array = array();
-	foreach ( $default_labels as $label => $labels ) {
-		$slug_array += array_fill_keys(
-			$labels,
-			array(
-				'single' => $label,
-				'plural' => $label . 's'
-			)
-		);
+	if ( isset( $singular_map[ $slug ] ) ) {
+		$slug = $singular_map[ $slug ];
 	}
 
-	$slug_array = apply_filters( 'wptravelengine_get_label_by_slug', $slug_array );
-
-	if ( ! array_key_exists( $slug, $slug_array ) ) {
+	if ( ! isset( $slug_array[ $slug ] ) ) {
 		return '';
 	}
 
-	return $slug_array[ $slug ][ 1 === $count ? 'single' : 'plural' ];
+	return $slug_array[ $slug ][ 1 === intval( $count ) ? 'single' : 'plural' ];
 }
 
 /**
  * Checks if a WP Travel Engine add-on is active.
  *
  * @param string $addon Addon slug to check. Accepts:
+ *                     - wptravelengine
  *                     - fixed-starting-dates
  *                     - partial-payment
  *                     - extra-services
@@ -93,6 +93,7 @@ function wptravelengine_is_addon_active( string $addon ) {
 	}
 
 	$addon_files = array(
+		'wptravelengine'       => 'WP_TRAVEL_ENGINE_FILE_PATH',
 		'fixed-starting-dates' => 'WTE_FIXED_DEPARTURE_FILE_PATH',
 		'partial-payment'      => 'WP_TRAVEL_ENGINE_PARTIAL_PAYMENT_FILE_PATH',
 		'extra-services'       => 'WTE_EXTRA_SERVICES_FILE_PATH',
@@ -161,33 +162,30 @@ function wptravelengine_key_exists( array $data, array $keys ): bool {
  */
 function wptravelengine_replace( $data, $target_value, $by, $else = null, $target_key = null ) {
 
-	if ( is_array( $data ) ) {
+	if ( is_scalar( $data ) ) {
+		return $data === $target_value ? $by : $else;
+	}
 
-		foreach ( $data as $key => $value ) {
-			if ( is_null( $target_key ) ) {
-				$data[ $key ] = ( $target_value === $value ) ? $by : $else;
-				continue;
-			}
-
-			if ( is_array( $value ) && array_key_exists( $target_key, $value ) ) {
-				$data[ $key ][ $target_key ] = ( $target_value === $value[ $target_key ] ) ? $by : $else;
-				continue;
-			}
-
-			if ( ! is_array( $value ) && $target_key === $key ) {
-				$data[ $key ] = ( $target_value === $value ) ? $by : $else;
-				break;
-			}
-		}
-
+	if ( ! is_array( $data ) ) {
 		return $data;
 	}
 
-	if ( ! is_scalar( $data ) ) {
-		return $else;
+	$result 	 = [];
+	$target_keys = array_filter( array_map( 'trim', explode( ',', $target_key ?? '' ) ), 'strlen' );
+
+	foreach ( $data as $key => $value ) {
+		if ( is_array( $value ) ) {
+			$result[ $key ] = wptravelengine_replace( $value, $target_value, $by, $else, $target_key );
+		} elseif ( empty( $target_keys ) ) {
+			$result[ $key ] = ( $value === $target_value ) ? $by : ( ( is_bool( $target_value ) && is_bool( $value ) ) ? $else : $value );
+		} elseif ( in_array( $key, $target_keys, true ) ) {
+			$result[ $key ] = ( $value === $target_value ) ? $by : $else;
+		} else {
+			$result[ $key ] = $value;
+		}
 	}
 
-	return ( $data === $target_value ) ? $by : $else;
+	return $result;
 }
 
 /**
@@ -636,6 +634,9 @@ function wte_uniqid( $length = 5 ) {
  * @return string
  */
 function wte_jwt( array $payload, string $key ): string {
+	if( ! class_exists( 'Firebase\JWT\JWT' ) ) {
+		include_once WP_TRAVEL_ENGINE_BASE_PATH . '/includes/lib/jwt/loader.php';
+	}
 	return JWT::encode( $payload, $key );
 }
 
@@ -643,6 +644,9 @@ function wte_jwt( array $payload, string $key ): string {
  * Decode JWT.
  */
 function wte_jwt_decode( string $jwt, string $key ) {
+	if( ! class_exists( 'Firebase\JWT\JWT' ) ) {
+		include_once WP_TRAVEL_ENGINE_BASE_PATH . '/includes/lib/jwt/loader.php';
+	}
 	return JWT::decode( $jwt, $key, array( 'HS256' ) );
 }
 
@@ -2220,4 +2224,30 @@ function wptravelengine_generate_key( string $input ): string {
 		substr( $hash, 9, 5 ),
 		substr( $hash, 14, 4 )
 	);
+}
+
+/**
+ * @return void
+ * @since 6.5.2
+ */
+function wptravelengine_create_events_table() {
+	global $wpdb;
+
+	$table_name = $wpdb->prefix . 'wptravelengine_events';
+	$charset_collate = $wpdb->get_charset_collate();
+
+	$sql = "CREATE TABLE $table_name (
+		id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+		object_id BIGINT(20) UNSIGNED NOT NULL,
+		object_type VARCHAR(50) NOT NULL,
+		event_name VARCHAR(255) NOT NULL,
+		event_data LONGTEXT NOT NULL,
+		trigger_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		event_created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		PRIMARY KEY (id),
+		UNIQUE KEY unique_event (object_id, event_name, object_type)
+	) $charset_collate;";
+
+	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+	dbDelta( $sql );
 }

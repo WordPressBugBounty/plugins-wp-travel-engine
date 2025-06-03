@@ -26,6 +26,11 @@ class TravellersFormFields extends TravellerFormFields {
 	 */
 	protected $number_of_lead_travellers;
 
+	/**
+	 * @var array
+	 */
+	public $fields;
+
 
 	public function __construct( $args = array() ) {
 		$args = wp_parse_args( $args, [
@@ -62,6 +67,9 @@ class TravellersFormFields extends TravellerFormFields {
 	 * @return void
 	 */
 	public function render() {
+		if( empty( $this->fields ) ) {
+			return;
+		}
 		$this->fellow_traveller_form_fields();
 	}
 

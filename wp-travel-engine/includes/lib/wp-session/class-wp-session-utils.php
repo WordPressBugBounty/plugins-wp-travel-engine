@@ -9,9 +9,9 @@ class WP_Session_Utils {
 	/**
 	 * Count the total sessions in the database.
 	 *
+	 * @return int
 	 * @global wpdb $wpdb
 	 *
-	 * @return int
 	 */
 	public static function count_sessions() {
 		global $wpdb;
@@ -71,10 +71,10 @@ class WP_Session_Utils {
 	public static function clear_leftover_cache_data() {
 		global $wpdb;
 
-		$prefix      = '_wp_session_';
-		$batch_size  = 1000;
-		$loop_count  = 0;
-		$max_loops   = 1000;
+		$prefix     = '_wp_session_';
+		$batch_size = 1000;
+		$loop_count = 0;
+		$max_loops  = 1000;
 
 		do {
 			$option_names = $wpdb->get_col(
@@ -96,8 +96,55 @@ class WP_Session_Utils {
 				update_option( '_wptravelengine_leftover_cached_cleared', 'yes' );
 			}
 
-			$loop_count++;
+			$loop_count ++;
 		} while ( ! empty( $option_names ) && $loop_count < $max_loops );
+	}
+
+	/**
+	 * @param int|null $time
+	 *
+	 * @return array|object|stdClass[]|null
+	 *
+	 * @since 6.5.2
+	 */
+	public static function get_expired_sessions( int $time = null ) {
+		global $wpdb;
+		$time  = $time ?: time();
+		$query = $wpdb->prepare(
+			"
+			    SELECT
+			        REPLACE(e.option_name, %s, '') AS session_id,
+			        e.option_value AS expiry,
+			        s.option_value AS value
+			    FROM {$wpdb->options} e
+			    JOIN {$wpdb->options} s
+			      ON REPLACE(e.option_name, %s, '') = REPLACE(s.option_name, %s, '')
+			    WHERE e.option_name LIKE %s
+			      AND e.option_value < %d
+			      AND s.option_name LIKE %s
+			    ORDER BY e.option_value DESC
+			",
+			'_wp_session_expires_',
+			'_wp_session_expires_',
+			'_wp_session_',
+			$wpdb->esc_like( '_wp_session_expires_' ) . '%',
+			$time,
+			$wpdb->esc_like( '_wp_session_' ) . '%'
+		);
+
+		return $wpdb->get_results( $query );
+	}
+
+	/**
+	 * @TODO: Implement this feature later.
+	 */
+	public static function prepare_abandoned_cart_data( object $cart_data ) {
+		$cart_data = json_decode( $cart_data[ "wpte_trip_cart" ] );
+		if ( is_object( $cart_data ) ) {
+			return $cart_data;
+		}
+
+		return [];
 	}
 
 	/**
@@ -105,55 +152,53 @@ class WP_Session_Utils {
 	 *
 	 * @param int $limit Maximum number of sessions to delete.
 	 *
+	 * @return int Sessions deleted.
 	 * @global wpdb $wpdb
 	 *
-	 * @return int Sessions deleted.
 	 */
-	public static function delete_old_sessions( $limit = 1000 ) {
+	public static function delete_old_sessions( int $limit = 1000 ) {
 		global $wpdb;
 
 		if ( 'yes' !== get_option( '_wptravelengine_leftover_cached_cleared', 'no' ) ) {
 			static::clear_leftover_cache_data();
 		}
 
-		$limit = absint( $limit );
-		$keys  = $wpdb->get_results( "SELECT option_name, option_value FROM $wpdb->options WHERE option_name LIKE '_wp_session_expires_%' ORDER BY option_value ASC LIMIT 0, {$limit}" );
+		$expired_sessions = WP_Session_Utils::get_expired_sessions();
 
-		$now     = time();
-		$expired = array();
-		$count   = 0;
-
-		foreach ( $keys as $expiration ) {
-			$key     = $expiration->option_name;
-			$expires = $expiration->option_value;
-
-			if ( $now > $expires ) {
-				$session_id = addslashes( substr( $key, 20 ) );
-
-				$expired[] = $key;
-				$expired[] = "_wp_session_{$session_id}";
-
-				$count += 1;
-			}
+		$expired = [];
+		foreach ( $expired_sessions as $expired_session ) {
+			$session_data = maybe_unserialize( $expired_session->value );
+			$expired[]    = "_wp_session_{$expired_session->session_id}";
+			$expired[]    = "_wp_session_expires_{$expired_session->session_id}";
+			/**
+			 * @TODO: Implement this feature later.
+			 * Don't remove this code, as it may be needed in the future.
+			 */
+//			if ( isset( $session_data[ "wpte_trip_cart" ] ) ) {
+//				$cart_data = json_decode( $session_data[ "wpte_trip_cart" ] );
+//				if ( is_object( $cart_data ) ) {
+//					do_action( "wptravelengine.cart.abandoned", static::prepare_abandoned_cart_data( $cart_data ) );
+//				}
+//			}
 		}
 
 		// Delete expired sessions
 		if ( ! empty( $expired ) ) {
 			$names = implode( "','", $expired );
-			$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name IN ('{$names}')" );
+			return $wpdb->query( "DELETE FROM $wpdb->options WHERE option_name IN ('{$names}')" );
 		}
 
-		return $count;
+		return 0;
 	}
 
 	/**
 	 * Remove all sessions from the database, regardless of expiration.
 	 *
+	 * @return int Sessions deleted
 	 * @global wpdb $wpdb
 	 *
-	 * @return int Sessions deleted
 	 */
-	public static function delete_all_sessions() {
+	public static function delete_all_sessions(): int {
 		global $wpdb;
 
 		$count = $wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE '_wp_session_%'" );

@@ -257,11 +257,11 @@ class Settings {
 
 		$admin_email_notifi_tabs = array();
 		foreach ( $temp_admin_email_notifi_tabs as $key => $value ) {
-			$value[ 'enabled' ] = wptravelengine_toggled( $value[ 'enabled' ] );
-			$value[ 'is_default' ] = wptravelengine_toggled( $value[ 'is_default' ] );
-			if ( wptravelengine_is_addon_active( 'email-automator' ) || $value[ 'is_default' ] ) {
-				$admin_email_notifi_tabs[] = $value;
-			}
+			$value[ 'addon' ] 			??= 'wptravelengine';
+			$value[ 'enabled' ] 		= wptravelengine_toggled( $value[ 'enabled' ] );
+			$value[ 'is_default' ] 		= wptravelengine_toggled( $value[ 'is_default' ] );
+			$value[ 'show' ] 			= wptravelengine_is_addon_active( $value[ 'addon' ] );
+			$admin_email_notifi_tabs[] 	= $value;
 		}
 
 		$temp_customer_email_notifi_tabs = $this->plugin_settings->get( 'customer_email_notify_tabs', array(
@@ -309,11 +309,11 @@ class Settings {
 
 		$customer_email_notifi_tabs = array();
 		foreach ( $temp_customer_email_notifi_tabs as $key => $value ) {
-			$value[ 'enabled' ] 	= wptravelengine_toggled( $value[ 'enabled' ] );
-			$value[ 'is_default' ] 	= wptravelengine_toggled( $value[ 'is_default' ] );
-			if ( wptravelengine_is_addon_active( 'email-automator' ) || $value[ 'is_default' ] ) {
-				$customer_email_notifi_tabs[] = $value;
-			}
+			$value[ 'addon' ] 				??= 'wptravelengine';
+			$value[ 'enabled' ] 			= wptravelengine_toggled( $value[ 'enabled' ] );
+			$value[ 'is_default' ] 			= wptravelengine_toggled( $value[ 'is_default' ] );
+			$value[ 'show' ] 				= wptravelengine_is_addon_active( $value[ 'addon' ] );
+			$customer_email_notifi_tabs[] 	= $value;
 		}
 
 		return array( 'email_notification' => array(
@@ -1312,7 +1312,7 @@ class Settings {
 			$admin = $request[ 'email_notification' ][ 'admin' ];
 
 			foreach ( $admin as $value ) :
-
+				unset( $value['show'] );
 				switch ( $value[ 'id' ] ) :
 					case 'booking_confirmation':
 						$plugin_settings->set( 'email.disable_booking_notification', wptravelengine_replace( $value[ 'enabled' ], false, '1' ) );
@@ -1344,7 +1344,7 @@ class Settings {
 			$customer = $request[ 'email_notification' ][ 'customer' ];
 
 			foreach ( $customer as $value ) :
-
+				unset( $value['show'] );
 				switch ( $value[ 'id' ] ) :
 					case 'booking_confirmation':
 						$plugin_settings->set( 'email.enable_cust_notif', wptravelengine_replace( $value[ 'enabled' ], true, 'yes', 'no' ) );

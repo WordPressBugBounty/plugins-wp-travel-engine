@@ -1,5 +1,16 @@
 == Changelog ==
 
+= 6.5.2 - 3rd June 2025 =
+* New: Introduced a cron job framework for scheduled tasks.
+* Enhancement: Enabled support for applying discount coupons through URL parameters.
+* Fix: Adjusted sticky tab content positioning to maintain accuracy after tab switches across all devices.
+* Fix: Booking widget error on single trip page after demo import.
+* Fix: Set the appropriate Reply-To email header to ensure proper handling of user responses.
+* Fix: Compatibility issue with JWT Authentication Plugin.
+* Fix: Special characters display issue in the Booking Summary.
+* Fix: Text translation issue in the related trips section.
+* Fix: Difficulty level now properly saves after assignment.
+
 = 6.5.1 - 13th May 2025 =
 * Feature: Allow users to display pricing from any category independently, improving flexibility in booking forms.
 * Fix: Resolved an issue with the 'Load More' button not appearing when displaying trips using shortcodes.

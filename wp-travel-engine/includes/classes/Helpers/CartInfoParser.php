@@ -80,11 +80,11 @@ class CartInfoParser {
 	protected function parse_fees( $data ) {
 		if ( isset( $data[ 'fees' ] ) ) {
 			$unique_fees = [];
-			foreach ($data['fees'] as $fee) {
-				$unique_fees[$fee['name']] = $fee;
+			foreach ( $data[ 'fees' ] as $fee ) {
+				$unique_fees[ $fee[ 'name' ] ] = $fee;
 			}
 
-			return array_values($unique_fees);
+			return array_values( $unique_fees );
 		}
 
 		if ( ! empty( $data[ 'tax_amount' ] ) ) {
@@ -112,7 +112,7 @@ class CartInfoParser {
 	 */
 	public function get_totals( string $key = null ) {
 		if ( $key ) {
-			return $this->totals[ $key ] ?? 0;
+			return round( $this->totals[ $key ] ?? 0, 2 );
 		}
 
 		return $this->totals;

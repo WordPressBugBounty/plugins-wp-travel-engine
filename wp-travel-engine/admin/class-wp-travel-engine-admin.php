@@ -1071,7 +1071,7 @@ class Wp_Travel_Engine_Admin {
 						$level    = (string) $level;
 						$selected = '';
 
-						if ( isset( $difficulty_level[ $level ][ 'term_id' ] ) && $term_id === $difficulty_level[ $level ][ 'term_id' ] ) {
+						if ( $term_id === intval( $difficulty_level[ $level ][ 'term_id' ] ?? 0 ) ) {
 							$selected = 'selected';
 						}
 

@@ -165,6 +165,9 @@ abstract class CartAdjustment implements CartAdjustmentInterface {
 	   * @since 6.3.5
 	   */
 	public function render(): string {
+		if ( ! isset( $this->cart->get_totals()[ "total_{$this->name}" ] ) ) {
+			return '';
+		}
 		return sprintf(
 			'<tr class="wpte-checkout__booking-summary-%s">
 				<td>%s%s</td>

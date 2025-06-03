@@ -118,6 +118,7 @@ class Payment extends PostModel {
 	 */
 	public function update_status( $status ) {
 		update_post_meta( $this->get_id(), 'payment_status', $status );
+		unset( $this->data[ 'payment_status' ] );
 	}
 
 	/**
@@ -132,9 +133,9 @@ class Payment extends PostModel {
 	/**
 	 * Get Booking.
 	 *
-	 * @return Booking
+	 * @return ?Booking
 	 */
-	public function get_booking(): Booking {
+	public function get_booking(): ?Booking {
 		return wptravelengine_get_booking( $this->get_meta( 'booking_id' ) );
 	}
 
@@ -212,5 +213,34 @@ class Payment extends PostModel {
 	 */
 	public function set_transaction_date( string $data ) {
 		$this->set_meta( 'transaction_date', $data );
+	}
+
+	/**
+	 * @return array
+	 * @since 6.5.2
+	 */
+	public function get_data(): array {
+		$booking = $this->get_booking();
+
+		$data = array(
+			'id'             => $this->ID,
+			'status'         => $this->get_payment_status(),
+			'paid_amount'    => $this->get_amount(),
+			'currency'       => $this->get_currency(),
+			'payment_method' => $this->get_payment_gateway(),
+		);
+		if ( $booking ) {
+			$data[ 'booking_id' ]     = $booking->get_id();
+			$data[ 'booking_status' ] = $booking->get_booking_status();
+			$data[ 'booked_trip' ]    = array(
+				'id'              => $booking->get_trip_id(),
+				'title'           => $booking->get_trip_title(),
+				'url'             => get_permalink( $booking->get_trip_id() ),
+				'trip_start_date' => $booking->get_order_trip()->datetime,
+			);
+			$data[ 'customer' ]       = $booking->get_customer();
+		}
+
+		return $data;
 	}
 }

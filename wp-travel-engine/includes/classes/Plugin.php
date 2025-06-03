@@ -14,6 +14,7 @@ use WPTravelEngine\Core\Cart\Cart;
 use WPTravelEngine\Core\Controllers\RestAPI\V2\Settings;
 use WPTravelEngine\Core\Controllers\RestAPI\V2\Trip;
 use WPTravelEngine\Core\Models\Post\Booking;
+use WPTravelEngine\Core\Models\Review;
 use WPTravelEngine\Core\Shortcodes\CheckoutV2;
 use WPTravelEngine\Core\Shortcodes\General;
 use WPTravelEngine\Core\Shortcodes\ThankYou;
@@ -23,6 +24,7 @@ use WPTravelEngine\Core\Shortcodes\TripsList;
 use WPTravelEngine\Core\Shortcodes\UserAccount;
 use WPTravelEngine\Core\Updates;
 use WPTravelEngine\Core\SEO;
+use WPTravelEngine\Filters\Events;
 use WPTravelEngine\Filters\SettingsAPISchema;
 use WPTravelEngine\Filters\Template;
 use WPTravelEngine\Filters\TripAPISchema;
@@ -41,6 +43,7 @@ use function WTE\Upgrade500\wte_process_migration;
 use const WP_TRAVEL_ENGINE_FILE_PATH;
 use WPTravelEngine\Core\Models\Post\TripPackages;
 use WPTravelEngine\Helpers\Countries;
+use WPTravelEngine\Core\Controllers\RestAPI\V2\Booking as BookingController;
 
 /**
  * The file that defines the core plugin class
@@ -125,6 +128,8 @@ final class Plugin {
 
 		$schema_filters = new SettingsAPISchema();
 		$schema_filters->hooks();
+
+		new Events();
 
 		TripAPISchema::instance();
 
@@ -238,10 +243,27 @@ final class Plugin {
 				}
 			}
 		} );
-
+ 
 		add_action( 'admin_init', array( \WTE_Ajax::class, 'ajax_request_middleware' ) );
 		add_action( 'admin_init', array( $this, 'plugin_inline_update_notices' ) );
 		add_action( 'admin_notices', array( $this, 'booking_dashboard_notice' ), 99 );
+		add_action( 'comment_post', array( $this, 'on_insert_comment' ) );
+	}
+
+	/**
+	 * @return void
+	 * @since 6.5.2
+	 */
+	public function on_insert_comment( $comment_id ) {
+
+		$review = Review::instance( $comment_id );
+
+		if ( ! $review instanceof Review ) {
+			return;
+		}
+
+		Events::review_created( $review );
+
 	}
 
 	/**
@@ -343,9 +365,24 @@ final class Plugin {
 		 * @param int $booking_id
 		 *
 		 * @return array
-		 * @since enhancement/bookin-details
+		 * @since enhancement/booking-details
 		 */
 		add_action( 'plugins_loaded', array( $this, 'plugins_loaded' ), 20 );
+
+		/**
+		 * Cron Job.
+		 *
+		 * @since 6.5.2
+		 */
+		add_filter( 'cron_schedules', function ( $schedules ) {
+			$schedules['every_minute'] = [
+				'interval' => 60,
+				'display'  => 'Every Minute',
+			];
+			return $schedules;
+		} );
+
+		add_action( 'plugins_loaded', array( $this, 'add_event_table' ) );
 
 		add_action(
 			'wp',
@@ -370,6 +407,14 @@ final class Plugin {
 					include_once sprintf( '%s/upgrade/500.php', WP_TRAVEL_ENGINE_BASE_PATH );
 					wte_process_migration();
 				}
+
+				if ( ! wp_next_scheduled( 'wptravelengine_check_events' ) ) {
+					/*
+					 * @since 6.5.2
+					 */
+					wp_schedule_event( time(), 'every_minute', 'wptravelengine_check_events' );
+				}
+				wptravelengine_create_events_table();
 			}
 		);
 
@@ -378,6 +423,10 @@ final class Plugin {
 			function () {
 				require_once plugin_dir_path( WP_TRAVEL_ENGINE_FILE_PATH ) . 'includes/class-wp-travel-engine-deactivator.php';
 				Wp_Travel_Engine_Deactivator::deactivate();
+				/*
+				 * @since 6.5.2
+				 */
+				wp_clear_scheduled_hook( 'wptravelengine_check_events' );
 			}
 		);
 
@@ -684,6 +733,22 @@ final class Plugin {
 	}
 
 	/**
+	 * @return void
+	 * @since 6.5.2
+	 */
+	public function add_event_table() {
+		if ( version_compare( get_option( 'wptravelengine_version' ), '6.6.0', '<' ) ) {
+			wptravelengine_create_events_table();
+			if ( ! wp_next_scheduled( 'wptravelengine_check_events' ) ) {
+				/*
+				 * @since 6.5.2
+				 */
+				wp_schedule_event( time(), 'every_minute', 'wptravelengine_check_events' );
+			}
+		}
+	}
+
+	/**
 	 * Get formatted package name
 	 */
 	private function get_package_name( $booking_id, $trip ) {
@@ -710,17 +775,17 @@ final class Plugin {
 			return;
 		}
 		?>
-        <tr>
-            <td><?php esc_html_e( 'Trip Date', 'wp-travel-engine' ); ?></td>
-            <td class="alignright"><?php echo esc_html( $trip_dates[ 'start_date' ] ?? '' ); ?></td>
-        </tr>
+		<tr>
+			<td><?php esc_html_e( 'Trip Date', 'wp-travel-engine' ); ?></td>
+			<td class="alignright"><?php echo esc_html( $trip_dates[ 'start_date' ] ?? '' ); ?></td>
+		</tr>
 		<?php
 		if ( ! empty( $trip_dates[ 'end_date' ] ) ) :
 			?>
-            <tr>
-                <td><?php esc_html_e( 'Trip End Date', 'wp-travel-engine' ); ?></td>
-                <td class="alignright"><?php echo esc_html( $trip_dates[ 'end_date' ] ); ?></td>
-            </tr>
+			<tr>
+				<td><?php esc_html_e( 'Trip End Date', 'wp-travel-engine' ); ?></td>
+				<td class="alignright"><?php echo esc_html( $trip_dates[ 'end_date' ] ); ?></td>
+			</tr>
 		<?php
 		endif;
 	}
@@ -738,8 +803,8 @@ final class Plugin {
 			$quantity = intval( $detail[ 'quantity' ] ?? 0 );
 			$sum      = $detail[ 'sum' ] ?? 0;
 			?>
-            <tr>
-                <td>
+			<tr>
+				<td>
 					<?php
 					printf(
 						'%s: %d x $%s = %s',
@@ -749,8 +814,8 @@ final class Plugin {
 						esc_html( $currency ) . number_format( $sum, 2 )
 					);
 					?>
-                </td>
-            </tr>
+				</td>
+			</tr>
 			<?php
 		}
 	}
@@ -768,8 +833,8 @@ final class Plugin {
 			$quantity = intval( $extra[ 'qty' ] ?? 0 );
 			$total    = $price * $quantity;
 			?>
-            <tr>
-                <td>
+			<tr>
+				<td>
 					<?php
 					printf(
 						'%s: %d x $%s = %s',
@@ -779,8 +844,8 @@ final class Plugin {
 						esc_html( $currency ) . number_format( $total, 2 )
 					);
 					?>
-                </td>
-            </tr>
+				</td>
+			</tr>
 			<?php
 		}
 	}
@@ -791,20 +856,20 @@ final class Plugin {
 	private function render_cost_summary( $line_items, $currency ) {
 		// Subtotal
 		?>
-        <tr class="title wpte-booking-subtotal">
-            <td colspan="1"><?php esc_html_e( 'Subtotal', 'wp-travel-engine' ); ?></td>
-            <td><?php echo esc_html( $currency ) . number_format( $line_items[ 'totals' ][ 'subtotal' ] ?? 0, 2 ); ?></td>
-        </tr>
+		<tr class="title wpte-booking-subtotal">
+			<td colspan="1"><?php esc_html_e( 'Subtotal', 'wp-travel-engine' ); ?></td>
+			<td><?php echo esc_html( $currency ) . number_format( $line_items[ 'totals' ][ 'subtotal' ] ?? 0, 2 ); ?></td>
+		</tr>
 
 		<?php
 		// Discounts
 		if ( ! empty( $line_items[ 'discounts' ] ) ) {
 			foreach ( $line_items[ 'discounts' ] as $discount ) {
 				?>
-                <tr class="wpte-booking-discount">
-                    <td><?php printf( esc_html__( 'Discount (%s)', 'wp-travel-engine' ), esc_html( $discount[ 'name' ] ?? '' ) ); ?></td>
-                    <td>-<?php echo esc_html( $currency ) . number_format( $discount[ 'value' ] ?? 0, 2 ); ?></td>
-                </tr>
+				<tr class="wpte-booking-discount">
+					<td><?php printf( esc_html__( 'Discount (%s)', 'wp-travel-engine' ), esc_html( $discount[ 'name' ] ?? '' ) ); ?></td>
+					<td>-<?php echo esc_html( $currency ) . number_format( $discount[ 'value' ] ?? 0, 2 ); ?></td>
+				</tr>
 				<?php
 			}
 		}
@@ -812,10 +877,10 @@ final class Plugin {
 		// Tax
 		if ( ! empty( $line_items[ 'tax_amount' ] ) && $line_items[ 'tax_amount' ] > 0 ) {
 			?>
-            <tr class="wpte-booking-tax">
-                <td><?php printf( esc_html__( 'Tax (%s%%)', 'wp-travel-engine' ), $line_items[ 'tax_amount' ] ); ?></td>
-                <td><?php echo esc_html( $currency ) . number_format( $line_items[ 'totals' ][ 'total_tax' ] ?? 0, 2 ); ?></td>
-            </tr>
+			<tr class="wpte-booking-tax">
+				<td><?php printf( esc_html__( 'Tax (%s%%)', 'wp-travel-engine' ), $line_items[ 'tax_amount' ] ); ?></td>
+				<td><?php echo esc_html( $currency ) . number_format( $line_items[ 'totals' ][ 'total_tax' ] ?? 0, 2 ); ?></td>
+			</tr>
 			<?php
 		}
 
@@ -830,30 +895,30 @@ final class Plugin {
 		// Total
 		if ( ! empty( $line_items[ 'total' ] ) ) {
 			?>
-            <tr class="wpte-booking-total">
-                <td><?php esc_html_e( 'Total', 'wp-travel-engine' ); ?></td>
-                <td><?php echo esc_html( $currency ) . number_format( $line_items[ 'total' ], 2 ); ?></td>
-            </tr>
+			<tr class="wpte-booking-total">
+				<td><?php esc_html_e( 'Total', 'wp-travel-engine' ); ?></td>
+				<td><?php echo esc_html( $currency ) . number_format( $line_items[ 'total' ], 2 ); ?></td>
+			</tr>
 			<?php
 		}
 
 		// Deposit
 		if ( ! empty( $line_items[ 'cart_partial' ] ) ) {
 			?>
-            <tr>
-                <td><?php esc_html_e( 'Deposit Today', 'wp-travel-engine' ); ?></td>
-                <td><?php echo esc_html( $currency ) . number_format( $line_items[ 'cart_partial' ], 2 ); ?></td>
-            </tr>
+			<tr>
+				<td><?php esc_html_e( 'Deposit Today', 'wp-travel-engine' ); ?></td>
+				<td><?php echo esc_html( $currency ) . number_format( $line_items[ 'cart_partial' ], 2 ); ?></td>
+			</tr>
 			<?php
 		}
 
 		// Amount Due
 		if ( ! empty( $line_items[ 'totals' ][ 'due_total' ] ) ) {
 			?>
-            <tr>
-                <td><?php esc_html_e( 'Amount Due', 'wp-travel-engine' ); ?></td>
-                <td><?php echo esc_html( $currency ) . number_format( $line_items[ 'totals' ][ 'due_total' ], 2 ); ?></td>
-            </tr>
+			<tr>
+				<td><?php esc_html_e( 'Amount Due', 'wp-travel-engine' ); ?></td>
+				<td><?php echo esc_html( $currency ) . number_format( $line_items[ 'totals' ][ 'due_total' ], 2 ); ?></td>
+			</tr>
 			<?php
 		}
 	}
@@ -870,6 +935,9 @@ final class Plugin {
 
 		$settings_controller = new Settings();
 		$settings_controller->register_routes();
+
+		$booking_controller = new BookingController( 'booking' );
+		$booking_controller->register_routes();
 	}
 
 	function wte_login_integration() {
@@ -929,8 +997,8 @@ final class Plugin {
 			)
 		);
 		?>
-        <div id="wptravelengine-trip-booking-modal"
-             data-trip-booking="<?php echo esc_attr( wp_json_encode( $trip_booking_data ) ); ?>"></div>
+		<div id="wptravelengine-trip-booking-modal"
+			 data-trip-booking="<?php echo esc_attr( wp_json_encode( $trip_booking_data ) ); ?>"></div>
 		<?php
 	}
 
@@ -1029,7 +1097,6 @@ final class Plugin {
 		 *
 		 * @since 4.3.0
 		 */
-		include WP_TRAVEL_ENGINE_BASE_PATH . '/includes/lib/jwt/loader.php';
 		require_once WP_TRAVEL_ENGINE_BASE_PATH . '/includes/helpers/helpers.php';
 		require_once WP_TRAVEL_ENGINE_BASE_PATH . '/includes/helpers/helpers-packages.php';
 		require_once WP_TRAVEL_ENGINE_BASE_PATH . '/includes/helpers/privacy-functions.php';
@@ -1678,13 +1745,13 @@ final class Plugin {
 	 */
 	public function init_shortcodes() {
 		ShortcodeRegistry::make()
-		                 ->register( CheckoutV2::class )
-		                 ->register( ThankYou::class )
-		                 ->register( TravelerInformation::class )
-		                 ->register( General::class )
-		                 ->register( TripCheckout::class )
-		                 ->register( UserAccount::class )
-		                 ->register( TripsList::class );
+						 ->register( CheckoutV2::class )
+						 ->register( ThankYou::class )
+						 ->register( TravelerInformation::class )
+						 ->register( General::class )
+						 ->register( TripCheckout::class )
+						 ->register( UserAccount::class )
+						 ->register( TripsList::class );
 	}
 
 	/**

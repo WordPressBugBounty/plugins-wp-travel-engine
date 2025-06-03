@@ -12,6 +12,11 @@ namespace WPTravelEngine\Builders\FormFields;
  */
 class LeadTravellersFormFields extends LeadTravellerFormFields {
 
+	/**
+	 * @var array
+	 */
+	public $fields;
+
 	public function __construct( $args = array() ) {
 		$this->fields = DefaultFormFields::lead_traveller_form_fields();
 		parent::__construct();
@@ -23,6 +28,9 @@ class LeadTravellersFormFields extends LeadTravellerFormFields {
 	 * @return void
 	 */
 	public function render() {
+		if( empty( $this->fields ) ) {
+			return;
+		}
 		$this->lead_traveller_form_fields();
 	}
 

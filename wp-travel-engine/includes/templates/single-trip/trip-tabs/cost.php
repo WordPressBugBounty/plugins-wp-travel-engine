@@ -12,9 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-$include_title = $cost['includes_title'] ?? '';
+$include_title = ! empty( $cost['includes_title'] ?? '' ) ? $cost['includes_title'] : __( 'Cost Includes', 'wp-travel-engine' );
 $cost_includes = preg_split( '/\r\n|[\r\n]/', $cost['cost_includes'] ?? '' );
-$exclude_title = $cost['excludes_title'] ?? '';
+$exclude_title = ! empty( $cost['excludes_title'] ?? '' ) ? $cost['excludes_title'] : __( 'Cost Excludes', 'wp-travel-engine' );
 $cost_excludes = preg_split( '/\r\n|[\r\n]/', $cost['cost_excludes'] ?? '' );
 
 do_action( 'wte_before_cost_content' ); ?>

@@ -492,13 +492,12 @@ class WP_Travel_Engine_Template_Hooks {
 		$today_prices = self::get_today_prices( $post->ID );
 
 		if( $today_prices && $wtetrip->price !== $today_prices[ 'pricing' ][0][ 'price' ] ) {
-			$new_price = $today_prices[ 'pricing' ][0][ 'price' ];
+			$new_price = $today_prices[ 'pricing' ][0][ 'price' ] ?: 0;
+			$wtetrip->sale_price = $new_price;
 			if( $wtetrip->price < $new_price ) {
 				$wtetrip->has_sale = false;
-				$wtetrip->sale_price = $new_price;
-			}else {
+			} else if( $wtetrip->price > 0 ) {
 				$wtetrip->has_sale = true;
-				$wtetrip->sale_price = $new_price;
 				$wtetrip->sale_percentage = round( ( ( $wtetrip->price - $wtetrip->sale_price ) / $wtetrip->price ) * 100 );
 			}
 		}
@@ -1096,22 +1095,20 @@ class WP_Travel_Engine_Template_Hooks {
 		$trip_id       = $post->ID;
 		$post_settings = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
 
-		$trip_highlights_title   = isset( $post_settings[ 'trip_highlights_title' ] ) ? $post_settings[ 'trip_highlights_title' ] : '';
+		$trip_highlights_title   = ! empty( $post_settings[ 'trip_highlights_title' ] ?? '' ) ? $post_settings[ 'trip_highlights_title' ] : __( 'Highlights', 'wp-travel-engine' );
 		$trip_highlights_content = isset( $post_settings[ 'trip_highlights' ] ) ? $post_settings[ 'trip_highlights' ] : array();
 
 		if ( ! empty( $trip_highlights_content ) && is_array( $trip_highlights_content ) ) {
-			if ( ! empty( $trip_highlights_title ) ) {
-				echo "<h3 class='wpte-trip-highlights-title'>" . esc_html( $trip_highlights_title ) . '</h3>';
-				echo "<ul class='wpte-trip-highlights' >";
-				foreach ( $trip_highlights_content as $key => $highlight ) {
-					$highlight = isset( $highlight[ 'highlight_text' ] ) && ! empty( $highlight[ 'highlight_text' ] ) ? $highlight[ 'highlight_text' ] : false;
+			echo "<h3 class='wpte-trip-highlights-title'>" . esc_html( $trip_highlights_title ) . '</h3>';
+			echo "<ul class='wpte-trip-highlights' >";
+			foreach ( $trip_highlights_content as $key => $highlight ) {
+				$highlight = isset( $highlight[ 'highlight_text' ] ) && ! empty( $highlight[ 'highlight_text' ] ) ? $highlight[ 'highlight_text' ] : false;
 
-					if ( $highlight ) {
-						echo "<li class='trip-highlight'>" . esc_html( $highlight ) . '</li>';
-					}
+				if ( $highlight ) {
+					echo "<li class='trip-highlight'>" . esc_html( $highlight ) . '</li>';
 				}
-				echo '</ul>';
 			}
+			echo '</ul>';
 		}
 	}
 
@@ -1128,11 +1125,9 @@ class WP_Travel_Engine_Template_Hooks {
 		$trip_id = $post->ID;
 
 		$trip_settings = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
-		$tab_title     = isset( $trip_settings[ 'overview_section_title' ] ) && ! empty( $trip_settings[ 'overview_section_title' ] ) ? $trip_settings[ 'overview_section_title' ] : false;
+		$tab_title     = isset( $trip_settings[ 'overview_section_title' ] ) && ! empty( $trip_settings[ 'overview_section_title' ] ) ? $trip_settings[ 'overview_section_title' ] : __( 'Overview', 'wp-travel-engine' );
 
-		if ( $tab_title ) {
-			echo "<h2 class='wpte-overview-title'>" . esc_html( $tab_title ) . '</h2>';
-		}
+		echo "<h2 class='wpte-overview-title'>" . esc_html( $tab_title ) . '</h2>';
 	}
 
 	// Tab section title hooks.
@@ -1148,11 +1143,8 @@ class WP_Travel_Engine_Template_Hooks {
 		$trip_id = $post->ID;
 
 		$trip_settings = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
-		$tab_title     = isset( $trip_settings[ 'cost_tab_sec_title' ] ) && ! empty( $trip_settings[ 'cost_tab_sec_title' ] ) ? $trip_settings[ 'cost_tab_sec_title' ] : false;
-
-		if ( $tab_title ) {
-			echo "<h2 class='wpte-cost-tab-title'>" . esc_html( $tab_title ) . '</h2>';
-		}
+		$tab_title     = isset( $trip_settings[ 'cost_tab_sec_title' ] ) && ! empty( $trip_settings[ 'cost_tab_sec_title' ] ) ? $trip_settings[ 'cost_tab_sec_title' ] : __( 'Includes/Excludes', 'wp-travel-engine' );
+		echo "<h2 class='wpte-cost-tab-title'>" . esc_html( $tab_title ) . '</h2>';
 	}
 
 	// Tab section title hooks.
@@ -1168,19 +1160,17 @@ class WP_Travel_Engine_Template_Hooks {
 		$trip_id = $post->ID;
 
 		$trip_settings             = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
-		$tab_title                 = isset( $trip_settings[ 'trip_itinerary_title' ] ) && ! empty( $trip_settings[ 'trip_itinerary_title' ] ) ? $trip_settings[ 'trip_itinerary_title' ] : false;
+		$tab_title                 = isset( $trip_settings[ 'trip_itinerary_title' ] ) && ! empty( $trip_settings[ 'trip_itinerary_title' ] ) ? $trip_settings[ 'trip_itinerary_title' ] : __( 'Itinerary', 'wp-travel-engine' );
 		$wp_travel_engine_settings = get_option( 'wp_travel_engine_settings' );
 		$enabled_expand_all        = ! isset( $wp_travel_engine_settings[ 'wte_advance_itinerary' ][ 'enable_expand_all' ] ) || 'yes' == $wp_travel_engine_settings[ 'wte_advance_itinerary' ][ 'enable_expand_all' ] ? 'enabled' : '';
 
-		if ( $tab_title && defined( 'WTEAI_VERSION' ) ) {
+		if ( defined( 'WTEAI_VERSION' ) ) {
 			echo "<h2 class='wpte-itinerary-title'>" . esc_html( $tab_title ) . '</h2>';
 		} else {
 			?>
 			<div class="wte-itinerary-header-wrapper">
 				<div class="wp-travel-engine-itinerary-header">
-					<?php if ( $tab_title ) : ?>
-						<h2 class='wpte-itinerary-title'><?php echo esc_html( $tab_title ); ?></h2>
-					<?php endif; ?>
+					<h2 class='wpte-itinerary-title'><?php echo esc_html( $tab_title ); ?></h2>
 					<div class="aib-button-toggle toggle-button expand-all-button">
 						<label for="itinerary-toggle-button"
 								class="aib-button-label"><?php echo esc_html__( 'Expand all', 'wp-travel-engine' ); ?></label>
@@ -1206,11 +1196,8 @@ class WP_Travel_Engine_Template_Hooks {
 		$trip_id = $post->ID;
 
 		$trip_settings = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
-		$tab_title     = isset( $trip_settings[ 'faq_section_title' ] ) && ! empty( $trip_settings[ 'faq_section_title' ] ) ? $trip_settings[ 'faq_section_title' ] : false;
-
-		if ( $tab_title ) {
-			echo "<h2 class='wpte-faqs-title'>" . esc_html( $tab_title ) . '</h2>';
-		}
+		$tab_title     = isset( $trip_settings[ 'faq_section_title' ] ) && ! empty( $trip_settings[ 'faq_section_title' ] ) ? $trip_settings[ 'faq_section_title' ] : __( 'FAQs', 'wp-travel-engine' );
+		echo "<h2 class='wpte-faqs-title'>" . esc_html( $tab_title ) . '</h2>';
 	}
 
 	// Tab section title hooks.
@@ -1226,11 +1213,8 @@ class WP_Travel_Engine_Template_Hooks {
 		$trip_id = $post->ID;
 
 		$trip_settings = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
-		$tab_title     = isset( $trip_settings[ 'map_section_title' ] ) && ! empty( $trip_settings[ 'map_section_title' ] ) ? $trip_settings[ 'map_section_title' ] : false;
-
-		if ( $tab_title ) {
-			echo "<h2 class='wpte-map-title'>" . esc_html( $tab_title ) . '</h2>';
-		}
+		$tab_title     = isset( $trip_settings[ 'map_section_title' ] ) && ! empty( $trip_settings[ 'map_section_title' ] ) ? $trip_settings[ 'map_section_title' ] : __( 'Map', 'wp-travel-engine' );
+		echo "<h2 class='wpte-map-title'>" . esc_html( $tab_title ) . '</h2>';
 	}
 
 	// Tab section title hooks.

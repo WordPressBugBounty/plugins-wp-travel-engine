@@ -53,10 +53,11 @@ final class WP_Session extends Recursive_ArrayAccess {
 	 * @return bool|WP_Session
 	 */
 	public static function get_instance() {
-		if ( ! self::$instance ) {
-			self::$instance = new self();
+		if ( ! WP_Session::$instance ) {
+			WP_Session::$instance = new WP_Session();
 		}
-		return self::$instance;
+
+		return WP_Session::$instance;
 	}
 
 	/**
@@ -69,6 +70,7 @@ final class WP_Session extends Recursive_ArrayAccess {
 	 * @uses apply_filters Calls `wp_session_expiration` to determine how long until sessions expire.
 	 */
 	protected function __construct() {
+
 		if ( isset( $_COOKIE[ WP_TRAVEL_ENGINE_SESSION_COOKIE ] ) ) {
 			$cookie        = sanitize_text_field( wp_unslash( $_COOKIE[ WP_TRAVEL_ENGINE_SESSION_COOKIE ] ) );
 			$cookie_crumbs = explode( '||', $cookie );
@@ -147,6 +149,9 @@ final class WP_Session extends Recursive_ArrayAccess {
 	 * Write the data from the current session to the data storage system.
 	 */
 	public function write_data() {
+		if ( defined( 'DOING_CRON' ) && DOING_CRON ) {
+			return;
+		}
 		update_option( "_wp_session_{$this->session_id}", $this->container, '', 'no' );
 		if ( false === get_option( "_wp_session_expires_{$this->session_id}" ) ) {
 			update_option( "_wp_session_expires_{$this->session_id}", $this->expires, '', 'no' );

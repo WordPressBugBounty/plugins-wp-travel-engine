@@ -211,7 +211,7 @@ class Cart {
 		} );
 
 		return apply_filters( 'wptravelengine_cart_' . __FUNCTION__, $fees, $this );
-    }
+	}
 
 	/**
 	 * @param array $fees
@@ -261,8 +261,8 @@ class Cart {
 	 * @since 6.4.0
 	 */
 	public function get_cart_items(): array {
-        return $this->items;
-    }
+		return $this->items;
+	}
 
 	/**
 	 * Add additional line items.
@@ -363,7 +363,7 @@ class Cart {
 		 * @since 6.4.0
 		 */
 		do_action( 'wptravelengine_after_items_added_to_cart', $this->items, $this );
-	
+
 		$this->calculate_totals();
 
 		$this->write();
@@ -846,7 +846,9 @@ class Cart {
 	 * @return void
 	 */
 	public function read_cart_onload() {
-		$this->read();
+		if ( ! ( defined( 'DOING_CRON' ) && DOING_CRON ) ) {
+			$this->read();
+		}
 	}
 
 	/**

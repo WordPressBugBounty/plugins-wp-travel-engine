@@ -173,7 +173,15 @@ class CheckoutPageTemplate extends BookingProcessPageTemplate {
 		if ( ! isset( $billing_form_fields ) ) {
 			$billing_form_fields = new BillingFormFields( array( 'booking_ref' => $wte_cart->get_booking_ref() ) );
 		}
-		$args = compact( 'billing_form_fields' );
+
+		$lead_travellers_form_fields = array();
+		if ( isset( $lead_travellers_form_fields ) ) {
+			foreach ( $wte_cart->getItems( true ) as $cart_item ) {
+				$lead_travellers_form_fields[] = new LeadTravellersFormFields( array() );
+			}
+		}
+		$lead_travellers_fields_count = isset( $lead_travellers_form_fields ) && isset( $lead_travellers_form_fields[0]->fields ) ? count( $lead_travellers_form_fields[0]->fields ) : 0;
+		$args = compact( 'billing_form_fields', 'lead_travellers_fields_count' );
 		wptravelengine_get_template( 'template-checkout/content-billing-details.php', $args );
 	}
 

@@ -66,7 +66,10 @@ class Booking extends PostType {
 		add_filter( 'disable_months_dropdown', array( $this, 'remove_date_filter' ) );
 		add_action( 'admin_init', array( $this, 'export_bookings' ) );
 		add_action( 'admin_head', array( $this, 'add_booking_export_button' ) );
-		add_filter( 'wptravelengine_booking_line_item_group_title', array( $this, 'add_booking_line_item_title' ), 10, 2 );
+		add_filter( 'wptravelengine_booking_line_item_group_title', array(
+			$this,
+			'add_booking_line_item_title',
+		), 10, 2 );
 		add_filter( 'wptravelengine_booking_line_items', array( $this, 'add_booking_line_items' ), 10, 2 );
 	}
 
@@ -74,7 +77,7 @@ class Booking extends PostType {
 	 * Add booking line item title.
 	 *
 	 * @param string $title Title.
-	 * @param array  $item Item.
+	 * @param array $item Item.
 	 *
 	 * @return string
 	 * @since 6.4.0
@@ -86,23 +89,25 @@ class Booking extends PostType {
 		if ( 'extra_service' === $title ) {
 			$title = wptravelengine_settings()->get( 'extra_service_title' ) ?? __( 'Extra Services', 'wp-travel-engine' );
 		}
+
 		return $title;
 	}
 
 	/**
 	 * Add booking line items.
 	 *
-	 * @param array      $line_items Line items.
+	 * @param array $line_items Line items.
 	 * @param BookedItem $item Item.
 	 *
 	 * @return array
 	 * @since 6.4.0
 	 */
 	public function add_booking_line_items( array $line_items, BookedItem $item ): array {
-		$line_items['pricing_category'] ??= array();
+		$line_items[ 'pricing_category' ] ??= array();
 		if ( wptravelengine_is_addon_active( 'extra-services' ) ) {
-			$line_items['extra_service'] ??= array();
+			$line_items[ 'extra_service' ] ??= array();
 		}
+
 		return $line_items;
 	}
 
@@ -187,8 +192,8 @@ class Booking extends PostType {
 	/**
 	 * Get capabilities.
 	 *
-	 * @since 6.4.0
 	 * @return array
+	 * @since 6.4.0
 	 */
 	public function get_capabilities(): array {
 		// TODO: Add capabilities for the booking post type specifically once we define particular capabilities for the booking post type.
@@ -220,8 +225,8 @@ class Booking extends PostType {
 		// Booking status and Trip Name filter options.
 		$trips            = wp_travel_engine_get_trips_array();
 		$status           = wp_travel_engine_get_booking_status();
-		$booking_selected = isset( $_REQUEST['booking_status'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['booking_status'] ) ) : 'all';
-		$trip_selected    = isset( $_REQUEST['trip_id'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['trip_id'] ) ) : 'all';
+		$booking_selected = isset( $_REQUEST[ 'booking_status' ] ) ? sanitize_text_field( wp_unslash( $_REQUEST[ 'booking_status' ] ) ) : 'all';
+		$trip_selected    = isset( $_REQUEST[ 'trip_id' ] ) ? sanitize_text_field( wp_unslash( $_REQUEST[ 'trip_id' ] ) ) : 'all';
 
 		$mappings = array(
 			'trip_id'        => array(
@@ -237,12 +242,12 @@ class Booking extends PostType {
 		);
 		foreach ( $mappings as $id => $data ) { ?>
 			<select id="<?php echo esc_attr( $id ); ?>_filter" name="<?php echo esc_attr( $id ); ?>">
-				<option value="all"> <?php echo esc_html( $data['label'] ); ?> </option>
+				<option value="all"> <?php echo esc_html( $data[ 'label' ] ); ?> </option>
 				<?php
-				foreach ( $data['data'] as $key => $value ) :
-					$display = 'booking_status' === $id ? $value['text'] : $value;
+				foreach ( $data[ 'data' ] as $key => $value ) :
+					$display = 'booking_status' === $id ? $value[ 'text' ] : $value;
 					?>
-					<option value="<?php echo esc_html( $key ); ?>" <?php selected( $data['selected'], $key ); ?>>
+					<option value="<?php echo esc_html( $key ); ?>" <?php selected( $data[ 'selected' ], $key ); ?>>
 						<?php echo esc_html( $display ); ?>
 					</option>
 				<?php endforeach; ?>
@@ -254,12 +259,12 @@ class Booking extends PostType {
 	/**
 	 * Remove date filter given by WordPress
 	 *
+	 * @return bool
 	 * @since 6.3.5
 	 *
-	 * @return bool
 	 */
 	public function remove_date_filter() {
-		return isset( $_GET['post_type'] ) && 'booking' === $_GET['post_type'] ? true : false;
+		return isset( $_GET[ 'post_type' ] ) && 'booking' === $_GET[ 'post_type' ] ? true : false;
 	}
 
 	/**
@@ -288,7 +293,7 @@ class Booking extends PostType {
 			return;
 		}
 
-		if ( isset( $_GET['post_type'] ) && 'booking' === $_GET['post_type'] && 'booking' == $post_type ) {
+		if ( isset( $_GET[ 'post_type' ] ) && 'booking' === $_GET[ 'post_type' ] && 'booking' == $post_type ) {
 			// Remove admin notices.
 			remove_all_actions( 'admin_notices' );
 
@@ -306,13 +311,14 @@ class Booking extends PostType {
 				$status
 			);
 
-			$trip_selected   = isset( $_REQUEST['trip_id'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['trip_id'] ) ) : 'all';
-			$status_selected = isset( $_REQUEST['booking_status'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['booking_status'] ) ) : 'all';
+			$trip_selected   = isset( $_REQUEST[ 'trip_id' ] ) ? sanitize_text_field( wp_unslash( $_REQUEST[ 'trip_id' ] ) ) : 'all';
+			$status_selected = isset( $_REQUEST[ 'booking_status' ] ) ? sanitize_text_field( wp_unslash( $_REQUEST[ 'booking_status' ] ) ) : 'all';
 
 			?>
 			<form id="wpte-booking-export-form" class="wpte-export-form" method="post">
 				<?php wp_nonce_field( 'booking_export_nonce_action', 'booking_export_nonce' ); ?>
-				<input type="text" data-fpconfig='{"mode":"range","showMonths":"2"}' id="wte-flatpickr__date-range" class="wte-flatpickr">
+				<input type="text" data-fpconfig='{"mode":"range","showMonths":"2"}' id="wte-flatpickr__date-range"
+					   class="wte-flatpickr">
 				<button id="wpte-booking-export-open-modal" type="button" class="button button-primary">
 					<?php esc_html_e( 'Export Bookings', 'wp-travel-engine' ); ?>
 				</button>
@@ -321,36 +327,48 @@ class Booking extends PostType {
 						<div class="wpte-booking-export-modal-header">
 							<h2><?php esc_html_e( 'Export Bookings', 'wp-travel-engine' ); ?></h2>
 							<button type="button" class="wpte-booking-modal-close">
-								<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-									<path d="M18 6L6 18M6 6L18 18" stroke="#F04438" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+								<svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+									 xmlns="http://www.w3.org/2000/svg">
+									<path d="M18 6L6 18M6 6L18 18" stroke="#F04438" stroke-width="2"
+										  stroke-linecap="round" stroke-linejoin="round" />
 								</svg>
 							</button>
 						</div>
 						<div class="wpte-booking-export-modal-body">
 							<div class="wpte-field">
-								<label for="wpte-booking-export-date"><?php esc_html_e( 'Date', 'wp-travel-engine' ); ?></label>
-								<input style="max-width: 320px;" id="wpte-booking-export-date" type="text" name="wte_booking_range" data-fpconfig='{"mode":"range","showMonths":"2"}' name="wte-flatpickr__date" value="<?php echo esc_attr( isset( $_POST['wte_booking_range'] ) ? $_POST['wte_booking_range'] : '' ); ?>" class="wte-flatpickr">
+								<label
+									for="wpte-booking-export-date"><?php esc_html_e( 'Date', 'wp-travel-engine' ); ?></label>
+								<input style="max-width: 320px;" id="wpte-booking-export-date" type="text"
+									   name="wte_booking_range" data-fpconfig='{"mode":"range","showMonths":"2"}'
+									   name="wte-flatpickr__date"
+									   value="<?php echo esc_attr( isset( $_POST[ 'wte_booking_range' ] ) ? $_POST[ 'wte_booking_range' ] : '' ); ?>"
+									   class="wte-flatpickr">
 							</div>
 							<div class="wpte-field">
-								<label for="wpte-booking-export-trip"><?php esc_html_e( 'Trip', 'wp-travel-engine' ); ?></label>
+								<label
+									for="wpte-booking-export-trip"><?php esc_html_e( 'Trip', 'wp-travel-engine' ); ?></label>
 								<select name="wptravelengine_trip_id" id="wpte-booking-export-trip">
 									<?php foreach ( $trips as $key => $value ) : ?>
-										<option value="<?php echo esc_attr( $key ); ?>" name="wptravelengine_trip_id" <?php selected( $trip_selected, $key ); ?>><?php echo esc_html( $value ); ?></option>
+										<option value="<?php echo esc_attr( $key ); ?>"
+												name="wptravelengine_trip_id" <?php selected( $trip_selected, $key ); ?>><?php echo esc_html( $value ); ?></option>
 									<?php endforeach; ?>
 								</select>
 							</div>
 							<div class="wpte-field">
-								<label for="wpte-booking-export-status"><?php esc_html_e( 'Booking Status', 'wp-travel-engine' ); ?></label>
-								<select style="max-width: 320px;" name="wptravelengine_booking_status" id="wpte-booking-export-status">
+								<label
+									for="wpte-booking-export-status"><?php esc_html_e( 'Booking Status', 'wp-travel-engine' ); ?></label>
+								<select style="max-width: 320px;" name="wptravelengine_booking_status"
+										id="wpte-booking-export-status">
 									<?php foreach ( $status as $key => $value ) : ?>
-										<option value="<?php echo esc_attr( $key ); ?>" name="wptravelengine_booking_status" <?php selected( $status_selected, $key ); ?>><?php echo esc_html( $value['text'] ); ?></option>
+										<option value="<?php echo esc_attr( $key ); ?>"
+												name="wptravelengine_booking_status" <?php selected( $status_selected, $key ); ?>><?php echo esc_html( $value[ 'text' ] ); ?></option>
 									<?php endforeach; ?>
 								</select>
 							</div>
 						</div>
 						<div class="wpte-booking-export-modal-footer">
 							<input type="submit" name="booking_export_submit" class="wpte-booking-export-submit button"
-						value="<?php esc_html_e( 'Export', 'wp-travel-engine' ); ?>">
+								   value="<?php esc_html_e( 'Export', 'wp-travel-engine' ); ?>">
 						</div>
 					</div>
 				</div>
@@ -368,7 +386,7 @@ class Booking extends PostType {
 	public function save( $post_id, $post, $update = false ) {
 
 		// Verify nonce.
-		if ( $this->post_type !== $post->post_type || ! isset( $_POST['wptravelengine_new_booking_nonce'] ) || ! wp_verify_nonce( $_POST['wptravelengine_new_booking_nonce'], 'wptravelengine_new_booking' ) ) {
+		if ( $this->post_type !== $post->post_type || ! isset( $_POST[ 'wptravelengine_new_booking_nonce' ] ) || ! wp_verify_nonce( $_POST[ 'wptravelengine_new_booking_nonce' ], 'wptravelengine_new_booking' ) ) {
 			return;
 		}
 
@@ -484,6 +502,7 @@ class Booking extends PostType {
 								$sanitized_emergency_contact[ $field ] = sanitize_text_field( $value );
 						}
 					}
+
 					return $sanitized_emergency_contact;
 				},
 				$data
@@ -493,14 +512,14 @@ class Booking extends PostType {
 		}
 
 		if ( $billing_details = $request->get_param( 'billing' ) ) {
-			$customer_id    = Customer::is_exists( $billing_details['email'] ?? '' );
+			$customer_id    = Customer::is_exists( $billing_details[ 'email' ] ?? '' );
 			$customer_model = $customer_id
 				? new Customer( $customer_id )
 				: Customer::create_post(
 					array(
 						'post_status' => 'publish',
 						'post_type'   => 'customer',
-						'post_title'  => $billing_details['email'],
+						'post_title'  => $billing_details[ 'email' ],
 					)
 				);
 
@@ -563,37 +582,37 @@ class Booking extends PostType {
 		if ( $trip_info = $request->get_param( 'order_trip' ) ) {
 			// Sanitize trip info
 			$sanitized_trip_info = array(
-				'id'                  => absint( $trip_info['id'] ),
-				'start_date'          => sanitize_text_field( $trip_info['start_date'] ),
-				'end_date'            => sanitize_text_field( $trip_info['end_date'] ),
-				'trip_code'           => sanitize_text_field( $trip_info['trip_code'] ),
-				'number_of_travelers' => absint( $trip_info['number_of_travelers'] ),
-				'package_name'        => sanitize_text_field( $trip_info['package_name'] ),
+				'id'                  => absint( $trip_info[ 'id' ] ),
+				'start_date'          => sanitize_text_field( $trip_info[ 'start_date' ] ),
+				'end_date'            => sanitize_text_field( $trip_info[ 'end_date' ] ),
+				'trip_code'           => sanitize_text_field( $trip_info[ 'trip_code' ] ),
+				'number_of_travelers' => absint( $trip_info[ 'number_of_travelers' ] ),
+				'package_name'        => sanitize_text_field( $trip_info[ 'package_name' ] ),
 			);
 
 			// Validate dates
 
-			$start_date = DateTime::createFromFormat( 'Y-m-d H:i', $sanitized_trip_info['start_date'] );
-			$end_date   = DateTime::createFromFormat( 'Y-m-d H:i', $sanitized_trip_info['end_date'] );
+			$start_date = DateTime::createFromFormat( 'Y-m-d H:i', $sanitized_trip_info[ 'start_date' ] );
+			$end_date   = DateTime::createFromFormat( 'Y-m-d H:i', $sanitized_trip_info[ 'end_date' ] );
 
 			if ( ! $start_date || ! $end_date ) {
 				// Handle invalid date format
-				$sanitized_trip_info['start_date'] = current_time( 'Y-m-d H:i' );
-				$sanitized_trip_info['end_date']   = current_time( 'Y-m-d H:i' );
+				$sanitized_trip_info[ 'start_date' ] = current_time( 'Y-m-d H:i' );
+				$sanitized_trip_info[ 'end_date' ]   = current_time( 'Y-m-d H:i' );
 			}
 
-			$cart_info                                = $booking->get_cart_info() ?? array();
-			$cart_info['items'][0]['trip_id']         = $sanitized_trip_info['id'];
-			$cart_info['items'][0]['trip_date']       = $sanitized_trip_info['start_date'];
-			$cart_info['items'][0]['end_date']        = $sanitized_trip_info['end_date'];
-			$cart_info['items'][0]['travelers_count'] = $sanitized_trip_info['number_of_travelers'];
-			$cart_info['items'][0]['trip_package']    = $sanitized_trip_info['package_name'];
+			$cart_info                                      = $booking->get_cart_info() ?? array();
+			$cart_info[ 'items' ][ 0 ][ 'trip_id' ]         = $sanitized_trip_info[ 'id' ];
+			$cart_info[ 'items' ][ 0 ][ 'trip_date' ]       = $sanitized_trip_info[ 'start_date' ];
+			$cart_info[ 'items' ][ 0 ][ 'end_date' ]        = $sanitized_trip_info[ 'end_date' ];
+			$cart_info[ 'items' ][ 0 ][ 'travelers_count' ] = $sanitized_trip_info[ 'number_of_travelers' ];
+			$cart_info[ 'items' ][ 0 ][ 'trip_package' ]    = $sanitized_trip_info[ 'package_name' ];
 		}
 
 		// Remove discounts if they are deleted from the request.
 		if ( ! $request->get_param( 'discounts' ) ) {
-			unset( $cart_info['totals']['total_discount'] );
-			unset( $cart_info['deductible_items'] );
+			unset( $cart_info[ 'totals' ][ 'total_discount' ] );
+			unset( $cart_info[ 'deductible_items' ] );
 		}
 
 		if ( $deductible_items = $request->get_param( 'discounts' ) ) {
@@ -601,36 +620,36 @@ class Booking extends PostType {
 			$_items = array();
 			foreach ( $items as $index => $item ) {
 				$percentage = '';
-				if ( preg_match( '/(\d+)%/', $item['label'], $matches ) ) {
-					$percentage = $matches[1];
+				if ( preg_match( '/(\d+)%/', $item[ 'label' ], $matches ) ) {
+					$percentage = $matches[ 1 ];
 				} else {
 					$percentage = '';
 				}
-				$_items[] = wp_parse_args(
+				$_items[]                                           = wp_parse_args(
 					$item,
 					array(
 						'name'                     => 'discount' . $index, // coupon
 						'order'                    => $index,
-						'label'                    => $item['label'], // Discount
+						'label'                    => $item[ 'label' ], // Discount
 						'description'              => '',
 						'adjustment_type'          => 'percentage',
 						'apply_to_actual_subtotal' => false,
 						'percentage'               => $percentage,
-						'value'                    => $item['value'],
+						'value'                    => $item[ 'value' ],
 						'_class_name'              => CouponAdjustment::class,
 						'type'                     => 'deductible',
 					)
 				);
-				$cart_info['totals'][ 'total_discount' . $index ] = $item['value'];
+				$cart_info[ 'totals' ][ 'total_discount' . $index ] = $item[ 'value' ];
 			}
-			$cart_info['deductible_items'] = $_items;
+			$cart_info[ 'deductible_items' ] = $_items;
 		}
 
 		// Remove fees if they are deleted from the request.
 		if ( ! $request->get_param( 'fees' ) ) {
-			unset( $cart_info['tax_amount'] );
-			unset( $cart_info['totals']['total_fee'] );
-			unset( $cart_info['fees'] );
+			unset( $cart_info[ 'tax_amount' ] );
+			unset( $cart_info[ 'totals' ][ 'total_fee' ] );
+			unset( $cart_info[ 'fees' ] );
 		}
 
 		if ( $fees = $request->get_param( 'fees' ) ) {
@@ -638,35 +657,35 @@ class Booking extends PostType {
 			$_items = array();
 			foreach ( $items as $index => $item ) {
 				$percentage = '';
-				if ( preg_match( '/(\d+)%/', $item['label'], $matches ) ) {
-					$percentage = $matches[1];
+				if ( preg_match( '/(\d+)%/', $item[ 'label' ], $matches ) ) {
+					$percentage = $matches[ 1 ];
 				} else {
 					$percentage = '';
 				}
-				$_items[]                                    = wp_parse_args(
+				$_items[]                                      = wp_parse_args(
 					$item,
 					array(
 						'name'                     => 'fee' . $index, // fees
 						'order'                    => $index,
-						'label'                    => $item['label'], // Discount
+						'label'                    => $item[ 'label' ], // Discount
 						'description'              => '',
 						'adjustment_type'          => 'percentage',
 						'apply_to_actual_subtotal' => false,
 						'percentage'               => $percentage,
-						'value'                    => $item['value'],
+						'value'                    => $item[ 'value' ],
 						'_class_name'              => TaxAdjustment::class,
 						'type'                     => 'fee',
 					)
 				);
-				$cart_info['totals'][ 'total_fee' . $index ] = $item['value'];
+				$cart_info[ 'totals' ][ 'total_fee' . $index ] = $item[ 'value' ];
 			}
-			$cart_info['fees'] = $_items;
+			$cart_info[ 'fees' ] = $_items;
 		}
 
 		if ( $line_items = $request->get_param( 'line_items' ) ) {
 			foreach ( $line_items as $key => $item ) {
-				if ( empty( $item ) && isset( $cart_info['items'][0]['line_items'][ $key ] ) ) {
-					unset( $cart_info['items'][0]['line_items'][ $key ] );
+				if ( empty( $item ) && isset( $cart_info[ 'items' ][ 0 ][ 'line_items' ][ $key ] ) ) {
+					unset( $cart_info[ 'items' ][ 0 ][ 'line_items' ][ $key ] );
 				}
 
 				$items  = ArrayUtility::normalize( $item, 'label' );
@@ -675,36 +694,36 @@ class Booking extends PostType {
 					$_items[] = wp_parse_args(
 						$_item,
 						array(
-							'label'       => $_item['label'],
-							'quantity'    => $_item['quantity'],
-							'price'       => $_item['price'],
-							'total'       => $_item['total'],
+							'label'       => $_item[ 'label' ],
+							'quantity'    => $_item[ 'quantity' ],
+							'price'       => $_item[ 'price' ],
+							'total'       => $_item[ 'total' ],
 							'_class_name' => PricingCategory::class,
 						)
 					);
 				}
 
-				$cart_info['items'][0]['line_items'][ $key ] = $_items;
+				$cart_info[ 'items' ][ 0 ][ 'line_items' ][ $key ] = $_items;
 			}
 		}
 
 		if ( is_numeric( $total = $request->get_param( 'total' ) ) ) {
-			$cart_info['total']           = (float) $total;
-			$cart_info['totals']['total'] = (float) $total;
+			$cart_info[ 'total' ]             = (float) $total;
+			$cart_info[ 'totals' ][ 'total' ] = (float) $total;
 		}
 
 		if ( is_numeric( $subtotal = $request->get_param( 'subtotal' ) ) ) {
-			$cart_info['subtotal']           = (float) $subtotal;
-			$cart_info['totals']['subtotal'] = (float) $subtotal;
+			$cart_info[ 'subtotal' ]             = (float) $subtotal;
+			$cart_info[ 'totals' ][ 'subtotal' ] = (float) $subtotal;
 		}
 
 		if ( is_numeric( $due_amount = $request->get_param( 'due_amount' ) ) ) {
 			$booking->set_total_due_amount( (float) $due_amount );
-			$cart_info['totals']['due_total'] = (float) $due_amount;
+			$cart_info[ 'totals' ][ 'due_total' ] = (float) $due_amount;
 		}
 
 		if ( is_numeric( $paid_amount = $request->get_param( 'paid_amount' ) ) ) {
-			$cart_info['totals']['partial_total'] = (float) $paid_amount;
+			$cart_info[ 'totals' ][ 'partial_total' ] = (float) $paid_amount;
 			$booking->set_total_paid_amount( (float) $paid_amount );
 		}
 
@@ -717,7 +736,7 @@ class Booking extends PostType {
 			$_payments = array();
 			foreach ( $items as $payment_data ) {
 				try {
-					$payment_model = new Payment( (int) $payment_data['id'] );
+					$payment_model = new Payment( (int) $payment_data[ 'id' ] );
 				} catch ( \Exception $e ) {
 					$payment_model = Payment::create_post(
 						array(
@@ -728,44 +747,44 @@ class Booking extends PostType {
 					);
 				}
 
-				if ( $status = $payment_data['status'] ?? null ) {
+				if ( $status = $payment_data[ 'status' ] ?? null ) {
 					$payment_model->set_status( sanitize_text_field( $status ) );
 				}
 
-				if ( $gateway = $payment_data['gateway'] ) {
+				if ( $gateway = $payment_data[ 'gateway' ] ) {
 					$payment_model->set_meta( 'payment_gateway', sanitize_text_field( $gateway ) );
 					$booking->set_meta( 'wp_travel_engine_booking_payment_gateway', sanitize_text_field( $gateway ) );
 				}
 
-				if ( is_numeric( $paid_amount = $payment_data['amount'] ?? null ) ) {
+				if ( is_numeric( $paid_amount = $payment_data[ 'amount' ] ?? null ) ) {
 					$payment_model->set_meta(
 						'payment_amount',
 						array(
 							'value'    => (float) $paid_amount,
-							'currency' => sanitize_text_field( $payment_data['currency'] ?? '' ),
+							'currency' => sanitize_text_field( $payment_data[ 'currency' ] ?? '' ),
 						)
 					);
 				}
 
-				if( is_numeric( $due_amount = $request->get_param( 'due_amount' ) ) ){
+				if ( is_numeric( $due_amount = $request->get_param( 'due_amount' ) ) ) {
 					$payment_model->set_meta(
 						'payable',
 						array(
-							'currency' => sanitize_text_field( $payment_data['currency'] ?? '' ),
-							'amount' => (float) $due_amount,
+							'currency' => sanitize_text_field( $payment_data[ 'currency' ] ?? '' ),
+							'amount'   => (float) $due_amount,
 						)
 					);
 				}
 
-				if ( $transaction_id = $payment_data['transaction_id'] ?? null ) {
+				if ( $transaction_id = $payment_data[ 'transaction_id' ] ?? null ) {
 					$payment_model->set_transaction_id( sanitize_text_field( $transaction_id ) );
 				}
 
-				if ( $transaction_date = $payment_data['transaction_date'] ?? null ) {
+				if ( $transaction_date = $payment_data[ 'transaction_date' ] ?? null ) {
 					$payment_model->set_transaction_date( sanitize_text_field( $transaction_date ) );
 				}
 
-				if ( $gateway_response = $payment_data['gateway_response'] ?? null ) {
+				if ( $gateway_response = $payment_data[ 'gateway_response' ] ?? null ) {
 					$payment_model->set_meta( 'gateway_response', sanitize_text_field( $gateway_response ) );
 				}
 
@@ -780,6 +799,12 @@ class Booking extends PostType {
 		}
 
 		$booking->save();
+
+		if ( ! $update ) {
+			do_action( 'wptravelengine.booking.created', $booking->get_data(), $booking );
+		} else {
+			do_action( 'wptravelengine.booking.updated', $booking->get_data(), $booking );
+		}
 	}
 
 	/**
@@ -810,7 +835,7 @@ class Booking extends PostType {
 
 		if ( 'booking' === $current_screen->id && $current_screen->action == 'add' ) {
 			$action = 'create';
-		} elseif ( ( $_GET['wptravelengine_action'] ?? '' ) === 'edit' ) {
+		} else if ( ( $_GET[ 'wptravelengine_action' ] ?? '' ) === 'edit' ) {
 			$action = 'update';
 		}
 
@@ -831,18 +856,18 @@ class Booking extends PostType {
 	 * Prepares template arguments for Booking Page.
 	 *
 	 * @param BookingModel $booking
-	 * @param string       $mode
+	 * @param string $mode
 	 *
 	 * @return array
 	 * @since 6.4.0
 	 */
 	protected function get_template_args( BookingModel $booking, string $mode = 'view' ): array {
-		$package_name       = $booking->get_order_items()[0]['package_name'] ?? '';
-		$cart_info          = $booking->get_cart_info() ?? array();
-		$items              = $cart_info['items'] ?? array();
-		$items[0]           = array_merge( $items[0] ?? array(), array( 'package_name' => $package_name ) );
-		$cart_info['items'] = $items;
-		$cart_info          = new CartInfoParser( $cart_info );
+		$package_name         = $booking->get_order_items()[ 0 ][ 'package_name' ] ?? '';
+		$cart_info            = $booking->get_cart_info() ?? array();
+		$items                = $cart_info[ 'items' ] ?? array();
+		$items[ 0 ]           = array_merge( $items[ 0 ] ?? array(), array( 'package_name' => $package_name ) );
+		$cart_info[ 'items' ] = $items;
+		$cart_info            = new CartInfoParser( $cart_info );
 
 		$order_trip = $cart_info->get_item();
 
@@ -867,7 +892,8 @@ class Booking extends PostType {
 			),
 			'travellers_form_fields'         => array_map(
 				function ( array $traveller, $index ) use ( $mode, $booking ) {
-					$traveller['index'] = $index;
+					$traveller[ 'index' ] = $index;
+
 					return new TravellerEditFormFields( $traveller, $mode, $booking );
 				},
 				$booking->get_travelers(),
@@ -875,7 +901,8 @@ class Booking extends PostType {
 			),
 			'emergency_contacts_form_fields' => array_map(
 				function ( array $emergency_contact, $index ) use ( $mode, $booking ) {
-					$emergency_contact['index'] = $index;
+					$emergency_contact[ 'index' ] = $index;
+
 					return new EmergencyEditFormFields( $emergency_contact, $mode, $booking );
 				},
 				$booking->get_emergency_contacts(),
@@ -885,7 +912,7 @@ class Booking extends PostType {
 			'payments_edit_form_fields'      => array_map(
 				function ( $payment ) use ( $mode ) {
 					$gateway_response = $payment->get_gateway_response();
-					$response = '';
+					$response         = '';
 					if ( ! empty( $gateway_response ) ) :
 						if ( is_array( $gateway_response ) || is_object( $gateway_response ) ) {
 							$response = wp_json_encode( $gateway_response, JSON_PRETTY_PRINT );
@@ -904,7 +931,7 @@ class Booking extends PostType {
 								'status'           => $payment->get_payment_status(),
 								'gateway'          => $payment->get_payment_gateway(),
 								'amount'           => $payment->get_amount(),
-								'currency'         => $payable['currency'] ?? 'USD',
+								'currency'         => $payable[ 'currency' ] ?? 'USD',
 								'transaction_id'   => $payment->get_transaction_id(),
 								'gateway_response' => $response,
 							),
@@ -958,18 +985,18 @@ class Booking extends PostType {
 		$current_screen = get_current_screen();
 		$trip_id        = 'all';
 		$booking_status = 'all';
-		if ( isset( $_REQUEST['trip_id'] ) ) {
-			$trip_id = sanitize_text_field( wp_unslash( $_REQUEST['trip_id'] ) );
+		if ( isset( $_REQUEST[ 'trip_id' ] ) ) {
+			$trip_id = sanitize_text_field( wp_unslash( $_REQUEST[ 'trip_id' ] ) );
 		}
-		if ( isset( $_REQUEST['booking_status'] ) ) {
-			$booking_status = sanitize_text_field( wp_unslash( $_REQUEST['booking_status'] ) );
+		if ( isset( $_REQUEST[ 'booking_status' ] ) ) {
+			$booking_status = sanitize_text_field( wp_unslash( $_REQUEST[ 'booking_status' ] ) );
 		}
-		$date_range = isset( $_REQUEST['wte_booking_range'] ) ? sanitize_text_field( $_REQUEST['wte_booking_range'] ) : '';
+		$date_range = isset( $_REQUEST[ 'wte_booking_range' ] ) ? sanitize_text_field( $_REQUEST[ 'wte_booking_range' ] ) : '';
 		$dates      = explode( ' to ', $date_range );
 
 		// Store the dates in separate variables.
-		$start_date = isset( $dates[0] ) ? $dates[0] : '';
-		$end_date   = isset( $dates[1] ) ? $dates[1] : '';
+		$start_date = isset( $dates[ 0 ] ) ? $dates[ 0 ] : '';
+		$end_date   = isset( $dates[ 1 ] ) ? $dates[ 1 ] : '';
 
 		// Modify the query for the targeted screen and filter option.
 		if ( ( 'edit-booking' !== $current_screen->id ) || ( 'all' === $booking_status && 'all' === $trip_id && empty( $date_range ) ) ) {
@@ -1012,19 +1039,20 @@ class Booking extends PostType {
 					),
 				)
 			);
-		} elseif ( ! empty( $start_date ) ) {
+		} else if ( ! empty( $start_date ) ) {
 			$get_specific_date = explode( '-', $start_date );
 			$query->set(
 				'date_query',
 				array(
 					array(
-						'year'  => $get_specific_date[0],
-						'month' => $get_specific_date[1],
-						'day'   => $get_specific_date[2],
+						'year'  => $get_specific_date[ 0 ],
+						'month' => $get_specific_date[ 1 ],
+						'day'   => $get_specific_date[ 2 ],
 					),
 				)
 			);
 		}
+
 		return $query;
 	}
 }

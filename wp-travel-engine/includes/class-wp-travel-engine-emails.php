@@ -962,7 +962,7 @@ class WPTE_Booking_Emails extends WP_Travel_Engine_Emails {
 	}
 
 	public static function get_subject( $email_template_type, $to ) {
-		$options = array(
+		$options = apply_filters( 'wptravelengine_email_template_subject_options', array(
 			'order_confirmation' => array(
 				'admin'    => 'email.sale_subject',
 				'customer' => 'email.subject',
@@ -971,11 +971,14 @@ class WPTE_Booking_Emails extends WP_Travel_Engine_Emails {
 				'admin'    => 'email.booking_notification_subject_admin',
 				'customer' => 'email.booking_notification_subject_customer',
 			),
-		);
-		$subject = wte_array_get( get_option( 'wp_travel_engine_settings', array() ), $options[ $email_template_type ][ $to ], '' );
+		) );
+
+		$subject = isset( $options[ $email_template_type ][ $to ] ) ? wptravelengine_settings()->get( $options[ $email_template_type ][ $to ], '' ) : '';
+
 		if ( ! empty( trim( $subject ) ) ) {
 			return $subject;
 		}
+
 		$subjects = array(
 			'order'              => array(
 				'customer' => sprintf( __( 'Your Booking Order has been placed (%s)', 'wp-travel-engine' ), '{booking_id}' ),

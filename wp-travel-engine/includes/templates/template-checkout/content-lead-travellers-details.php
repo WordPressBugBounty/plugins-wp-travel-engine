@@ -7,8 +7,11 @@
 if ( 'hide' === ( $args['attributes']['lead-travellers'] ?? '' ) ) {
     return;
 }
+// Lead Traveller's Details Form
+if( isset( $lead_travellers_form_fields ) && isset( $lead_travellers_form_fields[0]->fields ) && empty( $lead_travellers_form_fields[0]->fields ) ) {
+	return;
+}
 ?>
-<!-- Lead Traveller's Details Form -->
 <div class="wpte-checkout__box collapsible <?php echo $show_title ? 'open' : ''; ?>">
 	<?php if ( $show_title ) : ?>
 		<h3 class="wpte-checkout__box-title">

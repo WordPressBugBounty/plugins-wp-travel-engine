@@ -10,6 +10,7 @@ namespace WPTravelEngine\Core\Booking;
 
 use WPTravelEngine\Abstracts\PaymentGateway;
 use WPTravelEngine\Core\Cart\Cart;
+use WPTravelEngine\Filters\Events;
 use WPTravelEngine\Helpers\CartInfoParser;
 use WPTravelEngine\Core\Models\Post\Booking;
 use WPTravelEngine\Core\Models\Post\Customer;
@@ -92,6 +93,17 @@ class BookingProcess {
 	 * @var string full_payment|partial|due
 	 */
 	protected string $payment_type;
+
+	/**
+	 * @since 6.5.2
+	 */
+	protected bool $is_new_booking = true;
+
+	/**
+	 * @var bool
+	 * @since 6.5.2
+	 */
+	protected bool $is_new_customer;
 
 	/**
 	 * BookingProcess constructor.
@@ -199,15 +211,27 @@ class BookingProcess {
 			$this->booking->add_payment( $this->payment->get_id() );
 
 			$this->booking->save();
+
 			$this->customer->update_customer_meta( $this->booking->get_id() );
 			$this->customer->save();
+
 			$this->payment->save();
 
 			$this->update_session();
 			$this->payment_gateway_process();
 			$this->send_notification_emails();
 
-			if ( in_array( $this->payment_type, array( 'due', 'partial' ) ) ) {
+			if ( $this->is_new_booking ) {
+				Events::booking_created( $this->booking );
+			} else {
+				Events::booking_updated( $this->booking );
+			}
+
+			if ( $this->is_new_customer ) {
+				Events::customer_created( $this->customer );
+			}
+
+			if ( in_array( $this->payment_type, array( 'due' ) ) ) {
 				do_action( 'wp_travel_engine_after_remaining_payment_process_completed', $this->booking->get_id() );
 			} else {
 				/**
@@ -234,15 +258,16 @@ class BookingProcess {
 	 */
 	protected function maybe_redirect() {
 		$booking_ref = $this->cart->get_booking_ref();
- 		$payment_key = $this->payment->get_payment_key();
+		$payment_key = $this->payment->get_payment_key();
 
- 		/**
- 		 * If booking reference and payment key are set, redirect to thank you page.
- 		 * @since 6.5.0
- 		 */
- 		if ( $booking_ref && $payment_key ) {
- 			wptravelengine_redirect_to_thank_you_page( $booking_ref, $payment_key );
- 		}
+		/**
+		 * If booking reference and payment key are set, redirect to thank you page.
+		 *
+		 * @since 6.5.0
+		 */
+		if ( $booking_ref && $payment_key ) {
+			wptravelengine_redirect_to_thank_you_page( $booking_ref, $payment_key );
+		}
 
 		$this->cart->clear();
 		// Redirect if not redirected till this point.
@@ -293,9 +318,11 @@ class BookingProcess {
 	 */
 	protected function process_booking(): Booking {
 		if ( $booking_id = $this->get_booking_ref() ) {
-			$booking = new Booking( $booking_id );
+			$booking              = new Booking( $booking_id );
+			$this->is_new_booking = false;
 		} else {
-			$booking = $this->create_booking();
+			$booking              = $this->create_booking();
+			$this->is_new_booking = true;
 
 			$this->set_booking_ref( $booking );
 			/**
@@ -347,7 +374,11 @@ class BookingProcess {
 				'booking'      => $this->billing_info,
 				'tax'          => esc_attr( $data[ 'tax' ] ?? '' ),
 				'tduration'    => esc_attr( ( $trip->get_trip_duration() ?? '' ) . ' ' . ( $trip->get_trip_duration_unit() ?? '' ) ),
-				'tenddate'     => ( $trip->get_trip_duration_unit() ?? '' ) == 'days' ? date( 'Y-m-d', strtotime( ( $data[ 'trip_date' ] ?? '' ) . '+' . ( $trip->get_trip_duration() ?? '' ) . ( $trip->get_trip_duration_unit() ?? '' ) ) ) : '',
+				'tenddate'	   => wptravelengine_format_trip_end_datetime(
+					!empty($data['trip_time']) ? $data['trip_time'] : ( !empty($data['trip_date']) ? $data['trip_date'] : '' ),
+					$trip,
+					'Y-m-d\TH:i'
+				),
 				'trip_package' => esc_attr( $package->post_title ?? '' ),
 			);
 
@@ -388,7 +419,8 @@ class BookingProcess {
 			try {
 				$customer_model = new Customer( $customer_id );
 			} catch ( \Exception $e ) {
-				$customer_model = Customer::create_post(
+				$this->is_new_customer = true;
+				$customer_model        = Customer::create_post(
 					array(
 						'post_status' => 'publish',
 						'post_type'   => 'customer',
@@ -396,9 +428,10 @@ class BookingProcess {
 					)
 				);
 			}
-
+			$this->is_new_customer = false;
 		} else {
-			$customer_model = Customer::create_post(
+			$this->is_new_customer = true;
+			$customer_model        = Customer::create_post(
 				array(
 					'post_status' => 'publish',
 					'post_type'   => 'customer',
@@ -458,7 +491,8 @@ class BookingProcess {
 		$payment_model->set_meta( 'booking_id', $this->booking->get_id() )
 					  ->set_meta( 'payment_gateway', $this->payment_method )
 					  ->set_meta( 'payment_status', 'pending' )
-					  ->set_meta( 'billing_info', $this->billing_info );
+					  ->set_meta( 'billing_info', $this->billing_info )
+					  ->set_meta( 'is_due_payment', $this->payment_type === 'due' ? 'yes' : 'no' );
 
 		$payment_types = apply_filters(
 			'wte_payment_modes_and_titles',

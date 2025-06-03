@@ -51,6 +51,19 @@ if ( ! class_exists( 'WTE' ) ) :
 			require_once WP_TRAVEL_ENGINE_BASE_PATH . '/includes/class-wte-session.php';
 			require_once WP_TRAVEL_ENGINE_BASE_PATH . '/includes/class-wte-notices.php';
 
+			if ( ! class_exists( 'Recursive_ArrayAccess' ) ) {
+				include sprintf( '%s/includes/lib/wp-session/class-recursive-arrayaccess.php', WP_TRAVEL_ENGINE_ABSPATH );
+			}
+
+			if ( ! class_exists( 'WP_Session_Utils' ) ) {
+				include sprintf( '%s/includes/lib/wp-session/class-wp-session-utils.php', WP_TRAVEL_ENGINE_ABSPATH );
+			}
+
+			if ( ! class_exists( 'WP_Session' ) ) {
+				include sprintf( '%s/includes/lib/wp-session/class-wp-session.php', WP_TRAVEL_ENGINE_ABSPATH );
+				include sprintf( '%s/includes/lib/wp-session/wp-session.php', WP_TRAVEL_ENGINE_ABSPATH );
+			}
+
 			$this->session = new WTE_Session();
 			$this->notices = new WTE_Notices();
 		}

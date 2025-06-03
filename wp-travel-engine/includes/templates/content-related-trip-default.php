@@ -134,7 +134,7 @@ if ( class_exists( 'Wte_Trip_Review_Init' ) ) {
                             /* translators: %1$s: Trip duration number, %2$s: Trip duration unit (days/hours etc) */
                             printf( '%1$s %2$s', 
                                 esc_html( $trip_data->get_trip_duration() ),
-                                esc_html( $trip_data->get_trip_duration_unit() )
+                                esc_html( wptravelengine_get_label_by_slug( $trip_data->get_trip_duration_unit(), $trip_data->get_trip_duration() ) )
                             );
                             ?>
 						</span>

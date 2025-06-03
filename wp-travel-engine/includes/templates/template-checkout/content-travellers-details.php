@@ -17,6 +17,9 @@ if ( 'only_lead' === $travellers_details_type || $number_of_travellers <= 1 ) {
     return;
 }
 
+if( isset( $travellers_form_fields ) && isset( $travellers_form_fields[0]->fields ) && empty( $travellers_form_fields[0]->fields ) ) {
+	return;
+}
 ?>
 <!-- Traveller's Details Form -->
 <div class="wpte-checkout__box collapsible <?php echo $show_title ? 'open' : ''; ?>">

@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 6.5.1
+Stable tag: 6.5.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -367,6 +367,17 @@ Yes. We have created WooCommerce Payments add-ons that supports all the payment 
 Please send us an email via [support ticket](https://wptravelengine.com/support-ticket/?utm_source=free_plugin&utm_medium=wporg&utm_campaign=support), and we will be happy to help you.
 
 == Changelog ==
+
+= 6.5.2 - 3rd June 2025 =
+* New: Introduced a cron job framework for scheduled tasks.
+* Enhancement: Enabled support for applying discount coupons through URL parameters.
+* Fix: Adjusted sticky tab content positioning to maintain accuracy after tab switches across all devices.
+* Fix: Booking widget error on single trip page after demo import.
+* Fix: Set the appropriate Reply-To email header to ensure proper handling of user responses.
+* Fix: Compatibility issue with JWT Authentication Plugin.
+* Fix: Special characters display issue in the Booking Summary.
+* Fix: Text translation issue in the related trips section.
+* Fix: Difficulty level now properly saves after assignment.
 
 = 6.5.1 - 13th May 2025 =
 * Feature: Allow users to display pricing from any category independently, improving flexibility in booking forms.

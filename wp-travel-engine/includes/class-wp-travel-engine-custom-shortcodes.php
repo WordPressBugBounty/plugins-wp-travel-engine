@@ -367,13 +367,17 @@ class WP_Travel_Engine_Custom_Shortcodes {
 			array(
 				'activities'  => '',
 				'destination' => '',
-				'trip_types'  => '',
+				'trip_types'  => '',	
 				'layout'      => 'grid',
 				'postsnumber' => get_option( 'posts_per_page' ),
 			),
 			$attr,
 			'wte_trip_tax'
 		);
+
+		if ( ! in_array( $attr[ 'layout' ], array( 'grid', 'list' ) ) ) {
+			return '<h1>' . sprintf( __( 'Layout not found: %s', 'wp-travel-engine' ), $attr[ 'layout' ] ) . '</h1>';
+		}
 
 		if ( ! empty( $attr[ 'activities' ] ) ) {
 			$activities           = array();

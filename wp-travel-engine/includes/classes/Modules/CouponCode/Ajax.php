@@ -141,9 +141,11 @@ class Ajax {
 		global $wte_cart;
 		$wte_cart->discount_clear();
 
+		$url = esc_url( remove_query_arg( 'discount', wp_travel_engine_get_raw_referer() ) );
 		\wp_send_json_success(
 			array(
 				'default_cost' => wptravelengine_the_price( $wte_cart->get_subtotal(), false, false ),
+				'url'          => $url,
 				'message'      => __(
 					'Applied Coupons reset successfully.',
 					'wp-travel-engine'

@@ -4,6 +4,7 @@ use WPTravelEngine\Core\Controllers\Ajax\AddToCart;
 use WPTravelEngine\Core\Controllers\Ajax\ApplyCoupon;
 use WPTravelEngine\Core\Controllers\Ajax\Cart;
 use WPTravelEngine\Core\Controllers\Ajax\Checkout;
+use WPTravelEngine\Core\Controllers\Ajax\EnquiryMail;
 use WPTravelEngine\Core\Controllers\Ajax\UpdateMailTemplate;
 use WPTravelEngine\Core\Models\Post\Booking;
 use WPTravelEngine\Helpers\Functions;
@@ -33,21 +34,29 @@ class WTE_Ajax {
 		$ajax_registry->register( Cart::class );
 		/**
 		 * Adds resend purchase receipt action
+		 *
 		 * @since 6.4.0
 		 */
 		$ajax_registry->register( ResendPurchaseReceipt::class );
 
 		/**
 		 * Adds upcoming tours ajax actions
+		 *
 		 * @since 6.4.1
 		 */
 		$ajax_registry->register( UpcomingToursFilter::class );
 		$ajax_registry->register( UpcomingToursDetails::class );
 		/**
 		 * Adds update mail template ajax action
+		 *
 		 * @since 6.5.0
 		 */
 		$ajax_registry->register( UpdateMailTemplate::class );
+
+		/**
+		 * @since 6.5.2
+		 */
+		$ajax_registry->register( EnquiryMail::class );
 
 		add_action( 'wp_ajax_nopriv_email_test', function () {
 
@@ -103,138 +112,138 @@ class WTE_Ajax {
 		) );
 
 		$actions = array(
-			'wte_enquiry_send_mail'                 => array(
-				'callback' => array(
-					'\WP_Travel_Engine_Enquiry_Form_Shortcodes',
-					'wte_enquiry_send_mail',
-				),
-			),
-			// [x]
-			'wpte_onboard_save_function'            => array(
-				'callback' => array(
-					'\WP_TRAVEL_ENGINE_ONBOARDING_PROCESS',
-					'wpte_onboard_save_function_callback',
-				),
-			),
-			// [x]
-			'wp_add_trip_info'                      => array(
-				'callback' => array(
-					'Wp_Travel_Engine_Admin',
-					'wp_add_trip_info',
-				),
-			),
-			// [x]
-			'wte_show_ajax_result'                  => array(
-				'callback' => array(
-					'\WPTravelEngine\Modules\TripSearch',
-					'filter_trips_html',
-				),
-			),
-			// [x]
-			'wte_show_ajax_result_load'             => array(
-				'callback' => array(
-					'\WPTravelEngine\Modules\TripSearch',
-					'load_trips_html',
-				),
-			),
-			// [x]
-			'wp_travel_engine_check_coupon_code'    => array(
-				'callback' => array(
-					'\WPTravelEngine\Modules\CouponCode\Ajax',
-					'check_coupon_code',
-				),
-			),
-			// [x]
-			//			'wte_session_cart_apply_coupon'         => array(
-			//				'callback' => array(
-			//					'\WPTravelEngine\Modules\CouponCode\Ajax',
-			//					'apply_coupon',
-			//				),
-			//			),
-			// [x]
-			'wte_session_cart_reset_coupon'         => array(
-				'callback' => array(
-					'\WPTravelEngine\Modules\CouponCode\Ajax',
-					'reset_coupon',
-				),
-			),
-			// [x]
-			'wte_get_enquiry_preview'               => array(
-				'callback' => array(
-					'\Wp_Travel_Engine_Admin',
-					'wte_get_enquiry_preview_action',
-				),
-			),
-			// [x]
-			'wp_travel_engine_featured_trip'        => array(
-				'callback' => array(
-					'\Wp_Travel_Engine_Admin',
-					'wp_travel_engine_featured_trip_admin_ajax',
-				),
-			),
-			// [x]
-			'wp_travel_engine_featured_term'        => array(
-				'callback' => array(
-					'\Wp_Travel_Engine_Admin',
-					'wp_travel_engine_featured_term_admin_ajax',
-				),
-			),
-			// [x]
-			'wpte_admin_load_tab_content'           => array(
-				'callback' => array(
-					'\Wp_Travel_Engine_Admin',
-					'wpte_admin_load_tab_content_callback',
-				),
-			),
-			// [x]
-			'wpte_tab_trip_save_and_continue'       => array(
-				'sanitization_callback' => array( '\Wp_Travel_Engine_Admin', 'sanitize_post_data' ),
-				'callback'              => array(
-					'\Wp_Travel_Engine_Admin',
-					'wpte_tab_trip_save_and_continue_callback',
-				),
-			),
-			// [x]
-			'wpte_global_settings_load_tab_content' => array(
-				'callback' => array(
-					'\Wp_Travel_Engine_Admin',
-					'wpte_global_settings_load_tab_content_callback',
-				),
-			),
-			// [x]
-			// 'wp_add_trip_cart'                      => array( 'callback' => array( '\Wp_Travel_Engine_Public', 'wp_add_trip_cart' ) ),
-			'wte_remove_order'                      => array(
-				'callback' => array(
-					'\Wp_Travel_Engine_Public',
-					'wte_remove_from_cart',
-				),
-			),
-			'wte_update_cart'                       => array(
-				'callback' => array(
-					'\Wp_Travel_Engine_Public',
-					'wte_ajax_update_cart',
-				),
-			),
-			'wpte_ajax_load_more'                   => array(
-				'callback'     => array( '\Wp_Travel_Engine_Public', 'wpte_ajax_load_more' ),
-				'nonce_action' => 'wpte-be-load-more-nonce',
-			),
-			'wpte_ajax_load_more_destination'       => array(
-				'callback'     => array( '\Wp_Travel_Engine_Public', 'wpte_ajax_load_more_destination' ),
-				'nonce_action' => 'wpte-be-load-more-nonce',
-			),
-			'wte_payment_gateway'                   => array(
-				'callback'     => array( '\Wp_Travel_Engine_Public', 'wte_payment_gateway' ),
-				'nonce_action' => 'wp_rest',
-			),
-			'wte_set_difficulty_term_level'         => array(
-				'callback'     => array( __CLASS__, 'set_difficulty_term_level' ),
-				'nonce_action' => 'wp_xhr',
-			),
-			'wte_user_wishlist'                     => array(
-				'callback'     => array( __CLASS__, 'wte_user_wishlist' ),
-				'nonce_action' => 'wp_xhr',
-			),
+//			'wte_enquiry_send_mail'                 => array(
+//				'callback' => array(
+//					'\WP_Travel_Engine_Enquiry_Form_Shortcodes',
+//					'wte_enquiry_send_mail',
+//				),
+//			),
+// [x]
+'wpte_onboard_save_function'            => array(
+	'callback' => array(
+		'\WP_TRAVEL_ENGINE_ONBOARDING_PROCESS',
+		'wpte_onboard_save_function_callback',
+	),
+),
+// [x]
+'wp_add_trip_info'                      => array(
+	'callback' => array(
+		'Wp_Travel_Engine_Admin',
+		'wp_add_trip_info',
+	),
+),
+// [x]
+'wte_show_ajax_result'                  => array(
+	'callback' => array(
+		'\WPTravelEngine\Modules\TripSearch',
+		'filter_trips_html',
+	),
+),
+// [x]
+'wte_show_ajax_result_load'             => array(
+	'callback' => array(
+		'\WPTravelEngine\Modules\TripSearch',
+		'load_trips_html',
+	),
+),
+// [x]
+'wp_travel_engine_check_coupon_code'    => array(
+	'callback' => array(
+		'\WPTravelEngine\Modules\CouponCode\Ajax',
+		'check_coupon_code',
+	),
+),
+// [x]
+//			'wte_session_cart_apply_coupon'         => array(
+//				'callback' => array(
+//					'\WPTravelEngine\Modules\CouponCode\Ajax',
+//					'apply_coupon',
+//				),
+//			),
+// [x]
+'wte_session_cart_reset_coupon'         => array(
+	'callback' => array(
+		'\WPTravelEngine\Modules\CouponCode\Ajax',
+		'reset_coupon',
+	),
+),
+// [x]
+'wte_get_enquiry_preview'               => array(
+	'callback' => array(
+		'\Wp_Travel_Engine_Admin',
+		'wte_get_enquiry_preview_action',
+	),
+),
+// [x]
+'wp_travel_engine_featured_trip'        => array(
+	'callback' => array(
+		'\Wp_Travel_Engine_Admin',
+		'wp_travel_engine_featured_trip_admin_ajax',
+	),
+),
+// [x]
+'wp_travel_engine_featured_term'        => array(
+	'callback' => array(
+		'\Wp_Travel_Engine_Admin',
+		'wp_travel_engine_featured_term_admin_ajax',
+	),
+),
+// [x]
+'wpte_admin_load_tab_content'           => array(
+	'callback' => array(
+		'\Wp_Travel_Engine_Admin',
+		'wpte_admin_load_tab_content_callback',
+	),
+),
+// [x]
+'wpte_tab_trip_save_and_continue'       => array(
+	'sanitization_callback' => array( '\Wp_Travel_Engine_Admin', 'sanitize_post_data' ),
+	'callback'              => array(
+		'\Wp_Travel_Engine_Admin',
+		'wpte_tab_trip_save_and_continue_callback',
+	),
+),
+// [x]
+'wpte_global_settings_load_tab_content' => array(
+	'callback' => array(
+		'\Wp_Travel_Engine_Admin',
+		'wpte_global_settings_load_tab_content_callback',
+	),
+),
+// [x]
+// 'wp_add_trip_cart'                      => array( 'callback' => array( '\Wp_Travel_Engine_Public', 'wp_add_trip_cart' ) ),
+'wte_remove_order'                      => array(
+	'callback' => array(
+		'\Wp_Travel_Engine_Public',
+		'wte_remove_from_cart',
+	),
+),
+'wte_update_cart'                       => array(
+	'callback' => array(
+		'\Wp_Travel_Engine_Public',
+		'wte_ajax_update_cart',
+	),
+),
+'wpte_ajax_load_more'                   => array(
+	'callback'     => array( '\Wp_Travel_Engine_Public', 'wpte_ajax_load_more' ),
+	'nonce_action' => 'wpte-be-load-more-nonce',
+),
+'wpte_ajax_load_more_destination'       => array(
+	'callback'     => array( '\Wp_Travel_Engine_Public', 'wpte_ajax_load_more_destination' ),
+	'nonce_action' => 'wpte-be-load-more-nonce',
+),
+'wte_payment_gateway'                   => array(
+	'callback'     => array( '\Wp_Travel_Engine_Public', 'wte_payment_gateway' ),
+	'nonce_action' => 'wp_rest',
+),
+'wte_set_difficulty_term_level'         => array(
+	'callback'     => array( __CLASS__, 'set_difficulty_term_level' ),
+	'nonce_action' => 'wp_xhr',
+),
+'wte_user_wishlist'                     => array(
+	'callback'     => array( __CLASS__, 'wte_user_wishlist' ),
+	'nonce_action' => 'wp_xhr',
+),
 		);
 
 		foreach ( $actions as $action => $args ) {
@@ -302,7 +311,7 @@ class WTE_Ajax {
 	 * Sends test email.
 	 */
 	public function send_test_email() {
-		if ( ! isset( $_POST[ 'nonce' ] ) ){
+		if ( ! isset( $_POST[ 'nonce' ] ) ) {
 			wp_send_json_error( array( 'message' => __( 'Missing required parameters.', 'wp-travel-engine' ) ) );
 		}
 
@@ -310,21 +319,21 @@ class WTE_Ajax {
 			wp_send_json_error( array( 'message' => __( 'Security Error! Nonce verification failed', 'wp-travel-engine' ) ) );
 			die;
 		}
-		if( isset( $_POST[ 'id' ] ) && isset( $_POST[ 'tab' ] ) ) {
+		if ( isset( $_POST[ 'id' ] ) && isset( $_POST[ 'tab' ] ) ) {
 			$global_settings = wptravelengine_settings();
-			$subject = $global_settings->get( $_POST[ 'tab' ] .'_email_notify_tabs' )[ $_POST[ 'id' ] ][ 'subject' ];
-			$content = $global_settings->get( $_POST[ 'tab' ] .'_email_notify_tabs' )[ $_POST[ 'id' ] ][ 'content' ];
+			$subject         = $global_settings->get( $_POST[ 'tab' ] . '_email_notify_tabs' )[ $_POST[ 'id' ] ][ 'subject' ];
+			$content         = $global_settings->get( $_POST[ 'tab' ] . '_email_notify_tabs' )[ $_POST[ 'id' ] ][ 'content' ];
 		} else {
-			$subject   = get_bloginfo( 'name' ) . " Test Email: Confirming Server Configuration";
-			$content   = "This is a test email to confirm that your email server configuration is set up correctly. You should have received this email shortly after initiating the test from our system.\n\nIf you are reading this message, it means that your server is properly configured for email sending. Congratulations!";
+			$subject = get_bloginfo( 'name' ) . " Test Email: Confirming Server Configuration";
+			$content = "This is a test email to confirm that your email server configuration is set up correctly. You should have received this email shortly after initiating the test from our system.\n\nIf you are reading this message, it means that your server is properly configured for email sending. Congratulations!";
 		}
-		$to        = sanitize_email( $_POST[ 'email' ] ?? wp_get_current_user()->user_email );
+		$to = sanitize_email( $_POST[ 'email' ] ?? wp_get_current_user()->user_email );
 
 		$email = new Email();
 		$email->set( 'to', $to )
-			  ->set( 'my_subject', $subject )
-			  ->set( 'template', $_POST[ 'id' ] ?? '' )
-			  ->set( 'content', $content );
+		      ->set( 'my_subject', $subject )
+		      ->set( 'template', $_POST[ 'id' ] ?? '' )
+		      ->set( 'content', $content );
 
 		if ( $email->send() ) {
 			wp_send_json_success( array( 'message' => 'Test Email Sent Successfully. Please check your inbox.' ) );
@@ -418,7 +427,7 @@ class WTE_Ajax {
 		$new_post_id = wptravelengine_duplicate_post( $post );
 
 		$primary_package_id = get_post_meta( $post_id, 'primary_package', true );
-		$packages_ids = get_post_meta( $post_id, 'packages_ids', true );
+		$packages_ids       = get_post_meta( $post_id, 'packages_ids', true );
 
 		$_new_package_ids = array();
 		if ( is_array( $packages_ids ) ) {

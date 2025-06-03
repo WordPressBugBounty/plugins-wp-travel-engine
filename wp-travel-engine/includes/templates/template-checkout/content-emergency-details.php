@@ -1,6 +1,6 @@
 <?php
 /**
- * @var WPTravelEngine\Builders\FormFields\FormField $emergency_contact_fields
+ * @var WPTravelEngine\Builders\FormFields\EmergencyFormFields $emergency_contact_fields
  * @var bool $show_title
  * @since 6.3.0
  */
@@ -10,6 +10,10 @@ if ( 'hide' === ( $args['attributes']['travellers'] ?? '' ) ) {
 
 if ( 'hide' === ( $args['attributes']['emergency'] ?? '' ) ) {
     return;
+}
+
+if ( isset( $emergency_contact_fields->fields ) && empty( $emergency_contact_fields->fields ) ) {
+	return;
 }
 ?>
 <!-- Emergency Details Form -->

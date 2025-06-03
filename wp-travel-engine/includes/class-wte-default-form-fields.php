@@ -386,7 +386,7 @@ class WTE_Default_Form_Fields {
 	 * @return array[]
 	 */
 	public static function emergency_contact() {
-		$fields = array(
+		$fields = apply_filters( 'wp_travel_engine_emergency_contact_fields_display', array(
 			'traveller_emergency_title' => array(
 				'type'          => 'select',
 				'field_label'   => __( 'Title', 'wp-travel-engine' ),
@@ -473,7 +473,7 @@ class WTE_Default_Form_Fields {
 				'priority'      => 170,
 				'default_field' => true,
 			),
-		);
+		) );
 
 		return $fields;
 	}

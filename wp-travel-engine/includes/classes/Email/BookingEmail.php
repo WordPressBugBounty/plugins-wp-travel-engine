@@ -159,7 +159,7 @@ class BookingEmail extends Email {
 	public function set_headers() {
 		$this->add_headers(
 			array(
-				'reply_to' => 'Reply-To: ' . ( 'admin' === $this->sendto ? wptravelengine_settings()->get( 'email.reply_to' ) : $this->booking->get_billing_info( 'email' ) ),
+				'reply_to' => 'Reply-To: ' . ( 'admin' === $this->sendto ? $this->booking->get_billing_info( 'email' ) : wptravelengine_settings()->get( 'email.reply_to' ) ),
 			)
 		);
 		return $this;

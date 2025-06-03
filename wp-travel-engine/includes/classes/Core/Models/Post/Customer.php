@@ -137,8 +137,8 @@ class Customer extends PostModel {
 	/**
 	 * Retrieves customer avatar.
 	 *
-	 * @since 6.4.0
 	 * @return string Customer Avatar
+	 * @since 6.4.0
 	 */
 	public function get_customer_avatar() {
 		return get_avatar_url( $this->get_customer_email(), [ 'default' => 'mm' ] );
@@ -147,8 +147,8 @@ class Customer extends PostModel {
 	/**
 	 * Retrieves customer phone.
 	 *
-	 * @since 6.4.0
 	 * @return string Customer Phone
+	 * @since 6.4.0
 	 */
 	public function get_customer_phone() {
 		$customer_details = $this->get_customer_details();
@@ -159,8 +159,8 @@ class Customer extends PostModel {
 	/**
 	 * Retrieves customer state.
 	 *
-	 * @since 6.4.0
 	 * @return string Customer State
+	 * @since 6.4.0
 	 */
 	public function get_customer_state() {
 		$customer_details = $this->get_customer_details();
@@ -194,6 +194,7 @@ class Customer extends PostModel {
 		} catch ( \Exception $e ) {
 			// Do nothing.
 		}
+
 		return $bookings;
 	}
 
@@ -209,9 +210,9 @@ class Customer extends PostModel {
 	/**
 	 * Customer detail info.
 	 *
+	 * @return array Customer Detail Info
 	 * @since 6.4.0
 	 *
-	 * @return array Customer Detail Info
 	 */
 	public function get_customer_info() {
 		$user = get_user_by( 'email', $this->get_customer_email() );
@@ -219,20 +220,21 @@ class Customer extends PostModel {
 		if ( $user instanceof \WP_User ) {
 			$data = get_user_meta( $user->ID, 'wp_travel_engine_customer_billing_details', true );
 		}
+
 		return [
-			'fname'    => $user->first_name ?? $this->get_customer_fname(),
-			'lname'    => $user->last_name ?? $this->get_customer_lname(),
-			'email'    => $user->user_email ?? $this->get_customer_email(),
-			'phone'    => $data['billing_phone'] ?? $this->get_customer_phone(),
+			'fname' => $user->first_name ?? $this->get_customer_fname(),
+			'lname' => $user->last_name ?? $this->get_customer_lname(),
+			'email' => $user->user_email ?? $this->get_customer_email(),
+			'phone' => $data[ 'billing_phone' ] ?? $this->get_customer_phone(),
 		];
 	}
 
 	/**
 	 * Retrieves customer all address info.
 	 *
+	 * @return array Customer Address Info
 	 * @since 6.4.0
 	 *
-	 * @return array Customer Address Info
 	 */
 	public function get_customer_addresses() {
 		$user = get_user_by( 'email', $this->get_customer_email() );
@@ -240,12 +242,13 @@ class Customer extends PostModel {
 		if ( $user instanceof \WP_User ) {
 			$data = get_user_meta( $user->ID, 'wp_travel_engine_customer_billing_details', true );
 		}
+
 		return [
-			'address'  => $data['billing_address'] ?? $this->get_customer_address(),
-			'city'     => $data['billing_city'] ?? $this->get_customer_city(),
-			'state'    => $data['billing_state'] ?? $this->get_customer_state(),
-			'postcode' => $data['billing_zip_code'] ?? $this->get_customer_postcode(),
-			'country'  => $data['billing_country'] ?? $this->get_customer_country(),
+			'address'  => $data[ 'billing_address' ] ?? $this->get_customer_address(),
+			'city'     => $data[ 'billing_city' ] ?? $this->get_customer_city(),
+			'state'    => $data[ 'billing_state' ] ?? $this->get_customer_state(),
+			'postcode' => $data[ 'billing_zip_code' ] ?? $this->get_customer_postcode(),
+			'country'  => $data[ 'billing_country' ] ?? $this->get_customer_country(),
 		];
 	}
 
@@ -292,6 +295,7 @@ class Customer extends PostModel {
 	public static function create_post( array $postarr ): Customer {
 		/* @var $model Customer */
 		$model = parent::create_post( $postarr );
+
 		return $model;
 	}
 
@@ -327,7 +331,7 @@ class Customer extends PostModel {
 			$user = wp_get_current_user();
 		} else {
 			$billing_info = get_post_meta( $booking_id, 'wptravelengine_billing_details', true );
-			$user 		  = get_user_by( 'email', $billing_info[ 'email' ] ?? $this->get_customer_email() );
+			$user         = get_user_by( 'email', $billing_info[ 'email' ] ?? $this->get_customer_email() );
 		}
 
 		if ( $user instanceof \WP_User ) {
@@ -390,11 +394,32 @@ class Customer extends PostModel {
 	 * Retrieves the user ID for a given email.
 	 *
 	 * @param string $email The email address to search for.
+	 *
 	 * @return int|false The user ID if found, false otherwise.
 	 * @since 6.4.0
 	 */
 	public function get_user_id( string $email ) {
 		$user = get_user_by( 'email', $email );
+
 		return $user->ID ?? false;
+	}
+
+	/**
+	 * @return array
+	 * @since 6.5.2
+	 */
+	public function get_data(): array {
+		return array(
+			'id'         => $this->get_id(),
+			'email'      => $this->get_customer_email(),
+			'first_name' => $this->get_customer_fname(),
+			'last_name'  => $this->get_customer_lname(),
+			'address'    => $this->get_customer_address(),
+			'city'       => $this->get_customer_city(),
+			'state'      => $this->get_customer_state(),
+			'country'    => $this->get_customer_country(),
+			'postcode'   => $this->get_customer_postcode(),
+			'phone'      => $this->get_customer_phone(),
+		);
 	}
 }

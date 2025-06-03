@@ -28,19 +28,6 @@ class WTE_Session {
 			define( 'WP_TRAVEL_ENGINE_SESSION_COOKIE', 'wordpress_wp_travel_engine_session' );
 		}
 
-		if ( ! class_exists( 'Recursive_ArrayAccess' ) ) {
-			include sprintf( '%s/includes/lib/wp-session/class-recursive-arrayaccess.php', WP_TRAVEL_ENGINE_ABSPATH );
-		}
-
-		if ( ! class_exists( 'WP_Session_Utils' ) ) {
-			include sprintf( '%s/includes/lib/wp-session/class-wp-session-utils.php', WP_TRAVEL_ENGINE_ABSPATH );
-		}
-
-		if ( ! class_exists( 'WP_Session' ) ) {
-			include sprintf( '%s/includes/lib/wp-session/class-wp-session.php', WP_TRAVEL_ENGINE_ABSPATH );
-			include sprintf( '%s/includes/lib/wp-session/wp-session.php', WP_TRAVEL_ENGINE_ABSPATH );
-		}
-
 		if ( empty( $this->session ) ) { // on page load or refresh.
 			add_action( 'plugins_loaded', array( $this, 'init' ), - 1 );
 		}

@@ -8,10 +8,7 @@
 namespace WPTravelEngine\Booking\Email;
 use WPTravelEngine\Core\Models\Post\Trip;
 use WPTravelEngine\Core\Models\Settings\Options;
-use WPTravelEngine\Builders\FormFields\FormField;
-use WPTravelEngine\Builders\FormFields\DefaultFormFields;
-use WPTravelEngine\Builders\FormFields\TravellerEditFormFields;
-
+use WPTravelEngine\Builders\FormFields\TravellerFormFields;
 use WPTravelEngine\Email\TemplateTags;
 use WPTravelEngine\Helpers\Countries;
 use WPTravelEngine\Helpers\CartInfoParser;
@@ -775,6 +772,7 @@ class Template_Tags extends TemplateTags {
 		endif;
 
 		$booking_id        = $this->booking->ID;
+		$_booking          = new Booking( $booking_id );
 		$edit_booking_link = admin_url() . 'post.php?post=' . $booking_id . '&action=edit';
 
 		parent::set_tags( apply_filters(
@@ -827,6 +825,7 @@ class Template_Tags extends TemplateTags {
 				'{trip_total_price}' 		  => $this->get_total_amount(),
 				'{trip_paid_amount}' 		  => $this->get_paid_amount(),
 				'{trip_due_amount}' 		  => $this->get_due_amount(),
+				'{payment_link}' 			  => $_booking->get_due_payment_link(),
 			),
 			$this->payment->ID,
 			$this->booking->ID
@@ -1004,51 +1003,36 @@ class Template_Tags extends TemplateTags {
 				</td>
 			</tr>
 			<?php
-			$traveller_form_fields = DefaultFormFields::traveller();
-			foreach ( $this->traveller_details as $traveler => $details ) {
+			$traveller_details = array();
+			foreach ( $this->traveller_details as $details ) {
+				$traveller_form_fields = new TravellerFormFields();
+				$traveller_details[]   = $traveller_form_fields->with_values( $details, new Booking( $this->booking->ID ) );
+			}
+			foreach ( $traveller_details as $index => $traveller_detail ) :
+				$traveller_label = sprintf( __( 'Traveller %d%s', 'wp-travel-engine' ), $index + 1, $index === 0 ? __( ' (Lead Traveller)', 'wp-travel-engine' ) : '' );
 				?>
 				<tr>
-					<td class="title-holder" style="margin: 0;" valign="top">
-						<h3 class="alignleft"><?php echo esc_html( sprintf( 'Traveller %s', $traveler + 1 ) ); ?></h3>
+					<td>
+						<h3><?php echo esc_html( $traveller_label ); ?></h3>
 					</td>
 				</tr>
 				<?php
-				foreach ( $traveller_form_fields as $field_id => $field_args ) {
-					$field_name = $field_args[ 'name' ];
-					if ( preg_match( "#\[([^\[]+)]$#", $field_args[ 'name' ], $matches ) ) {
-						$field_name = $matches[ 1 ];
-					}
-
-					if ( ! isset( $details[ $field_name ] ) ) {
-						continue;
-					}
-
-					$key   = $field_args[ 'field_label' ] ?? $field_name;
-					$value = $details[ $field_name ];
-
-					if ( is_array( $value ) ) {
-						$value = implode( ',', $value );
-					}
-					$countries_list = Countries::list();
-					if ( isset( $countries_list[ $value ] ) ) {
-						$value = $countries_list[ $value ];
-					}
-					?>
-					<tr>
-						<td><?php echo esc_html( ucfirst( $key ) ); ?></td>
-						<td>
-							<?php
-							if ( filter_var( $value, FILTER_VALIDATE_URL ) ) : ?>
-								<a href="<?php echo esc_url( $value ); ?>"
-								   target="_blank"><?php echo esc_html( basename( $value ) ); ?></a>
-							<?php else: ?>
-								<?php echo esc_html( $value ); ?>
-							<?php endif; ?>
-						</td>
-					</tr>
-					<?php
-				}
-			}
+					foreach ( $traveller_detail as $field ) :
+					if( empty( $field[ 'value' ] ) ) continue;
+					$value = isset( $field[ 'value' ] ) ? $field[ 'value' ] : ''; ?>
+						<tr>
+							<td><?php echo esc_html( ucfirst( $field[ 'field_label' ] ) ); ?></td>
+							<td>
+								<?php
+								if ( filter_var( $value, FILTER_VALIDATE_URL ) ) : ?>
+									<a href="<?php echo esc_url( $value ); ?>" target="_blank"><?php echo esc_html( basename( $value ) ); ?></a>
+								<?php else: ?>
+									<strong><?php echo is_array( $value ) ? esc_html( implode(', ', $value ) ) : esc_html( $value ?? '' ); ?></strong>
+								<?php endif; ?>
+							</td>
+						</tr>
+					<?php endforeach;
+			endforeach;
 			?>
 		</table>
 		<?php

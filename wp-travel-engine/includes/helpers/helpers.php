@@ -1480,8 +1480,8 @@ function wte_get_active_single_trip_tabs() {
 				break;
 			case 'cost':
 				if (
-					empty( $post_meta[ 'cost' ][ 'includes_title' ] )
-					&& empty( $post_meta[ 'cost' ][ 'excludes_title' ] )
+					empty( $post_meta[ 'cost' ][ 'cost_includes' ] )
+					&& empty( $post_meta[ 'cost' ][ 'cost_excludes' ] )
 				) {
 					unset( $settings[ 'trip_tabs' ][ 'id' ][ $value ] );
 				}

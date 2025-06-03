@@ -16,6 +16,12 @@ use WPTravelEngine\Builders\FormFields\DefaultFormFields;
  * @since 6.3.0
  */
 class EmergencyFormFields extends FormField {
+
+	/**
+	 * @var array
+	 */
+	public $fields;
+
 	public function __construct() {
 		parent::__construct( false );
 
@@ -26,6 +32,9 @@ class EmergencyFormFields extends FormField {
 
 	public function render() {
 		$this->fields = $this->map_fields( $this->fields );
+		if( empty( $this->fields ) ) {
+			return;
+		}
 		?>
 		<div class="wpte-checkout__form-section">
 			<div class="wpte-checkout__form-row">
@@ -82,8 +91,8 @@ class EmergencyFormFields extends FormField {
 			$field[ 'value' ]     = $form_data[ $name ] ?? $field[ 'default' ] ?? '';
 			// Convert country code to country name to show in the emergency form.
 			$countries_list = Countries::list();
-			if ( isset( $countries_list[ $field[ 'value' ] ] ) ) {
-				$field[ 'value' ] = $countries_list[ $field[ 'value' ] ];
+			if ( isset( $field['value'] ) && is_string( $field['value'] ) && isset( $countries_list[ $field['value'] ] ) ) {
+				$field['value'] = $countries_list[ $field['value'] ];
 			}
 
 			return $field;
