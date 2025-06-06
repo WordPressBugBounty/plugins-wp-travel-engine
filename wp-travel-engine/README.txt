@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 6.5.2
+Stable tag: 6.5.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -367,6 +367,12 @@ Yes. We have created WooCommerce Payments add-ons that supports all the payment 
 Please send us an email via [support ticket](https://wptravelengine.com/support-ticket/?utm_source=free_plugin&utm_medium=wporg&utm_campaign=support), and we will be happy to help you.
 
 == Changelog ==
+
+= 6.5.3 - 6th June 2025 =
+* Fix: Resolved an issue where the Stripe payment form was not mounted on the initial load of the checkout page.
+* Fix: Removed due amount display on the checkout page for the 'Book Now, Pay Later' option, as it doesn't support partial payments.
+* Fix: Updated Google OAuth 2.0 parameters to include account selection prompt.
+* Fix: Resolved missing data problem during booking export.
 
 = 6.5.2 - 3rd June 2025 =
 * New: Introduced a cron job framework for scheduled tasks.

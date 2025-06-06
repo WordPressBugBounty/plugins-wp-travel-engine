@@ -56,12 +56,13 @@ class WP_Travel_Engine_Booking_Export {
 
 		$meta_keys = array(
 			'wp_travel_engine_booking_status',
-			'wp_travel_engine_booking_setting',
+			'order_trips',
 			'billing_info',
 			'paid_amount',
 			'wp_travel_engine_booking_payment_gateway',
 			'_wte_wc_order_id',
-			'due_amount',
+			'payments',
+			'due_amount'
 		);
 
 		$post_status = array( 'publish', 'draft' );
@@ -112,7 +113,14 @@ class WP_Travel_Engine_Booking_Export {
 		         LIMIT 1
 		        ) AS wc_id,
 
-		        p.post_date AS BookingDate
+		        p.post_date AS BookingDate,
+
+				(
+					SELECT pm6.meta_value
+					FROM $wpdb->postmeta pm6
+					WHERE pm6.post_id = p.ID AND pm6.meta_key = %s
+					LIMIT 1
+				) AS payments
 
 		    FROM
 		        $wpdb->postmeta pm
@@ -324,9 +332,10 @@ class WP_Travel_Engine_Booking_Export {
 			// Process place order data.
 			if ( isset( $data->placeorder ) ) {
 				$unserializedOrderData = unserialize( $data->placeorder );
-				$tripname              = isset( $unserializedOrderData['place_order']['tname'] ) ? $unserializedOrderData['place_order']['tname'] : '';
-				$traveler              = isset( $unserializedOrderData['place_order']['traveler'] ) ? $unserializedOrderData['place_order']['traveler'] : '';
-				$tripstartingdate      = isset( $unserializedOrderData['place_order']['datetime'] ) ? $unserializedOrderData['place_order']['datetime'] : '';
+				$unserializedOrderData = (object) array_shift($unserializedOrderData);
+				$tripname              = isset( $unserializedOrderData->title ) ? $unserializedOrderData->title : '';
+				$traveler              = isset( $unserializedOrderData->pax ) ? count($unserializedOrderData->pax) : '';
+				$tripstartingdate      = isset( $unserializedOrderData->datetime ) ? $unserializedOrderData->datetime : '';
 			}
 
 			// Process billing info.
@@ -342,6 +351,19 @@ class WP_Travel_Engine_Booking_Export {
 			if ( isset( $data->PaymentGateway ) ) {
 				$paymentgateway = $data->PaymentGateway != 'N/A' ? $data->PaymentGateway : '';
 			}
+			
+			// Handle payment gateway retrieval
+			if ( empty($data->PaymentGateway) && ! empty( $data->payments ) ) {
+				$payment_ids = maybe_unserialize( $data->payments );
+				if (is_array($payment_ids) && !empty($payment_ids)) {
+					$latest_payment_id = end($payment_ids); // Get the last payment ID
+					$payment_gateway = get_post_meta($latest_payment_id, 'payment_gateway', true);
+					$paymentgateway = $payment_gateway ?: '';
+				} else {
+					$paymentgateway = ''; // Default value if no valid payment IDs
+				}
+			}
+			
 			if ( isset( $data->wc_id ) && $data->wc_id != '(NULL)' ) {
 				$paymentgateway = 'woocommerce';
 			}

@@ -1,5 +1,11 @@
 == Changelog ==
 
+= 6.5.3 - 6th June 2025 =
+* Fix: Resolved an issue where the Stripe payment form was not mounted on the initial load of the checkout page.
+* Fix: Removed due amount display on the checkout page for the 'Book Now, Pay Later' option, as it doesn't support partial payments.
+* Fix: Updated Google OAuth 2.0 parameters to include account selection prompt.
+* Fix: Resolved missing data problem during booking export.
+
 = 6.5.2 - 3rd June 2025 =
 * New: Introduced a cron job framework for scheduled tasks.
 * Enhancement: Enabled support for applying discount coupons through URL parameters.

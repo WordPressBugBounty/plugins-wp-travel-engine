@@ -137,8 +137,8 @@ class Login extends UserAccount {
 			),
 			'scope'                    => 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
 			'authorize_url_parameters' => array(
-				'approval_prompt' => 'force',
-				'access_type'     => 'offline',
+				'prompt'		=> 'select_account',
+				'access_type'	=> 'offline',
 
 			),
 		);

@@ -1,13 +1,13 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WP Travel Engine - Travel and Tour Booking Plugin 6.5.2\n"
+"Project-Id-Version: WP Travel Engine - Travel and Tour Booking Plugin 6.5.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wptravelengine\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-06-03T06:05:03+00:00\n"
+"POT-Creation-Date: 2025-06-06T08:40:57+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language: \n"
 "X-Generator: WP-CLI 2.12.0\n"
@@ -395,7 +395,7 @@ msgid "Date"
 msgstr ""
 
 #: admin/class-wp-travel-engine-admin.php:717
-#: admin/class-wp-travel-engine-booking-export.php:261
+#: admin/class-wp-travel-engine-booking-export.php:269
 #: includes/class-wp-travel-engine-emails.php:681
 #: includes/classes/Booking/Email/Template_Tags.php:292
 #: includes/classes/Booking/Email/Template_Tags.php:468
@@ -404,7 +404,7 @@ msgid "Trip Date"
 msgstr ""
 
 #: admin/class-wp-travel-engine-admin.php:718
-#: admin/class-wp-travel-engine-booking-export.php:255
+#: admin/class-wp-travel-engine-booking-export.php:263
 #: includes/backend/booking/booking-parts/booking-details_trip-info.php:51
 #: includes/backend/booking/legacy/booking-parts/trip-info.php:20
 #: includes/backend/booking/legacy/booking-parts/trip-info.php:60
@@ -444,7 +444,7 @@ msgstr ""
 #: admin/class-wp-travel-engine-admin.php:720
 #: admin/class-wp-travel-engine-admin.php:1761
 #: admin/class-wp-travel-engine-admin.php:1770
-#: admin/class-wp-travel-engine-booking-export.php:254
+#: admin/class-wp-travel-engine-booking-export.php:262
 #: includes/backend/booking/booking-parts/booking-details.php:312
 #: includes/backend/templates/booking/partials/edit/booking-status.php:11
 #: includes/bookings/class-wte-process-booking-core.php:1223
@@ -454,7 +454,7 @@ msgid "Booking Status"
 msgstr ""
 
 #: admin/class-wp-travel-engine-admin.php:721
-#: admin/class-wp-travel-engine-booking-export.php:257
+#: admin/class-wp-travel-engine-booking-export.php:265
 #: includes/backend/booking/legacy/booking-parts/trip-info.php:40
 #: includes/backend/booking/legacy/booking-parts/trip-info.php:100
 msgid "Total Paid"
@@ -468,7 +468,7 @@ msgid "Remaining Payment"
 msgstr ""
 
 #: admin/class-wp-travel-engine-admin.php:723
-#: admin/class-wp-travel-engine-booking-export.php:256
+#: admin/class-wp-travel-engine-booking-export.php:264
 #: includes/backend/booking/booking-parts/booking-details_payments.php:154
 #: includes/backend/booking/legacy/booking-parts/trip-info.php:48
 #: includes/backend/booking/legacy/booking-parts/trip-info.php:120
@@ -479,7 +479,7 @@ msgstr ""
 
 #: admin/class-wp-travel-engine-admin.php:737
 #: admin/class-wp-travel-engine-admin.php:2599
-#: admin/class-wp-travel-engine-booking-export.php:300
+#: admin/class-wp-travel-engine-booking-export.php:308
 #: admin/meta-parts/enquiry.php:66
 #: includes/backend/booking/booking-parts/booking-details.php:137
 #: includes/backend/booking/booking-parts/booking-details.php:164
@@ -1359,11 +1359,11 @@ msgstr ""
 msgid "Go Pro"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:253
+#: admin/class-wp-travel-engine-booking-export.php:261
 msgid "Booking ID"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:258
+#: admin/class-wp-travel-engine-booking-export.php:266
 #: includes/backend/booking/booking-parts/booking-details_payments.php:79
 #: includes/backend/booking/legacy/booking-parts/payment-details.php:44
 #: includes/backend/booking/legacy/booking-parts/payment-details.php:87
@@ -1371,31 +1371,31 @@ msgstr ""
 msgid "Payment Gateway"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:259
+#: admin/class-wp-travel-engine-booking-export.php:267
 #: includes/backend/booking/booking-parts/booking-details.php:104
 msgid "No. of Travellers"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:260
+#: admin/class-wp-travel-engine-booking-export.php:268
 msgid "Booking Date"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:267
+#: admin/class-wp-travel-engine-booking-export.php:275
 #, php-format
 msgid "Billing - %s"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:274
+#: admin/class-wp-travel-engine-booking-export.php:282
 #, php-format
 msgid "Traveler %1$d - %2$s"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:282
+#: admin/class-wp-travel-engine-booking-export.php:290
 #, php-format
 msgid "Emergency Contact %1$d - %2$s"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:298
+#: admin/class-wp-travel-engine-booking-export.php:306
 #: includes/backend/booking/booking.php:67
 #: includes/backend/booking/booking.php:266
 #: includes/backend/booking/customer.php:7
@@ -1417,7 +1417,7 @@ msgstr ""
 msgid "First Name"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:299
+#: admin/class-wp-travel-engine-booking-export.php:307
 #: includes/backend/booking/booking-parts/booking-details.php:133
 #: includes/backend/booking/booking-parts/booking-details.php:160
 #: includes/backend/booking/booking.php:78
@@ -1440,7 +1440,7 @@ msgstr ""
 msgid "Last Name"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:301
+#: admin/class-wp-travel-engine-booking-export.php:309
 #: includes/backend/booking/booking.php:100
 #: includes/backend/booking/booking.php:288
 #: includes/backend/booking/customer.php:18
@@ -1457,7 +1457,7 @@ msgstr ""
 msgid "Address"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:307
+#: admin/class-wp-travel-engine-booking-export.php:315
 #: includes/backend/booking/booking-parts/booking-details.php:68
 #: includes/backend/templates/booking/partials/additional-field.php:22
 #: includes/backend/templates/booking/partials/tab-title.php:40
