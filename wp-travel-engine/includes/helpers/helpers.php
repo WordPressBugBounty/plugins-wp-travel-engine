@@ -1669,7 +1669,7 @@ function wte_get_discount_percent( $trip_id ) {
 function wp_travel_engine_user_new_account_created( $customer_id, $new_customer_data, $password_generated, $template ) {
 
 	$account_settings = Options::get( 'wp_travel_engine_settings' )['customer_email_notify_tabs']['account_registration'];
-	if ( $account_settings['enabled'] && $new_customer_data ) {
+	if ( wptravelengine_toggled( $account_settings['enabled'] ) && $new_customer_data ) {
 		$email = new UserEmail( $customer_id );
 		$email->set( 'to', $new_customer_data[ 'user_email' ] );
 		$email->set( 'my_subject', $account_settings[ 'subject' ] );

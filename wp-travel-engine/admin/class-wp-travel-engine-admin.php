@@ -101,7 +101,6 @@ class Wp_Travel_Engine_Admin {
 		);
 
 		add_action( 'admin_menu', array( $this, 'admin_menu' ), 15 );
-		add_action( 'admin_menu', array( $this, 'analytics_menu' ), 15 );
 
 		/**
 		 *
@@ -172,6 +171,16 @@ class Wp_Travel_Engine_Admin {
 				'position'    => 0,
 			),
 			'wptravelengine-upcoming-tours'          => new \WPTravelEngine\Pages\Admin\UpcomingTours(),
+			'wptravelengine-analytics' => array(
+				'parent_slug' => 'edit.php?post_type=booking',
+				'page_title'  => __( 'Analytics', 'wp-travel-engine' ),
+				'menu_title'  => __( 'Analytics', 'wp-travel-engine' ),
+				'capability'  => 'manage_options',
+				'callback'    => function () {
+					include_once plugin_dir_path( WP_TRAVEL_ENGINE_FILE_PATH ) . '/includes/backend/dashboard/dashboard.php';
+				},
+				'position'    => 6,
+			),
 			WP_TRAVEL_ENGINE_PLUGIN_LICENSE_PAGE => array(
 				'parent_slug' => 'edit.php?post_type=booking',
 				'page_title'  => __( 'Plugin License', 'wp-travel-engine' ),
@@ -233,39 +242,6 @@ class Wp_Travel_Engine_Admin {
 				$slug,
 				$menu instanceof \WPTravelEngine\Interfaces\AdminPage ? array( $menu, 'view' ) : $menu->callback,
 				$menu->position
-			);
-		}
-	}
-
-	/**
-	 * Added Analytics Page Menu.
-	 *
-	 * @since 5.7
-	 */
-	public function analytics_menu() {
-		$menus = array(
-			'wte-analytics-page' => array(
-				'page_title' => __( 'Analytics', 'wp-travel-engine' ),
-				'menu_title' => __( 'Analytics', 'wp-travel-engine' ) . ' <span class="update-plugins">NEW</span>',
-				'capability' => 'manage_options',
-				'menu_slug'  => 'wp-travel-engine-analytics',
-				'callback'   => function () {
-					include plugin_dir_path( WP_TRAVEL_ENGINE_FILE_PATH ) . '/includes/backend/dashboard/dashboard.php';
-				},
-				'icon_url'   => 'dashicons-chart-pie',
-				'position'   => '40',
-			),
-		);
-
-		foreach ( $menus as $menu ) {
-			add_menu_page(
-				$menu[ 'page_title' ],
-				$menu[ 'menu_title' ],
-				$menu[ 'capability' ],
-				$menu[ 'menu_slug' ],
-				$menu[ 'callback' ],
-				$menu[ 'icon_url' ],
-				$menu[ 'position' ]
 			);
 		}
 	}

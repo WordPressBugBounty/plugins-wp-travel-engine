@@ -108,6 +108,21 @@ class ApplyCoupon extends AjaxController {
 			$new_dicounted_cost = $discounted_total;
 		}
 
+		/**
+		 * Store form data in session
+		 * @since next
+		 */
+		if( $this->request->get_param( 'formData' ) ) {
+			$form_data = stripslashes( $this->request->get_param( 'formData' ) );
+			
+			$form_data = json_decode($form_data, true);
+			
+			WTE()->session->set( 'billing_form_data', $form_data['billing'] ?? array() );
+			WTE()->session->set( 'travellers_form_data', $form_data['travellers'] ?? array() );
+			WTE()->session->set( 'emergency_form_data', $form_data['emergency'] ?? array() );
+			WTE()->session->set( 'additional_note', $this->request->get_param('wptravelengine_additional_note') );
+		}
+
 		wp_send_json_success(
 			array(
 				'dis_type'            => $discount_type,

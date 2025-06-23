@@ -284,7 +284,7 @@ class UserAccount extends Shortcode {
 		}
 
 		$forgot_password_settings = Options::get( 'wp_travel_engine_settings' )['customer_email_notify_tabs']['forgot_password'];
-		if ( $forgot_password_settings['enabled'] ) {
+		if ( wptravelengine_toggled( $forgot_password_settings['enabled'] ) ) {
 			// Get password reset key (function introduced in WordPress 4.4).
 			$key = get_password_reset_key( $user_data );
 

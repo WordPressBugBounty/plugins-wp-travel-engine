@@ -65,9 +65,6 @@
 
 			if ( ! empty( $cart_info->get_fees() ) ) {
 				foreach ( $cart_info->get_fees() as $line_item ) {
-					if ( strpos( $line_item['label'], '%' ) === false ) {
-						$line_item['label'] = $line_item['label'] . '(' . $line_item['percentage'] . '%)';
-					}
 					printf(
 						'<tr class="wpte-booking-tax"><td>%1$s</td><td class="pricing-total"><b>+%2$s</b</td></tr>',
 						esc_html( $line_item['label'] ?? '' ),

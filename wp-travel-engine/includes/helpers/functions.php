@@ -428,7 +428,7 @@ function wptravelengine_send_booking_emails( $payment, string $template = 'order
 	foreach ( $to as $recipient ) {
 		$enable = $settings->get( $recipient . '_email_notify_tabs.' . wptravelengine_map_email_template( $template ) . '.enabled', 1 );
 
-		if ( ( 'admin' === $recipient || 'customer' === $recipient ) && ! $enable ) {
+		if ( ( 'admin' === $recipient || 'customer' === $recipient ) && ! wptravelengine_toggled( $enable ) ) {
 			continue;
 		}
 

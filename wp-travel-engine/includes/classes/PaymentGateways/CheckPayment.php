@@ -89,11 +89,23 @@ class CheckPayment extends BaseGateway {
 	 */
 	public function process_payment( Booking $booking, Payment $payment, $booking_instance ): void {
 		update_post_meta( $booking->get_id(), 'wp_travel_engine_booking_payment_gateway', __( 'Check Payment', 'wp-travel-engine' ) );
-		update_post_meta( $booking->get_id(), 'wp_travel_engine_booking_payment_status', 'check-waiting' );
-
-		$payment->set_status( 'check-waiting' );
-		$payment->set_payment_gateway( 'check_payments' );
-		$payment->save();
+        update_post_meta( $booking->get_id(), 'wp_travel_engine_booking_payment_status', 'check-waiting' );
+        $payment->set_status( 'check-waiting' );
+        $payment->set_payment_gateway( 'check_payments' );
+        $payable = $payment->get_meta('payable');
+        $amount = [
+            'value'    => (float) $payable['amount'],
+            'currency' => $payable['currency'],
+        ];
+        $payment->set_meta('payment_status', 'check-waiting');
+        $payment->set_payment_gateway($this->get_gateway_id());
+        $payment->set_meta('payment_amount', $amount);
+        $payment->save();
+        $paid_amount  = (float) $booking->get_paid_amount();
+        $due_amount   = (float) $booking->get_due_amount();
+        $booking->set_meta( 'paid_amount', $paid_amount + $amount['value'] );
+        $booking->set_meta( 'due_amount', max( $due_amount - $amount['value'], 0 ) );
+        $booking->save();
 	}
 
 	/**

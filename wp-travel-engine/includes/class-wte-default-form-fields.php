@@ -20,7 +20,7 @@ class WTE_Default_Form_Fields {
 	 * @return void
 	 */
 	public static function enquiry() {
-		$fields = array(
+		$fields = apply_filters( 'wp_travel_engine_enquiry_fields_display', array(
 			'enquiry_name'     => array(
 				'type'           => 'text',
 				'wrapper_class'  => 'row-repeater name-holder',
@@ -151,7 +151,7 @@ class WTE_Default_Form_Fields {
 				'priority'      => 70,
 				'default_field' => true,
 			),
-		);
+		) );
 
 		// return the fields array
 		return $fields;

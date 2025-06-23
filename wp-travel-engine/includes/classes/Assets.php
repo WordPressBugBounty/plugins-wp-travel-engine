@@ -146,7 +146,7 @@ class Assets extends AssetsAbstract {
 		$this->register_script( Asset::register( 'wptravelengine-booking-edit', 'admin/booking-edit.js' ) );
 		$this->register_script( Asset::register( 'wptravelengine-customer-edit', 'admin/customer-edit.js' ) );
 		$this->register_script( Asset::register( 'wptravelengine-upcoming-tours', 'admin/upcoming-tours.js' ) );
-		$this->register_script( Asset::register( 'wptravelengine-exports', 'admin/exports.js' ) );
+		$this->register_script( Asset::register( 'wptravelengine-exports', 'admin/exports.js' )->dependencies( [ 'wte-fpickr' ] ) )->localize( 'wptravelengine-exports', 'wteL10n' );
 	}
 
 	/**

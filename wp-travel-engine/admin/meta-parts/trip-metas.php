@@ -237,7 +237,7 @@ $trip_meta_tabs = array(
 			array(
 				'condition'   => 'participants.enable == true',
 				'label'       => true,
-				'description' => __( '', 'wp-travel-engine' ),
+				'description' => __( 'Set a limit to the number of participants required for each booking. Group sizes must be within the specified range to be booked.', 'wp-travel-engine' ),
 				'cols'        => 2,
 				'field'       => [
 					'type' => 'GROUP',

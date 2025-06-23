@@ -38,7 +38,7 @@ class EnquiryMail extends AjaxController {
 		$form_fields = WTE_Default_Form_Fields::enquiry();
 		$sanitized_data = array();
 		foreach ( $form_fields as $form_field ) {
-			if ( (bool) ( $form_field[ 'validations' ][ 'required' ] ?? false ) && empty( $data[ $form_field[ 'name' ] ] ) ) {
+			if ( isset( $form_field[ 'validations' ][ 'required' ] ) && $form_field[ 'validations' ][ 'required' ] == 'true' && empty( $data[ $form_field[ 'name' ] ] ) ) {
 				throw new Exception( sprintf( __( 'Missing required fields: %s', 'wp-travel-engine' ), $form_field[ 'field_label' ] ) );
 			}
 			if ( isset( $form_field[ 'name' ] ) && isset( $data[ $form_field[ 'name' ] ] ) ) {
@@ -91,11 +91,6 @@ class EnquiryMail extends AjaxController {
 		$name            = ! empty( $formdata[ 'enquiry_name' ] ) ? ( $formdata[ 'enquiry_name' ] ) : false;
 
 		$cust_enquiry_subject = ! empty( $formdata[ 'enquiry_subject' ] ) ? $formdata[ 'enquiry_subject' ] : false;
-
-		if ( ! $email || ! is_email( $email ) ) {
-			wp_send_json_error( array( 'message' => __( 'Please provide a valid email', 'wp-travel-engine' ) ) );
-			die;
-		}
 
 		$validation_check = apply_filters( 'wp_travel_engine_enquiry_validation_check', array( 'status' => true ) );
 
@@ -196,7 +191,7 @@ class EnquiryMail extends AjaxController {
 		$admin_sent = false;
 		foreach ( $to as $val ) {
 			$email_instance = new Email();
-			$admin_sent     = $email_instance->add_headers( array( "from" => "From: {$name}<{$email}>" ) )
+			$admin_sent     = $email_instance->add_headers( array( "from" => "From: {$name}<{$email}>", "reply_to" => "Reply-To: {$name}<{$email}>" ) )
 			                                 ->set( 'to', $val )
 			                                 ->set( 'my_subject', esc_html( $subject ) )
 			                                 ->set( 'attachments', $attachments )
@@ -211,8 +206,7 @@ class EnquiryMail extends AjaxController {
 				'user_email' => $email,
 			);
 			$mail = new UserEmail( $user );
-			$mail->add_headers( array( "reply_to" => "Reply-To: {$to[0]}" ) )
-			     ->set( 'to', $email )
+			$mail->set( 'to', $email )
 			     ->set( 'my_subject', wptravelengine_settings()->get( 'customer_email_notify_tabs.enquiry.subject', __( 'Enquiry Sent.', 'wp-travel-engine' ) ) )
 			     ->set( 'content', wptravelengine_settings()->get( 'customer_email_notify_tabs.enquiry.content', '' ) )
 			     ->send();

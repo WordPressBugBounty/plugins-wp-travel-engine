@@ -136,7 +136,22 @@ abstract class AssetsAbstract {
 	 * Localize Scripts.
 	 */
 	public function localize_script( $handle, $object_name, $l10n ): AssetsAbstract {
-		wp_localize_script( $handle, $object_name, $l10n );
+
+		static $cache = [];
+
+		if (  ! isset( $cache[$handle] ) || ! in_array( $object_name, $cache[$handle], true ) ) {
+			$cache[$handle][] = $object_name;
+
+			$l10n = is_array( $l10n ) ? wp_json_encode( $l10n ) : $l10n;
+			$script = ";(function(){
+				var {$object_name} = window[{$object_name}] || {};
+				if(! window.{$object_name}){
+					window.{$object_name} = $l10n;
+				}
+			})();";
+
+			wp_add_inline_script( $handle, $script, 'before' );
+		}
 
 		return $this;
 	}

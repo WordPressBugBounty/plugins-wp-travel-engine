@@ -86,6 +86,9 @@ class TravelerCategory {
 				if ( in_array( $property, [ 'prices', 'sale_prices' ], true ) ) {
 					$value = is_numeric( $value ) ? max( 0, (float) $value ) : '';
 				}
+				if ( $value instanceof \WP_Term ) {
+					$value = $value->name;
+				}
 				$this->{$mapped_property} = $value;
 				continue;
 			}

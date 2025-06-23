@@ -284,7 +284,9 @@ class WP_Travel_Engine_Custom_Shortcodes {
 
 		$wp_travel_engine_setting = get_post_meta( $attr[ 'id' ], 'wp_travel_engine_setting', true );
 
-		$map_lazy_loading = wptravelengine_toggled( wptravelengine_settings()->get( 'enable_map_lazy_loading', 'no' ) );
+		$global_settings = wptravelengine_settings();
+		$do_lazy_loading = wptravelengine_toggled( $global_settings->get( 'enable_lazy_loading', 'no' ) );
+		$map_lazy_loading = wptravelengine_toggled( $global_settings->get( 'enable_map_lazy_loading', 'no' ) );
 
 		ob_start();
 
@@ -294,11 +296,12 @@ class WP_Travel_Engine_Custom_Shortcodes {
 				'iframe|image',
 			) ) && ! empty( $wp_travel_engine_setting[ 'map' ][ 'iframe' ] ) ) {
 			?>
-			<div class="trip-map iframe">
-				<?php if ( ! $map_lazy_loading || ! is_singular( WP_TRAVEL_ENGINE_POST_TYPE ) ) :
-					echo wptravelengine_esc_iframe( $wp_travel_engine_setting[ 'map' ][ 'iframe' ] );
-				endif; ?>
-			</div>
+				<div class="trip-map iframe">
+					<?php if ( ! is_singular( WP_TRAVEL_ENGINE_POST_TYPE ) || ! $do_lazy_loading || ! $map_lazy_loading ) :
+						echo wptravelengine_esc_iframe( $wp_travel_engine_setting[ 'map' ][ 'iframe' ] );
+					endif;
+					?>
+				</div>
 			<?php
 			if ( 'iframe|image' === $attr[ 'show' ] ) {
 				$attr[ 'show' ] = 'none';

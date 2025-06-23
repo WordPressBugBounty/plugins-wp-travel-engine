@@ -62,7 +62,7 @@ abstract class CartItem implements CartItemInterface {
 		$this->label    = (string) $this->args[ 'label' ];
 		$this->quantity = (int) $this->args[ 'quantity' ];
 		$this->price    = (float) $this->args[ 'price' ];
-		$this->total    = $this->args['total'] = $this->quantity * $this->price;
+		$this->total    = isset( $this->args['total'] ) && $this->args['total'] > 0 ? $this->args['total'] : ( $this->args['total'] = $this->quantity * $this->price );
 	}
 
 	/**

@@ -15,6 +15,7 @@ use WPTravelEngine\Interfaces\CartItem;
 use WPTravelEngine\Core\Models\Settings\Options;
 use WPTravelEngine\Core\Models\Post\Booking;
 use WPTravelEngine\Traits\Singleton;
+use WPTravelEngine\Helpers\CartInfoParser;
 
 /**
  * Checkout page class.
@@ -338,26 +339,92 @@ class Checkout extends BasePage {
 
 	public function get_tour_details() {
 		$cart_items = $this->cart->getItems();
-
-		$item_details = array();
-
+		$booking_ref = $this->cart->get_booking_ref();
+		$item_details = [];
+	
 		foreach ( $cart_items as $cart_item ) {
 			/** @var array $cart_item */
-			$trip            = new Trip( $cart_item[ 'trip_id' ] );
-			$trip_start_date = ! empty( $cart_item[ 'trip_time' ] ) ? $cart_item[ 'trip_time' ] : $cart_item[ 'trip_date' ];
-			$item            = array(
-				sprintf( '<tr><td colspan="2">%s</td></tr>', sprintf( '<a href="%s" class="wpte-checkout__trip-name">%s</a>', $trip->get_permalink(), $trip->get_title() ) ),
-				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Package:', 'wp-travel-engine' ), get_the_title( $cart_item[ 'price_key' ] ) ),
-				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Trip Code:', 'wp-travel-engine' ), $trip->get_trip_code() ),
-				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Starts on:', 'wp-travel-engine' ), wptravelengine_format_trip_datetime( $trip_start_date ) ),
-				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Ends on:', 'wp-travel-engine' ), wptravelengine_format_trip_end_datetime( $trip_start_date, $trip ) ),
-				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'No. of Travellers:', 'wp-travel-engine' ), array_sum( $cart_item[ 'pax' ] ?? [] ) ),
-			);
-
-			$item_details[] = apply_filters( 'wptravelengine_checkout_page_item_' . __FUNCTION__, $item, $trip, $cart_item );
+			$trip_data = $this->get_trip_data( $cart_item, $booking_ref );
+			$item = $this->generate_trip_details_html( $trip_data );
+			$item_details[] = apply_filters( 'wptravelengine_checkout_page_item_' . __FUNCTION__, $item, $trip_data['trip'], $cart_item );
 		}
-
+	
 		return apply_filters( 'wptravelengine_checkout_page_' . __FUNCTION__, $item_details, $cart_items, $this );
+	}
+	
+	/**
+	 * Get trip data based on booking reference or cart item.
+	 * 
+	 * @param array $cart_item Cart item data.
+	 * @param string|null $booking_ref Booking reference.
+	 * @since next
+	 * @return array Trip data.
+	 */
+	private function get_trip_data( array $cart_item, ?string $booking_ref = '' ): array {
+		if ( !empty( $booking_ref ) ) {
+			$booking = Booking::make( $booking_ref );
+			$cart_info = new CartInfoParser( $booking->get_cart_info() ?? [] );
+			$order_trip = $cart_info->get_item();
+			
+			return [
+				'trip' => new Trip( $order_trip->get_trip_id() ),
+				'package_name' => $order_trip->get_package_name(),
+				'trip_code' => $order_trip->get_trip_code(),
+				'start_date' => $order_trip->get_trip_date(),
+				'end_date' => $order_trip->get_end_date(),
+				'travelers' => $order_trip->travelers_count()
+			];
+		}
+	
+		$trip = new Trip( $cart_item['trip_id'] );
+		$trip_start_date = !empty( $cart_item['trip_time'] ) ? $cart_item['trip_time'] : $cart_item['trip_date'];
+		
+		return [
+			'trip' => $trip,
+			'package_name' => get_the_title( $cart_item['price_key'] ?? '' ),
+			'trip_code' => $trip->get_trip_code(),
+			'start_date' => $trip_start_date,
+			'end_date' => wptravelengine_format_trip_end_datetime( $trip_start_date, $trip ),
+			'travelers' => array_sum( $cart_item['pax'] ?? [] )
+		];
+	}
+	
+	/**
+	 * Generate HTML for trip details.
+	 * 
+	 * @param array $trip_data Trip data.
+	 * @since next
+	 * @return array HTML rows.
+	 */
+	private function generate_trip_details_html( array $trip_data ): array {
+		return [
+			sprintf('<tr><td colspan="2">%s</td></tr>', 
+				sprintf('<a href="%s" class="wpte-checkout__trip-name">%s</a>', 
+					esc_url( $trip_data['trip']->get_permalink() ), 
+					esc_html( $trip_data['trip']->get_title() )
+				)
+			),
+			sprintf('<tr><td>%s</td><td><strong>%s</strong></td></tr>', 
+				__('Package:', 'wp-travel-engine'), 
+				esc_html( $trip_data['package_name'] ?? '' )
+			),
+			sprintf('<tr><td>%s</td><td><strong>%s</strong></td></tr>', 
+				__('Trip Code:', 'wp-travel-engine'), 
+				esc_html( $trip_data['trip_code'] ?? '' )
+			),
+			sprintf('<tr><td>%s</td><td><strong>%s</strong></td></tr>', 
+				__('Starts on:', 'wp-travel-engine'), 
+				wptravelengine_format_trip_datetime( $trip_data['start_date'] ?? '' )
+			),
+			sprintf('<tr><td>%s</td><td><strong>%s</strong></td></tr>', 
+				__('Ends on:', 'wp-travel-engine'), 
+				wptravelengine_format_trip_datetime( $trip_data['end_date'] ?? '' )
+			),
+			sprintf('<tr><td>%s</td><td><strong>%s</strong></td></tr>', 
+				__('No. of Travellers:', 'wp-travel-engine'), 
+				esc_html( $trip_data['travelers'] ?? '' )
+			)
+		];
 	}
 
 	/**

@@ -111,7 +111,7 @@ class TripPackages extends WP_REST_Posts_Controller {
 	 *
 	 * @param array $package Package data.
 	 * @param int   $trip_id Trip ID.
-	 * 
+	 *
 	 * @return void
 	 */
 	public function update_trip_package_ids( $package, $trip_id ) {
@@ -143,9 +143,11 @@ class TripPackages extends WP_REST_Posts_Controller {
 		$data[ 'name' ]        = $trip_package->get_title();
 		$data[ 'description' ] = $trip_package->get_content();
 		$data[ 'is_primary' ]  = $trip_package->get_id() === (int) $trip_package->get_trip()->get_meta( 'primary_package' );
+		$data[ 'min_pax' ]     = $trip_package->get_trip()->is_enabled_min_max_participants() ? (int) $trip_package->get_trip()->get_minimum_participants() : 0;
 
 		$package_categories = $trip_package->get_traveler_categories();
 
+		$temp_min_pax_count = 0;
 		/** @var Post\TravelerCategory $category */
 		foreach ( $package_categories as $category ) {
 			$min_pax = $category->get( 'min_pax', '' );
@@ -163,10 +165,11 @@ class TripPackages extends WP_REST_Posts_Controller {
 				);
 			}, $group_pricing );
 
-			$pricing_label                   = apply_filters( 'wptravelengine-packages-labels', [
+			$pricing_label = apply_filters( 'wptravelengine-packages-labels', [
 				'per-person' => __( 'Person', 'wp-travel-engine' ),
 				'per-group'  => __( 'Group', 'wp-travel-engine' ),
 			] );
+
 			$get_pricing_type                = $category->get( 'pricing_type', 'per-person' );
 			$price                           = $category->get( 'price', '' );
 			$sale_price                      = $category->get( 'sale_price', '' );
@@ -187,7 +190,11 @@ class TripPackages extends WP_REST_Posts_Controller {
 				'max_pax'           => $max_pax,
 				'description'       => $category->get( 'description', '' ),
 			);
+
+			$temp_min_pax_count += $min_pax;
 		}
+
+		$data[ 'min_pax' ] = max( $data[ 'min_pax' ], $temp_min_pax_count );
 
 		return apply_filters( 'wptravelengine_rest_prepare_package_data', $data, $trip_package );
 	}

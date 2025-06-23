@@ -99,7 +99,7 @@ class TravelerCategories extends Iterator {
 						$_categories[ $id ][ 'enabled_group_discount' ] = (bool) ( $values[ $id ] ?? false );
 						break;
 					case 'group_pricing':
-						$_categories[ $id ][ 'group_pricing' ] = $_categories[ $id ][ 'enabled_group_discount' ] ? $values[ $id ] : array();
+						$_categories[ $id ][ 'group_pricing' ] = ( $_categories[ $id ][ 'enabled_group_discount' ] ?? false ) ? ( $values[ $id ] ?? array() ) : array();
 						break;
 					default:
 						$_categories[ $id ][ $key ] = $values[ $id ] ?? '';

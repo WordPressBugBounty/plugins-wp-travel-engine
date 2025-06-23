@@ -54,7 +54,8 @@ class AddCartItems {
 					return Payment::make($payment)->get_meta('payment_gateway');
 				}, $payments );
 				
-				$offline_gateways = [ 'check_payments', 'direct_bank_transfer', 'booking_only' ];
+				$offline_gateways = [ 'booking_only' ];
+
 				$has_offline_payment = !empty( array_intersect( $payment_gateways, $offline_gateways ) );
 				$has_online_payment = count(array_diff( $payment_gateways, $offline_gateways ) ) > 0;
 		

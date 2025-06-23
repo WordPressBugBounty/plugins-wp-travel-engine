@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 6.5.3
+Stable tag: 6.5.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -367,6 +367,16 @@ Yes. We have created WooCommerce Payments add-ons that supports all the payment 
 Please send us an email via [support ticket](https://wptravelengine.com/support-ticket/?utm_source=free_plugin&utm_medium=wporg&utm_campaign=support), and we will be happy to help you.
 
 == Changelog ==
+
+= 6.5.4 - 23rd June 2025 =
+* Fix: Incorrect price shown in {price} email tag when using Book Now, Pay Later.
+* Fix: Edited tour details from the booking details page not reflected on the Checkout and My Account pages.
+* Fix: Data reset issue on the checkout page when applying a coupon code.
+* Fix: Issue where the same coupon could be applied multiple times.
+* Fix: Corrected min/max participant validation with proper priority between general and pricing category settings.
+* Fix: Resolved issue where the Email Disabled feature was not functioning as expected.
+* Refactor: Set paid amount and due amount for Direct Bank Transfer and Check Payment methods to improve visibility and support for subsequent payments.
+* Enhancement: Relocated the Analytics page under the WP Travel Engine submenu for improved navigation and organization.
 
 = 6.5.3 - 6th June 2025 =
 * Fix: Resolved an issue where the Stripe payment form was not mounted on the initial load of the checkout page.

@@ -789,7 +789,7 @@ class Template_Tags extends TemplateTags {
 				'{traveler}'                  => isset( $trip->pax ) ? array_sum( $trip->pax ) : 0,
 				// '{child-traveler}'            => $trip->pax['child'],
 				'{tprice}'                    => isset( $trip->cost ) ? wte_get_formated_price( $trip->cost, $this->currency ) : 0,
-				'{price}'                     => wte_get_formated_price( $this->payment->payable[ 'amount' ] ?? 0, $this->currency ),
+				'{price}'                     => $_booking->get_total_paid_amount() == 0 ? 	0 : wte_get_formated_price( $_booking->get_total_paid_amount(), $this->currency ),
 				'{total_cost}'                => wte_get_formated_price( $this->cart_info->total ?? $this->cart_info['total'] ?? 0, $this->currency ),
 				'{due}'                       => $this->get_due_amount(),
 				'{booking_url}'               => $edit_booking_link,

@@ -255,7 +255,7 @@ class TourPackages {
 				?>
 				<div class="form-field">
 					<label
-						for="package-primary-catgory"><?php esc_html_e( 'Set as Primary Pricing Catgeory', 'wp-travel-engine' ); ?></label>
+						for="package-primary-catgory"><?php esc_html_e( 'Set as Primary Pricing Category', 'wp-travel-engine' ); ?></label>
 					<input type="checkbox" name="is_primary_pricing_catgory" value="1" id="package-primary-catgory">
 					<p><?php esc_html_e( 'If checked, this category will be treated as primary pricing category in packages and trip price will be the price of this category.', 'wp-travel-engine' ); ?></p>
 				</div>

@@ -293,7 +293,7 @@ class TripPackage extends PostModel {
 						'r_frequency' => 'DAILY',
 						'r_until'     => $to,
 					),
-					'seats'        => '',
+					'seats'        => $available_seats,
 				)
 			);
 
