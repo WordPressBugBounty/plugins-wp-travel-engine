@@ -6,10 +6,6 @@ $wte_options     = get_option( 'wp_travel_engine_settings', true );
 $currency_code   = isset( $wte_options['currency_code'] ) ? $wte_options['currency_code'] : '';
 $currency_symbol = wp_travel_engine_get_currency_symbol( $currency_code );
 
-global $post;
-global $wtetrip;
-$settings = get_option( 'wp_travel_engine_settings', array() );
-
 // Pricing Section layout Options
 $form_layout           = isset( $settings['pricing_section_layout'] ) ? $settings['pricing_section_layout'] : 'layout-1';
 $class_based_on_layout = isset( $settings['pricing_section_layout'] ) ? ' wpte-form-' . $settings['pricing_section_layout'] . '' : ' wpte-form-layout-1';
@@ -54,7 +50,7 @@ $custom_enquiry_link = $settings['custom_enquiry_link'] ?? '#';
 						?>
 						<!-- Group Discount Badge Section -->
 						<?php
-						if ( $wtetrip->has_group_discount ) :
+						if ( $trip->has_group_discount() ) :
 							?>
 							<span
 								class="wpte-bf-gd-text"><?php echo esc_html( apply_filters( 'wte_group_discount_badge_text', __( 'Group Discount Available', 'wp-travel-engine' ) ) ); ?></span>
@@ -65,10 +61,10 @@ $custom_enquiry_link = $settings['custom_enquiry_link'] ?? '#';
 						<!-- Discount Percent Badge -->
 						<?php
 						// Show Discount Percent if Available.
-						if ( $wtetrip->has_sale ) :
+						if ( $default_package->has_sale ) :
 							?>
 							<span
-								class="wpte-bf-discount-tag"><?php printf( esc_html__( '%d%% Off', 'wp-travel-engine' ), (float) $wtetrip->sale_percentage ); ?></span>
+								class="wpte-bf-discount-tag"><?php printf( esc_html__( '%d%% Off', 'wp-travel-engine' ), (float) $default_package->sale_percentage ); ?></span>
 							<?php
 						endif;
 						?>
@@ -100,7 +96,7 @@ $custom_enquiry_link = $settings['custom_enquiry_link'] ?? '#';
 					$trip_booking_data = apply_filters(
 						'wptravelengine_trip_booking_modal_data',
 						array(
-							'tripID'      => $post->ID,
+							'tripID'      => $trip->get_id(),
 							'nonce'       => wp_create_nonce( 'wte_add_trip_to_cart' ),
 							'wpXHR'       => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
 							'cartVersion' => '2.0',

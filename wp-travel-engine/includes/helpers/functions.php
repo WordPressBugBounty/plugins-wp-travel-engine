@@ -1211,43 +1211,14 @@ function wte_trip_get_trip_rest_metadata( $trip_id ) {
 
 	// $wte_trip = \wte_get_trip( $trip_id );
 
-	$lowest_package = WPTravelEngine\Packages\get_trip_lowest_price_package( $trip_id );
+	$trip = new Trip( $trip_id );
+	$default_package = $trip->default_package();
 
-	$primary_category_id = (int) get_post_meta( $trip_id, 'primary_category', true ) ?: get_option( 'primary_pricing_category', 0 );
-	$primary_category    = new \stdClass();
-	if ( isset( $lowest_package->{'package-categories'} ) && $primary_category_id ) {
-		$package_categories = $lowest_package->{'package-categories'};
+	$data->price = $default_package->price;
+	$data->has_sale = $default_package->has_sale;
+	$data->sale_price = $default_package->sale_price;
+	$data->primary_category = $default_package->primary_pricing_category->id;
 
-		foreach (
-			array(
-				'prices'        => 'price',
-				'labels'        => 'label',
-				'pricing_types' => 'pricing_type',
-				'enabled_sale'  => 'has_sale',
-				'sale_prices'   => 'sale_price',
-				'min_paxes'     => 'min_pax',
-				'max_paxes'     => 'max_pax',
-			) as $source => $key
-		) {
-			if ( isset( $package_categories[ $source ][ $primary_category_id ] ) ) {
-				$value = in_array(
-					$key,
-					array(
-						'price',
-						'sale_price',
-						'has_sale',
-					)
-				) ? (float) $package_categories[ $source ][ $primary_category_id ] : $package_categories[ $source ][ $primary_category_id ];
-			} else {
-				$value = in_array( $key, array( 'price', 'sale_price', 'has_sale' ) ) ? 0 : '';
-			}
-			$primary_category->{$key} = $value;
-		}
-	}
-	$data->price            = isset( $primary_category->price ) && $primary_category->price != '' ? (float) $primary_category->price : '';
-	$data->has_sale         = isset( $primary_category->has_sale ) ? $primary_category->has_sale : false;
-	$data->sale_price       = isset( $primary_category->sale_price ) && $primary_category->sale_price != '' ? (float) $primary_category->sale_price : '';
-	$data->primary_category = $primary_category_id;
 	$data->available_times  = array(
 		'type'  => 'default',
 		'items' => array_map(

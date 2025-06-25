@@ -268,4 +268,18 @@ class PackageDateParser {
 			return wp_date( $format, strtotime( $date ) );
 		}, array_keys( $this->get_dates( $object, $args ) ) ) );
 	}
+
+	/**
+	 * Get data of a single date.
+	 * 
+	 * @param string $date Date.
+	 * @param ?string $key Key.
+	 *
+	 * @return array
+	 * @since 6.5.5
+	 */
+	public function get_data_of( string $date, $key = null ): array {
+		$data = $this->prepare_date( new \DateTime( $date ) );
+		return $key ? ( $data[ $key ] ?? array() ) : $data;
+	}
 }

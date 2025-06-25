@@ -7,6 +7,8 @@
 
 namespace WPTravelEngine\Builders\FormFields;
 use WPTravelEngine\Helpers\Countries;
+use WPTravelEngine\Core\Models\Post\Customer;
+
 
 /**
  * Form field class to render billing form fields.
@@ -35,9 +37,33 @@ class BillingFormFields extends FormField {
 	}
 
 	protected function map_fields( $fields, $booking_ref ) {
-		$billing_form_data = WTE()->session->get( 'billing_form_data' );
-		if( $booking_ref ) {
-			$billing_form_data = get_post_meta( $booking_ref, 'wptravelengine_billing_details', true );
+		// Initialize billing form data with session data as fallback.
+		$billing_form_data = WTE()->session->get('billing_form_data') ?? [];
+    
+		// Get logged in user data if available.
+		$user_data = get_user_by( 'id', get_current_user_id() );
+		
+		if ( $user_data ) {
+			$customer_id = Customer::is_exists( $user_data->user_email );
+			if ( $customer_id ) {
+				$customer_data = new Customer( $customer_id );
+				$billing_form_data = array_merge(
+					[
+						'fname' => $customer_data->get_customer_fname(),
+						'lname' => $customer_data->get_customer_lname(),
+						'email' => $customer_data->get_customer_email(),
+					],
+					$customer_data->get_customer_addresses()
+				);
+			}
+		}
+	
+		// Override with booking data if available.
+		if ( $booking_ref ) {
+			$booking_data = get_post_meta( $booking_ref, 'wptravelengine_billing_details', true );
+			if ( $booking_data ) {
+				$billing_form_data = $booking_data;
+			}
 		}
 		if ( ! $billing_form_data ) {
 			$billing_form_data = [];

@@ -357,7 +357,7 @@ class Checkout extends BasePage {
 	 * 
 	 * @param array $cart_item Cart item data.
 	 * @param string|null $booking_ref Booking reference.
-	 * @since next
+	 * @since 6.5.5
 	 * @return array Trip data.
 	 */
 	private function get_trip_data( array $cart_item, ?string $booking_ref = '' ): array {
@@ -393,7 +393,7 @@ class Checkout extends BasePage {
 	 * Generate HTML for trip details.
 	 * 
 	 * @param array $trip_data Trip data.
-	 * @since next
+	 * @since 6.5.5
 	 * @return array HTML rows.
 	 */
 	private function generate_trip_details_html( array $trip_data ): array {

@@ -110,7 +110,7 @@ class ApplyCoupon extends AjaxController {
 
 		/**
 		 * Store form data in session
-		 * @since next
+		 * @since 6.5.5
 		 */
 		if( $this->request->get_param( 'formData' ) ) {
 			$form_data = stripslashes( $this->request->get_param( 'formData' ) );

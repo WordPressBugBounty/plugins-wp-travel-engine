@@ -39,6 +39,14 @@ class TravelerCategories extends Iterator {
 	protected TripPackage $package;
 
 	/**
+	 * Available traveler categories.
+	 *
+	 * @var ?array
+	 * @since 6.5.5
+	 */
+	protected $available_categories = null;
+
+	/**
 	 * Traveler Categories Model Constructor.
 	 *
 	 * @param Trip $trip The trip object.
@@ -65,10 +73,9 @@ class TravelerCategories extends Iterator {
 
 		$_categories = array();
 
-		$traveler_categories = wptravelengine_settings()
-			->get_traveler_categories( array( 'fields' => 'id=>name' ) );
+		$this->available_categories = wptravelengine_settings()->get_traveler_categories( array( 'fields' => 'id=>name' ) );
 
-		foreach ( $traveler_categories as $id => $label ) {
+		foreach ( $this->available_categories as $id => $label ) {
 			foreach ( $categories as $key => $values ) {
 				switch ( $key ) {
 					case 'c_ids':
@@ -108,7 +115,8 @@ class TravelerCategories extends Iterator {
 			}
 			$_categories[ $id ][ 'age_group' ] = (string) ( get_term_meta( $id )[ 'age_group' ][ 0 ] ?? '' );
 		}
-		$primary_category =  (int) ( $this->trip->get_meta( 'primary_category' ) ?: Options::get( 'primary_pricing_category', 0 ) );
+
+		$primary_category = $this->get_primary_category_id();
 
 		if ( isset( $_categories[ $primary_category ] ) ) {
 			$_categories = [ $primary_category => $_categories[ $primary_category ] ] + array_diff_key( $_categories, [ $primary_category => true ] );
@@ -120,7 +128,6 @@ class TravelerCategories extends Iterator {
 			},
 			$_categories
 		);
-
 
 		parent::__construct( array_values( $data ) );
 	}
@@ -147,18 +154,40 @@ class TravelerCategories extends Iterator {
 	}
 
 	/**
+	 * Get primar category id.
+	 *
+	 * @return int
+	 * @since 6.5.5
+	 */
+	public function get_primary_category_id(): int {
+
+		$term_ids = [
+			$this->package->get_meta( '_primary_category_id' ),
+			$this->trip->get_meta( 'primary_category' ),
+			wptravelengine_settings()->get_primary_pricing_category()->term_id,
+		];
+
+		foreach ( $term_ids as $id ) {
+			if ( $id && isset( $this->available_categories[ $id ] ) ) {
+				return (int) $id;
+			}
+		}
+		
+		return 0;
+	}
+
+	/**
 	 * Get the primary traveler category.
 	 *
 	 * @return TravelerCategory
+	 * @updated 6.5.5
 	 */
 	public function get_primary_traveler_category(): TravelerCategory {
-		$traveler_term = (int) $this->trip->get_meta( 'primary_category' ) ?: wptravelengine_settings()->get_primary_pricing_category();
-		if ( ! is_numeric( $traveler_term ) ) {
-			$traveler_term = $traveler_term->term_id;
-		}
+
+		$traveler_term_id = $this->get_primary_category_id();
 
 		foreach ( $this->data as $category ) {
-			if ( isset( $category->id ) && $category->id === $traveler_term ) {
+			if ( isset( $category->id ) && $category->id === $traveler_term_id ) {
 				return $category;
 			}
 		}
@@ -193,5 +222,17 @@ class TravelerCategories extends Iterator {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Is category available.
+	 *
+	 * @param int $category_id
+	 *
+	 * @return bool
+	 * @since 6.5.5
+	 */
+	public function is_category_available( int $category_id ): bool {
+		return isset( $this->available_categories[ $category_id ] );
 	}
 }

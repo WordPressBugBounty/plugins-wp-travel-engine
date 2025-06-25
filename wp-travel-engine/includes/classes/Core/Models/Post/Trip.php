@@ -267,6 +267,22 @@ class Trip extends PostModel {
 	}
 
 	/**
+	 * Checks if any package has group discount.
+	 *
+	 * @return bool
+	 * @since 6.5.5
+	 */
+	public function has_group_discount(): bool {
+		foreach ( $this->packages() as $package ) {
+			if ( $package->has_group_discount() ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Get the default package.
 	 *
 	 * @return ?TripPackage
@@ -1211,5 +1227,15 @@ class Trip extends PostModel {
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Get the primary package.
+	 *
+	 * @return TripPackage
+	 * @since 6.5.5
+	 */
+	public function get_primary_package(): TripPackage {
+		return $this->primary_package;
 	}
 }

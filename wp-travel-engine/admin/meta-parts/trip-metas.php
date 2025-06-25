@@ -286,19 +286,6 @@ $trip_meta_tabs = array(
 		'priority'          => 20,
 		'icon'              => 'calendarcheck',
 		'fields'            => array(
-      		array(
-				'divider' => true,
-				'field'      	=> [
-					'label'     => __( 'Primary Pricing Category', 'wp-travel-engine' ),
-					'help' 		=> __( 'Choose the primary category for the trip.', 'wp-travel-engine' ),
-					'type'   	=> 'SELECT',
-					'name'   	=> 'primary_category',
-					'options'   => $pricing_categories,
-					'attributes'   => [
-						'style' => ['max-width' => '250px'],
-					],
-				],
-			),
 			array(
 				'field' => [
 					'type'  => 'TITLE',
@@ -405,6 +392,16 @@ $trip_meta_tabs = array(
 					'name'        => 'itinerary_title',
 					'type'        => 'TEXT',
 					'placeholder' => __( 'Itinerary', 'wp-travel-engine' ),
+				],
+			),
+			array(
+				'label'       => __( 'Itinerary Description', 'wp-travel-engine' ),
+				'description' => __( 'Enter description for the trip itinerary section tab content.', 'wp-travel-engine' ),
+				'divider'     => true,
+				'field'       => [
+					'name'        => 'itinerary_description',
+					'type'        => 'EDITOR',
+					'placeholder' => __( 'Itinerary Description', 'wp-travel-engine' ),
 				],
 			),
 			array(

@@ -72,11 +72,25 @@ class TripPackage extends PostModel {
 	public bool $has_group_discount = false;
 
 	/**
+	 * Group pricing.
+	 *
+	 * @var array
+	 */
+	public array $group_pricing = array();
+
+	/**
 	 * The default pricing.
 	 *
 	 * @var array
 	 */
 	public array $categories_pricings = array();
+
+	/**
+	 * The primary pricing category.
+	 *
+	 * @var TravelerCategory
+	 */
+	public TravelerCategory $primary_pricing_category;
 
 	/**
 	 *
@@ -93,9 +107,9 @@ class TripPackage extends PostModel {
 	/**
 	 * Gets package's categories data.
 	 *
-	 * @return object
+	 * @return TravelerCategories
 	 */
-	public function get_traveler_categories() {
+	public function get_traveler_categories(): TravelerCategories {
 		return new TravelerCategories( $this->trip, $this );
 	}
 
@@ -380,13 +394,27 @@ class TripPackage extends PostModel {
 	 */
 	protected function set_primary_pricing_category_details() {
 
-		$primary_traveler_category = $this->get_traveler_categories()->get_primary_traveler_category();
+		$this->primary_pricing_category = $this->get_traveler_categories()->get_primary_traveler_category();
 
-		$this->has_sale           = (bool) $primary_traveler_category->get( 'has_sale' ) ?? false;
-		$this->price              = (float) $primary_traveler_category->get( 'price' ) ?? 0;
-		$this->sale_price         = (float) $primary_traveler_category->get( 'sale_price' ) ?? 0;
-		$this->sale_percentage    = ( $this->has_sale && $this->price > 0 ) ? round( ( ( $this->price - $this->sale_price ) / $this->price ) * 100 ) : 0;
-		$this->has_group_discount = (bool) $primary_traveler_category->get( 'enabled_group_discount' );
+		$this->has_sale           = (bool) ( $this->primary_pricing_category->get( 'has_sale' ) ?? false );
+		$this->price              = (float) ( $this->primary_pricing_category->get( 'price' ) ?? 0 );
+		$this->sale_price         = (float) ( $this->primary_pricing_category->get( 'sale_price' ) ?? 0 );
+		$this->has_group_discount = (bool) ( $this->primary_pricing_category->get( 'enabled_group_discount' ) ?? false );
+		$this->group_pricing 	  = (array) ( $this->primary_pricing_category->get( 'group_pricing' ) ?? array() );
 
+		$package_dates = $this->get_meta( 'package-dates' ) ?: array();
+		if ( ! empty( $package_dates ) ) {
+			$package_date 	= reset( $package_dates );
+			$parser 		= new PackageDateParser( $this, $package_date );
+			$this->categories_pricings = $parser->get_data_of( $package_date['dtstart'], 'pricing' );
+			$new_price = floatval( $this->categories_pricings[0]['price'] ?? 0 );
+
+			$this->price         = $this->has_sale ? $this->price : $new_price;
+			$this->sale_price    = $this->has_sale ? $new_price : $this->sale_price;
+			$this->group_pricing = (array) ( $this->categories_pricings[0]['group_pricing'] ?? $this->group_pricing );
+		}
+
+		$this->has_sale 		= $this->has_sale && ( $this->sale_price < $this->price );
+		$this->sale_percentage	= ( $this->has_sale && $this->price > 0 ) ? round( ( ( $this->price - $this->sale_price ) / $this->price ) * 100 ) : 0;	
 	}
 }

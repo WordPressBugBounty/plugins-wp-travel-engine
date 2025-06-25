@@ -1,5 +1,11 @@
 == Changelog ==
 
+= 6.5.5 - 25th June 2025 =
+* Fix: Resolved issue where the Catalan language file was not loading correctly in Flatpickr.
+* Fix: Corrected an issue with currency symbol parsing in the search filter, ensuring accurate price filtering.
+* Enhancement: Introduced a field description for the Itinerary tab in the Trip Edit page.
+* Enhancement: The checkout page now accurately reflects data for logged-in customers, ensuring personalized and consistent user experience.
+
 = 6.5.4 - 23rd June 2025 =
 * Fix: Incorrect price shown in {price} email tag when using Book Now, Pay Later.
 * Fix: Edited tour details from the booking details page not reflected on the Checkout and My Account pages.

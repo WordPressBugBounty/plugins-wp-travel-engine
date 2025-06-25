@@ -122,7 +122,7 @@ class TravelerCategory {
 	public function get( $key, $default = null ) {
 		switch ( $key ) {
 			case 'group_pricing':
-				$value = $this->package->get_group_pricing()[ $this->{'id'} ] ?? [];
+				$value = $this->package->get_group_pricing()[ $this->id ] ?? [];
 				break;
 			case 'description':
 				$value = get_term_by( 'id', $this->id, 'trip-packages-categories' )->{$key};

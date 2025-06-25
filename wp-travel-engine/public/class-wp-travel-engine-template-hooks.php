@@ -5,8 +5,10 @@
  * @package WP_Travel_Engine
  */
 
-use WPTravelEngine\Core\Models\Post\Trip;
 use WPTravelEngine\Packages;
+use WPTravelEngine\Core\Models\Post\Trip;
+use WPTravelEngine\Core\Models\Post\TravelerCategory;
+use WPTravelEngine\Core\Controllers\RestAPI\V2\Trip as RestAPI_Trip;
 
 class WP_Travel_Engine_Template_Hooks {
 
@@ -78,6 +80,7 @@ class WP_Travel_Engine_Template_Hooks {
 		add_action( 'wte_faqs_tab_title', array( $this, 'show_faqs_tab_title' ), 999 );
 		add_action( 'wte_map_tab_title', array( $this, 'show_map_tab_title' ), 999 );
 		add_action( 'wte_itinerary_tab_title', array( $this, 'show_itinerary_tab_title' ), 999 );
+		add_action( 'wte_after_itinerary_header', array( $this, 'show_itinerary_description' ), 8 );
 
 		add_action( 'wp_travel_engine_related_posts', array( __CLASS__, 'trip_related_trips' ), 15 );
 
@@ -321,77 +324,45 @@ class WP_Travel_Engine_Template_Hooks {
 	/**
 	 * Displays multiple prices from different categories.
 	 *
-	 * @return void
+	 * @return mixed
+	 * @updated 6.5.5
 	 */
 	public static function categorised_trip_prices( $trip_id = null, $echo = true ) {
-		if ( $trip_id ) {
-			$trip = get_post( $trip_id );
-		} else {
+
+		if ( is_null( $trip_id ) ) {
 			global $post;
-			$trip = $post;
-		}
-		if ( is_null( $trip ) || WP_TRAVEL_ENGINE_POST_TYPE != $trip->post_type ) {
-			return;
+			$trip_id = $post->ID;
 		}
 
-		global $wtetrip;
+		$trip = new Trip( $trip_id );
 
-		if ( $wtetrip && $wtetrip->use_legacy_trip ) {
-			return;
-		}
+		$default_package 		= $trip->default_package();
+		$categories_in_package 	= $default_package->get_traveler_categories();
+		$package_categories 	= (object) $default_package->{'package-categories'};
 
 		if ( ! $echo ) {
 			ob_start();
 		}
 
-		$package            = $wtetrip->default_package;
-		$package_categories = (object) $package->{'package-categories'};
-		$pricing_categories = wte_get_terms_by_id(
-			'trip-packages-categories',
-			array(
-				'hide_empty' => false,
-			)
-		);
-
-		$primary_pricing_category = get_post_meta( $trip->ID, 'primary_category', true ) ?: get_option( 'primary_pricing_category' );
-
-		$categories_in_package = $package_categories->c_ids;
-		if ( in_array( $primary_pricing_category, $categories_in_package ) ) {
-			$ids_as_key = array_combine( $categories_in_package, range( 1, count( $categories_in_package ) ) );
-			unset( $ids_as_key[ $primary_pricing_category ] );
-			$categories_in_package = array_keys( $ids_as_key );
-			array_unshift( $categories_in_package, $primary_pricing_category );
-		}
-
-		$today_prices = self::get_today_prices( $post->ID );
-
-		foreach ( $categories_in_package as $c_id ) {
-			if ( ! isset( $pricing_categories[ $c_id ] ) ) {
-				continue;
-			}
-			$price = $package_categories->prices[ $c_id ];
+		/** @var TravelerCategory $category */
+		foreach ( $categories_in_package as $key => $category ) {
+			$c_id 	= $category->id;
+			$price 	= $package_categories->prices[ $c_id ] ?? '';
 
 			if ( '' === $price ) {
 				continue;
 			}
-			$has_sale   = isset( $package_categories->enabled_sale[ $c_id ] ) && ( $package_categories->enabled_sale[ $c_id ] == '1' );
-			$sale_price = $has_sale ? $package_categories->sale_prices[ $c_id ] : $price;
+
+			$sale_price = $default_package->categories_pricings[ $key ]['price'] ?? $price;
 
 			$sale_price = apply_filters_deprecated( 'wp_travel_engine_trip_prev_price', array(
 				$sale_price,
-				$trip->ID,
+				$trip_id,
 			), '5.0', 'wte_before_formatting_price_figure', __( 'Replacing multiple filters with single filter', 'wp-travel-engine' ) );
-			$price      = apply_filters( 'wp_travel_engine_trip_prev_price', $price, $trip->ID );
-			$per_label  = ! empty( $pricing_categories[ $c_id ]->name ) ? $pricing_categories[ $c_id ]->name : $package_categories->labels[ $c_id ];
 
-			if( $today_prices ) {
-				foreach( $today_prices['pricing'] as $today_price ) {
-					if( $c_id == $today_price['id'] && $price !== $today_price['price'] ) {
-						$sale_price = $today_price['price'];
-						$has_sale = ( $price > $sale_price ) ? '1' : false;
-					}
-				}
-			}
+			$price      = apply_filters( 'wp_travel_engine_trip_prev_price', $price, $trip_id );
+			$has_sale   = wptravelengine_toggled( $package_categories->enabled_sale[ $c_id ] ?? false ) && $sale_price < $price;
+			$per_label  = $category->label ?: $package_categories->labels[ $c_id ];
 
 			$category_term_meta = get_term_meta( $c_id, 'pll_category_name', true );
 			$locale             = get_locale();
@@ -405,7 +376,7 @@ class WP_Travel_Engine_Template_Hooks {
 				'categorised_trip_price_display_format',
 				null,
 				array(
-					'trip_ID'     => $trip->ID,
+					'trip_ID'     => $trip_id,
 					'category_id' => $c_id,
 					'has_sale'    => $has_sale,
 					'price'       => $price,
@@ -468,55 +439,19 @@ class WP_Travel_Engine_Template_Hooks {
 	 * @since 5.0.0
 	 */
 	public static function trip_price_sidebar() {
-		global $wp_query;
+		global $post;
 
-		$queried_object = $wp_query->get_queried_object();
+		$trip 				= new Trip( $post );
+		$default_package 	= $trip->default_package();
+		$settings 			= get_option( 'wp_travel_engine_settings', array() );
 
-		if ( ! isset( $queried_object->post_type ) || WP_TRAVEL_ENGINE_POST_TYPE !== $queried_object->post_type ) {
+		if ( ( isset( $settings[ 'booking' ] ) && ! empty( $settings[ 'booking' ] ) ) || '' === $default_package->price ) {
 			return;
-		}
-		$post = $queried_object;
-
-		$trip_version = get_post_meta( $post->ID, 'trip_version', ! 0 );
-
-		$price = Packages\get_trip_lowest_price( $post->ID );
-
-		$wte_settings = get_option( 'wp_travel_engine_settings', array() );
-
-		if ( ( isset( $wte_settings[ 'booking' ] ) && ! empty( $wte_settings[ 'booking' ] ) ) || empty( $price ) ) {
-			return;
-		}
-
-		global $wtetrip;
-
-		$today_prices = self::get_today_prices( $post->ID );
-
-		if( $today_prices && $wtetrip->price !== $today_prices[ 'pricing' ][0][ 'price' ] ) {
-			$new_price = $today_prices[ 'pricing' ][0][ 'price' ] ?: 0;
-			$wtetrip->sale_price = $new_price;
-			if( $wtetrip->price < $new_price ) {
-				$wtetrip->has_sale = false;
-			} else if( $wtetrip->price > 0 ) {
-				$wtetrip->has_sale = true;
-				$wtetrip->sale_percentage = round( ( ( $wtetrip->price - $wtetrip->sale_price ) / $wtetrip->price ) * 100 );
-			}
 		}
 
 		do_action( 'wp_travel_engine_before_trip_price' );
 		require WP_TRAVEL_ENGINE_BASE_PATH . '/includes/frontend/trip-meta/trip-meta-parts/trip-prices-sidebar-widget.php';
 		do_action( 'wp_travel_engine_after_trip_price' );
-	}
-
-	/**
-	 * Get today prices.
-	 *
-	 * @param int $trip_id
-	 * @return array|null
-	 */
-	private static function get_today_prices( $trip_id ) {
-		$trip_modal      = new Trip( $trip_id );
-		$primary_package = $trip_modal->default_package()->get_package_dates();
-		return $primary_package[ date( 'Y-m-d' ) ] ?? null;
 	}
 
 	/**
@@ -1178,8 +1113,24 @@ class WP_Travel_Engine_Template_Hooks {
 								class="checkbox" <?php echo $enabled_expand_all != '' ? 'checked' : ''; ?>>
 					</div>
 				</div>
+				<?php $this->show_itinerary_description(); ?>
 			</div>
 			<?php
+		}
+	}
+
+	/**
+	 * Show itinerary description.
+	 *
+	 * @since 6.5.5
+	 * @return void
+	 */
+	public function show_itinerary_description() {
+		global $post;
+		$trip_id = $post->ID;
+		$trip_settings = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
+		if ( isset( $trip_settings[ 'trip_itinerary_description' ] ) && ! empty( $trip_settings[ 'trip_itinerary_description' ] ) ) {
+			echo "<div style='width: 100%; margin-bottom: 2%;'>" . wp_kses_post( $trip_settings[ 'trip_itinerary_description' ] ) . '</div>';
 		}
 	}
 
