@@ -1,13 +1,13 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WP Travel Engine - Travel and Tour Booking Plugin 6.5.5\n"
+"Project-Id-Version: WP Travel Engine - Travel and Tour Booking Plugin 6.5.6\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wptravelengine\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-06-25T05:54:28+00:00\n"
+"POT-Creation-Date: 2025-06-25T08:04:04+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language: \n"
 "X-Generator: WP-CLI 2.12.0\n"
@@ -81,8 +81,8 @@ msgstr ""
 #: includes/backend/submenu/extensions.php:10
 #: includes/class-wp-travel-engine-settings.php:809
 #: includes/classes/Builders/admin-settings/extensions.php:10
-#: includes/helpers/functions.php:1907
-#: includes/helpers/functions.php:1924
+#: includes/helpers/functions.php:1913
+#: includes/helpers/functions.php:1930
 msgid "Extensions"
 msgstr ""
 
@@ -602,8 +602,8 @@ msgstr ""
 #: includes/classes/Booking/Email/Template_Tags.php:756
 #: includes/classes/Core/Booking/BookingProcess.php:611
 #: includes/deprecated/class-booking.php:39
-#: includes/helpers/functions.php:1968
-#: includes/helpers/functions.php:1989
+#: includes/helpers/functions.php:1974
+#: includes/helpers/functions.php:1995
 #: includes/helpers/helpers.php:2248
 msgid "N/A"
 msgstr ""
@@ -1021,7 +1021,7 @@ msgstr ""
 #: includes/classes/Modules/TripSearch.php:143
 #: includes/classes/Modules/TripSearch.php:642
 #: includes/helpers/functions.php:37
-#: includes/helpers/functions.php:1834
+#: includes/helpers/functions.php:1840
 #: includes/templates/components/content-trip-card-duration.php:19
 #: includes/templates/template-trip-search-form.php:185
 msgid "Days"
@@ -1130,7 +1130,7 @@ msgstr ""
 #: includes/backend/booking/booking-parts/booking-details.php:129
 #: includes/backend/booking/booking-parts/booking-details.php:156
 #: includes/classes/Core/Controllers/Ajax/EnquiryPreview.php:74
-#: includes/helpers/functions.php:1841
+#: includes/helpers/functions.php:1847
 #: includes/helpers/privacy-functions.php:120
 #: includes/templates/content--template-taxonomy.php:95
 #: includes/templates/emails/booking/notification.php:14
@@ -2909,8 +2909,8 @@ msgstr ""
 
 #: includes/backend/booking/booking-parts/booking-details.php:30
 #: includes/backend/booking/legacy/booking-parts/payment-details.php:17
-#: includes/helpers/functions.php:1952
-#: includes/helpers/functions.php:1980
+#: includes/helpers/functions.php:1958
+#: includes/helpers/functions.php:1986
 #: includes/helpers/helpers.php:2232
 #: includes/templates/account/tab-content/bookings/bookings-html.php:11
 #: includes/templates/account/tab-content/bookings/bookings-manager.php:51
@@ -2927,16 +2927,16 @@ msgstr ""
 
 #: includes/backend/booking/booking-parts/booking-details.php:32
 #: includes/backend/booking/legacy/booking-parts/payment-details.php:19
-#: includes/helpers/functions.php:1955
+#: includes/helpers/functions.php:1961
 #: includes/helpers/helpers.php:2240
 msgid "Refunded"
 msgstr ""
 
 #: includes/backend/booking/booking-parts/booking-details.php:33
 #: includes/backend/booking/legacy/booking-parts/payment-details.php:16
-#: includes/helpers/functions.php:1943
-#: includes/helpers/functions.php:1944
-#: includes/helpers/functions.php:1981
+#: includes/helpers/functions.php:1949
+#: includes/helpers/functions.php:1950
+#: includes/helpers/functions.php:1987
 msgid "Cancelled"
 msgstr ""
 
@@ -3063,7 +3063,7 @@ msgstr ""
 #: includes/backend/templates/booking/partials/edit/booking-summary.php:17
 #: includes/classes/Core/Controllers/Ajax/ResendPurchaseReceipt.php:213
 #: includes/classes/Core/Controllers/MiniCart.php:26
-#: includes/helpers/functions.php:1324
+#: includes/helpers/functions.php:1330
 #: includes/templates/checkout/mini-cart-before-coupon.php:19
 #: includes/templates/script-templates/booking-process/tmpl-wte-booking-summary.php:16
 #: dist/chunks/8516.js:1
@@ -3474,42 +3474,42 @@ msgid "Customer details not found. Click \"Edit\" to fill details."
 msgstr ""
 
 #: includes/backend/booking/legacy/booking-parts/payment-details.php:15
-#: includes/helpers/functions.php:1941
-#: includes/helpers/functions.php:1942
-#: includes/helpers/functions.php:1979
+#: includes/helpers/functions.php:1947
+#: includes/helpers/functions.php:1948
+#: includes/helpers/functions.php:1985
 msgid "Completed"
 msgstr ""
 
 #: includes/backend/booking/legacy/booking-parts/payment-details.php:18
-#: includes/helpers/functions.php:1950
+#: includes/helpers/functions.php:1956
 #: includes/templates/account/tab-content/bookings/bookings-html.php:10
 #: includes/templates/account/tab-content/bookings/bookings-manager.php:51
 msgid "Partially Paid"
 msgstr ""
 
 #: includes/backend/booking/legacy/booking-parts/payment-details.php:20
-#: includes/helpers/functions.php:1940
+#: includes/helpers/functions.php:1946
 msgid "Abandoned"
 msgstr ""
 
 #: includes/backend/booking/legacy/booking-parts/payment-details.php:21
-#: includes/helpers/functions.php:1958
-#: includes/helpers/functions.php:1959
+#: includes/helpers/functions.php:1964
+#: includes/helpers/functions.php:1965
 msgid "Waiting for Voucher"
 msgstr ""
 
 #: includes/backend/booking/legacy/booking-parts/payment-details.php:22
-#: includes/helpers/functions.php:1960
+#: includes/helpers/functions.php:1966
 msgid "Voucher Received"
 msgstr ""
 
 #: includes/backend/booking/legacy/booking-parts/payment-details.php:23
-#: includes/helpers/functions.php:1948
+#: includes/helpers/functions.php:1954
 msgid "Waiting for Check"
 msgstr ""
 
 #: includes/backend/booking/legacy/booking-parts/payment-details.php:24
-#: includes/helpers/functions.php:1947
+#: includes/helpers/functions.php:1953
 msgid "Check Received"
 msgstr ""
 
@@ -5226,7 +5226,7 @@ msgstr ""
 
 #: includes/class-wp-travel-engine-archive-hooks.php:267
 #: includes/classes/Modules/trip-search/class-wte-show-trip-results.php:230
-#: includes/helpers/functions.php:1824
+#: includes/helpers/functions.php:1830
 #: dist/blocks/editor/editor.js:2
 msgid "Latest"
 msgstr ""
@@ -6361,7 +6361,7 @@ msgstr ""
 #: includes/classes/Blocks/Blocks.php:123
 #: includes/classes/Blocks/Blocks.php:124
 #: includes/classes/Modules/TripSearch.php:461
-#: includes/helpers/functions.php:1827
+#: includes/helpers/functions.php:1833
 #: includes/templates/script-templates/tmpl-wte-package-category-single.php:31
 #: dist/blocks/editor/editor.js:2
 #: dist/chunks/8516.js:1
@@ -13401,12 +13401,12 @@ msgid "Slug"
 msgstr ""
 
 #: includes/classes/Modules/custom-filters/views/admin-custom-filters-page.php:123
-#: includes/helpers/functions.php:1892
+#: includes/helpers/functions.php:1898
 msgid "Yes"
 msgstr ""
 
 #: includes/classes/Modules/custom-filters/views/admin-custom-filters-page.php:123
-#: includes/helpers/functions.php:1892
+#: includes/helpers/functions.php:1898
 msgid "No"
 msgstr ""
 
@@ -13444,7 +13444,7 @@ msgid "Default Sorting"
 msgstr ""
 
 #: includes/classes/Modules/trip-search/class-wte-show-trip-results.php:231
-#: includes/helpers/functions.php:1825
+#: includes/helpers/functions.php:1831
 msgid "Most Reviewed"
 msgstr ""
 
@@ -14018,76 +14018,76 @@ msgid_plural "%d Reviews"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/helpers/functions.php:1323
+#: includes/helpers/functions.php:1329
 msgid "Book Now"
 msgstr ""
 
-#: includes/helpers/functions.php:1325
+#: includes/helpers/functions.php:1331
 msgid "Total Payable Now"
 msgstr ""
 
-#: includes/helpers/functions.php:1829
-#: includes/helpers/functions.php:1836
+#: includes/helpers/functions.php:1835
+#: includes/helpers/functions.php:1842
 msgid "Low to High"
 msgstr ""
 
-#: includes/helpers/functions.php:1830
-#: includes/helpers/functions.php:1837
+#: includes/helpers/functions.php:1836
+#: includes/helpers/functions.php:1843
 msgid "High to Low"
 msgstr ""
 
-#: includes/helpers/functions.php:1843
+#: includes/helpers/functions.php:1849
 #: includes/templates/content--template-taxonomy.php:88
 #: includes/templates/content--template-taxonomy.php:97
 #: includes/templates/content--template-taxonomy.php:103
 msgid "a - z"
 msgstr ""
 
-#: includes/helpers/functions.php:1844
+#: includes/helpers/functions.php:1850
 #: includes/templates/content--template-taxonomy.php:89
 #: includes/templates/content--template-taxonomy.php:106
 #: includes/templates/content--template-taxonomy.php:112
 msgid "z - a"
 msgstr ""
 
-#: includes/helpers/functions.php:1888
+#: includes/helpers/functions.php:1894
 msgid "Site Info"
 msgstr ""
 
-#: includes/helpers/functions.php:1896
+#: includes/helpers/functions.php:1902
 msgid "WordPress Configuration"
 msgstr ""
 
-#: includes/helpers/functions.php:1945
-#: includes/helpers/functions.php:1946
+#: includes/helpers/functions.php:1951
+#: includes/helpers/functions.php:1952
 msgid "Captured"
 msgstr ""
 
-#: includes/helpers/functions.php:1949
+#: includes/helpers/functions.php:1955
 msgid "Failed"
 msgstr ""
 
-#: includes/helpers/functions.php:1951
+#: includes/helpers/functions.php:1957
 msgid "Settlement"
 msgstr ""
 
-#: includes/helpers/functions.php:1953
+#: includes/helpers/functions.php:1959
 msgid "Denied"
 msgstr ""
 
-#: includes/helpers/functions.php:1954
+#: includes/helpers/functions.php:1960
 msgid "Expired"
 msgstr ""
 
-#: includes/helpers/functions.php:1956
+#: includes/helpers/functions.php:1962
 msgid "Revoked"
 msgstr ""
 
-#: includes/helpers/functions.php:1957
+#: includes/helpers/functions.php:1963
 msgid "Success"
 msgstr ""
 
-#: includes/helpers/functions.php:1978
+#: includes/helpers/functions.php:1984
 #: includes/helpers/helpers.php:2236
 msgid "Booked"
 msgstr ""

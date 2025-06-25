@@ -1211,13 +1211,19 @@ function wte_trip_get_trip_rest_metadata( $trip_id ) {
 
 	// $wte_trip = \wte_get_trip( $trip_id );
 
-	$trip = new Trip( $trip_id );
-	$default_package = $trip->default_package();
+	$trip = wptravelengine_get_trip( $trip_id );
+	if ( $trip ) {
+		$default_package 	= $trip->default_package();
+		$primary_category 	= $default_package->primary_pricing_category->id;
+	} else {
+		$default_package 	= false;
+		$primary_category 	= (int) ( get_post_meta( $trip_id, 'primary_category', true ) ?: wptravelengine_settings()->get_primary_pricing_category()->term_id );
+	}
 
-	$data->price = $default_package->price;
-	$data->has_sale = $default_package->has_sale;
-	$data->sale_price = $default_package->sale_price;
-	$data->primary_category = $default_package->primary_pricing_category->id;
+	$data->price            = $default_package->price ?? '';
+	$data->has_sale         = $default_package->has_sale ?? false;
+	$data->sale_price       = $default_package->sale_price ?? '';
+	$data->primary_category = $primary_category;
 
 	$data->available_times  = array(
 		'type'  => 'default',
