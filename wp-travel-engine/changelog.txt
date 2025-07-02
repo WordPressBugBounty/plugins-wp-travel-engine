@@ -1,5 +1,10 @@
 == Changelog ==
 
+= 6.5.7 - 2nd July 2025 =
+* New: Introduced a new admin notice system to display notifications within the WordPress dashboard.
+* Fix: Addressed WooCommerce checkout compatibility issue with the form editor.
+* Fix: Fixed an issue where fields containing country codes were incorrectly displaying country names.
+
 = 6.5.6 - 25th June 2025 =
 * Fix: Resolved a fatal error occurring in admin sub-menus.
 

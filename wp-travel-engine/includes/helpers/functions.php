@@ -1214,11 +1214,12 @@ function wte_trip_get_trip_rest_metadata( $trip_id ) {
 	$trip = wptravelengine_get_trip( $trip_id );
 	if ( $trip ) {
 		$default_package 	= $trip->default_package();
-		$primary_category 	= $default_package->primary_pricing_category->id;
+		$primary_category 	= $default_package->primary_pricing_category->id ?? null;
 	} else {
 		$default_package 	= false;
-		$primary_category 	= (int) ( get_post_meta( $trip_id, 'primary_category', true ) ?: wptravelengine_settings()->get_primary_pricing_category()->term_id );
 	}
+
+	$primary_category ??= (int) ( get_post_meta( $trip_id, 'primary_category', true ) ?: wptravelengine_settings()->get_primary_pricing_category()->term_id );
 
 	$data->price            = $default_package->price ?? '';
 	$data->has_sale         = $default_package->has_sale ?? false;

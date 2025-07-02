@@ -43,9 +43,11 @@ class BillingEditFormFields extends BookingEditFormFields {
 			$field['validations']['required'] = false;
 			// Convert country code to country name to show in the billing form.
 			$countries_list = Countries::list();
-			foreach ( $countries_list as $key => $value ) {
-				if ( $field[ 'default' ] === $value ) {
-					$field[ 'default' ] = $key;
+			if( $field['type'] == 'country' ) {
+				foreach ( $countries_list as $key => $value ) {
+					if ( $field[ 'default' ] === $value ) {
+						$field[ 'default' ] = $key;
+					}
 				}
 			}
 		}

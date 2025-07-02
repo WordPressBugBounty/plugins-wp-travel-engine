@@ -1019,7 +1019,11 @@ class Template_Tags extends TemplateTags {
 				<?php
 					foreach ( $traveller_detail as $field ) :
 					if( empty( $field[ 'value' ] ) ) continue;
-					$value = isset( $field[ 'value' ] ) ? $field[ 'value' ] : ''; ?>
+					$value = isset( $field[ 'value' ] ) ? $field[ 'value' ] : '';
+					$countries_list = Countries::list();
+					if( $field['type'] == 'country_dropdown' ) {
+						$value = $countries_list[ $field['value'] ];
+					}?>
 						<tr>
 							<td><?php echo esc_html( ucfirst( $field[ 'field_label' ] ) ); ?></td>
 							<td>

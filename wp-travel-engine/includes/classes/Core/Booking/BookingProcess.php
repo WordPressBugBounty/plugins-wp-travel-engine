@@ -633,6 +633,15 @@ class BookingProcess {
 
 		$result = $this->validator->validate( $this->request->get_body_params() );
 
+		/**
+		 * If WooCommerce integration is active, let it continue the process ignoring the form validation errors since it is handled by WooCommerce.
+		 * @since 6.5.7
+		 */
+		$enable_woocommerce_gateway = wptravelengine_settings()->get( 'use_woocommerce_payment_gateway', false );
+		if ( defined( 'WPTRAVELENGINE_WC_PAYMENTS_FILE__' ) && $enable_woocommerce_gateway ) {
+			return true;
+		}
+
 		return ! $result->has_errors();
 	}
 

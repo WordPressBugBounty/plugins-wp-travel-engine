@@ -6,6 +6,7 @@ use WPTravelEngine\Core\Controllers\Ajax\Cart;
 use WPTravelEngine\Core\Controllers\Ajax\Checkout;
 use WPTravelEngine\Core\Controllers\Ajax\EnquiryMail;
 use WPTravelEngine\Core\Controllers\Ajax\UpdateMailTemplate;
+use WPTravelEngine\Core\Controllers\Ajax\AdminNotice;
 use WPTravelEngine\Core\Models\Post\Booking;
 use WPTravelEngine\Helpers\Functions;
 use WPTravelEngine\Registers\AjaxRequestRegistry;
@@ -57,6 +58,11 @@ class WTE_Ajax {
 		 * @since 6.5.2
 		 */
 		$ajax_registry->register( EnquiryMail::class );
+
+		/**
+		 * @since 6.5.7
+		 */
+		$ajax_registry->register( AdminNotice::class );
 
 		add_action( 'wp_ajax_nopriv_email_test', function () {
 

@@ -131,8 +131,10 @@ class BillingFormFields extends FormField {
 				$field[ 'value' ]     = $form_data[ $name ] ?? $field[ 'default' ] ?? '';
 				// Convert country code to country name to show in the billing form.
 				$countries_list = Countries::list();
-				if ( isset( $field['value'] ) && is_string( $field['value'] ) && isset( $countries_list[ $field['value'] ] ) ) {
-					$field['value'] = $countries_list[ $field['value'] ];
+				if( $field['type'] == 'country' ) {
+					if ( isset( $field['value'] ) && is_string( $field['value'] ) && isset( $countries_list[ $field['value'] ] ) ) {
+						$field['value'] = $countries_list[ $field['value'] ];
+					}
 				}
 			}
 

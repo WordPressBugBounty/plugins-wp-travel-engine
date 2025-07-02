@@ -42,7 +42,6 @@ use WPTravelEngine\Email\Email;
 use function WTE\Upgrade500\wte_process_migration;
 use const WP_TRAVEL_ENGINE_FILE_PATH;
 use WPTravelEngine\Core\Models\Post\TripPackages;
-use WPTravelEngine\Helpers\Countries;
 use WPTravelEngine\Core\Controllers\RestAPI\V2\Booking as BookingController;
 
 /**
@@ -122,6 +121,13 @@ final class Plugin {
 		$this->hooks();
 
 		$this->init_shortcodes();
+
+		/**
+		 * This fetches the notice from the server and displays it in the admin dashboard.
+		 * 
+		 * @since 6.5.7
+		 */
+		new AdminNotice();
 
 		$template_filters = new Template();
 		$template_filters->hooks();
@@ -526,11 +532,8 @@ final class Plugin {
 				$additional_fields = wte_array_get( get_post_meta( $booking->ID, 'wptravelengine_billing_details', ! 0 ), null, array() );
 
 				foreach ( $additional_fields as $field_name => $field_value ) {
-					$countries_list = Countries::list();
 					if ( is_array( $field_value ) ) {
 						$field_value = implode( ',', $field_value );
-					} else if ( isset( $countries_list[ $field_value ] ) ) {
-						$field_value = $countries_list[ $field_value ];
 					}
 					$mail_tags[ '{' . $field_name . '}' ] = is_array( $field_value ) ? implode( ',', $field_value ) : $field_value;
 				}

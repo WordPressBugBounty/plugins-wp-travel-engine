@@ -52,11 +52,13 @@ class EmergencyEditFormFields extends BookingEditFormFields {
 			$field[ 'field_label' ] = isset( $field[ 'placeholder' ] ) && $field[ 'placeholder' ] !== '' ? $field[ 'placeholder' ] : $field[ 'field_label' ];
 			$field[ 'default' ]     = $this->defaults[ $name ] ?? $field[ 'default' ] ?? '';
 			$field['validations']['required'] = false;
-			// Convert country code to country name to show in the billing form.
+			// Convert country code to country name to show in the emergency form.
 			$countries_list = Countries::list();
-			foreach ( $countries_list as $key => $value ) {
-				if ( $field[ 'default' ] === $value ) {
-					$field[ 'default' ] = $key;
+			if( $field['type'] == 'country' ) {
+				foreach ( $countries_list as $key => $value ) {
+					if ( $field[ 'default' ] === $value ) {
+						$field[ 'default' ] = $key;
+					}
 				}
 			}
 		}

@@ -5,16 +5,16 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 6.5.6
+Stable tag: 6.5.7
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-WP Travel Engine is the most popular tour and travel booking WordPress plugin. Used by over 10,000 travel agency websites.
+WP Travel Engine is the most popular tour and travel booking WordPress plugin. Used by over 20,000 travel agency websites.
 
 == Description ==
 
 ### WP Travel Engine is the most popular WordPress tour booking plugin.
-[WP Travel Engine](https://wptravelengine.com/?utm_source=free_plugin&utm_medium=wporg&utm_campaign=upgrade_to_pro) was launched in 2017. Today, over 10,000 travel agency owners use it to sell tours and activities online.
+[WP Travel Engine](https://wptravelengine.com/?utm_source=free_plugin&utm_medium=wporg&utm_campaign=upgrade_to_pro) was launched in 2017. Today, over 20,000 travel agency owners use it to sell tours and activities online.
 It provides a complete tour management and booking system. You can use it to create SEO-friendly websites and sell tour packages.
 It also offers tools to increase bookings, inquiries, and Average Order Value (AOV).
 
@@ -367,6 +367,11 @@ Yes. We have created WooCommerce Payments add-ons that supports all the payment 
 Please send us an email via [support ticket](https://wptravelengine.com/support-ticket/?utm_source=free_plugin&utm_medium=wporg&utm_campaign=support), and we will be happy to help you.
 
 == Changelog ==
+
+= 6.5.7 - 2nd July 2025 =
+* New: Introduced a new admin notice system to display notifications within the WordPress dashboard.
+* Fix: Addressed WooCommerce checkout compatibility issue with the form editor.
+* Fix: Fixed an issue where fields containing country codes were incorrectly displaying country names.
 
 = 6.5.6 - 25th June 2025 =
 * Fix: Resolved a fatal error occurring in admin sub-menus.

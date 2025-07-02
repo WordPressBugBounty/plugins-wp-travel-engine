@@ -4,6 +4,7 @@
  * @var string $trip_start_date
  * @var string $trip_end_date
  */
+use WPTravelEngine\Helpers\Countries;
 ?>
 <div class="wpte-thankyou__booking-details">
 	<?php do_action( 'wptravelengine_thankyou_before_booking_details' ); ?>
@@ -42,7 +43,11 @@
 				<div class="wpte-thankyou__block-content">
 					<div class="wpte-thankyou__grid">
 						<?php foreach ( $traveller_detail as $name => $field ) : ?>
-							<?php if( empty( $field[ 'value' ] ) ) continue; ?>
+							<?php if( empty( $field[ 'value' ] ) ) continue;
+							$countries_list = Countries::list();
+							if( $field['type'] == 'country_dropdown' ){
+								$field['value'] = $countries_list[ $field['value'] ];
+							}?>
 							<div>
 								<span
 									class="wpte-thankyou__label"><?php echo esc_html( $field[ 'field_label' ] ); ?></span>
