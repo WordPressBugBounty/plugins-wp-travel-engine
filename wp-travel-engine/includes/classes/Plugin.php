@@ -248,6 +248,17 @@ final class Plugin {
 					);
 				}
 			}
+
+			/**
+			 * Set default value for display_new_trip_listing as yes.
+			 * @since 6.6.0
+			 */
+			$settings = wptravelengine_settings();
+			$new_trip_listing = $settings->get( 'display_new_trip_listing' );
+			if ( 'yes' !== $new_trip_listing ) {
+				$settings->set( 'display_new_trip_listing', 'yes' );
+				$settings->save();
+			}
 		} );
  
 		add_action( 'admin_init', array( \WTE_Ajax::class, 'ajax_request_middleware' ) );

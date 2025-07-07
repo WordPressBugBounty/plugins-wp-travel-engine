@@ -36,7 +36,7 @@ class LoadMore extends AjaxController {
 		while ( $query->have_posts() ) :
 			$query->the_post();
 			$details = wte_get_trip_details( get_the_ID() );
-			wte_get_template( 'content-grid.php', $details );
+			wptravelengine_get_template( 'content-grid.php', $details );
 		endwhile;
 		wp_reset_postdata();
 

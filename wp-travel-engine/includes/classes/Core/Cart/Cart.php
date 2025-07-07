@@ -999,7 +999,7 @@ class Cart {
 	 * @since 6.0.0
 	 */
 	public function get_cart_total(): float {
-		return $this->totals[ 'total' ];
+		return $this->totals[ 'total' ] ?? 0;
 	}
 
 	/**

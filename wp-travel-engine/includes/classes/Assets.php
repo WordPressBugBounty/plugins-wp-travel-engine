@@ -14,6 +14,7 @@ use WPTravelEngine\Helpers\Functions;
 use WPTravelEngine\Helpers\Asset;
 use WPTravelEngine\Helpers\AssetLib;
 use WPTravelEngine\Traits\Singleton;
+use WPTravelEngine\Modules\TripSearch;
 
 /**
  * Class Assets
@@ -111,6 +112,11 @@ class Assets extends AssetsAbstract {
 			'WTEAjaxData'      => array(
 				'ajaxurl' => admin_url( 'admin-ajax.php' ),
 				'nonce'   => wp_create_nonce( 'wp_rest' ),
+			),
+			'wptravelengineWishlist'      => array(
+				'ajaxurl' => admin_url( 'admin-ajax.php' ),
+				'action'  => 'wte_user_wishlist',
+				'nonce'   => wp_create_nonce( 'wp_xhr' ),
 			),
 		];
 
@@ -254,9 +260,19 @@ class Assets extends AssetsAbstract {
 			}
 		}
 
+		// Trip Archive.
+		$this->register_style( Asset::register( 'wpte-trip-archive', 'public/trip-archive.css' ) );
+		$this->register_script( Asset::register( 'wte-trip-search', 'public/trip-search/index.js' ) )
+			->localize( 'wte-trip-search', 'wteL10n,wptravelengineWishlist' )
+			->localize_script( 'wte-trip-search', 'wte_advanced_search', TripSearch::get_localized_data() );
+		$this->register_script( Asset::register( 'wptravelengine-trip-search-widgets-dropdown', 'public/trip-search/widgets-dropdown.js' ) );
+		$this->register_script( Asset::register( 'wptravelengine-trip-search-widgets-slider', 'public/trip-search/widgets-slider.js' ) );
+
 		//Wishlist Page.
 		$this->register_style( Asset::register( 'trip-wishlist', 'public/trip-wishlist.css' ) );
-		$this->register_script( Asset::register( 'trip-wishlist', 'public/trip-wishlist.js' )->dependencies( [ 'wp-travel-engine' ] ) );
+		$this->register_script( Asset::register( 'trip-wishlist', 'public/trip-wishlist.js' ) )
+			->localize( 'trip-wishlist', 'wptravelengineWishlist' );
+
 	}
 
 	/**
@@ -825,11 +841,19 @@ class Assets extends AssetsAbstract {
 	public function get_payment_localize_data(): array {
 		global $wte_cart;
 
+		if ( empty( $wte_cart->getItems() ) ) {
+			return array();
+		}
+
 		$booking_id        = $wte_cart->get_booking_ref();
 		$locale            = get_locale();
 		$total             = round( $wte_cart->get_cart_total(), 2 );
 		$total_partial     = round( $wte_cart->get_total_partial(), 2 );
 		$remaining_payment = $total - $total_partial;
+
+		if ( ! $booking_id ) {
+			return array();
+		}
 
 		/* @var Core\Models\Post\Booking $booking */
 		$booking = wptravelengine_get_booking( $booking_id );

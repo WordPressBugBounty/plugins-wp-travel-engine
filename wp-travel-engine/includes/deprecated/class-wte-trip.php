@@ -90,7 +90,11 @@ class Trip {
 	}
 
 	public function set_default_package() {
-		$default_package 		= wptravelengine_get_trip_primary_package( $this->post->ID );
+		if ( $this->post->post_type !== 'trip' ) {
+			$default_package = null;
+		} else {
+			$default_package = wptravelengine_get_trip_primary_package( $this->post->ID );
+		}
 		$this->has_sale        	= $default_package->{'has_sale'} ?? false;
 		$this->price           	= $default_package->{'price'} ?? 0;
 		$this->sale_price      	= $default_package->{'sale_price'} ?? 0;

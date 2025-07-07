@@ -23,16 +23,25 @@ class UserWishlist extends AjaxController {
 	 * Process Request.
 	 * Update user wishlist.
 	 *
-	 * @since 5.5.7
+	 * @return void
 	 */
-	public function process_request() {
+	public function process_request(): void {
 		$request        = $this->request->get_params();
-		$request_method = $this->get_current_request_method();
+		$request_method = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? 'GET' ) );
 		$user_wishlists = array_values( (array) wptravelengine_user_wishlists() );
 		$message        = __( 'Wishlist fetched successfully.', 'wp-travel-engine' );
 
+		$args = array(
+			'post_type'   => WP_TRAVEL_ENGINE_POST_TYPE,
+			'post_status' => 'publish',
+			'post__in'    => $user_wishlists,
+			'orderby'     => 'post__in',
+			'paged'       => intval( $request['paged'] ?? 1 ),
+		);
+
 		if ( 'GET' === $request_method ) {
-			wp_send_json_success( compact( 'message', 'user_wishlists' ) );
+			list( $markup, $pagination, $max_page ) = $this->get_wishlist_markup( $args );
+			wp_send_json_success( compact( 'message',  'markup', 'pagination', 'max_page' ) );
 			wp_die();
 		}
 
@@ -55,13 +64,17 @@ class UserWishlist extends AjaxController {
 			WTE()->session->set( 'user_wishlists', $user_wishlists );
 		}
 
-		$message        = __( '<strong>0</strong> item in wishlist', 'wp-travel-engine' );
-		$user_wishlists = wptravelengine_user_wishlists();
+		$args['post__in'] = $user_wishlists;
+		list( $markup, $pagination, $max_page ) = $this->get_wishlist_markup( $args );
+
 		wp_send_json_success(
 			array(
 				'message'        => $message,
+				'markup'         => $markup,
+				'max_page'       => $max_page,
+				'pagination'     => $pagination,
 				'user_wishlists' => $user_wishlists,
-				'refresh'        => 'all' === $request['wishlist'],
+				'refresh'        => 'all' === $request['wishlist'] || empty( $user_wishlists ),
 				'partials'       => array(
 					/* Translators: %d is the number of items in the wishlist. */
 					'[data-wptravelengine-wishlist-count]' => ! empty( $user_wishlists ) ? sprintf( _n( '<strong>%d</strong> item in the wishlist', '<strong>%d</strong> items in the wishlist', count( $user_wishlists ), 'wp-travel-engine' ), count( $user_wishlists ) ) : '',
@@ -72,12 +85,44 @@ class UserWishlist extends AjaxController {
 	}
 
 	/**
-	 * Get request method.
-	 *
-	 * @since 5.5.7
-	 * @return string
+	 * Get the user wishlist markup.
+	 * 
+	 * @param array $args The query arguments.
+	 * 
+	 * @return array
 	 */
-	public static function get_current_request_method() {
-		return sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? 'GET' ) );
+	private function get_wishlist_markup( $args ): array {
+		$query = new \WP_Query( $args );
+	
+		ob_start();
+		while ( $query->have_posts() ) :
+			$query->the_post();
+			$details = wte_get_trip_details( get_the_ID() );
+			$details['user_wishlists'] = $args['post__in'];
+			wptravelengine_get_template( 'content-grid.php', $details );
+		endwhile;
+		$markup = ob_get_clean();
+
+		$original_query       = $GLOBALS['wp_query'];
+		$GLOBALS['wp_query']  = $query;
+	
+		$pagination = '';
+		$max_page 	= $query->max_num_pages;
+		if ( $max_page > 1 ) {
+			ob_start();
+			the_posts_pagination( [
+				'prev_text'          => esc_html__( 'Previous', 'wp-travel-engine' ),
+				'next_text'          => esc_html__( 'Next', 'wp-travel-engine' ),
+				'before_page_number' => '<span class="meta-nav screen-reader-text">' . esc_html__( 'Page', 'wp-travel-engine' ) . ' </span>',
+			] );
+			$pagination = ob_get_clean();
+		}
+
+		$GLOBALS['wp_query'] = $original_query;
+
+		wp_reset_postdata();
+	
+		return array( $markup, $pagination, $max_page );
 	}
+	
 }

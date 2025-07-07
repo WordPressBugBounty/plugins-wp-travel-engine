@@ -1,5 +1,7 @@
 <?php
 
+use WPTravelEngine\Modules\TripSearch;
+
 /**
  * Class for trip custom shortcodes.
  */
@@ -33,6 +35,13 @@ class WP_Travel_Engine_Custom_Shortcodes {
 		foreach ( $shortcodes as $shortcode => $function ) {
 			add_shortcode( apply_filters( "{$shortcode}_shortcode_tag", $shortcode ), $function );
 		}
+		
+		add_action( 'wp', function() {
+			if ( is_singular() && has_shortcode( get_post()->post_content, 'WP_TRAVEL_ENGINE_WISHLIST' ) ) {
+				TripSearch::enqueue_scripts();
+				\WPTravelEngine\Assets::instance()->enqueue_style( 'trip-wishlist' )->enqueue_script( 'trip-wishlist' );
+			}
+		} );
 	}
 
 	/*
@@ -44,24 +53,23 @@ class WP_Travel_Engine_Custom_Shortcodes {
 			$attr,
 			'wte_wishlist'
 		);
+
 		ob_start();
 		$current_user_wishlist = wptravelengine_user_wishlists();
 		?>
-		<div class="trip-content-area">
+		<div>
 			<div class="wte-category-outer-wrap wte-user-wishlists">
 				<?php
 				if ( empty( $current_user_wishlist ) || ! is_array( $current_user_wishlist ) ) {
-					$message    = __( '<strong>0</strong> item in wishlist', 'wp-travel-engine' );
 					$button_txt = __( 'Explore Trips', 'wp-travel-engine' );
-					printf( '<p class="wte-wishlist-message">%s</p>', wp_kses_post( $message ) );
 					$site_url      = get_site_url();
 					$trip_page_url = $site_url . '/trip';
 					?>
-					<div class="wpte_empty-items-box">
+					<div class="wpte_empty-items-box" style="text-align: center;">
 						<div class="wpte_empty-items-img"></div>
 						<h3 class="wpte_empty-items-title"><?php esc_html_e( 'Ohhh... Your Wishlist is Empty', 'wp-travel-engine' ); ?></h3>
 						<p><?php esc_html_e( "But it doesn't have to be.", 'wp-travel-engine' ); ?></p>
-						<?php printf( '<a href="%s" aria-label="Got back to all trips" class="wpte_all-trips-btn">%s</a>', esc_url( $trip_page_url ), esc_attr( $button_txt ), 'wp-travel-engine' ); ?>
+						<?php printf( '<a href="%s" aria-label="Got back to all trips" class="wpte-button">%s</a>', esc_url( $trip_page_url ), esc_attr( $button_txt ), 'wp-travel-engine' ); ?>
 					</div>
 					<?php
 				} else {
@@ -69,7 +77,7 @@ class WP_Travel_Engine_Custom_Shortcodes {
 					<p class="wte-wishlist-message" data-wptravelengine-wishlist-empty-notice></p>
 					<div class="wpte_empty-items-box" data-wptravelengine-wishlist-empty>
 					</div>
-					<div class="wte-category-outer-wrap">
+					<div class="wte-category-outer-wrap" data-wptravelengine-wishlist-list>
 						<?php
 						$args = array(
 							'post_type'   => WP_TRAVEL_ENGINE_POST_TYPE,
@@ -84,7 +92,7 @@ class WP_Travel_Engine_Custom_Shortcodes {
 								<?php printf( wp_kses_post( _n( '<strong>%d</strong> item in wishlist', '<strong>%d</strong> items in wishlist', count( $current_user_wishlist ), 'wp-travel-engine' ) ), count( $current_user_wishlist ) ); ?>
 							</span>
 							<button aria-label="Remove All Items from Wishlist"
-									class="wishlist-toggle wte-wishlist-remove-all" data-wptravelengine-wishlist-remove>
+									class="wishlist-toggle wte-wishlist-remove-all" data-wptravelengine-wishlist-remove data-product="all">
 								<?php esc_html_e( 'Remove All', 'wp-travel-engine' ); ?>
 							</button>
 						</div>
@@ -97,9 +105,9 @@ class WP_Travel_Engine_Custom_Shortcodes {
 								$user_wishlists = wptravelengine_user_wishlists();
 								while ( $query->have_posts() ) :
 									$query->the_post();
-									$details                     = wte_get_trip_details( get_the_ID() );
-									$details[ 'user_wishlists' ] = $user_wishlists;
-									wte_get_template( 'content-grid.php', $details );
+									$details                   = wte_get_trip_details( get_the_ID() );
+									$details['user_wishlists'] = $user_wishlists;
+									wptravelengine_get_template( 'content-grid.php', $details );
 								endwhile;
 								wp_reset_postdata();
 								?>
@@ -112,7 +120,7 @@ class WP_Travel_Engine_Custom_Shortcodes {
 				}
 				?>
 			</div>
-			<div class="trip-pagination wishlist" data-wptravelengine-wishlist-pagination>
+			<div class="trip-pagination wishlist" data-current-page="<?php echo esc_attr( get_query_var( 'paged' ) ?: 1 ); ?>" data-max-page="<?php echo esc_attr( $query->max_num_pages ?? 0 ); ?>" data-wptravelengine-wishlist-pagination>
 				<?php
 				if ( isset( $query ) ) {
 					$GLOBALS[ 'wp_query' ] = $query;
@@ -475,34 +483,15 @@ class WP_Travel_Engine_Custom_Shortcodes {
 						<?php
 						$user_wishlists = wptravelengine_user_wishlists();
 
-						while ( $query->have_posts() ) :
-							$query->the_post();
-							$details                     = wte_get_trip_details( get_the_ID() );
-							$details[ 'user_wishlists' ] = $user_wishlists;
-							wte_get_template( 'content-' . $atts[ 'layout' ] . '.php', $details );
-						endwhile;
-						?>
-					</div>
-				</div>
-			</div>
-			<div class="trip-pagination">
-				<?php
-				$total_pages = $query->max_num_pages;
-
-				if ( $total_pages > 1 ) {
-					$current_page = max( 1, get_query_var( 'paged' ) );
-
-					echo paginate_links( [
-						'base'      => get_pagenum_link(1) . '%_%',
-						'format'    => 'page/%#%/',
-						'current'   => $current_page,
-						'total'     => $total_pages,
-						'prev_text' => __('« Prev', 'wp-travel-engine'),
-						'next_text' => __('Next »', 'wp-travel-engine'),
-					] );
-				}
-				wp_reset_postdata();
-				?>
+			while ( $query->have_posts() ) :
+				$query->the_post();
+				$details                   = wte_get_trip_details( get_the_ID() );
+				$details['user_wishlists'] = $user_wishlists;
+				wptravelengine_get_template( 'content-' . $atts['layout'] . '.php', $details );
+			endwhile;
+			wp_reset_postdata();
+			echo '</div>';
+			?>
 			</div>
 		<?php
 		endif;

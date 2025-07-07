@@ -356,7 +356,7 @@ class SettingsAPISchema {
 			'show_availability'         => ! wptravelengine_toggled( $this->plugin_settings->get( 'departure.hide_availability_column', '' ) ),
 			'show_price'                => ! wptravelengine_toggled( $this->plugin_settings->get( 'departure.hide_price_column', '' ) ),
 			'show_space_left'           => ! wptravelengine_toggled( $this->plugin_settings->get( 'departure.hide_space_left_column', '' ) ),
-			'date_layout'               => (string) $this->plugin_settings->get( 'fsd_dates_layout', 'dates_list' ),
+			// 'date_layout'               => (string) $this->plugin_settings->get( 'fsd_dates_layout', 'dates_list' ),
 			'number_of_dates'           => (string) $this->plugin_settings->get( 'trip_dates.number', '3' ),
 			'number_of_pagination'      => (string) $this->plugin_settings->get( 'trip_dates.pagination_number', '10' ),
 			'show_without_fsd'          => ! wptravelengine_toggled( $this->plugin_settings->get( 'hide_trips_without_dates', 'no' ) ),
@@ -1039,9 +1039,9 @@ class SettingsAPISchema {
 			$this->plugin_settings->set( 'departure.hide_space_left_column', wptravelengine_replace( $fsd['show_space_left'], false, 'yes', '' ) );
 		}
 
-		if ( isset( $fsd['date_layout'] ) ) {
-			$this->plugin_settings->set( 'fsd_dates_layout', $fsd['date_layout'] );
-		}
+		// if ( isset( $fsd['date_layout'] ) ) {
+		// 	$this->plugin_settings->set( 'fsd_dates_layout', $fsd['date_layout'] );
+		// }
 
 		if ( isset( $fsd['number_of_dates'] ) ) {
 			$this->plugin_settings->set( 'trip_dates.number', $fsd['number_of_dates'] );

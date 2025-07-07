@@ -25,29 +25,32 @@ class LoadMoreDestination extends AjaxController {
 	 */
 	public function process_request() {
 		$post = $this->request->get_params();
+
 		// prepare our arguments for the query
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-		$args = json_decode( wte_clean( wp_unslash( $post( 'query' ) ) ), true );
+		$args = json_decode( wte_clean( wp_unslash( $post['query'] ) ), true );
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-		$args['paged']       = wte_clean( wp_unslash( $post( 'page' ) ) ) + 1; // we need next page to be loaded
+
+		$post_page 			 = intval( $post['page'] );
+		$args['paged']       = ( 0 === $post_page ) ? 2 : ( $post_page + 1 );
 		$args['post_status'] = 'publish';
 
 		$query = new \WP_Query( $args );
-		ob_start();
 
-		// $view_mode = $post( 'mode' );
+		ob_start();
 
 		while ( $query->have_posts() ) :
 			$query->the_post();
 			$details = wte_get_trip_details( get_the_ID() );
-			wte_get_template( 'content-grid.php', $details );
+			wptravelengine_get_template( 'content-grid.php', $details );
 		endwhile;
+
 		wp_reset_postdata();
 
-		$output = ob_get_contents();
-		ob_end_clean();
-		echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		wp_reset_query();
-		exit();
+		return wp_send_json_success( array(
+			'data' => ob_get_clean(),
+			'current_page' => $args['paged'],
+			'remove_button' => $query->max_num_pages <= $args['paged'],
+		) );
 	}
 }

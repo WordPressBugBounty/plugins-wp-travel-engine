@@ -578,11 +578,6 @@ class PluginSettings extends BaseSetting {
 			);
 		}
 
-		if ( is_wp_error( $terms ) ) {
-			dump($terms);
-			return array();
-		}
-
 		return is_wp_error( $terms ) ? [] : $terms;
 	}
 

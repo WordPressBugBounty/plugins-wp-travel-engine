@@ -30,7 +30,7 @@ class TripPackages extends TripPackageIterator {
 	/**
 	 * The position of the current element in the data array.
 	 *
-	 * @var int
+	 * @var intw
 	 */
 	protected int $position = 0;
 

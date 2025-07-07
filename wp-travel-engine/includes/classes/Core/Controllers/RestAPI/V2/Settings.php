@@ -442,11 +442,12 @@ class Settings {
 
 		$settings                      = array();
 		$settings[ 'card_new_layout' ] = array(
-			'enable'                  => wptravelengine_toggled( $this->plugin_settings->get( 'display_new_trip_listing' ) ),
+			// 'enable'                  => wptravelengine_toggled( $this->plugin_settings->get( 'display_new_trip_listing' ) ),
 			'enable_slider'           => wptravelengine_toggled( $this->plugin_settings->get( 'display_slider_layout', '1' ) ),
 			'enable_featured_tag'     => wptravelengine_toggled( $this->plugin_settings->get( 'show_featured_tag', '1' ) ),
 			'enable_wishlist'         => wptravelengine_toggled( $this->plugin_settings->get( 'show_wishlist', '1' ) ),
 			'enable_map'              => wptravelengine_toggled( $this->plugin_settings->get( 'show_map_on_card', '1' ) ),
+			'enable_excerpt'          => wptravelengine_toggled( $this->plugin_settings->get( 'show_excerpt', '1' ) ),
 			'enable_difficulty'       => wptravelengine_toggled( $this->plugin_settings->get( 'show_difficulty_tax', '1' ) ),
 			'enable_tags'             => wptravelengine_toggled( $this->plugin_settings->get( 'show_trips_tag', '1' ) ),
 			'enable_fsd'              => wptravelengine_toggled( $this->plugin_settings->get( 'show_date_layout', '1' ) ),
@@ -509,6 +510,7 @@ class Settings {
 			'enable_featured_tag'     => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_featured_tag', '1' ) ),
 			'enable_wishlist'         => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_wishlist', '1' ) ),
 			'enable_map'              => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_map', '1' ) ),
+			'enable_excerpt'          => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_excerpt', '1' ) ),
 			'enable_difficulty'       => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_difficulty_tax', '1' ) ),
 			'enable_tags'             => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_trip_tags', '1' ) ),
 			'enable_fsd'              => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_date_layout', '1' ) ),
@@ -568,10 +570,15 @@ class Settings {
 		$settings[ 'archives' ] = array(
 			'title'                 => (string) $this->plugin_settings->get( 'archive.title', '' ),
 			'enable_title'          => ! wptravelengine_toggled( $this->plugin_settings->get( 'archive.hide_archive_title', 'no' ) ),
-			'enable_advance_search' => wptravelengine_toggled( $this->plugin_settings->get( 'archive.collapsible_filter_panel', 'no' ) ),
+			'title_type'    => (string) $this->plugin_settings->get( 'archive.title_type', 'default' )
+			// 'enable_advance_search' => wptravelengine_toggled( $this->plugin_settings->get( 'archive.collapsible_filter_panel', 'no' ) ),
 		);
 
-		$settings[ 'enable_criteria_filter' ] = wptravelengine_toggled( $this->plugin_settings->get( 'search_filter_option', 'yes' ) );
+		$settings[ 'show_sidebar' ] = (bool) wptravelengine_toggled( Options::get( 'wptravelengine_show_trip_search_sidebar', 'yes' ) );
+
+		$settings[ 'display_mode' ] = (string) Options::get( 'wptravelengine_archive_display_mode', 'pagination' );
+
+		// $settings[ 'enable_criteria_filter' ] = wptravelengine_toggled( $this->plugin_settings->get( 'search_filter_option', 'yes' ) );
 
 		return $settings;
 	}
@@ -632,9 +639,7 @@ class Settings {
 		return array(
 			'taxonomy' => array(
 				'enable_image'            => wptravelengine_toggled( $this->plugin_settings->get( 'tax_images' ) ),
-				'enable_excerpt'          => wptravelengine_toggled( $this->plugin_settings->get( 'show_excerpt', '1' ) ),
 				'enable_children_terms'   => wptravelengine_toggled( $this->plugin_settings->get( 'show_taxonomy_children', 'no' ) ),
-				'enable_term_description' => ! wptravelengine_toggled( $this->plugin_settings->get( 'hide_term_description', 'no' ) ),
 			),
 		);
 	}
@@ -1456,9 +1461,9 @@ class Settings {
 			return;
 		}
 
-		if ( isset( $request[ 'card_new_layout' ][ 'enable' ] ) ) {
-			$plugin_settings->set( 'display_new_trip_listing', wptravelengine_replace( $request[ 'card_new_layout' ][ 'enable' ], true, 'yes', 'no' ) );
-		}
+		// if ( isset( $request[ 'card_new_layout' ][ 'enable' ] ) ) {
+		// 	$plugin_settings->set( 'display_new_trip_listing', wptravelengine_replace( $request[ 'card_new_layout' ][ 'enable' ], true, 'yes', 'no' ) );
+		// }
 
 		if ( isset( $request[ 'card_new_layout' ][ 'enable_slider' ] ) ) {
 			$plugin_settings->set( 'display_slider_layout', wptravelengine_replace( $request[ 'card_new_layout' ][ 'enable_slider' ], true, '1', '0' ) );
@@ -1474,6 +1479,10 @@ class Settings {
 
 		if ( isset( $request[ 'card_new_layout' ][ 'enable_map' ] ) ) {
 			$plugin_settings->set( 'show_map_on_card', wptravelengine_replace( $request[ 'card_new_layout' ][ 'enable_map' ], true, '1', '0' ) );
+		}
+
+		if ( isset( $request[ 'card_new_layout' ][ 'enable_excerpt' ] ) ) {
+			$plugin_settings->set( 'show_excerpt', wptravelengine_replace( $request[ 'card_new_layout' ][ 'enable_excerpt' ], true, '1', '0' ) );
 		}
 
 		if ( isset( $request[ 'card_new_layout' ][ 'enable_difficulty' ] ) ) {
@@ -1593,6 +1602,10 @@ class Settings {
 			$plugin_settings->set( 'show_related_map', wptravelengine_replace( $request[ 'related_trip_new_layout' ][ 'enable_map' ], true, '1', '0' ) );
 		}
 
+		if ( isset( $request[ 'related_trip_new_layout' ][ 'enable_excerpt' ] ) ) {
+			$plugin_settings->set( 'show_related_excerpt', wptravelengine_replace( $request[ 'related_trip_new_layout' ][ 'enable_excerpt' ], true, '1', '0' ) );
+		}
+
 		if ( isset( $request[ 'related_trip_new_layout' ][ 'enable_difficulty' ] ) ) {
 			$plugin_settings->set( 'show_related_difficulty_tax', wptravelengine_replace( $request[ 'related_trip_new_layout' ][ 'enable_difficulty' ], true, '1', '0' ) );
 		}
@@ -1682,6 +1695,14 @@ class Settings {
 			Options::update( 'wptravelengine_trip_view_mode', $request[ 'trip_view_mode' ] );
 		}
 
+		if ( isset( $request[ 'show_sidebar' ] ) ) {
+			Options::update( 'wptravelengine_show_trip_search_sidebar', wptravelengine_replace( $request[ 'show_sidebar' ], true, 'yes', 'no' ) );
+		}
+
+		if ( isset( $request[ 'display_mode' ] ) ) {
+			Options::update( 'wptravelengine_archive_display_mode', $request[ 'display_mode' ] );
+		}
+
 		if ( isset( $request[ 'featured_trips' ][ 'enable' ] ) ) {
 			$plugin_settings->set( 'show_featured_trips_on_top', wptravelengine_replace( $request[ 'featured_trips' ][ 'enable' ], true, 'yes', 'no' ) );
 		}
@@ -1694,14 +1715,15 @@ class Settings {
 			$archives                               = $plugin_settings->get( 'archive', array() );
 			$archives[ 'title' ]                    = $request[ 'archives' ][ 'title' ] ?? $archives[ 'title' ] ?? '';
 			$archives[ 'hide_archive_title' ]       = isset( $request[ 'archives' ][ 'enable_title' ] ) ? wptravelengine_replace( $request[ 'archives' ][ 'enable_title' ], false, 'yes', 'no' ) : ( $archives[ 'hide_archive_title' ] ?? 'no' );
-			$archives[ 'collapsible_filter_panel' ] = isset( $request[ 'archives' ][ 'enable_advance_search' ] ) ? wptravelengine_replace( $request[ 'archives' ][ 'enable_advance_search' ], true, 'yes', 'no' ) : ( $archives[ 'collapsible_filter_panel' ] ?? 'no' );
+			$archives[ 'title_type' ]       		= $request['archives'][ 'title_type' ] ?? $archives[ 'title_type' ] ?? 'default';
+			// $archives[ 'collapsible_filter_panel' ] = isset( $request[ 'archives' ][ 'enable_advance_search' ] ) ? wptravelengine_replace( $request[ 'archives' ][ 'enable_advance_search' ], true, 'yes', 'no' ) : ( $archives[ 'collapsible_filter_panel' ] ?? 'no' );
 			$plugin_settings->set( 'archive', $archives );
 			unset( $archives );
 		}
 
-		if ( isset( $request[ 'enable_criteria_filter' ] ) ) {
-			$plugin_settings->set( 'search_filter_option', wptravelengine_replace( $request[ 'enable_criteria_filter' ], true, 'yes', 'no' ) );
-		}
+		// if ( isset( $request[ 'enable_criteria_filter' ] ) ) {
+		// 	$plugin_settings->set( 'search_filter_option', wptravelengine_replace( $request[ 'enable_criteria_filter' ], true, 'yes', 'no' ) );
+		// }
 	}
 
 	/**
@@ -1796,16 +1818,8 @@ class Settings {
 			$plugin_settings->set( 'tax_images', wptravelengine_replace( $request[ 'taxonomy' ][ 'enable_image' ], true, '1' ) );
 		}
 
-		if ( isset( $request[ 'taxonomy' ][ 'enable_excerpt' ] ) ) {
-			$plugin_settings->set( 'show_excerpt', wptravelengine_replace( $request[ 'taxonomy' ][ 'enable_excerpt' ], true, '1', 'no' ) );
-		}
-
 		if ( isset( $request[ 'taxonomy' ][ 'enable_children_terms' ] ) ) {
 			$plugin_settings->set( 'show_taxonomy_children', wptravelengine_replace( $request[ 'taxonomy' ][ 'enable_children_terms' ], true, 'yes', 'no' ) );
-		}
-
-		if ( isset( $request[ 'taxonomy' ][ 'enable_term_description' ] ) ) {
-			$plugin_settings->set( 'hide_term_description', wptravelengine_replace( $request[ 'taxonomy' ][ 'enable_term_description' ], false, 'yes', 'no' ) );
 		}
 	}
 
@@ -2921,6 +2935,10 @@ class Settings {
 						'description' => __( 'Display Map or Not', 'wp-travel-engine' ),
 						'type'        => 'boolean',
 					),
+					'enable_excerpt'          => array(
+						'description' => __( 'Display Trip Archive Excerpt or Not', 'wp-travel-engine' ),
+						'type'        => 'boolean',
+					),
 					'enable_difficulty'       => array(
 						'description' => __( 'Display Difficulty or Not', 'wp-travel-engine' ),
 						'type'        => 'boolean',
@@ -3055,6 +3073,10 @@ class Settings {
 						'description' => __( 'Display Map or Not', 'wp-travel-engine' ),
 						'type'        => 'boolean',
 					),
+					'enable_excerpt'          => array(
+						'description' => __( 'Display Related Trip Excerpt or Not', 'wp-travel-engine' ),
+						'type'        => 'boolean',
+					),
 					'enable_difficulty'       => array(
 						'description' => __( 'Display Difficulty or Not', 'wp-travel-engine' ),
 						'type'        => 'boolean',
@@ -3129,6 +3151,15 @@ class Settings {
 					),
 				),
 			),
+			'show_sidebar' => array(
+				'description' => __( 'Show Sidebar', 'wp-travel-engine' ),
+				'type'        => 'boolean',
+			),
+			'display_mode' => array(
+				'description' => __( 'Display Mode', 'wp-travel-engine' ),
+				'type'        => 'string',
+				'enum'        => array( 'pagination', 'load_more' ),
+			),
 			'archives'                         => array(
 				'description' => __( 'Customize Archives', 'wp-travel-engine' ),
 				'type'        => 'object',
@@ -3141,16 +3172,21 @@ class Settings {
 						'description' => __( 'Archive title Enabled or Not', 'wp-travel-engine' ),
 						'type'        => 'boolean',
 					),
-					'enable_advance_search' => array(
-						'description' => __( 'Advance Search Panel Enabled or Not', 'wp-travel-engine' ),
-						'type'        => 'boolean',
+					'title_type' => array(
+						'description' => __( 'Archive Title Type', 'wp-travel-engine' ),
+						'type'        => 'string',
+						'enum'        => array( 'default', 'custom' ),
 					),
+					// 'enable_advance_search' => array(
+					// 	'description' => __( 'Advance Search Panel Enabled or Not', 'wp-travel-engine' ),
+					// 	'type'        => 'boolean',
+					// ),
 				),
 			),
-			'enable_criteria_filter'           => array(
-				'description' => __( 'Criteria Filter Enabled or Not', 'wp-travel-engine' ),
-				'type'        => 'boolean',
-			),
+			// 'enable_criteria_filter'           => array(
+			// 	'description' => __( 'Criteria Filter Enabled or Not', 'wp-travel-engine' ),
+			// 	'type'        => 'boolean',
+			// ),
 			'custom_strings'                   => array(
 				'description' => __( 'Custom Strings', 'wp-travel-engine' ),
 				'type'        => 'array',
@@ -3216,16 +3252,8 @@ class Settings {
 						'description' => __( 'Taxonomy Image Enabled or Not', 'wp-travel-engine' ),
 						'type'        => 'boolean',
 					),
-					'enable_excerpt'          => array(
-						'description' => __( 'Taxonomy Excerpt Enabled or Not', 'wp-travel-engine' ),
-						'type'        => 'boolean',
-					),
 					'enable_children_terms'   => array(
 						'description' => __( 'Taxonomy Children Terms Enabled or Not', 'wp-travel-engine' ),
-						'type'        => 'boolean',
-					),
-					'enable_term_description' => array(
-						'description' => __( 'Taxonomy Term Description Enabled or Not', 'wp-travel-engine' ),
 						'type'        => 'boolean',
 					),
 				),

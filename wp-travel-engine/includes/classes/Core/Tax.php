@@ -16,9 +16,8 @@ class Tax implements TaxInterface {
 	protected float $tax_percentage = 0;
 
 	public function __construct() {
-		// dd(get_option( 'wp_travel_engine_settings', array() ));
-		$this->settings = get_option( 'wp_travel_engine_settings', array() );
-
+		$settings = get_option( 'wp_travel_engine_settings', array() );
+		$this->settings = is_array( $settings ) ? $settings : array();
 
 		$this->tax_percentage = (float) ( $this->settings[ 'tax_percentage' ] ?? 0 );
 	}

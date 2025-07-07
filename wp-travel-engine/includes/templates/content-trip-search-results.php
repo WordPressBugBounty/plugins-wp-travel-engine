@@ -1,4 +1,8 @@
 <?php
+do_action( 'wp_travel_engine_trip_archive_wrap' );
+return;
+
+// TODO: Remove this once above is stable
 $active_theme = get_option( 'template', '' );
 global $post;
 
@@ -99,3 +103,4 @@ use WPTravelEngine\Modules\TripSearch;
 		<input type="hidden" name="search-nonce" id="search-nonce" value="<?php echo esc_attr( $nonce ); ?>">
 	</div>
 </div>
+

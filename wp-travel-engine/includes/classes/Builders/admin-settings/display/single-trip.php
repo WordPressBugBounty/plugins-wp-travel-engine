@@ -259,6 +259,13 @@ return apply_filters(
 						'divider'     => true,
 					),
 					array(
+						'label'       => __( 'Show Excerpt', 'wp-travel-engine' ),
+						'description' => __( 'Enable to display related trip excerpt.', 'wp-travel-engine' ),
+						'field_type'  => 'SWITCH',
+						'name'        => 'related_trip_new_layout.enable_excerpt',
+						'divider'     => true,
+					),
+					array(
 						'label'       => __( 'Enable Difficulty', 'wp-travel-engine' ),
 						'description' => sprintf( __( 'Click <a href="%s" target="_blank">here</a> to add difficulty level.', 'wp-travel-engine' ), esc_url( $related_difficulty_tax_url ) ),
 						'field_type'  => 'SWITCH',
@@ -287,6 +294,7 @@ return apply_filters(
 						'divider'     => true,
 					),
 					array(
+						'visibility'  => 'related_trip_new_layout.enable_available_months === true',
 						'label'       => __( 'Enable Available Dates', 'wp-travel-engine' ),
 						'description' => __( 'Enable to show available dates on hover.', 'wp-travel-engine' ),
 						'field_type'  => 'SWITCH',

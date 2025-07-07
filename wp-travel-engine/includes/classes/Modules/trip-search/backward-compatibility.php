@@ -93,14 +93,12 @@ function wte_advanced_search_cost_and_duration( $attr, $type ) {
 
 /**
  * Check if search fields should be hidden in Search Page - FILTER BY Section
+ * 
+ * @updated 6.6.0
  */
 function wte_advanced_search_hide_filters_in_search_page( $search_field ) {
-
 	$options = get_option( 'wp_travel_engine_settings', array() );
-	if ( isset( $options['trip_search']['apply_in_search_page'] ) && '1' === $options['trip_search']['apply_in_search_page'] && isset( $options['trip_search'][ '' . $search_field . '' ] ) && '1' === $options['trip_search'][ '' . $search_field . '' ] ) {
-		return true;
-	}
-	return false;
+	return wptravelengine_toggled( $options['trip_search'][ $search_field ] ?? false );
 }
 
 /**

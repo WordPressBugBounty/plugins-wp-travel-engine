@@ -9,6 +9,7 @@
 namespace WPTravelEngine\Core\Controllers\Ajax;
 
 use WPTravelEngine\Abstracts\AjaxController;
+use WPTravelEngine\Core\Models\Settings\Options;
 
 /**
  * Loads the trips html.
@@ -25,6 +26,8 @@ class LoadTripsHtml extends AjaxController {
 	 */
 	protected function process_request() {
 		$post = $this->request->get_params();
+		$posts_per_page = ( new Options() )->get( 'posts_per_page', 10 );
+
 		// phpcs:disable
 		$args                = json_decode( wp_unslash( $post['query'] ), true );
 		$args['paged']       = wte_clean( wp_unslash( $post['page'] ) ) + 1; // we need next page to be loaded
@@ -42,14 +45,14 @@ class LoadTripsHtml extends AjaxController {
 			$query->the_post();
 			$details                   = \wte_get_trip_details( get_the_ID() );
 			$details['user_wishlists'] = $user_wishlists;
-			\wte_get_template( 'content-' . $view_mode . '.php', $details );
+			wptravelengine_get_template( 'content-' . $view_mode . '.php', $details );
 		endwhile;
-		\wp_reset_postdata();
+		
+		wp_reset_postdata();
 
-		$html = ob_get_clean();
 		wp_send_json_success(
 			array(
-				'data' => $html,
+				'data' => ob_get_clean()
 			)
 		);
 		exit();

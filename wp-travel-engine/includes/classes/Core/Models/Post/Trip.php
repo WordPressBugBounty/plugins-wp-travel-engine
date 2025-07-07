@@ -239,6 +239,7 @@ class Trip extends PostModel {
 		return $data;
 		
 	}
+
 	/**
 	 * Get the trip price.
 	 *
@@ -259,7 +260,7 @@ class Trip extends PostModel {
 
 	/**
 	 * Check if the trip has a sale price.
-	 *
+	 * 
 	 * @return bool
 	 */
 	public function has_sale(): bool {
@@ -893,6 +894,10 @@ class Trip extends PostModel {
 				$link      = wp_get_attachment_image_src( $image, $gallery_image_size );
 				$image_alt = get_post_meta( $image, '_wp_attachment_image_alt', true );
 
+				if ( empty( $link ) ) {
+					continue;
+				}
+
 				if ( empty( $image_alt ) ) {
 					$image_alt = get_the_title( $image );
 				}
@@ -1227,6 +1232,42 @@ class Trip extends PostModel {
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Check if the trip is featured.
+	 *
+	 * @return boolean
+	 * @since 6.6.0
+	 */
+	public function is_featured(): bool {
+		return wptravelengine_toggled( $this->get_meta( 'wp_travel_engine_featured_trip' ) ?? false );
+	}
+
+	/**
+	 * Get the trip discount percent.
+	 *
+	 * @return int
+	 * @since 6.6.0
+	 */
+	public function get_discount_percent(): int {
+		$trip_price = $this->get_price();
+		if ( $this->has_sale() && (float) $trip_price > 0 ) {
+			$sale_price = $this->get_sale_price();
+			return round( ( ( $trip_price - $sale_price ) * 100 ) / $trip_price );
+		}
+
+		return 0;
+	}
+
+	/**
+	 * Get the trip type
+	 *
+	 * @return string
+	 * @since 6.6.0
+	 */
+	public function get_trip_type(): string {
+		return $this->get_meta( 'trip_type' );
 	}
 
 	/**

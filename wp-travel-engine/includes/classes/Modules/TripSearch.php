@@ -2,38 +2,85 @@
 
 namespace WPTravelEngine\Modules;
 
+use WPTravelEngine\Assets;
+
 /**
- * Trip Search
- *
+ * Trip Search Module Class
+ * 
+ * Handles trip search functionality including filters, search forms, and results display.
+ * Provides methods for price range filtering, duration filtering, and taxonomy-based filtering.
+ * 
  * @since __addonmigration__
+ * @package WPTravelEngine\Modules
  */
 class TripSearch {
 
+	/**
+	 * Constructor for the TripSearch class.
+	 * Initializes the module by including required files and setting up hooks.
+	 */
 	public function __construct() {
 		$this->includes();
 		$this->init_hooks();
 	}
 
+	/**
+	 * Includes required dependency files for the search module.
+	 * 
+	 * @access private
+	 */
 	private function includes() {
 		require_once __DIR__ . '/trip-search/backward-compatibility.php';
 	}
 
+	/**
+	 * Initializes WordPress hooks for the search functionality.
+	 * Sets up actions and filters for both admin and public interfaces.
+	 * 
+	 * @access private
+	 */
 	private function init_hooks() {
 
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 15 );
+		add_action( 'wp', function () {
+			if ( is_post_type_archive( WP_TRAVEL_ENGINE_POST_TYPE ) ) {
+				self::enqueue_assets();
+				return;
+			}
+
+			global $post;
+
+			if ( ! $post instanceof \WP_Post || ! is_singular() ) {
+				return;
+			}
+
+			if ( has_shortcode( $post->post_content, 'Wte_Advanced_Search_Form' ) ) {
+				self::enqueue_trip_search_scripts();
+			}
+
+			if (
+				has_shortcode( $post->post_content, 'WTE_Trip_Search' ) ||
+				has_block( 'wptravelenginepagesblocks/archive-trip', $post ) ||
+				has_block( 'wptravelenginepagesblocks/trip-search', $post )
+			) {
+				self::enqueue_styles();
+			}
+
+		} );
 
 		add_action( 'init', array( $this, 'init' ) );
+
 		/**
 		 * Admin Hooks.
 		 */
 		// add_action( 'wte_advanced_search_page', array( __CLASS__, 'search_page' ) );
 		// add_action( 'wp_travel_engine_search_fields', array( __CLASS__, 'search_fields' ) );
-		add_action( 'wpte_get_global_extensions_tab', array( __CLASS__, 'settings' ) );
-		/**p
+		add_action( 'wpte_get_global_extensions_tab', array( self::class, 'settings' ) );
+
+		/**
 		 * Add settings to choose Search Page.
 		 * Settings>General>Page Settings
 		 */
-		add_filter( 'wpte_global_page_options', array( __CLASS__, 'choose_page' ) );
+		add_filter( 'wpte_global_page_options', array( self::class, 'choose_page' ) );
 
 		/**
 		 * Public hooks
@@ -49,103 +96,167 @@ class TripSearch {
 			}
 		);
 
-		add_action( 'template_redirect', array( __CLASS__, 'template_redirect' ) );
+		add_action( 'template_redirect', array( self::class, 'template_redirect' ) );
 
-		add_action( 'wp_travel_engine_archive_sidebar', array( __CLASS__, 'archive_filter_sidebar' ) );
+		add_action( 'wp_travel_engine_archive_sidebar', array( self::class, 'archive_filter_sidebar' ) );
 
 		// Search Filter forms callback.
-		add_filter(
-			'wptravelengine_search_filter_price',
-			function () {
-				return array( __CLASS__, 'search_filter_price' );
-			}
-		);
-		add_filter(
-			'wptravelengine_search_filter_duration',
-			function () {
-				return array( __CLASS__, 'search_filter_duration' );
-			}
-		);
+		add_filter( 'wptravelengine_search_filter_price', function () {
+			return array( self::class, 'search_filter_price' );
+		} );
+
+		add_filter( 'wptravelengine_search_filter_duration', function () {
+			return array( self::class, 'search_filter_duration' );
+		} );
+
+		// Loading Elementor Widgets Trip Search Assets.
+		add_filter( 'wte_register_block_types', function ( $val, $args ) {
+			self::enqueue_trip_search_scripts();
+			return $val;
+		}, 10, 2 );
+
 	}
 
+	/**
+	 * Enqueue trip search widgets dropdown scripts.
+	 */
+	public static function enqueue_trip_search_scripts() {
+		Assets::instance()->enqueue_script( 'wptravelengine-trip-search-widgets-dropdown' )->enqueue_script( 'wptravelengine-trip-search-widgets-slider' );
+	}
+
+	/**
+	 * Renders the duration filter in the search interface.
+	 * 
+	 * @param array $args Filter arguments including labels and settings
+	 * @static
+	 */
 	public static function search_filter_duration( $args ) {
-		wp_enqueue_script( 'jquery-ui-slider' );
-		$range = (array) self::get_duration_range();
+		// wp_enqueue_script( 'jquery-ui-slider' );
+		wp_enqueue_script( 'wptravelengine-trip-search-widgets-slider' );
+		$range = (array) self::get_duration_range( true );
 		$id    = wte_uniqid();
 		?>
         <div data-value-format="duration" class="wpte-trip__adv-field wpte__select-field"
              data-range-slider="#<?php echo esc_attr( $id ); ?>"
-             data-range="<?php echo esc_attr( implode( ',', $range ) ); ?>" data-min="0" data-max="50"
+             data-range="<?php echo esc_attr( implode( ',', $range ) ); ?>" data-min="<?php echo esc_attr( $range[ 'min_value' ] ); ?>" data-max="<?php echo esc_attr( $range[ 'max_value' ] ); ?>"
              data-suffix="<?php esc_attr_e( 'Days', 'wp-travel-engine' ); ?>">
 			<?php
 			self::search_filter_icon( $args, 'duration' );
 			?>
-            <input type="text" data-value class="wpte__input"
-                   placeholder="<?php echo esc_attr( $args[ 'label' ] ); ?>" />
+            <input type="text" data-value class="wpte__input" placeholder="<?php echo esc_attr( $args[ 'label' ] ); ?>" id="wte-duration-filter-input" />
             <input type="hidden" data-value-min class="wpte__input-min" name="min-duration">
             <input type="hidden" data-value-max class="wpte__input-max" name="max-duration">
             <div class="wpte__select-options">
                 <div id="<?php echo esc_attr( $id ); ?>"></div>
+				<div class="wpte-slider-values">
+					<span data-value-min-display></span>
+					<span data-value-max-display></span>
+				</div>
             </div>
         </div>
 		<?php
 	}
 
+	/**
+	 * Renders the price filter in the search interface.
+	 * 
+	 * @param array $args Filter arguments including labels and settings
+	 * @static
+	 */
 	public static function search_filter_price( $args ) {
 		// wp_enqueue_script( 'jquery-ui-slider' );
-		wp_enqueue_script( 'wte-nouislider' );
-		wp_enqueue_style( 'wte-nouislider' );
-		$range = (array) self::get_price_range();
+		// wp_enqueue_script( 'wte-nouislider' );
+		// wp_enqueue_style( 'wte-nouislider' );
+		wp_enqueue_script( 'wptravelengine-trip-search-widgets-slider' );
+		$range = (array) self::get_price_range( true );
 		$id    = wte_uniqid();
 		?>
         <div class="wpte-trip__adv-field wpte__select-field" data-range-slider="#<?php echo esc_attr( $id ); ?>"
-             data-range="<?php echo esc_attr( implode( ',', $range ) ); ?>" data-min="0" data-max="50"
-             data-value-format="price">
+             data-range="<?php echo esc_attr( implode( ',', $range ) ); ?>" data-min="<?php echo esc_attr( $range[ 'min_value' ] ); ?>" data-max="<?php echo esc_attr( $range[ 'max_value' ] ); ?>"
+             data-value-format="price"
+			 >
 			<?php
 			self::search_filter_icon( $args, 'price' );
 			?>
 
-            <input type="text" class="wpte__input" data-value
-                   placeholder="<?php echo esc_attr( $args[ 'label' ] ); ?>" />
+            <input type="text" class="wpte__input" data-value placeholder="<?php echo esc_attr( $args[ 'label' ] ); ?>" id="wte-price-filter-input" />
             <input type="hidden" data-value-min class="wpte__input-min" name="min-cost" />
             <input type="hidden" data-value-max class="wpte__input-max" name="max-cost" />
             <div class="wpte__select-options">
                 <div id="<?php echo esc_attr( $id ); ?>"></div>
+				<div class="wpte-slider-values">
+					<span data-value-min-display></span>
+					<span data-value-max-display></span>
+				</div>
             </div>
         </div>
 		<?php
 	}
 
-	public function enqueue_scripts() {
-		wp_register_script( 'wte-trip-search', plugin_dir_url( WP_TRAVEL_ENGINE_FILE_PATH ) . 'dist/public/trip-search/index.js', array(
-			'jquery',
-			'wte-custom-scrollbar',
-			'jquery-ui-slider',
-		), WP_TRAVEL_ENGINE_VERSION, true );
-		// wp_register_style( 'wte-trip-search', plugin_dir_url( WP_TRAVEL_ENGINE_FILE_PATH ) . 'dist/public/trip-search/index.css', array(), WP_TRAVEL_ENGINE_VERSION );
+	/**
+	 * Get the data to be localized.
+	 * 
+	 * @return array
+	 */
+	public static function get_localized_data() {
 
-		$price_range = self::get_price_range();
-		$min_cost    = 0;
-		$max_cost    = $price_range->{'max_price'};
-		// phpcs:disable
-		$duration_range  = self::get_duration_range();
-		$to_be_localized = array(
-			'ajax_url'              => admin_url( 'admin-ajax.php' ),
-			'min_cost'              => (int) $price_range->{'min_price'},
-			'max_cost'              => (int) $price_range->{'max_price'},
-			'min_duration'          => (int) $duration_range->{'min_duration'},
-			'max_duration'          => (int) $duration_range->{'max_duration'},
-			'selected_min_cost'     => ! empty( $_GET[ 'min-cost' ] ) ? (int) $_GET[ 'min-cost' ] : (int) $price_range->{'min_price'},
-			'selected_max_cost'     => (int) $price_range->{'max_price'},
-			'selected_min_duration' => ! empty( $_GET[ 'min-duration' ] ) ? (int) $_GET[ 'min-duration' ] : (int) $duration_range->{'min_duration'},
-			'selected_max_duration' => ! empty( $_GET[ 'max-duration' ] ) ? (int) $_GET[ 'max-duration' ] : (int) $duration_range->{'max_duration'},
-			'cur_symbol'            => wp_travel_engine_get_currency_code(),
-			'days_text'             => __( 'Days', 'wp-travel-engine' ),
+		$settings 		= get_option( 'wp_travel_engine_settings', array() );
+		$price_range 	= self::get_price_range( true );
+		$duration_range = self::get_duration_range( true );
+
+		return array(
+			'ajax_url'               => admin_url( 'admin-ajax.php' ),
+			'destination_nonce'      => wp_create_nonce( 'wpte_ajax_load_more_destination' ),
+			'is_tax'                 => is_tax( get_object_taxonomies( 'trip', 'names' ) ),
+			'min_cost'               => (int) $price_range[ 'min_value' ],
+			'max_cost'               => (int) $price_range[ 'max_value' ],
+			'min_duration'           => (int) $duration_range[ 'min_value' ],
+			'max_duration'           => (int) $duration_range[ 'max_value' ],
+			'selected_min_cost'      => intval( $_REQUEST[ 'mincost' ] ?? $price_range[ 'min_value' ] ),
+			'selected_max_cost'      => intval( $_REQUEST[ 'maxcost' ] ?? $price_range[ 'max_value' ] ),
+			'selected_min_duration'  => intval( $_REQUEST[ 'mindur' ] ?? $duration_range[ 'min_value' ] ),
+			'selected_max_duration'  => intval( $_REQUEST[ 'maxdur' ] ?? $duration_range[ 'max_value' ] ),
+			'cur_symbol'             => wp_travel_engine_get_currency_code(),
+			'days_text'              => __( 'Days', 'wp-travel-engine' ),
+			'is_load_more'           => get_option( 'wptravelengine_archive_display_mode', 'pagination' ) === 'load_more',
+			'default_view_mode'      => wp_travel_engine_get_archive_view_mode(),
+			'default_orderby'        => get_option( 'wptravelengine_trip_sort_by', 'latest' ),
+			'showFeaturedTripsOnTop' => wptravelengine_toggled( $settings[ 'show_featured_trips_on_top' ] ?? false ),
+			'noOfFeaturedTrips'      => (int) ( $settings[ 'feat_trip_num' ] ?? 2 ),
+			'showOptionFilter'       => wptravelengine_toggled( $settings[ 'search_filter_option' ] ?? false ),
+			'showSidebar'            => wptravelengine_toggled( get_option( 'wptravelengine_show_trip_search_sidebar', 'yes' ) ),
 		);
-		wp_localize_script( 'wte-trip-search', 'wte_advanced_search', $to_be_localized );
-		// phpcs:enable
 	}
 
+	/**
+	 * Enqueues the required styles and scripts for the search functionality.
+	 */
+	public static function enqueue_assets() {
+		self::enqueue_styles();
+		self::enqueue_scripts();
+	}
+
+	/**
+	 * Enqueues required scripts for the search functionality.
+	 * Registers and localizes the trip search scripts with necessary data.
+	 */
+	public static function enqueue_scripts() {
+		Assets::instance()->enqueue_script( 'wte-trip-search' );
+	}
+
+	/**
+	 * Enqueues required styles for the search functionality.
+	 */
+	public static function enqueue_styles() {
+		Assets::instance()->enqueue_style( 'wpte-trip-archive' );
+	}
+
+	/**
+	 * Loads and returns HTML for trip search results via AJAX.
+	 * Handles pagination and view mode (grid/list) for search results.
+	 * 
+	 * @static
+	 */
 	public static function load_trips_html() {
 		// phpcs:disable
 		$args                  = json_decode( wp_unslash( $_POST[ 'query' ] ), true );
@@ -156,7 +267,8 @@ class TripSearch {
 		ob_start();
 
 		$view_mode  = wte_clean( wp_unslash( $_POST[ 'mode' ] ) );
-		$view_class = 'grid' === $view_mode ? 'col-2 category-grid' : 'category-list';
+		$show_sidebar = wptravelengine_toggled( get_option( 'wptravelengine_show_trip_search_sidebar', 'yes' ) );
+		$view_class = 'grid' === $view_mode ? ( $show_sidebar ? 'col-2 category-grid' : 'col-3 category-grid' ) : 'category-list';
 
 		$user_wishlists = wptravelengine_user_wishlists();
 
@@ -165,13 +277,7 @@ class TripSearch {
 			$query->the_post();
 			$details                     = \wte_get_trip_details( get_the_ID() );
 			$details[ 'user_wishlists' ] = $user_wishlists;
-			// \wte_get_template( 'content-' . $view_mode . '.php', $details );
-			if ( version_compare( '6.0.0', \WP_TRAVEL_ENGINE_VERSION, '<' ) ) {
-				wte_get_template( 'content-' . $view_mode . '.php', $details );
-			} else {
-				$details[ 'view_mode' ] = $view_mode;
-				wte_get_template( 'content-view.php', $details );
-			}
+			wptravelengine_get_template( 'content-' . $view_mode . '.php', $details );
 		endwhile;
 		\wp_reset_postdata();
 
@@ -184,6 +290,13 @@ class TripSearch {
 		exit();
 	}
 
+	/**
+	 * Filters trips based on search criteria and returns filtered HTML results.
+	 * 
+	 * @param array $post_data Posted search filter data
+	 * @static
+	 * @return string|void JSON response with filtered trips HTML
+	 */
 	public static function filter_trips_html( $post_data ) {
 
 		$view_mode = ! empty( $post_data[ 'mode' ] ) ? wte_clean( wp_unslash( $post_data[ 'mode' ] ) ) : wp_travel_engine_get_archive_view_mode(); // phpcs:ignore
@@ -205,7 +318,8 @@ class TripSearch {
 			);
 		}
 
-		$view_class = 'grid' === $view_mode ? 'wte-col-2 category-grid' : 'category-list';
+		$show_sidebar = wptravelengine_toggled( get_option( 'wptravelengine_show_trip_search_sidebar', 'yes' ) );
+		$view_class = 'grid' === $view_mode ? ( $show_sidebar ? 'wte-col-2 category-grid' : 'wte-col-3 category-grid' ) : 'category-list';
 
 		ob_start();
 
@@ -218,13 +332,7 @@ class TripSearch {
 			$details                     = wte_get_trip_details( get_the_ID() );
 			$details[ 'user_wishlists' ] = $user_wishlists;
 
-			// wte_get_template( 'content-' . $view_mode . '.php', $details );
-			if ( version_compare( '6.0.0', \WP_TRAVEL_ENGINE_VERSION, '<' ) ) {
-				wte_get_template( 'content-' . $view_mode . '.php', $details );
-			} else {
-				$details[ 'view_mode' ] = $view_mode;
-				wte_get_template( 'content-view.php', $details );
-			}
+			wptravelengine_get_template( 'content-' . $view_mode . '.php', $details );
 		endwhile;
 		wp_reset_postdata();
 		echo '</div>';
@@ -247,18 +355,37 @@ class TripSearch {
 	}
 
 	/**
-	 * Prepares query to get results.
+	 * Gets query arguments for trip filtering based on search parameters.
+	 * 
+	 * @param boolean $ajax_request Whether the request is an AJAX request
+	 * 
+	 * @static
+	 * @return array Query arguments for WP_Query
+	 * @updated 6.6.0
 	 */
 	public static function get_query_args( $ajax_request = false ) {
-		$paged          = ( get_query_var( 'paged' ) ) ? absint( get_query_var( 'paged' ) ) : 1;
-		$posts_per_page = get_option( 'posts_per_page', 10 );
+
+		$def_args = array();
+		$settings = wptravelengine_settings();
+
+		if ( ! $ajax_request ) {
+			$def_args = array(
+				'mode' => wp_travel_engine_get_archive_view_mode(),
+				'sort' => \Wp_Travel_Engine_Archive_Hooks::archive_sort_by(),
+				'show_featured' => empty( array_diff( array_keys( $_GET ), array( 'view_mode' ) ) )
+			);
+		}
+
+		$post_data = wp_parse_args( $_REQUEST, $def_args );
+		$post_data['show_featured'] = wptravelengine_toggled( $post_data['show_featured'] );
 
 		$query_args = array(
 			'post_type'                => WP_TRAVEL_ENGINE_POST_TYPE,
 			'post_status'              => 'publish',
-			'posts_per_page'           => $posts_per_page,
+			'posts_per_page'           => get_option( 'posts_per_page', 10 ),
+			'post__not_in'             => ( $post_data['show_featured'] && wptravelengine_toggled( $settings->get( 'show_featured_trips_on_top' ) ) ) ? wte_get_featured_trips_array() : array(),
 			'wpse_search_or_tax_query' => true,
-			'paged'                    => $paged,
+			'paged'                    => absint( ! empty( $post_data['paged'] ?? '' ) ? $post_data['paged'] : ( get_query_var( 'paged' ) ?: 1 ) ),
 		);
 
 		$categories = apply_filters(
@@ -299,67 +426,54 @@ class TripSearch {
 				),
 			)
 		);
+
 		// phpcs:disable
 		$tax_query = array();
 		foreach ( $categories as $cat => $term_args ) {
-			if ( $ajax_request ) {
-				$category = ! empty( $_REQUEST[ 'result' ][ $cat ] ) && $_REQUEST[ 'result' ][ $cat ] != '-1' ? $_REQUEST[ 'result' ][ $cat ] : ''; // phpcs:ignore
-			} else {
-				$category = ! empty( $_REQUEST[ $cat ] ) && $_REQUEST[ $cat ] != - 1 ? $_REQUEST[ $cat ] : ''; // phpcs:ignore
-			}
-
+			$category = ( $post_data['result'][ $cat ] ?? '-1' ) != '-1' ? $post_data['result'][ $cat ] : ( $post_data[$cat] ?? '' ); // phpcs:ignore
 			if ( ! empty( $category ) ) {
-				$term_args[ 'terms' ] = $category;
-				$tax_query[]          = $term_args;
+				$term_args['terms'] = is_string( $category ) && (strpos( $category, ',' ) !== false) ? explode( ',', $category ) : $category;
+				$tax_query[]        = $term_args;
 			}
 		}
 
 		if ( ! empty( $tax_query ) ) {
-			$query_args[ 'tax_query' ]               = $tax_query; // phpcs:ignore
-			$query_args[ 'tax_query' ][ 'relation' ] = 'AND';
+			$query_args['tax_query'] = $tax_query; // phpcs:ignore
+			$query_args['tax_query']['relation'] = 'AND';
 		}
 
 		$meta_query = array();
 		// Check Price.
-		if ( $ajax_request && isset( $_REQUEST[ 'mincost' ], $_REQUEST[ 'maxcost' ] ) ) {
-			$min_cost = intval( $_REQUEST[ 'mincost' ] );
-			$max_cost = intval( $_REQUEST[ 'maxcost' ] );
-		} else {
-			$cost_range = (array) self::get_price_range();
-			$min_cost   = isset( $_REQUEST[ 'min-cost' ] ) ? intval( $_REQUEST[ 'min-cost' ] ) : (int) $cost_range[ 'min_price' ];
-			$max_cost   = isset( $_REQUEST[ 'max-cost' ] ) ? intval( $_REQUEST[ 'max-cost' ] ) : (int) $cost_range[ 'max_price' ];
-		}
+		$cost_range = self::get_price_range( true );
+		$min_cost   = max( 0, floatval( $post_data['mincost'] ?? $post_data['min-cost'] ?? $cost_range['min_value'] ) );
+		$max_cost   = max( 0, floatval( $post_data['maxcost'] ?? $post_data['max-cost'] ?? $cost_range['max_value'] ) );
 
-		if ( isset( $max_cost ) && $max_cost > 0 ) {
+		if ( $max_cost > 0 ) {
 			$meta_query[] = array(
 				'key'     => apply_filters( 'wpte_advance_search_price_filter', '_s_price' ),
-				'value'   => array( $min_cost - 1, $max_cost + 1 ),
+				'value'   => array( $min_cost, $max_cost ),
 				'compare' => 'BETWEEN',
 				'type'    => 'numeric',
 			);
 		}
 
 		// Check Duration.
-		if ( $ajax_request && isset( $_REQUEST[ 'mindur' ], $_REQUEST[ 'maxdur' ] ) ) {
-			$min_duration = intval( $_REQUEST[ 'mindur' ] );
-			$max_duration = intval( $_REQUEST[ 'maxdur' ] );
-		} else {
-			$range        = (array) self::get_duration_range();
-			$min_duration = isset( $_REQUEST[ 'min-duration' ] ) ? intval( $_REQUEST[ 'min-duration' ] ) : (int) $range[ 'min_duration' ];
-			$max_duration = isset( $_REQUEST[ 'max-duration' ] ) ? intval( $_REQUEST[ 'max-duration' ] ) : (int) $range[ 'max_duration' ];
+		$range        = self::get_duration_range( true );
+		$min_duration = max( 0, floatval( $post_data['mindur'] ?? $post_data['min-duration'] ?? $range['min_value'] ) );
+		$max_duration = max( 0, floatval( $post_data['maxdur'] ?? $post_data['max-duration'] ?? $range['max_value'] ) );
+
+		if ( $max_duration > 0 ) {
+			$meta_query[] = array(
+				'key'     => '_s_duration',
+				'value'   => array( $min_duration * 24, $max_duration * 24 ),
+				'compare' => 'BETWEEN',
+				'type'    => 'numeric',
+			);
 		}
 
-        $max_duration = $max_duration <= 0 ? 0.9999 : $max_duration;
-		$meta_query[] = array(
-			'key'     => '_s_duration',
-			'value'   => array( ( $min_duration * 24 ) - 1, ( $max_duration * 24 ) + 1 ),
-			'compare' => 'BETWEEN',
-			'type'    => 'numeric',
-		);
-
-
-		if ( ! empty( $_REQUEST[ 'trip-date-select' ] ) || ! empty( $_REQUEST[ 'date' ] ) ) {
-			$date = $ajax_request ? wte_clean( wp_unslash( $_REQUEST[ 'date' ] ) ) : wte_clean( wp_unslash( $_REQUEST[ 'trip-date-select' ] ) );
+		$date = $post_data['date'] ?? $post_data['trip-date-select'] ?? '';
+		if ( ! empty( $date ) ) {
+			$date = wte_clean( wp_unslash( $date ) );
 
 			try {
 				$min_date = new \DateTime( $date . '-01' );
@@ -375,27 +489,106 @@ class TripSearch {
 		}
 
 		if ( ! empty( $meta_query ) ) {
-			$query_args[ 'meta_query' ]               = $meta_query; // phpcs:ignore
-			$query_args[ 'meta_query' ][ 'relation' ] = 'AND'; // phpcs:ignore
+			$query_args['meta_query'] = $meta_query; // phpcs:ignore
+			$query_args['meta_query']['relation'] = 'AND'; // phpcs:ignore
 		}
 
-		if ( isset( $_REQUEST[ 'sort' ] ) && ! empty( $_REQUEST[ 'sort' ] ) ) {
-			$sortby_val = isset( $_REQUEST[ 'sort' ] ) && ! empty( $_REQUEST[ 'sort' ] ) ? wte_clean( wp_unslash( $_REQUEST[ 'sort' ] ) ) : 'menu_order';
-			$sort_args  = wte_advanced_search_get_order_args( $sortby_val );
-			$args       = array_merge( $query_args, $sort_args );
-		}
-
-		if ( ! empty( $_REQUEST[ 'wte_orderby' ] ) || ! empty( $_REQUEST[ 'sort' ] ) ) {
-			$order_by   = $ajax_request ? $_REQUEST[ 'sort' ] : wte_clean( wp_unslash( $_REQUEST[ 'wte_orderby' ] ) );
+		if ( ! empty( $post_data['sort'] ?? '' ) ) {
+			$order_by   = wte_clean( wp_unslash( $post_data['sort'] ) );
 			$sort_args  = wte_advanced_search_get_order_args( $order_by ); // phpcs:ignore
 			$query_args = array_merge( $query_args, $sort_args );
 		}
 
+		if ( ! empty( $post_data['search'] ?? '' ) ) {
+			$query_args['s'] = $post_data['search'];
+		}
 		// phpcs:enable
 
 		return apply_filters( 'query_args_for_trip_filters', $query_args );
 	}
 
+	/**
+	 * Retrieves the duration range.
+	 *
+	 * @param boolean $new_format Whether to return the range in the new format
+	 * 
+	 * @return object The duration range.
+	 */
+	public static function get_duration_range( $new_format = false ) {
+		$duration = self::get_range( 'wpte_duration_range' );
+		return $new_format ? array(
+			'min_value' => $duration->min_value,
+			'max_value' => $duration->max_value,
+		) : $duration;
+	}
+
+	/**
+	 * Retrieves the price range.
+	 * 
+	 * @param boolean $new_format Whether to return the range in the new format
+	 *
+	 * @return object The price range.
+	 */
+	public static function get_price_range( $new_format = false ) {
+		$price = self::get_range( 'wpte_price_range' );
+		return $new_format ? array(
+			'min_value' => $price->min_value,
+			'max_value' => $price->max_value,
+		) : $price;
+	}
+
+	/**
+	 * Retrieves the duration or price range.
+	 *
+	 * @param string $range_type The type of range to retrieve ('wte_duration_range' or 'wte_price_range').
+	 * @return object The range object.
+	 */
+	private static function get_range( $range_type ): object {
+		
+		$range = wp_cache_get( $range_type, 'options' );
+		
+		if ( $range ) {
+			return $range;
+		}
+
+		global $wpdb;
+
+		$meta_key 	= 'wpte_duration_range' === $range_type ? '_s_duration' : '_s_price';
+		$query 		= $wpdb->prepare(
+			"SELECT MIN(`pm`.`meta_value` * 1) AS `min_value`, MAX(`pm`.`meta_value` * 1) AS `max_value`
+			FROM `{$wpdb->postmeta}` AS `pm`
+			INNER JOIN `{$wpdb->posts}` AS `p` ON `pm`.`post_id` = `p`.`ID`
+			WHERE `pm`.`meta_key` = %s AND `p`.`post_status` = %s",
+			$meta_key,
+			'publish'
+		);
+		$results 	= $wpdb->get_row( $query ); // phpcs:ignore
+		$range 		= (object) [ 'min_value' => 0,'max_value' => 0 ];
+		if ( ! empty( $results ) ) {
+			$range = $results;
+			if ( 'wpte_duration_range' === $range_type ) {
+				$range->min_value = $range->min = floor( (int) $range->min_value / 24 );
+				$range->max_value = ceil( (int) $range->max_value / 24 );
+				$range->min_duration = $range->min_value;
+				$range->max_duration = $range->max_value;
+			} else {
+				$range->min_price = $range->min_value;
+				$range->max_price = $range->max_value;
+			}
+		}
+
+		wp_cache_add( $range_type, $range, 'options' );
+
+		return (object) $range;
+	}
+
+	/**
+	 * Handles template redirection for search results page.
+	 * 
+	 * @param string $template The template path
+	 * @static
+	 * @return mixed The template path
+	 */
 	public static function template_redirect( $template ) {
 		global $post;
 		if ( is_null( $post ) ) {
@@ -408,44 +601,19 @@ class TripSearch {
 			if ( current_theme_supports( 'wptravelengine-templates' ) || ( wp_is_block_theme() && $is_enabled_fse_template == 'yes' ) ) {
 				return $template;
 			}
-			wp_enqueue_script( 'wp-travel-engine' );
-			wp_enqueue_style( 'wp-travel-engine' );
-			\wte_get_template( 'template-trip-search-results.php' );
+			// wp_enqueue_script( 'wp-travel-engine' );
+			// wp_enqueue_style( 'wp-travel-engine' );
+			\wptravelengine_get_template( 'template-trip-search-results.php' );
 			exit;
 		}
 	}
 
-	public static function get_duration_range() {
-		global $wpdb;
-
-		$range = wp_cache_get( 'wte_duration_range', 'options' );
-
-		if ( ! $range ) {
-			$query   = $wpdb->prepare(
-				"SELECT MIN(pm.meta_value * 1) AS min_duration,
-				MAX(pm.meta_value * 1) AS max_duration
-				FROM {$wpdb->postmeta} pm
-				INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
-				WHERE pm.meta_key = %s AND p.post_status = 'publish' ",
-				'_s_duration'
-			);
-			$results = $wpdb->get_row( $query ); // phpcs:ignore
-			$range   = array(
-				'min_duration' => 0,
-				'max_duration' => 0,
-			);
-			if ( ! empty( $results ) ) {
-				$range               = $results;
-				$range->min_duration = floor( (int) $range->min_duration / 24 );
-				$range->max_duration = ceil( $range->max_duration / 24 );
-			}
-
-			wp_cache_add( 'wte_duration_range', $range, 'options' );
-		}
-
-		return (object) $range;
-	}
-
+	/**
+	 * Gets the available filter sections for trip search.
+	 * 
+	 * @static
+	 * @return array Array of filter sections with their configurations
+	 */
 	public static function get_filters_sections() {
 		$settings = get_option( 'wp_travel_engine_settings', array() );
 
@@ -491,18 +659,24 @@ class TripSearch {
 		);
 	}
 
+	/**
+	 * Renders the taxonomy filter HTML for trip search.
+	 * 
+	 * @param array   $terms    Array of taxonomy terms to display
+	 * @param boolean $children Whether to show child terms
+	 * @static
+	 */
 	public static function taxonomy_filter_html( $terms, $children = false ) {
 
-		$parent_count = 0;
-		$term_count   = 0;
 		if ( is_array( $terms ) && count( $terms ) > 0 ) {
 			printf( '<ul class="%1$s">', $children ? 'children' : 'wte-search-terms-list' );
-			$invisible_terms  = '';
+			// $list_count  = [];
 			$queried_term     = get_queried_object();
 			$possible_queries = array();
 			if ( $queried_term instanceof \WP_Term ) {
 				$possible_queries[] = $queried_term->slug;
 			}
+			$list_count = 0;
 			foreach ( $terms as $term ) {
 				if ( isset( $term->parent ) && $term->parent && ! $children ) {
 					continue;
@@ -512,16 +686,20 @@ class TripSearch {
 					continue;
 				}
 
-				$possible_queries[] = wte_array_get( $_GET, $term->taxonomy, false );
+				$list_count++;
+
+				$get_terms = wte_array_get( $_GET, $term->taxonomy, array() );
+				$get_terms = is_string( $get_terms ) ? explode( ',', $get_terms ) : ( $get_terms ?: array() );
+				$possible_queries = array_merge( $possible_queries, $get_terms );
 
 				ob_start();
-				printf( '<li class="%1$s">', $children ? 'has-children' : '' );
+				printf( '<li class="%1$s" %2$s>', $children ? 'has-children' : '', $list_count > 4 ? 'style="display: none;"' : '' );
 				printf(
 					'<label>'
 					. '<input type="checkbox" %1$s value="%2$s" name="%3$s" class="%3$s wte-filter-item"/>'
 					. '<span>%4$s</span>'
 					. '</label>',
-					checked( true, in_array( $term->slug, $possible_queries ), false ), // phpcs:ignore
+					checked( true, in_array( $term->slug, array_unique( $possible_queries ) ), false ), // phpcs:ignore
 					esc_attr( $term->slug ),
 					esc_attr( $term->taxonomy ),
 					esc_html( $term->name )
@@ -537,50 +715,34 @@ class TripSearch {
 							continue;
 						}
 						$_children[ $term_child ] = $terms[ $term_child ];
+						$list_count++;
 					}
 					call_user_func( array( __CLASS__, __FUNCTION__ ), $_children, true );
 				}
-				print( '</li>' );
 
-				$list = ob_get_clean();
-				if ( ( ++ $parent_count > 4 ) && ! $children ) {
-					$invisible_terms .= $list;
-				} else {
-					$term_count += count( $term->children ) + 1;
-					echo $list; // phpcs:ignore
-				}
+				echo '</li>';
+
+				echo ob_get_clean();
 			}
 
-			if ( $invisible_terms != '' && ! $children ) {
-				$allowed_html = array(
-					'input' => array(
-						'type'  => array(),
-						'value' => array(),
-						'name'  => array(),
-						'class' => array(),
-					),
-					'label' => array(),
-					'span'  => array(
-						'class' => array(),
-					),
-					'li'    => array(
-						'class' => array(),
-					),
-					'ul'    => array(
-						'class' => array(),
-					),
-				);
-				printf(
-					'<li class="wte-terms-more"><button class="show-more">%2$s</button><ul class="wte-terms-more-list">%1$s</ul><button class="show-less">%3$s</button></li>',
-					wp_kses( $invisible_terms, $allowed_html ),
-					sprintf( esc_html__( 'Show all %s', 'wp-travel-engine' ), count( $terms ) - $term_count ),
-					esc_html__( 'Show less', 'wp-travel-engine' )
+			echo '</ul>';
+
+			if ( !$children && $list_count > 4 ) {
+				printf( '<div class="wte-terms-show-btns"><button class="show-more-btn">%1$s</button><button class="show-less-btn" style="display: none;">%2$s</button></div>',
+					esc_html__( 'Show More', 'wp-travel-engine' ),
+					esc_html__( 'Show Less', 'wp-travel-engine' )
 				);
 			}
-			print( '</ul>' );
 		}
 	}
 
+	/**
+	 * Renders the filter section for a specific taxonomy.
+	 * 
+	 * @param string $taxonomy The taxonomy to render filters for
+	 * @param array  $filter   Filter configuration array
+	 * @static
+	 */
 	public static function filter_taxonomies_render( $taxonomy, $filter ) {
 		if ( empty( $filter[ 'label' ] ) ) {
 			return;
@@ -593,25 +755,40 @@ class TripSearch {
 		$terms = \wte_get_terms_by_id( $taxonomy );
 
 		?>
-        <div class='advanced-search-field search-trip-type'>
-            <h3 class='filter-section-title trip-type'><?php echo esc_html( $filter[ 'label' ] ); ?></h3>
-            <div class="filter-section-content">
+		<div class='advanced-search-field search-trip-type wte-list-opn'>
+			<h3 class='filter-section-title trip-type'><?php echo esc_html( $filter[ 'label' ] ); ?></h3>
+			<div class="filter-section-content">
 				<?php self::taxonomy_filter_html( $terms ); ?>
             </div>
         </div>
 		<?php
 	}
 
+	/**
+	 * Renders the destinations filter section.
+	 * 
+	 * @param array $filter Filter configuration array
+	 * @static
+	 */
 	public static function filter_destinations_render( $filter ) {
 		self::filter_taxonomies_render( 'destination', $filter );
 	}
 
+	/**
+	 * Renders the activities filter section.
+	 * 
+	 * @param array $filter Filter configuration array
+	 * @static
+	 */
 	public static function filter_activities_render( $filter ) {
 		self::filter_taxonomies_render( 'activities', $filter );
 	}
 
 	/**
-	 *
+	 * Renders the trip tag filter section.
+	 * 
+	 * @param array $filter Filter configuration array
+	 * @static
 	 * @since 5.5.7
 	 */
 	public static function filter_trip_tag_render( $filter ) {
@@ -619,43 +796,43 @@ class TripSearch {
 	}
 
 	/**
-	 *
+	 * Renders the difficulty filter section.
+	 * 
+	 * @param array $filter Filter configuration array
+	 * @static
 	 * @since 5.5.7
 	 */
 	public static function filter_difficulty_render( $filter ) {
 		self::filter_taxonomies_render( 'difficulty', $filter );
 	}
 
+	/**
+	 * Renders the duration filter section.
+	 * 
+	 * @param array $filter Filter configuration array
+	 * @static
+	 */
 	public static function filter_duration_render( $filter ) {
-		// phpcs:disable
-		$min_duration = isset( $_GET[ 'min-duration' ] ) ? (int) $_GET[ 'min-duration' ] : '';
-		$max_duration = isset( $_GET[ 'max-duration' ] ) ? (int) $_GET[ 'max-duration' ] : '';
-		// phpcs:enable
-		$duration_range = self::get_duration_range();
-		if ( '' === $min_duration ) {
-			$min_duration = (int) $duration_range->{'min_duration'};
-			$max_duration = (int) $duration_range->{'max_duration'};
-		}
+		$duration_range = self::get_duration_range( true );
+		$min_duration = intval( ! empty( $_GET[ 'min-duration' ] ?? '' ) ? $_GET[ 'min-duration' ] : $duration_range['min_value'] );
+		$max_duration = intval( ! empty( $_GET[ 'max-duration' ] ?? '' ) ? $_GET[ 'max-duration' ] : $duration_range['max_value'] );
 		?>
         <div class="advanced-search-field search-duration search-trip-type"
              data-value-format="duration"
              data-suffix="<?php echo esc_attr__( 'Days', 'wp-travel-engine' ); ?>"
-             data-min="<?php echo esc_attr( $duration_range->min_duration ); ?>"
-             data-max="<?php echo esc_attr( $duration_range->max_duration ); ?>"
+             data-min="<?php echo esc_attr( $duration_range['min_value'] ); ?>"
+             data-max="<?php echo esc_attr( $duration_range['max_value'] ); ?>"
              data-range="<?php echo esc_attr( $min_duration . ',' . $max_duration ); ?>"
              data-range-slider="#duration-slider-range">
             <h3 class="filter-section-title"><?php echo esc_html( $filter[ 'label' ] ); ?></h3>
             <div class="filter-section-content">
                 <div id="duration-slider-range" data-min-key="mindur" data-max-key="maxdur"></div>
-                <input type="hidden" data-value-min class="wpte__input-min" name="mindur" />
-                <input type="hidden" data-value-max class="wpte__input-max" name="maxdur" />
-
-                <div class="duration-slider-value">
-					<span id="min-duration" class="min-duration" name="min-duration">
-						<?php printf( esc_html__( '%1$s Days', 'wp-travel-engine' ), esc_html( round( $duration_range->min_duration ) ) ); ?>
+				<div class="wpte-slider-values">
+					<span id="min-duration" class="min-duration" name="min-duration" data-value-min-display>
+						<?php printf( esc_html__( '%1$s Days', 'wp-travel-engine' ), esc_html( round( $min_duration ) ) ); ?>
 					</span>
-                    <span class="max-duration" id="max-duration" name="max-duration">
-						<?php printf( esc_html__( '%1$s Days', 'wp-travel-engine' ), esc_html( round( $duration_range->max_duration ) ) ); ?>
+					<span class="max-duration" id="max-duration" name="max-duration" data-value-max-display>
+						<?php printf( esc_html__( '%1$s Days', 'wp-travel-engine' ), esc_html( round( $max_duration ) ) ); ?>
 					</span>
                 </div>
             </div>
@@ -663,107 +840,104 @@ class TripSearch {
 		<?php
 	}
 
+	/**
+	 * Renders the price filter section.
+	 * 
+	 * @param array $filter Filter configuration array
+	 * @static
+	 */
 	public static function filter_price_render( $filter ) {
-		// phpcs:disable
-		$min_cost = ! empty( $_GET[ 'min-cost' ] ) ? (int) $_GET[ 'min-cost' ] : '';
-		$max_cost = ! empty( $_GET[ 'max-cost' ] ) ? (int) $_GET[ 'max-cost' ] : '';
-		// phpcs:enable
-		$price_range = self::get_price_range();
-		if ( $min_cost === '' ) {
-			$min_cost = (int) $price_range->{'min_price'};
-			$max_cost = (int) $price_range->{'max_price'};
-		}
+		$price_range = self::get_price_range( true );
+		$min_cost 	 = intval( ! empty( $_GET[ 'min-cost' ] ?? '' ) ? $_GET[ 'min-cost' ] : $price_range['min_value'] );
+		$max_cost 	 = intval( ! empty( $_GET[ 'max-cost' ] ?? '' ) ? $_GET[ 'max-cost' ] : $price_range['max_value'] );
 
-		print( '<div class="advanced-search-field search-cost search-trip-type" data-max="' . esc_attr( $price_range->{'max_price'} ) . '" data-min="' . esc_attr( $price_range->{'min_price'} ) . '" data-range="' . esc_attr( $min_cost ) . ',' . esc_attr( $max_cost ) . '" data-value-format="price" data-range-slider="#cost-slider-range">'
-		       . '<h3 class="filter-section-title">' . esc_html( $filter[ 'label' ] ) . '</h3>'
-		       . '<div class="filter-section-content">'
-		       . '<input type="hidden" data-value-min class="wpte__input-min" name="mincost" />'
-		       . '<input type="hidden" data-value-max class="wpte__input-max" name="maxcost"/>'
-		       . '<div id="cost-slider-range" data-min-key="mincost" data-max-key="maxcost"></div>'
-		       . '<div class="cost-slider-value"><span class="min-cost">'
-		       . wp_kses( \wte_get_formated_price( (int) $price_range->{'min_price'} ), 'allowed_price_html' )
-		       . '</span><span class="max-cost">'
-		       . wp_kses( \wte_get_formated_price( (int) $price_range->{'max_price'} ), 'allowed_price_html' )
-		       . '</span></div>'
-		       . '</div>'
-		       . '</div>'
+		print( '<div class="advanced-search-field search-cost search-trip-type" data-max="' . esc_attr( $price_range['max_value'] ) . '" data-min="' . esc_attr( $price_range['min_value'] ) . '" data-range="' . esc_attr( $min_cost ) . ',' . esc_attr( $max_cost ) . '" data-value-format="price" data-range-slider="#cost-slider-range">'
+			   . '<h3 class="filter-section-title">' . esc_html( $filter[ 'label' ] ) . '</h3>'
+			   . '<div class="filter-section-content">'
+			   . '<div id="cost-slider-range" data-min-key="mincost" data-max-key="maxcost"></div>'
+			   . '<div class="wpte-slider-values"><span class="min-cost" data-value-min-display>'
+			   . wp_kses( \wte_get_formated_price( $min_cost ), 'allowed_price_html' )
+			   . '</span><span class="max-cost" data-value-max-display>'
+			   . wp_kses( \wte_get_formated_price( $max_cost ), 'allowed_price_html' )
+			   . '</span></div>'
+			   . '</div>'
+			   . '</div>'
 		);
 	}
 
+	/**
+	 * Renders the trip types filter section.
+	 * 
+	 * @param array $filter Filter configuration array
+	 * @static
+	 */
 	public static function filter_trip_types_render( $filter ) {
 		self::filter_taxonomies_render( 'trip_types', $filter );
-	}
-
-	public static function get_price_range() {
-		global $wpdb;
-
-		$range = wp_cache_get( 'wte_price_range', 'options' );
-
-		if ( ! $range ) {
-			$query = "
-				SELECT MIN(pm.meta_value * 1) as min_price, MAX(pm.meta_value * 1) as max_price
-				FROM {$wpdb->postmeta} pm
-				INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
-				WHERE pm.meta_key = '_s_price'
-				AND p.post_status = 'publish'
-			";
-
-			$results = $wpdb->get_row( $query ); // phpcs:ignore
-			$range   = array(
-				'min_price' => 0,
-				'max_price' => 0,
-			);
-			if ( ! empty( $results ) ) {
-				$range = $results;
-			}
-			wp_cache_add( 'wte_price_range', $range, 'options' );
-		}
-
-		return (object) $range;
 	}
 
 	/**
 	 * Shows filters sidebar on Archive Page.
 	 */
 	public static function archive_filter_sidebar() {
-		\wp_enqueue_style( 'wte-trip-search' );
-		\wp_enqueue_script( 'wte-trip-search' );
-		\wte_get_template( 'template-trip-filters-sidebar.php' );
-	}
-
-	public function init() {
-		add_shortcode( 'Wte_Advanced_Search_Form', array( __CLASS__, 'search_form' ) );
-		add_shortcode( 'WTE_Trip_Search', function () {
-			ob_start();
-			wp_enqueue_script( 'wp-travel-engine' );
-			wp_enqueue_style( 'wp-travel-engine' );
-			\wte_get_template( 'content-trip-search-results.php' );
-
-			return ob_get_clean();
-		} );
+		// \wp_enqueue_style( 'wte-trip-search' );
+		// \wp_enqueue_script( 'wte-trip-search' );
+		self::enqueue_assets();
+		\wptravelengine_get_template( 'template-trip-filters-sidebar.php' );
 	}
 
 	/**
-	 * Search Form Output.
+	 * Initializes the search functionality and registers shortcodes.
+	 * 
+	 * @since 5.5.7
 	 */
-	public static function search_form() {
-		$is_rest_route = defined( 'REST_REQUEST' ) && REST_REQUEST;
-		if ( ( is_admin() && ! $is_rest_route ) || ( ! is_admin() && $is_rest_route ) ) {
-			return;
-		}
+	public function init() {
+		add_shortcode( 'Wte_Advanced_Search_Form', array( self::class, 'search_form' ) );
+		add_shortcode( 'WTE_Trip_Search', array( $this, 'search_results' ) );
+	}
 
-		$cost_range     = self::get_price_range();
-		$duration_range = self::get_duration_range();
-
-		wp_enqueue_script( 'wte-trip-search' );
-		wp_enqueue_style( 'wte-trip-search' );
-
+	/**
+	 * Renders the search results HTML.
+	 * 
+	 * @return string The search results HTML
+	 */
+	public function search_results() {
 		ob_start();
-		\wte_get_template( 'template-trip-search-form.php', compact( 'duration_range', 'cost_range' ) );
-
+		wptravelengine_get_template( 'content-trip-search-results.php' );
 		return ob_get_clean();
 	}
 
+	/**
+	 * Renders the search form HTML.
+	 * 
+	 * @static
+	 * @return string The search form HTML
+	 */
+	public static function search_form( $atts ) {
+		$is_rest_route = defined( 'REST_REQUEST' ) && REST_REQUEST;
+
+		if ( ( is_admin() && ! $is_rest_route ) || ( ! is_admin() && $is_rest_route ) ) {
+			return '';
+		}
+
+		$atts = shortcode_atts( array(
+			'direction' => 'horizontal',
+		), $atts, 'Wte_Advanced_Search_Form' );
+
+		if ( ! wp_script_is( 'wptravelengine-trip-search-widgets-slider', 'enqueued' ) ) {
+			self::enqueue_trip_search_scripts();
+		}
+
+		ob_start();
+		wptravelengine_get_template( 'template-trip-search-form.php', array( 'direction' => $atts['direction'] ) );
+		return ob_get_clean();
+	}
+
+	/**
+	 * Checks if current page is the search results page.
+	 * 
+	 * @static
+	 * @return boolean True if current page is search page, false otherwise
+	 */
 	public static function is_search_page() {
 		global $post;
 
@@ -776,13 +950,30 @@ class TripSearch {
 		return isset( $options[ 'pages' ][ 'search' ] ) && ( (int) $post->ID === (int) $options[ 'pages' ][ 'search' ] );
 	}
 
+	/**
+	 * Renders the search page content.
+	 * 
+	 * @static
+	 */
 	public static function search_page() {
 		// 404 do_action not found
 	}
 
+	/**
+	 * Renders the search fields HTML.
+	 * 
+	 * @static
+	 */
 	public static function search_fields() {
 	}
 
+	/**
+	 * Adds trip search settings to the global settings array.
+	 * 
+	 * @param array $settings The global settings array
+	 * @static
+	 * @return array Modified settings array with trip search settings
+	 */
 	public static function settings( $settings ) {
 		$settings[ 'wte_trip_search' ] = array(
 			'label'        => __( 'Trip Search', 'wp-travel-engine' ),
@@ -794,6 +985,13 @@ class TripSearch {
 		return $settings;
 	}
 
+	/**
+	 * Adds search page selection to the page settings.
+	 * 
+	 * @param array $pages The page settings array
+	 * @static
+	 * @return array Modified page settings array with search page option
+	 */
 	public static function choose_page( $pages ) {
 		$options = get_option( 'wp_travel_engine_settings', array() );
 		$search  = isset( $options[ 'pages' ][ 'search' ] ) ? esc_attr( $options[ 'pages' ][ 'search' ] ) : wptravelengine_get_page_by_title( 'Trip Search Result' )->ID;
@@ -818,6 +1016,12 @@ class TripSearch {
 		return $pages;
 	}
 
+	/**
+	 * Gets the search page ID from settings.
+	 * 
+	 * @static
+	 * @return int The page ID for the search results page, -1 if not found
+	 */
 	public static function get_page_id() {
 		$page_id = get_option( 'wp_travel_engine_search_page_id', false );
 
@@ -833,11 +1037,11 @@ class TripSearch {
 	}
 
 	/**
-	 * Displays Icon for duration, price and date in search widget/block.
-	 *
-	 * @param array $args Arguments.
-	 * @param string $tag Tag Name.
-	 *
+	 * Renders the search filter icon based on the filter type.
+	 * 
+	 * @param array  $args Arguments for the icon rendering
+	 * @param string $tag  The type of filter ('duration', 'price', or 'date')
+	 * @static
 	 * @since 5.7.1
 	 */
 	public static function search_filter_icon( $args, $tag ) {

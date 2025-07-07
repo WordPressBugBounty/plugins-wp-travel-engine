@@ -22,6 +22,39 @@ require_once __DIR__ . '/wp-travel-engine-form-fields.php';
 require_once __DIR__ . '/cart.php';
 
 /**
+ * Get the trip duration in array format.
+ * 
+ * @param int|Trip $trip Trip ID or Trip instance.
+ * @param string $set_duration_type Set duration type. Accepts: 'days', 'nights', 'both'.
+ * 
+ * @return array Trip duration in array format.
+ * 
+ * @since 6.6.0
+ */
+function wptravelengine_get_trip_duration_arr( $trip, string $set_duration_type = 'both' ): array {
+
+	$trip = wptravelengine_get_trip( $trip );
+
+	if ( ! $trip ) {
+		return array();
+	}
+
+	$trip_duration 	= (int) $trip->get_trip_duration();
+	$trip_type 		= $trip->get_trip_type();
+	
+	$duration_label = array();
+	if ( $trip_duration && in_array( $set_duration_type, array( 'both', 'days' ) ) ) {
+		$duration_label[] = sprintf( __( "%d %s", "wp-travel-engine" ), $trip_duration, wptravelengine_get_label_by_slug( $trip->get_trip_duration_unit(), $trip_duration ) );
+	}
+
+	if ( 'multi' === $trip_type && in_array( $set_duration_type, array( 'both', 'nights' ) ) ) {
+		$duration_label[] = $trip->get_trip_nights();
+	}
+
+	return apply_filters( 'wptravelengine_trip_duration_arr', $duration_label, $trip, $set_duration_type );
+}
+
+/**
  * Get the label of provided slug and count.
  *
  * @param string $slug Slug of the label to get.
@@ -489,12 +522,18 @@ function wptravelengine_get_email_template( string $template_name ): string {
 /**
  * Get the instance of the trip.
  *
- * @param int|WP_Post $object Object Name.
+ * @param int|WP_Post|Trip $object Object Name.
  *
  * @return Trip|null
  * @since 6.0.0
+ * @updated 6.6.0
  */
 function wptravelengine_get_trip( $object ): ?Trip {
+
+	if ( $object instanceof Trip ) {
+		return $object;
+	}
+
 	try {
 		return new Trip( $object );
 	} catch ( InvalidArgumentException $e ) {
@@ -1020,6 +1059,11 @@ function wte_get_the_trip_reviews( $trip_id = null ) {
 	// phpcs:enable
 }
 
+/**
+ * Get the trip reviews.
+ * 
+ * @return string
+ */
 function wte_the_trip_reviews() {
 	echo wte_get_the_trip_reviews( get_the_ID() ); //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
@@ -1214,7 +1258,7 @@ function wte_trip_get_trip_rest_metadata( $trip_id ) {
 	$trip = wptravelengine_get_trip( $trip_id );
 	if ( $trip ) {
 		$default_package 	= $trip->default_package();
-		$primary_category 	= $default_package->primary_pricing_category->id ?? null;
+		$primary_category 	= $default_package->primary_pricing_category->id ?? 0;
 	} else {
 		$default_package 	= false;
 	}
@@ -1827,30 +1871,38 @@ function wptravelengine_get_sorting_options() {
 	return apply_filters(
 		'wp_travel_engine_archive_header_sorting_options',
 		array(
+			'latest' => esc_html__( 'Recently Added', 'wp-travel-engine' ),
+			'rating' => esc_html__( 'Top Rated', 'wp-travel-engine' ),
+			'price'  => esc_html__( 'Highest Price First', 'wp-travel-engine' ),
+			'price-desc'  => esc_html__( 'Lowest Price First', 'wp-travel-engine' ),
+			'days' => esc_html__( 'Longest Duration First', 'wp-travel-engine' ),
+			'days-desc' => esc_html__( 'Shortest Duration First', 'wp-travel-engine' ),
+			'name' => esc_html__( 'Alphabetical - A to Z', 'wp-travel-engine' ),
+			'name-desc' => esc_html__( 'Alphabetical - Z to A', 'wp-travel-engine' ),
 			// ''       => esc_html__( 'Default Sorting', 'wp-travel-engine' ),
-			'latest' => esc_html__( 'Latest', 'wp-travel-engine' ),
-			'rating' => esc_html__( 'Most Reviewed', 'wp-travel-engine' ),
-			'price'  => array(
-				'label'   => esc_html__( 'Price', 'wp-travel-engine' ),
-				'options' => array(
-					'price'      => esc_html__( 'Low to High', 'wp-travel-engine' ),
-					'price-desc' => esc_html__( 'High to Low', 'wp-travel-engine' ),
-				),
-			),
-			'days'   => array(
-				'label'   => esc_html__( 'Days', 'wp-travel-engine' ),
-				'options' => array(
-					'days'      => esc_html__( 'Low to High', 'wp-travel-engine' ),
-					'days-desc' => esc_html__( 'High to Low', 'wp-travel-engine' ),
-				),
-			),
-			'name'   => array(
-				'label'   => esc_html__( 'Name', 'wp-travel-engine' ),
-				'options' => array(
-					'name'      => __( 'a - z', 'wp-travel-engine' ),
-					'name-desc' => __( 'z - a', 'wp-travel-engine' ),
-				),
-			),
+			// 'latest' => esc_html__( 'Latest', 'wp-travel-engine' ),
+			// 'rating' => esc_html__( 'Most Reviewed', 'wp-travel-engine' ),
+			// 'price'  => array(
+			// 	'label'   => esc_html__( 'Price', 'wp-travel-engine' ),
+			// 	'options' => array(
+			// 		'price'      => esc_html__( 'Low to High', 'wp-travel-engine' ),
+			// 		'price-desc' => esc_html__( 'High to Low', 'wp-travel-engine' ),
+			// 	),
+			// ),
+			// 'days'   => array(
+			// 	'label'   => esc_html__( 'Days', 'wp-travel-engine' ),
+			// 	'options' => array(
+			// 		'days'      => esc_html__( 'Low to High', 'wp-travel-engine' ),
+			// 		'days-desc' => esc_html__( 'High to Low', 'wp-travel-engine' ),
+			// 	),
+			// ),
+			// 'name'   => array(
+			// 	'label'   => esc_html__( 'Name', 'wp-travel-engine' ),
+			// 	'options' => array(
+			// 		'name'      => __( 'a - z', 'wp-travel-engine' ),
+			// 		'name-desc' => __( 'z - a', 'wp-travel-engine' ),
+			// 	),
+			// ),
 		)
 	);
 }

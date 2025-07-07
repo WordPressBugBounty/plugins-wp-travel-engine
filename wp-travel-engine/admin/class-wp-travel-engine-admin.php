@@ -2199,7 +2199,11 @@ class Wp_Travel_Engine_Admin {
 	 * @since    1.0.0
 	 */
 	function wp_travel_engine_trip_custom_columns( $column, $post_id ) {
-		$wp_travel_engine_setting = get_post_meta( $post_id, 'wp_travel_engine_setting', true );
+
+		$screen = get_current_screen();
+		if ( $screen && 'trip' !== $screen->post_type ){
+			return;
+		}
 
 		// Retrive duration and duration unit.
 		$results               = array();
@@ -2231,7 +2235,6 @@ class Wp_Travel_Engine_Admin {
 		// Gets booking stats for the trip.
 		$trip_booking_stats = $this->get_trip_booking_stats( $post_id );
 
-		$screen = get_current_screen();
 		if ( $screen && 'trip' === $screen->post_type ) {
 			switch ( $column ) {
 				case 'tid':
@@ -3208,14 +3211,17 @@ class Wp_Travel_Engine_Admin {
 	 * Adds new dashboard widget.
 	 */
 	public function wte_add_dashboard_widget() {
-		wp_add_dashboard_widget(
-			'wpte_dashboard_widget',
-			'WP Travel Engine Booking Summary',
-			array(
-				$this,
-				'wpte_dashboard_widget_function',
-			)
-		);
+		$current_user = wp_get_current_user();
+		if ( in_array( 'administrator', $current_user->roles ?? [] ) ) {
+			wp_add_dashboard_widget(
+				'wpte_dashboard_widget',
+				'WP Travel Engine Booking Summary',
+				array(
+					$this,
+					'wpte_dashboard_widget_function',
+				)
+			);
+		}
 	}
 
 	/**
@@ -3485,8 +3491,8 @@ class Wp_Travel_Engine_Admin {
 
 		$archive_title = isset( $global_settings[ 'archive' ][ 'title' ] ) && ! empty( $global_settings[ 'archive' ][ 'title' ] ) ? $global_settings[ 'archive' ][ 'title' ] : $prefix . $original_title;
 
-		if ( is_post_type_archive( array( 'trip' ) ) ) {
-			if ( isset( $global_settings[ 'archive' ][ 'hide_archive_title' ] ) && 'yes' === $global_settings[ 'archive' ][ 'hide_archive_title' ] ) {
+		if ( is_wte_archive_page() ) {
+			if ( isset( $global_settings[ 'archive' ][ 'hide_term_title' ] ) && 'yes' === $global_settings[ 'archive' ][ 'hide_term_title' ] ) {
 				// To hide the title.
 				$title = '';
 			} else {

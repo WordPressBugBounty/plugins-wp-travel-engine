@@ -404,7 +404,7 @@ class TripPackage extends PostModel {
 
 		$package_dates = $this->get_meta( 'package-dates' ) ?: array();
 
-		if ( empty( $package_dates ) ) {
+		if ( ! wptravelengine_is_addon_active( 'fixed-starting-dates' ) || empty( $package_dates ) ) {
 			$package_dates = array(
 				array(
 					'dtstart'      => wp_date( 'Y-m-d' ),
@@ -412,9 +412,10 @@ class TripPackage extends PostModel {
 					'seats'        => '',
 				),
 			);
+		} else {
+			usort( $package_dates, fn( $a, $b ) => strtotime( $a['dtstart'] ) <=> strtotime( $b['dtstart'] ) );
 		}
-
-		$package_date 	= reset( $package_dates );
+		$package_date = reset( $package_dates );
 		$parser 		= new PackageDateParser( $this, $package_date );
 		$this->categories_pricings = $parser->get_data_of( $package_date['dtstart'], 'pricing' );
 		$new_price = floatval( $this->categories_pricings[0]['price'] ?? 0 );
@@ -424,6 +425,6 @@ class TripPackage extends PostModel {
 		$this->group_pricing = (array) ( $this->categories_pricings[0]['group_pricing'] ?? $this->group_pricing );
 
 		$this->has_sale 		= $this->has_sale && ( $this->sale_price < $this->price );
-		$this->sale_percentage	= ( $this->has_sale && $this->price > 0 ) ? round( ( ( $this->price - $this->sale_price ) / $this->price ) * 100 ) : 0;	
+		$this->sale_percentage	= ( $this->has_sale && $this->price > 0 ) ? round( ( ( $this->price - $this->sale_price ) / $this->price ) * 100 ) : 0;
 	}
 }

@@ -5,6 +5,7 @@ namespace WPTravelEngine\Filters;
 use WP_Block_Template;
 use WPTravelEngine\Assets;
 use Elementor\Plugin;
+use WPTravelEngine\Modules\TripSearch;
 
 class Template {
 
@@ -53,6 +54,10 @@ class Template {
 				      ->enqueue_style( 'style-trip-booking-modal' );
 			}
 
+			if( is_post_type_archive(WP_TRAVEL_ENGINE_POST_TYPE) || is_tax( array( 'trip_types', 'trip_tag', 'destination', 'activities' ) ) ){
+				TripSearch::enqueue_assets();
+			}
+
 			return $template_path;
 		}
 
@@ -80,10 +85,12 @@ class Template {
 			      ->enqueue_style( 'style-trip-booking-modal' );
 			$template_path = wte_locate_template( 'single-trip.php' );
 		} else if ( is_post_type_archive( WP_TRAVEL_ENGINE_POST_TYPE ) ) {
+			TripSearch::enqueue_assets();
 			$template_path = wte_locate_template( 'archive-trip.php' );
 		} else {
 			foreach ( array( 'trip_types', 'trip_tag', 'destination', 'activities' ) as $tax ) {
 				if ( is_tax( $tax ) ) {
+					TripSearch::enqueue_styles();
 					$template_path = wte_locate_template( 'taxonomy-' . $tax . '.php' );
 					break;
 				}

@@ -92,7 +92,7 @@ class Email extends TemplateTags {
 	 *
 	 * @param array $header Headers
 	 *
-	 * @return $this
+	 * @return void
 	 */
 	public function add_headers( array $header = array() ): Email {
 

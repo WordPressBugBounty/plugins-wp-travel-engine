@@ -266,13 +266,7 @@ if ( ! class_exists( 'WTE_Show_Trip_Results' ) ) {
 								$details['j'] = $j;
 								$details['user_wishlists'] = $user_wishlists;
 
-								// wte_get_template( 'content-' . $view_mode . '.php', $details );
-								if ( version_compare( '6.0.0', \WP_TRAVEL_ENGINE_VERSION, '<' ) ) {
-									wte_get_template('content-' . $view_mode . '.php', $details);
-								} else {
-									$details['view_mode'] = $view_mode;
-									wte_get_template( 'content-view.php', $details );
-								}
+								wptravelengine_get_template( 'content-' . $view_mode . '.php', $details );
 								$j++;
 							}
 								wp_reset_postdata();

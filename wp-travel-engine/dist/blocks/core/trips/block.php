@@ -62,7 +62,7 @@ $layout   = wte_array_get( $attributes, 'layout', 'grid' );
 $column   = wte_array_get( $attributes, 'tripsCountPerRow', 3 );
 $settings = get_option( 'wp_travel_engine_settings', array() );
 
-$dates_layout = ! empty( $settings['fsd_dates_layout'] ) ? $settings['fsd_dates_layout'] : 'dates_list';
+$dates_layout = 'months_list';
 $show_heading = wte_array_get( $attributes, 'showSectionHeading', false );
 
 $show_section_description = wte_array_get( $attributes, 'showSectionDescription', false );

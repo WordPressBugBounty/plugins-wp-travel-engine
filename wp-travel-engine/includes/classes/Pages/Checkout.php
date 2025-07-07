@@ -371,7 +371,7 @@ class Checkout extends BasePage {
 				'package_name' => $order_trip->get_package_name(),
 				'trip_code' => $order_trip->get_trip_code(),
 				'start_date' => $order_trip->get_trip_date(),
-				'end_date' => $order_trip->get_end_date(),
+				'end_date' => wptravelengine_format_trip_datetime( $order_trip->get_end_date() ),
 				'travelers' => $order_trip->travelers_count()
 			];
 		}
@@ -418,7 +418,7 @@ class Checkout extends BasePage {
 			),
 			sprintf('<tr><td>%s</td><td><strong>%s</strong></td></tr>', 
 				__('Ends on:', 'wp-travel-engine'), 
-				wptravelengine_format_trip_datetime( $trip_data['end_date'] ?? '' )
+				esc_html( $trip_data['end_date'] ?? '' )
 			),
 			sprintf('<tr><td>%s</td><td><strong>%s</strong></td></tr>', 
 				__('No. of Travellers:', 'wp-travel-engine'), 

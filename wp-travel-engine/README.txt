@@ -5,11 +5,11 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 6.5.7
+Stable tag: 6.6.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-WP Travel Engine is the most popular tour and travel booking WordPress plugin. Used by over 20,000 travel agency websites.
+WP Travel Engine is the most popular tour and travel booking WordPress plugin. Used by over 10,000 travel agency websites.
 
 == Description ==
 
@@ -367,6 +367,14 @@ Yes. We have created WooCommerce Payments add-ons that supports all the payment 
 Please send us an email via [support ticket](https://wptravelengine.com/support-ticket/?utm_source=free_plugin&utm_medium=wporg&utm_campaign=support), and we will be happy to help you.
 
 == Changelog ==
+
+= 6.6.0 - 7th July 2025 =
+* New: Introduced a comprehensive set of new settings for the archive page, allowing greater flexibility and control over its display and behavior.
+* Enhancement: Streamlined asset loading on the archive page to enhance performance.
+* Enhancement: Refactored archive page settings for improved clarity and better organization.
+* Enhancement: Redesigned the trip search results and archive page interface for a more refined user experience.
+* Fix: Resolved issue with My Account assets not loading on multilingual sites.
+* Fix: Resolved the issue where the Booking Summary was accessible to clients via the WP Admin Dashboard.
 
 = 6.5.7 - 2nd July 2025 =
 * New: Introduced a new admin notice system to display notifications within the WordPress dashboard.

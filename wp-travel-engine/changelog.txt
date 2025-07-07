@@ -1,5 +1,13 @@
 == Changelog ==
 
+= 6.6.0 - 7th July 2025 =
+* New: Introduced a comprehensive set of new settings for the archive page, allowing greater flexibility and control over its display and behavior.
+* Enhancement: Streamlined asset loading on the archive page to enhance performance.
+* Enhancement: Refactored archive page settings for improved clarity and better organization.
+* Enhancement: Redesigned the trip search results and archive page interface for a more refined user experience.
+* Fix: Resolved issue with My Account assets not loading on multilingual sites.
+* Fix: Resolved the issue where the Booking Summary was accessible to clients via the WP Admin Dashboard.
+
 = 6.5.7 - 2nd July 2025 =
 * New: Introduced a new admin notice system to display notifications within the WordPress dashboard.
 * Fix: Addressed WooCommerce checkout compatibility issue with the form editor.

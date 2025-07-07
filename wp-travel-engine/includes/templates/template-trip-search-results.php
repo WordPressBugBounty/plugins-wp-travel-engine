@@ -1,18 +1,40 @@
 <?php
-use WPTravelEngine\Modules\TripSearch;
 /**
  * Trip Results Template.
  */
+use WPTravelEngine\Modules\TripSearch;
+
+TripSearch::enqueue_assets();
 get_header();
+
+if ( 'builder' === get_post_meta( get_the_ID(), '_elementor_edit_mode', true ) ) :
+	?>
+		<div class="wp-travel-engine-archive-outer-wrap collapsible-filter-panel">
+			<?php if ( 'travel-agency' !== get_option( 'template', '' ) ) : ?>
+				<div class="page-header">
+					<?php echo apply_filters( 'wte-trip-search-page-title', sprintf( '<h1 class="page-title">%1$s</h1>', get_the_title() ) ); ?>
+					<div class="page-content">
+						<?php
+						the_content();
+						?>
+					</div>
+				</div>
+			<?php endif; ?>
+		</div>
+	<?php 
+else :
+    do_action( 'wp_travel_engine_trip_archive_wrap' );
+endif;
+
+get_footer();
+
+return;
+
+// TODO: Remove this once above is stable
 $active_theme = get_option( 'template', '' );
-global $post;
 
-$settings = get_option('wp_travel_engine_settings', array());
-$collapsible_filter_panel = $settings['archive']['collapsible_filter_panel'] ?? 'no';
-
-wp_enqueue_script( 'wp-travel-engine' );
 ?>
-	<div class="wp-travel-engine-archive-outer-wrap <?php echo 'yes' === $collapsible_filter_panel ? 'collapsible-filter-panel' : ''?>">
+	<div class="wp-travel-engine-archive-outer-wrap collapsible-filter-panel">
 		<?php if ( 'travel-agency' !== $active_theme ) : ?>
 			<div class="page-header">
 				<?php echo apply_filters( 'wte-trip-search-page-title', sprintf( '<h1 class="page-title">%1$s</h1>', get_the_title() ) ); ?>
@@ -41,7 +63,8 @@ wp_enqueue_script( 'wp-travel-engine' );
 					<?php
 					$j          = 1;
 					$view_mode  = wp_travel_engine_get_archive_view_mode();
-					$classes    = apply_filters( 'wte_advanced_search_trip_results_grid_classes', 'wte-col-2 category-grid' );
+					$show_sidebar = wptravelengine_toggled( get_option( 'wptravelengine_show_trip_search_sidebar', 'yes' ) );
+					$classes    = apply_filters( 'wte_advanced_search_trip_results_grid_classes', $show_sidebar ? 'wte-col-2 category-grid' : 'wte-col-3 category-grid' );
 					$view_class = 'grid' === $view_mode ? $classes : 'category-list';
 
 					echo '<div class="category-main-wrap ' . esc_attr( $view_class ) . '">';
@@ -59,13 +82,7 @@ wp_enqueue_script( 'wp-travel-engine' );
 						$details['j']              = $j;
 						$details['user_wishlists'] = $user_wishlists;
 
-						// wte_get_template( 'content-' . $view_mode . '.php', $details );
-						if ( version_compare( '6.0.0', \WP_TRAVEL_ENGINE_VERSION, '<' ) ) {
-							wte_get_template('content-' . $view_mode . '.php', $details);
-						} else {
-							$details['view_mode'] = $view_mode;
-							wte_get_template( 'content-view.php', $details );
-						}
+						wptravelengine_get_template( 'content-' . $view_mode . '.php', $details );
 						$j++;
 					}
 						wp_reset_postdata();

@@ -8,8 +8,8 @@
  * @subpackage Wp_Travel_Engine/includes/templates
  * @since @release-version //TODO: change after travel muni is live
  */
-wp_enqueue_style( 'wp-travel-engine' );
-wp_enqueue_script( 'wp-travel-engine' );
+// wp_enqueue_style( 'wp-travel-engine' );
+// wp_enqueue_script( 'wp-travel-engine' );
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly

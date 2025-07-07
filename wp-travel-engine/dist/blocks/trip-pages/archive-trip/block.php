@@ -4,6 +4,9 @@
  * @package Wp_Travel_Engine
  * @since 5.9
  */
+use WPTravelEngine\Modules\TripSearch;
+TripSearch::enqueue_scripts();
+
 wp_enqueue_script( 'wp-travel-engine' );
 wp_enqueue_style( 'wp-travel-engine' );
 // Main wrapper

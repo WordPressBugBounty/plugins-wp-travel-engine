@@ -77,7 +77,7 @@
 							</div>
 							<?php endif;?>
 					</div>
-					<div class="wp-travel-toolbar clearfix">
+					<div class="wp-travel-toolbar clearfix" style="margin-bottom: 24px;">
 						<div class="wte-filter-foundposts"></div>
 						<div class="wp-travel-engine-toolbar wte-filterby-dropdown">
 							<form class="wte-ordering" method="get">

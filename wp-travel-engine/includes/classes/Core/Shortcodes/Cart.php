@@ -42,7 +42,7 @@ class Cart extends Shortcode {
 
 		// @codingStandardsIgnoreStart
 		echo empty( $wrapper[ 'before' ] ) ? '<div class="' . esc_attr( $wrapper[ 'class' ] ) . '">' : wp_kses_post( $wrapper[ 'before' ] );
-		wte_get_template( 'content-cart.php' );
+		wptravelengine_get_template( 'content-cart.php' );
 		echo empty( $wrapper[ 'after' ] ) ? '</div>' : wp_kses_post( $wrapper[ 'after' ] );
 
 		// @codingStandardsIgnoreEnd

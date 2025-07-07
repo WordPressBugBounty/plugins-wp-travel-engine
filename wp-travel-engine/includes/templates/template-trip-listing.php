@@ -6,6 +6,9 @@
  * @subpackage Wp_Travel_Engine/includes/templates
  * @since 1.0.0
  */
+use WPTravelEngine\Modules\TripSearch;
+TripSearch::enqueue_assets();
+
 get_header();
 $active_theme = get_option( 'template', '' );
 ?>
@@ -122,12 +125,12 @@ if ( defined( 'WTE_FIXED_DEPARTURE_VERSION' ) && in_array( 'dates', array(
 	$wte_trip_tax_post_args[ 'post__in' ] = array_merge( array_keys( $trips_without_dates ), array_keys( $post__in ) );
 }
 
-$wte_trip_tax_post_qry = new WP_Query( $wte_trip_tax_post_args );
+\Wp_Travel_Engine_Archive_Hooks::$query = $wte_trip_tax_post_qry = new WP_Query( $wte_trip_tax_post_args );
 global $post;
 if ( $wte_trip_tax_post_qry->have_posts() ) :
 	?>
 
-	<div id="wp-travel-trip-wrapper" class="trip-content-area" itemscope itemtype="https://schema.org/ItemList">
+	<div id="wp-travel-trip-wrapper" class="trip-content-area container" itemscope itemtype="https://schema.org/ItemList">
 		<?php if ( 'travel-agency' !== $active_theme ) : ?>
 			<div class="page-header">
 				<?php the_title( '<h1 class="page-title">', '</h1>' ); ?>
@@ -173,7 +176,8 @@ if ( $wte_trip_tax_post_qry->have_posts() ) :
 						$j         = 1;
 						$view_mode = wp_travel_engine_get_archive_view_mode();
 						if ( 'grid' === $view_mode ) {
-							$view_class = class_exists( 'Wte_Advanced_Search' ) ? 'wte-col-2 category-grid' : 'wte-col-3 category-grid';
+							$show_sidebar = wptravelengine_toggled( get_option( 'wptravelengine_show_trip_search_sidebar', 'yes' ) );
+							$view_class = class_exists( 'Wte_Advanced_Search' ) ? ( $show_sidebar ? 'wte-col-2 category-grid' : 'wte-col-3 category-grid' ) : 'wte-col-3 category-grid';
 						} else {
 							$view_class = 'category-list';
 						}
@@ -186,13 +190,7 @@ if ( $wte_trip_tax_post_qry->have_posts() ) :
 							$details[ 'j' ]              = $j;
 							$details[ 'user_wishlists' ] = $user_wishlists;
 
-							// wte_get_template( 'content-' . $view_mode . '.php', $details );
-							if ( version_compare( '6.0.0', \WP_TRAVEL_ENGINE_VERSION, '<' ) ) {
-								wte_get_template( 'content-' . $view_mode . '.php', $details );
-							} else {
-								$details[ 'view_mode' ] = $view_mode;
-								wte_get_template( 'content-view.php', $details );
-							}
+							wptravelengine_get_template( 'content-' . $view_mode . '.php', $details );
 							$j ++;
 						endwhile;
 						wp_reset_postdata();

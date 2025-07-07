@@ -12,7 +12,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
-wp_enqueue_style ( 'single-trip' );
+
 $is_featured_widget = true;
 ?>
 <div class="category-trips-widget">

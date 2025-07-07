@@ -317,7 +317,7 @@ class WP_Travel_Engine_Template_Hooks {
 			)
 		);
 		if ( $related_trips->have_posts() ) {
-			wte_get_template( 'content-related-trips.php', compact( 'section_title', 'related_trips' ) );
+			wptravelengine_get_template( 'content-related-trips.php', compact( 'section_title', 'related_trips' ) );
 		}
 	}
 
@@ -714,6 +714,7 @@ class WP_Travel_Engine_Template_Hooks {
 				array(
 					'is_main_slider' => true,
 					'banner_layout'  => $global_settings[ 'trip_banner_layout' ] ?? 'banner-default',
+					'related_query'  => false,
 				)
 			);
 		}

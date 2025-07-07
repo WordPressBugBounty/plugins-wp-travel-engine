@@ -4,9 +4,17 @@
  * @package Wp_Travel_Engine
  * @since 5.9
  */
-wp_enqueue_script( 'wp-travel-engine' );
-wp_enqueue_style( 'wp-travel-engine' );
 use WPTravelEngine\Modules\TripSearch;
+TripSearch::enqueue_scripts();
+
+do_action( 'wp_travel_engine_trip_archive_wrap' );
+return;
+
+// TODO: Remove this once above is stable
+// use WPTravelEngine\Modules\TripSearch;
+// wp_enqueue_script( 'wp-travel-engine' );
+// wp_enqueue_style( 'wp-travel-engine' );
+
 ?>
 	<div class="wp-travel-engine-archive-outer-wrap">
 		<?php
@@ -25,7 +33,8 @@ use WPTravelEngine\Modules\TripSearch;
 					<?php
 					$j          = 1;
 					$view_mode  = wp_travel_engine_get_archive_view_mode();
-					$classes    = apply_filters( 'wte_advanced_search_trip_results_grid_classes', 'col-2 category-grid' );
+					$show_sidebar = wptravelengine_toggled( get_option( 'wptravelengine_show_trip_search_sidebar', 'yes' ) );
+					$classes    = apply_filters( 'wte_advanced_search_trip_results_grid_classes', $show_sidebar ? 'col-2 category-grid' : 'col-3 category-grid' );
 					$view_class = 'grid' === $view_mode ? $classes : 'category-list';
 
 					echo '<div class="category-main-wrap ' . esc_attr( $view_class ) . '">';
@@ -38,7 +47,7 @@ use WPTravelEngine\Modules\TripSearch;
 						$details['j']              = $j;
 						$details['user_wishlists'] = $user_wishlists;
 
-						wte_get_template( 'content-' . $view_mode . '.php', $details );
+						wptravelengine_get_template( 'content-' . $view_mode . '.php', $details );
 						$j++;
 					}
 						wp_reset_postdata();
