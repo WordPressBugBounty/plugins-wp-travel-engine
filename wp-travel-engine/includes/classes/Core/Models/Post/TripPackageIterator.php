@@ -56,7 +56,8 @@ class TripPackageIterator extends Iterator {
 		foreach ( $package_ids as $package_id ) {
 			if ( is_numeric( $package_id ) ) {
 				$package = get_post( $package_id );
-				if ( $package ) {
+				$package_categories = get_post_meta( $package_id, 'package-categories', true );
+				if ( $package && $package_categories ) {
 					$this->packages[] = new TripPackage( $package_id, $this->trip );
 				}
 			}

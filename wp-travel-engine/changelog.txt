@@ -1,5 +1,12 @@
 == Changelog ==
 
+= 6.6.1 - 14th July 2025 =
+* New: Added an Appearance tab under the Display section in Settings for color customization.
+* Enhancement: Addressed minor bugs in the Trip Search functionality.
+* Enhancement: Improved SEO schema with cleaner and more accurate markup.
+* Fix: Fixed issue where 'Check Availability' occasionally failed with Optimized Loading enabled.
+* Fix: Corrected the %Amount% display format not rendering properly for trips with zero price.
+
 = 6.6.0 - 7th July 2025 =
 * New: Introduced a comprehensive set of new settings for the archive page, allowing greater flexibility and control over its display and behavior.
 * Enhancement: Streamlined asset loading on the archive page to enhance performance.

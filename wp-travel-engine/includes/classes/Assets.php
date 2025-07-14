@@ -188,7 +188,7 @@ class Assets extends AssetsAbstract {
 			: 'public/single-trip.js';
 
 		$single_trip_dependencies = $optimized_loading
-			? [ 'wp-element' ]
+			? [ 'wp-element', 'wte-moment-tz' ]
 			: [ 'wp-dom-ready', 'wp-api-fetch', 'lodash', 'jquery' ];
 
 		$this->register_script(

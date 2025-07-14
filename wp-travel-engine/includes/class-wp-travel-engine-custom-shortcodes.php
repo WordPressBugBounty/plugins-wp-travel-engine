@@ -37,10 +37,21 @@ class WP_Travel_Engine_Custom_Shortcodes {
 		}
 		
 		add_action( 'wp', function() {
-			if ( is_singular() && has_shortcode( get_post()->post_content, 'WP_TRAVEL_ENGINE_WISHLIST' ) ) {
+			global $post;
+
+			if ( ! $post instanceof \WP_Post || ! is_singular() ) {
+				return;
+			}
+
+			if ( has_shortcode( $post->post_content, 'wte_trip' ) || has_shortcode( $post->post_content, 'wte_trip_tax' ) ) {
+				TripSearch::enqueue_assets();
+			}
+
+			if ( has_shortcode( $post->post_content, 'WP_TRAVEL_ENGINE_WISHLIST' ) ) {
 				TripSearch::enqueue_scripts();
 				\WPTravelEngine\Assets::instance()->enqueue_style( 'trip-wishlist' )->enqueue_script( 'trip-wishlist' );
 			}
+
 		} );
 	}
 

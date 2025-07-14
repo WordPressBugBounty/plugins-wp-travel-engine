@@ -203,11 +203,13 @@ class TripSearch {
 		$settings 		= get_option( 'wp_travel_engine_settings', array() );
 		$price_range 	= self::get_price_range( true );
 		$duration_range = self::get_duration_range( true );
+		$is_search_page = (is_post_type_archive( 'trip' ) && 'trip' !== ( $_REQUEST['post_type'] ?? '' ) ) || is_page( 'trip-search-result' );
 
 		return array(
 			'ajax_url'               => admin_url( 'admin-ajax.php' ),
 			'destination_nonce'      => wp_create_nonce( 'wpte_ajax_load_more_destination' ),
-			'is_tax'                 => is_tax( get_object_taxonomies( 'trip', 'names' ) ),
+			'is_search'         	 => $is_search_page,
+			'is_tax'                 => ! $is_search_page && is_tax( get_object_taxonomies( 'trip', 'names' ) ),
 			'min_cost'               => (int) $price_range[ 'min_value' ],
 			'max_cost'               => (int) $price_range[ 'max_value' ],
 			'min_duration'           => (int) $duration_range[ 'min_value' ],
@@ -218,8 +220,8 @@ class TripSearch {
 			'selected_max_duration'  => intval( $_REQUEST[ 'maxdur' ] ?? $duration_range[ 'max_value' ] ),
 			'cur_symbol'             => wp_travel_engine_get_currency_code(),
 			'days_text'              => __( 'Days', 'wp-travel-engine' ),
-			'is_load_more'           => get_option( 'wptravelengine_archive_display_mode', 'pagination' ) === 'load_more',
-			'default_view_mode'      => wp_travel_engine_get_archive_view_mode(),
+			'is_load_more'           => 'load_more' === get_option( 'wptravelengine_archive_display_mode', 'pagination' ),
+			'default_view_mode'      => apply_filters( 'wp_travel_engine_default_archive_view_mode', get_option( 'wptravelengine_trip_view_mode', 'list' ) ),
 			'default_orderby'        => get_option( 'wptravelengine_trip_sort_by', 'latest' ),
 			'showFeaturedTripsOnTop' => wptravelengine_toggled( $settings[ 'show_featured_trips_on_top' ] ?? false ),
 			'noOfFeaturedTrips'      => (int) ( $settings[ 'feat_trip_num' ] ?? 2 ),
@@ -499,8 +501,8 @@ class TripSearch {
 			$query_args = array_merge( $query_args, $sort_args );
 		}
 
-		if ( ! empty( $post_data['search'] ?? '' ) ) {
-			$query_args['s'] = $post_data['search'];
+		if ( ! empty( $post_data['search'] ?? $post_data['s'] ?? '' ) ) {
+			$query_args['s'] = $post_data['search'] ?? $post_data['s'];
 		}
 		// phpcs:enable
 
@@ -693,7 +695,7 @@ class TripSearch {
 				$possible_queries = array_merge( $possible_queries, $get_terms );
 
 				ob_start();
-				printf( '<li class="%1$s" %2$s>', $children ? 'has-children' : '', $list_count > 4 ? 'style="display: none;"' : '' );
+				printf( '<li class="%1$s" %2$s>', $children ? 'has-children' : '', ( $list_count > 4 && ! $children ) ? 'style="display: none;"' : '' );
 				printf(
 					'<label>'
 					. '<input type="checkbox" %1$s value="%2$s" name="%3$s" class="%3$s wte-filter-item"/>'
@@ -715,7 +717,7 @@ class TripSearch {
 							continue;
 						}
 						$_children[ $term_child ] = $terms[ $term_child ];
-						$list_count++;
+						// $list_count++;
 					}
 					call_user_func( array( __CLASS__, __FUNCTION__ ), $_children, true );
 				}

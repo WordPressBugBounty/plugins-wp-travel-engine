@@ -297,11 +297,13 @@ class Wp_Travel_Engine_Archive_Hooks {
 			$current_url .= esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) );
 		}
 
+		$search_value = $_GET['s'] ?? $_GET['search'] ?? '';
+
 		?>
 		<div class="wpte-toolbar-container">
 			<div class="wp-travel-toolbar trip-content-area">
 				<div class="wpte-trip-search-input">
-					<input type="search" name="wte_search" id="wte_search" placeholder="<?php esc_html_e( 'Search', 'wp-travel-engine' ); ?>">
+					<input type="search" name="wte_search" id="wte_search" placeholder="<?php esc_html_e( 'Search', 'wp-travel-engine' ); ?>"<?php echo empty( $search_value ) ? '' : ' value="' . esc_attr( $search_value ) . '"'; ?>>
 				</div>
 
 				<div class="wte-filterby-dropdown wte-ordering">

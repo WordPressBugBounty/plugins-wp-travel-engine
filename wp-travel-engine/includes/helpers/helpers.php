@@ -2002,7 +2002,7 @@ function wte_get_formated_date( $date_string, $format = false ) {
  */
 function wte_get_new_formated_date( $date_string, $format = false ) {
 	if ( ! $format ) {
-		$date_format = 'M d';
+		$format = 'M d';
 	}
 
 	if ( empty( $date_string ) ) {
@@ -2011,7 +2011,7 @@ function wte_get_new_formated_date( $date_string, $format = false ) {
 
 	$date = strtotime( $date_string );
 
-	return date_i18n( $date_format, $date );
+	return date_i18n( $format, $date );
 }
 
 /**

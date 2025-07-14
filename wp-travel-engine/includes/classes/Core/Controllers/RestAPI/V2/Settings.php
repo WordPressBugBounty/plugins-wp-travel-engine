@@ -17,6 +17,7 @@ use WPTravelEngine\Core\Models\Settings\Options;
 use WPTravelEngine\Core\Models\Settings\PluginSettings;
 use WPTravelEngine\Core\Models\Settings\StaticStrings;
 use WPTravelEngine\PaymentGateways\PaymentGateways;
+use WPTravelEngine\Utilities\ArrayUtility;
 
 /**
  * Settings API class.
@@ -584,6 +585,30 @@ class Settings {
 	}
 
 	/**
+	 * Prepare Appearance Details of Display Tab.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return array
+	 * @since 6.6.1
+	 */
+	protected function prepare_appearance_details( WP_REST_Request $request ): array {
+		$settings = array();
+
+		$appearance = Options::get( 'wptravelengine_appearance', array() );
+
+		$settings[ 'appearance' ] = array(
+			'primary_color' => (string) $appearance[ 'primary_color' ],
+			'primary_color_rgb' => (string) $appearance[ 'primary_color_rgb' ],
+			'discount_color' => (string) $appearance[ 'discount_color' ],
+			'featured_color' => (string) $appearance[ 'featured_color' ],
+			'icon_color' => (string) $appearance[ 'icon_color' ],
+		);
+
+		return $settings;
+	}
+
+	/**
 	 * Prepare Checkout Details of Display Tab.
 	 *
 	 * @param WP_REST_Request $request Request object.
@@ -664,6 +689,7 @@ class Settings {
 				$this->prepare_trip_card_details( $request ),
 				$this->prepare_single_trip_details( $request ),
 				$this->prepare_archive_details( $request ),
+				$this->prepare_appearance_details( $request ),
 				$this->prepare_checkout_details( $request ),
 				$this->prepare_taxonomy_details( $request ),
 				array(
@@ -1439,6 +1465,37 @@ class Settings {
 				$plugin_settings->set( 'email.footer', $request[ 'email_settings' ][ 'footer' ] );
 			}
 		}
+	}
+
+	/**
+	 * Process Appearance Settings.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return void
+	 * @since 6.6.1
+	 */
+	protected function set_appearance_settings( WP_REST_Request $request ) {
+		$appearance = ArrayUtility::make( Options::get( 'wptravelengine_appearance' ) );
+
+		if( isset( $request[ 'appearance' ][ 'primary_color' ] ) ) {
+			$appearance->set( 'primary_color', sanitize_hex_color( $request[ 'appearance' ][ 'primary_color' ] ) );
+			$appearance->set( 'primary_color_rgb', wptravelengine_hex_to_rgb( $request[ 'appearance' ][ 'primary_color' ] ) );
+		}
+
+		if( isset( $request[ 'appearance' ][ 'discount_color' ] ) ) {
+			$appearance->set( 'discount_color', sanitize_hex_color( $request[ 'appearance' ][ 'discount_color' ] ) );
+		}
+
+		if( isset( $request[ 'appearance' ][ 'featured_color' ] ) ) {
+			$appearance->set( 'featured_color', sanitize_hex_color( $request[ 'appearance' ][ 'featured_color' ] ) );
+		}
+
+		if( isset( $request[ 'appearance' ][ 'icon_color' ] ) ) {
+			$appearance->set( 'icon_color', sanitize_hex_color( $request[ 'appearance' ][ 'icon_color' ] ) );
+		}
+
+		Options::update( 'wptravelengine_appearance', $appearance->value() );
 	}
 
 	/**
@@ -2326,6 +2383,7 @@ class Settings {
 		// $this->set_admin_tabs( $request );
 		$this->set_email_notification_details( $request );
 		$this->set_email_settings( $request );
+		$this->set_appearance_settings( $request );
 		$this->set_display_tabs( $request );
 		$this->set_currency_details( $request );
 		$this->set_payment_gateway( $request );
@@ -2751,6 +2809,32 @@ class Settings {
 					),
 					'footer' => array(
 						'description' => __( 'Footer Text', 'wp-travel-engine' ),
+						'type'        => 'string',
+					),
+				),
+			),
+			'appearance' => array(
+				'description' => __( 'Appearance Settings', 'wp-travel-engine' ),
+				'type'        => 'object',
+				'properties'  => array(
+					'primary_color' => array(
+						'description' => __( 'Primary Color', 'wp-travel-engine' ),
+						'type'        => 'string',
+					),
+					'primary_color_rgb' => array(
+						'description' => __( 'Primary Color RGB', 'wp-travel-engine' ),
+						'type'        => 'string',
+					),
+					'discount_color' => array(
+						'description' => __( 'Discount Color', 'wp-travel-engine' ),
+						'type'        => 'string',
+					),
+					'featured_color' => array(
+						'description' => __( 'Featured Color', 'wp-travel-engine' ),
+						'type'        => 'string',
+					),
+					'icon_color' => array(
+						'description' => __( 'Icon Color', 'wp-travel-engine' ),
 						'type'        => 'string',
 					),
 				),

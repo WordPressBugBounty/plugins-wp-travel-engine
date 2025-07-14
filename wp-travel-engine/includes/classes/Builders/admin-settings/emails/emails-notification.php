@@ -31,6 +31,7 @@ $customer_email_tags = apply_filters( 'wptravelengine_customer_email_template_ta
 ) ) );
 
 $all_email_tags = apply_filters( 'wptravelengine_booking_email_tags', array_merge( $common_email_tags, array(
+	'{booked_trip_name}'			=> __( 'The name of the trip booked.', 'wp-travel-engine' ),
     '{trip_url}'        			=> __( 'The trip URL for each booked trip', 'wp-travel-engine' ),
     '{name}'            			=> __( 'The buyer\'s first name', 'wp-travel-engine' ),
     '{fullname}'        			=> __( 'The buyer\'s full name, first and last', 'wp-travel-engine' ),

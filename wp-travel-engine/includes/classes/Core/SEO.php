@@ -1,7 +1,7 @@
 <?php
 /**
  * Main SEO class.
- * 
+ *
  * @package WPTravelEngine\Core
  * @since 1119-schema-issue
  */
@@ -44,11 +44,11 @@ class SEO {
 		// Get basic post data.
 		$post_data = self::get_post_data( $post_id );
 		$post_id = $post_data['post_id'];
-		
+
 		// Get trip data.
 		$trip  = self::get_trip_basic_data( $post_id, $post_data['post'] );
 		$costs = self::get_trip_costs( $trip['settings'], $trip['trip_data'] );
-		
+
 		// Build schemas.
 		$itinerary      = self::build_itinerary_schema( $trip['settings'] );
 		$faq_schema     = self::build_faq_schema( $trip['settings'], $post_id );
@@ -92,7 +92,7 @@ class SEO {
 	private static function get_trip_basic_data( $post_id, $post ) {
 		$obj = \wte_functions(); // Backward compatibility.
 		$trip_data = new Trip( $post_id );
-		
+
 		$price = $trip_data->has_sale() ? $trip_data->get_sale_price() : $trip_data->get_price();
 
 		return [
@@ -115,12 +115,12 @@ class SEO {
 	 * @return array
 	 */
 	private static function get_trip_costs( $settings, $trip_data ) {
-		$cost = $settings['trip_price'] ?? '';
-		$prev_cost = $settings['trip_prev_price'] ?? '';
-		
+		$prev_cost = $trip_data->get_price();
+		$cost = $trip_data->has_sale() ? $trip_data->get_sale_price() : $prev_cost;
+
 		return [
-			'cost' => $cost ?: $trip_data->get_sale_price(),
-			'prev_cost' => $prev_cost ?: $trip_data->get_price()
+			'cost' => $cost,
+			'prev_cost' => $prev_cost
 		];
 	}
 
@@ -145,9 +145,9 @@ class SEO {
 			}
 
 			$title = $settings['itinerary']['itinerary_title'][$value] ?? '';
-			$content_itinerary = $settings['itinerary']['itinerary_content_inner'][$value] ?? 
+			$content_itinerary = $settings['itinerary']['itinerary_content_inner'][$value] ??
 								$settings['itinerary']['itinerary_content'][$value] ?? '';
-			
+
 			$content_itinerary = preg_replace( '/<p\b[^>]*>(.*?)<\/p>/i', '', strip_tags( $content_itinerary ) );
 
 			$items[] = [
@@ -217,7 +217,7 @@ class SEO {
 	 */
 	private static function build_trip_schema( $post_id, $trip, $costs, $content, $itinerary ) {
 		return apply_filters(
-			'wp_travel_engine_schema_array', 
+			'wp_travel_engine_schema_array',
 			array(
 				'@context'    => 'https://schema.org',
 				'@type'       => 'Trip',
@@ -245,8 +245,8 @@ class SEO {
 						'url'             => esc_url( $trip['trip_url'] ),
 					],
 				],
-			), 
-			$post_id, $trip[ 'settings' ] 
+			),
+			$post_id, $trip[ 'settings' ]
 		);
 	}
 
@@ -260,7 +260,7 @@ class SEO {
 	 */
 	private static function build_product_schema( $post_id, $trip, $content ) {
 		return apply_filters(
-			'wp_travel_engine_single_trip_product_schema', 
+			'wp_travel_engine_single_trip_product_schema',
 			array(
 				'@context'    => 'https://schema.org',
 				'@type'       => 'Product',
@@ -280,7 +280,7 @@ class SEO {
 					'availability'    => 'https://schema.org/InStock',
 					'priceValidUntil' => "2030-12-31"
 				],
-			), 
+			),
 			$post_id, $trip['trip_data'], $trip['settings']
 		);
 	}

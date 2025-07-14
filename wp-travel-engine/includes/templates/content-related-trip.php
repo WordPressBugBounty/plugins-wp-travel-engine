@@ -31,7 +31,7 @@ if( $is_featured ){
 	$classes .= ' __featured-trip';
 }
 ?>
-<div data-thumbnail="default" class="<?php echo esc_attr( $classes ); ?>" style="--span: 20;" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+<div data-thumbnail="default" class="<?php echo esc_attr( $classes ); ?>" style="--span: 20;">
 	<div class="category-trips-single-inner-wrap">
 		<?php
 			do_action('wptravelengine_before_trip_archive_card');

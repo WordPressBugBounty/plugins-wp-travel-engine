@@ -1873,10 +1873,10 @@ function wptravelengine_get_sorting_options() {
 		array(
 			'latest' => esc_html__( 'Recently Added', 'wp-travel-engine' ),
 			'rating' => esc_html__( 'Top Rated', 'wp-travel-engine' ),
-			'price'  => esc_html__( 'Highest Price First', 'wp-travel-engine' ),
-			'price-desc'  => esc_html__( 'Lowest Price First', 'wp-travel-engine' ),
-			'days' => esc_html__( 'Longest Duration First', 'wp-travel-engine' ),
-			'days-desc' => esc_html__( 'Shortest Duration First', 'wp-travel-engine' ),
+			'price'  => esc_html__( 'Lowest Price First', 'wp-travel-engine' ),
+			'price-desc'  => esc_html__( 'Highest Price First', 'wp-travel-engine' ),
+			'days' => esc_html__( 'Shortest Duration First', 'wp-travel-engine' ),
+			'days-desc' => esc_html__( 'Longest Duration First', 'wp-travel-engine' ),
 			'name' => esc_html__( 'Alphabetical - A to Z', 'wp-travel-engine' ),
 			'name-desc' => esc_html__( 'Alphabetical - Z to A', 'wp-travel-engine' ),
 			// ''       => esc_html__( 'Default Sorting', 'wp-travel-engine' ),
@@ -2207,6 +2207,37 @@ function wptravelengine_random_hex(): string {
 	$chars = '0123456789abcdef';
 
 	return $chars[ mt_rand( 0, 15 ) ];
+}
+
+/**
+ * Generate hext to rgb.
+ *
+ * @param string $hex Hex color.
+ *
+ * @return string
+ * @since 6.6.1
+ */
+function wptravelengine_hex_to_rgb( string $hex ) {
+	// Remove the "#" if present
+    $hex = ltrim($hex, '#');
+
+    // Handle shorthand format like #f60
+    if (strlen($hex) === 3) {
+        $hex = $hex[0].$hex[0].$hex[1].$hex[1].$hex[2].$hex[2];
+    }
+
+    // Convert to RGB components
+    if (strlen($hex) === 6) {
+        list($r, $g, $b) = [
+            hexdec(substr($hex, 0, 2)),
+            hexdec(substr($hex, 2, 2)),
+            hexdec(substr($hex, 4, 2)),
+        ];
+        return ''.$r.', '.$g.', '.$b.'';
+    }
+
+    // Invalid format
+    return null;
 }
 
 /**

@@ -30,7 +30,7 @@ foreach ( $fsds as $fsd ) :
         break;
     endif;
     $content .= '<span class="category-trip-start-date"><span>';
-    $content .= wte_get_new_formated_date( $fsd['start_date'] ?? $fsd );
+    $content .= wte_get_new_formated_date( $fsd['start_date'] ?? $fsd, get_option( 'date_format' ) );
     if ( empty( $fsd['seats_left'] ) ) {
         $content .= ' <em>('.esc_html__( 'Available', 'wp-travel-engine' ).')</em>';
     } else {

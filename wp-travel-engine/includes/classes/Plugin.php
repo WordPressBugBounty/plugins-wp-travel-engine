@@ -355,6 +355,32 @@ final class Plugin {
 		}
 	}
 
+	/**
+	 * Add Color Settings to the body.
+	 *
+	 * @return void
+	 * @since 6.6.1
+	 */
+	public function add_color_settings_to_body() {
+		$appearance = get_option('wptravelengine_appearance');
+		if( !empty( $appearance['primary_color'] ) ){
+			echo '<style>body{--wpte-primary-color: ' . $appearance['primary_color'] . '; --wpte-primary-color-rgb: ' . $appearance['primary_color_rgb'] . ';}</style>';
+		}
+
+		if( !empty( $appearance['discount_color'] ) ){
+			echo '<style>body{--wpte-discount-color: ' . $appearance['discount_color'] . ';}</style>';
+		}
+
+		if( !empty( $appearance['featured_color'] ) ){
+			echo '<style>body{--wpte-featured-color: ' . $appearance['featured_color'] . ';}</style>';
+		}
+
+		if( !empty( $appearance['icon_color'] ) ){
+			echo '<style>body{--wpte-icon-color: ' . $appearance['icon_color'] . ';}</style>';
+		}
+		
+	}
+
 	protected function hooks() {
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
@@ -373,6 +399,8 @@ final class Plugin {
 		add_filter( 'meta_content', 'prepend_attachment' );
 		add_filter( 'meta_content', 'do_shortcode' );
 		add_filter( 'term_description', 'wpautop' );
+
+		add_action('wp_head', array($this, 'add_color_settings_to_body'));
 
 		/**
 		 * Filter for resend purchase receipt to send modified post meta data to the email template.
