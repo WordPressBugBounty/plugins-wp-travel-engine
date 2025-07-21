@@ -172,7 +172,6 @@ $trip_meta_tabs = array(
 				],
 			),
 			array(
-				'condition' => 'cut_off_time.enable == true',
 				'field'     => [
 					'type' => 'DIVIDER',
 				],

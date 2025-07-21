@@ -1961,13 +1961,16 @@
     border: 1px solid ${e=>e.colors.primary||"#000000"};
     border-radius: 4px;
     background-color: #ffffff;
+    width: 100%;
+    max-width: 500px;
     input[type="text"]{
         padding: 10px 14px;
         font-size: 14px;
         line-height: 1.7;
         border: none !important;
         background: none;
-        min-width: 300px;
+        width: 100%;
+        background-color: #f0f0f0;
     }
     button{
         background-color: ${e=>e.colors.primary||"#000000"};
@@ -1978,7 +1981,7 @@
         cursor: pointer;
         font-size: 20px;
     }
-`,ys=({code:e,colors:c={}})=>{const t=(0,n.useRef)(null),a=(0,n.useRef)(null),[i,r]=(0,n.useState)(!1);return(0,l.createElement)("div",null,(0,l.createElement)(vs,{className:"wpte-copytoclipboard-wrap",colors:c},(0,l.createElement)("input",{ref:t,type:"text",defaultValue:e,readOnly:!0}),(0,l.createElement)(bs(),{text:e,onCopy:()=>{t.current.select(),r(!0)}},(0,l.createElement)("button",{ref:a,type:"button"},(0,l.createElement)(hs,{name:"copy"}))),(0,l.createElement)(qi,{trigger:"click",content:i?"Copied":"Copy",reference:a})))},ws=(window.wp.blockEditor,window.wp.blocks,Xe.div`
+`,ys=({code:e,colors:c={},...t})=>{const a=(0,n.useRef)(null),i=(0,n.useRef)(null),[r,o]=(0,n.useState)(!1);return(0,l.createElement)("div",{key:e},(0,l.createElement)(vs,{className:"wpte-copytoclipboard-wrap",colors:c},(0,l.createElement)("input",{ref:a,type:"text",defaultValue:e,readOnly:!0,...t}),(0,l.createElement)(bs(),{text:e,onCopy:()=>{a.current.select(),o(!0)}},(0,l.createElement)("button",{ref:i,type:"button"},(0,l.createElement)(hs,{name:"copy"}))),(0,l.createElement)(qi,{trigger:"click",content:r?"Copied":"Copy",reference:i})))},ws=(window.wp.blockEditor,window.wp.blocks,Xe.div`
     display: inline-flex;
     .wpte-icon{
         font-size: 20px;

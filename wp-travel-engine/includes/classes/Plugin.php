@@ -756,6 +756,13 @@ final class Plugin {
 		 * @since 6.4.0
 		 */
 		add_filter( 'editable_roles', array( $this, 'modify_role_display' ) );
+
+		/**
+		 * Add Open Graph meta tags for trip pages.
+		 *
+		 * @since 6.6.2
+		 */
+		add_action('wp_head', array( $this, 'wptravelengine_add_og_tag' ), 5);
 	}
 
 	/**
@@ -1683,6 +1690,93 @@ final class Plugin {
 		$this->loader->add_action( 'ninja_forms_after_submission', $enquiry_form, 'catch_ninja_forms_data', 10, 1 );
 		$this->loader->add_action( 'wpforms_frontend_confirmation_message', $enquiry_form, 'catch_wpforms_data', 10, 2 );
 		$this->loader->add_action( 'gform_after_submission', $enquiry_form, 'catch_gravity_forms_data', 10, 2 );
+	}
+
+	/**
+	 * Add Open Graph meta tags for trip pages.
+	 *
+	 * @since 6.6.2
+	 * @return void
+	*/
+	public function wptravelengine_add_og_tag() {
+		// Check if other SEO plugins are handling OG tags.
+		if ( $this->should_skip_og_tags() ) {
+			return;
+		}
+
+		if ( ! is_singular( WP_TRAVEL_ENGINE_POST_TYPE ) ) {
+			return;
+		}
+
+		global $post;
+		
+		$post_data = array(
+			'id'      => $post->ID,
+			'title'   => get_the_title( $post->ID ),
+			'url'     => get_permalink( $post->ID ),
+			'excerpt' => get_the_excerpt( $post->ID ),
+			'image_id' => get_post_thumbnail_id( $post->ID ),
+		);
+
+		if ( empty( $post_data['title'] ) || empty( $post_data['url'] ) ) {
+			return;
+		}
+
+		$meta_tags = array(
+			'og:type'        => 'website',
+			'og:title'       => $post_data['title'] ?? '',
+			'og:url'         => $post_data['url'] ?? '',
+			'og:description' => $post_data['excerpt'] ?? '',
+			'og:site_name'   => get_bloginfo( 'name' ) ?? '',
+			'og:locale'      => get_locale(),
+		);
+
+		if ( ! empty( $post_data['image_id'] ) ) {
+			$image_data = wp_get_attachment_image_src( $post_data['image_id'], 'full' );
+			if ( $image_data ) {
+				$meta_tags['og:image']       = $image_data[0] ?? '';
+				$meta_tags['og:image:width'] = $image_data[1] ?? '';
+				$meta_tags['og:image:height'] = $image_data[2] ?? '';
+			}
+		}
+
+		$meta_tags = apply_filters( 'wptravelengine_og_meta_tags', $meta_tags, $post_data );
+
+		$output = '';
+		foreach ( $meta_tags as $property => $content ) {
+			if ( ! empty( $content ) ) {
+				$output .= sprintf(
+					'<meta property="%s" content="%s">' . "\n",
+					esc_attr( $property ),
+					esc_attr( $content )
+				);
+			}
+		}
+
+		echo $output;
+	}
+
+	/**
+	 * Check if we should skip OG tags due to other plugins.
+	 *
+	 * @since 6.6.2
+	 * @return bool
+	 */
+	private function should_skip_og_tags() {
+		$seo_plugins = array(
+			'rank_math/rank-math.php',
+			'wordpress-seo/wp-seo.php',
+			'all-in-one-seo-pack/all_in_one_seo_pack.php',
+			'seo-by-rank-math/rank-math.php',
+		);
+
+		foreach ( $seo_plugins as $plugin ) {
+			if ( is_plugin_active( $plugin ) ) {
+				return true;
+			}
+		}
+
+		return apply_filters( 'wptravelengine_skip_og_tags', false );
 	}
 
 	/**

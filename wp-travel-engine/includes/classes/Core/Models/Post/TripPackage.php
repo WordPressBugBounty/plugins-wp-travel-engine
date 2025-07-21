@@ -399,32 +399,72 @@ class TripPackage extends PostModel {
 		$this->has_sale           = (bool) ( $this->primary_pricing_category->get( 'has_sale' ) ?? false );
 		$this->price              = (float) ( $this->primary_pricing_category->get( 'price' ) ?? 0 );
 		$this->sale_price         = (float) ( $this->primary_pricing_category->get( 'sale_price' ) ?? 0 );
+		$this->sale_percentage    = ( $this->has_sale && $this->price > 0 ) ? round( ( ( $this->price - $this->sale_price ) / $this->price ) * 100 ) : 0;
 		$this->has_group_discount = (bool) ( $this->primary_pricing_category->get( 'enabled_group_discount' ) ?? false );
 		$this->group_pricing 	  = (array) ( $this->primary_pricing_category->get( 'group_pricing' ) ?? array() );
 
+	}
+
+	/**
+	 * Set the categories pricings.
+	 *
+	 * @return void
+	 * @since 6.2.2
+	 */
+	public function set_categories_pricings() {
+
+		if ( ! wptravelengine_is_addon_active( 'conditional-price' ) ) {
+			$this->categories_pricings = $this->get_default_pricings();
+			return;
+		}
+
 		$package_dates = $this->get_meta( 'package-dates' ) ?: array();
 
-		if ( ! wptravelengine_is_addon_active( 'fixed-starting-dates' ) || empty( $package_dates ) ) {
-			$package_dates = array(
-				array(
-					'dtstart'      => wp_date( 'Y-m-d' ),
-					'is_recurring' => false,
-					'seats'        => '',
-				),
-			);
-		} else {
+		$package_date = array(
+			'dtstart'      => wp_date( 'Y-m-d' ),
+			'is_recurring' => false,
+			'seats'        => '',
+		);
+
+		if ( wptravelengine_is_addon_active( 'fixed-starting-dates' ) && ! empty( $package_dates ) ) {
 			usort( $package_dates, fn( $a, $b ) => strtotime( $a['dtstart'] ) <=> strtotime( $b['dtstart'] ) );
+			$comp_date 		 = wp_date( 'Y-m-d' );
+			$cut_off_enabled = wptravelengine_toggled( $this->trip->get_setting( 'trip_cutoff_enable', false ) );
+			if ( $cut_off_enabled ) {
+				$cut_off_period  = (int) $this->trip->get_setting( 'trip_cut_off_time', 0 );
+				$cut_off_unit    = $this->trip->get_setting( 'trip_cut_off_unit', 'days' );
+				$comp_date       = wp_date( 'Y-m-d', strtotime( "+$cut_off_period $cut_off_unit" ) );
+			}
+			$package_date 	= current( array_filter( $package_dates, fn( $date ) => $date['dtstart'] >= $comp_date ) );
 		}
-		$package_date = reset( $package_dates );
-		$parser 		= new PackageDateParser( $this, $package_date );
-		$this->categories_pricings = $parser->get_data_of( $package_date['dtstart'], 'pricing' );
-		$new_price = floatval( $this->categories_pricings[0]['price'] ?? 0 );
 
-		$this->price         = $this->has_sale ? $this->price : $new_price;
-		$this->sale_price    = $this->has_sale ? $new_price : $this->sale_price;
-		$this->group_pricing = (array) ( $this->categories_pricings[0]['group_pricing'] ?? $this->group_pricing );
+		if ( $package_date ) {
+			$parser  = new PackageDateParser( $this, $package_date );
+			$this->categories_pricings = $parser->get_data_of( $package_date['dtstart'], 'pricing' );
+		} else {
+			$this->categories_pricings = $this->get_default_pricings();
+		}
 
-		$this->has_sale 		= $this->has_sale && ( $this->sale_price < $this->price );
-		$this->sale_percentage	= ( $this->has_sale && $this->price > 0 ) ? round( ( ( $this->price - $this->sale_price ) / $this->price ) * 100 ) : 0;
+	}
+
+	/**
+	 * This function retrieves the nearest date pricing for the primary traveler category, even when the price has been conditionally overridden.
+	 *
+	 * @return array
+	 * @since 6.2.2
+	 */
+	public function get_actual_pricing_infos(): array {
+
+		$this->set_categories_pricings(); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+
+		$new_price		= floatval( $this->categories_pricings[0]['price'] ?? 0 );
+		$price         	= $this->has_sale ? $this->price : $new_price;
+		$sale_price    	= $this->has_sale ? $new_price : $this->sale_price;
+		$group_pricing 	= (array) ( $this->categories_pricings[0]['group_pricing'] ?? $this->group_pricing );
+
+		$has_sale 			= $this->has_sale && ( $sale_price < $price );
+		$sale_percentage	= ( $this->has_sale && $price > 0 ) ? round( ( ( $price - $sale_price ) / $price ) * 100 ) : 0;
+
+		return compact( 'price', 'sale_price', 'group_pricing', 'has_sale', 'sale_percentage' );
 	}
 }

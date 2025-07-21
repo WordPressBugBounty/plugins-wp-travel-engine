@@ -159,7 +159,7 @@ class Wp_Travel_Engine_Archive_Hooks {
 				if ( $query->is_tax ) {
 					$queried_object = $query->get_queried_object();
 					$taxonomies     = wptravelengine_get_trip_taxonomies();
-					if ( ! isset( $taxonomies[ $queried_object->taxonomy ] ) ) {
+					if ( ! isset( $taxonomies[ $queried_object->taxonomy ?? '' ] ) ) {
 						return;
 					}
 				}
@@ -282,8 +282,8 @@ class Wp_Travel_Engine_Archive_Hooks {
 			if ( $key === $orderby && ! is_array( $val ) ) {
 				$orderby_label = $val;
 			} elseif ( is_array( $val ) && isset( $val['options'][ $orderby ] ) ) {
-				$orderby_label = strpos( $orderby, 'name' ) === false 
-					? $val['label'] . ' - ' . $val['options'][ $orderby ] 
+				$orderby_label = strpos( $orderby, 'name' ) === false
+					? $val['label'] . ' - ' . $val['options'][ $orderby ]
 					: $val['options'][ $orderby ];
 			}
 		}
@@ -355,7 +355,7 @@ class Wp_Travel_Engine_Archive_Hooks {
 					</div>
 				<?php endif; ?>
 
-				<?php 
+				<?php
 					global $wp_query;
 					self::$query ??= $wp_query;
 					$foundpostss = '<div class="wte-filter-foundposts">';

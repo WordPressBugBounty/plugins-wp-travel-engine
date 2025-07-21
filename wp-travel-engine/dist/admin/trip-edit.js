@@ -1520,13 +1520,16 @@
     border: 1px solid ${e=>e.colors.primary||"#000000"};
     border-radius: 4px;
     background-color: #ffffff;
+    width: 100%;
+    max-width: 500px;
     input[type="text"]{
         padding: 10px 14px;
         font-size: 14px;
         line-height: 1.7;
         border: none !important;
         background: none;
-        min-width: 300px;
+        width: 100%;
+        background-color: #f0f0f0;
     }
     button{
         background-color: ${e=>e.colors.primary||"#000000"};
@@ -1537,7 +1540,7 @@
         cursor: pointer;
         font-size: 20px;
     }
-`,lf=({code:e,colors:c={}})=>{const t=(0,i.useRef)(null),a=(0,i.useRef)(null),[n,r]=(0,i.useState)(!1);return(0,l.createElement)("div",null,(0,l.createElement)(af,{className:"wpte-copytoclipboard-wrap",colors:c},(0,l.createElement)("input",{ref:t,type:"text",defaultValue:e,readOnly:!0}),(0,l.createElement)(tf(),{text:e,onCopy:()=>{t.current.select(),r(!0)}},(0,l.createElement)("button",{ref:a,type:"button"},(0,l.createElement)(Zs,{name:"copy"}))),(0,l.createElement)(Mi,{trigger:"click",content:n?"Copied":"Copy",reference:a})))},nf=e=>_i(lf)(e),rf=window.wp.blockEditor,of=window.wp.blocks,sf=["core/paragraph","core/image","core/heading","core/list","core/list-item","core/quote","core/freeform","core/spacer","core/table","core/html"],ff=({value:e="",onChange:c,colors:t})=>{const[a,n]=(0,i.useState)((0,of.parse)(e));(0,i.useEffect)((()=>{let e=a;if(1===a.length){const[c]=a;"core/paragraph"===c.name&&""===c.attributes.content.valueOf()&&(e=[])}c((0,of.serialize)(e))}),[a]);const r={allowedBlockTypes:sf,mediaUpload:!0};return(0,l.createElement)(xs.SlotFillProvider,null,(0,l.createElement)(rf.BlockEditorProvider,{value:a,onInput:n,onChange:n,settings:r},(0,l.createElement)(ite,{className:"wpte-isolated-block-editor editor-styles-wrapper",colors:t},(0,l.createElement)(rf.BlockTools,null,(0,l.createElement)(rf.WritingFlow,null,(0,l.createElement)(rf.ObserveTyping,null,(0,l.createElement)(rf.BlockList,null)))))))},df=dt.div`
+`,lf=({code:e,colors:c={},...t})=>{const a=(0,i.useRef)(null),n=(0,i.useRef)(null),[r,o]=(0,i.useState)(!1);return(0,l.createElement)("div",{key:e},(0,l.createElement)(af,{className:"wpte-copytoclipboard-wrap",colors:c},(0,l.createElement)("input",{ref:a,type:"text",defaultValue:e,readOnly:!0,...t}),(0,l.createElement)(tf(),{text:e,onCopy:()=>{a.current.select(),o(!0)}},(0,l.createElement)("button",{ref:n,type:"button"},(0,l.createElement)(Zs,{name:"copy"}))),(0,l.createElement)(Mi,{trigger:"click",content:r?"Copied":"Copy",reference:n})))},nf=e=>_i(lf)(e),rf=window.wp.blockEditor,of=window.wp.blocks,sf=["core/paragraph","core/image","core/heading","core/list","core/list-item","core/quote","core/freeform","core/spacer","core/table","core/html"],ff=({value:e="",onChange:c,colors:t})=>{const[a,n]=(0,i.useState)((0,of.parse)(e));(0,i.useEffect)((()=>{let e=a;if(1===a.length){const[c]=a;"core/paragraph"===c.name&&""===c.attributes.content.valueOf()&&(e=[])}c((0,of.serialize)(e))}),[a]);const r={allowedBlockTypes:sf,mediaUpload:!0};return(0,l.createElement)(xs.SlotFillProvider,null,(0,l.createElement)(rf.BlockEditorProvider,{value:a,onInput:n,onChange:n,settings:r},(0,l.createElement)(ite,{className:"wpte-isolated-block-editor editor-styles-wrapper",colors:t},(0,l.createElement)(rf.BlockTools,null,(0,l.createElement)(rf.WritingFlow,null,(0,l.createElement)(rf.ObserveTyping,null,(0,l.createElement)(rf.BlockList,null)))))))},df=dt.div`
     display: inline-flex;
     .wpte-icon{
         font-size: 20px;

@@ -114,6 +114,7 @@ function wptravelengine_get_label_by_slug( string $slug, $count = 1 ): string {
  *                     - booking-fee
  *                     - activity-tour
  *                     - email-automator
+ * 					   - conditional-price
  *
  * @return ?bool Returns true if addon is active, false if inactive, null if invalid addon
  * @since 6.2.2
@@ -145,6 +146,7 @@ function wptravelengine_is_addon_active( string $addon ) {
 		'booking-fee'          => 'WPTRAVELENGINE_BOOKING_FEE_FILE',
 		'activity-tour' 	   => 'WPTRAVELENGINE_ACTIVITY_TOUR_BOOKING_PATH',
 		'email-automator'      => 'WPTRAVELENGINE_EMAIL_AUTOMATOR_PATH',
+		'conditional-price'    => 'WPTRAVELENGINE_CONDITIONAL_PRICE_PLUGIN_PATH'
 	);
 
 	if ( ! isset( $addon_files[ $addon ] ) ) {

@@ -1814,6 +1814,7 @@ function wte_get_trip_details( $trip_id ) {
 		'engine_settings'               => $wte_global,
 		'trip_settings'                 => $trip_settings,
 		'trip_instance'                 => $_trip_instance,
+		'has_date'                      => $_trip_instance->has_date(),
 		'trip_id'                       => $trip_id,
 		'code'                          => $code,
 		'currency'                      => wp_travel_engine_get_currency_symbol( $code ),
@@ -1999,6 +2000,7 @@ function wte_get_formated_date( $date_string, $format = false ) {
  * @param [type] $date_string
  *
  * @return [string] $formated_date
+ * @updated 6.2.2
  */
 function wte_get_new_formated_date( $date_string, $format = false ) {
 	if ( ! $format ) {

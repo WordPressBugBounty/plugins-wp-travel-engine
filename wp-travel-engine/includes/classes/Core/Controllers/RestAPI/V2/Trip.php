@@ -696,7 +696,7 @@ class Trip extends WP_REST_Posts_Controller {
 					$this->set_bad_request( 'invalid_param', sprintf( __( 'The %1$s%3$s%2$s category in the %1$s%4$s%2$s Package requires a valid price.', 'wp-travel-engine' ), '<strong>', '</strong>', $last_meta_input[ 'package-categories' ][ 'labels' ][ $primary_category_id ], $package[ 'name' ] ) );
 				}
 
-				if ( '1' === $last_meta_input[ 'package-categories' ][ 'enabled_sale' ][ $primary_category_id ] ) {
+				if ( '1' === ( $last_meta_input[ 'package-categories' ][ 'enabled_sale' ][ $primary_category_id ] ?? '' ) ) {
 					$sale = $last_meta_input[ 'package-categories' ][ 'sale_prices' ][ $primary_category_id ] ?? '';
 					if ( $sale === "" ) {
 						$this->set_bad_request( 'invalid_param', sprintf( __( 'The %1$s%3$s%2$s category in the %1$s%4$s%2$s Package requires a valid sale price.', 'wp-travel-engine' ), '<strong>', '</strong>', $last_meta_input[ 'package-categories' ][ 'labels' ][ $primary_category_id ], $package[ 'name' ] ) );

@@ -105,7 +105,6 @@ $custom_enquiry_link = $settings['custom_enquiry_link'] ?? '#';
 					);
 					?>
 					<div class="wpte-bf-btn-wrap">
-						<!-- Whatsapp Call to Action -->
 						<?php
 							$show_whatsapp_icon = isset( $wte_options['show_whatsapp_icon'] ) && 'yes' === $wte_options['show_whatsapp_icon'];
 							$whatsapp_number    = $wte_options['whatsapp_number'] ?? '';
@@ -113,6 +112,7 @@ $custom_enquiry_link = $settings['custom_enquiry_link'] ?? '#';
 							// Normalize the number to remove any dashes or spaces
 							$normalized_number = preg_replace( '/[^0-9]/', '', $whatsapp_number );
 							?>
+							<!-- Whatsapp Call to Action -->
 							<div class="wpte-bf-whatsapp-cta">
 								<a href="https://wa.me/<?php echo esc_attr( $normalized_number ); ?>" class="wpte-bf-whatsapp-cta-link" target="_blank">
 									<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -144,10 +144,14 @@ $custom_enquiry_link = $settings['custom_enquiry_link'] ?? '#';
 							<?php
 						endif;
 						?>
+						<?php if ( $trip->has_date() ) : ?>
 						<button type="button"
 								data-trip-booking="<?php echo esc_attr( wp_json_encode( $trip_booking_data ) ); ?>"
 								disabled="disabled"
-								class="wpte-bf-btn wte-book-now btn-loading"><?php echo esc_html__( 'Check Availability', 'wp-travel-engine' ); ?></button>
+								class="wpte-bf-btn wte-book-now btn-loading"><?php esc_html_e( 'Check Availability', 'wp-travel-engine' ); ?></button>
+						<?php else: ?>
+							<button type="button" class="wpte-bf-btn wpte-button-disabled" disabled><?php esc_html_e( 'Sold Out', 'wp-travel-engine' ); ?></button>
+						<?php endif; ?>
 					</div>
 					<?php do_action( 'wptravelengine_after_booking_button' ); ?>
 				</div>

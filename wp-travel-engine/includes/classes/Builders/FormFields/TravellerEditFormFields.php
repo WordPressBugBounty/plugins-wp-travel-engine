@@ -22,7 +22,7 @@ class TravellerEditFormFields extends BookingEditFormFields {
 	public function __construct( array $defaults = array(), string $mode = 'edit', $booking = null ) {
 		parent::__construct( $defaults, $mode );
 		static::$mode = $mode;
-		$this->count = $defaults['index'] ?? $defaults['total_count'] + 1;
+		$this->count = intval( $defaults['index'] ?? $defaults['total_count'] ?? 0 ) + 1;
 		$this->init( $this->map_fields( static::structure( $mode, $defaults['index'] ?? 'new_traveller', $booking ) ) );
 	}
 
@@ -30,7 +30,7 @@ class TravellerEditFormFields extends BookingEditFormFields {
 		$name = null;
 
 		$field = parent::map_field( $field );
-		
+
 		// Extract the name using regex patterns.
 		if ( preg_match( "#\[([^\[]+)]$#", $field[ 'name' ], $matches ) ) {
 			$name = $matches[ 1 ];
@@ -90,7 +90,7 @@ class TravellerEditFormFields extends BookingEditFormFields {
 	 *
 	 * @param string $mode Mode.
 	 * @param mixed $count Count.
-	 * 
+	 *
 	 * @return array
 	 */
 	public static function structure( string $mode = 'edit', string $count = 'new_traveller', $booking = null ): array {

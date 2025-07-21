@@ -9,7 +9,7 @@
 
 $show_date_layout = $related_query ? $show_related_date_layout : $show_date_layout;
 
-if ( ! $show_date_layout || false === $fsds || empty( $fsds ) ) {
+if ( ! $show_date_layout || false === $fsds || empty( $fsds ) || ! $has_date ) {
     return;
 }
 
@@ -24,7 +24,7 @@ if ( is_numeric( $fsds ) ) {
 $i = 0;
 $content = '';
 foreach ( $fsds as $fsd ) :
-    if ( 0 === ( $fsd['seats_left'] ?? '' ) && $i <= 2 ) :
+    if ( 0 >= ( $fsd['seats_left'] ?? '' ) && $i <= 2 ) :
         continue;
     elseif ( $i > 2 ) :
         break;

@@ -24,18 +24,20 @@ $wp_travel_engine_setting = get_post_meta(get_the_ID(), 'wp_travel_engine_settin
 $wpte_trip_images         = get_post_meta(get_the_ID(), 'wpte_gallery_id', true);
 
 $view_mode = 'grid';
+wptravelengine_set_template_args( array( 'related_query' => true ) );
 
 $classes = 'category-trips-single wpte_new-layout';
 
-if( $is_featured ){
+if ( $is_featured ) {
 	$classes .= ' __featured-trip';
 }
+
 ?>
 <div data-thumbnail="default" class="<?php echo esc_attr( $classes ); ?>" style="--span: 20;">
 	<div class="category-trips-single-inner-wrap">
 		<?php
 			do_action('wptravelengine_before_trip_archive_card');
-			
+
 			wptravelengine_get_template( 'trip-card/index.php', compact( 'view_mode' ) );
 
 			do_action('wptravelengine_after_trip_archive_card');

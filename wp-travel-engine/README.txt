@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 6.6.1
+Stable tag: 6.6.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -367,6 +367,12 @@ Yes. We have created WooCommerce Payments add-ons that supports all the payment 
 Please send us an email via [support ticket](https://wptravelengine.com/support-ticket/?utm_source=free_plugin&utm_medium=wporg&utm_campaign=support), and we will be happy to help you.
 
 == Changelog ==
+
+= 6.6.2 - 21st July 2025 =
+* Enhancement: Display of pricing in the booking modal has been improved for better alignment with the related addons.
+* Enhancement: Trips without configured booking dates will now show as unavailable, and the 'Check Availability' button will be disabled accordingly.
+* Fix: The Open Graph metadata output is now compatible with Facebook Debugger, ensuring correct detection of `og:image` for social sharing.
+* Fix: Corrected the amount displayed on the checkout page when the Full Payment option is disabled.
 
 = 6.6.1 - 14th July 2025 =
 * New: Added an Appearance tab under the Display section in Settings for color customization.

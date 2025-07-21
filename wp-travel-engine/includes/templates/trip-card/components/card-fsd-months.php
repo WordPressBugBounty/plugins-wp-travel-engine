@@ -12,7 +12,7 @@
 $show_available_months = $related_query ? $show_related_available_months : $show_available_months;
 $show_available_dates = $related_query ? $show_related_available_dates : $show_available_dates;
 
-if ( false === $fsds || ! $show_available_months ) {
+if ( false === $fsds || ! $show_available_months || ! $has_date ) {
     return;
 }
 

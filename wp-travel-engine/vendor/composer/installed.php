@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'wp-travel-engine/core',
-        'pretty_version' => 'v6.6.1',
-        'version' => '6.6.1.0',
-        'reference' => 'fc4305b20a98fce67f4687d8e54796e45f5435bd',
+        'pretty_version' => 'v6.6.2',
+        'version' => '6.6.2.0',
+        'reference' => 'e0bc6d91105bf881dacb9e8ccc670156ce6d0d7a',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -29,9 +29,9 @@
             'dev_requirement' => false,
         ),
         'wp-travel-engine/core' => array(
-            'pretty_version' => 'v6.6.1',
-            'version' => '6.6.1.0',
-            'reference' => 'fc4305b20a98fce67f4687d8e54796e45f5435bd',
+            'pretty_version' => 'v6.6.2',
+            'version' => '6.6.2.0',
+            'reference' => 'e0bc6d91105bf881dacb9e8ccc670156ce6d0d7a',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

@@ -7,7 +7,9 @@ use WPTravelEngine\Modules\TripSearch;
 
 if ( ! isset( $trip_instance ) ) {
     global $post;
-    TripSearch::enqueue_assets();
+    if ( ! $related_query ) {
+        TripSearch::enqueue_assets();
+    }
 	$all_args = wte_get_trip_details( $post->ID );
     $all_args['user_wishlists'] = wptravelengine_user_wishlists();
     foreach ( $all_args as $key => $value ) {

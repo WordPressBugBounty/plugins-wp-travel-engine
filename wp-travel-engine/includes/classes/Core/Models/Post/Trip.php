@@ -1279,4 +1279,25 @@ class Trip extends PostModel {
 	public function get_primary_package(): TripPackage {
 		return $this->primary_package;
 	}
+
+	/**
+	 * Is any date available.
+	 * 
+	 * @return bool
+	 * @since 6.2.2
+	 */
+	public function has_date(): bool {
+
+		if ( ! wptravelengine_is_addon_active( 'fixed-starting-dates' ) ) {
+			return true;
+		}
+
+		foreach ( $this->packages() as $package ) {
+			if ( ! empty( $package->get_package_dates() ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 }

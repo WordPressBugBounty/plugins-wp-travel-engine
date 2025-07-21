@@ -340,6 +340,8 @@ class WP_Travel_Engine_Template_Hooks {
 		$categories_in_package 	= $default_package->get_traveler_categories();
 		$package_categories 	= (object) $default_package->{'package-categories'};
 
+		$default_package->set_categories_pricings();
+
 		if ( ! $echo ) {
 			ob_start();
 		}
