@@ -1285,15 +1285,17 @@ class Trip extends PostModel {
 	 * 
 	 * @return bool
 	 * @since 6.2.2
+	 * @updated 6.2.3
 	 */
 	public function has_date(): bool {
 
-		if ( ! wptravelengine_is_addon_active( 'fixed-starting-dates' ) ) {
+		if ( ! $this->has_package() || ! wptravelengine_is_addon_active( 'fixed-starting-dates' ) ) {
 			return true;
 		}
 
 		foreach ( $this->packages() as $package ) {
-			if ( ! empty( $package->get_package_dates() ) ) {
+			/** @var TripPackage $package */
+			if ( empty( $package->get_meta( 'package-dates' ) ) || ! empty( $package->get_package_dates() ) ) {
 				return true;
 			}
 		}

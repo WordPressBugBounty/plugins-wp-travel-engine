@@ -118,6 +118,13 @@ class Assets extends AssetsAbstract {
 				'action'  => 'wte_user_wishlist',
 				'nonce'   => wp_create_nonce( 'wp_xhr' ),
 			),
+			'wptravelengine_load_gateway_scripts' => apply_filters( 'wptravelengine_load_gateway_scripts', array(
+				'stripe' 			=> wptravelengine_is_addon_active( 'stripe' ),
+				'paypal_express' 	=> wptravelengine_is_addon_active( 'paypal_express' ),
+				'authorize_net' 	=> wptravelengine_is_addon_active( 'authorize_net' ),
+				'midtrans' 			=> wptravelengine_is_addon_active( 'midtrans' ),
+				'payu_money_bolt' 	=> wptravelengine_is_addon_active( 'payu_money_bolt' ),
+			) ),
 		];
 
 		$objects = explode( ',', $object_name );
@@ -225,7 +232,7 @@ class Assets extends AssetsAbstract {
 		//Checkout Page.
 		$this->register_style( Asset::register( 'trip-checkout', 'public/trip-checkout.css' ) );
 		$this->register_script( Asset::register( 'trip-checkout', 'public/trip-checkout.js' ) )
-		     ->localize( 'trip-checkout', 'wteL10n' );
+		     ->localize( 'trip-checkout', 'wteL10n,wptravelengine_load_gateway_scripts' );
 
 		$this->register_style( Asset::register( 'trip-thank-you', 'public/thank-you.css' ) );
 		$this->register_script( Asset::register( 'trip-thank-you', 'public/thank-you.js' ) );

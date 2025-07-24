@@ -479,7 +479,6 @@ class TripSearch {
 			'post_status'              => 'publish',
 			'posts_per_page'           => get_option( 'posts_per_page', 10 ),
 			'post__not_in'             => ( $post_data['show_featured'] && wptravelengine_toggled( $settings->get( 'show_featured_trips_on_top' ) ) ) ? wte_get_featured_trips_array() : array(),
-			'wpse_search_or_tax_query' => true,
 			'paged'                    => absint( ! empty( $post_data['paged'] ?? '' ) ? $post_data['paged'] : ( get_query_var( 'paged' ) ?: 1 ) ),
 		);
 
@@ -599,7 +598,13 @@ class TripSearch {
 		}
 		// phpcs:enable
 
-		return apply_filters( 'query_args_for_trip_filters', $query_args );
+		$query_args = apply_filters( 'query_args_for_trip_filters', $query_args );
+
+		if ( isset( $query_args['wpse_search_or_tax_query'] ) ) {
+			unset( $query_args['wpse_search_or_tax_query'] );
+		}
+
+		return $query_args;
 	}
 
 	/**

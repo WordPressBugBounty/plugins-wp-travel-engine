@@ -1,7 +1,6 @@
 <?php
 
 use WPTravelEngine\Builders\AdminSettings;
-use WPTravelEngine\Core\PostTypes\Booking;
 use WPTravelEngine\Core\PostTypes\Customer;
 use WPTravelEngine\Helpers\CartInfoParser;
 use WPTravelEngine\Core\Models\Post\Booking as BookingModel;
@@ -655,7 +654,7 @@ class Wp_Travel_Engine_Admin {
 	 * @link https://codex.wordpress.org/Function_Reference/register_post_type
 	 */
 	function wp_travel_engine_register_booking() {
-		$booking_post_type = new Booking();
+		$booking_post_type = new  \WPTravelEngine\Core\PostTypes\Booking();
 
 		register_post_type(
 			$booking_post_type->get_post_type(),

@@ -23,12 +23,12 @@ require_once __DIR__ . '/cart.php';
 
 /**
  * Get the trip duration in array format.
- * 
+ *
  * @param int|Trip $trip Trip ID or Trip instance.
  * @param string $set_duration_type Set duration type. Accepts: 'days', 'nights', 'both'.
- * 
+ *
  * @return array Trip duration in array format.
- * 
+ *
  * @since 6.6.0
  */
 function wptravelengine_get_trip_duration_arr( $trip, string $set_duration_type = 'both' ): array {
@@ -41,7 +41,7 @@ function wptravelengine_get_trip_duration_arr( $trip, string $set_duration_type 
 
 	$trip_duration 	= (int) $trip->get_trip_duration();
 	$trip_type 		= $trip->get_trip_type();
-	
+
 	$duration_label = array();
 	if ( $trip_duration && in_array( $set_duration_type, array( 'both', 'days' ) ) ) {
 		$duration_label[] = sprintf( __( "%d %s", "wp-travel-engine" ), $trip_duration, wptravelengine_get_label_by_slug( $trip->get_trip_duration_unit(), $trip_duration ) );
@@ -115,6 +115,11 @@ function wptravelengine_get_label_by_slug( string $slug, $count = 1 ): string {
  *                     - activity-tour
  *                     - email-automator
  * 					   - conditional-price
+ * 					   - stripe
+ * 					   - paypal_express
+ * 					   - authorize_net
+ * 					   - midtrans
+ * 					   - payu_money_bolt
  *
  * @return ?bool Returns true if addon is active, false if inactive, null if invalid addon
  * @since 6.2.2
@@ -146,7 +151,12 @@ function wptravelengine_is_addon_active( string $addon ) {
 		'booking-fee'          => 'WPTRAVELENGINE_BOOKING_FEE_FILE',
 		'activity-tour' 	   => 'WPTRAVELENGINE_ACTIVITY_TOUR_BOOKING_PATH',
 		'email-automator'      => 'WPTRAVELENGINE_EMAIL_AUTOMATOR_PATH',
-		'conditional-price'    => 'WPTRAVELENGINE_CONDITIONAL_PRICE_PLUGIN_PATH'
+		'conditional-price'    => 'WPTRAVELENGINE_CONDITIONAL_PRICE_PLUGIN_PATH',
+		'stripe'               => 'WTE_STRIPE_GATEWAY_FILE_PATH',
+		'paypal_express'       => 'WP_TRAVEL_ENGINE_PAYPAL_EXPRESS_FILE_PATH',
+		'authorize_net'        => 'WP_TRAVEL_ENGINE_AUTHORIZE_NET_FILE_PATH',
+		'midtrans'             => 'WTE_MIDTRANS_ABSPATH',
+		'payu_money_bolt'      => 'WTE_PAYU_MONEY_BOLT_FILE_PATH',
 	);
 
 	if ( ! isset( $addon_files[ $addon ] ) ) {
@@ -1063,7 +1073,7 @@ function wte_get_the_trip_reviews( $trip_id = null ) {
 
 /**
  * Get the trip reviews.
- * 
+ *
  * @return string
  */
 function wte_the_trip_reviews() {

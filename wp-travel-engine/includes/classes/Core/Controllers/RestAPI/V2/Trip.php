@@ -253,7 +253,7 @@ class Trip extends WP_REST_Posts_Controller {
 				if ( $default_package ) {
 					$trip->update_meta( '_s_price', $trip->has_sale() ? $trip->get_sale_price() : $trip->get_price() );
 				} else {
-					$trip->delete_meta( '_s_price' );
+					$trip->update_meta( '_s_price', 0 );
 				}
 				$previous           = $this->prepare_item_for_response( $trip->post, $request );
 				$remaining_packages = array_diff( (array) $trip->get_meta( 'packages_ids' ), [ $request[ 'package_id' ] ] );

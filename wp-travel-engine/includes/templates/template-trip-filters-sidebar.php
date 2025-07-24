@@ -20,7 +20,7 @@ $trip_search = $settings['trip_search'] ?? array();
 	</button>
 	<div class="sidebar">
 		<div class="advanced-search-header">
-			<h2><?php echo esc_html(apply_filters('wte_advanced_filterby_title', __('Criteria', 'wp-travel-engine'))); ?></h2>
+			<h2><?php echo esc_html(apply_filters('wte_advanced_filterby_title', __('Filter By', 'wp-travel-engine'))); ?></h2>
 			<button class="clear-search-criteria" id="reset-trip-search-criteria" style="display: none;"><?php esc_html_e('Clear all', 'wp-travel-engine'); ?></button>
 		</div>
 		<?php

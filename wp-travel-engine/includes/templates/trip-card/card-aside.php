@@ -25,12 +25,11 @@
 </div>
 <?php $fsds = apply_filters( 'trip_card_fixed_departure_dates', $trip_id ); ?>
 <div class="wpte-button-group">
-    <?php if ( $has_date ) : ?>
-        <a href="<?php echo esc_url( get_the_permalink() ); ?>" class="wpte-button">
-            <?php echo esc_html__('View More', 'wp-travel-engine'); ?>
-        </a>
-        <?php do_action( 'wp_travel_engine_download_pdf_button' ); ?>
-    <?php else : ?>
+    <a href="<?php echo esc_url( get_the_permalink() ); ?>" class="wpte-button">
+        <?php echo esc_html__('View Details', 'wp-travel-engine'); ?>
+    </a>
+    <?php do_action( 'wp_travel_engine_download_pdf_button' ); ?>
+    <?php if ( ! $has_date ) : ?>
         <a href="#" class="wpte-button wpte-button-disabled" disabled>
             <?php echo esc_html__('Sold Out', 'wp-travel-engine'); ?>
         </a>

@@ -1,5 +1,10 @@
 == Changelog ==
 
+= 6.6.3 - 24th July 2025 =
+* New: Added a quick link in settings for seamless access to key resources.
+* Enhancement: Refined 'Sold Out' logic to handle specific trip conditions more accurately.
+* Enhancement: Optimized asset loading on the checkout page to improve performance.
+
 = 6.6.2 - 21st July 2025 =
 * Enhancement: Display of pricing in the booking modal has been improved for better alignment with the related addons.
 * Enhancement: Trips without configured booking dates will now show as unavailable, and the 'Check Availability' button will be disabled accordingly.

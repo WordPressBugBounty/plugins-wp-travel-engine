@@ -20,8 +20,8 @@ class Optimizer {
 	 * Registers hooks for the optimizer.
 	 */
 	public function hooks() {
-		add_action( 'template_redirect', array( $this, 'start' ) );
-		add_filter( 'wptravelengine_output_buffer_template_redirect', array( $this, 'add_lazyload_attributes' ) );
+		add_action( 'template_redirect', array( __CLASS__, 'start' ) );
+		add_filter( 'wptravelengine_output_buffer_template_redirect', array( __CLASS__, 'add_lazyload_attributes' ) );
 	}
 
 	/**
@@ -44,7 +44,7 @@ class Optimizer {
 	 */
 	public static function add_lazyload_attributes( string $html ): string {
 		// Check if the current page is a WP Travel Engine single post and lazy loading is enabled.
-		 if ( ! wptravelengine_toggled( wptravelengine_settings()->get( 'enable_lazy_loading' ) ) || ! wptravelengine_toggled( wptravelengine_settings()->get( 'enable_img_lazy_loading' ) ) ) {
+		if ( ! wptravelengine_toggled( wptravelengine_settings()->get( 'enable_lazy_loading' ) ) || ! wptravelengine_toggled( wptravelengine_settings()->get( 'enable_img_lazy_loading' ) ) ) {
 			return $html;
 		}
 

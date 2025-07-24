@@ -36,6 +36,12 @@ class AdminSettings {
 
 			$tab_settings = apply_filters( "wptravelengine_settings:tabs:" . $tab_settings[ 'id' ], $tab_settings );
 
+			if ( 'extensions' === $tab_settings[ 'id' ] ) {
+				usort( $tab_settings[ 'sub_tabs' ], function ( $a, $b ) {
+					return $a[ 'title' ] <=> $b[ 'title' ];
+				} );
+			}
+
 			$tabs[] = $tab_settings;
 		}
 

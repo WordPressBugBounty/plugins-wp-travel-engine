@@ -9,11 +9,11 @@
 
 $show_date_layout = $related_query ? $show_related_date_layout : $show_date_layout;
 
-if ( ! $show_date_layout || false === $fsds || empty( $fsds ) || ! $has_date ) {
+if ( ! $trip_instance->has_package() || ! $has_date || ! $show_date_layout || false === $fsds ) {
     return;
 }
 
-if ( is_numeric( $fsds ) ) {
+if ( is_numeric( $fsds ) || empty( $fsds ) ) {
     $fsds = [
         wp_date( 'Y-m-d' ),
         wp_date( 'Y-m-d', strtotime( '+1 day' ) ),
@@ -24,20 +24,28 @@ if ( is_numeric( $fsds ) ) {
 $i = 0;
 $content = '';
 foreach ( $fsds as $fsd ) :
-    if ( 0 >= ( $fsd['seats_left'] ?? '' ) && $i <= 2 ) :
+
+    $seats_left = $fsd['seats_left'] ?? '';
+
+    if ( '' !== $seats_left && 0 >= $seats_left && $i <= 2 ) {
         continue;
-    elseif ( $i > 2 ) :
-        break;
-    endif;
+    }
+
     $content .= '<span class="category-trip-start-date"><span>';
     $content .= wte_get_new_formated_date( $fsd['start_date'] ?? $fsd, get_option( 'date_format' ) );
-    if ( empty( $fsd['seats_left'] ) ) {
+
+    if ( empty( $seats_left ) ) {
         $content .= ' <em>('.esc_html__( 'Available', 'wp-travel-engine' ).')</em>';
     } else {
-        $content .= ' <em>('. $fsd['seats_left'] .' '._n( 'Seat Available', 'Seats Available', $fsd['seats_left'], 'wp-travel-engine' ).')</em>';
+        $content .= ' <em>('. $seats_left .' '._n( 'Seat Available', 'Seats Available', $seats_left, 'wp-travel-engine' ).')</em>';
     }
+
     $content .= '</span></span>';
-    $i++;
+    
+    if ( ++$i > 2 ) {
+        break;
+    }
+
 endforeach;
 
 if ( empty( $content ) ) {
