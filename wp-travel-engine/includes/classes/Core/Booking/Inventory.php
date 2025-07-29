@@ -115,10 +115,19 @@ class Inventory {
 	public static function get_date_from_cart_key( $cart_key ) {
 		preg_match( '/(cart)_(\d+)_(\d+)_([\d-]+)_([\d-]+)/', $cart_key, $chunks );
 		$datetime = new \DateTime();
-
 		$datetime->setTimezone( new \DateTimeZone( 'utc' ) );
-		$datetime->setDate( ...explode( '-', $chunks[4] ) );
-		$datetime->setTime( ...explode( '-', $chunks[5] ) );
+
+		// Validate and parse date.
+		$date_parts = explode( '-', $chunks[4] ?? '' );
+		if ( count( $date_parts ) === 3 ) {
+			$datetime->setDate( $date_parts[0], $date_parts[1], $date_parts[2] );
+		}
+
+		// Validate and parse time.
+		$time_parts = explode( '-', $chunks[5] ?? '' );
+		if ( count( $time_parts ) === 2 ) {
+			$datetime->setTime( $time_parts[0], $time_parts[1] );
+		}
 
 		return $datetime;
 	}

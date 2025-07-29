@@ -845,7 +845,7 @@ class Booking extends PostModel {
 				$inventory = new Inventory( $order_trip[ 'ID' ] );
 				$pax       = 0;
 
-				if ( $this->trashed === true || 'canceled' === $this->get_booking_status() ) {
+				if ( $this->trashed === true || 'canceled' === $this->get_booking_status() || 'refunded' === $this->get_booking_status() ) {
 					$inventory->update_pax( $cart_id, 0, $order_trip[ 'ID' ], $this->ID );
 					continue;
 				}

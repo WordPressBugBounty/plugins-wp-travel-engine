@@ -15,6 +15,7 @@ use WPTravelEngine\Core\Controllers\RestAPI\V2\Settings;
 use WPTravelEngine\Core\Controllers\RestAPI\V2\Trip;
 use WPTravelEngine\Core\Models\Post\Booking;
 use WPTravelEngine\Core\Models\Review;
+use WPTravelEngine\Core\Models\Settings\Options;
 use WPTravelEngine\Core\Shortcodes\CheckoutV2;
 use WPTravelEngine\Core\Shortcodes\General;
 use WPTravelEngine\Core\Shortcodes\ThankYou;
@@ -43,6 +44,7 @@ use function WTE\Upgrade500\wte_process_migration;
 use const WP_TRAVEL_ENGINE_FILE_PATH;
 use WPTravelEngine\Core\Models\Post\TripPackages;
 use WPTravelEngine\Core\Controllers\RestAPI\V2\Booking as BookingController;
+use WPTravelEngine\Core\Models\Post\Payment;
 
 /**
  * The file that defines the core plugin class
@@ -124,7 +126,7 @@ final class Plugin {
 
 		/**
 		 * This fetches the notice from the server and displays it in the admin dashboard.
-		 * 
+		 *
 		 * @since 6.5.7
 		 */
 		new AdminNotice();
@@ -260,7 +262,23 @@ final class Plugin {
 				$settings->save();
 			}
 		} );
- 
+
+		add_action( 'init', function () {
+			if( is_null( Options::get( 'wptravelengine_pricing_type' ) ) ){
+				$pricing_type = array(
+					'per-person' => array(
+						'label'			=> 'Person',
+						'description'	=> '',
+					),
+					'per-group' => array(
+						'label'			=> 'Group',
+						'description'	=> '',
+					),
+				);
+				Options::update( 'wptravelengine_pricing_type', $pricing_type );
+			}
+		} );
+
 		add_action( 'admin_init', array( \WTE_Ajax::class, 'ajax_request_middleware' ) );
 		add_action( 'admin_init', array( $this, 'plugin_inline_update_notices' ) );
 		add_action( 'admin_notices', array( $this, 'booking_dashboard_notice' ), 99 );
@@ -763,6 +781,33 @@ final class Plugin {
 		 * @since 6.6.2
 		 */
 		add_action('wp_head', array( $this, 'wptravelengine_add_og_tag' ), 5);
+
+		/**
+		 * Update the paid amount of the booking
+		 *
+		 * @since v6.6.4
+		 */
+		add_action( 'wp_travel_engine_after_remaining_payment_process_completed', array( $this, 'update_paid_amount' ) );
+	}
+
+	/**
+	 * Update the paid amount of the booking.
+	 *
+	 * @since v6.6.4
+	 */
+	public function update_paid_amount( $booking_id ) {
+		$booking = new Booking( $booking_id );
+		$payments = $booking->get_meta( 'payments' );
+		$paid_amount = 0;
+		if( is_array( $payments ) && ! empty( $payments ) ) {
+			foreach ( $payments as $payment ) {
+				$payment_id = Payment::make( $payment );
+				$paid_amount += $payment_id->get_amount();
+			}
+		}
+
+		$booking->set_meta( 'paid_amount', $paid_amount );
+		$booking->save();
 	}
 
 	/**

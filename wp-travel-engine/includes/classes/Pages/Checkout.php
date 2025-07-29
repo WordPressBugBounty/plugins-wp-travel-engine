@@ -365,26 +365,43 @@ class Checkout extends BasePage {
 			$booking = Booking::make( $booking_ref );
 			$cart_info = new CartInfoParser( $booking->get_cart_info() ?? [] );
 			$order_trip = $cart_info->get_item();
+			$_package_name = $order_trip->get_package_name();
+
+			$package_name = isset( $_package_name ) && $_package_name !== '' ? $_package_name : ( $booking->get_order_items()[0]['package_name'] ?? '' );
+			
+			$trip_id = $order_trip->get_trip_id();
+			$trip_post = get_post( $trip_id );
+			if ( $trip_post && $trip_post->post_type === 'trip' ) {
+				$trip = new Trip( $trip_id );
+			} else {
+				return [];
+			}
 			
 			return [
 				'trip' => new Trip( $order_trip->get_trip_id() ),
-				'package_name' => $order_trip->get_package_name(),
+				'package_name' => $package_name,
 				'trip_code' => $order_trip->get_trip_code(),
 				'start_date' => $order_trip->get_trip_date(),
 				'end_date' => wptravelengine_format_trip_datetime( $order_trip->get_end_date() ),
 				'travelers' => $order_trip->travelers_count()
 			];
 		}
+
 	
 		$trip = new Trip( $cart_item['trip_id'] );
 		$trip_start_date = !empty( $cart_item['trip_time'] ) ? $cart_item['trip_time'] : $cart_item['trip_date'];
+		$trip_end_date = wptravelengine_format_trip_end_datetime( $trip_start_date, $trip );
+
+		if( !empty( $cart_item['trip_time_range'] ) ) {
+			$trip_end_date = wptravelengine_format_trip_datetime( $cart_item['trip_time_range'][1] ?? '' );
+		}
 		
 		return [
 			'trip' => $trip,
 			'package_name' => get_the_title( $cart_item['price_key'] ?? '' ),
 			'trip_code' => $trip->get_trip_code(),
 			'start_date' => $trip_start_date,
-			'end_date' => wptravelengine_format_trip_end_datetime( $trip_start_date, $trip ),
+			'end_date' => $trip_end_date,
 			'travelers' => array_sum( $cart_item['pax'] ?? [] )
 		];
 	}
@@ -400,8 +417,8 @@ class Checkout extends BasePage {
 		return [
 			sprintf('<tr><td colspan="2">%s</td></tr>', 
 				sprintf('<a href="%s" class="wpte-checkout__trip-name">%s</a>', 
-					esc_url( $trip_data['trip']->get_permalink() ), 
-					esc_html( $trip_data['trip']->get_title() )
+				$trip_data['trip']  ? esc_url( get_the_permalink( $trip_data['trip'] ) ) : '', 
+					$trip_data['trip']  ? esc_html( get_the_title( $trip_data['trip'] ) ) : ''
 				)
 			),
 			sprintf('<tr><td>%s</td><td><strong>%s</strong></td></tr>', 

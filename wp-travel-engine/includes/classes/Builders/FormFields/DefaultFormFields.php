@@ -158,7 +158,6 @@ class DefaultFormFields extends \WTE_Default_Form_Fields {
 						$skip_pairs = [
 							'cancel' => 'cancelled',
 							'complete' => 'completed',
-							'capture' => 'captured',
 							'voucher-awaiting' => 'voucher-waiting'
 						];
 						

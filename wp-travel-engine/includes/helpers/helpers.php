@@ -2794,3 +2794,30 @@ function wptravelengine_redirect_to_thank_you_page( $booking_ref, $payment_key )
     wp_safe_redirect( add_query_arg( 'payment_key', $payment_key, $thank_you_page_url)  );
     exit;
 }
+
+/**
+ * Get pricing type.
+ *
+ * @param bool $all Whether to get all pricing types.
+ * @param string $key The type of pricing to get.
+ * @return array
+ * @since v6.6.4
+ */
+function wptravelengine_get_pricing_type( $all = false, $key= 'per-person' ) {
+
+	$pricing_type = Options::get( 'wptravelengine_pricing_type', [] );
+	$defaults = [
+		'per-person' => [
+			'label' => __( 'Person', 'wp-travel-engine' ),
+			'description' => $pricing_type['per-person']['description'] ?? '',
+		],
+		'per-group' => [
+			'label' => __( 'Group', 'wp-travel-engine' ),
+			'description' => $pricing_type['per-group']['description'] ?? '',
+		],
+	];
+
+	$pricing_types = apply_filters( 'wptravelengine-packages-labels', array_merge( $pricing_type, $defaults ) );
+
+	return $all ? $pricing_types : ( $pricing_types[ $key ] ?? $pricing_types['per-person'] );
+}

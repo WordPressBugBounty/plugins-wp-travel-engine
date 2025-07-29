@@ -79,6 +79,11 @@ class BookedItem {
 	 */
 	protected $end_date;
 
+	/**
+	 * @var mixed|string
+	 */
+	protected $trip_end_time;
+
 	public function __construct( array $data ) {
 		$this->data = $data;
 		$this->parse( $data );
@@ -89,14 +94,15 @@ class BookedItem {
 		$this->trip_id         = $data[ 'trip_id' ] ?? $data[ 'ID' ] ?? 0;
 		$this->trip_package_id = $data[ 'price_key' ] ?? 0;
 		$this->trip_date       = empty( $data[ 'trip_time' ] ?? '' ) ? ( $data[ 'trip_date' ] ?? $data[ 'datetime' ] ?? wp_date( 'Y-m-d H:i:s' ) ) : $data['trip_time'];
-		$this->package_name    = $data['trip_package'] ?? $data[ 'package_name' ] ?? '';
+		$this->package_name    = isset( $data['trip_package'] ) && $data['trip_package'] !== '' ? $data['trip_package'] : ( isset( $data[ 'package_name' ] ) && $data[ 'package_name' ] !== '' ? $data[ 'package_name' ] : '' );
 		$this->line_items      = $this->parse_line_items( $data );
 		$this->travelers_count = $data[ 'travelers_count' ] ?? array_sum( $data[ 'travelers' ] ?? $data[ 'pax' ] ?? array() );
+		$this->trip_end_time   = isset( $data[ 'trip_time_range' ] ) && is_array( $data[ 'trip_time_range' ] ) && isset( $data[ 'trip_time_range' ][1] ) ? $data[ 'trip_time_range' ][1] : '';
 
 		try {
 			$trip            = new Trip( (int) $this->trip_id );
 			$this->trip_code = $trip->get_trip_code();
-			$this->end_date = $data[ 'end_date' ] ?? wptravelengine_format_trip_end_datetime( $this->trip_date, $trip, 'Y-m-d H:i:s' ) ?? wp_date( 'Y-m-d H:i:s' );
+			$this->end_date = isset( $data[ 'end_date' ] ) && $data[ 'end_date' ] !== '' ? $data[ 'end_date' ] : ( isset( $this->trip_end_time ) && $this->trip_end_time !== '' ? $this->trip_end_time : wptravelengine_format_trip_end_datetime( $this->trip_date, $trip, 'Y-m-d H:i:s' ) ?? wp_date( 'Y-m-d H:i:s' ) );
 		} catch ( \Exception $e ) {
 			$this->trip_code = $this->trip_id ? "WTE-{$this->trip_id}" : '';
 		}

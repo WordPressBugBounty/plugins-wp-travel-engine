@@ -104,11 +104,6 @@ class BillingEditFormFields extends BookingEditFormFields {
 			return $field;
 		endif;
 
-
-		if ( $field['default'] === '' ) {
-			return;
-		}
-
 		return $field;
 	}
 
@@ -116,7 +111,7 @@ class BillingEditFormFields extends BookingEditFormFields {
 		return new static( ...$args );
 	}
 
-	static function structure( string $mode = 'edit' ): array {
+	public static function structure( string $mode = 'edit' ): array {
 		return DefaultFormFields::billing( $mode );
 	}
 }

@@ -1,5 +1,11 @@
 == Changelog ==
 
+= 6.6.4 - 29th July 2025 =
+* Feature: Added support for additional pricing types to offer flexibility.
+* Enhancement: Manually created bookings are now visible on the customer's dashboard.
+* Enhancement: Enhanced the final payment process to prevent duplicate payments and provide clearer communication.
+* Fix: Payment link generation issue for manually added bookings has been fixed.
+
 = 6.6.3 - 24th July 2025 =
 * New: Added a quick link in settings for seamless access to key resources.
 * Enhancement: Refined 'Sold Out' logic to handle specific trip conditions more accurately.

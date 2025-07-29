@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 6.6.3
+Stable tag: 6.6.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -367,6 +367,12 @@ Yes. We have created WooCommerce Payments add-ons that supports all the payment 
 Please send us an email via [support ticket](https://wptravelengine.com/support-ticket/?utm_source=free_plugin&utm_medium=wporg&utm_campaign=support), and we will be happy to help you.
 
 == Changelog ==
+
+= 6.6.4 - 29th July 2025 =
+* Feature: Added support for additional pricing types to offer flexibility.
+* Enhancement: Manually created bookings are now visible on the customer's dashboard.
+* Enhancement: Enhanced the final payment process to prevent duplicate payments and provide clearer communication.
+* Fix: Payment link generation issue for manually added bookings has been fixed.
 
 = 6.6.3 - 24th July 2025 =
 * New: Added a quick link in settings for seamless access to key resources.

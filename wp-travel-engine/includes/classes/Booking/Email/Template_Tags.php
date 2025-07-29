@@ -324,7 +324,7 @@ class Template_Tags extends TemplateTags {
 									?>
 									<tr>
 										<td class="alignright"><?php echo esc_html( $label ); ?></td>
-										<td><?php echo (int) $tcount . ' X ' . wte_esc_price( wte_get_formated_price( $pax_cost, $this->currency, '', ! 0 ) ) . ' = ' . wte_esc_price( wte_get_formated_price( $trip->pax_cost[ $pricing_category_id ], $this->currency, '', ! 0 ) ); ?></td>
+										<td><?php echo (int) $tcount . ' X ' . wte_esc_price( wte_get_formated_price( $pax_cost, $this->currency, '', ! 0 ) ) . ' = ' . wte_esc_price( wte_get_formated_price( $trip->pax_cost[ $pricing_category_id ] ?? 0, $this->currency, '', ! 0 ) ); ?></td>
 									</tr>
 									<?php
 								}
@@ -453,6 +453,20 @@ class Template_Tags extends TemplateTags {
 				'fields'     => 'id=>name',
 			)
 		);
+
+		$is_customized_reservation = get_post_meta( $this->booking->ID, '_user_edited', true );
+		$line_items = [];
+		$travelers_count = 0;
+		if( $is_customized_reservation ) {
+			$booking_id = $this->booking->ID;
+			$booking = Booking::make( $booking_id );
+			$cart_info = $booking->get_cart_info();
+			if ( is_array($cart_info) && isset($cart_info['items'][0]['line_items'], $cart_info['items'][0]['travelers_count']) ) {
+				$line_items = $cart_info['items'][0]['line_items'];
+				$travelers_count = $cart_info['items'][0]['travelers_count'];
+			}
+		}
+
 		foreach ( $this->order_trips as $trip ) :
 			$trip = (object) $trip;
 			$trip_modal = new Trip( $trip->ID );
@@ -474,12 +488,16 @@ class Template_Tags extends TemplateTags {
 			</tr>
 			<tr>
 				<td style="color: #566267;"><?php esc_html_e( 'Travellers', 'wp-travel-engine' ); ?>:</td>
-				<td style="width: 50%;text-align: right;"><strong><?php echo esc_html( array_sum( $trip->pax ) ); ?></strong></td>
+				<?php if( ! $is_customized_reservation ) {?>
+					<td style="width: 50%;text-align: right;"><strong><?php echo esc_html( array_sum( $trip->pax ) ); ?></strong></td>
+				<?php } else { ?>
+					<td style="width: 50%;text-align: right;"><strong><?php echo esc_html( $travelers_count ); ?></strong></td>
+				<?php } ?>
 			</tr>
 			<tr>
 				<td colspan="2"><strong><?php esc_html_e( 'Traveller(s):', 'wp-travel-engine' ); ?></strong></td>
 			</tr>
-			<?php
+			<?php if( ! $is_customized_reservation ) {
 			$sum = 0;
 			foreach ( $trip->pax as $pricing_category_id => $tcount ) :
 				if ( + $tcount < 1 ) {
@@ -516,6 +534,20 @@ class Template_Tags extends TemplateTags {
 					?>
 				</tr>
 			<?php endif;
+			} else {
+					foreach ( $line_items as $line_item => $_items ) {
+						$label = str_replace( '_', ' ', ucwords( $line_item ) );
+						?>
+						<tr>
+							<td colspan="2"><strong><?php esc_html_e( $label, 'wp-travel-engine' ); ?></strong></td>
+						</tr>
+						<tr>
+							<td style="color: #566267;"><?php echo esc_html( $_items[0]['label'] ) . ': ' . $_items[0]['quantity'] . ' x ' . wptravelengine_the_price( $_items[0]['price'], false ); ?></td>
+							<td style="width: 50%;text-align: right;"><strong><?php echo wptravelengine_the_price( $_items[0]['total'], false ); ?></strong></td>
+						</tr>
+						<?php
+					}
+			}
 			do_action( 'wptravelengine_email_template_after_extra_services', (array) $this->cart_info );
 		endforeach;
 		return ob_get_clean();
@@ -531,6 +563,27 @@ class Template_Tags extends TemplateTags {
 	public function get_trip_booking_payment(){
 		ob_start();
 		$cart_info   = (array) $this->cart_info;
+		$is_customized_reservation = get_post_meta( $this->booking->ID, '_user_edited', true );
+		$deductible_items = [];
+		$fees = [];
+		$subtotal = 0;
+		$total = 0;
+		$amount_paid = 0;
+		$amount_due = 0;
+
+		if( $is_customized_reservation ) {
+			$booking_id = $this->booking->ID;
+			$booking = Booking::make( $booking_id );
+			$cart_info = $booking->get_cart_info();
+			if ( is_array($cart_info) ) {
+				$deductible_items = $cart_info['deductible_items'] ?? [];
+				$fees = $cart_info['fees'] ?? [];
+				$subtotal = $cart_info['subtotal'] ?? 0;
+				$total = $cart_info['total'] ?? 0;
+				$amount_paid = $cart_info['totals']['partial_total'] ?? 0;
+				$amount_due = $cart_info['totals']['due_total'] ?? 0;
+			}
+		}
 
 		$global_settings = Options::get( 'wp_travel_engine_settings', array() );
 		$tax_enable      = isset( $global_settings[ 'tax_enable' ] ) && 'yes' === $global_settings[ 'tax_enable' ];
@@ -538,6 +591,7 @@ class Template_Tags extends TemplateTags {
 		<tr>
 			<td colspan="2" style="font-size: 16px;line-height: 1.75;font-weight: bold;padding: 8px 0 4px;"><?php esc_html_e( 'Payment Details:', 'wp-travel-engine' ); ?></td>
 		</tr>
+		<?php if( ! $is_customized_reservation ) { ?>
 		<tr>
 			<td><strong><?php esc_html_e( 'Subtotal', 'wp-travel-engine' ); ?></strong></td>
 			<td style="text-align: right;"><strong><?php echo $this->get_subtotal(); ?></strong></td>
@@ -594,6 +648,41 @@ class Template_Tags extends TemplateTags {
 			<td><strong><?php esc_html_e( 'Due Amount', 'wp-travel-engine' ); ?></strong></td>
 			<td style="text-align: right;font-size: 16px;"><strong><?php echo $this->get_due_amount(); ?></strong></td>
 		</tr>
+		<?php } else{
+			?>
+			<tr>
+				<td><strong><?php esc_html_e( 'Subtotal', 'wp-travel-engine' ); ?></strong></td>
+				<td style="text-align: right;"><strong><?php echo wptravelengine_the_price( $subtotal, false ); ?></strong></td>
+			</tr>
+			<?php
+				foreach ( $deductible_items as $deductible_item ) {
+					?>
+					<tr>
+						<td><strong><?php esc_html_e( $deductible_item['label'], 'wp-travel-engine' ); ?></strong></td>
+						<td style="text-align: right;"><strong>-<?php echo wptravelengine_the_price( $deductible_item['value'], false ); ?></strong></td>
+					</tr>
+				<?php }
+				foreach ( $fees as $fee ) {
+					?>
+					<tr>
+						<td><strong><?php esc_html_e( $fee['label'], 'wp-travel-engine' ); ?></strong></td>
+						<td style="text-align: right;"><strong><?php echo wptravelengine_the_price( $fee['value'], false ); ?></strong></td>
+					</tr>
+				<?php }
+				?>
+			<tr>
+				<td><strong><?php esc_html_e( 'Total', 'wp-travel-engine' ); ?></strong></td>
+				<td style="text-align: right;font-size: 16px;"><strong><?php echo wptravelengine_the_price( $total, false ); ?></strong></td>
+			</tr>
+			<tr>
+				<td><strong><?php esc_html_e( 'Amount Paid', 'wp-travel-engine' ); ?></strong></td>
+				<td style="text-align: right;font-size: 16px;"><strong><?php echo wptravelengine_the_price( $amount_paid, false ); ?></strong></td>
+			</tr>
+			<tr>
+				<td><strong><?php esc_html_e( 'Amount Due', 'wp-travel-engine' ); ?></strong></td>
+				<td style="text-align: right;font-size: 16px;"><strong><?php echo wptravelengine_the_price( $amount_due, false ); ?></strong></td>
+			</tr>
+		<?php } ?>
 		<tr>
 			<td colspan="2" style="font-size: 16px;line-height: 1.75;font-weight: bold;padding: 8px 0 4px;"><?php esc_html_e( 'Billing Details:', 'wp-travel-engine' ); ?></td>
 		</tr>

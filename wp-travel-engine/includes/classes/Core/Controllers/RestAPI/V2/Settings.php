@@ -204,14 +204,14 @@ class Settings {
 	}
 
 	/**
-	 * Prepare Highlights.
+	 * Prepare Trip Settings.
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 *
 	 * @return array
 	 * @since 6.2.0
 	 */
-	protected function prepare_highlights( WP_REST_Request $request ): array {
+	protected function prepare_trip_settings( WP_REST_Request $request ): array {
 		$trip_highlights = array_filter( (array) $this->plugin_settings->get( 'trip_highlights' ) );
 
 		$highlights = array_map(
@@ -223,8 +223,9 @@ class Settings {
 			},
 			$trip_highlights
 		);
+		$pricing_type = array_values( Options::get( 'wptravelengine_pricing_type', [] ) );
 
-		return compact( 'highlights' );
+		return compact( 'highlights', 'pricing_type' );
 	}
 
 	/**
@@ -598,11 +599,11 @@ class Settings {
 		$appearance = Options::get( 'wptravelengine_appearance', array() );
 
 		$settings[ 'appearance' ] = array(
-			'primary_color' => (string) $appearance[ 'primary_color' ],
-			'primary_color_rgb' => (string) $appearance[ 'primary_color_rgb' ],
-			'discount_color' => (string) $appearance[ 'discount_color' ],
-			'featured_color' => (string) $appearance[ 'featured_color' ],
-			'icon_color' => (string) $appearance[ 'icon_color' ],
+			'primary_color' => (string) ( $appearance[ 'primary_color' ] ?? '' ),
+			'primary_color_rgb' => (string) ( $appearance[ 'primary_color_rgb' ] ?? '' ),
+			'discount_color' => (string) ( $appearance[ 'discount_color' ] ?? '' ),
+			'featured_color' => (string) ( $appearance[ 'featured_color' ] ?? '' ),
+			'icon_color' => (string) ( $appearance[ 'icon_color' ] ?? '' ),
 		);
 
 		return $settings;
@@ -1073,7 +1074,7 @@ class Settings {
 				$this->prepare_page_settings( $request ),
 				$this->prepare_trip_tabs( $request ),
 				$this->prepare_trip_infos( $request ),
-				$this->prepare_highlights( $request ),
+				$this->prepare_trip_settings( $request ),
 				// $this->prepare_admin_emails_configuration( $request ),
 				// $this->prepare_customer_emails_configuration( $request ),
 				$this->prepare_emails_configuration( $request ),
@@ -1121,13 +1122,29 @@ class Settings {
 	}
 
 	/**
-	 * Process Trip Facts.
+	 * Process Trip Settings.
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 *
 	 * @return void
 	 */
-	protected function set_trip_highlights( WP_REST_Request $request ) {
+	protected function set_trip_settings( WP_REST_Request $request ) {
+		if ( isset( $request[ 'pricing_type' ] ) ) {
+			$pricing_types = array();
+			foreach( $request[ 'pricing_type' ] as $pricing_type ) {
+				if ( empty( $pricing_type[ 'label' ] ) ) {
+					$this->set_bad_request( 'invalid_pricing_type', 'Pricing Type is required' );
+				}
+				$id = 'per-' . str_replace( ' ', '-', strtolower( $pricing_type[ 'label' ] ) );
+				$pricing_types[ $id ] = array(
+					'label'       => (string) $pricing_type[ 'label' ],
+					'description' => (string) $pricing_type[ 'description' ],
+				);
+			}
+
+			Options::update( 'wptravelengine_pricing_type', $pricing_types );
+		}
+
 		if ( isset( $request[ 'highlights' ] ) ) {
 			$highlights = array_map(
 				function ( $highlight ) {
@@ -2378,7 +2395,7 @@ class Settings {
 
 		$this->set_pages( $request );
 		$this->set_trip_tabs( $request );
-		$this->set_trip_highlights( $request );
+		$this->set_trip_settings( $request );
 		$this->set_trip_infos( $request );
 		// $this->set_admin_tabs( $request );
 		$this->set_email_notification_details( $request );
@@ -2740,6 +2757,23 @@ class Settings {
 						),
 						'description' => array(
 							'description' => __( 'Highlight Description', 'wp-travel-engine' ),
+							'type'        => 'string',
+						),
+					),
+				),
+			),
+			'pricing_type'                       => array(
+				'description' => __( 'Pricing Type', 'wp-travel-engine' ),
+				'type'        => 'array',
+				'items'       => array(
+					'type'       => 'object',
+					'properties' => array(
+						'label'       => array(
+							'description' => __( 'Pricing Type', 'wp-travel-engine' ),
+							'type'        => 'string',
+						),
+						'description' => array(
+							'description' => __( 'Pricing Type Description', 'wp-travel-engine' ),
 							'type'        => 'string',
 						),
 					),

@@ -108,6 +108,7 @@ class Payment extends PostModel {
 			'captured',
 			'complete',
 			'succeed',
+			'capture',
 		) );
 	}
 

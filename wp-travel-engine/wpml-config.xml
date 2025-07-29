@@ -105,6 +105,9 @@
 				<key name="number"/>
 			</key>
 		</key>
+		<key name="wptravelengine_pricing_type">
+			<key name="*"/>
+		</key>
 	</admin-texts>
 	<shortcodes>
 		<shortcode>

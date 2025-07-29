@@ -355,6 +355,12 @@ class CheckoutPageTemplate extends BookingProcessPageTemplate {
 		$instance             = Checkout::instance( $wte_cart );
 		$full_payment_enabled = $instance->is_full_payment_enabled();
 		$payment_mode         = $instance->get_payment_type() ?? 'partial';
+		//Get Booking Ref.
+		$booking_ref = $instance->cart->get_booking_ref();
+		if( $booking_ref ) {
+			$payment_mode = 'due';
+		}
+	
 		$down_payment_amount  = $instance->cart->get_totals()[ 'partial_total' ];
 		$full_payment_amount  = $instance->cart->get_totals()[ 'total' ];
 

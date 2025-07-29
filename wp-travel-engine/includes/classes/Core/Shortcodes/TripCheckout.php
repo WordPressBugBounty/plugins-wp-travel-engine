@@ -10,6 +10,8 @@ namespace WPTravelEngine\Core\Shortcodes;
 use WPTravelEngine\Abstracts\Shortcode;
 use WPTravelEngine\Assets;
 use WPTravelEngine\Core\Coupons;
+use WPTravelEngine\Core\Models\Post\Booking;
+use WPTravelEngine\Core\Models\Post\Payment;
 
 class TripCheckout extends Shortcode {
 	const TAG = 'WPTRAVELENGINE_CHECKOUT';
@@ -55,8 +57,44 @@ class TripCheckout extends Shortcode {
 		      ->dequeue_script( 'wp-travel-engine' )
 		      ->dequeue_style( 'wp-travel-engine' );
 		ob_start();
+
 		$cart_items = $wte_cart->getItems();
+		
 		if ( ! empty( $cart_items ) ) {
+			$booking_ref = $wte_cart->get_booking_ref();
+			if ( $booking_ref ) {
+				$booking = Booking::make( $booking_ref );
+				$due_amount = $booking->get_total_due_amount();
+			
+				// Early return if no amount is due.
+				if ( round( $due_amount, 2 ) <= 0 ) {
+					echo __(
+						'Thank you! Your payment has been received in full. No further action is required.',
+						'wp-travel-engine'
+					);
+					return ob_get_clean();
+				}
+
+				// Check for customized reservation with full payment.
+				$is_customized_reservation = $booking->get_meta( '_user_edited' );
+				if ( $is_customized_reservation ) {
+					$payments = $booking->get_payment_detail();
+					$payment_amount = 0;
+					
+					foreach ( $payments as $payment ) {
+						$payment_id = Payment::make( $payment );
+						$payment_amount += $payment_id->get_amount();
+					}
+					
+					if ( $payment_amount >= $due_amount ) {
+						echo __(
+							'Thank you! Your payment has been received in full. No further action is required.',
+							'wp-travel-engine'
+						);
+						return ob_get_clean();
+					}
+				}
+			}
 			// Parse the 'content' attribute or use defaults
 			$content_to_show = ! empty( $atts[ 'content' ] )
 				? array_map( 'trim', explode( ',', $atts[ 'content' ] ) )

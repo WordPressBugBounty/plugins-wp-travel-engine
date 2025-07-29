@@ -124,8 +124,8 @@ if (is_array($_traveller_details)) {
 										<span><?php esc_html_e('Amount:', 'wp-travel-engine'); ?></span>
 										<span>
 											<?php
-											$payable = get_post_meta($booking_payment->ID, 'payable', true) ?? 0;
-											wptravelengine_the_price($payable['amount'] ?? 0, true, compact('currency_code'));
+											$payable = get_post_meta($booking_payment->ID, 'payment_amount', true) ?? 0;
+											wptravelengine_the_price($payable['value'] ?? 0, true, compact('currency_code'));
 											?>
 										</span>
 									</li>

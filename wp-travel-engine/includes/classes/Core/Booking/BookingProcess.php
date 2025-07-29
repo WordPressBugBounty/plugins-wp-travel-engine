@@ -118,6 +118,10 @@ class BookingProcess {
 
 		$this->request = $request;
 		$this->cart    = $cart;
+		
+		if ( $this->request->get_param( 'action' ) === 'editpost' ) {
+			return;
+		}
 
 		$this->validator = new CheckoutValidator();
 		$is_valid_form   = $this->validate_form_data();
@@ -211,6 +215,8 @@ class BookingProcess {
 			$this->booking->add_payment( $this->payment->get_id() );
 
 			$this->booking->save();
+			
+			do_action('wptravelengine_after_booking_created', $this->booking->get_id());
 
 			$this->customer->update_customer_meta( $this->booking->get_id() );
 			$this->customer->save();
@@ -538,7 +544,7 @@ class BookingProcess {
 	 *
 	 * @return void
 	 */
-	protected function set_order_items( Booking $booking ): void {
+	public function set_order_items( Booking $booking ): void {
 		$items = $this->cart->getItems( true );
 
 		$_items = array();
@@ -561,7 +567,7 @@ class BookingProcess {
 				'_prev_cart_key'     => $cart_item_id,
 				'has_time'           => ! empty( $data[ 'trip_time' ] ),
 				'_cart_item_object'  => $data,
-				'package_name'       => get_the_title( $data[ 'price_key' ] ),
+				'package_name'       => $data[ 'package_name' ] ?? get_the_title( $data[ 'price_key' ] ),
 			);
 
 			if ( isset( $data[ 'trip_time_range' ][ 1 ] ) ) {

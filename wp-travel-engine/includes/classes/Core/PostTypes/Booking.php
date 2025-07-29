@@ -11,15 +11,9 @@ namespace WPTravelEngine\Core\PostTypes;
 use WP_Exception;
 use WPTravelEngine\Abstracts\PostType;
 use WPTravelEngine\Builders\FormFields\BillingEditFormFields;
-use WPTravelEngine\Builders\FormFields\BillingFormFields;
-use WPTravelEngine\Builders\FormFields\DefaultFormFields;
 use WPTravelEngine\Builders\FormFields\EmergencyEditFormFields;
-use WPTravelEngine\Builders\FormFields\EmergencyFormFields;
 use WPTravelEngine\Builders\FormFields\PaymentEditFormFields;
-use WPTravelEngine\Builders\FormFields\PaymentFormFields;
 use WPTravelEngine\Builders\FormFields\TravellerEditFormFields;
-use WPTravelEngine\Builders\FormFields\TravellerFormFields;
-use WPTravelEngine\Builders\FormFields\TravellersFormFields;
 use WPTravelEngine\Builders\FormFields\OrderTripEditFormFields;
 use WPTravelEngine\Core\Cart\Adjustments\CouponAdjustment;
 use WPTravelEngine\Core\Cart\Adjustments\TaxAdjustment;
@@ -27,8 +21,6 @@ use WPTravelEngine\Core\Cart\Items\PricingCategory;
 use WPTravelEngine\Core\Cart\Items\ExtraService;
 use WPTravelEngine\Core\Models\Post\Booking as BookingModel;
 use WPTravelEngine\Core\Models\Post\Payment;
-use WPTravelEngine\Core\Models\Post\TripPackages;
-use WPTravelEngine\Core\Models\Post\Trip;
 use WPTravelEngine\Helpers\BookedItem;
 use WPTravelEngine\Helpers\CartInfoParser;
 use WPTravelEngine\Helpers\Functions;
@@ -36,6 +28,11 @@ use WPTravelEngine\Utilities\ArrayUtility;
 use WPTravelEngine\Core\Models\Post\Customer;
 use WPTravelEngine\Validator\Validator;
 use DateTime;
+use WPTravelEngine\Core\Booking\BookingProcess;
+use WPTravelEngine\Core\Models\Post\TripPackageIterator;
+use WPTravelEngine\Core\Models\Post\TripPackage;
+use WPTravelEngine\Core\Models\Post\Trip;
+use WPTravelEngine\Abstracts\CartItem;
 
 /**
  * Class Trip
@@ -410,6 +407,156 @@ class Booking extends PostType {
 
 		$booking->set_meta( '_user_edited', 'yes' );
 
+		global $wte_cart;
+
+		// Get the booking data from the request
+		$trip_info = $request->get_param( 'order_trip' );
+		if ( ! is_array( $trip_info ) || ! isset( $trip_info['id'] ) ) {
+			return;
+		}
+		$trip_id = $trip_info['id'];
+		$cart_info = $booking->get_cart_info();
+
+		foreach ( $cart_info['items'][0]['line_items'] as $key => $line_item ) {
+
+			if ( 'pricing_category' === $key || empty( $line_item ) ) {
+				continue;
+			} else if ( 'extra_service' === $key ) {
+				$subtotal_reservations = array_map(
+					function ( $extra_service ) {
+						return array(
+							'id'       => $extra_service['id'] ?? 'es_' . uniqid(),
+							'quantity' => (int) ( $extra_service['quantity'] ?? 1 ),
+						);
+					},
+					$line_item
+				);
+				$key = 'extraServices';
+			} else {
+				$subtotal_reservations = array_map(
+					function ( $acc_item ) use ( $key ) {
+						return array(
+							'id'       => null,
+							'manual'   => true,
+							'label'    => $acc_item['label'] ?? 'Manual ' . $key,
+							'quantity' => (int) ( $acc_item['quantity'] ?? 1 ),
+							'price'    => (float) ( $acc_item['price'] ?? 0 ),
+							'total'    => (float) ( $acc_item['total'] ?? 0 ),
+						);
+					},
+					$line_item
+				);
+			}
+
+			$cart_info['items'][0]['subtotal_reservations'][$key] = $subtotal_reservations;
+			$cart_info['subtotal_reservations'][$key]             = $subtotal_reservations;
+
+		}
+
+		$package_name = sanitize_text_field( $request->get_param( 'order_trip' )['package_name'] ?? '' );
+		
+		if( $trip_id ) {
+			$price_key = $trip_id;
+			if ( ! get_post( $trip_id ) ) {
+				return;
+			}
+			$trip = new Trip( $trip_id );
+			$trip_packages = new TripPackageIterator( $trip );
+			
+			foreach ( $trip_packages as $trip_package ) {
+				/** @var TripPackage $trip_package */
+				if ( isset( $trip_package->post->post_title ) && 
+					$trip_package->post->post_title === $package_name ) {
+					$price_key = $trip_package->post->ID ?? $trip_id;
+					break;
+				}
+			}
+		}
+
+		$line_items = $request->get_param( 'line_items' );
+		$pax = array();
+		if ( is_array( $line_items ) && isset( $line_items['pricing_category']['quantity'] ) ) {
+			$pax = $line_items['pricing_category']['quantity'];
+		}
+
+		$cart_items = array(
+			'trip_id'               => $trip_id,
+			'trip_date'             => date('Y-m-d', strtotime($trip_info['start_date'])),
+			'trip_time'             => date('Y-m-d\TH:i', strtotime($trip_info['start_date'])),
+			'price_key'             => $price_key ?? 0,
+			'pax'                   => $pax ?? array(),
+			'pax_cost'              => array(),
+			'trip_price'            => 0,
+			'multi_pricing_used'    => false,
+			'trip_extras'           => array(),
+			'package_name'          => $trip_info['package_name'] ?? '',
+			'subtotal_reservations' => $cart_info['subtotal_reservations'] ?? array(),
+			'line_items'            => $cart_info['items'][0]['line_items'] ?? array(),
+			'travelers_count'       => $trip_info['number_of_travelers'] ?? 0,
+			'trip_end_date'         => date('Y-m-d\TH:i', strtotime($trip_info['end_date'])),
+			'trip_end_time'         => date('Y-m-d\TH:i', strtotime($trip_info['end_date'])),
+		);
+
+		// Add trip time range if end date exists.
+		if ( isset( $trip_info['end_date'] ) ) {
+			$cart_items['trip_time_range'] = array(
+				date('Y-m-d\TH:i', strtotime( $trip_info['start_date'] ?? '' ) ),
+				date('Y-m-d\TH:i', strtotime( $trip_info['end_date'] ?? '' ) ),
+			);
+		}
+
+		// Clear existing cart items and set up new cart
+		$wte_cart->clear();
+
+		// Create cart item and add to cart in one operation
+		$item = new \WPTravelEngine\Core\Cart\Item( $wte_cart, $cart_items );
+		$wte_cart->setItems( array( $trip_id => $item ) );
+		$wte_cart->add( $item );
+		$wte_cart->set_booking_ref( $post_id );
+
+		// Process booking with optimized flow/
+		$booking_process = new BookingProcess( $request, $wte_cart );
+
+		// Only process order items if cart has items and post exists.
+		if ( ! empty( $wte_cart->getItems( true ) ) && ! empty( $post_id ) && get_post( $post_id ) ) {
+			$booking_post = BookingModel::make( $post_id );
+			$booking_post->set_order_items( $wte_cart->getItems( true ) );
+			$booking_process->set_order_items( $booking_post );
+		}
+
+		// Process customer with optimized logic.
+		$customer_email = sanitize_email( $request->get_param( 'billing' )['email'] ?? '' );
+		
+		// Only process customer if email is not empty.
+		if ( ! empty( $customer_email ) && is_email( $customer_email ) ) {
+			$customer_id = Customer::is_exists( $customer_email );
+		
+			if ( ! $customer_id ) {
+				$customer_id = Customer::create_post(
+					array(
+						'post_status' => 'publish',
+						'post_type'   => 'customer',
+						'post_title'  => $customer_email,
+					)
+				);
+			} else {
+				$customer_model = new Customer( $customer_id );
+				$customer_model->update_customer_bookings( $post_id );
+				$customer_model->save();
+				$customer_model->update_customer_meta( $post_id );
+		
+				// Update user meta if user exists.
+				$billing_info = get_post_meta( $post_id, 'wptravelengine_billing_details', true );
+				$user         = get_user_by( 'email', $billing_info['email'] ?? $customer_email );
+		
+				if ( $user instanceof \WP_User ) {
+					update_user_meta( $user->ID, 'wp_travel_engine_user_bookings', array( $post_id ) );
+				}
+		
+				$customer_model->update_customer_meta( $post_id );
+			}
+		}
+
 		$order_items = $booking->get_order_items();
 
 		$cart_info = $booking->get_cart_info();
@@ -512,22 +659,27 @@ class Booking extends PostType {
 		}
 
 		if ( $billing_details = $request->get_param( 'billing' ) ) {
-			$customer_id    = Customer::is_exists( $billing_details[ 'email' ] ?? '' );
-			$customer_model = $customer_id
-				? new Customer( $customer_id )
-				: Customer::create_post(
-					array(
-						'post_status' => 'publish',
-						'post_type'   => 'customer',
-						'post_title'  => $billing_details[ 'email' ],
-					)
-				);
+			$billing_email = $billing_details[ 'email' ] ?? '';
+			
+			// Only process customer if email is not empty
+			if ( ! empty( $billing_email ) ) {
+				$customer_id    = Customer::is_exists( $billing_email );
+				$customer_model = $customer_id
+					? new Customer( $customer_id )
+					: Customer::create_post(
+						array(
+							'post_status' => 'publish',
+							'post_type'   => 'customer',
+							'post_title'  => $billing_email,
+						)
+					);
 
-			$customer_model->maybe_register_as_user();
-			do_action( 'wptravelengine_after_customer_created', $customer_model->ID );
+				$customer_model->maybe_register_as_user();
+				do_action( 'wptravelengine_after_customer_created', $customer_model->ID );
 
-			$customer_model->update_customer_bookings( $post_id );
-			$customer_model->save();
+				$customer_model->update_customer_bookings( $post_id );
+				$customer_model->save();
+			}
 			$booking->set_meta( 'wptravelengine_billing_details', $billing_details );
 
 			// Sanitize billing details
@@ -595,15 +747,26 @@ class Booking extends PostType {
 			$start_date = DateTime::createFromFormat( 'Y-m-d H:i', $sanitized_trip_info[ 'start_date' ] );
 			$end_date   = DateTime::createFromFormat( 'Y-m-d H:i', $sanitized_trip_info[ 'end_date' ] );
 
-			if ( ! $start_date || ! $end_date ) {
+			if ( ! $start_date ) {
 				// Handle invalid date format
-				$sanitized_trip_info[ 'start_date' ] = current_time( 'Y-m-d H:i' );
-				$sanitized_trip_info[ 'end_date' ]   = current_time( 'Y-m-d H:i' );
+				$sanitized_trip_info['start_date'] = current_time( 'Y-m-d\TH:i' );
+			} else {
+				// Convert to ISO 8601 format with T separator
+				$sanitized_trip_info['start_date'] = $start_date->format( 'Y-m-d\TH:i' );
+			}
+			
+			if ( ! $end_date ) {
+				// Handle invalid date format
+				$sanitized_trip_info['end_date'] = current_time( 'Y-m-d\TH:i' );
+			} else {
+				// Convert to ISO 8601 format with T separator
+				$sanitized_trip_info['end_date'] = $end_date->format( 'Y-m-d\TH:i' );
 			}
 
 			$cart_info                                      = $booking->get_cart_info() ?? array();
 			$cart_info[ 'items' ][ 0 ][ 'trip_id' ]         = $sanitized_trip_info[ 'id' ];
 			$cart_info[ 'items' ][ 0 ][ 'trip_date' ]       = $sanitized_trip_info[ 'start_date' ];
+			$cart_info[ 'items' ][ 0 ][ 'trip_time' ]       = $sanitized_trip_info[ 'start_date' ];
 			$cart_info[ 'items' ][ 0 ][ 'end_date' ]        = $sanitized_trip_info[ 'end_date' ];
 			$cart_info[ 'items' ][ 0 ][ 'travelers_count' ] = $sanitized_trip_info[ 'number_of_travelers' ];
 			$cart_info[ 'items' ][ 0 ][ 'trip_package' ]    = $sanitized_trip_info[ 'package_name' ];
@@ -691,14 +854,21 @@ class Booking extends PostType {
 				$items  = ArrayUtility::normalize( $item, 'label' );
 				$_items = array();
 				foreach ( $items as $_item ) {
+
+					$_class_name = apply_filters( 'wptravelengine_custom_line_item_class', $key == 'pricing_category' ? PricingCategory::class : ( $key == 'extra_service' ? ExtraService::class : false ), $key );
+
+					if ( ! is_subclass_of( $_class_name, CartItem::class ) ) {
+						continue;
+					}
+					
 					$_items[] = wp_parse_args(
 						$_item,
 						array(
-							'label'       => $_item[ 'label' ],
-							'quantity'    => $_item[ 'quantity' ],
-							'price'       => $_item[ 'price' ],
-							'total'       => $_item[ 'total' ],
-							'_class_name' => PricingCategory::class,
+							'label'       => $_item['label'],
+							'quantity'    => $_item['quantity'],
+							'price'       => $_item['price'],
+							'total'       => $_item['total'],
+							'_class_name' => $_class_name,
 						)
 					);
 				}
@@ -862,14 +1032,28 @@ class Booking extends PostType {
 	 * @since 6.4.0
 	 */
 	protected function get_template_args( BookingModel $booking, string $mode = 'view' ): array {
-		$package_name         = $booking->get_order_items()[ 0 ][ 'package_name' ] ?? '';
-		$cart_info            = $booking->get_cart_info() ?? array();
-		$items                = $cart_info[ 'items' ] ?? array();
-		$items[ 0 ]           = array_merge( $items[ 0 ] ?? array(), array( 'package_name' => $package_name ) );
-		$cart_info[ 'items' ] = $items;
-		$cart_info            = new CartInfoParser( $cart_info );
+		$package_name = $booking->get_order_items()[0]['package_name'] ?? '';
+
+		$cart_info = $booking->get_cart_info() ?? array();
+
+		$items = $cart_info['items'] ?? array();
+
+		$items[0] = array_merge(
+			$items[0] ?? array(),
+			array(
+				'package_name' => isset( $package_name ) && $package_name !== ''
+					? $package_name
+					: ( isset( $items[0]['package_name']) ? $items[0]['package_name'] : '' )
+			)
+		);
+		
+
+		$cart_info['items'] = $items;
+		$cart_info          = new CartInfoParser( $cart_info );
 
 		$order_trip = $cart_info->get_item();
+
+		$package_name = $items[0]['trip_package'] ?? $items[0]['package_name'] ?? $order_trip->get_package_name();
 
 		$mode = 'view' === $mode ? 'readonly' : 'edit';
 
@@ -886,7 +1070,7 @@ class Booking extends PostType {
 					'trip_code'           => $order_trip->get_trip_code(),
 					'number_of_travelers' => $order_trip->travelers_count(),
 					'package_id'          => $order_trip->get_trip_package_id(),
-					'package_name'        => $order_trip->get_package_name(),
+					'package_name'        => $package_name,
 				),
 				$mode
 			),

@@ -17,7 +17,6 @@ use WPTravelEngine\Helpers\CartInfoParser;
 use WPTravelEngine\Pages\Checkout;
 use WPTravelEngine\PaymentGateways\CheckPayment;
 use WPTravelEngine\PaymentGateways\DirectBankTransfer;
-
 /**
  * Thank You Page Template Filters.
  *
@@ -157,14 +156,24 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 			/** @var array $cart_item */
 			$trip            = new Trip( $cart_item[ 'trip_id' ] );
 			$trip_start_date = ! empty( $cart_item[ 'trip_time' ] ) ? $cart_item[ 'trip_time' ] : $cart_item[ 'trip_date' ];
+			$trip_end_date = wptravelengine_format_trip_end_datetime( $trip_start_date, $trip );
+			$package_name = $cart_item['package_name'] ?? '';
+			if ( empty( $package_name ) && !empty( $cart_item['price_key'] ) ) {
+				$package_name = get_the_title( $cart_item['price_key'] );
+			}
+			$travelers_count = isset( $cart_item['travelers_count'] ) && $cart_item['travelers_count'] > 0 ? $cart_item['travelers_count'] : array_sum( $cart_item[ 'pax' ] ?? [] );
+
+			if( !empty( $cart_item['trip_time_range'] ) ) {
+				$trip_end_date = wptravelengine_format_trip_datetime( $cart_item['trip_time_range'][1] ?? '' );
+			}
 			$item            = array(
 				sprintf( '<tr><td colspan="2">%s</td></tr>', sprintf( '<a href="%s" class="wpte-checkout__trip-name">%s</a>', $trip->get_permalink(), $trip->get_title() ) ),
 				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Booking ID:', 'wp-travel-engine' ), $this->booking->get_id() ),
-				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Package:', 'wp-travel-engine' ), get_the_title( $cart_item[ 'price_key' ] ) ),
+				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Package:', 'wp-travel-engine' ), $package_name ),
 				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Trip Code:', 'wp-travel-engine' ), $trip->get_trip_code() ),
 				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Starts on:', 'wp-travel-engine' ), wptravelengine_format_trip_datetime( $trip_start_date ) ),
-				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Ends on:', 'wp-travel-engine' ), wptravelengine_format_trip_end_datetime( $trip_start_date, $trip ) ),
-				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'No. of Travellers:', 'wp-travel-engine' ), array_sum( $cart_item[ 'pax' ] ?? [] ) ),
+				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Ends on:', 'wp-travel-engine' ), $trip_end_date ),
+				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'No. of Travellers:', 'wp-travel-engine' ), $travelers_count ),
 			);
 
 			$item_details[] = apply_filters( 'wptravelengine_checkout_page_item_' . __FUNCTION__, $item, $trip, $cart_item );
@@ -294,6 +303,10 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 		$start_datetime  = $order_trip[ 'datetime' ];
 		$trip_start_date = wptravelengine_format_trip_datetime( $start_datetime );
 		$trip_end_date   = wptravelengine_format_trip_end_datetime( $start_datetime, $trip );
+		
+		if( !empty( $order_trip['end_datetime'] ) ) {
+			$trip_end_date = wptravelengine_format_trip_datetime( $order_trip['end_datetime'] );
+		}
 
 		$traveller_details = array();
 		if ( is_array( $_traveller_details ) ) {

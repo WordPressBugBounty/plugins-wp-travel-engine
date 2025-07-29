@@ -329,8 +329,9 @@ class ResendPurchaseReceipt extends AjaxController {
 					$payment = PaymentModel::make( $payment->ID );
 					wptravelengine_send_booking_emails( $payment, 'order', 'customer' );
 					$latest_payment_status = $payment->get_payment_status();
+					$success_values = array( 'completed', 'success', 'captured', 'complete', 'succeed', 'capture' );
 
-				if ( 'success' === $latest_payment_status ) {
+				if ( in_array( $latest_payment_status, $success_values, true ) ) {
 					wptravelengine_send_booking_emails( $payment->ID, 'order_confirmation', 'all' );
 				}
 

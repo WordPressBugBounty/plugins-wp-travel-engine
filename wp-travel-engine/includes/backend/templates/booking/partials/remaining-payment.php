@@ -5,10 +5,26 @@
  */
 
 use WPTravelEngine\Core\Models\Post\Booking;
+use WPTravelEngine\Core\Models\Post\Payment;
 
 $_cart_info              = $booking->get_meta( 'cart_info' );
 $is_booking_edit_enabled = isset( $_cart_info['items'] );
-
+$due_amount = $booking->get_total_due_amount();
+if( round( $due_amount, 2 ) <= 0 ){
+	return;
+}
+$payments = $booking->get_payment_detail();
+$payment_amount = 0;
+if ( is_array( $payments ) && count( $payments ) > 0 ) {
+	foreach( $payments as $payment ){
+		$payment_id = Payment::make( $payment );
+		$payment_amount += $payment_id->get_amount();
+	}
+}
+$is_customized_reservation = $booking->get_meta( '_user_edited' );
+if( $payment_amount >= $due_amount && $is_customized_reservation ){
+	return;
+}
 if ( ! $is_booking_edit_enabled || ! $booking->has_due_payment() || ! $booking->get_order_items() ) {
 	return;
 }

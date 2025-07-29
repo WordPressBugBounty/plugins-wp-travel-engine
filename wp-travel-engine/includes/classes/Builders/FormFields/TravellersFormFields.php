@@ -38,8 +38,8 @@ class TravellersFormFields extends TravellerFormFields {
 			'number_of_lead_travellers' => 1,
 		] );
 
-		$this->number_of_travellers      = $args[ 'number_of_travellers' ];
-		$this->number_of_lead_travellers = $args[ 'number_of_lead_travellers' ];
+		$this->number_of_travellers      = (int) $args[ 'number_of_travellers' ];
+		$this->number_of_lead_travellers = (int) $args[ 'number_of_lead_travellers' ];
 
 		$this->fields = DefaultFormFields::traveller_form_fields();
 		parent::__construct();

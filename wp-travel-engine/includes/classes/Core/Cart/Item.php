@@ -735,7 +735,7 @@ class Item {
 		if ( isset( $this->pax ) && is_array( $this->pax ) ) {
 			$package_travelers    = $package->get_traveler_categories();
 			$cart_pricing_options = $this->pax;
-			
+
 			foreach ( $package_travelers as $package_traveler ) {
 				if ( isset( $cart_pricing_options[ $package_traveler->id ] ) ) {
 					$pax = (int) ( $cart_pricing_options[ $package_traveler->id ] ?? 0 );
@@ -767,6 +767,7 @@ class Item {
 									'package_traveler'
 								)
 							),
+							'pricingType' => $package_traveler->pricing_type,
 						) )
 					);
 				}
@@ -796,7 +797,7 @@ class Item {
 	public function add_line_items_from_order_item( $order_item ) {
 
 		$pricing_categories = $order_item['items'][0]['line_items']['pricing_category'] ?? [];
-		
+
 
 		foreach ( $pricing_categories as $pricing_category ) {
 			$this->add_additional_line_items(

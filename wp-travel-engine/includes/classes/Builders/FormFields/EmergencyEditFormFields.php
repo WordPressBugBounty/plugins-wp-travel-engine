@@ -24,7 +24,7 @@ class EmergencyEditFormFields extends BookingEditFormFields {
 
 	public function __construct( array $defaults = array(), string $mode = 'edit', $booking = null ) {
 		parent::__construct( $defaults, $mode );
-		$this->count = $defaults['index'] ?? $defaults['total_count'] + 1;
+		$this->count = $defaults['index'] ?? ( $defaults['total_count'] ?? 0 ) + 1;
 		static::$mode = $mode;
 		$this->init( $this->map_fields( static::structure( $mode, $booking ) ) );
 	}

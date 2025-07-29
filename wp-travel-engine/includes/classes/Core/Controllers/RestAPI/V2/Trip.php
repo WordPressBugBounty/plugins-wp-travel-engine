@@ -1030,6 +1030,13 @@ class Trip extends WP_REST_Posts_Controller {
 		}
 
 		$settings = Options::get( 'wp_travel_engine_settings', [] );
+		$pricing_label = wptravelengine_get_pricing_type( true );
+
+		$pricing_type = array();
+		foreach ( $pricing_label as $key => $item ) {
+			$pricing_type[ $key ] = __( 'Per', 'wp-travel-engine' ) . ' ' . $item['label'];
+		}
+		$data['price_types'] = $pricing_type;
 		$def_tabs = array( 'itinerary', 'cost', 'dates', 'faqs', 'map', 'review' );
 		foreach ( $settings[ 'trip_tabs' ][ 'id' ] ?? [] as $key => $i ) {
 			$i     = (int) $i;
@@ -1210,11 +1217,9 @@ class Trip extends WP_REST_Posts_Controller {
 				);
 			}, $group_pricing );
 
-			$pricing_label                   = apply_filters( 'wptravelengine-packages-labels', [
-				'per-person' => __( 'Person', 'wp-travel-engine' ),
-				'per-group'  => __( 'Group', 'wp-travel-engine' ),
-			] );
 			$get_pricing_type                = $category->get( 'pricing_type', 'per-person' );
+			$pricing_label                   = wptravelengine_get_pricing_type( false, $get_pricing_type );
+			$label                           = sprintf( __( 'Per %s', 'wp-travel-engine' ), $pricing_label[ 'label' ] );
 			$price                           = $category->get( 'price', '' );
 			$sale_price                      = $category->get( 'sale_price', '' );
 			$data[ 'traveler_categories' ][] = array(
@@ -1224,7 +1229,7 @@ class Trip extends WP_REST_Posts_Controller {
 				'age_group'         => $category->get( 'age_group', '' ),
 				'pricing_type'      => array(
 					'value' => $get_pricing_type,
-					'label' => $pricing_label[ $get_pricing_type ],
+					'label' => $label,
 				),
 				'sale_price'        => is_numeric( $sale_price ) ? (float) $sale_price : '',
 				'has_sale'          => wptravelengine_toggled( $category->get( 'has_sale', false ) ),

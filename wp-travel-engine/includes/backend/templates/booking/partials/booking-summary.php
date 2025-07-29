@@ -32,10 +32,11 @@
 						$price    = (float) $line_item['price'] ?? 0;
 						$total    = (float) ( isset( $line_item['total'] ) && $line_item['total'] > 0 ? $line_item['total'] : $price * $quantity );
 						printf(
-							'<tr><td class="pricing-details">%1$s: %2$d x %3$s</td><td class="pricing-total"><b>%4$s</b</td></tr>',
+							'<tr><td class="pricing-details">%1$s: %2$d x %3$s %4$s</td><td class="pricing-total"><b>%5$s</b</td></tr>',
 							esc_html( $line_item['label'] ?? '' ),
 							esc_html( $quantity ?? 0 ),
 							wptravelengine_the_price( $price, false, $pricing_arguments ),
+							( $item_type === 'pricing_category' && isset( $line_item['pricingType'] ) )  ? '/ ' . wptravelengine_get_pricing_type( false, $line_item['pricingType'] )['label'] ?? '' : '',
 							wptravelengine_the_price( $total, false, $pricing_arguments ),
 						);
 					}
