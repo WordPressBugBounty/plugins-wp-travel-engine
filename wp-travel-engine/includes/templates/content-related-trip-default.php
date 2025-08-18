@@ -47,9 +47,9 @@ if ( class_exists( 'Wte_Trip_Review_Init' ) ) {
 			</a>
 
 			<!-- Discount ribbon -->
-			<?php if ($discount_percent) : ?>
+			<?php if ( $trip_data->has_sale() ) : ?>
 				<span class="category-trip-discount-ribbon">
-					<?php printf(esc_html__('%1$s%% ', 'wp-travel-engine'), esc_html((float) $discount_percent)) . esc_html_e('OFF', 'wp-travel-engine'); ?></span>
+					<?php echo wptravelengine_get_discount_label( $trip_data->get_primary_package() ); ?>
 				</span>
 			<?php
 			endif; ?>

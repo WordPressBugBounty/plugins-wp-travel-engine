@@ -8,6 +8,8 @@
 namespace WPTravelEngine\Filters;
 
 use WPTravelEngine\Builders\FormFields\TravellerFormFields;
+use WPTravelEngine\Builders\FormFields\BillingFormFields;
+use WPTravelEngine\Builders\FormFields\EmergencyFormFields;
 use WPTravelEngine\Core\Cart\Cart;
 use WPTravelEngine\Core\Models\Post\Booking;
 use WPTravelEngine\Core\Coupons;
@@ -112,7 +114,7 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 
 		$payment_amount = $this->payment->get_payable_amount();
 		$payment_status = $this->payment->get_payment_status();
-		$remarks        = __( 'Your booking order has been placed. You booking will be confirmed after payment confirmation/settlement.', 'wp-travel-engine' );
+		$remarks        = __( 'Your booking order has been placed. Your booking will be confirmed after payment confirmation/settlement.', 'wp-travel-engine' );
 		wptravelengine_get_template( 'thank-you/content-payment-details.php',
 			compact(
 				'payment_amount',
@@ -295,6 +297,8 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 		$order_trips        = $this->booking->get_meta( 'order_trips' );
 		$additional_note    = $this->booking->get_meta( 'wptravelengine_additional_note' );
 		$_traveller_details = $this->booking->get_meta( 'wptravelengine_travelers_details' );
+		$_booking_details   = $this->booking->get_meta( 'wptravelengine_billing_details' );
+		$_emergency_details = $this->booking->get_meta( 'wptravelengine_emergency_details' );
 
 		$order_trip = reset( $order_trips );
 
@@ -316,11 +320,35 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 			}
 		}
 
+		$booking_details = array();
+		if ( is_array( $_booking_details ) && ! empty( $_booking_details ) ) {
+			$booking_form_fields = new BillingFormFields();
+			$booking_details[]   = $booking_form_fields->with_values( $_booking_details );
+		}
+
+
+		$emergency_details = array();
+		if ( is_array( $_emergency_details ) && ! empty( $_emergency_details ) ) {
+			$emergency_form_fields = new EmergencyFormFields();
+			
+			if ( isset( $_emergency_details[0] ) && is_array( $_emergency_details[0] ) ) {
+				foreach ( $_emergency_details as $emergency_contact ) {
+					if ( is_array( $emergency_contact ) && ! empty( $emergency_contact ) ) {
+						$emergency_details[] = $emergency_form_fields->with_values( $emergency_contact );
+					}
+				}
+			} else {
+				$emergency_details[] = $emergency_form_fields->with_values( $_emergency_details );
+			}
+		}
+
 		wptravelengine_get_template( 'thank-you/content-booking-details.php', compact(
 			'trip_start_date',
 			'trip_end_date',
 			'additional_note',
-			'traveller_details'
+			'traveller_details',
+			'booking_details',
+			'emergency_details'
 		) );
 	}
 

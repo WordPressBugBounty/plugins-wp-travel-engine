@@ -1271,6 +1271,10 @@ function wte_trip_get_trip_rest_metadata( $trip_id ) {
 	if ( $trip ) {
 		$default_package 	= $trip->default_package();
 		$primary_category 	= $default_package->primary_pricing_category->id ?? 0;
+
+		$data->discount_value   = $default_package->sale_amount ?? 0;
+		$data->discount_label 	= wptravelengine_get_discount_label( $default_package );
+
 	} else {
 		$default_package 	= false;
 	}

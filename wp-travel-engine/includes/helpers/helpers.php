@@ -21,6 +21,36 @@ use WPTravelEngine\PaymentGateways\PaymentGateways;
 use WPTravelEngine\Utilities\RequestParser;
 
 /**
+ * Get the discount label.
+ *
+ * @param TripPackage $trip_package
+ * @param int $discount_percent
+ * @param int $discount_amount
+ *
+ * @return string
+ * @since 6.6.5
+ */
+function wptravelengine_get_discount_label( $trip_package ) {
+
+	if ( ! $trip_package instanceof TripPackage ) {
+		return null;
+	}
+
+	$engine_settings 		= wptravelengine_settings();
+	$show_discounts_type 	= $engine_settings->get( 'show_discounts_type', 'percentage' );
+
+	$discount_label = '';
+	if ( 'percentage' === $show_discounts_type ) {
+		$discount_label = sprintf( __( '%1$s%% Off', 'wp-travel-engine' ), $trip_package->sale_percentage );
+	} else {
+		$currency_code 	= $engine_settings->get( 'currency_code', 'USD' );
+		$discount_label = sprintf( __( '%s Off', 'wp-travel-engine' ), wp_travel_engine_get_currency_symbol( $currency_code ) . $trip_package->sale_amount );
+	}
+
+	return apply_filters( 'wptravelengine_get_discount_label', $discount_label, $trip_package );
+}
+
+/**
  * @param $form_data
  *
  * @return void
@@ -1531,6 +1561,7 @@ function is_wte_archive_page() {
 				'activities',
 				'trip_types',
 				'trip_tag',
+				'difficulty',
 			) ) ) && ! is_search() ) {
 		return true;
 	}

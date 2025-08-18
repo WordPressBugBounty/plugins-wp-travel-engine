@@ -42,7 +42,7 @@ jQuery(function($) {
 		if (toggleInputs) {
 			for (var i = 0; i < toggleInputs.length; i++) {
 				var ti = toggleInputs[i];
-				console.log(ti)
+				// console.log(ti)
 				var toggle = ti.getElementsByClassName('wpte-onoff-toggle')[0]
 				var input = ti.querySelector('[type=checkbox]')
 				if (input && input.checked) {

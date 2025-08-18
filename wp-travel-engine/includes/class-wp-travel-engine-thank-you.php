@@ -16,7 +16,7 @@ class WTE_Booking_Response {
 
 	public static function responses( $response = null ) {
 		$responses = (object) array(
-			'pending'   => __( 'Your booking order has been placed. You booking will be confirmed after payment confirmation/settlement.', 'wp-travel-engine' ),
+			'pending'   => __( 'Your booking order has been placed. Your booking will be confirmed after payment confirmation/settlement.', 'wp-travel-engine' ),
 			'completed' => __( 'The payment transaction has been completed.', 'wp-travel-engine' ),
 			'success'   => __( 'The payment transaction has been successful.', 'wp-travel-engine' ),
 			'failed'    => __( 'The payment transaction has been failed.', 'wp-travel-engine' ),
@@ -36,7 +36,7 @@ class WTE_Booking_Response {
 
 	public function __construct() {
 		$this->responses = array(
-			'pending'   => __( 'Your booking order has been placed. You booking will be confirmed after payment confirmation/settlement.', 'wp-travel-engine' ),
+			'pending'   => __( 'Your booking order has been placed. Your booking will be confirmed after payment confirmation/settlement.', 'wp-travel-engine' ),
 			'completed' => __( 'The payment transaction has been completed.', 'wp-travel-engine' ),
 			'success'   => __( 'The payment transaction has been successful.', 'wp-travel-engine' ),
 			'failed'    => __( 'The payment transaction has been failed.', 'wp-travel-engine' ),

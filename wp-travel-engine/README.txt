@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 6.6.4
+Stable tag: 6.6.5
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -367,6 +367,13 @@ Yes. We have created WooCommerce Payments add-ons that supports all the payment 
 Please send us an email via [support ticket](https://wptravelengine.com/support-ticket/?utm_source=free_plugin&utm_medium=wporg&utm_campaign=support), and we will be happy to help you.
 
 == Changelog ==
+
+= 6.6.5 - 18th August 2025 =
+* New: Introduced a global setting to configure the discount display type.
+* Enhancement: Reorganized the global settings for the Single Trip tab to improve clarity and usability.
+* Enhancement: Added billing details and emergency details on the Thank You page.
+* Fix: Fixed issue where coupon code was not applying correctly when the discount value was greater than the cart total.
+* Fix: Fixed issue where on adding invalid coupon code, the button was not resetting to its original state.
 
 = 6.6.4 - 29th July 2025 =
 * Feature: Added support for additional pricing types to offer flexibility.

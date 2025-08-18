@@ -506,6 +506,8 @@ class Settings {
 			'show_by' => (string) $this->plugin_settings->get( 'related_trip_show_by', 'activities' ),
 		);
 
+		$settings[ 'pricing_widget_enquiry_message' ] = (string) $this->plugin_settings->get( 'pricing_widget_enquiry_message', '' );
+
 		$settings[ 'related_trip_new_layout' ] = array(
 			'enable'                  => wptravelengine_toggled( $this->plugin_settings->get( 'related_display_new_trip_listing' ) ),
 			'enable_slider'           => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_trip_carousel', '1' ) ),
@@ -529,6 +531,8 @@ class Settings {
 		$settings[ 'enable_image_autoplay' ] = wptravelengine_toggled( $this->plugin_settings->get( 'gallery_autoplay' ) );
 
 		$settings[ 'trip_duration_format' ] = (string) $this->plugin_settings->get( 'trip_duration_format', 'days' );
+
+		$settings[ 'show_discounts_type' ] = (string) $this->plugin_settings->get( 'show_discounts_type', 'percentage' );
 
 		$settings[ 'enable_featured_image' ] = ! wptravelengine_toggled( $this->plugin_settings->get( 'feat_img' ) );
 
@@ -1656,6 +1660,10 @@ class Settings {
 			$plugin_settings->set( 'related_trip_show_by', $request[ 'related_trips' ][ 'show_by' ] );
 		}
 
+		if ( isset( $request[ 'pricing_widget_enquiry_message' ] ) ) {
+			$plugin_settings->set( 'pricing_widget_enquiry_message', $request[ 'pricing_widget_enquiry_message' ] );
+		}
+
 		if ( isset( $request[ 'related_trip_new_layout' ][ 'enable' ] ) ) {
 			$plugin_settings->set( 'related_display_new_trip_listing', wptravelengine_replace( $request[ 'related_trip_new_layout' ][ 'enable' ], true, 'yes', 'no' ) );
 		}
@@ -1718,6 +1726,10 @@ class Settings {
 
 		if ( isset( $request[ 'trip_duration_format' ] ) ) {
 			$plugin_settings->set( 'trip_duration_format', $request[ 'trip_duration_format' ] );
+		}
+
+		if ( isset( $request[ 'show_discounts_type' ] ) ) {
+			$plugin_settings->set( 'show_discounts_type', $request[ 'show_discounts_type' ] );
 		}
 
 		if ( isset( $request[ 'enable_featured_image' ] ) ) {
@@ -3167,6 +3179,10 @@ class Settings {
 					),
 				),
 			),
+			'pricing_widget_enquiry_message' => array(
+				'description' => __( 'Pricing Widget Enquiry Message', 'wp-travel-engine' ),
+				'type'        => 'string',
+			),
 			'related_trip_new_layout'          => array(
 				'description' => __( 'New Trip Layout', 'wp-travel-engine' ),
 				'type'        => 'object',
@@ -3237,6 +3253,11 @@ class Settings {
 				'description' => __( 'Trip Duration Format', 'wp-travel-engine' ),
 				'type'        => 'string',
 				'enum'        => array( 'days', 'days_and_nights' ),
+			),
+			'show_discounts_type' => array(
+				'description' => __( 'Show Discounts Type', 'wp-travel-engine' ),
+				'type'        => 'string',
+				'enum'        => array( 'percentage', 'fixed_amount' ),
 			),
 			'enable_image_in_gallery'          => array(
 				'description' => __( 'Featured Image in Gallery Enabled or Not', 'wp-travel-engine' ),

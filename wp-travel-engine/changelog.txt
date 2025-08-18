@@ -1,5 +1,12 @@
 == Changelog ==
 
+= 6.6.5 - 18th August 2025 =
+* New: Introduced a global setting to configure the discount display type.
+* Enhancement: Reorganized the global settings for the Single Trip tab to improve clarity and usability.
+* Enhancement: Added billing details and emergency details on the Thank You page.
+* Fix: Fixed issue where coupon code was not applying correctly when the discount value was greater than the cart total.
+* Fix: Fixed issue where on adding invalid coupon code, the button was not resetting to its original state.
+
 = 6.6.4 - 29th July 2025 =
 * Feature: Added support for additional pricing types to offer flexibility.
 * Enhancement: Manually created bookings are now visible on the customer's dashboard.

@@ -214,6 +214,8 @@ class EnquiryMail extends AjaxController {
 
 		$post_id = Enquiry::insert( $formdata );
 
+		do_action( 'wp_travel_engine_after_enquiry_post_insert', $post_id );
+
 		$result = array();
 		if ( ! is_wp_error( $post_id ) ) {
 

@@ -413,7 +413,7 @@ class Wp_Travel_Engine_Archive_Hooks {
 				if ( $show_archive_title && $archive_title_type === 'default' ) {
 					echo '<h1 class="page-title" itemprop="name">' . esc_html( $page_title ) . '</h1>';
 				} elseif ( $show_archive_title && $archive_title_type === 'custom' ) {
-					echo '<h1 class="page-title" itemprop="name">' . esc_html( get_the_archive_title() ) . '</h1>';
+					echo '<h1 class="page-title" itemprop="name">' . get_the_archive_title() . '</h1>';
 				}
 				$taxonomies = array( 'trip_types', 'destination', 'activities' );
 				if ( is_tax( $taxonomies ) ) {

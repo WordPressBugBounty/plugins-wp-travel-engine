@@ -33,12 +33,13 @@ if ( $is_featured && $show_featured_tag) : ?>
     </div>
 <?php endif;
 
-if ( $discount_percent > 0 ) : ?>
+if ( $discount_percent > 0 ) :
+?>
     <div class="category-disc-feat-wrap">
         <div class="category-trip-discount">
             <span class="discount-offer">
-                <span><?php printf(esc_html__('%1$s%% ', 'wp-travel-engine'), esc_html( $discount_percent)); ?></span>
-                <?php esc_html_e('Off', 'wp-travel-engine'); ?></span>
+                <span><?php echo esc_html( wptravelengine_get_discount_label( $trip_instance->get_primary_package() ) ); ?></span>
+            </span>
         </div>
     </div>
 <?php endif;

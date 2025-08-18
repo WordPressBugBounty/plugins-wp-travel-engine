@@ -216,7 +216,7 @@ class BookingProcess {
 
 			$this->booking->save();
 			
-			do_action('wptravelengine_after_booking_created', $this->booking->get_id());
+			do_action( 'wptravelengine_after_booking_created', $this->booking->get_id() );
 
 			$this->customer->update_customer_meta( $this->booking->get_id() );
 			$this->customer->save();
@@ -225,6 +225,7 @@ class BookingProcess {
 
 			$this->update_session();
 			$this->payment_gateway_process();
+
 			$this->send_notification_emails();
 
 			if ( $this->is_new_booking ) {

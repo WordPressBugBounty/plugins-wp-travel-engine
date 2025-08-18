@@ -70,6 +70,8 @@ class PaymentEditFormFields extends BookingEditFormFields {
 			);
 		}
 
+		$field['wrapper_class'] = apply_filters( 'wptravelengine_payment_edit_form_fields_wrapper_class', 'wpte-field', $field );
+
 		return $field;
 	}
 

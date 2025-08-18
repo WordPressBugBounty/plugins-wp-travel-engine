@@ -93,6 +93,14 @@ class TripPackage extends PostModel {
 	public TravelerCategory $primary_pricing_category;
 
 	/**
+	 * The primary pricing category sale amount.
+	 *
+	 * @var float
+	 * @since 6.6.5
+	 */
+	public float $sale_amount = 0.0;
+
+	/**
 	 *
 	 * @param $package
 	 * @param Trip $trip
@@ -399,7 +407,14 @@ class TripPackage extends PostModel {
 		$this->has_sale           = (bool) ( $this->primary_pricing_category->get( 'has_sale' ) ?? false );
 		$this->price              = (float) ( $this->primary_pricing_category->get( 'price' ) ?? 0 );
 		$this->sale_price         = (float) ( $this->primary_pricing_category->get( 'sale_price' ) ?? 0 );
-		$this->sale_percentage    = ( $this->has_sale && $this->price > 0 ) ? round( ( ( $this->price - $this->sale_price ) / $this->price ) * 100 ) : 0;
+
+		if ( $this->has_sale && $this->price > 0 ) {
+			$this->sale_amount    	= $this->price - $this->sale_price;
+			$this->sale_percentage	= round( ( ( $this->price - $this->sale_price ) / $this->price ) * 100 );
+		} else {
+			$this->sale_amount = $this->sale_percentage = 0;
+		}
+
 		$this->has_group_discount = (bool) ( $this->primary_pricing_category->get( 'enabled_group_discount' ) ?? false );
 		$this->group_pricing 	  = (array) ( $this->primary_pricing_category->get( 'group_pricing' ) ?? array() );
 

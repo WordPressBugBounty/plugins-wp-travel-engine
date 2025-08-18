@@ -1379,6 +1379,7 @@
   justify-content: center;
   text-align: center;
   gap: 8px;
+  vertical-align: middle;
   @keyframes spin {
     to {
       transform: rotate(360deg);
@@ -1906,7 +1907,7 @@
     .mce-toolbar-grp{
         border-bottom: 1px solid ${e=>e.colors?.input?.border};
     }
-`,Tce=({colors:e,control:c,values:t,register:{name:a},options:n})=>{const[r,o]=(0,i.useState)({offset:0,width:0,index:0}),s=(0,i.useRef)([]),f=(0,i.useRef)(null),d=St().get(t,a);return(0,i.useEffect)((()=>{const e=n.findIndex((e=>e.value===d));if(-1!==e){const c=s.current[e],t=c.offsetLeft,a=c.offsetWidth;f.current.style.width=`${a}px`,f.current.style.left=`${t}px`,o({offset:t,width:a,index:e})}}),[d]),(0,l.createElement)(pa,{control:c,name:a,key:a,render:({field:{onChange:c}})=>(0,l.createElement)("div",null,(0,l.createElement)(Rce,{colors:e},(0,l.createElement)("span",{ref:f}),n.map(((t,a)=>(0,l.createElement)(Fce,{ref:e=>s.current[a]=e,type:"button",key:a,selected:d===t.value,onClick:e=>{return(l=e,(e,t)=>{c(e);const a=l.target,n=a.parentElement.offsetWidth-(a.offsetLeft+a.offsetWidth),i=s.current[r?.index]?.parentElement.offsetWidth-(s.current[r?.index]?.offsetLeft+s.current[r?.index]?.offsetWidth);console.log(n,i),r?.index!==t&&(r?.index<t?(f.current.classList.add("to-right"),f.current.style.setProperty("--inline-end",a.offsetLeft+a.offsetWidth-(s.current[r?.index]?.offsetWidth+s.current[r?.index]?.offsetLeft)+"px"),f.current.style.setProperty("--inline-start","0px")):(f.current.classList.add("to-left"),f.current.style.setProperty("--inline-end","0px"),f.current.style.setProperty("--inline-start",n+a.offsetWidth-(i+s.current[r?.index]?.offsetWidth)+"px")),setTimeout((()=>{f.current.classList.remove("to-right","to-left"),f.current.style.setProperty("--inline-end","0px"),f.current.style.setProperty("--inline-start","0px")}),200))})(t.value,a);var l},colors:e},t.label)))))})},Fce=dt.button`
+`,Tce=({colors:e,control:c,values:t,register:{name:a},options:n})=>{const[r,o]=(0,i.useState)({offset:0,width:0,index:0}),s=(0,i.useRef)([]),f=(0,i.useRef)(null),d=St().get(t,a);return(0,i.useEffect)((()=>{const e=n.findIndex((e=>e.value===d));if(-1!==e){const c=s.current[e],t=c.offsetLeft,a=c.offsetWidth;f.current.style.width=`${a}px`,f.current.style.left=`${t}px`,o({offset:t,width:a,index:e})}}),[d]),(0,l.createElement)(pa,{control:c,name:a,key:a,render:({field:{onChange:c}})=>(0,l.createElement)("div",null,(0,l.createElement)(Rce,{colors:e},(0,l.createElement)("span",{ref:f}),n.map(((t,a)=>(0,l.createElement)(Fce,{ref:e=>s.current[a]=e,type:"button",key:a,selected:d===t.value,onClick:e=>{return(l=e,(e,t)=>{c(e);const a=l.target,n=a.parentElement.offsetWidth-(a.offsetLeft+a.offsetWidth),i=s.current[r?.index]?.parentElement.offsetWidth-(s.current[r?.index]?.offsetLeft+s.current[r?.index]?.offsetWidth);r?.index!==t&&(r?.index<t?(f.current.classList.add("to-right"),f.current.style.setProperty("--inline-end",a.offsetLeft+a.offsetWidth-(s.current[r?.index]?.offsetWidth+s.current[r?.index]?.offsetLeft)+"px"),f.current.style.setProperty("--inline-start","0px")):(f.current.classList.add("to-left"),f.current.style.setProperty("--inline-end","0px"),f.current.style.setProperty("--inline-start",n+a.offsetWidth-(i+s.current[r?.index]?.offsetWidth)+"px")),setTimeout((()=>{f.current.classList.remove("to-right","to-left"),f.current.style.setProperty("--inline-end","0px"),f.current.style.setProperty("--inline-start","0px")}),200))})(t.value,a);var l},colors:e},t.label)))))})},Fce=dt.button`
     position: relative;
     background-color: transparent;
     color: #0F1D23;
@@ -2197,7 +2198,6 @@
         }
         .wpte-form-control{
             ${e=>{var c;return e.cols&&`width: calc(${100/(null!==(c=e.cols)&&void 0!==c?c:1)}% - 8px);`}}
-            margin-bottom: 0 !important;
         }
         input:not([type="checkbox"], [type="radio"], [type="button"], [type="submit"]), select, textarea, .wpte-isolated-block-editor, .wpte-prefix-value, .wpte-suffix-value, .input-selected-icon{
             border: 1px solid ${e=>e?.colors?.input?.border};
@@ -2374,7 +2374,6 @@
         flex-grow: 1;
     }
     .wpte-form-control{
-        flex-direction: column;
         gap: 6px;
     }
     .flatpickr-input{
@@ -3077,7 +3076,7 @@
         justify-content: center;
         align-items: center;
     }
-`,(0,ht.__)("View Website","wp-travel-engine"),(0,l.createElement)("svg",{width:"20",height:"20",viewBox:"0 0 20 20",fill:"none",xmlns:"http://www.w3.org/2000/svg"},(0,l.createElement)("path",{d:"M15.7143 2C16.975 2 18 3.00898 18 4.25V15.5C18 16.741 16.975 17.75 15.7143 17.75H4.28571C3.025 17.75 2 16.741 2 15.5V4.25C2 3.00898 3.025 2 4.28571 2H15.7143ZM7.71429 5.9375C7.23929 5.9375 6.85714 6.31367 6.85714 6.78125C6.85714 7.24883 7.23929 7.625 7.71429 7.625H11.075L6.25 12.3711C5.91429 12.7016 5.91429 13.2359 6.25 13.5629C6.58571 13.8898 7.12857 13.8934 7.46071 13.5629L12.2821 8.8168L12.2857 12.4062C12.2857 12.8738 12.6679 13.25 13.1429 13.25C13.6179 13.25 14 12.8738 14 12.4062V6.78125C14 6.31367 13.6179 5.9375 13.1429 5.9375H7.71429Z",fill:"white"})),(0,ht.__)("YouTube Tutorials","wp-travel-engine"),(0,l.createElement)("svg",{width:"20",height:"20",viewBox:"0 0 20 20",fill:"none",xmlns:"http://www.w3.org/2000/svg"},(0,l.createElement)("path",{d:"M17.6661 5.87812C17.4815 5.1375 16.9396 4.55625 16.2512 4.35938C15.0033 4 10 4 10 4C10 4 4.9967 4 3.74881 4.35938C3.06042 4.55625 2.51849 5.1375 2.33394 5.87812C2 7.21875 2 10.0125 2 10.0125C2 10.0125 2 12.8063 2.33394 14.1469C2.51849 14.8875 3.06042 15.4438 3.74881 15.6406C4.9967 16 10 16 10 16C10 16 15.0033 16 16.2512 15.6406C16.9396 15.4438 17.4815 14.8844 17.6661 14.1469C18 12.8063 18 10.0125 18 10.0125C18 10.0125 18 7.21875 17.6661 5.87812ZM8.36543 12.55V7.475L12.5456 10.0125L8.36543 12.55Z",fill:"white"})),(0,ht.__)("Documentation","wp-travel-engine"),(0,l.createElement)("svg",{width:"20",height:"20",viewBox:"0 0 20 20",fill:"none",xmlns:"http://www.w3.org/2000/svg"},(0,l.createElement)("path",{"fill-rule":"evenodd","clip-rule":"evenodd",d:"M11.583 6.25C11.583 6.8377 12.0677 7.3125 12.667 7.3125H17V16.875C17 18.0471 16.0281 19 14.833 19H6.16699C4.97193 19 4 18.0471 4 16.875V4.125C4 2.95293 4.97193 2 6.16699 2H11.583V6.25ZM6.90039 14.1992C6.40346 14.1992 6.0002 14.6027 6 15.0996C6 15.5967 6.40333 16 6.90039 16H13.1006L13.1924 15.9951C13.646 15.9489 14 15.5655 14 15.0996C13.9998 14.6339 13.646 14.2503 13.1924 14.2041L13.1006 14.1992H6.90039ZM6.90039 10.1992C6.40346 10.1992 6.0002 10.6027 6 11.0996C6 11.5967 6.40333 12 6.90039 12H11.1006L11.1924 11.9951C11.646 11.9489 12 11.5655 12 11.0996C11.9998 10.6339 11.646 10.2503 11.1924 10.2041L11.1006 10.1992H6.90039Z",fill:"white"}),(0,l.createElement)("path",{d:"M17 6.25H12.667V2L17 6.25Z",fill:"white"})),(0,ht.__)("Contact Support","wp-travel-engine"),(0,l.createElement)("svg",{width:"20",height:"20",viewBox:"0 0 20 20",fill:"none",xmlns:"http://www.w3.org/2000/svg"},(0,l.createElement)("path",{d:"M3.5 4C2.67188 4 2 4.67188 2 5.5C2 5.97187 2.22188 6.41562 2.6 6.7L9.4 11.8C9.75625 12.0656 10.2438 12.0656 10.6 11.8L17.4 6.7C17.7781 6.41562 18 5.97187 18 5.5C18 4.67188 17.3281 4 16.5 4H3.5ZM2 7.5V14C2 15.1031 2.89688 16 4 16H16C17.1031 16 18 15.1031 18 14V7.5L11.2 12.6C10.4875 13.1344 9.5125 13.1344 8.8 12.6L2 7.5Z",fill:"white"})),dt.div`
+`,(0,ht.__)("View Website","wp-travel-engine"),(0,l.createElement)("svg",{width:"20",height:"20",viewBox:"0 0 20 20",fill:"none",xmlns:"http://www.w3.org/2000/svg"},(0,l.createElement)("path",{d:"M15.7143 2C16.975 2 18 3.00898 18 4.25V15.5C18 16.741 16.975 17.75 15.7143 17.75H4.28571C3.025 17.75 2 16.741 2 15.5V4.25C2 3.00898 3.025 2 4.28571 2H15.7143ZM7.71429 5.9375C7.23929 5.9375 6.85714 6.31367 6.85714 6.78125C6.85714 7.24883 7.23929 7.625 7.71429 7.625H11.075L6.25 12.3711C5.91429 12.7016 5.91429 13.2359 6.25 13.5629C6.58571 13.8898 7.12857 13.8934 7.46071 13.5629L12.2821 8.8168L12.2857 12.4062C12.2857 12.8738 12.6679 13.25 13.1429 13.25C13.6179 13.25 14 12.8738 14 12.4062V6.78125C14 6.31367 13.6179 5.9375 13.1429 5.9375H7.71429Z",fill:"white"})),(0,ht.__)("YouTube Tutorials","wp-travel-engine"),(0,l.createElement)("svg",{width:"20",height:"20",viewBox:"0 0 20 20",fill:"none",xmlns:"http://www.w3.org/2000/svg"},(0,l.createElement)("path",{d:"M17.6661 5.87812C17.4815 5.1375 16.9396 4.55625 16.2512 4.35938C15.0033 4 10 4 10 4C10 4 4.9967 4 3.74881 4.35938C3.06042 4.55625 2.51849 5.1375 2.33394 5.87812C2 7.21875 2 10.0125 2 10.0125C2 10.0125 2 12.8063 2.33394 14.1469C2.51849 14.8875 3.06042 15.4438 3.74881 15.6406C4.9967 16 10 16 10 16C10 16 15.0033 16 16.2512 15.6406C16.9396 15.4438 17.4815 14.8844 17.6661 14.1469C18 12.8063 18 10.0125 18 10.0125C18 10.0125 18 7.21875 17.6661 5.87812ZM8.36543 12.55V7.475L12.5456 10.0125L8.36543 12.55Z",fill:"white"})),(0,ht.__)("Documentation","wp-travel-engine"),(0,l.createElement)("svg",{width:"20",height:"20",viewBox:"0 0 20 20",fill:"none",xmlns:"http://www.w3.org/2000/svg"},(0,l.createElement)("path",{fillRule:"evenodd",clipRule:"evenodd",d:"M11.583 6.25C11.583 6.8377 12.0677 7.3125 12.667 7.3125H17V16.875C17 18.0471 16.0281 19 14.833 19H6.16699C4.97193 19 4 18.0471 4 16.875V4.125C4 2.95293 4.97193 2 6.16699 2H11.583V6.25ZM6.90039 14.1992C6.40346 14.1992 6.0002 14.6027 6 15.0996C6 15.5967 6.40333 16 6.90039 16H13.1006L13.1924 15.9951C13.646 15.9489 14 15.5655 14 15.0996C13.9998 14.6339 13.646 14.2503 13.1924 14.2041L13.1006 14.1992H6.90039ZM6.90039 10.1992C6.40346 10.1992 6.0002 10.6027 6 11.0996C6 11.5967 6.40333 12 6.90039 12H11.1006L11.1924 11.9951C11.646 11.9489 12 11.5655 12 11.0996C11.9998 10.6339 11.646 10.2503 11.1924 10.2041L11.1006 10.1992H6.90039Z",fill:"white"}),(0,l.createElement)("path",{d:"M17 6.25H12.667V2L17 6.25Z",fill:"white"})),(0,ht.__)("Contact Support","wp-travel-engine"),(0,l.createElement)("svg",{width:"20",height:"20",viewBox:"0 0 20 20",fill:"none",xmlns:"http://www.w3.org/2000/svg"},(0,l.createElement)("path",{d:"M3.5 4C2.67188 4 2 4.67188 2 5.5C2 5.97187 2.22188 6.41562 2.6 6.7L9.4 11.8C9.75625 12.0656 10.2438 12.0656 10.6 11.8L17.4 6.7C17.7781 6.41562 18 5.97187 18 5.5C18 4.67188 17.3281 4 16.5 4H3.5ZM2 7.5V14C2 15.1031 2.89688 16 4 16H16C17.1031 16 18 15.1031 18 14V7.5L11.2 12.6C10.4875 13.1344 9.5125 13.1344 8.8 12.6L2 7.5Z",fill:"white"})),dt.div`
     position: fixed;
     bottom: 44px;
     right: 44px;
@@ -3600,6 +3599,9 @@
         max-width: 177px;
     }
 `,dt.header`
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     padding: 24px;
     border-bottom: 1px solid rgba(15, 29, 35, .1);
     margin: 0 0 24px;
@@ -4298,6 +4300,7 @@
             font-size: 16px;
             line-height: 1.5;
             font-weight: 500;
+            flex: 1;
         }
         &:hover{
             .wpte-repeater-label{
@@ -4362,7 +4365,7 @@
     .wpte-icon{
         font-size: 20px;
     }
-    ${e=>e.horizontal&&"\n        flex-flow: row wrap;\n        align-items: center;\n        gap: 24px;\n        > label{\n            flex: 0 0 15%;\n            margin: 0;\n        }\n        .wpte-form-field{\n            flex: 1;\n            margin: 0 !important;\n            padding: 0 !important;\n            border: none !important;\n        }\n    "}
+    ${e=>e.horizontal&&"\n        flex-flow: row wrap;\n        gap: 24px;\n        > label{\n            flex: 0 0 15%;\n            margin: 0 !important;\n        }\n        .wpte-form-field{\n            flex: 1;\n            margin: 0 !important;\n            padding: 0 !important;\n            border: none !important;\n            .wpte-form-control{\n                margin-bottom: 0 !important;\n            }\n        }\n    "}
     ${e=>e?.disableBorder&&"\n        border: none !important;\n        padding: 0 !important;\n    "}
     ${e=>e?.disableMargin&&"\n        &:not(:last-child){\n            margin-bottom: 0 !important;\n        }\n    "}
 `,gde=(dt.div`
@@ -4494,7 +4497,7 @@
     display: flex;
     gap: 8px;
     select.trip-fact-options{
-        max-width: 224px;
+        max-width: 224px !important;
     }
 `,Wde=dt.div`
     display: flex;

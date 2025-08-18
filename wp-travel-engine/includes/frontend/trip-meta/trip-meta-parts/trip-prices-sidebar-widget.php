@@ -64,7 +64,7 @@ $custom_enquiry_link = $settings['custom_enquiry_link'] ?? '#';
 						if ( $default_package->has_sale ) :
 							?>
 							<span
-								class="wpte-bf-discount-tag"><?php printf( esc_html__( '%d%% Off', 'wp-travel-engine' ), (float) $default_package->sale_percentage ); ?></span>
+								class="wpte-bf-discount-tag"><?php echo esc_html( wptravelengine_get_discount_label( $default_package ) ); ?></span>
 							<?php
 						endif;
 						?>
@@ -161,11 +161,19 @@ $custom_enquiry_link = $settings['custom_enquiry_link'] ?? '#';
 					$link           = $is_custom_link ? $custom_enquiry_link : '#wte_enquiry_form_scroll_wrappe';
 					$target         = $is_custom_link ? '_blank' : '_self';
 					$id             = $is_custom_link ? 'wte-open-enquiry-link' : 'wte-send-enquiry-message';
+
+					$enquiry_message 	= __( 'Need help with booking?', 'wp-travel-engine' );
+					$link_label 		= __( 'Send Us A Message', 'wp-travel-engine' );
+					if ( ( $settings['pricing_widget_enquiry_message'] ?? '' ) && preg_match( '/^(.*?)?(?:\s*\[\[(.*?)\]\])?$/', $settings['pricing_widget_enquiry_message'], $matches ) ) {
+						$enquiry_message = trim( $matches[1] ?? '' );
+						$link_label 	 = trim( $matches[2] ?? '' );
+					}
+
 					?>
 						<div class="wpte-booking-footer-text">
-							<span><?php esc_html_e( 'Need help with booking?', 'wp-travel-engine' ); ?></span>
+							<span><?php echo esc_html( $enquiry_message ); ?></span>
 							<a href="<?php echo esc_url( $link ); ?>" target="<?php echo esc_attr( $target ); ?>" id="<?php echo esc_attr( $id ); ?>">
-							<?php esc_html_e( 'Send Us A Message', 'wp-travel-engine' ); ?>
+							<?php echo esc_html( $link_label ); ?>
 							</a>
 						</div>
 					<?php

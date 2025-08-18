@@ -59,6 +59,56 @@ use WPTravelEngine\Helpers\Countries;
 			</div>
 		<?php
 		endforeach; endif;
+		if ( is_array( $emergency_details ) ) :
+			foreach ( $emergency_details as $index => $emergency_detail ) :
+				?>
+				<div class="wpte-thankyou__block">
+					<div class="wpte-thankyou__block-title"><?php echo esc_html( sprintf( __( 'Emergency Details %s', 'wp-travel-engine' ), count($emergency_details) > 1 ? $index + 1 : '' ) ); ?></div>
+					<div class="wpte-thankyou__block-content">
+						<div class="wpte-thankyou__grid">
+							<?php foreach ( $emergency_detail as $name => $field ) : ?>
+								<?php if( empty( $field[ 'value' ] ) ) continue;
+								$countries_list = Countries::list();
+								if( $field['type'] == 'country_dropdown' && ! empty( $field['value'] ) && isset( $countries_list[ $field['value'] ] ) ){
+									$field['value'] = $countries_list[ $field['value'] ];
+								}?>
+								<div>
+									<span
+										class="wpte-thankyou__label"><?php echo esc_html( $field[ 'field_label' ] ); ?></span>
+										<strong><?php echo is_array( $field[ 'value' ] ) ? esc_html( implode(', ', $field[ 'value' ] ) ) : esc_html( $field[ 'value' ] ?? '' ); ?></strong>
+								</div>
+							<?php endforeach; ?>
+						</div>
+					</div>
+				</div>
+			<?php
+			endforeach;
+		endif;
+		if ( is_array( $booking_details ) ) :
+			foreach ( $booking_details as $index => $booking_detail ) :
+				?>
+				<div class="wpte-thankyou__block">
+					<div class="wpte-thankyou__block-title"><?php echo esc_html__( 'Billing Details', 'wp-travel-engine' ); ?></div>
+					<div class="wpte-thankyou__block-content">
+						<div class="wpte-thankyou__grid">
+							<?php foreach ( $booking_detail as $name => $field ) : ?>
+								<?php if( empty( $field[ 'value' ] ) ) continue;
+								$countries_list = Countries::list();
+								if( $field['type'] == 'country_dropdown' && ! empty( $field['value'] ) && isset( $countries_list[ $field['value'] ] ) ){
+									$field['value'] = $countries_list[ $field['value'] ];
+								}?>
+								<div>
+									<span
+										class="wpte-thankyou__label"><?php echo esc_html( $field[ 'field_label' ] ); ?></span>
+										<strong><?php echo is_array( $field[ 'value' ] ) ? esc_html( implode(', ', $field[ 'value' ] ) ) : esc_html( $field[ 'value' ] ?? '' ); ?></strong>
+								</div>
+							<?php endforeach; ?>
+						</div>
+					</div>
+				</div>
+			<?php
+			endforeach;
+		endif;
 	if ( ! empty( $additional_note ) ) :
 		?>
 		<div class="wpte-thankyou__block">

@@ -94,7 +94,8 @@ class Events {
 		}
 
 		$post = get_post( $post_id );
-		$success_values = array( 'completed', 'success', 'captured', 'complete', 'succeed', 'capture' );
+
+		$success_values = array_keys( wptravelengine_payment_status() );
 
 		if ( 'wte-payments' === $post->post_type && in_array( $meta_value, $success_values, true ) ) {
 			$payment = new Payment( $post );

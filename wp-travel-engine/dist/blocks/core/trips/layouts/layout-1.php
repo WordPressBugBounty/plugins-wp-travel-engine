@@ -136,8 +136,7 @@ list( $settings, $trip, $results, $meta, $is_featured, $wte_global, $details ) =
 								<div class="category-disc-feat-wrap">
 									<div class="category-trip-discount">
 										<span class="discount-offer">
-											<span><?php echo sprintf( esc_html__( '%1$s%% ', 'wp-travel-engine' ), (float) $meta->discount_percent ); ?></span>
-										<?php esc_html_e( 'Off', 'wp-travel-engine' ); ?></span>
+											<span><?php echo isset( $meta->discount_label ) ? $meta->discount_label : sprintf( esc_html__( '%1$s%% Off', 'wp-travel-engine' ), (float) $meta->discount_percent ); ?></span>
 									</div>
 								</div>
 							<?php endif; ?>

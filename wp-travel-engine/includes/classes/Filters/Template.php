@@ -40,6 +40,9 @@ class Template {
 
 		$optimized_loading = wptravelengine_toggled( wptravelengine_settings()->get( 'enable_optimize_loading', false ) );
 		\WP_Travel_Engine_Template_Hooks::get_instance();
+
+		$all_taxonomies = get_object_taxonomies( 'trip', 'names' );
+
 		if ( current_theme_supports( 'wptravelengine-templates' ) || ( wp_is_block_theme() && 'yes' == wptravelengine_settings()->get( "enable_fse_template", "no" ) ) ) {
 			if ( is_single() ) {
 				if ( ! $optimized_loading ) {
@@ -54,13 +57,12 @@ class Template {
 				      ->enqueue_style( 'style-trip-booking-modal' );
 			}
 
-			if( is_post_type_archive(WP_TRAVEL_ENGINE_POST_TYPE) || is_tax( array( 'trip_types', 'trip_tag', 'destination', 'activities' ) ) ){
+			if ( is_post_type_archive( WP_TRAVEL_ENGINE_POST_TYPE ) || is_tax( $all_taxonomies ) ){
 				TripSearch::enqueue_assets();
 			}
 
 			return $template_path;
 		}
-
 
 		if ( is_singular( WP_TRAVEL_ENGINE_POST_TYPE ) ) {
 			if ( ! $optimized_loading ) {
@@ -88,10 +90,13 @@ class Template {
 			TripSearch::enqueue_assets();
 			$template_path = wte_locate_template( 'archive-trip.php' );
 		} else {
-			foreach ( array( 'trip_types', 'trip_tag', 'destination', 'activities' ) as $tax ) {
+			foreach ( $all_taxonomies as $tax ) {
 				if ( is_tax( $tax ) ) {
 					TripSearch::enqueue_styles();
 					$template_path = wte_locate_template( 'taxonomy-' . $tax . '.php' );
+					if ( ! file_exists( $template_path ) ) {
+						$template_path = wte_locate_template( 'archive-trip.php' );
+					}
 					break;
 				}
 			}

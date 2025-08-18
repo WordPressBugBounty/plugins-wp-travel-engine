@@ -76,7 +76,7 @@ class EmergencyFormFields extends FormField {
 		if( $booking && $booking->get_meta( 'traveller_page_type' ) == 'old' ){
 			$this->fields = WTE_Default_Form_Fields::emergency_contact();
 		} else {
-			$this->fields = DefaultFormFields::emergency();
+			$this->fields = DefaultFormFields::emergency( 'readonly');
 		}
 		
 		return array_map( function ( $field ) use ( $form_data ) {

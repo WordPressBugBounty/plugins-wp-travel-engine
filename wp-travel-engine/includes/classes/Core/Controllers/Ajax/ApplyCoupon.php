@@ -84,10 +84,9 @@ class ApplyCoupon extends AjaxController {
 
 		$cart_total = $wte_cart->get_subtotal();
 
-		$success          = false;
 		$discounted_total = 0;
 		if ( 'fixed' === $discount_type ) {
-			if ( $discount_value >= $cart_total ) {
+			if ( $discount_value > $cart_total ) {
 				\wp_send_json_error(
 					new \WP_Error( 'WTE_COUPON_AMOUNT_EXCEED', sprintf( __( 'Coupon "%1$s" cannot be applied for this trip.', 'wp-travel-engine' ), sanitize_text_field( wp_unslash( $apply_coupon_code ) ) ) ) // phpcs:ignore
 				);

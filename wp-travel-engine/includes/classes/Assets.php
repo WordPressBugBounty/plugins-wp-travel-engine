@@ -269,7 +269,7 @@ class Assets extends AssetsAbstract {
 
 		// Trip Archive.
 		$this->register_style( Asset::register( 'wpte-trip-archive', 'public/trip-archive.css' ) );
-		$this->register_script( Asset::register( 'wte-trip-search', 'public/trip-search/index.js' ) )
+		$this->register_script( Asset::register( 'wte-trip-search', 'public/trip-search/index.js' )->dependencies( [ 'wte-popper', 'wte-tippyjs' ] ) )
 			->localize( 'wte-trip-search', 'wteL10n,wptravelengineWishlist' )
 			->localize_script( 'wte-trip-search', 'wte_advanced_search', TripSearch::get_localized_data() );
 		$this->register_script( Asset::register( 'wptravelengine-trip-search-widgets-dropdown', 'public/trip-search/widgets-dropdown.js' ) );
