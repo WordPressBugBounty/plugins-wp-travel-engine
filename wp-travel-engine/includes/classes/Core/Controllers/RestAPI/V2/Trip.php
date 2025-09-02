@@ -803,6 +803,10 @@ class Trip extends WP_REST_Posts_Controller {
 			$trip_settings->set( 'tab_content', $tab_content );
 		}
 
+		if ( ! $trip->get_meta( '_s_price' ) ) {
+			$trip->set_meta( '_s_price', $trip->get_price() );
+		}
+
 	}
 
 	/**

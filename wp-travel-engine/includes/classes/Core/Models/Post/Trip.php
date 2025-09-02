@@ -1207,19 +1207,15 @@ class Trip extends PostModel {
 	 * @since 6.1.2
 	 */
 	public function set_primary_package( ?TripPackage $package = null ): Trip {
+
 		if ( $package ) {
 			$this->primary_package = $package;
 		} else if ( $this->has_package() ) {
-			if ( count( $this->trip_packages ) === 1 ) {
-				$this->primary_package = $this->trip_packages->current();
-
-				return $this;
-			}
 
 			$primary_package_id = $this->get_meta( 'primary_package' );
 
 			if ( is_numeric( $primary_package_id ) ) {
-				$primary_package = $this->trip_packages->get_package( $primary_package_id );
+				$primary_package = $this->trip_packages->get_package( intval( $primary_package_id ) );
 				if ( $primary_package ) {
 					$this->primary_package = $primary_package;
 
@@ -1227,7 +1223,9 @@ class Trip extends PostModel {
 				}
 			}
 
-			$this->trip_packages->get_package_with_low_price();
+			$this->trip_packages->rewind();
+
+			$this->primary_package = $this->trip_packages->current();
 
 		}
 

@@ -194,8 +194,11 @@ abstract class Account {
 	 *
 	 * @uses $wpdb WordPress Database object
 	 * @return bool True: when finish. False: on error
+	 *
+	 * @deprecated 6.6.6
 	 */
 	public static function retrieve_password() {
+		_deprecated_function( __METHOD__, '6.6.6', 'WPTravelEngine\Core\Shortcodes\UserAccount::retrieve_password' );
 		$login = trim( sanitize_text_field( wp_unslash( $_POST['user_login'] ) ) ); // phpcs:ignore
 
 		if ( empty( $login ) ) {

@@ -15,6 +15,7 @@ use WPTravelEngine\Core\Coupons;
 use WPTravelEngine\Core\Models\Post\Trip;
 use WPTravelEngine\Core\Models\Post\TripPackage;
 use WPTravelEngine\Core\Models\Settings\Options;
+use WPTravelEngine\Core\Models\Settings\PluginSettings;
 use WPTravelEngine\Email\UserEmail;
 use WPTravelEngine\Pages\Checkout;
 use WPTravelEngine\PaymentGateways\PaymentGateways;
@@ -1692,8 +1693,8 @@ function wte_get_discount_percent( $trip_id ) {
  * Send new account notification to users.
  */
 function wp_travel_engine_user_new_account_created( $customer_id, $new_customer_data, $password_generated, $template ) {
-
-	$account_settings = Options::get( 'wp_travel_engine_settings' )['customer_email_notify_tabs']['account_registration'];
+	$plugin_settings = new PluginSettings();
+	$account_settings = $plugin_settings->get( 'customer_email_notify_tabs.account_registration' );
 	if ( wptravelengine_toggled( $account_settings['enabled'] ) && $new_customer_data ) {
 		$email = new UserEmail( $customer_id );
 		$email->set( 'to', $new_customer_data[ 'user_email' ] );

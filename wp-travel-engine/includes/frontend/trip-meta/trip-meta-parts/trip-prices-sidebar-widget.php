@@ -158,7 +158,7 @@ $custom_enquiry_link = $settings['custom_enquiry_link'] ?? '#';
 				<?php
 				if ( $show_enquiry_info ) :
 					$is_custom_link = 'custom' === $enquiry_link && !empty( $custom_enquiry_link ) && $custom_enquiry_link !== '#';
-					$link           = $is_custom_link ? $custom_enquiry_link : '#wte_enquiry_form_scroll_wrappe';
+					$link           = $is_custom_link ? $custom_enquiry_link : '#wte_enquiry_form_scroll_wrapper';
 					$target         = $is_custom_link ? '_blank' : '_self';
 					$id             = $is_custom_link ? 'wte-open-enquiry-link' : 'wte-send-enquiry-message';
 

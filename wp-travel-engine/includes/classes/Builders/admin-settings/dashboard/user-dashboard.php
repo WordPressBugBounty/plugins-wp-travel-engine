@@ -17,6 +17,7 @@ return apply_filters(
 				/* translators: %s: admin url linking to general settings page */
 				'content'    => sprintf( __( 'You can set your User Dashboard page from %s.', 'wp-travel-engine' ), 
 					'<a target="_blank" href="' . esc_url( admin_url( 'edit.php?post_type=booking&page=class-wp-travel-engine-admin.php#general_pages' ) ) .'" rel="nofollow">here</a>' ),
+				'status'       => 'info',
 			),
 			array(
 				'divider'    => true,

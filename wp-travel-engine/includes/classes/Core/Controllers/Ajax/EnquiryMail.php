@@ -207,8 +207,8 @@ class EnquiryMail extends AjaxController {
 			);
 			$mail = new UserEmail( $user );
 			$mail->set( 'to', $email )
-			     ->set( 'my_subject', wptravelengine_settings()->get( 'customer_email_notify_tabs.enquiry.subject', __( 'Enquiry Sent.', 'wp-travel-engine' ) ) )
-			     ->set( 'content', wptravelengine_settings()->get( 'customer_email_notify_tabs.enquiry.content', '' ) )
+			     ->set( 'my_subject', $wp_travel_engine_settings[ 'customer_email_notify_tabs' ][ 'enquiry' ][ 'subject' ] ?? __( 'Enquiry Sent.', 'wp-travel-engine' ) )
+			     ->set( 'content', $wp_travel_engine_settings[ 'customer_email_notify_tabs' ][ 'enquiry' ][ 'content' ] ?? '' )
 			     ->send();
 		}
 

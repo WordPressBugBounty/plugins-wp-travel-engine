@@ -10,6 +10,7 @@ namespace WPTravelEngine\Email;
 use WPTravelEngine\Booking\Email\Template_Tags;
 use WPTravelEngine\Core\Models\Post\Booking;
 use WPTravelEngine\Core\Models\Post\Payment;
+use WPTravelEngine\Core\Models\Settings\PluginSettings;
 
 /**
  * Booking Email.
@@ -134,7 +135,8 @@ class BookingEmail extends Email {
 	 * @return string
 	 */
 	public function get_my_subject(): string {
-		$subject = wptravelengine_settings()->get( "{$this->sendto}_email_notify_tabs." . $this->template . '.subject', '' );
+		$plugin_settings = new PluginSettings();
+		$subject = $plugin_settings->get( "{$this->sendto}_email_notify_tabs." . $this->template . '.subject', '' );
 		$subject = apply_filters( "wptravelengine_{$this->email_template_type}_email_template_subject_{$this->sendto}", $subject, $this );
 		return $subject;
 	}
@@ -214,7 +216,8 @@ class BookingEmail extends Email {
 	 * @return $this
 	 */
 	public function set_content() {
-		$content = wptravelengine_settings()->get( $this->sendto . '_email_notify_tabs.' . $this->template . '.content', '' );
+		$plugin_settings = new PluginSettings();
+		$content = $plugin_settings->get( $this->sendto . '_email_notify_tabs.' . $this->template . '.content', '' );
 		$content = apply_filters( "wptravelengine_{$this->email_template_type}_email_template_content_{$this->sendto}", $content, $this );
 		$this->set( 'content', $content );
 		return $this;

@@ -9,7 +9,7 @@
 namespace WPTravelEngine\Core\Shortcodes;
 
 use WPTravelEngine\Abstracts\Shortcode;
-use WPTravelEngine\Core\Models\Settings\Options;
+use WPTravelEngine\Core\Models\Settings\PluginSettings;
 use WPTravelEngine\Email\UserEmail;
 
 /**
@@ -283,7 +283,9 @@ class UserAccount extends Shortcode {
 			return false;
 		}
 
-		$forgot_password_settings = Options::get( 'wp_travel_engine_settings' )['customer_email_notify_tabs']['forgot_password'];
+		$plugin_settings = new PluginSettings();
+
+		$forgot_password_settings = $plugin_settings->get( 'customer_email_notify_tabs.forgot_password' );
 		if ( wptravelengine_toggled( $forgot_password_settings['enabled'] ) ) {
 			// Get password reset key (function introduced in WordPress 4.4).
 			$key = get_password_reset_key( $user_data );

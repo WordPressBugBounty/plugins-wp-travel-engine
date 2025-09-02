@@ -16,6 +16,7 @@ use WP_REST_Server;
 use WPTravelEngine\Core\Models\Settings\Options;
 use WPTravelEngine\Core\Models\Settings\PluginSettings;
 use WPTravelEngine\Core\Models\Settings\StaticStrings;
+use WPTravelEngine\Helpers\Translators;
 use WPTravelEngine\PaymentGateways\PaymentGateways;
 use WPTravelEngine\Utilities\ArrayUtility;
 
@@ -1097,7 +1098,11 @@ class Settings {
 
 		$settings = apply_filters( 'wptravelengine_rest_prepare_settings', $settings, $request, $this );
 
-		$this->plugin_settings->save();
+		if ( ! Translators::is_wpml_multilingual_active() ) {
+			$this->plugin_settings->save();
+		} else {
+			Translators::register_wpml_admin_strings();
+		}
 
 		return $settings;
 	}
@@ -2428,7 +2433,24 @@ class Settings {
 			return $this->errors;
 		}
 
-		$plugin_settings->save();
+		if ( ! Translators::is_wpml_multilingual_active() ) {
+			$plugin_settings->save();
+
+			/**
+			 * Placed here for backward compatibility.
+			 * 
+			 * @deprecated 6.6.6
+			 */
+			do_action_deprecated(
+				'wpte_after_save_global_settings_data',
+				array( array( 'wp_travel_engine_settings' => $plugin_settings->get() ) ),
+				'6.6.6',
+				'wptravelengine_api_update_settings'
+			);
+
+		} else {
+			Translators::save_wpml_translation( $plugin_settings->get(), '[wp_travel_engine_settings]' );
+		}
 
 		return $this->get_settings( $request );
 	}

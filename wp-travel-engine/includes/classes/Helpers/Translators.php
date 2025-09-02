@@ -49,10 +49,76 @@ class Translators {
 		if ( function_exists( 'pll_current_language' ) ) {
 			$language = pll_current_language();
 
-			return $language ? [ $language => array() ] : false;
+			return $language ? array( $language => array() ) : false;
 		}
 
-		return apply_filters( 'wpml_active_languages', null, [] );
+		return apply_filters( 'wpml_active_languages', null, array() );
 	}
 
+	/**
+	 * Checks if WPML multilingual is active.
+	 *
+	 * @return bool True if WPML multilingual mode is active, false otherwise.
+	 * @since 6.6.6
+	 */
+	public static function is_wpml_multilingual_active(): bool {
+		return defined( 'WPML_ST_VERSION' ) && apply_filters( 'wpml_current_language', null ) !== apply_filters( 'wpml_default_language', null );
+	}
+
+	/**
+	 * Summary of set_wpml_language.
+	 * @param string|null $lang
+	 * @return void
+	 * @since 6.6.6
+	 */
+	public static function set_wpml_language( $lang = null ): void {
+		do_action( 'wpml_switch_language', $lang ?? apply_filters( 'wpml_current_language', null ) );
+	}
+
+	/**
+	 * This function is used to save the translations to the wpml string.
+	 *
+	 * @param array|string $translations Translations to save.
+	 * @param string       $base_context Name of the wpml string.
+	 * @since 6.6.6
+	 */
+	public static function save_wpml_translation( $translations, $base_context ): void {
+		if ( ! function_exists( 'icl_update_string_translation' ) ) {
+			return;
+		}
+
+		$lang = apply_filters( 'wpml_current_language', null );
+
+		if ( is_string( $translations ) ) {
+			icl_update_string_translation( $base_context, $lang, $translations, 10 );
+			return;
+		}
+
+		foreach ( $translations as $key => $translation ) {
+			if ( is_array( $translation ) ) {
+				$current_context = $base_context . '[' . $key . ']';
+				static::save_wpml_translation( $translation, $current_context );
+			} else {
+				icl_update_string_translation( $base_context . $key, $lang, $translation, 10 );
+			}
+		}
+	}
+
+	/**
+	 * Auto register admin strings.
+	 *
+	 * @return void
+	 * @since 6.6.6
+	 */
+	public static function register_wpml_admin_strings() {
+		if ( function_exists( 'wpml_st_parse_config' ) ) {
+			$config_file = WP_TRAVEL_ENGINE_BASE_PATH . '/wpml-config.xml';
+
+			if ( file_exists( $config_file ) ) {
+				$config_hash = md5( serialize( $config_file ) );
+				delete_transient( 'wpml_admin_text_import:parse_config:' . $config_hash );
+				wpml_st_parse_config( $config_file );
+			}
+		}
+	}
 }

@@ -62,10 +62,11 @@
 			<key name="trip_highlights">
 				<key name="*"/>
 			</key>
-			<key name="email">
-				<key name="template"/>
-				<key name="name"/>
-				<key name="subject"/>
+			<key name="admin_email_notify_tabs">
+				<key name="*"/>
+			</key>
+			<key name="customer_email_notify_tabs">
+				<key name="*"/>
 			</key>
 			<key name="bank_transfer">
 				<key name="title"/>

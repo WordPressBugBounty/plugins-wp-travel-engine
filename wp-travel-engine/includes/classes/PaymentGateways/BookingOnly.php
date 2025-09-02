@@ -85,6 +85,5 @@ class BookingOnly extends BaseGateway {
 
 			$booking->update_status( 'booked' );
 		}
-
 	}
 }

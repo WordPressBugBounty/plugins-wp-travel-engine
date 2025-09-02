@@ -1,9 +1,11 @@
 <?php
 
+use WPTravelEngine\Core\Models\Settings\PluginSettings;
 use WPTravelEngine\Email\Email;
 use WPTravelEngine\Helpers\Functions;
 use WPTravelEngine\Core\Controllers\Ajax;
 use WPTravelEngine\Core\Models\Post\Booking;
+use WPTravelEngine\Helpers\Translators;
 use WPTravelEngine\Registers\AjaxRequestRegistry;
 
 /**
@@ -50,7 +52,7 @@ class WTE_Ajax {
 		 * @since 6.5.2
 		 */
 		$ajax_registry->register( Ajax\EnquiryMail::class );
-		
+
 		/**
 		 * @since 6.5.7
 		 */
@@ -326,7 +328,10 @@ class WTE_Ajax {
 			die;
 		}
 		if ( isset( $_POST[ 'id' ] ) && isset( $_POST[ 'tab' ] ) ) {
-			$global_settings = wptravelengine_settings();
+			// Support for WPML Email Translation support @since 6.6.6.
+			Translators::set_wpml_language();
+
+			$global_settings = new PluginSettings();
 			$subject         = $global_settings->get( $_POST[ 'tab' ] . '_email_notify_tabs' )[ $_POST[ 'id' ] ][ 'subject' ];
 			$content         = $global_settings->get( $_POST[ 'tab' ] . '_email_notify_tabs' )[ $_POST[ 'id' ] ][ 'content' ];
 		} else {

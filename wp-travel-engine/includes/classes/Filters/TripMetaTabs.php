@@ -73,7 +73,8 @@ class TripMetaTabs {
 				array(
 					'field'       	=> [
 						'type'     	=> 'ALERT',
-						'content'  	=> __( '<p><strong>NOTE:</strong> Do you want to use a custom booking link for this trip instead of the default booking process? The Custom Booking Link addon allows you to replace the default booking link with any URL of your choice. <a href="https://wptravelengine.com/plugins/custom-booking-link/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro" target="_blank">Get Custom Booking Link addon now</a></p>', 'wp-travel-engine' ),
+						'content'  	=> __( '<strong>NOTE:</strong> Do you want to use a custom booking link for this trip instead of the default booking process? The Custom Booking Link addon allows you to replace the default booking link with any URL of your choice. <a href="https://wptravelengine.com/plugins/custom-booking-link/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro" target="_blank">Get Custom Booking Link addon now</a>', 'wp-travel-engine' ),
+						'status'    => 'upgrade',
 					],
 				),
 				array(
@@ -266,14 +267,16 @@ class TripMetaTabs {
                 array(
                     'field'       	=> [
                         'type'     	=> 'ALERT',
-                        'content'	=> __('<p>Want to provide downloadable files such as brochures, guidebooks, offline maps, etc? File Downloads extension allows you to upload files in various formats that can be downloaded by travellers. <a href="https://wptravelengine.com/plugins/file-downloads/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro" target="_blank">Get File Downloads extension now</a></p>', 'wp-travel-engine'),
+                        'content'	=> __('Want to provide downloadable files such as brochures, guidebooks, offline maps, etc? File Downloads extension allows you to upload files in various formats that can be downloaded by travellers. <a href="https://wptravelengine.com/plugins/file-downloads/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro" target="_blank">Get File Downloads extension now</a>', 'wp-travel-engine'),
+                        'status'    => 'upgrade',
                     ],
                     'visibility'	=> ! wptravelengine_is_addon_active( 'file-downloads' ),
                 ),
                 array(
                     'field'       	=> [
                         'type'     	=> 'ALERT',
-                        'content'	=> __('<p>You can add, edit and delete the global files via <strong>WP Travel Engine > Settings > Extensions > File Downloads.</strong> <a href="'.admin_url().'edit.php?post_type=booking&page=class-wp-travel-engine-admin.php#extension-file-downloads">Go To Settings</a></p>', 'wp-travel-engine'),
+                        'content'	=> __('You can add, edit and delete the global files via <strong>WP Travel Engine > Settings > Extensions > File Downloads.</strong> <a href="'.admin_url().'edit.php?post_type=booking&page=class-wp-travel-engine-admin.php#extension-file-downloads">Go To Settings</a>', 'wp-travel-engine'),
+                        'status'    => 'notice',
                     ],
                     'visibility'	=> wptravelengine_is_addon_active( 'file-downloads' ),
                 ),
@@ -343,7 +346,8 @@ class TripMetaTabs {
 				array(
 					'field'       	=> [
 						'type'     	=> 'ALERT',
-						'content'	=> __("<p><strong>NOTE:</strong> You can add, edit and delete the global extra services via <strong>WP Travel Engine > Extra Services</strong>.</p>", 'wp-travel-engine'),
+						'content'	=> __("<strong>NOTE:</strong> You can add, edit and delete the global extra services via <strong>WP Travel Engine > Extra Services</strong>.", 'wp-travel-engine'),
+                        'status'    => 'notice',
 					],
 					'visibility'  	=> wptravelengine_is_addon_active( 'extra-services' ),
 				),
@@ -474,6 +478,7 @@ class TripMetaTabs {
                     'field'       	=> [
                         'type'      => 'ALERT',
                         'content'  	=> __('<strong>NOTE:</strong> Want travellers to download the tour details in PDF format & read later? <a href="https://wptravelengine.com/plugins/itinerary-downloader/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro" target="_blank">Get Itinerary Downloader extension now</a>', 'wp-travel-engine'),
+                        'status'    => 'upgrade',
                     ],
                 ),
                 array(
@@ -481,6 +486,7 @@ class TripMetaTabs {
                     'field'       	=> [
                         'type'      => 'ALERT',
                         'content'  	=> __('<strong>NOTE:</strong> Want travellers to download the tour details in PDF format and read later? You can configure Itinerary Downloader via <b>WP Travel Engine &gt; Settings &gt; Extensions &gt; Itinerary Downloader', 'wp-travel-engine'),
+                        'status'    => 'info',
                     ],
                 ),
             );

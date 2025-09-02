@@ -598,13 +598,7 @@ class TripSearch {
 		}
 		// phpcs:enable
 
-		$query_args = apply_filters( 'query_args_for_trip_filters', $query_args );
-
-		if ( isset( $query_args['wpse_search_or_tax_query'] ) ) {
-			unset( $query_args['wpse_search_or_tax_query'] );
-		}
-
-		return $query_args;
+		return apply_filters( 'query_args_for_trip_filters', $query_args );
 	}
 
 	/**
@@ -1000,10 +994,11 @@ class TripSearch {
 		 * @since 6.6.2
 		 * @remove in 7.0.0
 		 */
-		if ( 'yes' !== get_option( 'wptravelengine_update_trip_prices__' ) ) {
+		if ( 'yes' !== get_option( 'wptravelengine_update_trip_prices__1' ) ) {
 			$posts = get_posts( array(
 				'post_type' => WP_TRAVEL_ENGINE_POST_TYPE,
-				'post_status' => 'publish'
+				'post_status' => 'publish',
+				'posts_per_page' => -1,
 			) );
 
 			foreach ( $posts as $post ) {
@@ -1017,7 +1012,8 @@ class TripSearch {
 				}
 			}
 
-			update_option( 'wptravelengine_update_trip_prices__', 'yes' );
+			delete_option( 'wptravelengine_update_trip_prices__' );
+			update_option( 'wptravelengine_update_trip_prices__1', 'yes' );
 		}
 	}
 

@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 6.6.5
+Stable tag: 6.6.6
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -367,6 +367,12 @@ Yes. We have created WooCommerce Payments add-ons that supports all the payment 
 Please send us an email via [support ticket](https://wptravelengine.com/support-ticket/?utm_source=free_plugin&utm_medium=wporg&utm_campaign=support), and we will be happy to help you.
 
 == Changelog ==
+
+= 6.6.6 - 2nd September 2025 =
+* Improved: Email templates can now be translated using WPML.
+* Improved: Updated notice banner design across the admin area for better visibility.
+* Improved: Added loading feedback and prevented duplicate clicks on the 'Confirm Booking' button to ensure a smoother checkout experience and proper redirection to the thank you page.
+* Fixed: Section titles are now optional — leaving the field blank no longer shows a heading on the trip page, keeping layouts cleaner.
 
 = 6.6.5 - 18th August 2025 =
 * New: Introduced a global setting to configure the discount display type.

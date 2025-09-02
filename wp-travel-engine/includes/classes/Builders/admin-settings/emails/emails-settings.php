@@ -82,6 +82,7 @@ return apply_filters(
 						__( '<strong>NOTE: </strong>After sending the test email and receiving a success message, please check your inbox. If your server is properly configured for email sending, you will receive the test email. However, if something seems amiss or the email does not arrive, please refer to the <a href="%s">Email FAQ page</a> for troubleshooting assistance.', 'wp-travel-engine' ),
 						'https://docs.wptravelengine.com/article/email-troubleshooting/'
 					),
+					'status'       => 'info',
 				),
 				array(
 					'label'      => __( 'Send Test Email', 'wp-travel-engine' ),

@@ -51,6 +51,7 @@ return apply_filters(
 							array(
 								'field_type' => 'ALERT',
 								'content'    => sprintf( __( 'The settings you configure here will apply to the Trip Archive page, all Trip Taxonomy pages (such as destinations, activities, or trip types), and the Search Results page.', 'wp-travel-engine' ), $trip_page_url ),
+								'status'       => 'info',
 							),
 							array(
 								'field_type' => 'DIVIDER',
@@ -195,6 +196,7 @@ return apply_filters(
 							array(
 								'field_type' => 'ALERT',
 								'content'    => __( 'The settings you configure here will apply to the Trip Archive page, all Trip Taxonomy pages (such as destinations, activities, or trip types), and the Search Results page.', 'wp-travel-engine' ),
+								'type'       => 'info',
 							),
 							array(
 								'field_type' => 'DIVIDER',
@@ -309,6 +311,7 @@ return apply_filters(
 							array(
 								'field_type' => 'ALERT',
 								'content'    => __( 'Taxonomy settings you configure here will apply to Destination, Activities and Trip Types listing pages.', 'wp-travel-engine' ),
+								'type'       => 'info',
 							),
 							array(
 								'field_type' => 'DIVIDER',

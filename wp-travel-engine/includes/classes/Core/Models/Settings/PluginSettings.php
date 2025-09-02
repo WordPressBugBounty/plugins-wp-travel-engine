@@ -32,6 +32,12 @@ class PluginSettings extends BaseSetting {
 	public function __construct() {
 		parent::__construct( 'wp_travel_engine_settings', array() );
 
+		/**
+		 * Clear cached settings and reload fresh data from the database to ensure current values.
+		 * @since 6.6.6
+		 */
+		$this->load_settings();
+
 		$this->callbacks = array(
 			'pages.wp_travel_engine_wishlist'              => array( $this, 'get_wishlist_page' ),
 			'pages.search'                                 => array( $this, 'get_search_page' ),

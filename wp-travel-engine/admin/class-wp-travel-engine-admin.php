@@ -947,7 +947,8 @@ class Wp_Travel_Engine_Admin {
 
 		);
 
-		if ( in_array( get_current_screen()->post_type, array( 'booking', 'customer' ) ) ) {
+		$current_screen = get_current_screen();
+		if ( $current_screen && in_array( $current_screen->post_type, array( 'booking', 'customer' ) ) ) {
 			if ( isset( $column_actions[ $column ] ) ) {
 				call_user_func( $column_actions[ $column ], $booking );
 			}

@@ -130,6 +130,7 @@ $trip_meta_tabs = array(
 				'field'      => [
 					'type'    => 'ALERT',
 					'content' => __( '<p>Do you offer activity-based or single-day tours? The Activity Tour Booking extension makes it easy to create and showcase these experiences with detailed itineraries, real-time availability, and seamless booking. <a href="https://wptravelengine.com/plugins/activity-tour-booking/" target="_blank"><strong>Get Activity Tour extension now!</strong></a></p>', 'wp-travel-engine' ),
+					'status'    => 'upgrade',
 				],
 			),
 			array(
@@ -409,6 +410,7 @@ $trip_meta_tabs = array(
 				'field'      => [
 					'type'    => 'ALERT',
 					'content' => __( '<strong>NOTE:</strong> Need additional itinerary fields or require rich text editing for the itinerary? Advanced Itinerary Builder extension provides a rich text editor, sleeping mode, meals, ability to add photos to each day and more. <a href="https://wptravelengine.com/plugins/advanced-itinerary-builder/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro" target="_blank">Get Advanced Itinerary Builder extension now</a>', 'wp-travel-engine' ),
+					'status'    => 'upgrade',
 				],
 			),
 			array(
@@ -417,6 +419,7 @@ $trip_meta_tabs = array(
 				'field'      => [
 					'type'    => 'ALERT',
 					'content' => __( '<p>You can add, edit and delete sleep modes via <strong>WP Travel Engine > Settings > Extensions > Advanced Itinerary Builder.</strong></p>', 'wp-travel-engine' ),
+					'status'    => 'notice',
 				],
 			),
 			array(

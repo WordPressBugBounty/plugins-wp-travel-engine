@@ -1063,7 +1063,7 @@ class WP_Travel_Engine_Template_Hooks {
 		$trip_id = $post->ID;
 
 		$trip_settings = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
-		$tab_title     = isset( $trip_settings[ 'overview_section_title' ] ) && ! empty( $trip_settings[ 'overview_section_title' ] ) ? $trip_settings[ 'overview_section_title' ] : __( 'Overview', 'wp-travel-engine' );
+		$tab_title     = isset( $trip_settings[ 'overview_section_title' ] ) && ! empty( $trip_settings[ 'overview_section_title' ] ) ? $trip_settings[ 'overview_section_title' ] : '';
 
 		echo "<h2 class='wpte-overview-title'>" . esc_html( $tab_title ) . '</h2>';
 	}
@@ -1081,7 +1081,7 @@ class WP_Travel_Engine_Template_Hooks {
 		$trip_id = $post->ID;
 
 		$trip_settings = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
-		$tab_title     = isset( $trip_settings[ 'cost_tab_sec_title' ] ) && ! empty( $trip_settings[ 'cost_tab_sec_title' ] ) ? $trip_settings[ 'cost_tab_sec_title' ] : __( 'Includes/Excludes', 'wp-travel-engine' );
+		$tab_title     = isset( $trip_settings[ 'cost_tab_sec_title' ] ) && ! empty( $trip_settings[ 'cost_tab_sec_title' ] ) ? $trip_settings[ 'cost_tab_sec_title' ] : '';
 		echo "<h2 class='wpte-cost-tab-title'>" . esc_html( $tab_title ) . '</h2>';
 	}
 
@@ -1098,7 +1098,7 @@ class WP_Travel_Engine_Template_Hooks {
 		$trip_id = $post->ID;
 
 		$trip_settings             = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
-		$tab_title                 = isset( $trip_settings[ 'trip_itinerary_title' ] ) && ! empty( $trip_settings[ 'trip_itinerary_title' ] ) ? $trip_settings[ 'trip_itinerary_title' ] : __( 'Itinerary', 'wp-travel-engine' );
+		$tab_title                 = isset( $trip_settings[ 'trip_itinerary_title' ] ) && ! empty( $trip_settings[ 'trip_itinerary_title' ] ) ? $trip_settings[ 'trip_itinerary_title' ] : '';
 		$wp_travel_engine_settings = get_option( 'wp_travel_engine_settings' );
 		$enabled_expand_all        = ! isset( $wp_travel_engine_settings[ 'wte_advance_itinerary' ][ 'enable_expand_all' ] ) || 'yes' == $wp_travel_engine_settings[ 'wte_advance_itinerary' ][ 'enable_expand_all' ] ? 'enabled' : '';
 
@@ -1150,7 +1150,7 @@ class WP_Travel_Engine_Template_Hooks {
 		$trip_id = $post->ID;
 
 		$trip_settings = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
-		$tab_title     = isset( $trip_settings[ 'faq_section_title' ] ) && ! empty( $trip_settings[ 'faq_section_title' ] ) ? $trip_settings[ 'faq_section_title' ] : __( 'FAQs', 'wp-travel-engine' );
+		$tab_title     = isset( $trip_settings[ 'faq_section_title' ] ) && ! empty( $trip_settings[ 'faq_section_title' ] ) ? $trip_settings[ 'faq_section_title' ] : '';
 		echo "<h2 class='wpte-faqs-title'>" . esc_html( $tab_title ) . '</h2>';
 	}
 
@@ -1167,7 +1167,7 @@ class WP_Travel_Engine_Template_Hooks {
 		$trip_id = $post->ID;
 
 		$trip_settings = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
-		$tab_title     = isset( $trip_settings[ 'map_section_title' ] ) && ! empty( $trip_settings[ 'map_section_title' ] ) ? $trip_settings[ 'map_section_title' ] : __( 'Map', 'wp-travel-engine' );
+		$tab_title     = isset( $trip_settings[ 'map_section_title' ] ) && ! empty( $trip_settings[ 'map_section_title' ] ) ? $trip_settings[ 'map_section_title' ] : '';
 		echo "<h2 class='wpte-map-title'>" . esc_html( $tab_title ) . '</h2>';
 	}
 

@@ -12,12 +12,13 @@ use WPTravelEngine\Core\Models\Post\Customer;
 use WPTravelEngine\Core\Models\Post\Enquiry;
 use WPTravelEngine\Core\Models\Post\Payment;
 use WPTravelEngine\Core\Models\Review;
+use WPTravelEngine\Helpers\Translators;
 
 class Events {
 
 	/**
 	 * Table name.
-	 * 
+	 *
 	 * @var string
 	 */
 	protected static string $table_name;
@@ -84,7 +85,7 @@ class Events {
 	 * @param int $post_id Post ID.
 	 * @param string $meta_key Meta key.
 	 * @param mixed $meta_value Meta value.
-	 * 
+	 *
 	 * @return void
 	 */
 	public function trigger_payment_status_update( int $meta_id, int $post_id, string $meta_key, $meta_value ) {
@@ -175,11 +176,15 @@ class Events {
 	public static function add_event( string $event_name, $object_id, $object_type, $trigger_time = null, $event_data = array() ) {
 		global $wpdb;
 
+		if ( Translators::is_wpml_multilingual_active() ) {
+			$event_data['wpml_lang'] = apply_filters( 'wpml_current_language', null );
+		}
+
 		$trigger_time ??= gmdate( 'Y-m-d H:i:s', current_time( 'timestamp', true ) + 60 );
-	
+
 		$table = static::$table_name;
 
-		$sql = $wpdb->prepare( 
+		$sql = $wpdb->prepare(
 			"INSERT INTO {$table} (`object_id`, `event_name`, `object_type`, `event_data`, `trigger_time`, `event_created_at`)
 			VALUES (%d, %s, %s, %s, %s, %s)
 			ON DUPLICATE KEY UPDATE
@@ -194,9 +199,9 @@ class Events {
 			$trigger_time,
 			current_time( 'mysql', true )
 		);
-	
+
 		$result = $wpdb->query( $sql );
-	
+
 		return $result ? $wpdb->insert_id : false;
 	}
 
