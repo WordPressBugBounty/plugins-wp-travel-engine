@@ -206,7 +206,7 @@ class Trip extends WP_CLI_Command {
 			$package_categories[ 'enabled_sale' ][ $term_id ]  = (bool) array_rand( [ 0, 1 ] );
 			$package_categories[ 'sale_prices' ][ $term_id ]   = (int) $price * rand( 80, 90 ) / 100;
 			$package_categories[ 'min_paxes' ][ $term_id ]     = rand( 0, 1 );
-			$package_categories[ 'max_paxes' ][ $term_id ]     = rand( 6, 100 );
+			// $package_categories[ 'max_paxes' ][ $term_id ]     = rand( 6, 100 );
 		}
 
 		$package_id = wp_insert_post(
@@ -468,7 +468,7 @@ class Trip extends WP_CLI_Command {
 			$package_categories[ 'enabled_sale' ][ $term_id ]  = $faker->boolean( 80 );
 			$package_categories[ 'sale_prices' ][ $term_id ]   = (int) $price * rand( 80, 90 ) / 100;
 			$package_categories[ 'min_paxes' ][ $term_id ]     = rand( 0, 1 );
-			$package_categories[ 'max_paxes' ][ $term_id ]     = rand( 6, 100 );
+			// $package_categories[ 'max_paxes' ][ $term_id ]     = rand( 6, 100 );
 		}
 
 		$package_ids = array();

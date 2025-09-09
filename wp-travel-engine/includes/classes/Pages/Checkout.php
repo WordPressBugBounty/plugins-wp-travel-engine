@@ -414,11 +414,13 @@ class Checkout extends BasePage {
 	 * @return array HTML rows.
 	 */
 	private function generate_trip_details_html( array $trip_data ): array {
+		$trip 		= $trip_data['trip'];
+		$trip_id 	= ( $trip instanceof Trip ) ? $trip->ID : $trip;
 		return [
 			sprintf('<tr><td colspan="2">%s</td></tr>', 
 				sprintf('<a href="%s" class="wpte-checkout__trip-name">%s</a>', 
-				$trip_data['trip']  ? esc_url( get_the_permalink( $trip_data['trip'] ) ) : '', 
-					$trip_data['trip']  ? esc_html( get_the_title( $trip_data['trip'] ) ) : ''
+				$trip ? esc_url( get_the_permalink( $trip_id ) ) : '', 
+					$trip ? esc_html( get_the_title( $trip_id ) ) : ''
 				)
 			),
 			sprintf('<tr><td>%s</td><td><strong>%s</strong></td></tr>', 

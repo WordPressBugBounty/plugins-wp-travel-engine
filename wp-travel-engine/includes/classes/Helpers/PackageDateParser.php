@@ -63,6 +63,18 @@ class PackageDateParser {
 	protected array $default_pricing = array();
 
 	/**
+	 * @var int|string
+	 * @since 6.6.7
+	 */
+	protected $total_seats;
+
+	/**
+	 * @var ?string
+	 * @since 6.6.7
+	 */
+	public static $version = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param TripPackage $trip_package Trip package object.
@@ -73,10 +85,13 @@ class PackageDateParser {
 
 		$this->package      = $trip_package;
 		$this->dtstart      = $args[ 'dtstart' ];
-		$this->times        = $args[ 'times' ] ?? array();
+		$this->times        = array_values( $args[ 'times' ] ?? array() );
 		$this->is_recurring = is_bool( $args[ 'is_recurring' ] ) ? $args[ 'is_recurring' ] : '1' === $args[ 'is_recurring' ];
-		$this->seats        = is_numeric( $args[ 'seats' ] ?? '' ) ? (int) $args[ 'seats' ] : '';
+		$this->seats        = wptravelengine_normalize_numeric_val( $args[ 'seats' ] ?? '' );
 		$this->rrule        = $this->parse_rrule( $args[ 'rrule' ] ?? array() );
+		$this->total_seats  = wptravelengine_normalize_numeric_val( $trip_package->get_trip()->get_maximum_participants() );
+
+		self::$version 		= strtolower( (string) ( $args[ 'version' ] ?? self::$version ?? 'v2' ) );
 
 		do_action( 'wptravelengine_package_date_parser_construct', $this->package, $args );
 	}
@@ -148,20 +163,18 @@ class PackageDateParser {
 	 * @return array
 	 */
 	protected function prepare_date( $date ): array {
-		$times          	= array();
-		$formatted_date 	= $date->format( 'Y-m-d' );
-		$trip 				= $this->package->get_trip();
-		
-		$booked_for_the_date = $this->booked_seats[ $this->package->get_id() ][ $formatted_date ][ '00:00' ] ?? 0;
 
-		foreach ( $this->times as $index => $time ) {
-			$booked_for_the_time  = $this->booked_seats[ $this->package->get_id() ][ $formatted_date ][ $time[ 'from' ] ] ?? 0;
-			$available_time_seats = is_numeric( $this->seats ) ? max( $this->seats - $booked_for_the_time, 0 ) : '';
+		$times          = array();
+		$formatted_date = $date->format( 'Y-m-d' );
+
+		foreach ( $this->times as $key => $time ) {
+			list( $available_time_seats, $capacity ) = $this->get_seats_details( $formatted_date, $time[ 'from' ] );
 
 			if ( is_numeric( $available_time_seats ) && $available_time_seats <= 0 ) {
 				continue;
 			}
-			$times[] = array(
+
+			$times[ $key ] = array(
 				'key'   => implode(
 					'_',
 					array(
@@ -175,27 +188,49 @@ class PackageDateParser {
 				'to'    => $formatted_date . 'T' . $time[ 'to' ],
 				'seats' => $available_time_seats,
 			);
+
+			if ( self::$version === 'v3' ) {
+				$times[ $key ]['capacity']   = $capacity;
+				$times[ $key ]['seats_left'] = $available_time_seats;
+			}
 		}
+
+		list( $seats_left, $capacity ) = $this->get_seats_details(  $formatted_date );
 
 		if ( ! empty( $this->times ) && empty( $times ) ) {
 			$available_seats = 0;
 		} else {
-			$available_seats = is_numeric( $this->seats ) ? max( $this->seats - $booked_for_the_date, 0 ) : '';
-		}
-
-		if ( !class_exists( 'WTE_Fixed_Starting_Dates' ) && $trip->is_enabled_min_max_participants() ) {
-			$available_seats = $trip->get_maximum_participants();
+			$available_seats = $seats_left;
 		}
 
 		if ( ! empty( $times ) ) {
-			$available_seats = is_numeric( $this->seats ) ? array_sum( array_column( $times, 'seats' ) ) : '';
+			if ( is_numeric( $available_seats ) ) {
+				$capacity = $available_seats = 0;
+				foreach ( $times as $time ) {
+					$available_seats += $time['seats'];
+					$capacity += $time['capacity'] ?? 0;
+				}
+			}
 		}
 
-		return apply_filters( 'wptravelengine_package_date_parser_prepare_date', array(
+		/**
+		 * Here, 'capacity' represents the overall seat capacity for the given date/time, 
+		 * while 'seats' & 'seats_left' indicates the seats left for that date/time.
+		 * 
+		 * @updated 6.6.7
+		 */
+		$date_data = array(
 			'times' 	=> $times,
 			'seats' 	=> is_numeric( $available_seats ) ? (int) $available_seats : '',
 			'pricing' 	=> $this->package->default_pricings,
-		), $this->package );
+		);
+
+		if ( self::$version === 'v3' ) {
+			$date_data['capacity'] 	 = $capacity;
+			$date_data['seats_left'] = $date_data['seats'];
+		}
+
+		return apply_filters( 'wptravelengine_package_date_parser_prepare_date', $date_data, $this->package );
 	}
 
 	/**
@@ -232,7 +267,7 @@ class PackageDateParser {
 	 */
 	public function get_dates( bool $object = true, $args = array() ) {
 
-		$this->booked_seats = $this->package->get_trip()->get_inventory()->inventory();
+		$this->booked_seats = $this->package->get_trip()->get_my_booked_seats();
 
 		if ( ! $this->is_recurring || empty( $this->rrule ) ) {
 			if ( $this->dtstart < date( 'Y-m-d' ) ) {
@@ -281,5 +316,49 @@ class PackageDateParser {
 	public function get_data_of( string $date, $key = null ): array {
 		$data = $this->prepare_date( new \DateTime( $date ) );
 		return $key ? ( $data[ $key ] ?? array() ) : $data;
+	}
+
+	/**
+	 * Retrieves seating information for a specific date and time.
+	 * 
+	 * Returns an array containing seating availability data in the following format:
+	 * - Index 0: Number of seats remaining (int)
+	 * - Index 1: Total seating capacity (int)
+	 * 
+	 * @param string $date The target date in YYYY-MM-DD format.
+	 * @param string $time The target time in HH:MM format.
+	 * 
+	 * @return array{0: int, 1: int} Indexed array with seats left and capacity
+	 * 
+	 * @since 6.6.7
+	 */
+	public function get_seats_details( string $date, string $time = '00:00' ) {
+
+		$my_seats 		= $this->seats;
+		$total_seats 	= $this->total_seats;
+
+		$booked_seats_for_this_pac = $this->booked_seats[ $this->package->get_id() ][ $date ][ $time ] ?? 0;
+
+		if ( ! is_numeric( $my_seats ) ) {
+			if ( ! is_numeric( $total_seats ) ) {
+				return array( '', '' );
+			}
+			$my_seats = $total_seats;
+		} else if ( ! is_numeric( $total_seats ) ) {
+			return array( max( $my_seats - $booked_seats_for_this_pac, 0 ), $my_seats );
+		}
+
+		$total_booked_seats = array_reduce( $this->booked_seats, function( $acc, $seats ) use ( $date, $time ) {
+			return $acc + ( $seats[ $date ][ $time ] ?? 0 );
+		}, 0 );
+
+		$available_capacity 	= min( $my_seats, $total_seats );
+		$remaining_for_package 	= max( $available_capacity - $booked_seats_for_this_pac, 0 );
+		$remaining_total 		= max( $total_seats - $total_booked_seats, 0 );
+
+		$seats_left	= min( $remaining_for_package, $remaining_total );
+		$capacity	= ( $seats_left === $remaining_for_package ) ? $available_capacity : $total_seats;
+
+		return array( $seats_left, $capacity );
 	}
 }

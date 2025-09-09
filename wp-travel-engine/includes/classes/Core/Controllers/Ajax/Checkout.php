@@ -67,6 +67,7 @@ class Checkout extends AjaxController {
 						'success'   => true,
 						'message'   => __( 'Cart updated successfully.', 'wp-travel-engine' ),
 						'cart'      => $wte_cart,
+						'cart_totals' => $wte_cart->get_totals(),
 						'fragments' => array(
 							'[data-checkout-form-submit]'   => $submit_button,
 							'[data-cart-summary]'           => $cart_summary,

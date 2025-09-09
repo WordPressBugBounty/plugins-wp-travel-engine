@@ -1080,6 +1080,7 @@ final class Plugin {
 
 	public function add_booking_modal_container() {
 		global $post;
+		$global_settings = wptravelengine_settings();
 		$trip_booking_data = apply_filters(
 			'wptravelengine_trip_booking_modal_data',
 			array(
@@ -1088,6 +1089,8 @@ final class Plugin {
 				'wpXHR'       => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
 				'cartVersion' => '2.0',
 				'buttonLabel' => esc_html__( 'Check Availability', 'wp-travel-engine' ),
+				'showModalWarning' 		=> wptravelengine_toggled( $global_settings->get( 'show_booking_modal_warning', true ) ),
+				'modalWarningMessage' 	=> $global_settings->get( 'booking_modal_warning_message', '' ),
 			)
 		);
 		?>

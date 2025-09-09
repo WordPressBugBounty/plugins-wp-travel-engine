@@ -790,6 +790,7 @@ class Template_Tags extends TemplateTags {
 					<td colspan="2" style="color: #566267;"><?php echo esc_html( $this->additional_notes ); ?></td>
 				</tr>
 			<?php endif;
+			do_action( 'wptravelengine_email_template_after_additional_notes', $this );
 		endif;
 		return ob_get_clean();
 	}

@@ -194,4 +194,16 @@ class Inventory {
 
 		return $_records;
 	}
+
+	/**
+	 * Get the invetory of only given ids.
+	 * 
+	 * @param array $ids IDs to filter.
+	 * 
+	 * @return array
+	 * @since 6.6.7
+	 */
+	public function inventory_of_( array $ids ): array {
+		return array_intersect_key( $this->inventory(), $ids );
+	}
 }

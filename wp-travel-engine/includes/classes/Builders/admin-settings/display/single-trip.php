@@ -204,6 +204,26 @@ return apply_filters(
 								'description' => sprintf( __( 'Enable to use the new Full Site Editing (FSE) templates provided by WP Travel Engine. For more details, refer to the %1$s documentation%2$s which guides you on how to set up these templates.', 'wp-travel-engine' ), '<a target="_blank" href="https://docs.wptravelengine.com/article/wp-travel-engine-blocks-patterns-templates/?utm_source=free_plugin&utm_medium=dashboard&utm_campaign=docs">','</a>' ),
 								'field_type'  => 'SWITCH',
 								'name'        => 'enable_fse',
+								'divider'     => true,
+							),
+							array(
+								'label'       => __( 'Show warning message in booking modal', 'wp-travel-engine' ),
+								'field_type'  => 'SWITCH',
+								'name'        => 'show_modal_warning',
+								'isNew'       => version_compare( WP_TRAVEL_ENGINE_VERSION, '6.7.0', '<' ),
+							),
+							array(
+								'field_type' => 'GROUP',
+								'condition'  => 'show_modal_warning === true',
+								'fields'     => array(
+									array(
+										'label'       => __( 'Warning Message', 'wp-travel-engine' ),
+										'description' => __( 'Add the warning message to be displayed in the booking modal. You can use {min_pax} as a placeholder for the minimum number of participants.', 'wp-travel-engine' ),
+										'field_type'  => 'TEXT',
+										'name'        => 'modal_warning_message',
+										'placeholder' => __( 'This trip requires a minimum of {min_pax} participants per booking.', 'wp-travel-engine' ),
+									),
+								),
 							),
 						),
 					),

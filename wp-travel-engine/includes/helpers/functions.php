@@ -22,6 +22,41 @@ require_once __DIR__ . '/wp-travel-engine-form-fields.php';
 require_once __DIR__ . '/cart.php';
 
 /**
+ * Check if the user is new user.
+ * 
+ * @since 6.6.7
+ */
+function wptravelengine_is_new_user(): bool {
+	return WP_TRAVEL_ENGINE_VERSION === ( get_option( 'wptravelengine_since' ) ?: '0.0.0' );
+}
+
+/**
+ * Normalize a numeric value by casting it to a specific type.
+ *
+ * Checks if the given value is numeric, and if so, casts it to the specified type.
+ * If the value is not numeric, it is returned unchanged.
+ *
+ * @param mixed  $value The input value to normalize.
+ * @param string $type  The target numeric type: 'int' or 'float'. Default is 'int'.
+ *
+ * @return mixed The normalized numeric value as int or float, or the original value if not numeric.
+ * @since 6.6.7
+ */
+function wptravelengine_normalize_numeric_val( $value, $type = 'int' ) {
+	if ( ! is_numeric( $value ) ) {
+		return $value;
+	}
+
+	switch ( $type ) :
+		case 'float':
+			return floatval( $value );
+		case 'int':
+		default:
+			return intval( $value );
+	endswitch;
+}
+
+/**
  * Get the trip duration in array format.
  *
  * @param int|Trip $trip Trip ID or Trip instance.

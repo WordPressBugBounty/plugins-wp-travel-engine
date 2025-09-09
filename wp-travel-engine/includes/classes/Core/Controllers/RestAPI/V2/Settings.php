@@ -475,6 +475,10 @@ class Settings {
 
 		$settings = array();
 
+		$settings['show_modal_warning'] = wptravelengine_toggled( $this->plugin_settings->get( 'show_booking_modal_warning', 'yes' ) );
+
+		$settings['modal_warning_message'] = (string) $this->plugin_settings->get( 'booking_modal_warning_message', '' );
+
 		$settings[ 'trip_banner_layout' ] = $this->plugin_settings->get( 'trip_banner_layout', 'banner-default' );
 
 		$settings[ 'display_banner_fullwidth' ] = wptravelengine_toggled( $this->plugin_settings->get( 'display_banner_fullwidth', 'no' ) );
@@ -1600,6 +1604,14 @@ class Settings {
 	protected function set_single_trip( WP_REST_Request $request ) {
 
 		$plugin_settings = $this->plugin_settings;
+
+		if ( isset( $request[ 'show_modal_warning' ] ) ) {
+			$plugin_settings->set( 'show_booking_modal_warning', wptravelengine_replace( $request[ 'show_modal_warning' ], true, 'yes', 'no' ) );
+		}
+
+		if ( isset( $request[ 'modal_warning_message' ] ) ) {
+			$plugin_settings->set( 'booking_modal_warning_message', $request[ 'modal_warning_message' ] );
+		}
 
 		if ( isset( $request[ 'trip_banner_layout' ] ) ) {
 			$plugin_settings->set( 'trip_banner_layout', $request[ 'trip_banner_layout' ] );
@@ -3117,6 +3129,14 @@ class Settings {
 				'description' => __( 'Trip Duration Label', 'wp-travel-engine' ),
 				'type'        => 'string',
 				'enum'        => array( 'days', 'nights', 'both' ),
+			),
+			'show_modal_warning' => array(
+				'description' => __( 'Show Booking Modal Warning', 'wp-travel-engine' ),
+				'type'        => 'boolean',
+			),
+			'modal_warning_message' => array(
+				'description' => __( 'Booking Modal Warning Message', 'wp-travel-engine' ),
+				'type'        => 'string',
 			),
 			'trip_banner_layout' => array(
 				'description' => __( 'Trip Banner Layout', 'wp-travel-engine' ),

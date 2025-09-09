@@ -57,6 +57,14 @@ class Trip extends PostModel {
 	protected ?TripPackage $primary_package = null;
 
 	/**
+	 * The inventory of available packages.
+	 *
+	 * @var array
+	 * @since 6.6.7
+	 */
+	protected array $my_booked_seats = array();
+
+	/**
 	 * Constructs a new instance of the Trip class.
 	 *
 	 * This constructor calls the parent constructor and then retrieves
@@ -479,9 +487,11 @@ class Trip extends PostModel {
 	 * Check if the trip minimum/maximum participants are enabled.
 	 *
 	 * @return boolean
+	 * @updated 6.6.7
 	 */
 	public function is_enabled_min_max_participants(): bool {
-		return wptravelengine_toggled( $this->get_setting( 'minmax_pax_enable' ) ?? false );
+		return true;
+		// return wptravelengine_toggled( $this->get_setting( 'minmax_pax_enable' ) ?? false );
 	}
 
 	/**
@@ -496,10 +506,25 @@ class Trip extends PostModel {
 	/**
 	 * Get the trip maximum participants.
 	 *
-	 * @return string
+	 * @return int|string
+	 * @updated 6.6.7
 	 */
-	public function get_maximum_participants(): string {
-		return $this->get_setting( 'trip_maximum_pax' ) ?? '';
+	public function get_maximum_participants() {
+
+		$value = get_metadata_raw( 
+			'post',
+			$this->post->ID,
+			'total_travellers_per_day',
+			true
+		);
+
+		if ( is_null( $value ) ) {
+			$value = $this->get_meta( 'max_travellers_per_day' );
+			$this->update_meta( 'total_travellers_per_day', $value );
+		}
+
+		return wptravelengine_normalize_numeric_val( $value );
+		// return $this->get_setting( 'trip_maximum_pax' ) ?? '';
 	}
 
 	/**
@@ -1265,7 +1290,7 @@ class Trip extends PostModel {
 	 * @since 6.6.0
 	 */
 	public function get_trip_type(): string {
-		return $this->get_meta( 'trip_type' );
+		return $this->get_meta( 'trip_type' ) ?: 'multi';
 	}
 
 	/**
@@ -1299,5 +1324,30 @@ class Trip extends PostModel {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Get the trip booked seats of only available packages.
+	 *
+	 * @return array
+	 * @since 6.6.7
+	 */
+	public function get_my_booked_seats(): array {
+
+		if ( empty( $this->my_booked_seats ) ) {
+			$this->my_booked_seats = $this->get_inventory()->inventory_of_( array_flip( $this->get_all_package_ids() ) );
+		}
+
+		return $this->my_booked_seats;
+	}
+
+	/**
+	 * Get all package ids.
+	 * 
+	 * @return array
+	 * @since 6.6.7
+	 */
+	public function get_all_package_ids(): array {
+		return array_column( $this->packages()->array(), 'ID' );
 	}
 }

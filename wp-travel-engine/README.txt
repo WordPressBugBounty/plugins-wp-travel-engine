@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 6.6.6
+Stable tag: 6.6.7
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -367,6 +367,12 @@ Yes. We have created WooCommerce Payments add-ons that supports all the payment 
 Please send us an email via [support ticket](https://wptravelengine.com/support-ticket/?utm_source=free_plugin&utm_medium=wporg&utm_campaign=support), and we will be happy to help you.
 
 == Changelog ==
+
+= 6.6.7 - 9th September 2025 =
+* New Feature: Added global seat allocation that automatically syncs across categories, dates, and timeslots to prevent overbookings.
+* Changed: Replaced Maximum and Minimum Participants with Minimum Travellers Per Booking and Total Travellers Seat for clearer control.
+* Changed: Updated pricing categories to use Minimum Pax per category, removing the maximum option to avoid conflicts with overall trip limits.
+* Improved: Enhanced date and timeslot logic so all timeslots follow the date's total seats and align with the global trip limit.
 
 = 6.6.6 - 2nd September 2025 =
 * Improved: Email templates can now be translated using WPML.

@@ -235,7 +235,7 @@ class TripPackage extends PostModel {
 		$enabled_time_slots = ( $this->get_meta( 'enable_weekly_time_slots' ) ?? 'no' ) === 'yes';
 
 		$dates           = array();
-		$available_seats = $this->trip->is_enabled_min_max_participants() ? $this->trip->get_maximum_participants() : '';
+		$available_seats = $this->trip->get_maximum_participants();
 		$available_seats = is_numeric( $available_seats ) ? (int) $available_seats : '';
 		if ( $enabled_time_slots && 'days' !== $this->trip->get_setting( 'trip_duration_unit', 'days' ) ) {
 			$week_days_mapping = array_combine( range( 1, 7 ), array( 'MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU' ) );
@@ -264,15 +264,17 @@ class TripPackage extends PostModel {
 						'r_until'     => wp_date( 'Y-m-d', strtotime( '+1 year' ) ),
 					),
 					'seats'        => '',
+					'version'      => $args['version'] ?? PackageDateParser::$version ?? 'v2',
 				)
 			);
 
 			$package_dates = $package_date_parser->get_dates();
 			/* @var DateTime $package_date */
 			foreach ( $package_dates as $package_date ) {
-				$times         = array();
-				$times_by_days = $weekly_time_slots[ $package_date->format( 'w' ) ?: 7 ] ?? array();
-				foreach ( $times_by_days as $time ) {
+				$date 			= $package_date->format( 'Y-m-d' );
+				$times         	= array();
+				$times_by_days 	= $weekly_time_slots[ $package_date->format( 'w' ) ?: 7 ] ?? array();
+				foreach ( $times_by_days as $key => $time ) {
 					if ( empty( $time ) ) {
 						continue;
 					}
@@ -292,18 +294,34 @@ class TripPackage extends PostModel {
 					$to = clone $package_date;
 					$to->add( new DateInterval( "PT{$duration}H" ) );
 
-					$times[] = array(
+					list( $seats, $capacity ) = $package_date_parser->get_seats_details( $date, $time );
+
+					$times[ $key ] 	= array(
 						'key'   => "{$this->ID}_{$package_date->format( 'Y-m-d_H:i' )}_{$to->format('H:i')}",
 						'from'  => $from_time,
 						'to'    => $to->format( 'Y-m-d\TH:i' ),
-						'seats' => $available_seats,
+						'seats' => $seats,
 					);
+
+					if ( 'v3' === $package_date_parser->version ) {
+						$times[ $key ]['capacity'] = $capacity;
+						$times[ $key ]['seats_left'] = $seats;
+					}
 				}
-				$dates[ $package_date->format( 'Y-m-d' ) ] = array(
-					'times' => $times,
-					'seats' => is_int( $available_seats ) ? array_sum( array_column( $times, 'seats' ) ) : '',
-					'pricing' => $this->get_default_pricings(),
-				);
+
+				$capacity = $seats = '';
+				$dates[ $date ] = array();
+				if ( is_int( $available_seats ) ) {
+					$seats = array_sum( array_column( $times, 'seats' ) );
+					if ( 'v3' === $package_date_parser->version ) {
+						$capacity = array_sum( array_column( $times, 'capacity' ) );
+						$dates[ $date ]['capacity'] = $capacity;
+					}
+				}
+
+				$dates[ $date ]['times'] = $times;
+				$dates[ $date ]['seats'] = $seats;
+				$dates[ $date ]['pricing'] = $this->get_default_pricings();
 			}
 		} else {
 			$package_date_parser = new PackageDateParser(
@@ -316,6 +334,7 @@ class TripPackage extends PostModel {
 						'r_until'     => $to,
 					),
 					'seats'        => $available_seats,
+					'version'      =>  $args['version'] ?? PackageDateParser::$version ?? 'v2',
 				)
 			);
 

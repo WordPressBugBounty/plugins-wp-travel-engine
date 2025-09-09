@@ -793,7 +793,7 @@ class TripSearch {
 					. '<input type="checkbox" %1$s value="%2$s" name="%3$s" class="%3$s wte-filter-item"/>'
 					. '<span>%4$s</span>'
 					. '</label>',
-					checked( true, in_array( $term->slug, array_unique( $possible_queries ) ), false ), // phpcs:ignore
+					checked( true, ( $queried_term->taxonomy ?? '' ) === $term->taxonomy && in_array( $term->slug, array_unique( $possible_queries ) ), false ), // phpcs:ignore
 					esc_attr( $term->slug ),
 					esc_attr( $term->taxonomy ),
 					esc_html( $term->name )
@@ -994,7 +994,7 @@ class TripSearch {
 		 * @since 6.6.2
 		 * @remove in 7.0.0
 		 */
-		if ( 'yes' !== get_option( 'wptravelengine_update_trip_prices__1' ) ) {
+		if ( 'yes' !== get_option( 'wptravelengine_update_trip_prices__' ) ) {
 			$posts = get_posts( array(
 				'post_type' => WP_TRAVEL_ENGINE_POST_TYPE,
 				'post_status' => 'publish',
@@ -1010,10 +1010,13 @@ class TripSearch {
 						->set_meta( 'wp_travel_engine_setting_trip_actual_price', $trip->get_price() )
 						->save();
 				}
+				if ( $trip->get_meta( 'max_travellers_per_day' ) ) {
+					$trip->delete_meta( 'max_travellers_per_day' );
+				}
 			}
 
-			delete_option( 'wptravelengine_update_trip_prices__' );
-			update_option( 'wptravelengine_update_trip_prices__1', 'yes' );
+			delete_option( 'wptravelengine_update_trip_prices__1' );
+			update_option( 'wptravelengine_update_trip_prices__', 'yes' );
 		}
 	}
 

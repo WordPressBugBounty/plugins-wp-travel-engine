@@ -137,18 +137,23 @@ class Trip extends WP_REST_Posts_Controller {
 			)
 		);
 
-		register_rest_route(
-			$this->namespace,
-			"/$this->rest_base/(?P<id>[\d]+)/dates",
-			array(
+		foreach ( array( 'v2', 'v3' ) as $ver ) {
+			register_rest_route(
+				"wptravelengine/{$ver}",
+				"/$this->rest_base/(?P<id>[\d]+)/dates",
 				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_dates' ),
-					'permission_callback' => array( $this, 'get_items_permissions_check' ),
-					'args'                => $this->get_collection_params(),
-				),
-			)
-		);
+					array(
+						'methods'             => WP_REST_Server::READABLE,
+						'callback'            => function ( $req ) use ( $ver ) {
+							PackageDateParser::$version = $ver;
+							return $this->get_dates( $req );
+						},
+						'permission_callback' => array( $this, 'get_items_permissions_check' ),
+						'args'                => $this->get_collection_params(),
+					),
+				)
+			);
+		}
 
 		register_rest_route(
 			$this->namespace,
@@ -300,6 +305,10 @@ class Trip extends WP_REST_Posts_Controller {
 
 		$this->set_core_settings( $request );
 
+		if ( isset( $request['max_travellers_per_day'] ) ) {
+			unset( $request['max_travellers_per_day'] );
+		}
+
 		do_action( 'wptravelengine_api_update_trip', $request, $this );
 
 		if ( isset( $this->errors ) ) {
@@ -346,10 +355,14 @@ class Trip extends WP_REST_Posts_Controller {
 				$trip_settings->set( 'trip_duration_unit', $duration_unit );
 			}
 			$duration_period = $request[ 'duration' ][ 'period' ] ?? $trip_settings->get( 'trip_duration' );
-			$trip_settings->set( 'trip_duration', $duration_period );
-			$duration = $duration_unit === 'days' ? $duration_period * 24 : $duration_period;
-			$trip->set_meta( 'wp_travel_engine_setting_trip_duration', $duration );
-			$trip->set_meta( '_s_duration', $duration );
+			if ( is_numeric( $duration_period ) ) {
+				$trip_settings->set( 'trip_duration', $duration_period );
+				$duration = $duration_unit === 'days' ? $duration_period * 24 : $duration_period;
+				$trip->set_meta( 'wp_travel_engine_setting_trip_duration', $duration );
+				$trip->set_meta( '_s_duration', $duration );
+			} else {
+				$this->set_bad_request( 'invalid_duration_unit', sprintf( __( '%sDuration%s must be a number.', 'wp-travel-engine' ), '<strong>', '</strong>' ) );
+			}
 		}
 
 		if ( isset( $request[ 'duration' ][ 'nights' ] ) ) {
@@ -405,9 +418,9 @@ class Trip extends WP_REST_Posts_Controller {
 			}
 		}
 
-		if ( isset( $request[ 'participants' ][ 'enable' ] ) ) {
-			$trip_settings->set( 'minmax_pax_enable', (string) ( $request[ 'participants' ][ 'enable' ] ? 'true' : 'false' ) );
-		}
+		// if ( isset( $request[ 'participants' ][ 'enable' ] ) ) {
+		// 	$trip_settings->set( 'minmax_pax_enable', (string) ( $request[ 'participants' ][ 'enable' ] ? 'true' : 'false' ) );
+		// }
 
 		if ( isset( $request[ 'participants' ][ 'min' ] ) ) {
 			if ( $request[ 'participants' ][ 'min' ] >= 0 ) {
@@ -419,9 +432,9 @@ class Trip extends WP_REST_Posts_Controller {
 		}
 
 		if ( isset( $request[ 'participants' ][ 'max' ] ) ) {
-			if ( $request[ 'participants' ][ 'max' ] > 0 ) {
+			if ( $request[ 'participants' ][ 'max' ] > 0 || $request[ 'participants' ][ 'max' ] === '' ) {
 				$trip->set_meta( '_s_max_pax', $request[ 'participants' ][ 'max' ] );
-				$trip_settings->set( 'trip_maximum_pax', $request[ 'participants' ][ 'max' ] );
+				$trip->set_meta( 'total_travellers_per_day', $request[ 'participants' ][ 'max' ] );
 			} else {
 				$this->set_bad_request( 'invalid_participants_max', sprintf( __( '%sMaximum Participants%s must be greater than 0.', 'wp-travel-engine' ), '<strong>', '</strong>' ) );
 			}
@@ -681,7 +694,7 @@ class Trip extends WP_REST_Posts_Controller {
 						'enabled_sale'           => array_filter( array_combine( $package_ids, array_map( fn ( $val ) => $val ? '1' : null, array_column( $package[ 'traveler_categories' ], 'has_sale' ) ) ) ),
 						'sale_prices'            => array_column( $package[ 'traveler_categories' ], 'sale_price', 'id' ),
 						'min_paxes'              => array_column( $package[ 'traveler_categories' ], 'min_pax', 'id' ),
-						'max_paxes'              => array_column( $package[ 'traveler_categories' ], 'max_pax', 'id' ),
+						// 'max_paxes'              => array_column( $package[ 'traveler_categories' ], 'max_pax', 'id' ),
 						'enabled_group_discount' => array_filter( array_combine( $package_ids, array_map( fn ( $val ) => $val ? '1' : null, array_column( $package[ 'traveler_categories' ], 'has_group_pricing' ) ) ) ),
 					], fn ( $v ) => $v !== null && ! empty( $v ) ),
 					'group-pricing'            	=> $group_pricing,
@@ -733,10 +746,10 @@ class Trip extends WP_REST_Posts_Controller {
 					$this->set_bad_request( 'invalid_param', sprintf( __( '%sMinimum Pax%s %s', 'wp-travel-engine' ), '<strong>', '</strong>', $common_plain_text ), "{$package['name']}_min_pax" );
 				}
 
-				$are_max_paxes_valid = ! ! array_filter( $last_meta_input[ 'package-categories' ][ 'max_paxes' ] ?? [], fn ( $val ) => ( $val <= 0 && '' !== $val ) );
-				if ( $are_max_paxes_valid ) {
-					$this->set_bad_request( 'invalid_param', sprintf( __( '%sMaximum Pax%s %s must be greater than 0 in \'%s Package\'.', 'wp-travel-engine' ), '<strong>', '</strong>', $package[ 'name' ] ), "{$package['name']}_max_pax" );
-				}
+				// $are_max_paxes_valid = ! ! array_filter( $last_meta_input[ 'package-categories' ][ 'max_paxes' ] ?? [], fn ( $val ) => ( $val <= 0 && '' !== $val ) );
+				// if ( $are_max_paxes_valid ) {
+				// 	$this->set_bad_request( 'invalid_param', sprintf( __( '%sMaximum Pax%s %s must be greater than 0 in \'%s Package\'.', 'wp-travel-engine' ), '<strong>', '</strong>', $package[ 'name' ] ), "{$package['name']}_max_pax" );
+				// }
 
 				unset( $group_pricing, $package_dates, $package_ids, $last_meta_input, $common_plain_text, $regular_vs_sale_prices, $are_counts_valid, $are_seats_valid, $are_prices_valid, $are_sale_prices_valid, $are_min_paxes_valid, $are_max_paxes_valid );
 			}
@@ -869,9 +882,9 @@ class Trip extends WP_REST_Posts_Controller {
 		];
 
 		$data[ 'participants' ] = [
-			'enable' => wptravelengine_toggled( $trip->get_setting( 'minmax_pax_enable', false ) ),
-			'min'    => (int) $trip->get_setting( 'trip_minimum_pax', 0 ),
-			'max'    => (int) $trip->get_setting( 'trip_maximum_pax', 0 ),
+			// 'enable' => wptravelengine_toggled( $trip->get_setting( 'minmax_pax_enable', false ) ),
+			'min'    => (int) $trip->get_setting( 'trip_minimum_pax', 1 ),
+			'max'    => $trip->get_maximum_participants(),
 		];
 
 		$map_img_id = $trip->get_setting( 'map.image_url', array() );
@@ -1208,8 +1221,8 @@ class Trip extends WP_REST_Posts_Controller {
 		foreach ( $package_categories as $category ) {
 			$min_pax = $category->get( 'min_pax', '' );
 			$min_pax = is_numeric( $min_pax ) ? (int) $min_pax : 0;
-			$max_pax = $category->get( 'max_pax', '' );
-			$max_pax = is_numeric( $max_pax ) && ( + $max_pax >= $min_pax ) ? (int) $max_pax : '';
+			$max_pax = wptravelengine_normalize_numeric_val( $category->get( 'max_pax', '' ) );
+			$max_pax = is_numeric( $max_pax ) ? ( $max_pax >= $min_pax ? $max_pax : $min_pax ) : '';
 
 			$group_pricing = $category->get( 'group_pricing', array() );
 
@@ -1240,7 +1253,7 @@ class Trip extends WP_REST_Posts_Controller {
 				'has_group_pricing' => wptravelengine_toggled( $category->get( 'enabled_group_discount', false ) && ! empty( $group_pricing ) ),
 				'group_pricing'     => $group_pricing,
 				'min_pax'           => $min_pax,
-				'max_pax'           => $max_pax,
+				'max_pax'           => '',
 				'description'       => $category->get( 'description', '' ),
 				'is_primary'        => $trip_package->primary_pricing_category->id === $category->id,
 			);
@@ -1346,12 +1359,12 @@ class Trip extends WP_REST_Posts_Controller {
 				'description' => __( 'Minimum and maximum participants for booking this trip.', 'wp-travel-engine' ),
 				'type'        => 'object',
 				'properties'  => array(
-					'enable' => array(
-						'description' => __( 'Pax enabled.', 'wp-travel-engine' ),
-						'type'        => 'boolean',
-						'enum'        => array( true, false ),
-						'context'     => array( 'edit' ),
-					),
+					// 'enable' => array(
+					// 	'description' => __( 'Pax enabled.', 'wp-travel-engine' ),
+					// 	'type'        => 'boolean',
+					// 	'enum'        => array( true, false ),
+					// 	'context'     => array( 'edit' ),
+					// ),
 					'min'    => array(
 						'description' => __( 'Minimum pax.', 'wp-travel-engine' ),
 						'type'        => array( 'integer', 'string' ),

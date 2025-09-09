@@ -39,6 +39,9 @@ if ( $default_package instanceof TripPackage ) {
 if ( 'yes' === $hide_booking_form ) {
 	return;
 }
+
+$global_settings = wptravelengine_settings();
+
 $trip_booking_data = apply_filters(
 	'wptravelengine_trip_booking_modal_data',
 	array(
@@ -47,8 +50,11 @@ $trip_booking_data = apply_filters(
 		'wpXHR'       => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
 		'cartVersion' => '2.0',
 		'buttonLabel' => wp_kses_post( $attributes_parser->get( 'text' ) ),
+		'showModalWarning' 		=> wptravelengine_toggled( $global_settings->get( 'show_booking_modal_warning', true ) ),
+		'modalWarningMessage' 	=> $global_settings->get( 'booking_modal_warning_message', '' ),
 	)
 );
+
 ?>
 <div <?php echo esc_attr( $attributes_parser->wrapper_attributes() ); ?>>
 	<div class="wpte-bf-btn-wrap">

@@ -75,6 +75,14 @@ class TravelerCategories extends Iterator {
 
 		$this->available_categories = wptravelengine_settings()->get_traveler_categories( array( 'fields' => 'id=>name' ) );
 
+		/**
+		 * This is temporary max. pax. as the max. pax for each pricing category is not set
+		 * This can be replaced if max. pax. per pricing category is set in the future.
+		 * 
+		 * @since 6.6.7
+		 */
+		$max_pax = wptravelengine_normalize_numeric_val( $this->trip->get_maximum_participants() );
+
 		foreach ( $this->available_categories as $id => $label ) {
 			foreach ( $categories as $key => $values ) {
 				switch ( $key ) {
@@ -96,9 +104,9 @@ class TravelerCategories extends Iterator {
 					case 'min_paxes':
 						$_categories[ $id ][ 'min_paxes' ] = $values[ $id ] ?? '';
 						break;
-					case 'max_paxes':
-						$_categories[ $id ][ 'max_paxes' ] = $values[ $id ] ?? '';
-						break;
+					// case 'max_paxes':
+						// $_categories[ $id ][ 'max_paxes' ] = $values[ $id ] ?? '';
+						// break;
 					case 'enabled_sale':
 						$_categories[ $id ][ 'enabled_sale' ] = (bool) ( $values[ $id ] ?? false );
 						break;
@@ -113,6 +121,7 @@ class TravelerCategories extends Iterator {
 						break;
 				}
 			}
+			$_categories[ $id ][ 'max_paxes' ] = $max_pax;
 			$_categories[ $id ][ 'age_group' ] = (string) ( get_term_meta( $id )[ 'age_group' ][ 0 ] ?? '' );
 		}
 

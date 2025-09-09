@@ -25,6 +25,7 @@ wp_enqueue_script( 'wptravelengine-booking-edit' );
 					wptravelengine_get_admin_template( 'booking/partials/billing-details.php' );
 					wptravelengine_get_admin_template( 'booking/partials/additional-field.php' );
 					wptravelengine_get_admin_template( 'booking/partials/admin-notes.php' );
+					do_action( 'wptravelengine_booking_details_additional_fields', $booking );
 					?>
 
 				</div>

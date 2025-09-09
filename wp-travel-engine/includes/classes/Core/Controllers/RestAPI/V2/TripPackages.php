@@ -143,17 +143,16 @@ class TripPackages extends WP_REST_Posts_Controller {
 		$data[ 'name' ]        = $trip_package->get_title();
 		$data[ 'description' ] = $trip_package->get_content();
 		$data[ 'is_primary' ]  = $trip_package->get_id() === (int) $trip_package->get_trip()->get_meta( 'primary_package' );
-		$data[ 'min_pax' ]     = $trip_package->get_trip()->is_enabled_min_max_participants() ? (int) $trip_package->get_trip()->get_minimum_participants() : 0;
+		$data[ 'min_pax' ]     = (int) $trip_package->get_trip()->get_minimum_participants();
 
 		$package_categories = $trip_package->get_traveler_categories();
 
-		$temp_min_pax_count = 0;
 		/** @var Post\TravelerCategory $category */
 		foreach ( $package_categories as $category ) {
 			$min_pax = $category->get( 'min_pax', '' );
 			$min_pax = is_numeric( $min_pax ) ? (int) $min_pax : 0;
-			$max_pax = $category->get( 'max_pax', '' );
-			$max_pax = is_numeric( $max_pax ) && ( + $max_pax >= $min_pax ) ? (int) $max_pax : '';
+			$max_pax = wptravelengine_normalize_numeric_val( $category->get( 'max_pax', '' ) );
+			$max_pax = is_numeric( $max_pax ) ? ( $max_pax >= $min_pax ? $max_pax : $min_pax ) : '';
 
 			$group_pricing = $category->get( 'group_pricing', array() );
 
@@ -184,14 +183,11 @@ class TripPackages extends WP_REST_Posts_Controller {
 				'has_group_pricing' => wptravelengine_toggled( $category->get( 'enabled_group_discount', false ) && ! empty( $group_pricing ) ),
 				'group_pricing'     => $group_pricing,
 				'min_pax'           => $min_pax,
-				'max_pax'           => $max_pax,
+				'max_pax'           => '',
 				'description'       => $category->get( 'description', '' ),
 			);
 
-			$temp_min_pax_count += $min_pax;
 		}
-
-		$data[ 'min_pax' ] = max( $data[ 'min_pax' ], $temp_min_pax_count );
 
 		return apply_filters( 'wptravelengine_rest_prepare_package_data', $data, $trip_package );
 	}

@@ -129,7 +129,7 @@ $trip_meta_tabs = array(
 				'visibility' => ! wptravelengine_is_addon_active( 'activity-tour' ),
 				'field'      => [
 					'type'    => 'ALERT',
-					'content' => __( '<p>Do you offer activity-based or single-day tours? The Activity Tour Booking extension makes it easy to create and showcase these experiences with detailed itineraries, real-time availability, and seamless booking. <a href="https://wptravelengine.com/plugins/activity-tour-booking/" target="_blank"><strong>Get Activity Tour extension now!</strong></a></p>', 'wp-travel-engine' ),
+					'content' => __( 'Do you offer activity-based or single-day tours? The Activity Tour Booking extension makes it easy to create and showcase these experiences with detailed itineraries, real-time availability, and seamless booking. <a href="https://wptravelengine.com/plugins/activity-tour-booking/" target="_blank"><strong>Get Activity Tour extension now!</strong></a>', 'wp-travel-engine' ),
 					'status'    => 'upgrade',
 				],
 			),
@@ -198,6 +198,7 @@ $trip_meta_tabs = array(
 							'name'       => 'age_limit.min',
 							'type'       => 'NUMBER',
 							'min'        => 0,
+							'direction'  => 'vertical',
 							'attributes' => [
 								'min' => [
 									'value'   => 0,
@@ -212,6 +213,7 @@ $trip_meta_tabs = array(
 							'name'       => 'age_limit.max',
 							'type'       => 'NUMBER',
 							'min'        => 0,
+							'direction'  => 'vertical',
 							'attributes' => [
 								'min' => [
 									'value'   => 0,
@@ -228,49 +230,58 @@ $trip_meta_tabs = array(
 				],
 			),
 			array(
-				'label' => __( 'Set Minimum And Maximum Participants(Optional)', 'wp-travel-engine' ),
-				'field' => [
-					'name' => 'participants.enable',
-					'type' => 'SWITCH',
+				'visibility' => version_compare( WP_TRAVEL_ENGINE_VERSION, '7.5.0', '<' ),
+				'field'      => [
+					'type'    => 'ALERT',
+					'content' => sprintf( __( 'WP Travel Engine with the Fixed Starting Dates (FSD) addon lets you manage seats by trip, package, and departure date. This ensures accurate availability, prevents overbooking, and gives you full control over capacity. Learn more in the <a href="%s" target="_blank"><strong>documentation →</strong></a>.', 'wp-travel-engine' ), 'https://docs.wptravelengine.com/article/seat-allocation/' ),
+					'status'  => 'notice',
 				],
 			),
 			array(
-				'condition'   => 'participants.enable == true',
-				'label'       => true,
-				'description' => __( 'Set a limit to the number of participants required for each booking. Group sizes must be within the specified range to be booked.', 'wp-travel-engine' ),
-				'cols'        => 2,
-				'field'       => [
-					'type' => 'GROUP',
+				'label' => __( 'Minimum Travellers Per Booking', 'wp-travel-engine' ),
+				'field' => [
+					'name'       => 'participants.min',
+					'type'       => 'NUMBER',
+					'attributes' => [
+						'min' => [
+							'value'   => 1,
+							'message' => __( 'Minimum value must be greater than 1', 'wp-travel-engine' ),
+						],
+						'style' => array(
+							'max-width' => '90px',
+						),
+					],
 				],
-				'sub_fields'  => [
-					array(
-						'label' => 'Minimum Participants',
-						'field' => [
-							'name'       => 'participants.min',
-							'type'       => 'NUMBER',
-							'min'        => 0,
-							'attributes' => [
-								'min' => [
-									'value'   => 0,
-									'message' => __( 'Minimum value must be greater than 0', 'wp-travel-engine' ),
-								],
-							],
+			),
+			array(
+				'label' => __( 'Total Travellers Seats', 'wp-travel-engine' ),
+				'field' => [
+					'name'       => 'participants.max',
+					'type'       => 'NUMBER',
+					'attributes' => [
+						'min' => [
+							'value'   => 1,
+							'message' => __( 'Maximum value must be greater than 1', 'wp-travel-engine' ),
 						],
-					),
-					array(
-						'label' => 'Maximum Participants',
-						'field' => [
-							'name'       => 'participants.max',
-							'type'       => 'NUMBER',
-							'min'        => 1,
-							'attributes' => [
-								'min' => [
-									'value'   => 0,
-									'message' => __( 'Minimum value must be greater than 0', 'wp-travel-engine' ),
-								],
-							],
-						],
-					),
+						'style' => array(
+							'max-width' => '90px',
+						),
+					],
+				],
+			),
+			array(
+				'field' => [
+					'type'       => 'SEAT_VALIDATION_ALERT',
+					'key_names'  => [
+						'participants.min',
+						'participants.max',
+					],
+					'status'     => 'tip',
+				],
+			),
+			array(
+				'field' => [
+					'type' => 'DIVIDER',
 				],
 			),
 		),
@@ -733,6 +744,17 @@ $trip_meta_tabs = array(
 );
 // Apply filter hooks.
 $trip_meta_tabs = apply_filters( 'wp_travel_engine_admin_trip_meta_tabs', $trip_meta_tabs );
+
+if ( wptravelengine_is_addon_active( 'fixed-starting-dates' ) ) {
+	foreach ( $trip_meta_tabs['wpte-general']['fields'] as $key => $field ) {
+		if ( 'fsd' === ( $field['extension'] ?? '' ) && 'max_travellers_per_day' === $field['field']['name'] ) {
+			unset( $trip_meta_tabs['wpte-general']['fields'][$key] );
+			unset( $trip_meta_tabs['wpte-general']['fields'][$key + 1] );
+			break;
+		}
+	}
+	$trip_meta_tabs['wpte-general']['fields'] = array_values( $trip_meta_tabs['wpte-general']['fields'] );
+}
 
 // Initialize tabs class.
 require_once plugin_dir_path( WP_TRAVEL_ENGINE_FILE_PATH ) . '/admin/class-wp-travel-engine-tabs-ui.php';

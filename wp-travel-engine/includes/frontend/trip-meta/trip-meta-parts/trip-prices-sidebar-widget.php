@@ -21,6 +21,8 @@ $enable_compact_layout = isset( $settings['enable_compact_layout'] ) && 'yes' ==
 $show_enquiry_info   = ! isset( $settings['show_enquiry_info'] ) || 'yes' === $settings['show_enquiry_info'];
 $enquiry_link        = $settings['enquiry_form_link'] ?? 'default';
 $custom_enquiry_link = $settings['custom_enquiry_link'] ?? '#';
+
+$global_settings = wptravelengine_settings();
 ?>
 	<div class="widget wpte-booking-area-wrapper wpte-bf-outer <?php echo esc_attr( $wrapper_classes ); ?>">
 		<!-- Prices List -->
@@ -101,6 +103,8 @@ $custom_enquiry_link = $settings['custom_enquiry_link'] ?? '#';
 							'wpXHR'       => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
 							'cartVersion' => '2.0',
 							'buttonLabel' => esc_html__( 'Check Availability', 'wp-travel-engine' ),
+							'showModalWarning' 		=> wptravelengine_toggled( $global_settings->get( 'show_booking_modal_warning', true ) ),
+							'modalWarningMessage' 	=> $global_settings->get( 'booking_modal_warning_message', '' ),
 						)
 					);
 					?>
