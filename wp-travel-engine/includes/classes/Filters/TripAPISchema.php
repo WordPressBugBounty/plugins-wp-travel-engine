@@ -289,14 +289,6 @@ class TripAPISchema {
                 ? ( $service_data['service_type'] == 'custom' ? 'Advanced' : 'Default' )
                 : 'Default';
 
-            $service_post_data = get_post_meta($service->ID, 'wte_services', true);
-            //Map options name to service_post_data options name.
-            foreach( $service_post_data['options'] as $key => $option ) {
-                if( isset( $service_data['options'][$key] ) ) {
-                    $service_data['options'][$key] = $option;
-                }
-            }
-
             // Add service data to trip extra services.
             $data['trip_extra_services'][] = [
                 'id'            => (int)$service->ID,

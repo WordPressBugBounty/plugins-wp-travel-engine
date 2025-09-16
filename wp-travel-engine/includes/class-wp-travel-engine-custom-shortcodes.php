@@ -493,14 +493,15 @@ class WP_Travel_Engine_Custom_Shortcodes {
 					<div class="category-main-wrap <?php echo esc_attr( $view_class ); ?>">
 						<?php
 						$user_wishlists = wptravelengine_user_wishlists();
+						$template_name	= wptravelengine_get_template_by_view_mode( $atts[ 'layout' ] );
 
 			while ( $query->have_posts() ) :
 				$query->the_post();
 				$details                   = wte_get_trip_details( get_the_ID() );
 				$details['user_wishlists'] = $user_wishlists;
-				wptravelengine_get_template( 'content-' . $atts['layout'] . '.php', $details );
+				wptravelengine_get_template( $template_name, $details );
 			endwhile;
-			wp_reset_postdata();
+		wp_reset_postdata();
 			echo '</div>';
 			?>
 			</div>

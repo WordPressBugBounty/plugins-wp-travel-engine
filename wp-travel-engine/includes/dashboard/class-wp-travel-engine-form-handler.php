@@ -479,67 +479,79 @@ class Wp_Travel_Engine_Form_Handler {
 	/**
 	 * Set user dashboard profile image
 	 *
-	 * @param boolean $image_url
-	 * @param boolean $user_id
+	 * @param boolean|string $image_url
+	 * @param boolean|string|int $user_id
 	 *
-	 * @return void
+	 * @return mixed
 	 */
 	public static function set_user_profile_image( $image_url = false, $user_id = false ) {
 
-		if ( $image_url && $user_id ) :
+		if ( ! $image_url || ! $user_id ) {
+			return false;
+		}
 
-			$users_meta = get_user_meta( $user_id, 'wte_users_meta' );
+		$users_meta = get_user_meta( $user_id, 'wte_users_meta' );
 
-			if ( ! is_array( $users_meta ) ) :
-				$users_meta = array();
+		if ( ! is_array( $users_meta ) ) :
+			$users_meta = array();
+		endif;
+
+		if ( ! function_exists( 'wp_get_current_user' ) ) {
+			require_once ABSPATH . 'wp-includes/pluggable.php';
+		}
+
+		$uploads  = wp_get_upload_dir();
+		$base_real = ( $uploads['basedir'] ?? false ) ? realpath( $uploads['basedir'] ) : false;
+		if ( ! $base_real ) {
+			return false;
+		}
+
+		$wte_image_dir  = trailingslashit( $uploads[ 'basedir' ] ) . 'wp-travel-engine/images/users';
+		$img_filetype   = wp_check_filetype( $image_url, null );
+
+		if ( ! ( $img_filetype[ 'ext' ] ?? true ) || ! ( $img_filetype[ 'type' ] ?? true ) ) {
+			return false;
+		}
+
+		$img_file_ext	= $img_filetype[ 'ext' ] ?? '.jpg';
+
+		$img_file_name 	= $wte_image_dir . '/wte_users_' . $user_id . '.' . $img_file_ext;
+
+		if ( wp_mkdir_p( $wte_image_dir ) ) :
+
+			if ( file_exists( $img_file_name ) ) :
+				wp_delete_file( $img_file_name );
 			endif;
 
-			$img_upload_dir = wp_upload_dir();
-			$wte_image_dir  = trailingslashit( $img_upload_dir[ 'basedir' ] ) . 'wp-travel-engine/images/users';
-			$img_filetype   = wp_check_filetype( $image_url, null );
-			$img_file_ext   = isset( $img_filetype[ 'ext' ] ) ? $img_filetype[ 'ext' ] : '.jpg';
-
-			$img_file_name = $wte_image_dir . '/wte_users_' . $user_id . '.' . $img_file_ext;
-			if ( wp_mkdir_p( $wte_image_dir ) ) :
-
-				if ( file_exists( $image_url ) || file_exists( $wte_image_dir . '/wte_users_' . $user_id . '.' . $img_file_ext ) ) :
-
-					if ( file_exists( $wte_image_dir . '/wte_users_' . $user_id . '.' . $img_file_ext ) ) :
-						unlink( $wte_image_dir . '/wte_users_' . $user_id . '.' . $img_file_ext );
-					endif;
-
-					if ( file_exists( $image_url ) ) :
-						rename( $image_url, $wte_image_dir . '/wte_users_' . $user_id . '.' . $img_file_ext );
-					endif;
-
-				endif;
-
-			endif;
-
-			$attachment = array(
-				'post_mime_type' => $img_filetype[ 'type' ],
-				'post_title'     => sanitize_file_name( 'wte_users_' . $user_id . '.' . $img_file_ext ),
-				'post_content'   => '',
-				'post_status'    => 'inherit',
-			);
-
-			$attached_img_id = wp_insert_attachment( $attachment, $img_file_name );
-
-			if ( defined( 'ABSPATH' ) && file_exists( ABSPATH . 'wp-admin/includes/image.php' ) ) :
-
-				require_once ABSPATH . 'wp-admin/includes/image.php';
-
-				$attach_data                           = wp_generate_attachment_metadata( $attached_img_id, $img_file_name );
-				$update_attachment                     = wp_update_attachment_metadata( $attached_img_id, $attach_data );
-				$users_meta[ 'user_profile_image_id' ] = $attached_img_id;
-
-				return $attached_img_id;
-
+			if ( file_exists( $image_url ) ) :
+				$src_real = realpath( $image_url );
+				if ( $src_real && is_file( $src_real ) && strpos( wp_normalize_path( $src_real ), wp_normalize_path( $base_real ) ) === 0 ) {
+					@rename( $src_real, $img_file_name );
+				}
 			endif;
 
 		endif;
 
-		return false;
+		$attachment = array(
+			'post_mime_type' => $img_filetype[ 'type' ],
+			'post_title'     => sanitize_file_name( 'wte_users_' . $user_id . '.' . $img_file_ext ),
+			'post_content'   => '',
+			'post_status'    => 'inherit',
+		);
+
+		$attached_img_id = wp_insert_attachment( $attachment, $img_file_name );
+
+		if ( defined( 'ABSPATH' ) && file_exists( ABSPATH . 'wp-admin/includes/image.php' ) ) :
+
+			require_once ABSPATH . 'wp-admin/includes/image.php';
+
+			$attach_data                           = wp_generate_attachment_metadata( $attached_img_id, $img_file_name );
+			$update_attachment                     = wp_update_attachment_metadata( $attached_img_id, $attach_data );
+			$users_meta[ 'user_profile_image_id' ] = $attached_img_id;
+
+			return $attached_img_id;
+
+		endif;
 
 	}
 

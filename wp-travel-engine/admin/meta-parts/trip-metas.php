@@ -244,8 +244,8 @@ $trip_meta_tabs = array(
 					'type'       => 'NUMBER',
 					'attributes' => [
 						'min' => [
-							'value'   => 1,
-							'message' => __( 'Minimum value must be greater than 1', 'wp-travel-engine' ),
+							'value'   => 0,
+							'message' => __( 'Minimum value must be greater than or equal to 0', 'wp-travel-engine' ),
 						],
 						'style' => array(
 							'max-width' => '90px',

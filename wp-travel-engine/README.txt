@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 6.6.7
+Stable tag: 6.6.8
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -367,6 +367,10 @@ Yes. We have created WooCommerce Payments add-ons that supports all the payment 
 Please send us an email via [support ticket](https://wptravelengine.com/support-ticket/?utm_source=free_plugin&utm_medium=wporg&utm_campaign=support), and we will be happy to help you.
 
 == Changelog ==
+
+= 6.6.8 - 16th September 2025 =
+* Security: Fixed multiple vulnerabilities to ensure safer use of file uploads.
+* Fixed: Improved reliability when uploading and processing files.
 
 = 6.6.7 - 9th September 2025 =
 * New Feature: Added global seat allocation that automatically syncs across categories, dates, and timeslots to prevent overbookings.

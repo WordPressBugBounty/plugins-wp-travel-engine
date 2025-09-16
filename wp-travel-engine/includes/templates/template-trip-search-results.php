@@ -75,6 +75,7 @@ $active_theme = get_option( 'template', '' );
 					}
 
 					$user_wishlists = wptravelengine_user_wishlists();
+					$template_name	= wptravelengine_get_template_by_view_mode( $view_mode );
 
 					while ( $query->have_posts() ) {
 						$query->the_post();
@@ -82,7 +83,7 @@ $active_theme = get_option( 'template', '' );
 						$details['j']              = $j;
 						$details['user_wishlists'] = $user_wishlists;
 
-						wptravelengine_get_template( 'content-' . $view_mode . '.php', $details );
+						wptravelengine_get_template( $template_name, $details );
 						$j++;
 					}
 						wp_reset_postdata();

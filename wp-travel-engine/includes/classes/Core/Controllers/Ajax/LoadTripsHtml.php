@@ -36,16 +36,15 @@ class LoadTripsHtml extends AjaxController {
 		$query = new \WP_Query( $args );
 		ob_start();
 
-		$view_mode  = wte_clean( wp_unslash( $post['mode'] ) );
-
 		$user_wishlists = wptravelengine_user_wishlists();
+		$template_name	= wptravelengine_get_template_by_view_mode( $view_mode );
 
 		// phpcs:enable
 		while ( $query->have_posts() ) :
 			$query->the_post();
 			$details                   = \wte_get_trip_details( get_the_ID() );
 			$details['user_wishlists'] = $user_wishlists;
-			wptravelengine_get_template( 'content-' . $view_mode . '.php', $details );
+			wptravelengine_get_template( $template_name, $details );
 		endwhile;
 		
 		wp_reset_postdata();

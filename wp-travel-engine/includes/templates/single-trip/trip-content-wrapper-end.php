@@ -16,6 +16,8 @@ $settings                      = get_option( 'wp_travel_engine_settings', array(
 $custom_enquiry_form_shortcode = ( isset( $settings['enquiry_shortcode'] ) && '' !== $settings['enquiry_shortcode'] ) ? $settings['enquiry_shortcode'] : '';
 
 if ( empty( $settings['enquiry'] ) ) {
+	do_action( 'wptravelengine_before_enquiry_form' );
+
 	/**
 	 * Custom Enquiry Form Check .
 	 *

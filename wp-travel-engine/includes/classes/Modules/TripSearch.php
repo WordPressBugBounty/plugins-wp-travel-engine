@@ -366,13 +366,14 @@ class TripSearch {
 		$view_class = 'grid' === $view_mode ? ( $show_sidebar ? 'col-2 category-grid' : 'col-3 category-grid' ) : 'category-list';
 
 		$user_wishlists = wptravelengine_user_wishlists();
+		$template_name	= wptravelengine_get_template_by_view_mode( $view_mode );
 
 		// phpcs:enable
 		while ( $query->have_posts() ) :
 			$query->the_post();
 			$details                     = \wte_get_trip_details( get_the_ID() );
 			$details[ 'user_wishlists' ] = $user_wishlists;
-			wptravelengine_get_template( 'content-' . $view_mode . '.php', $details );
+			wptravelengine_get_template( $template_name, $details );
 		endwhile;
 		\wp_reset_postdata();
 
@@ -421,13 +422,14 @@ class TripSearch {
 		echo '<div class="category-main-wrap ' . esc_attr( $view_class ) . '">';
 
 		$user_wishlists = wptravelengine_user_wishlists();
+		$template_name	= wptravelengine_get_template_by_view_mode( $view_mode );
 
 		while ( $query->have_posts() ) :
 			$query->the_post();
 			$details                     = wte_get_trip_details( get_the_ID() );
 			$details[ 'user_wishlists' ] = $user_wishlists;
 
-			wptravelengine_get_template( 'content-' . $view_mode . '.php', $details );
+			wptravelengine_get_template( $template_name, $details );
 		endwhile;
 		wp_reset_postdata();
 		echo '</div>';

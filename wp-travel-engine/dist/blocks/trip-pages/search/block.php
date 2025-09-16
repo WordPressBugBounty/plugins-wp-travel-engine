@@ -40,6 +40,7 @@ return;
 					echo '<div class="category-main-wrap ' . esc_attr( $view_class ) . '">';
 					$query          = new \WP_Query( TripSearch::get_query_args() );
 					$user_wishlists = wptravelengine_user_wishlists();
+					$template_name	= wptravelengine_get_template_by_view_mode( $view_mode );
 
 					while ( $query->have_posts() ) {
 						$query->the_post();
@@ -47,7 +48,7 @@ return;
 						$details['j']              = $j;
 						$details['user_wishlists'] = $user_wishlists;
 
-						wptravelengine_get_template( 'content-' . $view_mode . '.php', $details );
+						wptravelengine_get_template( $template_name, $details );
 						$j++;
 					}
 						wp_reset_postdata();

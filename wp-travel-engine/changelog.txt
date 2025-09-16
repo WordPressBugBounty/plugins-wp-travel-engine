@@ -1,5 +1,9 @@
 == Changelog ==
 
+= 6.6.8 - 16th September 2025 =
+* Security: Fixed multiple vulnerabilities to ensure safer use of file uploads.
+* Fixed: Improved reliability when uploading and processing files.
+
 = 6.6.7 - 9th September 2025 =
 * New Feature: Added global seat allocation that automatically syncs across categories, dates, and timeslots to prevent overbookings.
 * Changed: Replaced Maximum and Minimum Participants with Minimum Travellers Per Booking and Total Travellers Seat for clearer control.

@@ -191,7 +191,7 @@ class EnquiryMail extends AjaxController {
 		$admin_sent = false;
 		foreach ( $to as $val ) {
 			$email_instance = new Email();
-			$admin_sent     = $email_instance->add_headers( array( "from" => "From: {$name}<{$email}>", "reply_to" => "Reply-To: {$name}<{$email}>" ) )
+			$admin_sent     = $email_instance->add_headers( array( "reply_to" => "Reply-To: {$name}<{$email}>" ) )
 			                                 ->set( 'to', $val )
 			                                 ->set( 'my_subject', esc_html( $subject ) )
 			                                 ->set( 'attachments', $attachments )

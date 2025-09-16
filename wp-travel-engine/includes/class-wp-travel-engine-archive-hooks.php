@@ -49,22 +49,10 @@ class Wp_Travel_Engine_Archive_Hooks {
 	 *
 	 * @since 1.0.0
 	 * @return string
+	 * @updated 6.6.8 Migrated the code to wp_travel_engine_get_archive_view_mode() function due to security reason.
 	 */
 	public static function archive_view_mode() {
-
-		if ( wp_is_mobile() ) {
-			return 'grid';
-		}
-
-		// phpcs:disable
-		if ( isset( $_GET['view_mode'] ) && ( 'grid' === $_GET['view_mode'] || 'list' === $_GET['view_mode'] ) ) {
-			$view_mode = wte_clean( wp_unslash( $_GET['view_mode'] ) );
-		} else {
-			$view_mode = apply_filters( 'wp_travel_engine_default_archive_view_mode', get_option( 'wptravelengine_trip_view_mode', 'list' ) );
-		}
-		// phpcs:enable
-
-		return $view_mode;
+		return wp_travel_engine_get_archive_view_mode();
 	}
 
 	/**
@@ -256,11 +244,13 @@ class Wp_Travel_Engine_Archive_Hooks {
 		$featured_query = new \WP_Query( $args );
 
 		$user_wishlists = wptravelengine_user_wishlists();
+		$template_name	= wptravelengine_get_template_by_view_mode( $view_mode );
+
 		while ( $featured_query->have_posts() ) :
 			$featured_query->the_post();
 			$details                   = wte_get_trip_details( get_the_ID() );
 			$details['user_wishlists'] = $user_wishlists;
-			wptravelengine_get_template( 'content-' . $view_mode . '.php', $details );
+			wptravelengine_get_template( $template_name, $details );
 		endwhile;
 
 		wp_reset_postdata();
@@ -526,6 +516,7 @@ class Wp_Travel_Engine_Archive_Hooks {
 					}
 
 					$user_wishlists = wptravelengine_user_wishlists();
+					$template_name	= wptravelengine_get_template_by_view_mode( $view_mode );
 
 					while ( self::$query->have_posts() ) {
 						self::$query->the_post();
@@ -533,7 +524,7 @@ class Wp_Travel_Engine_Archive_Hooks {
 						if ( $details ) {
 							$details['j']              = $j;
 							$details['user_wishlists'] = $user_wishlists;
-							wptravelengine_get_template( 'content-' . $view_mode . '.php', $details );
+							wptravelengine_get_template( $template_name, $details );
 							$j++;
 						}
 					}

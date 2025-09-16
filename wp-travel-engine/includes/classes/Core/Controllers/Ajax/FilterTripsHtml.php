@@ -69,7 +69,7 @@ class FilterTripsHtml extends AjaxController {
 		$is_load_more 	= wptravelengine_toggled( self::$post_data['is_load_more'] ?? false );
 		$show_featured 	= wptravelengine_toggled( self::$post_data['show_featured'] );
 		$posts_per_page = get_option( 'posts_per_page', 10 );
-		$view_mode 		= !empty( self::$post_data['mode'] ) ? wte_clean( wp_unslash( self::$post_data['mode'] ) ) : wp_travel_engine_get_archive_view_mode();
+		$view_mode 		= wp_travel_engine_get_archive_view_mode();
 		$has_more_posts = $this->query->found_posts > $posts_per_page;
 		$_show_more_ 	= get_option( 'wptravelengine_archive_display_mode', 'pagination' ) === 'load_more';
 		$show_load_more = $_show_more_ && $has_more_posts;
@@ -117,7 +117,9 @@ class FilterTripsHtml extends AjaxController {
 	 */
 	private function render_posts( $view_mode ): void {
 		$post_ids = array();
+
 		$user_wishlists = wptravelengine_user_wishlists();
+		$template_name	= wptravelengine_get_template_by_view_mode( $view_mode );
 
 		while ( $this->query->have_posts() ) :
 			$this->query->the_post();
@@ -131,7 +133,7 @@ class FilterTripsHtml extends AjaxController {
 			$details                   = wte_get_trip_details( $post_id );
 			$details['user_wishlists'] = $user_wishlists;
 
-			wptravelengine_get_template( "content-{$view_mode}.php", $details );
+			wptravelengine_get_template( $template_name, $details );
 		endwhile;
 
 		wp_reset_postdata();

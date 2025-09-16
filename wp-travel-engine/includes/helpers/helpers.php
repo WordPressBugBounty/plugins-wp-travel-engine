@@ -22,6 +22,21 @@ use WPTravelEngine\PaymentGateways\PaymentGateways;
 use WPTravelEngine\Utilities\RequestParser;
 
 /**
+ * Get template by view mode.
+ *
+ * @param string $view_mode View mode.
+ * 
+ * @return string Template path.
+ * @since 6.6.8
+ */
+function wptravelengine_get_template_by_view_mode( $view_mode = 'default' ) {
+	if( $view_mode === 'default' ) {
+		$view_mode = wp_travel_engine_get_archive_view_mode();
+	}
+	return sanitize_file_name( 'content-' . $view_mode . '.php' );
+}
+
+/**
  * Get the discount label.
  *
  * @param TripPackage $trip_package
@@ -971,12 +986,33 @@ function wte_purge_transients( $prefix ) {
 }
 
 /**
- * Get view mode
+ * Get view mode from request and default view mode.
  *
  * @return string $view_mode
+ * @updated 6.6.8
  */
 function wp_travel_engine_get_archive_view_mode() {
-	return Wp_Travel_Engine_Archive_Hooks::archive_view_mode();
+
+	$view_mode = apply_filters( 'wp_travel_engine_default_archive_view_mode', get_option( 'wptravelengine_trip_view_mode', 'list' ) );
+
+	if ( wp_is_mobile() ) {
+		$view_mode = 'grid';
+	}
+
+	if ( isset( $_REQUEST['mode'] ) ) {
+		$view_mode = sanitize_text_field( wp_unslash( $_REQUEST['mode'] ) );
+	} else if ( isset( $_REQUEST['view_mode'] ) ) {
+		$view_mode = sanitize_text_field( wp_unslash( $_REQUEST['view_mode'] ) );
+	}
+
+	$allowed_modes 	= apply_filters( 'wptravelengine_allowed_archive_view_modes', array( 'grid', 'list' ) );
+	$view_mode 		= apply_filters( 'wptravelengine_archive_view_mode', $view_mode );
+
+	if ( !in_array( $view_mode, $allowed_modes, true ) ) {
+		$view_mode = 'list';
+	}
+
+	return $view_mode;
 }
 
 /**

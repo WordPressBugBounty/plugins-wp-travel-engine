@@ -259,6 +259,7 @@ if ( ! class_exists( 'WTE_Show_Trip_Results' ) ) {
 
 							echo '<div class="category-main-wrap ' . esc_attr( $view_class ) . '">';
 							$user_wishlists = wptravelengine_user_wishlists();
+							$template_name	= wptravelengine_get_template_by_view_mode( $view_mode );
 
 							while ( $query->have_posts() ) {
 								$query->the_post();
@@ -266,7 +267,7 @@ if ( ! class_exists( 'WTE_Show_Trip_Results' ) ) {
 								$details['j'] = $j;
 								$details['user_wishlists'] = $user_wishlists;
 
-								wptravelengine_get_template( 'content-' . $view_mode . '.php', $details );
+								wptravelengine_get_template( $template_name, $details );
 								$j++;
 							}
 								wp_reset_postdata();
