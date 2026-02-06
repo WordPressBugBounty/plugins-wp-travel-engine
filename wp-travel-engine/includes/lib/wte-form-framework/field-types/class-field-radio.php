@@ -85,7 +85,7 @@ class WP_Travel_Engine_Form_Field_Radio {
 						esc_html( $value )
 					);
 
-				$index++;
+				++$index;
 			}
 
 			$output .= sprintf( '<div id="%s"></div>', $error_coontainer_id );

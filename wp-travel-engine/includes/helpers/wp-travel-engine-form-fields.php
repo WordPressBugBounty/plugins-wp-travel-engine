@@ -12,7 +12,7 @@
 function wp_travel_engine_get_checkout_form_fields() {
 
 	$options                           = get_option( 'wp_travel_engine_settings', true );
-	$wp_travel_engine_terms_conditions = isset( $options[ 'pages' ][ 'wp_travel_engine_terms_and_conditions' ] ) ? esc_attr( $options[ 'pages' ][ 'wp_travel_engine_terms_and_conditions' ] ) : '';
+	$wp_travel_engine_terms_conditions = isset( $options['pages']['wp_travel_engine_terms_and_conditions'] ) ? esc_attr( $options['pages']['wp_travel_engine_terms_and_conditions'] ) : '';
 
 	$checkout_fields = array(
 		'datetime'   => array(
@@ -26,7 +26,7 @@ function wp_travel_engine_get_checkout_form_fields() {
 				'maxlength' => '50',
 				'type'      => 'alphanum',
 			),
-			'default' => isset( $_SESSION[ 'trip-date' ] ) ? wte_clean( wp_unslash( $_SESSION[ 'trip-date' ] ) ) : '',
+			'default'       => isset( $_SESSION['trip-date'] ) ? wte_clean( wp_unslash( $_SESSION['trip-date'] ) ) : '',
 			'priority'      => 10,
 		),
 		'first_name' => array(
@@ -149,7 +149,7 @@ function wp_travel_engine_get_checkout_form_fields() {
 
 		$privacy_policy_lbl = sprintf( __( 'Check the box to confirm you\'ve read and agree to our <a href="%1$s" id="terms-and-conditions" target="_blank"> Terms and Conditions</a> and <a href="%2$s" id="privacy-policy" target="_blank">Privacy Policy</a>.', 'wp-travel-engine' ), esc_url( get_permalink( $wp_travel_engine_terms_conditions ) ), esc_url( get_privacy_policy_url() ) );
 
-		$checkout_fields[ 'privacy_policy_info' ] = array(
+		$checkout_fields['privacy_policy_info'] = array(
 			'type'              => 'checkbox',
 			'options'           => array( '0' => $privacy_policy_lbl ),
 			'name'              => 'wp_travel_engine_booking_setting[terms_conditions]',
@@ -167,11 +167,11 @@ function wp_travel_engine_get_checkout_form_fields() {
 			'priority'          => 70,
 		);
 
-	} else if ( current_user_can( 'edit_theme_options' ) ) {
+	} elseif ( current_user_can( 'edit_theme_options' ) ) {
 
 		$privacy_policy_lbl = sprintf( __( '%1$sPrivacy Policy page not set or not published, please check Admin Dashboard > Settings > Privacy.%2$s', 'wp-travel-engine' ), '<p style="color:red;">', '</p>' );
 
-		$checkout_fields[ 'privacy_policy_info' ] = array(
+		$checkout_fields['privacy_policy_info'] = array(
 			'type'     => 'text_info',
 			// 'label'             => __( 'Privacy Policy', 'wp-travel-engine' ),
 			'id'       => 'wp-travel-engine-privacy-info',
@@ -182,7 +182,6 @@ function wp_travel_engine_get_checkout_form_fields() {
 	}
 
 	return apply_filters( 'wp_travel_engine_checkout_default_fields', $checkout_fields );
-
 }
 
 /**
@@ -289,8 +288,7 @@ function wp_travel_engine_get_enquiry_form_fields() {
 			'id'            => 'enquiry_children',
 			'placeholder'   => __( 'Enter Number of Children', 'wp-travel-engine' ),
 			'validations'   => array(
-				'type' => 'alphanum',
-				'min'  => 1,
+				'min' => 0,
 			),
 			'default'       => '',
 			'priority'      => 60,
@@ -319,7 +317,7 @@ function wp_travel_engine_get_enquiry_form_fields() {
 	);
 
 	if ( is_singular( 'trip' ) ) {
-		$enquiry_fields[ 'package_id' ]    = array(
+		$enquiry_fields['package_id']    = array(
 			'type'          => 'hidden',
 			'name'          => 'package_id',
 			'wrapper_class' => 'row-repeater package-name-holder',
@@ -327,7 +325,7 @@ function wp_travel_engine_get_enquiry_form_fields() {
 			'default'       => esc_attr( $post_id ),
 			'priority'      => 8,
 		);
-		$enquiry_fields[ 'package_label' ] = array(
+		$enquiry_fields['package_label'] = array(
 			'type'          => 'text_info',
 			'wrapper_class' => 'row-repeater package-name-holder',
 			'field_label'   => __( 'Package name:', 'wp-travel-engine' ),
@@ -340,7 +338,7 @@ function wp_travel_engine_get_enquiry_form_fields() {
 			'default'       => get_the_title( $post_id ),
 			'priority'      => 9,
 		);
-		$enquiry_fields[ 'package_name' ]  = array(
+		$enquiry_fields['package_name']  = array(
 			'type'     => 'hidden',
 			'name'     => 'package_name',
 			'id'       => 'package_name',
@@ -351,14 +349,14 @@ function wp_travel_engine_get_enquiry_form_fields() {
 		$wp_travel_engine_settings = get_option( 'wp_travel_engine_settings', true );
 		$url                       = '';
 
-		if ( isset( $wp_travel_engine_settings[ 'pages' ][ 'enquiry' ] ) && $wp_travel_engine_settings[ 'pages' ][ 'enquiry' ] != '' ) {
+		if ( isset( $wp_travel_engine_settings['pages']['enquiry'] ) && $wp_travel_engine_settings['pages']['enquiry'] != '' ) {
 
-			$url = $wp_travel_engine_settings[ 'pages' ][ 'enquiry' ];
+			$url = $wp_travel_engine_settings['pages']['enquiry'];
 			$url = get_permalink( $url );
 
 		}
 
-		$enquiry_fields[ 'redirect-url' ] = array(
+		$enquiry_fields['redirect-url'] = array(
 			'type'          => 'hidden',
 			'name'          => 'redirect-url',
 			'wrapper_class' => 'row-repeater package-name-holder',
@@ -369,11 +367,11 @@ function wp_travel_engine_get_enquiry_form_fields() {
 
 		if ( function_exists( 'get_privacy_policy_url' ) && get_privacy_policy_url() ) {
 
-			$enquiry_fields[ 'enquiry_confirmation' ] = array(
+			$enquiry_fields['enquiry_confirmation'] = array(
 				'type'              => 'checkbox',
 				'label'             => __( 'Privacy Policy', 'wp-travel-engine' ),
-				'options' 			=> array( 
-					'on' => isset( $wp_travel_engine_settings[ 'gdpr_msg' ] ) ? esc_attr( $wp_travel_engine_settings[ 'gdpr_msg' ] ) . get_the_privacy_policy_link() . '.' : sprintf( __( 'By contacting us, you agree to our <a href="%1$s">Privacy Ploicy</a>', 'wp-travel-engine' ), get_privacy_policy_url() ) 
+				'options'           => array(
+					'on' => isset( $wp_travel_engine_settings['gdpr_msg'] ) ? esc_attr( $wp_travel_engine_settings['gdpr_msg'] ) . get_the_privacy_policy_link() . '.' : sprintf( __( 'By contacting us, you agree to our <a href="%1$s">Privacy Ploicy</a>', 'wp-travel-engine' ), get_privacy_policy_url() ),
 				),
 				'name'              => 'enquiry_confirmation',
 				'wrapper_class'     => 'row-form confirm-holder',
@@ -387,11 +385,11 @@ function wp_travel_engine_get_enquiry_form_fields() {
 				'priority'          => 80,
 			);
 
-		} else if ( current_user_can( 'edit_theme_options' ) ) {
+		} elseif ( current_user_can( 'edit_theme_options' ) ) {
 
 			$privacy_policy_lbl = sprintf( __( '%1$sPrivacy Policy page not set or not published, please check Admin Dashboard > Settings > Privacy.%2$s', 'wp-travel-engine' ), '<p style="color:red;">', '</p>' );
 
-			$enquiry_fields[ 'enquiry_confirmation' ] = array(
+			$enquiry_fields['enquiry_confirmation'] = array(
 				'type'     => 'text_info',
 				'label'    => __( 'Privacy Policy', 'wp-travel-engine' ),
 				'id'       => 'enquiry_confirmation',
@@ -402,7 +400,6 @@ function wp_travel_engine_get_enquiry_form_fields() {
 	}
 
 	return apply_filters( 'wp_travel_engine_enquiry_default_fields', $enquiry_fields );
-
 }
 
 /**
@@ -411,13 +408,13 @@ function wp_travel_engine_get_enquiry_form_fields() {
  * @return void
  */
 function wp_travel_engine_traveller_information_fields( $no_travellers = 1 ) {
-	wp_enqueue_script( "jquery-ui-datepicker" );
+	wp_enqueue_script( 'jquery-ui-datepicker' );
 
 	$wp_travel_engine_settings_options = get_option( 'wp_travel_engine_settings', true );
 	$travellers_information_fields     = array();
 	$travellers_information_emergency  = array();
 
-	for ( $i = 1; $i <= $no_travellers; $i ++ ) :
+	for ( $i = 1; $i <= $no_travellers; $i++ ) :
 
 		$travellers_information_fields[ $i ] = array(
 
@@ -425,11 +422,12 @@ function wp_travel_engine_traveller_information_fields( $no_travellers = 1 ) {
 				'type'     => 'heading',
 				'class'    => 'relation-options-title',
 				'tag'      => 'div',
-				'title'    => __( 'Personal details for Traveller: ' . $i, 'wp-travel-engine' ),
+				/* translators: %d: traveller number */
+				'title'    => sprintf( __( 'Personal details for Traveller: %d', 'wp-travel-engine' ), $i ),
 				'priority' => 9,
 			),
 
-			'traveller_title' => array(
+			'traveller_title'           => array(
 				'type'          => 'select',
 				'field_label'   => __( 'Title', 'wp-travel-engine' ),
 				'wrapper_class' => 'wp-travel-engine-personal-details',
@@ -451,7 +449,7 @@ function wp_travel_engine_traveller_information_fields( $no_travellers = 1 ) {
 				'priority'      => 10,
 			),
 
-			'traveller_first_name' => array(
+			'traveller_first_name'      => array(
 				'type'          => 'text',
 				'wrapper_class' => 'wp-travel-engine-personal-details',
 				'field_label'   => __( 'First Name', 'wp-travel-engine' ),
@@ -466,7 +464,7 @@ function wp_travel_engine_traveller_information_fields( $no_travellers = 1 ) {
 				'priority'      => 20,
 			),
 
-			'traveller_last_name' => array(
+			'traveller_last_name'       => array(
 				'type'          => 'text',
 				'wrapper_class' => 'wp-travel-engine-personal-details',
 				'field_label'   => __( 'Last Name', 'wp-travel-engine' ),
@@ -496,7 +494,7 @@ function wp_travel_engine_traveller_information_fields( $no_travellers = 1 ) {
 				'priority'      => 40,
 			),
 
-			'traveller_email' => array(
+			'traveller_email'           => array(
 				'type'          => 'email',
 				'wrapper_class' => 'wp-travel-engine-personal-details',
 				'class'         => 'input',
@@ -510,7 +508,7 @@ function wp_travel_engine_traveller_information_fields( $no_travellers = 1 ) {
 				'priority'      => 50,
 			),
 
-			'traveller_address' => array(
+			'traveller_address'         => array(
 				'type'          => 'text',
 				'wrapper_class' => 'wp-travel-engine-personal-details',
 				'field_label'   => __( 'Address', 'wp-travel-engine' ),
@@ -525,7 +523,7 @@ function wp_travel_engine_traveller_information_fields( $no_travellers = 1 ) {
 				'priority'      => 60,
 			),
 
-			'traveller_city' => array(
+			'traveller_city'            => array(
 				'type'          => 'text',
 				'wrapper_class' => 'wp-travel-engine-personal-details',
 				'field_label'   => __( 'City', 'wp-travel-engine' ),
@@ -540,7 +538,7 @@ function wp_travel_engine_traveller_information_fields( $no_travellers = 1 ) {
 				'priority'      => 70,
 			),
 
-			'traveller_country' => array(
+			'traveller_country'         => array(
 				'type'          => 'country_dropdown',
 				'field_label'   => __( 'Country', 'wp-travel-engine' ),
 				'wrapper_class' => 'wp-travel-engine-personal-details',
@@ -554,7 +552,7 @@ function wp_travel_engine_traveller_information_fields( $no_travellers = 1 ) {
 				'priority'      => 80,
 			),
 
-			'traveller_postcode' => array(
+			'traveller_postcode'        => array(
 				'type'          => 'text',
 				'wrapper_class' => 'wp-travel-engine-personal-details',
 				'field_label'   => __( 'Post-code', 'wp-travel-engine' ),
@@ -569,7 +567,7 @@ function wp_travel_engine_traveller_information_fields( $no_travellers = 1 ) {
 				'priority'      => 90,
 			),
 
-			'traveller_phone' => array(
+			'traveller_phone'           => array(
 				'type'          => 'tel',
 				'wrapper_class' => 'wp-travel-engine-personal-details',
 				'field_label'   => __( 'Phone', 'wp-travel-engine' ),
@@ -584,14 +582,14 @@ function wp_travel_engine_traveller_information_fields( $no_travellers = 1 ) {
 				'priority'      => 100,
 			),
 
-			'traveller_dob' => array(
+			'traveller_dob'             => array(
 				'type'          => 'datepicker',
 				'class'         => 'wp-travel-engine-datetime hasDatepicker',
 				'wrapper_class' => 'wp-travel-engine-personal-details',
 				'field_label'   => __( 'Date of Birth', 'wp-travel-engine' ),
 				'name'          => 'wp_travel_engine_placeorder_setting[place_order][travelers][dob][' . $i . ']',
-				'id'         => 'wp_travel_engine_placeorder_setting[place_order][travelers][dob][' . $i . ']',
-				'attributes' => array(
+				'id'            => 'wp_travel_engine_placeorder_setting[place_order][travelers][dob][' . $i . ']',
+				'attributes'    => array(
 					'data-id' => 'travellers_dob-' . $i,
 				),
 				'validations'   => array(
@@ -605,19 +603,20 @@ function wp_travel_engine_traveller_information_fields( $no_travellers = 1 ) {
 
 		);
 
-		if ( ! isset( $wp_travel_engine_settings_options[ 'emergency' ] ) ) :
+		if ( ! isset( $wp_travel_engine_settings_options['emergency'] ) ) :
 
 			$travellers_information_emergency = array(
 
-				'traveller_emergency_heading' => array(
+				'traveller_emergency_heading'    => array(
 					'type'     => 'heading',
 					'class'    => 'relation-options-title',
 					'tag'      => 'div',
-					'title'    => __( 'Emergency contact details for Traveller: ' . $i, 'wp-travel-engine' ),
+					/* translators: %d: traveller number */
+					'title'    => sprintf( __( 'Emergency contact details for Traveller: %d', 'wp-travel-engine' ), $i ),
 					'priority' => 120,
 				),
 
-				'traveller_emergency_title' => array(
+				'traveller_emergency_title'      => array(
 					'type'          => 'select',
 					'field_label'   => __( 'Title', 'wp-travel-engine' ),
 					'wrapper_class' => 'wp-travel-engine-relation-details',
@@ -654,7 +653,7 @@ function wp_travel_engine_traveller_information_fields( $no_travellers = 1 ) {
 					'priority'      => 140,
 				),
 
-				'traveller_emergency_last_name' => array(
+				'traveller_emergency_last_name'  => array(
 					'type'          => 'text',
 					'wrapper_class' => 'wp-travel-engine-relation-details',
 					'field_label'   => __( 'Last Name', 'wp-travel-engine' ),
@@ -669,7 +668,7 @@ function wp_travel_engine_traveller_information_fields( $no_travellers = 1 ) {
 					'priority'      => 150,
 				),
 
-				'traveller_emergency_phone' => array(
+				'traveller_emergency_phone'      => array(
 					'type'          => 'tel',
 					'wrapper_class' => 'wp-travel-engine-relation-details',
 					'field_label'   => __( 'Phone', 'wp-travel-engine' ),
@@ -684,7 +683,7 @@ function wp_travel_engine_traveller_information_fields( $no_travellers = 1 ) {
 					'priority'      => 160,
 				),
 
-				'traveller_emergency_relation' => array(
+				'traveller_emergency_relation'   => array(
 					'type'          => 'text',
 					'wrapper_class' => 'wp-travel-engine-relation-details',
 					'field_label'   => __( 'Relationship', 'wp-travel-engine' ),
@@ -711,5 +710,4 @@ function wp_travel_engine_traveller_information_fields( $no_travellers = 1 ) {
 	endfor;
 
 	return apply_filters( 'wp_travel_engine_enquiry_default_fields', $travellers_information_fields );
-
 }

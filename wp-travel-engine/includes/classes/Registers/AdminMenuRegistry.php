@@ -55,13 +55,13 @@ class AdminMenuRegistry extends Registrable {
 		$this->check_missing_args( $args );
 
 		\add_menu_page(
-			$args[ 'page_title' ],
-			$args[ 'menu_title' ],
-			$args[ 'capability' ],
+			$args['page_title'],
+			$args['menu_title'],
+			$args['capability'],
 			$menu::SLUG,
-			$args[ 'callback' ],
+			$args['callback'],
 			$menu->get_icon(),
-			$args[ 'position' ] ?? null
+			$args['position'] ?? null
 		);
 	}
 
@@ -96,13 +96,13 @@ class AdminMenuRegistry extends Registrable {
 		$this->check_missing_args( $args );
 
 		\add_submenu_page(
-			$args[ 'parent_slug' ],
-			$args[ 'page_title' ],
-			$args[ 'menu_title' ],
-			$args[ 'capability' ],
+			$args['parent_slug'],
+			$args['page_title'],
+			$args['menu_title'],
+			$args['capability'],
 			$menu::SLUG,
-			$args[ 'callback' ],
-			$args[ 'position' ] ?? null
+			$args['callback'],
+			$args['position'] ?? null
 		);
 	}
 }

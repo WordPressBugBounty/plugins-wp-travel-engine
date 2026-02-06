@@ -32,7 +32,7 @@ if ( $render->is_editor() ) {
 		$itineraries = array();
 	}
 	if ( ! defined( 'WTEAI_VERSION' ) ) {
-		if( isset( $itinerary ) && isset( $itinerary['itinerary_title'] ) ){
+		if ( isset( $itinerary ) && isset( $itinerary['itinerary_title'] ) ){
 			foreach ( $itinerary['itinerary_title'] as $key => $itinerary_title ) {
 				if ( isset( $itinerary['itinerary_content'][ $key ] ) ) {
 					$itineraries[] = array(

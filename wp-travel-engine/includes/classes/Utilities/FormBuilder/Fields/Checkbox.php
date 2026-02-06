@@ -18,15 +18,15 @@ class Checkbox extends Select {
 	 */
 	protected function options(): string {
 
-		$options     = [];
+		$options     = array();
 		$index       = 0;
-		$field_value = is_scalar( $this->field_value ) ? [ $this->field_value ] : $this->field_value;
+		$field_value = is_scalar( $this->field_value ) ? array( $this->field_value ) : $this->field_value;
 
 		$option_attributes = $this->concat_attributes( $this->option_attributes );
 		if ( empty( $this->options ) ) {
-			$checked           = checked( $this->field_value, '1', false );
+			$checked            = checked( $this->field_value, '1', false );
 			$option_attributes .= ' data-parsley-multiple="checkbox" data-parsley-mincheck="1" data-parsley-required ';
-			$attributes        = [ $this->field_name, '1', $this->field_id, $checked, $option_attributes ];
+			$attributes         = array( $this->field_name, '1', $this->field_id, $checked, $option_attributes );
 
 			return sprintf(
 				'<div class="wpte-checkbox-wrap"><input type="checkbox" name="%1$s" value="%2$s" id="%3$s" %4$s %5$s><label for="%3$s"></label></div>',
@@ -41,7 +41,7 @@ class Checkbox extends Select {
 						</div>',
 				$this->field_name . '[]',
 				$value,
-				$this->field_id . '_' . $index ++,
+				$this->field_id . '_' . $index++,
 				$option_attributes,
 				$label,
 				checked( in_array( $value, $field_value, true ), true, false )

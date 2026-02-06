@@ -4,38 +4,33 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit115e7cf827ba2afb04885913ddc8d163
+class ComposerStaticInite56d5fe55b1f4d647665ed08cddec5f4
 {
-    public static $files = array (
-        '9853c3fa1a9ef82a8e9ccc06e84c7f21' => __DIR__ . '/../..' . '/includes/helpers/functions.php',
-        '690ebd1068c22ba652d7d2e81349c83e' => __DIR__ . '/../..' . '/includes/class-wte-session.php',
-    );
-
     public static $prefixLengthsPsr4 = array (
-        'W' => 
+        'W' =>
         array (
             'WPTravelEngine\\' => 15,
         ),
-        'R' => 
+        'R' =>
         array (
             'RRule\\' => 6,
         ),
-        'H' => 
+        'H' =>
         array (
             'Hybridauth\\' => 11,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'WPTravelEngine\\' => 
+        'WPTravelEngine\\' =>
         array (
             0 => __DIR__ . '/../..' . '/includes/classes',
         ),
-        'RRule\\' => 
+        'RRule\\' =>
         array (
             0 => __DIR__ . '/..' . '/rlanvin/php-rrule/src',
         ),
-        'Hybridauth\\' => 
+        'Hybridauth\\' =>
         array (
             0 => __DIR__ . '/..' . '/hybridauth/hybridauth/src',
         ),
@@ -48,9 +43,9 @@ class ComposerStaticInit115e7cf827ba2afb04885913ddc8d163
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit115e7cf827ba2afb04885913ddc8d163::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit115e7cf827ba2afb04885913ddc8d163::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit115e7cf827ba2afb04885913ddc8d163::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInite56d5fe55b1f4d647665ed08cddec5f4::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInite56d5fe55b1f4d647665ed08cddec5f4::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInite56d5fe55b1f4d647665ed08cddec5f4::$classMap;
 
         }, null, ClassLoader::class);
     }

@@ -40,9 +40,9 @@ if ( ! empty( $saved_tabs ) ) {
 						<span class="wpte-icon-holdr">
 							<?php wptravelengine_svg_by_fa_icon( $tab_icon ); ?>
 						</span>
-						<?php if( ! empty( $tab_icon ) ):?>
+						<?php if ( ! empty( $tab_icon ) ) : ?>
 						<button class="wpte-remove-icn-btn"><?php echo esc_html( 'Remove' ); ?></button>
-						<?php endif;?>
+						<?php endif; ?>
 					</span>
 					<input type="hidden" class="trip-tabs-icon" name="wp_travel_engine_settings[trip_tabs][icon][<?php echo esc_attr( $value ); ?>]" id="wp_travel_engine_settings[trip_tabs][icon][<?php echo esc_attr( $value ); ?>]"
 						value="<?php echo esc_attr( $tab_icon ); ?>">

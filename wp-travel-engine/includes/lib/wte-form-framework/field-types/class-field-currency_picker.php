@@ -31,7 +31,7 @@ class WP_Travel_Engine_Form_Field_Currency_Picker extends WP_Travel_Engine_Form_
 
 		$this->field = $field;
 
-		$this->field[ 'options' ] = $currency_options;
+		$this->field['options'] = $currency_options;
 
 		return $this;
 	}

@@ -70,7 +70,6 @@ class WTE_Featured_Trips_Widget extends WP_Widget {
 
 		echo $after_widget;
 		//phpcs:enable
-
 	}
 
 	/**
@@ -112,5 +111,4 @@ class WTE_Featured_Trips_Widget extends WP_Widget {
 
 		return $instance;
 	}
-
 } // class WTE_Featured_Trips_Widget

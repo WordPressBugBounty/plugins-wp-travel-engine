@@ -32,7 +32,7 @@ $reset_key  = $args['reset_key'];
 	<tr>
 		<td colspan="2" style="padding: 16px 0 8px;">
 			<?php echo esc_html__( 'Welcome to', 'wp-travel-engine' ); ?> <strong><?php bloginfo( 'name' ) . esc_html( '!' ); ?></strong>
-		<p style="margin: 8px 0 0;"><?php echo sprintf( __( 'We received a request to reset your password for your %s account.', 'wp-travel-engine' ), $user_login ); ?></p>
+		<p style="margin: 8px 0 0;"><?php printf( __( 'We received a request to reset your password for your %s account.', 'wp-travel-engine' ), $user_login ); ?></p>
 		</td>
 	</tr>
 	<tr>

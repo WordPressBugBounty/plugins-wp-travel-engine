@@ -43,5 +43,4 @@ class TaxAdjustment extends BaseCartAdjustment {
 	public function apply( $total, Item $cart_item ): float {
 		return $this->tax->get_tax_amount( $total );
 	}
-
 }

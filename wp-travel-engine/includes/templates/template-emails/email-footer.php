@@ -7,12 +7,12 @@
 use WPTravelEngine\Core\Models\Settings\Options;
 
 $settings = Options::get( 'wp_travel_engine_settings' );
-$logo_url = $settings[ 'email' ][ 'logo' ][ 'url' ];
-$footer = $settings[ 'email' ][ 'footer' ];
+$logo_url = $settings['email']['logo']['url'];
+$footer   = $settings['email']['footer'];
 ?>
 </td>
 	</tr>
-    	</tbody>
+		</tbody>
 		<tfoot>
 			<tr>
 				<td style="text-align: center;padding: 24px 0;">

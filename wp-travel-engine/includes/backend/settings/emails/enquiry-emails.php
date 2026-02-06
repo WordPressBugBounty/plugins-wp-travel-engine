@@ -27,7 +27,7 @@ $enquiry_emailaddress      = ! empty( $wp_travel_engine_settings['email']['enqui
 </div>
 <?php
 $enable_customer_notification = isset( $wp_travel_engine_settings['email']['cust_notif'] ) ? $wp_travel_engine_settings['email']['cust_notif'] : ''
-	?>
+?>
 <div class="wpte-field wpte-checkbox advance-checkbox">
 	<label class="wpte-field-label " for="enable-customer-enquiry-notification">
 		<?php esc_html_e( 'Enable Customer Enquiry Notification', 'wp-travel-engine' ); ?>

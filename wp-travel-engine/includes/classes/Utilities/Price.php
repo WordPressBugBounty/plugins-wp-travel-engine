@@ -35,16 +35,16 @@ class Price {
 	private function replacer( $num = false ) {
 		$num = ! $num ? $this->number : $num;
 
-		if ( $num < 0 && ( strpos($this->format, '%AMOUNT%') !== false || strpos( $this->format, '%FORMATED_AMOUNT%' ) !== false ) ) {
-			$num = abs( $num );
+		if ( $num < 0 && ( strpos( $this->format, '%AMOUNT%' ) !== false || strpos( $this->format, '%FORMATED_AMOUNT%' ) !== false ) ) {
+			$num          = abs( $num );
 			$this->format = '-' . $this->format;
 		}
 
 		$replacer = array(
 			'%CURRENCY_CODE%'   => $this->use_html ? '<span class="wpte-currency-code">' . $this->currency_code . '</span>' : $this->currency_code,
 			'%CURRENCY_SYMBOL%' => $this->use_html ? '<span class="wpte-currency-code">' . $this->currency_symbol . '</span>' : $this->currency_symbol,
-			'%AMOUNT%'          => $this->use_html ? '<span class="wpte-price">' . $num . '</span>' : $num,
-			'%FORMATED_AMOUNT%' => $this->use_html ? '<span class="wpte-price">' . $this->get_formated_number( $num ) . '</span>' : $this->get_formated_number( $num ),
+			'%AMOUNT%'          => $this->use_html ? '<span class="wpte-price" data-value="' . $num . '">' . $num . '</span>' : $num,
+			'%FORMATED_AMOUNT%' => $this->use_html ? '<span class="wpte-price" data-value="' . $num . '">' . $this->get_formated_number( $num ) . '</span>' : $this->get_formated_number( $num ),
 		);
 
 		return str_replace( array_keys( $replacer ), array_values( $replacer ), $this->format );

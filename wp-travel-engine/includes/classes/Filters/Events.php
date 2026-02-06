@@ -24,6 +24,13 @@ class Events {
 	protected static string $table_name;
 
 	/**
+	 * List of events
+	 *
+	 * @since 6.7.1
+	 */
+	private static array $events_data = array();
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -31,6 +38,71 @@ class Events {
 		static::$table_name = $wpdb->prefix . 'wptravelengine_events';
 		add_action( 'wptravelengine_check_events', array( $this, 'check_events' ) );
 		add_action( 'updated_postmeta', array( $this, 'trigger_payment_status_update' ), 10, 4 );
+		add_action( 'shutdown', array( $this, 'process_events' ) );
+	}
+
+	/**
+	 * Process events.
+	 *
+	 * @since 6.7.1
+	 */
+	public function process_events() {
+
+		if ( empty( self::$events_data ) ) {
+			return;
+		}
+
+		global $wpdb;
+
+		$table            = static::$table_name;
+		$processed_events = array();
+		foreach ( self::$events_data as $__data ) :
+
+			if ( Translators::is_wpml_multilingual_active() ) {
+				$__data['event_data']['wpml_lang'] = apply_filters( 'wpml_current_language', null );
+			}
+
+			$__data['trigger_time'] ??= gmdate( 'Y-m-d H:i:s', time() + 60 );
+
+			$sql = $wpdb->prepare(
+				"INSERT INTO {$table} (`object_id`, `event_name`, `object_type`, `event_data`, `trigger_time`, `event_created_at`)
+				VALUES (%d, %s, %s, %s, %s, %s)
+				ON DUPLICATE KEY UPDATE
+					`event_data` = VALUES(`event_data`),
+					`trigger_time` = VALUES(`trigger_time`),
+					`event_created_at` = VALUES(`event_created_at`)
+				",
+				$__data['object_id'],
+				$__data['event_name'],
+				$__data['object_type'],
+				wp_json_encode( $__data['event_data'] ),
+				$__data['trigger_time'],
+				current_time( 'mysql', true )
+			);
+
+			$result = $wpdb->query( $sql );
+
+			if ( $result ) {
+				$processed_events[ $__data['object_id'] . '_' . $__data['object_type'] ] = $wpdb->insert_id;
+			}
+
+		endforeach;
+
+		if ( ! empty( $processed_events ) ) {
+			do_action( 'wptravelengine_events_processed', $processed_events );
+		}
+	}
+
+	/**
+	 * Schedule events.
+	 *
+	 * @return void
+	 * @since 6.6.9
+	 */
+	public static function schedule() {
+		if ( ! wp_next_scheduled( 'wptravelengine_check_events' ) ) {
+			wp_schedule_event( time(), 'every_minute', 'wptravelengine_check_events' );
+		}
 	}
 
 	/**
@@ -45,35 +117,44 @@ class Events {
 		$table = $wpdb->prefix . 'wptravelengine_events';
 		$now   = current_time( 'mysql', true );
 
-		$events = $wpdb->get_results( "SELECT * FROM $table WHERE `trigger_time` <= '$now'", ARRAY_A );
+		$prepare = $wpdb->prepare( "SELECT * FROM $table WHERE `trigger_time` <= %s", $now );
+		$events  = $wpdb->get_results( $prepare, ARRAY_A );
 
 		foreach ( $events as $event ) :
 
 			extract( $event );
 
-			switch ( $object_type ) :
-				case 'customer':
-					$object = new Customer( $object_id );
-					break;
-				case 'enquiry':
-					$object = new Enquiry( $object_id );
-					break;
-				case 'booking':
-					$object = new Booking( $object_id );
-					break;
-				case 'wte-payments':
-					$object = new Payment( $object_id );
-					break;
-				case 'comment':
-					$object = new Review( get_comment( $object_id ) );
-					break;
-				default:
-					$object = $object_id;
-			endswitch;
+			try {
+				switch ( $object_type ) :
+					case 'customer':
+						$object = new Customer( $object_id );
+						break;
+					case 'enquiry':
+						$object = new Enquiry( $object_id );
+						break;
+					case 'booking':
+						$object = new Booking( $object_id );
+						break;
+					case 'wte-payments':
+						$object = new Payment( $object_id );
+						break;
+					case 'comment':
+						$comment = get_comment( $object_id );
+						if ( ! $comment instanceof \WP_Comment ) {
+							continue 2;
+						}
+						$object = new Review( $comment );
+						break;
+					default:
+						$object = $object_id;
+				endswitch;
+			} catch ( \Exception $e ) {
+				continue;
+			}
 
 			do_action( $event_name, $object, json_decode( $event_data, true ) );
 
-			$wpdb->delete( $table, compact( 'id' ), [ '%d' ] );
+			$wpdb->delete( $table, compact( 'id' ), array( '%d' ) );
 
 		endforeach;
 	}
@@ -81,10 +162,10 @@ class Events {
 	/**
 	 * Trigger payment status update.
 	 *
-	 * @param int $meta_id Meta ID.
-	 * @param int $post_id Post ID.
+	 * @param int    $meta_id Meta ID.
+	 * @param int    $post_id Post ID.
 	 * @param string $meta_key Meta key.
-	 * @param mixed $meta_value Meta value.
+	 * @param mixed  $meta_value Meta value.
 	 *
 	 * @return void
 	 */
@@ -126,7 +207,7 @@ class Events {
 	 * @return void
 	 */
 	public static function enquiry_created( Enquiry $enquiry ) {
-		static::add_event( "wptravelengine.enquiry.created", $enquiry->get_id(), $enquiry->get_post_type() );
+		static::add_event( 'wptravelengine.enquiry.created', $enquiry->get_id(), $enquiry->get_post_type() );
 	}
 
 	/**
@@ -137,7 +218,7 @@ class Events {
 	 * @return void
 	 */
 	public static function booking_created( Booking $booking ) {
-		static::add_event( "wptravelengine.booking.created", $booking->get_id(), $booking->get_post_type() );
+		static::add_event( 'wptravelengine.booking.created', $booking->get_id(), $booking->get_post_type() );
 	}
 
 	/**
@@ -148,7 +229,7 @@ class Events {
 	 * @return void
 	 */
 	public static function booking_updated( Booking $booking ) {
-		static::add_event( "wptravelengine.booking.updated", $booking->get_id(), $booking->get_post_type() );
+		static::add_event( 'wptravelengine.booking.updated', $booking->get_id(), $booking->get_post_type() );
 	}
 
 	/**
@@ -159,57 +240,30 @@ class Events {
 	 * @return void
 	 */
 	public static function review_created( Review $review ) {
-		static::add_event( "wptravelengine.review.created", $review->get_id(), 'comment' );
+		static::add_event( 'wptravelengine.review.created', $review->get_id(), 'comment' );
 	}
 
 	/**
 	 * Add event.
 	 *
 	 * @param string $event_name Event name.
-	 * @param int $object_id Object ID.
+	 * @param int    $object_id Object ID.
 	 * @param string $object_type Object type.
 	 * @param string $trigger_time Trigger time.
-	 * @param array $event_data Data.
+	 * @param array  $event_data Data.
 	 *
-	 * @return int|false
+	 * @return void
+	 * @since 6.7.1 Added support for events data storage.
 	 */
 	public static function add_event( string $event_name, $object_id, $object_type, $trigger_time = null, $event_data = array() ) {
-		global $wpdb;
-
-		if ( Translators::is_wpml_multilingual_active() ) {
-			$event_data['wpml_lang'] = apply_filters( 'wpml_current_language', null );
-		}
-
-		$trigger_time ??= gmdate( 'Y-m-d H:i:s', current_time( 'timestamp', true ) + 60 );
-
-		$table = static::$table_name;
-
-		$sql = $wpdb->prepare(
-			"INSERT INTO {$table} (`object_id`, `event_name`, `object_type`, `event_data`, `trigger_time`, `event_created_at`)
-			VALUES (%d, %s, %s, %s, %s, %s)
-			ON DUPLICATE KEY UPDATE
-				`event_data` = VALUES(`event_data`),
-				`trigger_time` = VALUES(`trigger_time`),
-				`event_created_at` = VALUES(`event_created_at`)
-			",
-			$object_id,
-			$event_name,
-			$object_type,
-			wp_json_encode( $event_data ),
-			$trigger_time,
-			current_time( 'mysql', true )
-		);
-
-		$result = $wpdb->query( $sql );
-
-		return $result ? $wpdb->insert_id : false;
+		self::$events_data[] = compact( 'event_name', 'object_id', 'object_type', 'trigger_time', 'event_data' );
 	}
 
 	/**
 	 * Event Exists.
 	 *
 	 * @param string $event_name Event name.
-	 * @param int $object_id Object ID.
+	 * @param int    $object_id Object ID.
 	 * @param string $object_type Object type.
 	 *
 	 * @return bool

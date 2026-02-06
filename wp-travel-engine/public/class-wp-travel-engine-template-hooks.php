@@ -40,7 +40,6 @@ class WP_Travel_Engine_Template_Hooks {
 		add_action( 'wp_travel_engine_checkout_header_steps', array( $this, 'checkout_header_steps' ) );
 
 		$this->init_single_trip_hooks();
-
 	}
 
 	private function init_single_trip_hooks() {
@@ -86,14 +85,20 @@ class WP_Travel_Engine_Template_Hooks {
 
 		add_action( 'wptravelengine_trip_dynamic_banner', array( $this, 'trip_dynamic_banner' ) );
 		add_action( 'wptravelengine_trip_carousel', array( $this, 'trip_carousel' ), 10, 2 );
-		add_filter( 'wptravelengine_trip_dynamic_banner_list_images', array(
-			$this,
-			'generate_image_markup',
-		), 10, 4 );
+		add_filter(
+			'wptravelengine_trip_dynamic_banner_list_images',
+			array(
+				$this,
+				'generate_image_markup',
+			),
+			10,
+			4
+		);
 	}
 
 	/**
 	 * Register trip gallery action as per the layout.
+	 *
 	 * @return void
 	 * @since 6.3.3
 	 */
@@ -106,9 +111,9 @@ class WP_Travel_Engine_Template_Hooks {
 			return;
 		}
 
-		$settings = wptravelengine_settings();
+		$settings      = wptravelengine_settings();
 		$banner_layout = $settings->get( 'trip_banner_layout', 'banner-default' );
-		$action_hook = ( 'banner-layout-6' === $banner_layout )
+		$action_hook   = ( 'banner-layout-6' === $banner_layout )
 			? 'wte_single_trip_content'
 			: 'wp_travel_engine_gallery_before_content';
 
@@ -132,7 +137,7 @@ class WP_Travel_Engine_Template_Hooks {
 			$random = wptravelengine_generate_key( maybe_serialize( $slide_images ) )
 			?>
 			<div class="wpte-gallery-container">
-				<?php if( wptravelengine_get_template_arg( 'show_image_gallery', true ) ) : ?>
+				<?php if ( wptravelengine_get_template_arg( 'show_image_gallery', true ) ) : ?>
 					<span class="wp-travel-engine-image-gal-popup">
 						<a data-galtarget="#wte-image-gallary-popup-<?php echo esc_attr( $trip_id . $random ); ?>"
 						data-variable="<?php echo esc_attr( 'wteimageGallery' . $random ); ?>"
@@ -141,13 +146,14 @@ class WP_Travel_Engine_Template_Hooks {
 						class="wte-trip-image-gal-popup-trigger"><?php esc_html_e( 'Gallery', 'wp-travel-engine' ); ?>
 						</a>
 					</span>
-				<?php endif;
+					<?php
+				endif;
 				if ( wptravelengine_get_template_arg( 'show_video_gallery', true ) ) {
 					echo do_shortcode( '[wte_video_gallery label="Video"]' );
 				}
 				?>
 			</div>
-		<?php
+			<?php
 		endif;
 		$script = '
 		jQuery(document).ready(function() {
@@ -214,14 +220,14 @@ class WP_Travel_Engine_Template_Hooks {
 			ob_start();
 			?>
 			<div class="wpte-multi-banner-image">
-				<?php if( $open_lightbox ){ ?>
+				<?php if ( $open_lightbox ) { ?>
 					<a href="<?php echo esc_url( $lightbox_url ); ?>" data-fancybox="gallery">
 				<?php } ?>
 					<img
 						src="<?php echo esc_url( $attachment_url ); ?>"
 						alt="<?php echo esc_attr( get_post_meta( $image, '_wp_attachment_image_alt', true ) ); ?>"
 					/>
-				<?php if( $open_lightbox ){ ?>
+				<?php if ( $open_lightbox ) { ?>
 					</a>
 				<?php } ?>
 			</div>
@@ -247,18 +253,21 @@ class WP_Travel_Engine_Template_Hooks {
 		if ( ! is_array( $list_images ) ) {
 			$list_images = array();
 		}
-		$show_image_gallery = wptravelengine_toggled( $list_images[ 'enable' ] ?? false );
-		if ( isset( $list_images[ 'enable' ] ) ) {
-			unset( $list_images[ 'enable' ] );
+		$show_image_gallery = wptravelengine_toggled( $list_images['enable'] ?? false );
+		if ( isset( $list_images['enable'] ) ) {
+			unset( $list_images['enable'] );
 		}
 
 		if ( $thumbnail_id = get_post_thumbnail_id( $trip_id ) ) {
-			if ( ! in_array( $thumbnail_id, $list_images, false ) ) {
-				array_unshift( $list_images, $thumbnail_id );
+			if ( in_array( $thumbnail_id, $list_images, false ) ) {
+				// Remove featured image from gallery if it exists at any position.
+				$list_images = array_diff( $list_images, array( $thumbnail_id ) );
 			}
+			// Add featured image to the beginning (whether it was in gallery or not).
+			array_unshift( $list_images, $thumbnail_id );
 		}
 
-		$show_video_gallery = get_post_meta( $trip_id, 'wp_travel_engine_setting', true )[ 'enable_video_gallery' ] ?? false;
+		$show_video_gallery = get_post_meta( $trip_id, 'wp_travel_engine_setting', true )['enable_video_gallery'] ?? false;
 
 		wptravelengine_get_template(
 			'single-trip/dynamic-banner.php',
@@ -285,14 +294,14 @@ class WP_Travel_Engine_Template_Hooks {
 	 */
 	public static function trip_related_trips() {
 		$settings = get_option( 'wp_travel_engine_settings', array() );
-		if ( isset( $settings[ 'show_related_trips' ] ) && 'no' == $settings[ 'show_related_trips' ] ) {
+		if ( isset( $settings['show_related_trips'] ) && 'no' == $settings['show_related_trips'] ) {
 			return;
 		}
-		$section_title = ! empty( $settings[ 'related_trips_section_title' ] ) ? $settings[ 'related_trips_section_title' ] : __( 'Related trips you might interested in', 'wp-travel-engine' );
+		$section_title = ! empty( $settings['related_trips_section_title'] ) ? $settings['related_trips_section_title'] : __( 'Related trips you might interested in', 'wp-travel-engine' );
 
-		$no_of_trips = ! empty( $settings[ 'no_of_related_trips' ] ) ? (int) $settings[ 'no_of_related_trips' ] : 3;
+		$no_of_trips = ! empty( $settings['no_of_related_trips'] ) ? (int) $settings['no_of_related_trips'] : 3;
 
-		$show_trip_by = ! empty( $settings[ 'related_trip_show_by' ] ) ? $settings[ 'related_trip_show_by' ] : 'activities';
+		$show_trip_by = ! empty( $settings['related_trip_show_by'] ) ? $settings['related_trip_show_by'] : 'activities';
 
 		global $post;
 		$terms         = get_the_terms( $post->ID, $show_trip_by );
@@ -336,11 +345,9 @@ class WP_Travel_Engine_Template_Hooks {
 
 		$trip = new Trip( $trip_id );
 
-		$default_package 		= $trip->default_package();
-		$categories_in_package 	= $default_package->get_traveler_categories();
-		$package_categories 	= (object) $default_package->{'package-categories'};
-
-		$default_package->set_categories_pricings();
+		$default_package       = $trip->default_package();
+		$categories_in_package = $default_package->get_traveler_categories();
+		$package_categories    = (object) $default_package->{'package-categories'};
 
 		if ( ! $echo ) {
 			ob_start();
@@ -348,31 +355,43 @@ class WP_Travel_Engine_Template_Hooks {
 
 		/** @var TravelerCategory $category */
 		foreach ( $categories_in_package as $key => $category ) {
-			$c_id 	= $category->id;
-			$price 	= $package_categories->prices[ $c_id ] ?? '';
+			$c_id  = $category->id;
+			$price = $package_categories->prices[ $c_id ] ?? '';
 
 			if ( '' === $price ) {
 				continue;
 			}
 
-			$sale_price = $default_package->categories_pricings[ $key ]['price'] ?? $price;
+			$sale_price = $package_categories->sale_prices[ $c_id ] ?? $price;
 
-			$sale_price = apply_filters_deprecated( 'wp_travel_engine_trip_prev_price', array(
-				$sale_price,
-				$trip_id,
-			), '5.0', 'wte_before_formatting_price_figure', __( 'Replacing multiple filters with single filter', 'wp-travel-engine' ) );
+			$sale_price = apply_filters_deprecated(
+				'wp_travel_engine_trip_prev_price',
+				array(
+					$sale_price,
+					$trip_id,
+				),
+				'5.0',
+				'wte_before_formatting_price_figure',
+				__( 'Replacing multiple filters with single filter', 'wp-travel-engine' )
+			);
 
-			$price      = apply_filters( 'wp_travel_engine_trip_prev_price', $price, $trip_id );
-			$has_sale   = wptravelengine_toggled( $package_categories->enabled_sale[ $c_id ] ?? false ) && $sale_price < $price;
-			$per_label  = $category->label ?: $package_categories->labels[ $c_id ];
+			$price     = apply_filters( 'wp_travel_engine_trip_prev_price', $price, $trip_id );
+			$has_sale  = wptravelengine_toggled( $package_categories->enabled_sale[ $c_id ] ?? false ) && $sale_price < $price;
+			$per_label = $category->get_label();
 
-			$category_term_meta = get_term_meta( $c_id, 'pll_category_name', true );
-			$locale             = get_locale();
-			if ( ! empty( $category_term_meta[ substr( $locale, 0, 2 ) ] ) ) {
-				$per_label = $category_term_meta[ substr( $locale, 0, 2 ) ];
-			}
+			// TODO: Remove this after stable release. @since 6.7.4
+			// $category_term_meta = get_term_meta( $c_id, 'pll_category_name', true );
+			// $locale             = get_locale();
+			// if ( ! empty( $category_term_meta[ substr( $locale, 0, 2 ) ] ) ) {
+			// 	$per_label = $category_term_meta[ substr( $locale, 0, 2 ) ];
+			// }
+
 			// NOTE to Dev: Disabled this as per support request. Maybe add filter later ?
 			// $per_label  = isset( $package_categories->pricing_types[ $c_id ] ) && 'per-group' === $package_categories->pricing_types[ $c_id ] ? __( 'Group', 'wp-travel-engine' ) : $per_label;
+
+			if ( ! $has_sale ) {
+				$sale_price = $price;
+			}
 
 			$price_display_format = apply_filters(
 				'categorised_trip_price_display_format',
@@ -387,8 +406,24 @@ class WP_Travel_Engine_Template_Hooks {
 				)
 			);
 
-			if ( is_null( $price_display_format ) ) :
-				$price_per_label = apply_filters( 'wptravelengine_price_per_label', __( '/ %s', 'wp-travel-engine' ) );
+			$price_per_label = apply_filters( 'wptravelengine_price_per_label', __( '/ %s', 'wp-travel-engine' ) );
+
+			if ( 0.00 === floatval( $sale_price ) ) : 
+				?>
+				<div class="wpte-bf-price">
+					<span class="wpte-bf-reg-price">
+						<?php if ( $has_sale ) : ?>
+							<span class="wpte-bf-price-from"><?php esc_html_e( 'From', 'wp-travel-engine' ); ?></span>
+							<del><?php \wte_the_formated_price( $price ); ?></del>
+						<?php endif; ?>
+					</span>
+					<span class="wpte-bf-offer-price">
+						<ins class="wpte-bf-offer-amount wpte-is-free"><?php esc_html_e( 'Free', 'wp-travel-engine' ); ?></ins>
+						<div class="wpte-bf-pqty"><?php printf( esc_html( $price_per_label ), esc_html( $per_label ) ); ?></div>
+					</span>
+				</div>
+				<?php
+			elseif ( is_null( $price_display_format ) ) :
 				?>
 				<div class="wpte-bf-price">
 					<span class="wpte-bf-reg-price">
@@ -399,11 +434,10 @@ class WP_Travel_Engine_Template_Hooks {
 					</span>
 					<span class="wpte-bf-offer-price">
 						<ins class="wpte-bf-offer-amount"><?php \wte_the_formated_price( $sale_price ); ?></ins>
-						<div
-							class="wpte-bf-pqty"><?php printf( esc_html( $price_per_label ), esc_html( $per_label ) ); ?></div>
+						<div class="wpte-bf-pqty"><?php printf( esc_html( $price_per_label ), esc_html( $per_label ) ); ?></div>
 					</span>
 				</div>
-			<?php
+				<?php
 			else :
 				echo wp_kses_post( (string) $price_display_format );
 			endif;
@@ -443,11 +477,11 @@ class WP_Travel_Engine_Template_Hooks {
 	public static function trip_price_sidebar() {
 		global $post;
 
-		$trip 				= new Trip( $post );
-		$default_package 	= $trip->default_package();
-		$settings 			= get_option( 'wp_travel_engine_settings', array() );
+		$trip            = new Trip( $post );
+		$default_package = $trip->default_package();
+		$settings        = get_option( 'wp_travel_engine_settings', array() );
 
-		if ( ( isset( $settings[ 'booking' ] ) && ! empty( $settings[ 'booking' ] ) ) || '' === $default_package->price ) {
+		if ( ( isset( $settings['booking'] ) && ! empty( $settings['booking'] ) ) || '' === $default_package->price ) {
 			return;
 		}
 
@@ -480,7 +514,7 @@ class WP_Travel_Engine_Template_Hooks {
 		$post_meta    = get_post_meta( $post->ID, 'wp_travel_engine_setting', true );
 		$wte_settings = get_option( 'wp_travel_engine_settings', true );
 
-		$price_per_text = isset( $post_meta[ 'trip_price_per' ] ) && ! empty( $post_meta[ 'trip_price_per' ] ) ? $post_meta[ 'trip_price_per' ] : 'per-person';
+		$price_per_text = isset( $post_meta['trip_price_per'] ) && ! empty( $post_meta['trip_price_per'] ) ? $post_meta['trip_price_per'] : 'per-person';
 
 		// Get trip price.
 		$is_sale_price_enabled = wp_travel_engine_is_trip_on_sale( $post->ID );
@@ -488,7 +522,7 @@ class WP_Travel_Engine_Template_Hooks {
 		$regular_price         = wp_travel_engine_get_prev_price( $post->ID );
 		$price                 = wp_travel_engine_get_actual_trip_price( $post->ID );
 		// Don't load the trip price template, if the booking form hidden option is set.
-		if ( isset( $wte_settings[ 'booking' ] ) ) {
+		if ( isset( $wte_settings['booking'] ) ) {
 			return;
 		}
 
@@ -510,7 +544,7 @@ class WP_Travel_Engine_Template_Hooks {
 		$booking_steps = apply_filters( 'wte_trip_booking_steps', $booking_steps );
 
 		// Get placeholder.
-		$wte_placeholder = isset( $wte_settings[ 'pages' ][ 'wp_travel_engine_place_order' ] ) ? $wte_settings[ 'pages' ][ 'wp_travel_engine_place_order' ] : '';
+		$wte_placeholder = isset( $wte_settings['pages']['wp_travel_engine_place_order'] ) ? $wte_settings['pages']['wp_travel_engine_place_order'] : '';
 
 		do_action( 'wp_travel_engine_before_trip_price' );
 		if ( defined( 'WTE_USE_OLD_BOOKING_PROCESS' ) && WTE_USE_OLD_BOOKING_PROCESS ) :
@@ -526,7 +560,7 @@ class WP_Travel_Engine_Template_Hooks {
 	 */
 	public function display_trip_facts() {
 		$settings = get_option( 'wp_travel_engine_settings', true );
-		if ( ( ! isset( $settings[ 'show_trip_facts' ] ) || 'yes' === $settings[ 'show_trip_facts' ] ) && isset( $settings[ 'show_trip_facts_sidebar' ] ) && 'yes' === $settings[ 'show_trip_facts_sidebar' ] ) {
+		if ( ( ! isset( $settings['show_trip_facts'] ) || 'yes' === $settings['show_trip_facts'] ) && isset( $settings['show_trip_facts_sidebar'] ) && 'yes' === $settings['show_trip_facts_sidebar'] ) {
 			do_action( 'wp_travel_engine_before_trip_facts' );
 			include WP_TRAVEL_ENGINE_BASE_PATH . '/includes/frontend/trip-meta/trip-meta-parts/trip-facts.php';
 			do_action( 'wp_travel_engine_after_trip_facts' );
@@ -559,7 +593,7 @@ class WP_Travel_Engine_Template_Hooks {
 		$post_meta = get_post_meta( $post->ID, 'wp_travel_engine_setting', true );
 
 		$data = array(
-			'cost' => $post_meta[ 'cost' ],
+			'cost' => $post_meta['cost'],
 		);
 
 		wte_get_template( 'single-trip/trip-tabs/cost.php', $data );
@@ -574,7 +608,7 @@ class WP_Travel_Engine_Template_Hooks {
 		$post_meta = get_post_meta( $post->ID, 'wp_travel_engine_setting', true );
 
 		$data = array(
-			'faq' => $post_meta[ 'faq' ],
+			'faq' => $post_meta['faq'],
 		);
 
 		wte_get_template( 'single-trip/trip-tabs/faqs.php', $data );
@@ -602,8 +636,8 @@ class WP_Travel_Engine_Template_Hooks {
 
 		$post_meta = get_post_meta( $post->ID, 'wp_travel_engine_setting', true );
 
-		$title = isset( $post_meta[ 'review' ][ 'review_title' ] ) && '' != $post_meta[ 'review' ][ 'review_title' ]
-			? $post_meta[ 'review' ][ 'review_title' ] : '';
+		$title = isset( $post_meta['review']['review_title'] ) && '' != $post_meta['review']['review_title']
+			? $post_meta['review']['review_title'] : '';
 
 		$data = array(
 			'id'    => $post->ID,
@@ -631,12 +665,12 @@ class WP_Travel_Engine_Template_Hooks {
 
 		if ( '1' == $id ) {
 			$data = array(
-				'overview' => $post_meta[ 'tab_content' ][ $key ],
+				'overview' => $post_meta['tab_content'][ $key ],
 			);
 			wte_get_template( 'single-trip/trip-tabs/overview.php', $data );
 		} else {
 			$data = array(
-				'editor' => $post_meta[ 'tab_content' ][ $key ],
+				'editor' => $post_meta['tab_content'][ $key ],
 				'name'   => sanitize_title( $name ),
 				'id'     => $id,
 			);
@@ -655,7 +689,7 @@ class WP_Travel_Engine_Template_Hooks {
 		}
 
 		$data = array(
-			'tabs' => $settings[ 'trip_tabs' ],
+			'tabs' => $settings['trip_tabs'],
 		);
 
 		wte_get_template( 'single-trip/tabs-content.php', $data );
@@ -672,7 +706,7 @@ class WP_Travel_Engine_Template_Hooks {
 		}
 
 		$data = array(
-			'tabs' => $settings[ 'trip_tabs' ],
+			'tabs' => $settings['trip_tabs'],
 		);
 
 		wte_get_template( 'single-trip/tabs-nav.php', $data );
@@ -687,15 +721,15 @@ class WP_Travel_Engine_Template_Hooks {
 		$post_meta   = get_post_meta( $post->ID, 'wp_travel_engine_setting', true );
 		$option_meta = get_option( 'wp_travel_engine_settings', true );
 
-		$duration      = isset( $post_meta[ 'trip_duration' ] ) && '' != $post_meta[ 'trip_duration' ]
-			? $post_meta[ 'trip_duration' ] : '';
-		$duration_unit = isset( $post_meta[ 'trip_duration_unit' ] ) && '' != $post_meta[ 'trip_duration_unit' ]
-			? $post_meta[ 'trip_duration_unit' ] : 'days';
+		$duration      = isset( $post_meta['trip_duration'] ) && '' != $post_meta['trip_duration']
+			? $post_meta['trip_duration'] : '';
+		$duration_unit = isset( $post_meta['trip_duration_unit'] ) && '' != $post_meta['trip_duration_unit']
+			? $post_meta['trip_duration_unit'] : 'days';
 
-		$nights = isset( $post_meta[ 'trip_duration_nights' ] ) && '' != $post_meta[ 'trip_duration_nights' ]
-			? $post_meta[ 'trip_duration_nights' ] : '';
+		$nights = isset( $post_meta['trip_duration_nights'] ) && '' != $post_meta['trip_duration_nights']
+			? $post_meta['trip_duration_nights'] : '';
 
-		$trip_duration_format           = $option_meta[ 'trip_duration_format' ] ?? 'days';
+		$trip_duration_format           = $option_meta['trip_duration_format'] ?? 'days';
 		$show_trip_duration_days_nights = 'days_and_nights' === $trip_duration_format ? 'yes' : 'no';
 		wte_get_template( 'single-trip/title.php', compact( 'duration', 'duration_unit', 'nights', 'show_trip_duration_days_nights', 'trip_duration_format' ) );
 	}
@@ -708,14 +742,14 @@ class WP_Travel_Engine_Template_Hooks {
 
 		do_action( 'wp_travel_engine_feat_img_trip_galleries' );
 		$global_settings     = get_option( 'wp_travel_engine_settings', array() );
-		$hide_featured_image = isset( $global_settings[ 'feat_img' ] ) && '1' == $global_settings[ 'feat_img' ];
+		$hide_featured_image = isset( $global_settings['feat_img'] ) && '1' == $global_settings['feat_img'];
 
 		if ( ! $hide_featured_image && ! has_action( 'wp_travel_engine_feat_img_trip_galleries' ) ) {
 			wptravelengine_get_template(
 				'single-trip/gallery.php',
 				array(
 					'is_main_slider' => true,
-					'banner_layout'  => $global_settings[ 'trip_banner_layout' ] ?? 'banner-default',
+					'banner_layout'  => $global_settings['trip_banner_layout'] ?? 'banner-default',
 					'related_query'  => false,
 				)
 			);
@@ -745,7 +779,7 @@ class WP_Travel_Engine_Template_Hooks {
 	public function display_single_trip_facts() {
 
 		$settings = get_option( 'wp_travel_engine_settings', array() );
-		if ( isset( $settings[ 'show_trip_facts' ] ) && 'yes' === $settings[ 'show_trip_facts' ] && isset( $settings[ 'show_trip_facts_content_area' ] ) && 'yes' === $settings[ 'show_trip_facts_content_area' ] ) {
+		if ( isset( $settings['show_trip_facts'] ) && 'yes' === $settings['show_trip_facts'] && isset( $settings['show_trip_facts_content_area'] ) && 'yes' === $settings['show_trip_facts_content_area'] ) {
 			require WP_TRAVEL_ENGINE_BASE_PATH . '/includes/frontend/trip-meta/trip-meta-parts/trip-facts.php';
 		}
 	}
@@ -781,7 +815,7 @@ class WP_Travel_Engine_Template_Hooks {
 		</div>
 		<!-- .trip-content-area  -->
 		</div>
-		 <!-- wrapper with 100% width -->
+		<!-- wrapper with 100% width -->
 		<?php
 	}
 
@@ -812,14 +846,13 @@ class WP_Travel_Engine_Template_Hooks {
 		$price                 = wp_travel_engine_get_actual_trip_price( $post->ID );
 
 		$this->booking_form_multiple_pricing_inputs( $trip_id, $price );
-
 	}
 
 	public function display_multi_pricing_info() {
 		$wte_options = get_option( 'wp_travel_engine_settings', true );
 
 		// Bail if disabled.
-		if ( ! isset( $wte_options[ 'show_multiple_pricing_list_disp' ] ) || '1' != $wte_options[ 'show_multiple_pricing_list_disp' ] ) {
+		if ( ! isset( $wte_options['show_multiple_pricing_list_disp'] ) || '1' != $wte_options['show_multiple_pricing_list_disp'] ) {
 			return;
 		}
 
@@ -835,24 +868,24 @@ class WP_Travel_Engine_Template_Hooks {
 
 		// Don't show the child price info, if the multi pricing is for child is set.
 		$trip_settings            = get_post_meta( $post->ID, 'wp_travel_engine_setting', true );
-		$multiple_pricing_options = isset( $trip_settings[ 'multiple_pricing' ] ) && ! empty( $trip_settings[ 'multiple_pricing' ] ) ? $trip_settings[ 'multiple_pricing' ] : false;
+		$multiple_pricing_options = isset( $trip_settings['multiple_pricing'] ) && ! empty( $trip_settings['multiple_pricing'] ) ? $trip_settings['multiple_pricing'] : false;
 		if ( $multiple_pricing_options ) :
 			foreach ( $multiple_pricing_options as $price_key => $multiple_pricing ) :
-				if ( '' === $multiple_pricing[ 'price' ] ) {
+				if ( '' === $multiple_pricing['price'] ) {
 					continue;
 				}
 
 				$is_sale = false;
-				if ( isset( $multiple_pricing[ 'enable_sale' ] ) && '1' === $multiple_pricing[ 'enable_sale' ] ) {
+				if ( isset( $multiple_pricing['enable_sale'] ) && '1' === $multiple_pricing['enable_sale'] ) {
 					$is_sale = true;
 				}
 
-				if ( isset( $multiple_pricing[ 'sale_price' ] ) ) {
-					$sale_price = apply_filters( 'wp_travel_engine_trip_prev_price', $multiple_pricing[ 'sale_price' ], $post->ID );
+				if ( isset( $multiple_pricing['sale_price'] ) ) {
+					$sale_price = apply_filters( 'wp_travel_engine_trip_prev_price', $multiple_pricing['sale_price'], $post->ID );
 				}
 
-				if ( isset( $multiple_pricing[ 'price' ] ) ) {
-					$regular_price = apply_filters( 'wp_travel_engine_trip_prev_price', $multiple_pricing[ 'price' ], $post->ID );
+				if ( isset( $multiple_pricing['price'] ) ) {
+					$regular_price = apply_filters( 'wp_travel_engine_trip_prev_price', $multiple_pricing['price'], $post->ID );
 				}
 
 				$price = $regular_price;
@@ -871,10 +904,10 @@ class WP_Travel_Engine_Template_Hooks {
 						<?php echo wp_kses( wte_get_formated_price_html( $price ), array( 'span' => array( 'class' => array() ) ) ); ?></b>
 					</ins>
 					<span
-						class="wpte-bf-pqty"><?php esc_html_e( 'Per', 'wp-travel-engine' ); ?><?php echo esc_html( $multiple_pricing[ 'label' ] ); ?></span>
+						class="wpte-bf-pqty"><?php esc_html_e( 'Per', 'wp-travel-engine' ); ?><?php echo esc_html( $multiple_pricing['label'] ); ?></span>
 				</div>
 
-			<?php
+				<?php
 			endforeach;
 		endif;
 	}
@@ -890,21 +923,21 @@ class WP_Travel_Engine_Template_Hooks {
 			<div class="wpte-bf-traveler">
 				<div class="wpte-bf-number-field">
 					<input type="text" name="add-member" value="1" min="0" max="99999999999999"
-						   disabled
-						   data-cart-field="travelers"
-						   data-cost-field='travelers-cost'
-						   data-type='<?php echo esc_html( apply_filters( 'wte_default_traveller_type', __( 'Person', 'wp-travel-engine' ) ) ); ?>'
-						   data-cost="<?php echo esc_attr( $price ); ?>" />
+							disabled
+							data-cart-field="travelers"
+							data-cost-field='travelers-cost'
+							data-type='<?php echo esc_html( apply_filters( 'wte_default_traveller_type', __( 'Person', 'wp-travel-engine' ) ) ); ?>'
+							data-cost="<?php echo esc_attr( $price ); ?>" />
 					<button class="wpte-bf-plus">
 						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
 							<path fill="currentColor"
-								  d="M368 224H224V80c0-8.84-7.16-16-16-16h-32c-8.84 0-16 7.16-16 16v144H16c-8.84 0-16 7.16-16 16v32c0 8.84 7.16 16 16 16h144v144c0 8.84 7.16 16 16 16h32c8.84 0 16-7.16 16-16V288h144c8.84 0 16-7.16 16-16v-32c0-8.84-7.16-16-16-16z"></path>
+									d="M368 224H224V80c0-8.84-7.16-16-16-16h-32c-8.84 0-16 7.16-16 16v144H16c-8.84 0-16 7.16-16 16v32c0 8.84 7.16 16 16 16h144v144c0 8.84 7.16 16 16 16h32c8.84 0 16-7.16 16-16V288h144c8.84 0 16-7.16 16-16v-32c0-8.84-7.16-16-16-16z"></path>
 						</svg>
 					</button>
 					<button class="wpte-bf-minus">
 						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
 							<path fill="currentColor"
-								  d="M368 224H16c-8.84 0-16 7.16-16 16v32c0 8.84 7.16 16 16 16h352c8.84 0 16-7.16 16-16v-32c0-8.84-7.16-16-16-16z"></path>
+									d="M368 224H16c-8.84 0-16 7.16-16 16v32c0 8.84 7.16 16 16 16h352c8.84 0 16-7.16 16-16v-32c0-8.84-7.16-16-16-16z"></path>
 						</svg>
 					</button>
 				</div>
@@ -920,7 +953,6 @@ class WP_Travel_Engine_Template_Hooks {
 		</div>
 		<?php
 		do_action( 'wpte_after_travellers_input' );
-
 	}
 
 	/**
@@ -931,20 +963,20 @@ class WP_Travel_Engine_Template_Hooks {
 	public function booking_form_multiple_pricing_inputs( $trip_id, $default_price ) {
 
 		$trip_settings                             = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
-		$multiple_pricing_options                  = isset( $trip_settings[ 'multiple_pricing' ] ) && ! empty( $trip_settings[ 'multiple_pricing' ] ) ? $trip_settings[ 'multiple_pricing' ] : false;
+		$multiple_pricing_options                  = isset( $trip_settings['multiple_pricing'] ) && ! empty( $trip_settings['multiple_pricing'] ) ? $trip_settings['multiple_pricing'] : false;
 		$multiple_pricing_is_adult_price_available = $this->multiple_pricing_is_adult_price_available( $trip_id );
 		if ( $multiple_pricing_options && $multiple_pricing_is_adult_price_available ) :
 			foreach ( $multiple_pricing_options as $key => $pricing_option ) :
-				$min_pax = isset( $pricing_option[ 'min_pax' ] ) && ! empty( $pricing_option[ 'min_pax' ] ) ? $pricing_option[ 'min_pax' ] : 0;
-				$max_pax                           = isset( $pricing_option[ 'max_pax' ] ) && ! empty( $pricing_option[ 'max_pax' ] ) ? $pricing_option[ 'max_pax' ] : 999999999;
-				$enable_sale                       = isset( $pricing_option[ 'enable_sale' ] ) && '1' == $pricing_option[ 'enable_sale' ] ? true : false;
+				$min_pax     = isset( $pricing_option['min_pax'] ) && ! empty( $pricing_option['min_pax'] ) ? $pricing_option['min_pax'] : 0;
+				$max_pax     = isset( $pricing_option['max_pax'] ) && ! empty( $pricing_option['max_pax'] ) ? $pricing_option['max_pax'] : 999999999;
+				$enable_sale = isset( $pricing_option['enable_sale'] ) && '1' == $pricing_option['enable_sale'] ? true : false;
 
-				$price         = $enable_sale && isset( $pricing_option[ 'sale_price' ] ) && ! empty( $pricing_option[ 'sale_price' ] ) ? $pricing_option[ 'sale_price' ] : $pricing_option[ 'price' ];
-				$pricing_label = isset( $pricing_option[ 'label' ] ) ? $pricing_option[ 'label' ] : ucfirst( $key );
+				$price         = $enable_sale && isset( $pricing_option['sale_price'] ) && ! empty( $pricing_option['sale_price'] ) ? $pricing_option['sale_price'] : $pricing_option['price'];
+				$pricing_label = isset( $pricing_option['label'] ) ? $pricing_option['label'] : ucfirst( $key );
 				$value         = 'adult' === $key ? '1' : 0;
 				$min_pax       = 0;
 
-				$pricing_type = isset( $pricing_option[ 'price_type' ] ) && ! empty( $pricing_option[ 'price_type' ] ) ? $pricing_option[ 'price_type' ] : 'per-person';
+				$pricing_type = isset( $pricing_option['price_type'] ) && ! empty( $pricing_option['price_type'] ) ? $pricing_option['price_type'] : 'per-person';
 
 				if ( '' === $price ) {
 					continue;
@@ -957,23 +989,23 @@ class WP_Travel_Engine_Template_Hooks {
 					<div class="wpte-bf-traveler">
 						<div class="wpte-bf-number-field">
 							<input type="text" name="add-member" value="<?php echo esc_attr( $value ); ?>"
-								   min="<?php echo esc_attr( $min_pax ); ?>" max="<?php echo esc_attr( $max_pax ); ?>"
-								   disabled
-								   data-cart-field="pricing_options[<?php echo esc_attr( $key ); ?>][pax]"
-								   data-cost-field='pricing_options[<?php echo esc_attr( $key ); ?>][cost]'
-								   data-type='<?php echo esc_attr( $key ); ?>'
-								   data-cost="<?php echo esc_attr( $price ); ?>"
-								   data-pricing-type="<?php echo esc_attr( $pricing_type ); ?>" />
+									min="<?php echo esc_attr( $min_pax ); ?>" max="<?php echo esc_attr( $max_pax ); ?>"
+									disabled
+									data-cart-field="pricing_options[<?php echo esc_attr( $key ); ?>][pax]"
+									data-cost-field='pricing_options[<?php echo esc_attr( $key ); ?>][cost]'
+									data-type='<?php echo esc_attr( $key ); ?>'
+									data-cost="<?php echo esc_attr( $price ); ?>"
+									data-pricing-type="<?php echo esc_attr( $pricing_type ); ?>" />
 							<button class="wpte-bf-plus">
 								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
 									<path fill="currentColor"
-										  d="M368 224H224V80c0-8.84-7.16-16-16-16h-32c-8.84 0-16 7.16-16 16v144H16c-8.84 0-16 7.16-16 16v32c0 8.84 7.16 16 16 16h144v144c0 8.84 7.16 16 16 16h32c8.84 0 16-7.16 16-16V288h144c8.84 0 16-7.16 16-16v-32c0-8.84-7.16-16-16-16z"></path>
+											d="M368 224H224V80c0-8.84-7.16-16-16-16h-32c-8.84 0-16 7.16-16 16v144H16c-8.84 0-16 7.16-16 16v32c0 8.84 7.16 16 16 16h144v144c0 8.84 7.16 16 16 16h32c8.84 0 16-7.16 16-16V288h144c8.84 0 16-7.16 16-16v-32c0-8.84-7.16-16-16-16z"></path>
 								</svg>
 							</button>
 							<button class="wpte-bf-minus">
 								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
 									<path fill="currentColor"
-										  d="M368 224H16c-8.84 0-16 7.16-16 16v32c0 8.84 7.16 16 16 16h352c8.84 0 16-7.16 16-16v-32c0-8.84-7.16-16-16-16z"></path>
+											d="M368 224H16c-8.84 0-16 7.16-16 16v32c0 8.84 7.16 16 16 16h352c8.84 0 16-7.16 16-16v-32c0-8.84-7.16-16-16-16z"></path>
 								</svg>
 							</button>
 						</div>
@@ -987,12 +1019,11 @@ class WP_Travel_Engine_Template_Hooks {
 							class="wpte-bf-pqty"><?php echo esc_html( apply_filters( 'wte_default_pricing_option_unit_' . $key, sprintf( __( 'Per %1$s', 'wp-travel-engine' ), $pricing_label ) ) ); ?></span>
 					</div>
 				</div>
-			<?php
+				<?php
 			endforeach;
 		else :
 			$this->booking_form_default_traveller_inputs( $default_price );
 		endif;
-
 	}
 
 	/**
@@ -1003,17 +1034,17 @@ class WP_Travel_Engine_Template_Hooks {
 	public function multiple_pricing_is_adult_price_available( $trip_id ) {
 
 		$trip_settings            = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
-		$multiple_pricing_options = isset( $trip_settings[ 'multiple_pricing' ] ) && ! empty( $trip_settings[ 'multiple_pricing' ] ) ? $trip_settings[ 'multiple_pricing' ] : false;
+		$multiple_pricing_options = isset( $trip_settings['multiple_pricing'] ) && ! empty( $trip_settings['multiple_pricing'] ) ? $trip_settings['multiple_pricing'] : false;
 
 		if ( ! $multiple_pricing_options ) {
 			return false;
 		}
 
-		if ( isset( $multiple_pricing_options[ 'adult' ] ) ) {
+		if ( isset( $multiple_pricing_options['adult'] ) ) {
 
-			$pricing_option = $multiple_pricing_options[ 'adult' ];
-			$enable_sale    = isset( $pricing_option[ 'enable_sale' ] ) && '1' == $pricing_option[ 'enable_sale' ] ? true : false;
-			$price          = $enable_sale && isset( $pricing_option[ 'sale_price' ] ) && ! empty( $pricing_option[ 'sale_price' ] ) ? $pricing_option[ 'sale_price' ] : $pricing_option[ 'price' ];
+			$pricing_option = $multiple_pricing_options['adult'];
+			$enable_sale    = isset( $pricing_option['enable_sale'] ) && '1' == $pricing_option['enable_sale'] ? true : false;
+			$price          = $enable_sale && isset( $pricing_option['sale_price'] ) && ! empty( $pricing_option['sale_price'] ) ? $pricing_option['sale_price'] : $pricing_option['price'];
 
 			return ! empty( $price );
 
@@ -1033,14 +1064,14 @@ class WP_Travel_Engine_Template_Hooks {
 		$trip_id       = $post->ID;
 		$post_settings = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
 
-		$trip_highlights_title   = ! empty( $post_settings[ 'trip_highlights_title' ] ?? '' ) ? $post_settings[ 'trip_highlights_title' ] : __( 'Highlights', 'wp-travel-engine' );
-		$trip_highlights_content = isset( $post_settings[ 'trip_highlights' ] ) ? $post_settings[ 'trip_highlights' ] : array();
+		$trip_highlights_title   = ! empty( $post_settings['trip_highlights_title'] ?? '' ) ? $post_settings['trip_highlights_title'] : __( 'Highlights', 'wp-travel-engine' );
+		$trip_highlights_content = isset( $post_settings['trip_highlights'] ) ? $post_settings['trip_highlights'] : array();
 
 		if ( ! empty( $trip_highlights_content ) && is_array( $trip_highlights_content ) ) {
 			echo "<h3 class='wpte-trip-highlights-title'>" . esc_html( $trip_highlights_title ) . '</h3>';
 			echo "<ul class='wpte-trip-highlights' >";
 			foreach ( $trip_highlights_content as $key => $highlight ) {
-				$highlight = isset( $highlight[ 'highlight_text' ] ) && ! empty( $highlight[ 'highlight_text' ] ) ? $highlight[ 'highlight_text' ] : false;
+				$highlight = isset( $highlight['highlight_text'] ) && ! empty( $highlight['highlight_text'] ) ? $highlight['highlight_text'] : false;
 
 				if ( $highlight ) {
 					echo "<li class='trip-highlight'>" . esc_html( $highlight ) . '</li>';
@@ -1063,7 +1094,7 @@ class WP_Travel_Engine_Template_Hooks {
 		$trip_id = $post->ID;
 
 		$trip_settings = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
-		$tab_title     = isset( $trip_settings[ 'overview_section_title' ] ) && ! empty( $trip_settings[ 'overview_section_title' ] ) ? $trip_settings[ 'overview_section_title' ] : '';
+		$tab_title     = isset( $trip_settings['overview_section_title'] ) && ! empty( $trip_settings['overview_section_title'] ) ? $trip_settings['overview_section_title'] : '';
 
 		echo "<h2 class='wpte-overview-title'>" . esc_html( $tab_title ) . '</h2>';
 	}
@@ -1081,7 +1112,7 @@ class WP_Travel_Engine_Template_Hooks {
 		$trip_id = $post->ID;
 
 		$trip_settings = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
-		$tab_title     = isset( $trip_settings[ 'cost_tab_sec_title' ] ) && ! empty( $trip_settings[ 'cost_tab_sec_title' ] ) ? $trip_settings[ 'cost_tab_sec_title' ] : '';
+		$tab_title     = isset( $trip_settings['cost_tab_sec_title'] ) && ! empty( $trip_settings['cost_tab_sec_title'] ) ? $trip_settings['cost_tab_sec_title'] : '';
 		echo "<h2 class='wpte-cost-tab-title'>" . esc_html( $tab_title ) . '</h2>';
 	}
 
@@ -1098,9 +1129,9 @@ class WP_Travel_Engine_Template_Hooks {
 		$trip_id = $post->ID;
 
 		$trip_settings             = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
-		$tab_title                 = isset( $trip_settings[ 'trip_itinerary_title' ] ) && ! empty( $trip_settings[ 'trip_itinerary_title' ] ) ? $trip_settings[ 'trip_itinerary_title' ] : '';
+		$tab_title                 = isset( $trip_settings['trip_itinerary_title'] ) && ! empty( $trip_settings['trip_itinerary_title'] ) ? $trip_settings['trip_itinerary_title'] : '';
 		$wp_travel_engine_settings = get_option( 'wp_travel_engine_settings' );
-		$enabled_expand_all        = ! isset( $wp_travel_engine_settings[ 'wte_advance_itinerary' ][ 'enable_expand_all' ] ) || 'yes' == $wp_travel_engine_settings[ 'wte_advance_itinerary' ][ 'enable_expand_all' ] ? 'enabled' : '';
+		$enabled_expand_all        = ! isset( $wp_travel_engine_settings['wte_advance_itinerary']['enable_expand_all'] ) || 'yes' == $wp_travel_engine_settings['wte_advance_itinerary']['enable_expand_all'] ? 'enabled' : '';
 
 		if ( defined( 'WTEAI_VERSION' ) ) {
 			echo "<h2 class='wpte-itinerary-title'>" . esc_html( $tab_title ) . '</h2>';
@@ -1130,10 +1161,10 @@ class WP_Travel_Engine_Template_Hooks {
 	 */
 	public function show_itinerary_description() {
 		global $post;
-		$trip_id = $post->ID;
+		$trip_id       = $post->ID;
 		$trip_settings = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
-		if ( isset( $trip_settings[ 'trip_itinerary_description' ] ) && ! empty( $trip_settings[ 'trip_itinerary_description' ] ) ) {
-			echo "<div style='width: 100%; margin-bottom: 2%;'>" . wp_kses_post( $trip_settings[ 'trip_itinerary_description' ] ) . '</div>';
+		if ( isset( $trip_settings['trip_itinerary_description'] ) && ! empty( $trip_settings['trip_itinerary_description'] ) ) {
+			echo "<div style='width: 100%; margin-bottom: 2%;'>" . wp_kses_post( $trip_settings['trip_itinerary_description'] ) . '</div>';
 		}
 	}
 
@@ -1150,7 +1181,7 @@ class WP_Travel_Engine_Template_Hooks {
 		$trip_id = $post->ID;
 
 		$trip_settings = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
-		$tab_title     = isset( $trip_settings[ 'faq_section_title' ] ) && ! empty( $trip_settings[ 'faq_section_title' ] ) ? $trip_settings[ 'faq_section_title' ] : '';
+		$tab_title     = isset( $trip_settings['faq_section_title'] ) && ! empty( $trip_settings['faq_section_title'] ) ? $trip_settings['faq_section_title'] : '';
 		echo "<h2 class='wpte-faqs-title'>" . esc_html( $tab_title ) . '</h2>';
 	}
 
@@ -1167,7 +1198,7 @@ class WP_Travel_Engine_Template_Hooks {
 		$trip_id = $post->ID;
 
 		$trip_settings = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
-		$tab_title     = isset( $trip_settings[ 'map_section_title' ] ) && ! empty( $trip_settings[ 'map_section_title' ] ) ? $trip_settings[ 'map_section_title' ] : '';
+		$tab_title     = isset( $trip_settings['map_section_title'] ) && ! empty( $trip_settings['map_section_title'] ) ? $trip_settings['map_section_title'] : '';
 		echo "<h2 class='wpte-map-title'>" . esc_html( $tab_title ) . '</h2>';
 	}
 
@@ -1223,7 +1254,5 @@ class WP_Travel_Engine_Template_Hooks {
 		}
 
 		return true;
-
 	}
-
 }

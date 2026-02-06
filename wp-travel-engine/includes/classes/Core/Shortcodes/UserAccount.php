@@ -241,7 +241,7 @@ class UserAccount extends Shortcode {
 
 		$errors = new \WP_Error();
 
-		do_action( 'lostpassword_post', $errors );
+		do_action( 'wptravelengine_lostpassword_post', $errors );
 
 		if ( $errors->get_error_code() ) {
 
@@ -266,7 +266,7 @@ class UserAccount extends Shortcode {
 		// redefining user_login ensures we return the right case in the email.
 		$user_login = $user_data->user_login;
 
-		do_action( 'retrieve_password', $user_login );
+		do_action( 'wptravelengine_retrieve_password', $user_login );
 
 		$allow = apply_filters( 'allow_password_reset', true, $user_data->ID );
 
@@ -293,8 +293,8 @@ class UserAccount extends Shortcode {
 			if ( $user_login && $key ) {
 				$email = new UserEmail( $user_data->ID );
 				$email->set( 'to', $user_data->user_email );
-				$email->set( 'my_subject', $forgot_password_settings[ 'subject' ] );
-				$email->set( 'content', $forgot_password_settings[ 'content' ] );
+				$email->set( 'my_subject', $forgot_password_settings['subject'] );
+				$email->set( 'content', $forgot_password_settings['content'] );
 				$email->send();
 			}
 		}

@@ -7,7 +7,7 @@
 use WPTravelEngine\Core\Models\Settings\Options;
 
 $settings = Options::get( 'wp_travel_engine_settings' );
-$logo_url = $settings[ 'email' ][ 'logo' ][ 'url' ];
+$logo_url = $settings['email']['logo']['url'];
 ?>
 <div style="background-color: #F4F4F4;width: 100%;font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; padding-bottom: 72px;">
 <table style="max-width: 590px; width: 100%;margin: 0 auto;color: #111322;font-size: 14px;line-height: 1.7;">

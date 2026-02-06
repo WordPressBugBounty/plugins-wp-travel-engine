@@ -10,6 +10,7 @@ namespace WPTravelEngine\PaymentGateways;
 
 use WPTravelEngine\Core\Models\Post\Booking;
 use WPTravelEngine\Core\Models\Post\Payment;
+use WPTravelEngine\Core\Booking\BookingProcess;
 
 /**
  * Direct Bank Transfer Payment Gateway
@@ -17,6 +18,11 @@ use WPTravelEngine\Core\Models\Post\Payment;
  * @since 6.0.0
  */
 class DirectBankTransfer extends BaseGateway {
+
+	/**
+	 * @inheritDoc
+	 */
+	public static string $cart_version = '4.0';
 
 	/**
 	 * Get gateway id.
@@ -85,22 +91,54 @@ class DirectBankTransfer extends BaseGateway {
 
 	/**
 	 * @inheritDoc
+	 * @updated 6.7.0
 	 */
 	public function process_payment( Booking $booking, Payment $payment, $booking_instance ): void {
-		$payable = $payment->get_meta('payable');
-        $amount = [
-            'value'    => (float) $payable['amount'],
-            'currency' => $payable['currency'],
-        ];
-        $payment->set_meta('payment_status', 'voucher-waiting');
-        $payment->set_payment_gateway($this->get_gateway_id());
-        $payment->set_meta('payment_amount', $amount);
-        $payment->save();
-        $paid_amount  = (float) $booking->get_paid_amount();
-        $due_amount   = (float) $booking->get_due_amount();
-        $booking->set_meta( 'paid_amount', $paid_amount + $amount['value'] );
-        $booking->set_meta( 'due_amount', max( $due_amount - $amount['value'], 0 ) );
-        $booking->save();
+		if ( $booking->is_curr_cart( '<' ) ) {
+			$this->process_payment_before_v4( $booking, $payment, $booking_instance );
+		} else {
+			$this->process_payment_in_v4( $booking, $payment, $booking_instance );
+		}
+	}
+
+	/**
+	 * Process payment before v4.
+	 *
+	 * @param Booking        $booking Booking object.
+	 * @param Payment        $payment Payment object.
+	 * @param BookingProcess $booking_instance Booking process object.
+	 * @return void
+	 */
+	protected function process_payment_before_v4( Booking $booking, Payment $payment, $booking_instance ): void {
+		$payable = $payment->get_meta( 'payable' );
+		$amount  = array(
+			'value'    => (float) $payable['amount'],
+			'currency' => $payable['currency'],
+		);
+		$payment->set_meta( 'payment_status', 'voucher-waiting' );
+		$payment->set_payment_gateway( $this->get_gateway_id() );
+		$payment->set_meta( 'payment_amount', $amount );
+		$payment->save();
+		$paid_amount = (float) $booking->get_paid_amount();
+		$due_amount  = (float) $booking->get_due_amount();
+		$booking->set_meta( 'paid_amount', $paid_amount + $amount['value'] );
+		$booking->set_meta( 'due_amount', max( $due_amount - $amount['value'], 0 ) );
+		$booking->save();
+	}
+
+	/**
+	 * Process payment in v4.
+	 *
+	 * @param Booking        $booking Booking object.
+	 * @param Payment        $payment Payment object.
+	 * @param BookingProcess $booking_instance Booking process object.
+	 * @return void
+	 * @since 6.7.0
+	 */
+	protected function process_payment_in_v4( Booking $booking, Payment $payment, $booking_instance ): void {
+		global $wte_cart;
+		$amount = $wte_cart->get_total_payable_amount();
+		$booking->sync_payment_pending_metas( $payment->ID, $amount );
 	}
 
 	/**
@@ -110,7 +148,7 @@ class DirectBankTransfer extends BaseGateway {
 	 */
 	public function print_instruction( int $payment_id ) {
 		$instruction  = $this->get_info();
-		$bank_details = wptravelengine_settings()->get( 'bank_transfer.accounts', [] );
+		$bank_details = wptravelengine_settings()->get( 'bank_transfer.accounts', array() );
 		if ( ! is_array( $bank_details ) ) {
 			return;
 		}
@@ -124,21 +162,23 @@ class DirectBankTransfer extends BaseGateway {
 			'swift'          => __( 'BIC/SWIFT:', 'wp-travel-engine' ),
 		);
 
-		$bank_details = array_map( function ( $bank_detail ) use ( $keys ) {
-			$_bank_detail = array();
+		$bank_details = array_map(
+			function ( $bank_detail ) use ( $keys ) {
+				$_bank_detail = array();
 
-			foreach ( $keys as $key => $label ) {
-				if ( ! empty( $bank_detail[ $key ] ) ) {
-					$_bank_detail[ $key ] = array(
-						'label' => $label,
-						'value' => $bank_detail[ $key ],
-					);
+				foreach ( $keys as $key => $label ) {
+					if ( ! empty( $bank_detail[ $key ] ) ) {
+						$_bank_detail[ $key ] = array(
+							'label' => $label,
+							'value' => $bank_detail[ $key ],
+						);
+					}
 				}
-			}
 
-			return $_bank_detail;
-		}, $bank_details );
-
+				return $_bank_detail;
+			},
+			$bank_details
+		);
 
 		wptravelengine_get_template(
 			'template-checkout/content-bank-transfer-instruction.php',

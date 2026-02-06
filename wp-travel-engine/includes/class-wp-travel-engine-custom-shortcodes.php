@@ -9,7 +9,7 @@ class WP_Travel_Engine_Custom_Shortcodes {
 
 	public function __construct() {
 
-//		add_shortcode( 'wte_trip', array( $this, 'wte_trip_shortcodes_callback' ) );
+		// add_shortcode( 'wte_trip', array( $this, 'wte_trip_shortcodes_callback' ) );
 		add_shortcode( 'wte_trip_map', array( __CLASS__, 'wte_show_trip_map_shortcodes_callback' ) );
 		add_shortcode( 'wte_trip_tax', array( $this, 'wte_trip_tax_shortcodes_callback' ) );
 		add_shortcode( 'wte_video_gallery', array( $this, 'wte_video_gallery_output_callback' ) );
@@ -35,24 +35,26 @@ class WP_Travel_Engine_Custom_Shortcodes {
 		foreach ( $shortcodes as $shortcode => $function ) {
 			add_shortcode( apply_filters( "{$shortcode}_shortcode_tag", $shortcode ), $function );
 		}
-		
-		add_action( 'wp', function() {
-			global $post;
 
-			if ( ! $post instanceof \WP_Post || ! is_singular() ) {
-				return;
+		add_action(
+			'wp',
+			function () {
+				global $post;
+
+				if ( ! $post instanceof \WP_Post || ! is_singular() ) {
+					return;
+				}
+
+				if ( has_shortcode( $post->post_content, 'wte_trip' ) || has_shortcode( $post->post_content, 'wte_trip_tax' ) ) {
+					TripSearch::enqueue_assets();
+				}
+
+				if ( has_shortcode( $post->post_content, 'WP_TRAVEL_ENGINE_WISHLIST' ) ) {
+					TripSearch::enqueue_scripts();
+					\WPTravelEngine\Assets::instance()->enqueue_style( 'trip-wishlist' )->enqueue_script( 'trip-wishlist' );
+				}
 			}
-
-			if ( has_shortcode( $post->post_content, 'wte_trip' ) || has_shortcode( $post->post_content, 'wte_trip_tax' ) ) {
-				TripSearch::enqueue_assets();
-			}
-
-			if ( has_shortcode( $post->post_content, 'WP_TRAVEL_ENGINE_WISHLIST' ) ) {
-				TripSearch::enqueue_scripts();
-				\WPTravelEngine\Assets::instance()->enqueue_style( 'trip-wishlist' )->enqueue_script( 'trip-wishlist' );
-			}
-
-		} );
+		);
 	}
 
 	/*
@@ -72,7 +74,7 @@ class WP_Travel_Engine_Custom_Shortcodes {
 			<div class="wte-category-outer-wrap wte-user-wishlists">
 				<?php
 				if ( empty( $current_user_wishlist ) || ! is_array( $current_user_wishlist ) ) {
-					$button_txt = __( 'Explore Trips', 'wp-travel-engine' );
+					$button_txt    = __( 'Explore Trips', 'wp-travel-engine' );
 					$site_url      = get_site_url();
 					$trip_page_url = $site_url . '/trip';
 					?>
@@ -89,15 +91,6 @@ class WP_Travel_Engine_Custom_Shortcodes {
 					<div class="wpte_empty-items-box" data-wptravelengine-wishlist-empty>
 					</div>
 					<div class="wte-category-outer-wrap" data-wptravelengine-wishlist-list>
-						<?php
-						$args = array(
-							'post_type'   => WP_TRAVEL_ENGINE_POST_TYPE,
-							'post_status' => 'publish',
-							'post__in'    => $current_user_wishlist,
-							'orderby'     => 'post__in',
-							'paged'       => get_query_var( 'paged' ),
-						);
-						?>
 						<div class="wte-user-wishlist-toolbar">
 							<span class="wte-user-wishlist-count" data-wptravelengine-wishlist-count>
 								<?php printf( wp_kses_post( _n( '<strong>%d</strong> item in wishlist', '<strong>%d</strong> items in wishlist', count( $current_user_wishlist ), 'wp-travel-engine' ) ), count( $current_user_wishlist ) ); ?>
@@ -108,7 +101,15 @@ class WP_Travel_Engine_Custom_Shortcodes {
 							</button>
 						</div>
 						<?php
-						$query = new WP_Query( $args );
+						$query = new WP_Query(
+							array(
+								'post_type'   => WP_TRAVEL_ENGINE_POST_TYPE,
+								'post_status' => 'publish',
+								'post__in'    => $current_user_wishlist,
+								'orderby'     => 'post__in',
+								'paged'       => get_query_var( 'paged' ),
+							)
+						);
 						if ( $query->have_posts() ) :
 							?>
 							<div class="category-main-wrap wte-col-3 category-grid" data-wptravelengine-wishlists>
@@ -123,7 +124,7 @@ class WP_Travel_Engine_Custom_Shortcodes {
 								wp_reset_postdata();
 								?>
 							</div>
-						<?php
+							<?php
 						endif;
 						?>
 					</div>
@@ -134,7 +135,7 @@ class WP_Travel_Engine_Custom_Shortcodes {
 			<div class="trip-pagination wishlist" data-current-page="<?php echo esc_attr( get_query_var( 'paged' ) ?: 1 ); ?>" data-max-page="<?php echo esc_attr( $query->max_num_pages ?? 0 ); ?>" data-wptravelengine-wishlist-pagination>
 				<?php
 				if ( isset( $query ) ) {
-					$GLOBALS[ 'wp_query' ] = $query;
+					$GLOBALS['wp_query'] = $query;
 					the_posts_pagination(
 						array(
 							'prev_text'          => esc_html__( 'Previous', 'wp-travel-engine' ),
@@ -173,32 +174,32 @@ class WP_Travel_Engine_Custom_Shortcodes {
 		);
 
 		// Bail if no trip ID found.
-		if ( ! $atts[ 'trip_id' ] ) {
+		if ( ! $atts['trip_id'] ) {
 			esc_html_e( 'No Trip ID supplied. Gallery Unavailable.', 'wp-travel-engine' );
 			$output = ob_get_clean();
 
 			return $output;
 		}
 
-		$video_gallery = get_post_meta( $atts[ 'trip_id' ], 'wpte_vid_gallery', true );
+		$video_gallery = get_post_meta( $atts['trip_id'], 'wpte_vid_gallery', true );
 		if ( ! empty( $video_gallery ) ) {
-			if ( 'popup' === $atts[ 'type' ] ) {
+			if ( 'popup' === $atts['type'] ) {
 				wte_get_template(
 					'single-trip/gallery-video-popup.php',
 					array(
-						'label'   => $atts[ 'label' ],
-						'title'   => $atts[ 'title' ],
-						'trip_id' => $atts[ 'trip_id' ],
+						'label'   => $atts['label'],
+						'title'   => $atts['title'],
+						'trip_id' => $atts['trip_id'],
 						'gallery' => $video_gallery,
 					)
 				);
-			} else if ( 'slider' === $atts[ 'type' ] ) {
+			} elseif ( 'slider' === $atts['type'] ) {
 				wte_get_template(
 					'single-trip/gallery-video-slider.php',
 					array(
-						'label'   => $atts[ 'label' ],
-						'title'   => $atts[ 'title' ],
-						'trip_id' => $atts[ 'trip_id' ],
+						'label'   => $atts['label'],
+						'title'   => $atts['title'],
+						'trip_id' => $atts['trip_id'],
 						'gallery' => $video_gallery,
 					)
 				);
@@ -242,8 +243,8 @@ class WP_Travel_Engine_Custom_Shortcodes {
 	 * Shortcode Wrapper.
 	 *
 	 * @param string[] $function Callback function.
-	 * @param array $atts Attributes. Default to empty array.
-	 * @param array $wrapper Customer wrapper data.
+	 * @param array    $atts Attributes. Default to empty array.
+	 * @param array    $wrapper Customer wrapper data.
 	 *
 	 * @return string
 	 */
@@ -290,55 +291,62 @@ class WP_Travel_Engine_Custom_Shortcodes {
 			'wte_trip_map'
 		);
 
-		if ( empty( $attr[ 'id' ] ) ) {
+		if ( empty( $attr['id'] ) ) {
 			global $post;
 			if ( $post && WP_TRAVEL_ENGINE_POST_TYPE === get_post_type( $post->ID ) ) {
-				$attr[ 'id' ] = $post->ID;
+				$attr['id'] = $post->ID;
 			}
 		}
 
-		if ( empty( $attr[ 'id' ] ) ) {
+		if ( empty( $attr['id'] ) ) {
 			return '';
 		}
 
-		$wp_travel_engine_setting = get_post_meta( $attr[ 'id' ], 'wp_travel_engine_setting', true );
+		$wp_travel_engine_setting = get_post_meta( $attr['id'], 'wp_travel_engine_setting', true );
 
-		$global_settings = wptravelengine_settings();
-		$do_lazy_loading = wptravelengine_toggled( $global_settings->get( 'enable_lazy_loading', 'no' ) );
+		$global_settings  = wptravelengine_settings();
+		$do_lazy_loading  = wptravelengine_toggled( $global_settings->get( 'enable_lazy_loading', 'no' ) );
 		$map_lazy_loading = wptravelengine_toggled( $global_settings->get( 'enable_map_lazy_loading', 'no' ) );
 
 		ob_start();
 
-		if ( in_array( $attr[ 'show' ], array(
+		if ( in_array(
+			$attr['show'],
+			array(
 				'both',
 				'iframe',
 				'iframe|image',
-			) ) && ! empty( $wp_travel_engine_setting[ 'map' ][ 'iframe' ] ) ) {
+			)
+		) && ! empty( $wp_travel_engine_setting['map']['iframe'] ) ) {
 			?>
 				<div class="trip-map iframe">
-					<?php if ( ! is_singular( WP_TRAVEL_ENGINE_POST_TYPE ) || ! $do_lazy_loading || ! $map_lazy_loading ) :
-						echo wptravelengine_esc_iframe( $wp_travel_engine_setting[ 'map' ][ 'iframe' ] );
+					<?php
+					if ( ! is_singular( WP_TRAVEL_ENGINE_POST_TYPE ) || ! $do_lazy_loading || ! $map_lazy_loading ) :
+						echo wptravelengine_esc_iframe( $wp_travel_engine_setting['map']['iframe'] );
 					endif;
 					?>
 				</div>
 			<?php
-			if ( 'iframe|image' === $attr[ 'show' ] ) {
-				$attr[ 'show' ] = 'none';
+			if ( 'iframe|image' === $attr['show'] ) {
+				$attr['show'] = 'none';
 			}
 		}
 
-		if ( in_array( $attr[ 'show' ], array(
+		if ( in_array(
+			$attr['show'],
+			array(
 				'both',
 				'image',
 				'iframe|image',
-			) ) && ! empty( $wp_travel_engine_setting[ 'map' ][ 'image_url' ] ) ) {
-			$img_id = $wp_travel_engine_setting[ 'map' ][ 'image_url' ];
+			)
+		) && ! empty( $wp_travel_engine_setting['map']['image_url'] ) ) {
+			$img_id = $wp_travel_engine_setting['map']['image_url'];
 			$src    = wp_get_attachment_image_src( $img_id, 'full' );
 			?>
 			<div class="trip-map image">
 				<img
 					alt="<?php echo esc_attr( get_post_meta( $img_id, '_wp_attachment_image_alt', true ) ?? get_the_title( $img_id ) ); ?>"
-					width="910" height="490" src="<?php echo esc_url( $src[ 0 ] ); ?>">
+					width="910" height="490" src="<?php echo esc_url( $src[0] ); ?>">
 			</div>
 			<?php
 		}
@@ -361,14 +369,14 @@ class WP_Travel_Engine_Custom_Shortcodes {
 			'wte_trip'
 		);
 
-		if ( ! in_array( $attr[ 'layout' ], array( 'grid', 'list' ) ) ) {
-			return '<h1>' . sprintf( __( 'Layout not found: %s', 'wp-travel-engine' ), $attr[ 'layout' ] ) . '</h1>';
+		if ( ! in_array( $attr['layout'], array( 'grid', 'list' ) ) ) {
+			return '<h1>' . sprintf( __( 'Layout not found: %s', 'wp-travel-engine' ), $attr['layout'] ) . '</h1>';
 		}
 
-		if ( ! empty( $attr[ 'ids' ] ) ) {
-			$ids           = array();
-			$ids           = explode( ',', $attr[ 'ids' ] );
-			$attr[ 'ids' ] = $ids;
+		if ( ! empty( $attr['ids'] ) ) {
+			$ids         = array();
+			$ids         = explode( ',', $attr['ids'] );
+			$attr['ids'] = $ids;
 		}
 
 		ob_start();
@@ -389,7 +397,7 @@ class WP_Travel_Engine_Custom_Shortcodes {
 			array(
 				'activities'  => '',
 				'destination' => '',
-				'trip_types'  => '',	
+				'trip_types'  => '',
 				'layout'      => 'grid',
 				'postsnumber' => get_option( 'posts_per_page' ),
 			),
@@ -397,26 +405,26 @@ class WP_Travel_Engine_Custom_Shortcodes {
 			'wte_trip_tax'
 		);
 
-		if ( ! in_array( $attr[ 'layout' ], array( 'grid', 'list' ) ) ) {
-			return '<h1>' . sprintf( __( 'Layout not found: %s', 'wp-travel-engine' ), $attr[ 'layout' ] ) . '</h1>';
+		if ( ! in_array( $attr['layout'], array( 'grid', 'list' ) ) ) {
+			return '<h1>' . sprintf( __( 'Layout not found: %s', 'wp-travel-engine' ), $attr['layout'] ) . '</h1>';
 		}
 
-		if ( ! empty( $attr[ 'activities' ] ) ) {
-			$activities           = array();
-			$activities           = explode( ',', $attr[ 'activities' ] );
-			$attr[ 'activities' ] = $activities;
+		if ( ! empty( $attr['activities'] ) ) {
+			$activities         = array();
+			$activities         = explode( ',', $attr['activities'] );
+			$attr['activities'] = $activities;
 		}
 
-		if ( ! empty( $attr[ 'destination' ] ) ) {
-			$destination           = array();
-			$destination           = explode( ',', $attr[ 'destination' ] );
-			$attr[ 'destination' ] = $destination;
+		if ( ! empty( $attr['destination'] ) ) {
+			$destination         = array();
+			$destination         = explode( ',', $attr['destination'] );
+			$attr['destination'] = $destination;
 		}
 
-		if ( ! empty( $attr[ 'trip_types' ] ) ) {
-			$trip_types           = array();
-			$trip_types           = explode( ',', $attr[ 'trip_types' ] );
-			$attr[ 'trip_types' ] = $trip_types;
+		if ( ! empty( $attr['trip_types'] ) ) {
+			$trip_types         = array();
+			$trip_types         = explode( ',', $attr['trip_types'] );
+			$attr['trip_types'] = $trip_types;
 		}
 
 		ob_start();
@@ -433,53 +441,53 @@ class WP_Travel_Engine_Custom_Shortcodes {
 
 	function wte_trip_content( $atts ) {
 		$paged = ( get_query_var( 'paged' ) ) ? get_query_var( 'paged' ) : 1;
-		$args = array(
+		$args  = array(
 			'post_type'      => 'trip',
 			'post_status'    => 'publish',
-			'posts_per_page' => $atts[ 'postsnumber' ] ?? get_option( 'posts_per_page', 10 ),
+			'posts_per_page' => $atts['postsnumber'] ?? get_option( 'posts_per_page', 10 ),
 		);
 
-		$args['offset'] = ( $paged - 1 ) * $args[ 'posts_per_page' ];
+		$args['offset'] = ( $paged - 1 ) * $args['posts_per_page'];
 
-		if ( ! empty( $atts[ 'ids' ] ) ) {
-			$args[ 'post__in' ] = $atts[ 'ids' ];
-			$args[ 'orderby' ]  = 'post__in';
+		if ( ! empty( $atts['ids'] ) ) {
+			$args['post__in'] = $atts['ids'];
+			$args['orderby']  = 'post__in';
 		}
 
-		if ( ! empty( $atts[ 'activities' ] ) || ! empty( $atts[ 'destination' ] ) || ! empty( $atts[ 'trip_types' ] ) ) {
+		if ( ! empty( $atts['activities'] ) || ! empty( $atts['destination'] ) || ! empty( $atts['trip_types'] ) ) {
 			$paged = ( get_query_var( 'paged' ) ) ? get_query_var( 'paged' ) : 1;
 
-			$args[ 'wpse_search_or_tax_query' ] = true;
-			$args[ 'paged' ]                    = $paged;
+			$args['wpse_search_or_tax_query'] = true;
+			$args['paged']                    = $paged;
 
 			$tax_query = array( 'relation' => 'OR' );
-			if ( ! empty( $atts[ 'activities' ] ) ) {
+			if ( ! empty( $atts['activities'] ) ) {
 				$tax_query[] = array(
 					'taxonomy'         => 'activities',
 					'field'            => 'term_id',
-					'terms'            => $atts[ 'activities' ],
+					'terms'            => $atts['activities'],
 					'include_children' => false,
 				);
 			}
-			if ( ! empty( $atts[ 'destination' ] ) ) {
+			if ( ! empty( $atts['destination'] ) ) {
 				$tax_query[] = array(
 					'taxonomy'         => 'destination',
 					'field'            => 'term_id',
-					'terms'            => $atts[ 'destination' ],
+					'terms'            => $atts['destination'],
 					'include_children' => false,
 				);
 			}
-			if ( ! empty( $atts[ 'trip_types' ] ) ) {
+			if ( ! empty( $atts['trip_types'] ) ) {
 				$tax_query[] = array(
 					'taxonomy'         => 'trip_types',
 					'field'            => 'term_id',
-					'terms'            => $atts[ 'trip_types' ],
+					'terms'            => $atts['trip_types'],
 					'include_children' => false,
 				);
 			}
 
 			if ( ! empty( $tax_query ) ) {
-				$args[ 'tax_query' ] = $tax_query;
+				$args['tax_query'] = $tax_query;
 			}
 		}
 
@@ -489,23 +497,23 @@ class WP_Travel_Engine_Custom_Shortcodes {
 			?>
 			<div class="wp-travel-engine-archive-repeater-wrap">
 				<div class="wte-category-outer-wrap">
-					<?php $view_class = 'grid' === $atts[ 'layout' ] ? 'wte-col-3 category-grid' : 'category-list'; ?>
+					<?php $view_class = 'grid' === $atts['layout'] ? 'wte-col-3 category-grid' : 'category-list'; ?>
 					<div class="category-main-wrap <?php echo esc_attr( $view_class ); ?>">
 						<?php
 						$user_wishlists = wptravelengine_user_wishlists();
-						$template_name	= wptravelengine_get_template_by_view_mode( $atts[ 'layout' ] );
+						$template_name  = wptravelengine_get_template_by_view_mode( $atts['layout'] );
 
-			while ( $query->have_posts() ) :
-				$query->the_post();
-				$details                   = wte_get_trip_details( get_the_ID() );
-				$details['user_wishlists'] = $user_wishlists;
-				wptravelengine_get_template( $template_name, $details );
+						while ( $query->have_posts() ) :
+							$query->the_post();
+							$details                   = wte_get_trip_details( get_the_ID() );
+							$details['user_wishlists'] = $user_wishlists;
+							wptravelengine_get_template( $template_name, $details );
 			endwhile;
-		wp_reset_postdata();
-			echo '</div>';
-			?>
+						wp_reset_postdata();
+						echo '</div>';
+						?>
 			</div>
-		<?php
+			<?php
 		endif;
 	}
 }

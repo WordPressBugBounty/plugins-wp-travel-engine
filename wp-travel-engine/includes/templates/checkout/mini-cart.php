@@ -97,8 +97,8 @@ if ( ! empty( $wte_cart->getItems() ) ) :
 			<!-- Partial payment Section -->
 			<?php
 			if ( wp_travel_engine_is_trip_partially_payable( $cart_item->trip_id )
-				 && ( 'due' !== $wte_cart->get_payment_type() )
-				 && 'booking_only' !== ( $wte_cart->payment_gateway ?? 'booking_only' )
+				&& ( 'due' !== $wte_cart->get_payment_type() )
+				&& 'booking_only' !== ( $wte_cart->payment_gateway ?? 'booking_only' )
 			) {
 				?>
 				<table class="wpte-bf-extra-info-table">
@@ -118,7 +118,7 @@ if ( ! empty( $wte_cart->getItems() ) ) :
 					</tbody>
 				</table>
 				<?php
-			} else if ( 'due' === $wte_cart->get_payment_type() && $wte_cart->get_booking_ref() ) {
+			} elseif ( 'due' === $wte_cart->get_payment_type() && $wte_cart->get_booking_ref() ) {
 				/* @var Booking $booking */
 				$booking = Booking::make( $wte_cart->get_booking_ref() );
 				?>
@@ -174,5 +174,5 @@ if ( ! empty( $wte_cart->getItems() ) ) :
 			<?php $mini_cart->tax_summary(); ?>
 		</div>
 	</div><!-- .wpte-bf-summary-total -->
-<?php
+	<?php
 endif;

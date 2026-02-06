@@ -9,6 +9,7 @@
 namespace WPTravelEngine\Core\Booking;
 
 use WPTravelEngine\Abstracts\PaymentGateway;
+use WPTravelEngine\PaymentGateways\BaseGateway;
 use WPTravelEngine\Core\Cart\Cart;
 use WPTravelEngine\Filters\Events;
 use WPTravelEngine\Helpers\CartInfoParser;
@@ -109,7 +110,7 @@ class BookingProcess {
 	 * BookingProcess constructor.
 	 *
 	 * @param RequestParser $request Request parser.
-	 * @param Cart $cart Cart.
+	 * @param Cart          $cart Cart.
 	 */
 	public function __construct( RequestParser $request, Cart $cart ) {
 		if ( empty( $cart->getItems( true ) ) ) {
@@ -118,7 +119,7 @@ class BookingProcess {
 
 		$this->request = $request;
 		$this->cart    = $cart;
-		
+
 		if ( $this->request->get_param( 'action' ) === 'editpost' ) {
 			return;
 		}
@@ -138,12 +139,12 @@ class BookingProcess {
 
 			if ( $ref = $this->request->get_param( "wte_pg_{$this->payment_method}_ref" ) ) {
 				$this->booking->set_meta( "wte_pg_{$this->payment_method}_ref", (string) $ref )
-							  ->set_meta( 'wp_travel_engine_booking_payment_method', $this->payment_method )
-							  ->set_meta( 'wp_travel_engine_booking_payment_gateway', $this->payment_method );
+								->set_meta( 'wp_travel_engine_booking_payment_method', $this->payment_method )
+								->set_meta( 'wp_travel_engine_booking_payment_gateway', $this->payment_method );
 			}
 
 			// Add additional note from the new checkout page template.
-			if ( $additional_note = $this->request->get_param( "wptravelengine_additional_note" ) ) {
+			if ( $additional_note = $this->request->get_param( 'wptravelengine_additional_note' ) ) {
 				// Set additional note to session.
 				WTE()->session->set( 'additional_note', $additional_note );
 
@@ -160,13 +161,13 @@ class BookingProcess {
 				WTE()->session->set( 'billing_form_data', $this->request->get_param( 'billing' ) );
 
 				// Get validated billing data.
-				$sanitized_billing = $this->validator->sanitized() ?? [];
+				$sanitized_billing = $this->validator->sanitized() ?? array();
 
 				// Set billing details to booking meta.
-				$this->booking->set_meta( 'wptravelengine_billing_details', $sanitized_billing[ 'billing' ] ?? [] );
+				$this->booking->set_meta( 'wptravelengine_billing_details', $sanitized_billing['billing'] ?? array() );
 			}
 
-			//Add new travelers info to booking meta.
+			// Add new travelers info to booking meta.
 			if ( $this->request->get_param( 'travellers' ) ) {
 				// Set travelers form data to session.
 				WTE()->session->set( 'travellers_form_data', $this->request->get_param( 'travellers' ) );
@@ -176,13 +177,13 @@ class BookingProcess {
 				$travelers->validate_data( $this->request->get_param( 'travellers' ) );
 
 				// Sanitize travelers data.
-				$sanitized_travellers = $travelers->sanitized() ?? [];
+				$sanitized_travellers = $travelers->sanitized() ?? array();
 
 				// Set travelers details to booking meta.
-				$this->booking->set_meta( 'wptravelengine_travelers_details', $sanitized_travellers[ 'travelers' ] ?? [] );
+				$this->booking->set_meta( 'wptravelengine_travelers_details', $sanitized_travellers['travelers'] ?? array() );
 			}
 
-			//Add new emergency contacts info to booking meta.
+			// Add new emergency contacts info to booking meta.
 			if ( $this->request->get_param( 'emergency' ) ) {
 				// Set emergency form data to session.
 				WTE()->session->set( 'emergency_form_data', $this->request->get_param( 'emergency' ) );
@@ -192,10 +193,10 @@ class BookingProcess {
 				$emergency->validate( $this->request->get_param( 'emergency' ) );
 
 				// Sanitize emergency data.
-				$sanitized_emergency = $emergency->sanitized() ?? [];
+				$sanitized_emergency = $emergency->sanitized() ?? array();
 
 				// Set emergency details to booking meta.
-				$this->booking->set_meta( 'wptravelengine_emergency_details', $sanitized_emergency[ 'emergency' ] ?? [] );
+				$this->booking->set_meta( 'wptravelengine_emergency_details', $sanitized_emergency['emergency'] ?? array() );
 			}
 
 			if ( $this->payment_method === 'booking_only' ) {
@@ -215,18 +216,11 @@ class BookingProcess {
 			$this->booking->add_payment( $this->payment->get_id() );
 
 			$this->booking->save();
-			
-			do_action( 'wptravelengine_after_booking_created', $this->booking->get_id() );
 
-			$this->customer->update_customer_meta( $this->booking->get_id() );
-			$this->customer->save();
-
-			$this->payment->save();
-
-			$this->update_session();
-			$this->payment_gateway_process();
-
-			$this->send_notification_emails();
+			// TODO: This needs to be $due = (float) $this->booking->get_due_amount(); only and should be handled properly in Core/Cart Class.
+			if ( (float) $this->booking->get_due_amount() >= 1 ) {
+				$this->booking->set_payment_transient();
+			}
 
 			if ( $this->is_new_booking ) {
 				Events::booking_created( $this->booking );
@@ -234,9 +228,21 @@ class BookingProcess {
 				Events::booking_updated( $this->booking );
 			}
 
+			do_action( 'wptravelengine_after_booking_created', $this->booking->get_id() );
+
+			$this->customer->update_customer_meta( $this->booking->get_id() );
+			$this->customer->save();
+
 			if ( $this->is_new_customer ) {
 				Events::customer_created( $this->customer );
 			}
+
+			$this->payment->save();
+
+			$this->update_session();
+			$this->payment_gateway_process();
+
+			$this->send_notification_emails();
 
 			if ( in_array( $this->payment_type, array( 'due' ) ) ) {
 				do_action( 'wp_travel_engine_after_remaining_payment_process_completed', $this->booking->get_id() );
@@ -279,15 +285,26 @@ class BookingProcess {
 		$this->cart->clear();
 		// Redirect if not redirected till this point.
 		if ( apply_filters( 'wptravelengine_redirect_after_booking', true ) ) {
-			$redirect_url = wp_travel_engine_get_booking_confirm_url();
-
-			$get_key = $this->payment->get_payment_key();
-
-			set_transient( 'payment_key_' . $get_key, $this->payment->get_id(), 24 * HOUR_IN_SECONDS );
-
-			wp_safe_redirect( add_query_arg( array( 'payment_key' => $get_key ), $redirect_url ) );
+			$redirect_url = self::completion_redirect_url( $this->payment );
+			wp_safe_redirect( $redirect_url );
 			exit;
 		}
+	}
+
+	/**
+	 * Get completion redirect url.
+	 *
+	 * @param Payment $payment Payment.
+	 * @return string
+	 * @since 6.7.1
+	 */
+	public static function completion_redirect_url( Payment $payment ) {
+		$get_key      = $payment->get_payment_key();
+		$redirect_url = wp_travel_engine_get_booking_confirm_url();
+
+		set_transient( 'payment_key_' . $get_key, $payment->get_id(), 24 * HOUR_IN_SECONDS );
+
+		return add_query_arg( array( 'payment_key' => $get_key ), $redirect_url );
 	}
 
 	/**
@@ -296,13 +313,22 @@ class BookingProcess {
 	 * @return void
 	 */
 	protected function payment_gateway_process() {
-
+		global $wte_cart;
 		set_transient( "payment_key_{$this->payment->get_payment_key()}", $this->payment->get_id(), 60 * 10 );
 
 		$payment_gateway = PaymentGateways::instance()->get_payment_gateway( $this->payment_method );
 
-		if ( $payment_gateway instanceof PaymentGateway ) {
-			$payment_gateway->process_payment( $this->booking, $this->payment, $this );
+		if ( $payment_gateway instanceof BaseGateway ) {
+			/**
+			 * Added to support Cart Version 4.0
+			 *
+			 * @since 6.7.0
+			 */
+			if ( $wte_cart->is_curr_cart( '>=' ) && $payment_gateway::is_curr_cart( '>=' ) && method_exists( $payment_gateway, 'process_payment_v2' ) ) {
+				$payment_gateway->process_payment_v2( $this->booking, $this->payment, $this );
+			} else {
+				$payment_gateway->process_payment( $this->booking, $this->payment, $this );
+			}
 		} else {
 			/**
 			 * Recommended for WTE Payment Addons.
@@ -340,15 +366,15 @@ class BookingProcess {
 			do_action( 'wte_after_booking_created', $booking->get_id() );
 		}
 
-		$this->billing_info = $this->set_billing_info( $booking, $this->validator->sanitized()[ 'booking' ] );
+		$this->billing_info = $this->set_billing_info( $booking, $this->validator->sanitized()['booking'] );
 
 		$this->set_order_items( $booking );
 
 		$booking_title = implode(
 			' ',
 			array(
-				$this->billing_info[ 'fname' ] ?? '',
-				$this->billing_info[ 'lname' ] ?? '',
+				$this->billing_info['fname'] ?? '',
+				$this->billing_info['lname'] ?? '',
 				"#{$booking->get_id()}",
 			)
 		);
@@ -366,23 +392,23 @@ class BookingProcess {
 
 		foreach ( $items as $cart_item ) {
 			$data                 = $cart_item->data();
-			$trip                 = new Trip( $data[ 'trip_id' ] ?? null );
+			$trip                 = new Trip( $data['trip_id'] ?? null );
 			$cart_pricing_options = (array) $cart_item->pricing_options;
 			$package              = get_post( $cart_item->price_key ?? null );
 
-			$_items[ 'place_order' ] = array(
-				'traveler'     => esc_attr( array_sum( $data[ 'pax' ] ?? array() ) ),
-				'cost'         => esc_attr( $data[ 'trip_price' ] ?? '' ),
+			$_items['place_order'] = array(
+				'traveler'     => esc_attr( array_sum( $data['pax'] ?? array() ) ),
+				'cost'         => esc_attr( $data['trip_price'] ?? '' ),
 				'due'          => esc_attr( $this->cart->get_cart_total() - (float) ( $booking->get_meta( 'paid_amount' ) ?? 0 ) ),
 				'tid'          => esc_attr( $trip->get_id() ?? '' ),
 				'tname'        => esc_attr( $trip->get_title() ?? '' ),
-				'datetime'     => ! empty( $data[ 'trip_date' ] ) ? $data[ 'trip_date' ] : '',
-				'datewithtime' => ! empty( $data[ 'trip_time' ] ) ? $data[ 'trip_time' ] : '',
+				'datetime'     => ! empty( $data['trip_date'] ) ? $data['trip_date'] : '',
+				'datewithtime' => ! empty( $data['trip_time'] ) ? $data['trip_time'] : '',
 				'booking'      => $this->billing_info,
-				'tax'          => esc_attr( $data[ 'tax' ] ?? '' ),
+				'tax'          => esc_attr( $data['tax'] ?? '' ),
 				'tduration'    => esc_attr( ( $trip->get_trip_duration() ?? '' ) . ' ' . ( $trip->get_trip_duration_unit() ?? '' ) ),
-				'tenddate'	   => wptravelengine_format_trip_end_datetime(
-					!empty($data['trip_time']) ? $data['trip_time'] : ( !empty($data['trip_date']) ? $data['trip_date'] : '' ),
+				'tenddate'     => wptravelengine_format_trip_end_datetime(
+					! empty( $data['trip_time'] ) ? $data['trip_time'] : ( ! empty( $data['trip_date'] ) ? $data['trip_date'] : '' ),
 					$trip,
 					'Y-m-d\TH:i'
 				),
@@ -390,29 +416,34 @@ class BookingProcess {
 			);
 
 			if ( isset( $cart_item->trip_extras ) ) {
-				$cart_extra_services                         = $cart_item->trip_extras;
-				$_items[ 'place_order' ][ 'extra_services' ] = $cart_extra_services;
+				$cart_extra_services                     = $cart_item->trip_extras;
+				$_items['place_order']['extra_services'] = $cart_extra_services;
 			}
 		}
 
 		return $booking->set_meta( 'paid_amount', (float) $booking->get_meta( 'paid_amount' ) )
-					   ->set_meta( 'due_amount', $this->cart->get_cart_total() - (float) $booking->get_meta( 'paid_amount' ) ?? 0 )
-					   ->set_cart_info(
-						   apply_filters( 'wptravelengine_before_setting_cart_info', array_merge(
-							   array(
-								   'currency'     => wptravelengine_settings()->get( 'currency_code', 'USD' ),
-								   'subtotal'     => $this->cart->get_subtotal(),
-								   'totals'       => $this->cart->get_totals(),
-								   'total'        => $this->cart->get_cart_total(),
-								   'cart_partial' => $this->cart->get_total_partial(),
-								   'discounts'    => $this->cart->get_discounts(),
-								   'tax_amount'   => $this->cart->tax()->is_taxable() && $this->cart->tax()->is_exclusive() ? $this->cart->tax()->get_tax_percentage() : 0,
-								   'payment_type' => $this->cart->get_payment_type(), // @since 6.4.0 For Thank You page
-							   ),
-							   $this->cart->data(),
-						   ), $this->cart )
-					   )
-					   ->set_meta( 'wp_travel_engine_booking_setting', $_items )->save();
+						->set_meta( 'due_amount', $this->cart->get_cart_total() - (float) $booking->get_meta( 'paid_amount' ) ?? 0 )
+						->set_cart_info(
+							apply_filters(
+								'wptravelengine_before_setting_cart_info',
+								array_merge(
+									array(
+										'currency'     => wptravelengine_settings()->get( 'currency_code', 'USD' ),
+										'subtotal'     => $this->cart->get_subtotal(),
+										'totals'       => $this->cart->get_totals(),
+										'total'        => $this->cart->get_cart_total(),
+										'cart_partial' => $this->cart->get_total_partial(),
+										'discounts'    => $this->cart->get_discounts(),
+										'tax_amount'   => $this->cart->tax()->is_taxable() && $this->cart->tax()->is_exclusive() ? $this->cart->tax()->get_tax_percentage() : 0,
+										'payment_type' => $this->cart->get_payment_type(), // @since 6.4.0 For Thank You page
+									),
+									$this->cart->data(),
+								),
+								$this->cart
+							)
+						)
+						->set_meta( 'trip_datetime', ! empty( $data['trip_time'] ) ? $data['trip_time'] : $data['trip_date'] )
+						->set_meta( 'wp_travel_engine_booking_setting', $_items )->save();
 	}
 
 	/**
@@ -422,7 +453,7 @@ class BookingProcess {
 	 */
 	protected function process_customer(): Customer {
 
-		if ( $customer_id = Customer::is_exists( $this->billing_info[ 'email' ] ?? '' ) ) {
+		if ( $customer_id = Customer::is_exists( $this->billing_info['email'] ?? '' ) ) {
 			try {
 				$customer_model = new Customer( $customer_id );
 			} catch ( \Exception $e ) {
@@ -431,7 +462,7 @@ class BookingProcess {
 					array(
 						'post_status' => 'publish',
 						'post_type'   => 'customer',
-						'post_title'  => $this->billing_info[ 'email' ],
+						'post_title'  => $this->billing_info['email'],
 					)
 				);
 			}
@@ -442,7 +473,7 @@ class BookingProcess {
 				array(
 					'post_status' => 'publish',
 					'post_type'   => 'customer',
-					'post_title'  => $this->billing_info[ 'email' ],
+					'post_title'  => $this->billing_info['email'],
 				)
 			);
 		}
@@ -456,18 +487,26 @@ class BookingProcess {
 	 * Process Payment.
 	 *
 	 * @return Payment
+	 * @updated 6.7.0
 	 */
 	protected function create_payment(): Payment {
 
 		$cart_info = new CartInfoParser( $this->booking->get_cart_info() );
 
-		$amounts = array(
-			'partial'      => $cart_info->get_totals( 'partial_total' ),
-			'full_payment' => $cart_info->get_totals( 'total' ),
-			'due'          => $cart_info->get_totals( 'due_total' ),
-		);
+		$cart_totals = $cart_info->get_totals();
 
-		$payable_amount = $amounts[ $this->payment_type ];
+		$payable_amount = 0;
+		if ( $this->cart->is_curr_cart( '<' ) ) {
+			$amounts        = array(
+				'partial'      => $cart_totals['partial_total'],
+				'full_payment' => $cart_totals['total'],
+				'due'          => $cart_totals['due_total'],
+			);
+			$payable_amount = $amounts[ $this->payment_type ];
+		} else {
+			$payable_amount = $cart_totals['payable_now'];
+		}
+
 		if ( $payment_id = $this->get_payment_ref() ) {
 			$payment_model = wptravelengine_get_payment( $payment_id );
 		} else {
@@ -487,6 +526,10 @@ class BookingProcess {
 			$this->set_payment_ref( $payment_model );
 		}
 
+		if ( $this->cart->is_curr_cart( '>=' ) ) {
+			$payment_model->set_meta( 'cart_totals', $cart_totals );
+		}
+
 		$payment_model->set_meta(
 			'payable',
 			array(
@@ -496,10 +539,11 @@ class BookingProcess {
 		);
 
 		$payment_model->set_meta( 'booking_id', $this->booking->get_id() )
-					  ->set_meta( 'payment_gateway', $this->payment_method )
-					  ->set_meta( 'payment_status', 'pending' )
-					  ->set_meta( 'billing_info', $this->billing_info )
-					  ->set_meta( 'is_due_payment', $this->payment_type === 'due' ? 'yes' : 'no' );
+						->set_meta( 'payment_gateway', $this->payment_method )
+						->set_meta( 'payment_status', 'pending' )
+						->set_meta( 'billing_info', $this->billing_info )
+						->set_meta( 'payment_source', 'checkout' )
+						->set_meta( 'is_due_payment', $this->payment_type === 'due' ? 'yes' : 'no' );
 
 		$payment_types = apply_filters(
 			'wte_payment_modes_and_titles',
@@ -530,7 +574,7 @@ class BookingProcess {
 		$discounts = $this->cart->get_discounts();
 		if ( is_array( $discounts ) ) {
 			foreach ( $discounts as $discount ) {
-				$coupon_id = CouponCode::coupon_id_by_code( $discount[ 'name' ] );
+				$coupon_id = CouponCode::coupon_id_by_code( $discount['name'] );
 				if ( $coupon_id ) {
 					CouponCode::update_usage_count( $coupon_id );
 				}
@@ -552,27 +596,27 @@ class BookingProcess {
 		/* @var Item $item */
 		foreach ( $items as $cart_item ) {
 			$data         = $cart_item->data();
-			$trip         = new Trip( $data[ 'trip_id' ] );
+			$trip         = new Trip( $data['trip_id'] );
 			$cart_item_id = $cart_item->id();
 
 			$_items[ $cart_item_id ] = array(
 				'ID'                 => $trip->get_id(),
 				'title'              => $trip->get_title(),
-				'cost'               => $data[ 'trip_price' ],
-				'pax'                => $data[ 'pax' ],
-				'pax_cost'           => $data[ 'pax_cost' ],
+				'cost'               => $data['trip_price'],
+				'pax'                => $data['pax'],
+				'pax_cost'           => $data['pax_cost'],
 				// 'partial_cost'       => $data[ 'trip_price_partial' ], // TODO
-				'multi_pricing_used' => $data[ 'multi_pricing_used' ],
-				'trip_extras'        => $data[ 'trip_extras' ],
-				'datetime'           => ! empty( $data[ 'trip_time' ] ) ? $data[ 'trip_time' ] : $data[ 'trip_date' ],
+				'multi_pricing_used' => $data['multi_pricing_used'],
+				'trip_extras'        => $data['trip_extras'],
+				'datetime'           => ! empty( $data['trip_time'] ) ? $data['trip_time'] : $data['trip_date'],
 				'_prev_cart_key'     => $cart_item_id,
-				'has_time'           => ! empty( $data[ 'trip_time' ] ),
+				'has_time'           => ! empty( $data['trip_time'] ),
 				'_cart_item_object'  => $data,
-				'package_name'       => $data[ 'package_name' ] ?? get_the_title( $data[ 'price_key' ] ),
+				'package_name'       => $data['package_name'] ?? get_the_title( $data['price_key'] ),
 			);
 
-			if ( isset( $data[ 'trip_time_range' ][ 1 ] ) ) {
-				$_items[ $cart_item_id ][ 'end_datetime' ] = $data[ 'trip_time_range' ][ 1 ];
+			if ( isset( $data['trip_time_range'][1] ) ) {
+				$_items[ $cart_item_id ]['end_datetime'] = $data['trip_time_range'][1];
 			}
 		}
 
@@ -585,7 +629,7 @@ class BookingProcess {
 	 * Set billing info.
 	 *
 	 * @param Booking $booking Booking model.
-	 * @param array $form_data Form Data.
+	 * @param array   $form_data Form Data.
 	 *
 	 * @return array Billing Info.
 	 */
@@ -616,16 +660,16 @@ class BookingProcess {
 				'meta_input'  => array(
 					'wp_travel_engine_booking_payment_status' => 'pending',
 					'wp_travel_engine_booking_payment_method' => __( 'N/A', 'wp-travel-engine' ),
-					'billing_info'                            => array(),
-					'cart_info'                               => array(
+					'billing_info'                    => array(),
+					'cart_info'                       => array(
 						'cart_total'   => 0,
 						'cart_partial' => 0,
 						'due'          => 0,
 					),
-					'payments'                                => array(),
-					'paid_amount'                             => 0,
-					'due_amount'                              => 0,
-					'wp_travel_engine_booking_status'         => 'pending',
+					'payments'                        => array(),
+					'paid_amount'                     => 0,
+					'due_amount'                      => 0,
+					'wp_travel_engine_booking_status' => 'pending',
 				),
 			)
 		);
@@ -642,6 +686,7 @@ class BookingProcess {
 
 		/**
 		 * If WooCommerce integration is active, let it continue the process ignoring the form validation errors since it is handled by WooCommerce.
+		 *
 		 * @since 6.5.7
 		 */
 		$enable_woocommerce_gateway = wptravelengine_settings()->get( 'use_woocommerce_payment_gateway', false );
@@ -667,13 +712,13 @@ class BookingProcess {
 	 * @return void
 	 */
 	public static function process_gateway_callback() {
-		if ( isset( $_REQUEST[ 'action' ], $_REQUEST[ '_gateway' ] ) ) {
-			do_action( 'wte_callback_for_' . $_REQUEST[ '_gateway' ] . '_' . $_REQUEST[ 'action' ] );
+		if ( isset( $_REQUEST['action'], $_REQUEST['_gateway'] ) ) {
+			do_action( 'wte_callback_for_' . $_REQUEST['_gateway'] . '_' . $_REQUEST['action'] );
 		}
 
-		if ( isset( $_REQUEST[ 'payment_key' ], $_REQUEST[ 'callback_type' ] ) ) {
+		if ( isset( $_REQUEST['payment_key'], $_REQUEST['callback_type'] ) ) {
 
-			$payment_key = sanitize_text_field( $_REQUEST[ 'payment_key' ] );
+			$payment_key = sanitize_text_field( $_REQUEST['payment_key'] );
 			$payment_id  = get_transient( "payment_key_{$payment_key}" );
 
 			if ( $payment_id ) {
@@ -685,7 +730,7 @@ class BookingProcess {
 
 				$instance = PaymentGateways::instance()->get_payment_gateway( $payment_gateway );
 
-				$callback_type = sanitize_text_field( $_REQUEST[ 'callback_type' ] );
+				$callback_type = sanitize_text_field( $_REQUEST['callback_type'] );
 				$booking       = Booking::make( $payment->get_meta( 'booking_id' ) );
 				if ( method_exists( $instance, "handle_{$callback_type}_request" ) ) {
 					$instance->{"handle_{$callback_type}_request"}( $booking, $payment );
@@ -700,7 +745,7 @@ class BookingProcess {
 	 * @return bool
 	 */
 	public static function is_gateway_callback(): bool {
-		return isset( $_REQUEST[ 'action' ], $_REQUEST[ '_gateway' ] ) || isset( $_REQUEST[ 'payment_key' ], $_REQUEST[ 'callback_type' ] ) || isset( $_REQUEST[ '_action' ], $_REQUEST[ '_token' ] );
+		return isset( $_REQUEST['action'], $_REQUEST['_gateway'] ) || isset( $_REQUEST['payment_key'], $_REQUEST['callback_type'] ) || isset( $_REQUEST['_action'], $_REQUEST['_token'] );
 	}
 
 	/**
@@ -771,7 +816,7 @@ class BookingProcess {
 	 * Update Booking State.
 	 *
 	 * @param string $key Key.
-	 * @param mixed $value Value.
+	 * @param mixed  $value Value.
 	 *
 	 * @return void
 	 */
@@ -787,7 +832,7 @@ class BookingProcess {
 	 * @return int|false
 	 */
 	public function get_booking_ref() {
-		return WTE()->session->get( '__cart_' . $this->cart->get_cart_key() )[ 'booking_id' ] ?? false;
+		return WTE()->session->get( '__cart_' . $this->cart->get_cart_key() )['booking_id'] ?? false;
 	}
 
 	/**
@@ -796,7 +841,7 @@ class BookingProcess {
 	 * @return int|false
 	 */
 	public function get_payment_ref() {
-		return WTE()->session->get( '__cart_' . $this->cart->get_cart_key() )[ 'payment_id' ] ?? false;
+		return WTE()->session->get( '__cart_' . $this->cart->get_cart_key() )['payment_id'] ?? false;
 	}
 
 	/**
@@ -831,39 +876,39 @@ class BookingProcess {
 			'wte_after_thankyou_booking_details_direct_bank_transfer',
 			function ( $payment_id ) {
 				$settings     = get_option( 'wp_travel_engine_settings', array() );
-				$instructions = $settings[ 'bank_transfer' ][ 'instruction' ] ?? '';
+				$instructions = $settings['bank_transfer']['instruction'] ?? '';
 				?>
 				<div class="wte-bank-transfer-instructions">
 					<?php echo wp_kses_post( $instructions ); ?>
 				</div>
 				<h4 class="bank-details"><?php echo esc_html__( 'Bank Details:', 'wp-travel-engine' ); ?></h4>
 				<?php
-				$bank_details = isset( $settings[ 'bank_transfer' ][ 'accounts' ] ) && is_array( $settings[ 'bank_transfer' ][ 'accounts' ] ) ? $settings[ 'bank_transfer' ][ 'accounts' ] : array();
+				$bank_details = isset( $settings['bank_transfer']['accounts'] ) && is_array( $settings['bank_transfer']['accounts'] ) ? $settings['bank_transfer']['accounts'] : array();
 				foreach ( $bank_details as $bank_detail ) :
 					$details = array(
 						'bank_name'      => array(
 							'label' => __( 'Bank:', 'wp-travel-engine' ),
-							'value' => $bank_detail[ 'bank_name' ],
+							'value' => $bank_detail['bank_name'],
 						),
 						'account_name'   => array(
 							'label' => __( 'Account Name:', 'wp-travel-engine' ),
-							'value' => $bank_detail[ 'account_name' ],
+							'value' => $bank_detail['account_name'],
 						),
 						'account_number' => array(
 							'label' => __( 'Account Number:', 'wp-travel-engine' ),
-							'value' => $bank_detail[ 'account_number' ],
+							'value' => $bank_detail['account_number'],
 						),
 						'sort_code'      => array(
 							'label' => __( 'Sort Code:', 'wp-travel-engine' ),
-							'value' => $bank_detail[ 'sort_code' ],
+							'value' => $bank_detail['sort_code'],
 						),
 						'iban'           => array(
 							'label' => __( 'IBAN:', 'wp-travel-engine' ),
-							'value' => $bank_detail[ 'iban' ],
+							'value' => $bank_detail['iban'],
 						),
 						'swift'          => array(
 							'label' => __( 'BIC/SWIFT:', 'wp-travel-engine' ),
-							'value' => $bank_detail[ 'swift' ],
+							'value' => $bank_detail['swift'],
 						),
 					);
 					?>
@@ -872,12 +917,12 @@ class BookingProcess {
 						foreach ( $details as $detail ) :
 							?>
 							<div class="detail-item">
-								<strong class="item-label"><?php echo esc_html( $detail[ 'label' ] ); ?></strong>
-								<span class="value"><?php echo esc_html( $detail[ 'value' ] ); ?></span>
+								<strong class="item-label"><?php echo esc_html( $detail['label'] ); ?></strong>
+								<span class="value"><?php echo esc_html( $detail['value'] ); ?></span>
 							</div>
 						<?php endforeach; ?>
 					</div>
-				<?php
+					<?php
 				endforeach;
 			}
 		);

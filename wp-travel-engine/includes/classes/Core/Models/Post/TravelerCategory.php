@@ -8,6 +8,8 @@
 
 namespace WPTravelEngine\Core\Models\Post;
 
+use WPTravelEngine\Helpers\Translators;
+
 #[\AllowDynamicProperties]
 /**
  * Class TravelerCategory.
@@ -61,9 +63,9 @@ class TravelerCategory {
 	/**
 	 * Traveler Category Model Constructor.
 	 *
-	 * @param Trip $trip The trip object.
+	 * @param Trip        $trip The trip object.
 	 * @param TripPackage $package The trip package object.
-	 * @param array $package_category_data The package category data.
+	 * @param array       $package_category_data The package category data.
 	 */
 	public function __construct( Trip $trip, TripPackage $package, array $package_category_data ) {
 		$this->trip    = $trip;
@@ -83,7 +85,7 @@ class TravelerCategory {
 		foreach ( $package_category_data as $property => $value ) {
 			if ( isset( $key_mapping[ $property ] ) ) {
 				$mapped_property = $key_mapping[ $property ];
-				if ( in_array( $property, [ 'prices', 'sale_prices' ], true ) ) {
+				if ( in_array( $property, array( 'prices', 'sale_prices' ), true ) ) {
 					$value = is_numeric( $value ) ? max( 0, (float) $value ) : '';
 				}
 				if ( $value instanceof \WP_Term ) {
@@ -99,16 +101,19 @@ class TravelerCategory {
 	/**
 	 * @return string
 	 * @since 6.4.3
+	 * @since 6.7.4 Update label retrieval to support WPML translation.
 	 */
-	public function get_label() : string {
+	public function get_label(): string {
 		$language = '';
 
-		if ( isset( $_GET['lang'] ) ) {
-			$language = substr( $_GET['lang'], 0, 2 );
+		if ( Translators::is_wpml_multilingual_active() ) {
+			$language = apply_filters( 'wpml_current_language', null ) ?? substr( get_locale(), 0, 2 );
+		} elseif ( isset( $_GET['lang'] ) ) {
+			$language = substr( sanitize_text_field( wp_unslash( $_GET['lang'] ) ), 0, 2 );
 		}
 
 		$category_term_meta = get_term_meta( $this->id, 'pll_category_name', true );
-		return $category_term_meta[ $language ] ?? $this->label;
+		return is_array( $category_term_meta ) && isset( $category_term_meta[ $language ] ) ? $category_term_meta[ $language ] : $this->label;
 	}
 
 	/**
@@ -122,12 +127,12 @@ class TravelerCategory {
 	public function get( $key, $default = null ) {
 		switch ( $key ) {
 			case 'group_pricing':
-				$value = $this->package->get_group_pricing()[ $this->id ] ?? [];
+				$value = $this->package->get_group_pricing()[ $this->id ] ?? array();
 				break;
 			case 'description':
 				$value = get_term_by( 'id', $this->id, 'trip-packages-categories' )->{$key};
 				break;
-			case 'label' :
+			case 'label':
 				$value = $this->get_label();
 				break;
 			default:

@@ -5,16 +5,16 @@
 
 use WPTravelEngine\Helpers\Functions;
 
-wp_enqueue_script( "jquery-ui-datepicker" );
+wp_enqueue_script( 'jquery-ui-datepicker' );
 
 global $post;
-$cart_info         = get_post_meta( $post->ID, 'order_trips', ! 0 );
-$item              = array_shift( $cart_info );
-$pno = ( isset( $item[ 'pax' ] ) ) ? array_sum( $item[ 'pax' ] ) : 0;
-$booked_travellers = $pno;
+$cart_info             = get_post_meta( $post->ID, 'order_trips', ! 0 );
+$item                  = array_shift( $cart_info );
+$pno                   = ( isset( $item['pax'] ) ) ? array_sum( $item['pax'] ) : 0;
+$booked_travellers     = $pno;
 $traveller_information = get_post_meta( $post->ID, 'wptravelengine_travelers_details', true );
-$emergency_contact = get_post_meta( $post->ID, 'wptravelengine_emergency_details', true );
-if( isset( $traveller_information ) && !empty( $traveller_information ) ):
+$emergency_contact     = get_post_meta( $post->ID, 'wptravelengine_emergency_details', true );
+if ( isset( $traveller_information ) && ! empty( $traveller_information ) ) :
 	include plugin_dir_path( __FILE__ ) . 'booking-details_travellers.php';
 	return;
 endif;
@@ -25,10 +25,10 @@ endif;
 				<h4 class="wpte-title"><?php esc_html_e( 'Traveller Details', 'wp-travel-engine' ); ?></h4>
 			</div>
 			<div class="wpte-block-content wpte-floated">
-				<?php if ( isset( $personal_options ) && !empty( $personal_options ) ) : ?>
+				<?php if ( isset( $personal_options ) && ! empty( $personal_options ) ) : ?>
 				<div class="wpte-toggle-item-wrap wpte-col2">
 					<?php
-					for ( $i = 1; $i <= $pno; $i ++ ) {
+					for ( $i = 1; $i <= $pno; $i++ ) {
 						?>
 						<div class="wpte-toggle-item">
 							<div class="wpte-toggle-title">
@@ -38,17 +38,17 @@ endif;
 								<div class="wpte-prsnl-dtl-blk wpte-floated">
 									<div class="wpte-button-wrap wpte-rightalign wpte-edit-prsnl-details">
 										<a href="#" class="wpte-btn-transparent wpte-btn-sm">
-											<?php wptravelengine_svg_by_fa_icon( "fas fa-pencil-alt" ); ?>
+											<?php wptravelengine_svg_by_fa_icon( 'fas fa-pencil-alt' ); ?>
 											<?php esc_html_e( 'Edit', 'wp-travel-engine' ); ?>
 										</a>
 									</div>
-									<?php if ( isset( $personal_options[ 'travelers' ] ) ) : ?>
+									<?php if ( isset( $personal_options['travelers'] ) ) : ?>
 										<h4><?php esc_html_e( 'Traveller information', 'wp-travel-engine' ); ?></h4>
 										<div class="wpte-prsnl-dtl-blk-content">
-											<?php do_action( 'wptravelengine_before_travellers_information', $personal_options[ 'travelers' ], $post->ID ); ?>
+											<?php do_action( 'wptravelengine_before_travellers_information', $personal_options['travelers'], $post->ID ); ?>
 											<ul class="wpte-list">
 												<?php
-												foreach ( $personal_options[ 'travelers' ] as $key => $value ) :
+												foreach ( $personal_options['travelers'] as $key => $value ) :
 													if ( ! isset( $value[ $i ] ) ) :
 														continue;
 													endif;
@@ -57,9 +57,9 @@ endif;
 
 													if ( 'fname' === $key ) {
 														$ti_key = 'traveller_first_name';
-													} else if ( 'lname' === $key ) {
+													} elseif ( 'lname' === $key ) {
 														$ti_key = 'traveller_last_name';
-													} else if ( 'passport' === $key ) {
+													} elseif ( 'passport' === $key ) {
 														$ti_key = 'traveller_passport_number';
 													}
 													$data_label = wp_travel_engine_get_traveler_info_field_label_by_name( $ti_key );
@@ -79,18 +79,18 @@ endif;
 															?>
 															<span><?php echo esc_html( $data_value ); ?></span>
 														</li>
-													<?php
+														<?php
 													endif;
 												endforeach;
 												?>
 											</ul>
-											<?php do_action( 'wptravelengine_after_travellers_information', $personal_options[ 'travelers' ], $post->ID ); ?>
+											<?php do_action( 'wptravelengine_after_travellers_information', $personal_options['travelers'], $post->ID ); ?>
 										</div>
 										<div style="display:none;"
-											 class="wpte-prsnl-dtl-blk-content-edit edit-personal-info">
+											class="wpte-prsnl-dtl-blk-content-edit edit-personal-info">
 											<ul class="wpte-list">
 												<?php
-												foreach ( $personal_options[ 'travelers' ] as $key => $value ) :
+												foreach ( $personal_options['travelers'] as $key => $value ) :
 													if ( ! isset( $value[ $i ] ) ) :
 														continue;
 													endif;
@@ -99,9 +99,9 @@ endif;
 
 													if ( 'fname' === $key ) {
 														$ti_key = 'traveller_first_name';
-													} else if ( 'lname' === $key ) {
+													} elseif ( 'lname' === $key ) {
 														$ti_key = 'traveller_last_name';
-													} else if ( 'passport' === $key ) {
+													} elseif ( 'passport' === $key ) {
 														$ti_key = 'traveller_passport_number';
 													}
 													$data_label = wp_travel_engine_get_traveler_info_field_label_by_name( $ti_key );
@@ -153,15 +153,15 @@ endif;
 																	<span>
 																		<div class="wpte-field wpte-text">
 																			<input type="text"
-																				   name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
-																				   value="<?php echo esc_attr( $data_value ); ?>">
+																					name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
+																					value="<?php echo esc_attr( $data_value ); ?>">
 																			</div>
 																		</span>
-																<?php
+																	<?php
 															}
 															?>
 														</li>
-													<?php
+														<?php
 													endif;
 												endforeach;
 												?>
@@ -172,17 +172,17 @@ endif;
 								<div class="wpte-prsnl-dtl-blk wpte-floated">
 									<div class="wpte-button-wrap wpte-rightalign wpte-edit-prsnl-details">
 										<a href="#" class="wpte-btn-transparent wpte-btn-sm">
-											<?php wptravelengine_svg_by_fa_icon( "fas fa-pencil-alt" ); ?>
+											<?php wptravelengine_svg_by_fa_icon( 'fas fa-pencil-alt' ); ?>
 											<?php esc_html_e( 'Edit', 'wp-travel-engine' ); ?>
 										</a>
 									</div>
-									<?php if ( isset( $personal_options[ 'relation' ] ) ) : ?>
+									<?php if ( isset( $personal_options['relation'] ) ) : ?>
 										<h4><?php esc_html_e( 'Emergency Contact', 'wp-travel-engine' ); ?></h4>
 										<div class="wpte-prsnl-dtl-blk-content">
-											<?php do_action( 'wptravelengine_before_emergency_contact_information', $personal_options[ 'relation' ], $post->ID ); ?>
+											<?php do_action( 'wptravelengine_before_emergency_contact_information', $personal_options['relation'], $post->ID ); ?>
 											<ul class="wpte-list">
 												<?php
-												foreach ( $personal_options[ 'relation' ] as $key => $value ) :
+												foreach ( $personal_options['relation'] as $key => $value ) :
 													if ( ! isset( $value[ $i ] ) ) :
 														continue;
 													endif;
@@ -191,9 +191,9 @@ endif;
 
 													if ( 'fname' === $key ) {
 														$ti_key = 'traveller_emergency_first_name';
-													} else if ( 'lname' === $key ) {
+													} elseif ( 'lname' === $key ) {
 														$ti_key = 'traveller_emergency_last_name';
-													} else if ( 'passport' === $key ) {
+													} elseif ( 'passport' === $key ) {
 														$ti_key = 'traveller_emergency_passport_number';
 													}
 													$data_label = wp_travel_engine_get_relationship_field_label_by_name( $ti_key );
@@ -214,18 +214,18 @@ endif;
 															?>
 															<span><?php echo esc_html( $data_value ); ?></span>
 														</li>
-													<?php
+														<?php
 													endif;
 												endforeach;
 												?>
 											</ul>
-											<?php do_action( 'wptravelengine_after_emergency_contact_information', $personal_options[ 'relation' ], $post->ID ); ?>
+											<?php do_action( 'wptravelengine_after_emergency_contact_information', $personal_options['relation'], $post->ID ); ?>
 										</div>
 										<div style="display:none;"
-											 class="wpte-prsnl-dtl-blk-content-edit edit-relation-info">
+											class="wpte-prsnl-dtl-blk-content-edit edit-relation-info">
 											<ul class="wpte-list">
 												<?php
-												foreach ( $personal_options[ 'relation' ] as $key => $value ) :
+												foreach ( $personal_options['relation'] as $key => $value ) :
 													if ( ! isset( $value[ $i ] ) ) :
 														continue;
 													endif;
@@ -234,9 +234,9 @@ endif;
 
 													if ( 'fname' === $key ) {
 														$ti_key = 'traveller_emergency_first_name';
-													} else if ( 'lname' === $key ) {
+													} elseif ( 'lname' === $key ) {
 														$ti_key = 'traveller_emergency_last_name';
-													} else if ( 'passport' === $key ) {
+													} elseif ( 'passport' === $key ) {
 														$ti_key = 'traveller_emergency_passport_number';
 													}
 													$data_label = wp_travel_engine_get_relationship_field_label_by_name( $ti_key );
@@ -286,15 +286,15 @@ endif;
 																	<span>
 																			<div class="wpte-field wpte-text">
 																				<input type="text"
-																					   name="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
-																					   value="<?php echo esc_attr( $data_value ); ?>">
+																						name="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
+																						value="<?php echo esc_attr( $data_value ); ?>">
 																				</div>
 																			</span>
-																<?php
+																	<?php
 															}
 															?>
 														</li>
-													<?php
+														<?php
 													endif;
 												endforeach;
 												?>

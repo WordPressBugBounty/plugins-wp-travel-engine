@@ -23,12 +23,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $settings = wptravelengine_settings()->get();
 
-$generate_user_account = $settings[ 'generate_user_account' ] ?? 'yes';
+$generate_user_account = $settings['generate_user_account'] ?? 'yes';
 $custom_logo_id        = get_theme_mod( 'custom_logo' );
 $image                 = wp_get_attachment_image_src( $custom_logo_id, 'full' );
-$manual_password	   = '' !== $user_pass ? $user_pass : false; // If the user is signing up manually, password is sent to the email.
-$user = new \WP_User( (int) $user_id );
-$rp_key = get_password_reset_key( $user );
+$manual_password       = '' !== $user_pass ? $user_pass : false; // If the user is signing up manually, password is sent to the email.
+$user                  = new \WP_User( (int) $user_id );
+$rp_key                = get_password_reset_key( $user );
 
 $rp_link = esc_url(
 	add_query_arg(
@@ -47,7 +47,7 @@ $rp_link = esc_url(
 		<tr>
 			<td>
 				<h3 style="text-align: center;font-size: 32px;margin: 0 0 24px"><img
-						src="<?php echo esc_url( $image[ 0 ] ); ?>"
+						src="<?php echo esc_url( $image[0] ); ?>"
 						style="
 					max-height: 56px;
 					width: auto;
@@ -71,7 +71,7 @@ $rp_link = esc_url(
 				padding: 24px;">
 				<tbody>
 				<tr>
-					<td style="padding: 24px 0px 12px;text-align: center;"><?php echo esc_html__( 'Hi ', 'wp-travel-engine' ) . esc_html($first_name); ?>
+					<td style="padding: 24px 0px 12px;text-align: center;"><?php echo esc_html__( 'Hi ', 'wp-travel-engine' ) . esc_html( $first_name ); ?>
 					</td>
 				</tr>
 				<tr>
@@ -88,11 +88,11 @@ $rp_link = esc_url(
 				<tr>
 					<td style="padding: 8px 0px 32px;text-align: center;">
 						<?php echo esc_html__( 'Your password:', 'wp-travel-engine' ); ?>
-						<?php 
+						<?php
 						if ( $manual_password ) {
 							echo esc_html( $manual_password );
 						} else {
-							printf( '<a target="_blank" href="%s">%s</a>', esc_url($rp_link), esc_html__( 'Set Your Password', 'wp-travel-engine' ) );
+							printf( '<a target="_blank" href="%s">%s</a>', esc_url( $rp_link ), esc_html__( 'Set Your Password', 'wp-travel-engine' ) );
 						}
 						?>
 					</td>

@@ -24,12 +24,12 @@
 				$termchildren   = get_terms(
 					$taxonomy,
 					array(
-						'orderby' => apply_filters( "wpte_{$taxonomy}_terms_order_by", 'name' ),
-						'order'   => apply_filters( "wpte_{$taxonomy}_terms_order", $selected_order ),
+						'orderby'      => apply_filters( "wpte_{$taxonomy}_terms_order_by", 'name' ),
+						'order'        => apply_filters( "wpte_{$taxonomy}_terms_order", $selected_order ),
 						'hierarchical' => true,
 					)
 				);
-				$terms_by_ids = array();
+				$terms_by_ids   = array();
 
 				if ( is_array( $termchildren ) ) {
 					foreach ( $termchildren as $term_object ) {
@@ -57,7 +57,8 @@
 								<h1 class="page-title" data-id="<?php echo esc_attr( $taxonomy ); ?>"><?php the_title(); ?></h1>
 								<?php
 								endif;
-							if( isset( $post->ID ) ):?>
+							if ( isset( $post->ID ) ) :
+								?>
 							<div class="page-feat-image">
 								<?php
 								$image_id    = get_post_thumbnail_id( $post->ID );
@@ -65,8 +66,10 @@
 								echo wp_get_attachment_image( $image_id, $banner_size );
 								?>
 							</div>
-							<?php endif;
-							if( isset( $post->post_content ) ):?>
+								<?php
+							endif;
+							if ( isset( $post->post_content ) ) :
+								?>
 							<div class="page-content">
 								<p>
 									<?php
@@ -75,7 +78,7 @@
 									?>
 								</p>
 							</div>
-							<?php endif;?>
+							<?php endif; ?>
 					</div>
 					<div class="wp-travel-toolbar clearfix" style="margin-bottom: 24px;">
 						<div class="wte-filter-foundposts"></div>

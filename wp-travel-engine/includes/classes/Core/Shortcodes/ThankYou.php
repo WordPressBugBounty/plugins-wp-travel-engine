@@ -94,25 +94,25 @@ class ThankYou extends Shortcode {
 
 		$booking_id = null;
 		$payment_id = null;
-		if ( isset( $_GET[ 'payment_key' ] ) ) {
+		if ( isset( $_GET['payment_key'] ) ) {
 
-			$payment_key = sanitize_text_field( wp_unslash( $_GET[ 'payment_key' ] ) );
+			$payment_key = sanitize_text_field( wp_unslash( $_GET['payment_key'] ) );
 
 			try {
 				$payment = Payment::from_payment_key( $payment_key );
 				$booking = Booking::from_payment( $payment );
 
-				if ( ! $atts[ 'legacy' ] ) {
+				if ( ! $atts['legacy'] ) {
 					$thank_you_page_template = new ThankYouPageTemplate( $booking, $payment );
 					$thank_you_page_template->hooks();
 
 					Assets::instance()->enqueue_script( 'wte-popper' )
-					      ->dequeue_script( 'wp-travel-engine' )
-					      ->dequeue_style( 'wp-travel-engine' )
-					      ->enqueue_script( 'wte-popper' )
-					      ->enqueue_script( 'wte-tippyjs' )
-					      ->enqueue_style( 'trip-thank-you' )
-					      ->enqueue_script( 'trip-thank-you' );
+							->dequeue_script( 'wp-travel-engine' )
+							->dequeue_style( 'wp-travel-engine' )
+							->enqueue_script( 'wte-popper' )
+							->enqueue_script( 'wte-tippyjs' )
+							->enqueue_style( 'trip-thank-you' )
+							->enqueue_script( 'trip-thank-you' );
 
 					ob_start();
 					do_action( 'wptravelengine_thankyou_before_content' );
@@ -128,12 +128,11 @@ class ThankYou extends Shortcode {
 				wp_safe_redirect( home_url( '/404' ) );
 				exit;
 			}
-
 		} else {
 			$data = \WTE_Booking::get_callback_token_payload( 'thankyou' );
-			if ( is_array( $data ) && isset( $data[ 'bid' ] ) ) {
-				$booking_id = $data[ 'bid' ];
-				$payment_id = $data[ 'pid' ];
+			if ( is_array( $data ) && isset( $data['bid'] ) ) {
+				$booking_id = $data['bid'];
+				$payment_id = $data['pid'];
 			}
 		}
 

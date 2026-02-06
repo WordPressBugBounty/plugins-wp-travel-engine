@@ -42,7 +42,7 @@ $social_networking_sites   = array(
 				<input type="hidden" name="wp_travel_engine_settings[enable_<?php echo esc_attr( $social_network ); ?>_login]" value="no">
 				<input login-integration="<?php echo esc_attr( $social_network ); ?>"
 				class="wpte-<?php echo esc_attr( $social_network ); ?>-checkbox" type="checkbox"
-				id="wp_travel_engine_settings[enable_<?php echo esc_attr ( $social_network ) ; ?>_login]"
+				id="wp_travel_engine_settings[enable_<?php echo esc_attr( $social_network ); ?>_login]"
 				name="wp_travel_engine_settings[enable_<?php echo esc_attr( $social_network ); ?>_login]" value="yes"
 				data-onchange
 				data-onchange-toggle-target="[data-social-login-<?php echo esc_attr( $social_network ); ?>]"
@@ -54,7 +54,7 @@ $social_networking_sites   = array(
 		<div class="wpte-field-subfields wpte-field wpte-field-wrapper <?php wptravelengine_hidden_class( isset( ${"enable_{$social_network}_login"} ) && 'yes' !== ${"enable_{$social_network}_login"}, true ); ?>" data-social-login-<?php echo esc_attr( $social_network ); ?> login-integration="<?php echo esc_attr( $social_network ); ?>">
 			<div class="wpte-field wpte-floated wpte-social-login-client-credentials">
 				<label for="wp_travel_engine_settings[<?php echo esc_attr( $social_network ); ?>_client_id]" class="wpte-field-label"><?php esc_html_e( 'Client ID', 'wp-travel-engine' ); ?></label>
-				<input type="text" id="wp_travel_engine_settings[<?php echo esc_attr( $social_network ); ?>_client_id]" name="wp_travel_engine_settings[<?php echo esc_attr($social_network); ?>_client_id]" value="<?php echo esc_attr( isset( $wp_travel_engine_settings[ '' . $social_network . '_client_id' ] ) ? esc_attr( $wp_travel_engine_settings[ '' . $social_network . '_client_id' ] ) : '' ); ?>" placeholder="<?php esc_attr_e( '' . $social_logins . ' Client Id', 'wp-travel-engine' ); ?>">
+				<input type="text" id="wp_travel_engine_settings[<?php echo esc_attr( $social_network ); ?>_client_id]" name="wp_travel_engine_settings[<?php echo esc_attr( $social_network ); ?>_client_id]" value="<?php echo esc_attr( isset( $wp_travel_engine_settings[ '' . $social_network . '_client_id' ] ) ? esc_attr( $wp_travel_engine_settings[ '' . $social_network . '_client_id' ] ) : '' ); ?>" placeholder="<?php esc_attr_e( '' . $social_logins . ' Client Id', 'wp-travel-engine' ); ?>">
 				<?php $show = empty( $wp_travel_engine_settings[ "{$social_network}_client_id" ] ) ? '' : ' hidden'; ?>
 				<span class="wpte-tooltip<?php echo esc_attr( $show ); ?>" style="color:#d63638;padding-left:160px;"><?php printf( esc_html__( 'Please enter a valid client id for %s.', 'wp-travel-engine' ), esc_html( $social_logins ) ); ?></span>
 			</div>

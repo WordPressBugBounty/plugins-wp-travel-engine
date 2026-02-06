@@ -19,7 +19,7 @@ class Checkout {
 	}
 
 	protected function add_class_to_form_fields( $field ) {
-		$field[ 'wrapper_class' ] = 'wpte-bf-field wpte-cf-' . $field[ 'type' ];
+		$field['wrapper_class'] = 'wpte-bf-field wpte-cf-' . $field['type'];
 
 		return $field;
 	}
@@ -34,11 +34,11 @@ class Checkout {
 
 		$user = wp_get_current_user();
 
-		return [
+		return array(
 			'email' => $user->user_email,
 			'fname' => $user->first_name,
 			'lname' => $user->last_name,
-		];
+		);
 	}
 
 	protected function form_fields(): Checkout {
@@ -51,25 +51,28 @@ class Checkout {
 
 		$customer_details = $this->get_customer_details();
 
-		if ( $customer_id = Customer::is_exists( $customer_details[ 'email' ] ) ) {
+		if ( $customer_id = Customer::is_exists( $customer_details['email'] ) ) {
 			$customer         = Customer::make( $customer_id );
 			$customer_details = $customer->get_customer_details();
 		}
-		$this->form_fields = array_map( function ( $field ) use ( $customer_details ) {
+		$this->form_fields = array_map(
+			function ( $field ) use ( $customer_details ) {
 
-			$name = $field[ 'name' ];
-			if ( strpos( $field[ 'name' ], '[' ) ) {
-				if ( preg_match( '#\[([^\]]+)\]$#', $field[ 'name' ], $matches ) ) {
-					$name = $matches[ 1 ] ?? '';
+				$name = $field['name'];
+				if ( strpos( $field['name'], '[' ) ) {
+					if ( preg_match( '#\[([^\]]+)\]$#', $field['name'], $matches ) ) {
+						$name = $matches[1] ?? '';
+					}
 				}
-			}
 
-			if ( isset( $customer_details[ $name ] ) ) {
-				$field[ 'default' ] = $customer_details[ $name ];
-			}
+				if ( isset( $customer_details[ $name ] ) ) {
+					$field['default'] = $customer_details[ $name ];
+				}
 
-			return $field;
-		}, $this->form_fields );
+				return $field;
+			},
+			$this->form_fields
+		);
 
 		return $this;
 	}
@@ -87,12 +90,12 @@ class Checkout {
 
 		$privacy_policy_form_field = array();
 		if ( function_exists( 'get_privacy_policy_url' ) ) {
-			$privacy_policy_form_field[ 'privacy_policy_info' ] = array(
+			$privacy_policy_form_field['privacy_policy_info'] = array(
 				'type'              => 'checkbox',
 				'options'           => array(
 					'0' => sprintf(
 						__( 'Check the box to confirm you\'ve read and agree to our <a href="%1$s" id="terms-and-conditions" target="_blank"> Terms and Conditions</a> and <a href="%2$s" id="privacy-policy" target="_blank">Privacy Policy</a>.', 'wp-travel-engine' ),
-						esc_url( get_permalink( $options[ 'pages' ][ 'wp_travel_engine_terms_and_conditions' ] ?? '' ) ),
+						esc_url( get_permalink( $options['pages']['wp_travel_engine_terms_and_conditions'] ?? '' ) ),
 						esc_url( get_privacy_policy_url() )
 					),
 				),
@@ -124,7 +127,7 @@ class Checkout {
 		global $wte_cart;
 		$gateways = wp_travel_engine_get_active_payment_gateways();
 		if ( $wte_cart->get_payment_type() === 'due' ) {
-			unset( $gateways[ 'booking_only' ] );
+			unset( $gateways['booking_only'] );
 		}
 
 		return $gateways;
@@ -139,16 +142,20 @@ class Checkout {
 		$_attributes = array(
 			'type'                => 'submit',
 			'disabled'            => 'disabled',
-			"data-checkout-label" => __( 'Pay', 'wp-travel-engine' ),
+			'data-checkout-label' => __( 'Pay', 'wp-travel-engine' ),
 			'name'                => 'wp_travel_engine_nw_bkg_submit',
 			'value'               => wte_default_labels( 'checkout.submitButtonText' ),
 		);
 
 		$attributes = apply_filters( 'wptravelengine_checkout_submit_button_attributes', $_attributes );
 
-		$attributes = array_map( function ( $key, $value ) {
-			return sprintf( '%s="%s"', $key, $value );
-		}, array_keys( $attributes ), $attributes );
+		$attributes = array_map(
+			function ( $key, $value ) {
+				return sprintf( '%s="%s"', $key, $value );
+			},
+			array_keys( $attributes ),
+			$attributes
+		);
 
 		$attributes = implode( ' ', $attributes );
 
@@ -158,7 +165,7 @@ class Checkout {
 	public function full_payment_label( $full_payment, $settings ) {
 		// translators: %s: Full payment Amount/Percentage.
 		$label = apply_filters( 'wte_checkout_full_pay_label', __( 'Full payment(%s)', 'wp-travel-engine' ) );
-		$value = ( $settings[ 'type' ] ?? '' ) === 'amount' ? wptravelengine_the_price( $full_payment, false, false ) : '100%';
+		$value = ( $settings['type'] ?? '' ) === 'amount' ? wptravelengine_the_price( $full_payment, false, false ) : '100%';
 
 		/**
 		 * Filters the full payment label.
@@ -182,8 +189,8 @@ class Checkout {
 	 * @return string
 	 */
 	public function down_payment_label( $settings ): string {
-		$is_amount = ( $settings[ 'type' ] ?? '' ) === 'amount';
-		$value     = $settings[ 'value' ] ?? 0;
+		$is_amount = ( $settings['type'] ?? '' ) === 'amount';
+		$value     = $settings['value'] ?? 0;
 		$label     = $is_amount ? wptravelengine_the_price( $value, false, false ) : "{$value}%";
 
 		// translators: %s: Down payment Amount/Percentage.down_payment_label
@@ -194,5 +201,4 @@ class Checkout {
 			return $format;
 		}
 	}
-
 }

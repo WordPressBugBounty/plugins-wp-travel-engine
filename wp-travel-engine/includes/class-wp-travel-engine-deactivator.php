@@ -29,5 +29,4 @@ class Wp_Travel_Engine_Deactivator {
 	 * @since    1.0.0
 	 */
 	public static function deactivate() {}
-
 }

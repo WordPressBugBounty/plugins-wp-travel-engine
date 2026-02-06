@@ -23,7 +23,7 @@ class ArrayUtility {
 	 * Create Instance.
 	 */
 	public static function make( $array ): ArrayUtility {
-		$array = is_array( $array ) ? $array : [];
+		$array = is_array( $array ) ? $array : array();
 
 		return new static( $array );
 	}
@@ -41,7 +41,7 @@ class ArrayUtility {
 	 * Get value from array.
 	 *
 	 * @param string $key Key.
-	 * @param mixed $default Default.
+	 * @param mixed  $default Default.
 	 *
 	 * @return mixed
 	 */
@@ -55,7 +55,7 @@ class ArrayUtility {
 	 * Set value in array.
 	 *
 	 * @param string $key Key.
-	 * @param mixed $value Value.
+	 * @param mixed  $value Value.
 	 *
 	 * @return ArrayUtility
 	 */
@@ -65,7 +65,7 @@ class ArrayUtility {
 		$data    = &$this->data;
 		foreach ( $keys as $key ) {
 			if ( ! isset( $data[ $key ] ) || ! is_array( $data[ $key ] ) ) {
-				$data[ $key ] = [];
+				$data[ $key ] = array();
 			}
 			$data = &$data[ $key ];
 		}
@@ -111,7 +111,7 @@ class ArrayUtility {
 	/**
 	 * Flatten a multi-dimensional associative array with dots.
 	 *
-	 * @param array $array The array to flatten.
+	 * @param array  $array The array to flatten.
 	 * @param string $prefix The prefix to prepend to the keys.
 	 *
 	 * @return array The flattened array.
@@ -132,13 +132,13 @@ class ArrayUtility {
 
 	/**
 	 * @param array $data
-	 * @param null $base_index
+	 * @param null  $base_index
 	 *
 	 * @return array
 	 * @since 6.4.0
 	 */
 	public static function normalize( array $data, $base_index = null ): array {
-		$result = [];
+		$result = array();
 
 		// Get the first key to determine the number of elements
 		$keys = array_keys( $data );
@@ -147,15 +147,15 @@ class ArrayUtility {
 		}
 
 		if ( ! $base_index ) {
-			$base_index = $keys[ 0 ];
+			$base_index = $keys[0];
 		}
 
-		if ( count( $data[ $base_index ] ?? [] ) < 1 ) {
+		if ( count( $data[ $base_index ] ?? array() ) < 1 ) {
 			return $result;
 		}
 
 		foreach ( array_keys( $data[ $base_index ] ) as $_key ) {
-			$temp = [];
+			$temp = array();
 			foreach ( $keys as $key ) {
 				$temp[ $key ] = $data[ $key ][ $_key ] ?? null; // Use null if index is missing
 			}
@@ -164,5 +164,4 @@ class ArrayUtility {
 
 		return $result;
 	}
-
 }

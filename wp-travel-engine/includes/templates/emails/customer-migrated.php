@@ -24,6 +24,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<p><?php printf( esc_html__( 'Your password has been automatically generated: %s', 'wp-travel-engine' ), '<strong>' . esc_html( $user_pass ) . '</strong>' ); ?></p>
 	<p><?php printf( esc_html__( 'You can access your account area to view your Trip Bookings and change your password here: %s.', 'wp-travel-engine' ), make_clickable( esc_url( wp_travel_engine_get_page_permalink_by_id( wp_travel_engine_get_dashboard_page_id() ) ) ) ); ?></p>
 	<p><?php esc_html_e( 'Powered by', 'wp-travel-engine' ); ?><a href="https://wptravelengine.com"
-																  target="_blank"> <?php esc_html_e( 'WP Travel Engine', 'wp-travel-engine' ); ?></a>
+																	target="_blank"> <?php esc_html_e( 'WP Travel Engine', 'wp-travel-engine' ); ?></a>
 	</p>
 <?php

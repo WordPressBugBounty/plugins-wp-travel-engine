@@ -11,23 +11,23 @@
  */
 use WpTravelEngine\Modules\TripSearch;
 
-if (! defined('ABSPATH')) {
+if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 global $post;
-$is_featured              = wte_is_trip_featured(get_the_ID());
+$is_featured              = wte_is_trip_featured( get_the_ID() );
 $settings                 = wptravelengine_settings()->get();
-$new_trip_listing         = isset($settings['display_new_trip_listing']) && $settings['display_new_trip_listing'] == 'yes';
-$set_duration_type        = isset($settings['set_duration_type']) && ! empty($settings['set_duration_type']) ? $settings['set_duration_type'] : 'days';
-$wp_travel_engine_setting = get_post_meta(get_the_ID(), 'wp_travel_engine_setting', true);
-$wpte_trip_images         = get_post_meta(get_the_ID(), 'wpte_gallery_id', true);
+$new_trip_listing         = isset( $settings['display_new_trip_listing'] ) && $settings['display_new_trip_listing'] == 'yes';
+$set_duration_type        = isset( $settings['set_duration_type'] ) && ! empty( $settings['set_duration_type'] ) ? $settings['set_duration_type'] : 'days';
+$wp_travel_engine_setting = get_post_meta( get_the_ID(), 'wp_travel_engine_setting', true );
+$wpte_trip_images         = get_post_meta( get_the_ID(), 'wpte_gallery_id', true );
 
-wp_enqueue_script('wte-popper');
-wp_enqueue_script('wte-tippyjs');
+wp_enqueue_script( 'wte-popper' );
+wp_enqueue_script( 'wte-tippyjs' );
 
 if ( ! isset( $user_wishlists ) ) {
 	TripSearch::enqueue_assets();
-    $args['user_wishlists'] = wptravelengine_user_wishlists();
+	$args['user_wishlists'] = wptravelengine_user_wishlists();
 	wptravelengine_set_template_args( $args );
 }
 
@@ -35,7 +35,7 @@ $view_mode = 'grid';
 
 $classes = 'category-trips-single wpte_new-layout';
 
-if( $is_featured ){
+if ( $is_featured ) {
 	$classes .= ' __featured-trip';
 }
 ?>
@@ -43,7 +43,7 @@ if( $is_featured ){
 	<div class="category-trips-single-inner-wrap">
 		<?php
 			do_action( 'wptravelengine_before_trip_archive_card' );
-			
+
 			wptravelengine_get_template( 'trip-card/index.php', compact( 'view_mode' ) );
 
 			do_action( 'wptravelengine_after_trip_archive_card' );

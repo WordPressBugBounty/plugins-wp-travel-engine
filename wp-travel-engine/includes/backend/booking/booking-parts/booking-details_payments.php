@@ -96,17 +96,17 @@ wp_enqueue_style( 'wte-highlightjs' );
 						 * @var Payment $payment
 						 */
 						$payment = Payment::make( $payment_id );
-						//						if ( $payment->is_completed() ) {
-						//							$amount = $payment->get_amount();
-						//						} else {
+						// if ( $payment->is_completed() ) {
+						// $amount = $payment->get_amount();
+						// } else {
 							$amount = $payment->get_payable_amount();
-						$currency = $payment->get_payable_currency();
-						//						}
+						$currency   = $payment->get_payable_currency();
+						// }
 						?>
 						<input readonly type="text"
 								data-attrib-name="<?php echo esc_attr( "payments[{$payment->ID}][payable][amount]" ); ?>"
 								data-attrib-value="<?php echo esc_attr( $amount ); ?>"
-							   value="<?php echo esc_attr( wte_get_formated_price( $amount, $currency, '', ! 1 ) ); ?>" />
+								value="<?php echo esc_attr( wte_get_formated_price( $amount, $currency, '', ! 1 ) ); ?>" />
 					</div>
 				</span>
 				</li>

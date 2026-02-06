@@ -261,14 +261,14 @@ abstract class Account {
 			return false;
 		}
 
-		$settings = wptravelengine_settings();
-		$forgot_password_settings = $settings->get( 'email.customer_email_notify_tabs.forgot_password', [] );
+		$settings                 = wptravelengine_settings();
+		$forgot_password_settings = $settings->get( 'email.customer_email_notify_tabs.forgot_password', array() );
 		if ( $forgot_password_settings['enabled'] && $user_login ) {
 			$email = new UserEmail( $user_data->ID );
 			$email->set( 'to', $user_data->user_email )
-				  ->set( 'my_subject', $forgot_password_settings[ 'subject' ] )
-				  ->set( 'content', $forgot_password_settings[ 'content' ] )
-				  ->send();
+					->set( 'my_subject', $forgot_password_settings['subject'] )
+					->set( 'content', $forgot_password_settings['content'] )
+					->send();
 		}
 
 		return true;

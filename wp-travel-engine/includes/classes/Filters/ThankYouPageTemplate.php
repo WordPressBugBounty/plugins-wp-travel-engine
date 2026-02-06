@@ -47,26 +47,28 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 
 		$this->set_cart();
 
-		add_action( 'shutdown', function () {
-			$this->cart->clear();
-		} );
-
+		add_action(
+			'shutdown',
+			function () {
+				$this->cart->clear();
+			}
+		);
 	}
 
 	/**
 	 * @return void
 	 */
 	public function hooks() {
-		add_action( 'wptravelengine_thankyou_before_content', [ $this, 'page_header' ] );
-		add_action( 'wptravelengine_thankyou_content', [ $this, 'page_content' ] );
-		add_action( 'wptravelengine_thankyou_booking_details', [ $this, 'booking_details' ] );
-		add_action( 'wptravelengine_thankyou_after_booking_details', [ $this, 'after_booking_details' ] );
-		add_action( 'wptravelengine_thankyou_cart_summary', [ $this, 'cart_summary' ] );
-		add_action( 'thankyou_template_parts_tour-details', [ $this, 'tour_details' ] );
-		add_action( 'thankyou_template_parts_cart-summary', [ $this, 'cart_summary_partial' ] );
-		add_action( 'thankyou_template_parts_cart-summary', [ $this, 'print_payment_details' ], 11 );
-		add_action( 'wptravelengine_thankyou_booking_details_direct_bank_transfer', [ $this, 'print_bank_details' ] );
-		add_action( 'wptravelengine_thankyou_booking_details_check_payments', [ $this, 'print_check_instruction', ] );
+		add_action( 'wptravelengine_thankyou_before_content', array( $this, 'page_header' ) );
+		add_action( 'wptravelengine_thankyou_content', array( $this, 'page_content' ) );
+		add_action( 'wptravelengine_thankyou_booking_details', array( $this, 'booking_details' ) );
+		add_action( 'wptravelengine_thankyou_after_booking_details', array( $this, 'after_booking_details' ) );
+		add_action( 'wptravelengine_thankyou_cart_summary', array( $this, 'cart_summary' ) );
+		add_action( 'thankyou_template_parts_tour-details', array( $this, 'tour_details' ) );
+		add_action( 'thankyou_template_parts_cart-summary', array( $this, 'cart_summary_partial' ) );
+		add_action( 'thankyou_template_parts_cart-summary', array( $this, 'print_payment_details' ), 11 );
+		add_action( 'wptravelengine_thankyou_booking_details_direct_bank_transfer', array( $this, 'print_bank_details' ) );
+		add_action( 'wptravelengine_thankyou_booking_details_check_payments', array( $this, 'print_check_instruction' ) );
 	}
 
 	/**
@@ -112,10 +114,11 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 	 */
 	public function print_payment_details() {
 
-		$payment_amount = $this->payment->get_payable_amount();
-		$payment_status = $this->payment->get_payment_status();
+		$payment_amount = $this->payment->get_cart_totals( 'payable_now' ) ?: $this->payment->get_payable_amount();
+		$payment_status = $this->payment->get_payment_status_label();
 		$remarks        = __( 'Your booking order has been placed. Your booking will be confirmed after payment confirmation/settlement.', 'wp-travel-engine' );
-		wptravelengine_get_template( 'thank-you/content-payment-details.php',
+		wptravelengine_get_template(
+			'thank-you/content-payment-details.php',
 			compact(
 				'payment_amount',
 				'payment_status',
@@ -139,6 +142,10 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 			global $wte_cart;
 			$this->cart = clone $wte_cart;
 
+			$this->cart->set_cart_key( wptravelengine_generate_key( time() ) );
+
+			$this->cart->version = $this->booking->get_cart_version();
+
 			$this->cart->load( $this->booking->get_cart_info() );
 		}
 
@@ -156,20 +163,30 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 
 		foreach ( $cart_items as $cart_item ) {
 			/** @var array $cart_item */
-			$trip            = new Trip( $cart_item[ 'trip_id' ] );
-			$trip_start_date = ! empty( $cart_item[ 'trip_time' ] ) ? $cart_item[ 'trip_time' ] : $cart_item[ 'trip_date' ];
-			$trip_end_date = wptravelengine_format_trip_end_datetime( $trip_start_date, $trip );
-			$package_name = $cart_item['package_name'] ?? '';
-			if ( empty( $package_name ) && !empty( $cart_item['price_key'] ) ) {
+			$trip            = new Trip( $cart_item['trip_id'] );
+			$trip_start_date = ! empty( $cart_item['trip_time'] ) ? $cart_item['trip_time'] : $cart_item['trip_date'];
+			$trip_end_date   = wptravelengine_format_trip_end_datetime( $trip_start_date, $trip );
+			$package_name    = $cart_item['package_name'] ?? '';
+			if ( empty( $package_name ) && ! empty( $cart_item['price_key'] ) ) {
 				$package_name = get_the_title( $cart_item['price_key'] );
 			}
-			$travelers_count = isset( $cart_item['travelers_count'] ) && $cart_item['travelers_count'] > 0 ? $cart_item['travelers_count'] : array_sum( $cart_item[ 'pax' ] ?? [] );
+			$travelers_count = isset( $cart_item['travelers_count'] ) && $cart_item['travelers_count'] > 0 ? $cart_item['travelers_count'] : array_sum( $cart_item['pax'] ?? array() );
 
-			if( !empty( $cart_item['trip_time_range'] ) ) {
+			if ( ! empty( $cart_item['trip_time_range'] ) ) {
 				$trip_end_date = wptravelengine_format_trip_datetime( $cart_item['trip_time_range'][1] ?? '' );
 			}
-			$item            = array(
-				sprintf( '<tr><td colspan="2">%s</td></tr>', sprintf( '<a href="%s" class="wpte-checkout__trip-name">%s</a>', $trip->get_permalink(), $trip->get_title() ) ),
+
+			$link = wptravelengine_toggled( $trip->get_meta( 'is_created_from_booking' ) ) ? '' : $trip->get_permalink();
+
+			$item = array(
+				sprintf(
+					'<tr><td colspan="2">%s</td></tr>',
+					sprintf(
+						'<a %sclass="wpte-checkout__trip-name">%s</a>',
+						$link ? 'href="' . esc_url( $link ) . '" ' : '',
+						esc_html( $trip->get_title() )
+					)
+				),
 				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Booking ID:', 'wp-travel-engine' ), $this->booking->get_id() ),
 				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Package:', 'wp-travel-engine' ), $package_name ),
 				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Trip Code:', 'wp-travel-engine' ), $trip->get_trip_code() ),
@@ -193,9 +210,12 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 		$tour_details = $this->get_tour_details();
 		wptravelengine_get_template(
 			'template-checkout/content-tour-details.php',
-			array_merge( compact( 'tour_details' ), array(
-				'content_only' => true,
-			) )
+			array_merge(
+				compact( 'tour_details' ),
+				array(
+					'content_only' => true,
+				)
+			)
 		);
 	}
 
@@ -206,27 +226,32 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 	 * @since 6.4.0
 	 */
 	public function print_cart_summary( $args ) {
-		$template_instance  = Checkout::instance( $this->cart );
+		$template_instance                   = new Checkout( $this->cart );
+		$template_instance->is_checkout_page = false;
 
 		$cart_info = new CartInfoParser( $this->booking->get_cart_info() );
 
-		$cart_line_items    = $template_instance->get_cart_line_items();
-	
-		$deposit_amount     = $cart_info->get_totals( 'partial_total' );
-		$due_amount         = $cart_info->get_totals( 'due_total' );
+		$cart_line_items = $template_instance->get_cart_line_items();
+
+		$deposit_amount = $cart_info->get_totals( 'partial_total' );
+		$due_amount     = $cart_info->get_totals( 'due_total' );
 		// Check if payment is due or partial payment.
-		$is_payment_due 	= $this->cart->get_booking_ref();
+		$is_payment_due = $this->cart->get_booking_ref();
 		if ( $is_payment_due ) {
 			$deposit_amount = $this->booking->get_total_paid_amount();
-			$due_amount 	= $this->booking->get_total_due_amount();
+			$due_amount     = $this->booking->get_total_due_amount();
 		}
-		$is_partial_payment = in_array( $template_instance->cart->get_payment_type(), [
-			'partial',
-			'due',
-			'remaining_payment',
-		], true );
+		$is_partial_payment = in_array(
+			$template_instance->cart->get_payment_type(),
+			array(
+				'partial',
+				'due',
+				'remaining_payment',
+			),
+			true
+		);
 
-		$show_coupon_form   = wptravelengine_settings()->get( 'show_discount' ) === 'yes' && Coupons::is_coupon_available() && 'due' !== $this->cart->get_payment_type() ? 'show' : 'hide';
+		$show_coupon_form = wptravelengine_settings()->get( 'show_discount' ) === 'yes' && Coupons::is_coupon_available() && 'due' !== $this->cart->get_payment_type() ? 'show' : 'hide';
 
 		$coupons = array();
 
@@ -236,13 +261,16 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 			}
 			$coupons[] = array(
 				'label'  => $coupon_item->label,
-				'amount' => $this->cart->get_totals()[ "total_coupon" ] ?? 0,
+				'amount' => $this->cart->get_totals()['total_coupon'] ?? 0,
 			);
 		}
 
 		$args = array_merge(
 			compact( 'cart_line_items', 'deposit_amount', 'due_amount', 'is_partial_payment', 'coupons' ),
-			[ 'show_coupon_form' => $show_coupon_form === 'show' ],
+			array(
+				'show_coupon_form' => $show_coupon_form === 'show',
+				'_wte_cart'        => $this->cart,
+			),
 			$args
 		);
 
@@ -258,11 +286,13 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 	 * @since 6.3.3
 	 */
 	public function cart_summary_partial() {
-		$this->print_cart_summary( array(
-			'show_coupon_form' => false,
-			'content_only'     => true,
-			'show_title'       => true,
-		) );
+		$this->print_cart_summary(
+			array(
+				'show_coupon_form' => false,
+				'content_only'     => true,
+				'show_title'       => true,
+			)
+		);
 	}
 
 	/**
@@ -302,13 +332,13 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 
 		$order_trip = reset( $order_trips );
 
-		$trip = new Trip( $order_trip[ 'ID' ] );
+		$trip = new Trip( $order_trip['ID'] );
 
-		$start_datetime  = $order_trip[ 'datetime' ];
+		$start_datetime  = $order_trip['datetime'];
 		$trip_start_date = wptravelengine_format_trip_datetime( $start_datetime );
 		$trip_end_date   = wptravelengine_format_trip_end_datetime( $start_datetime, $trip );
-		
-		if( !empty( $order_trip['end_datetime'] ) ) {
+
+		if ( ! empty( $order_trip['end_datetime'] ) ) {
 			$trip_end_date = wptravelengine_format_trip_datetime( $order_trip['end_datetime'] );
 		}
 
@@ -326,11 +356,10 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 			$booking_details[]   = $booking_form_fields->with_values( $_booking_details );
 		}
 
-
 		$emergency_details = array();
 		if ( is_array( $_emergency_details ) && ! empty( $_emergency_details ) ) {
 			$emergency_form_fields = new EmergencyFormFields();
-			
+
 			if ( isset( $_emergency_details[0] ) && is_array( $_emergency_details[0] ) ) {
 				foreach ( $_emergency_details as $emergency_contact ) {
 					if ( is_array( $emergency_contact ) && ! empty( $emergency_contact ) ) {
@@ -342,14 +371,17 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 			}
 		}
 
-		wptravelengine_get_template( 'thank-you/content-booking-details.php', compact(
-			'trip_start_date',
-			'trip_end_date',
-			'additional_note',
-			'traveller_details',
-			'booking_details',
-			'emergency_details'
-		) );
+		wptravelengine_get_template(
+			'thank-you/content-booking-details.php',
+			compact(
+				'trip_start_date',
+				'trip_end_date',
+				'additional_note',
+				'traveller_details',
+				'booking_details',
+				'emergency_details'
+			)
+		);
 	}
 
 	/**
@@ -362,5 +394,4 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 			'thank-you/content-cart-summary.php',
 		);
 	}
-
 }

@@ -12,9 +12,9 @@
 $specific_layout && print( '<div class="trip-content-area">' );
 
 if ( $is_mobile_view ) {
-	wptravelengine_get_template( "single-trip/banner-layouts/mobile-banner.php" );
+	wptravelengine_get_template( 'single-trip/banner-layouts/mobile-banner.php' );
 } else {
-	wptravelengine_get_template( "single-trip/banner-layouts/list.php" );
+	wptravelengine_get_template( 'single-trip/banner-layouts/list.php' );
 }
 
-$specific_layout && print( '</div>' ) ?>
+$specific_layout && print( '</div>' );

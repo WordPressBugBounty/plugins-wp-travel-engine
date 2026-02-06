@@ -1,7 +1,6 @@
 <?php
 /**
  * WTE Theme page content.
- *
  */
 ?>
 <div class="wrap" id="wpte-add-ons">

@@ -17,6 +17,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 	<div class="wpte-gallery-wrapper__multi-banners">
 		<?php
-		wptravelengine_get_template( "single-trip/banner-layouts/base.php" );
+		wptravelengine_get_template( 'single-trip/banner-layouts/base.php' );
 		?>
 	</div>

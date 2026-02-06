@@ -71,7 +71,6 @@ class Wp_Travel_Engine_Activator {
 				! empty( $page['parent'] ) ? wp_travel_engine_get_page_id( $page['parent'] ) : ''
 			);
 		}
-
 	}
 	/**
 	 * Create roles and capabilities.
@@ -113,7 +112,7 @@ class Wp_Travel_Engine_Activator {
 
 		// Add Wishlist Page.
 		if ( empty( $wishlist__page ) ) {
-			if ( isset(  $options['pages']['wp_travel_engine_wishlist'] ) ){
+			if ( isset( $options['pages']['wp_travel_engine_wishlist'] ) ) {
 				unset( $options['pages']['wp_travel_engine_wishlist'] );
 			}
 			$new_page                                  = array(
@@ -235,10 +234,8 @@ class Wp_Travel_Engine_Activator {
 				} elseif ( $title == 'Enquiry Thank You Page' ) {
 					$page = wptravelengine_get_page_by_title( 'Enquiry Thank You Page' );
 					wp_delete_post( $page->ID, true );
-				} else {
-					if ( has_shortcode( $content, $shortcode ) ) {
+				} elseif ( has_shortcode( $content, $shortcode ) ) {
 						wp_delete_post( $existing_page->ID, true );
-					}
 				}
 			}
 		}
@@ -418,13 +415,11 @@ class Wp_Travel_Engine_Activator {
 
 		$wp_travel_engine_option_settings = get_option( 'wp_travel_engine_settings', array() );
 
-		// if( isset( $wp_travel_engine_option_settings['trip_tabs'] ) && $wp_travel_engine_option_settings['trip_tabs']!='' && is_array( $wp_travel_engine_option_settings['trip_tabs'] ) )
+		// if ( isset( $wp_travel_engine_option_settings['trip_tabs'] ) && $wp_travel_engine_option_settings['trip_tabs']!='' && is_array( $wp_travel_engine_option_settings['trip_tabs'] ) )
 		// {
 		if ( ! isset( $wp_travel_engine_option_settings['trip_tabs'] ) && ! isset( $wp_travel_engine_option_settings['trip_facts'] ) ) {
 			$default_tab_settings = array_merge_recursive( $wp_travel_engine_option_settings, $default_tabs );
 			update_option( 'wp_travel_engine_settings', $default_tab_settings );
 		}
-
 	}
-
 }

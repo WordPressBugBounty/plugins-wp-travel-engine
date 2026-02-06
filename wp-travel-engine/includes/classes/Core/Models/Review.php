@@ -120,5 +120,4 @@ class Review {
 			'status'    => $this->get_status(),
 		);
 	}
-
 }

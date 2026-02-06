@@ -4,7 +4,7 @@
  *
  * @since 5.5.7
  */
-$settings = get_option( 'wp_travel_engine_settings', array() );
+$settings      = get_option( 'wp_travel_engine_settings', array() );
 $archive_title = isset( $settings['archive']['title'] ) ? $settings['archive']['title'] : '';
 
 ?>
@@ -94,7 +94,7 @@ $list_mode = get_option( 'wptravelengine_trip_view_mode', 'list' );
 		<?php esc_html_e( 'Customize Archive Title', 'wp-travel-engine' ); ?>
 	</label>
 	<input type="text" name="wp_travel_engine_settings[archive][title]" id="wp_travel_engine_settings[archive][title]"
-		value="<?php esc_html_e( $archive_title, 'wp-travel-engine' ) ?>" />
+		value="<?php esc_html_e( $archive_title, 'wp-travel-engine' ); ?>" />
 	<span class="wpte-tooltip">
 		<?php esc_html_e( 'Customize the Archive titles (Archives: Trips).', 'wp-travel-engine' ); ?>
 	</span>
@@ -128,14 +128,14 @@ $list_mode = get_option( 'wptravelengine_trip_view_mode', 'list' );
 
 <div class="wpte-field wpte-checkbox advance-checkbox" id="filterOptionsContainer">
 	<label class="wpte-field-label" data-wte-update="wte_new_5.5.5"
-		for="search_filter_option"><?php esc_html_e('Toggle Criteria Filter Display', 'wp-travel-engine'); ?></label>
+		for="search_filter_option"><?php esc_html_e( 'Toggle Criteria Filter Display', 'wp-travel-engine' ); ?></label>
 	<div class="wpte-checkbox-wrap">
 		<input type="hidden" name="wp_travel_engine_settings[search_filter_option]" value="no">
-		<?php $search_filter_option = 'yes' === ( $settings['search_filter_option'] ?? 'yes'); ?>
+		<?php $search_filter_option = 'yes' === ( $settings['search_filter_option'] ?? 'yes' ); ?>
 		<input type="checkbox" id="search_filter_option" class="" value="yes"
-			name="wp_travel_engine_settings[search_filter_option]" <?php checked($search_filter_option, true); ?>>
+			name="wp_travel_engine_settings[search_filter_option]" <?php checked( $search_filter_option, true ); ?>>
 		<label for="search_filter_option"></label>
 	</div>
 	<span
-		class="wpte-tooltip"><?php esc_html_e('Enabling this feature will display each filter option as a requirement on the archive page, allowing users to toggle the visibility of criteria filters.', 'wp-travel-engine'); ?></span>
+		class="wpte-tooltip"><?php esc_html_e( 'Enabling this feature will display each filter option as a requirement on the archive page, allowing users to toggle the visibility of criteria filters.', 'wp-travel-engine' ); ?></span>
 </div>

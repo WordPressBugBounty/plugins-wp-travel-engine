@@ -5,10 +5,10 @@
  * @since 5.3.0
  */
 
- /**
-  *
-  * @since 5.0.0
-  */
+/**
+ *
+ * @since 5.0.0
+ */
 class WTE_Field {
 
 	public $attributes;
@@ -211,7 +211,7 @@ class WTE_Field {
 		<div class="<?php echo esc_attr( $wrapper_classes ); ?>">
 			<?php
 			if ( $this->label && ! in_array( $this->type, array( 'checkbox', 'custom', 'radio' ) ) ) {
-				echo '<label class="wpte-field-label" for="' , esc_attr( $this->id ) . '">' . esc_html( $this->label ) . '</label>';
+				echo '<label class="wpte-field-label" for="', esc_attr( $this->id ) . '">' . esc_html( $this->label ) . '</label>';
 			}
 			echo isset( $this->before_field ) ? $this->before_field : '';
 			echo $field;

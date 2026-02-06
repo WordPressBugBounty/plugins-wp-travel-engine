@@ -29,8 +29,8 @@ class Textarea extends Base {
 	 */
 	public function render( bool $display = true ): string {
 		$validations = array();
-		if ( isset( $this->field[ 'validations' ] ) ) {
-			foreach ( $this->field[ 'validations' ] as $key => $attr ) {
+		if ( isset( $this->field['validations'] ) ) {
+			foreach ( $this->field['validations'] as $key => $attr ) {
 				$validations[ "data-parsley-{$key}" ] = $attr;
 			}
 		}
@@ -39,7 +39,7 @@ class Textarea extends Base {
 
 		$output = sprintf(
 			'<textarea %s>%s</textarea>',
-			$this->concat_attributes( $this->field_attributes(), [ 'value', 'type' ] ),
+			$this->concat_attributes( $this->field_attributes(), array( 'value', 'type' ) ),
 			$this->field_value
 		);
 
@@ -48,6 +48,5 @@ class Textarea extends Base {
 		}
 
 		return $output;
-
 	}
 }

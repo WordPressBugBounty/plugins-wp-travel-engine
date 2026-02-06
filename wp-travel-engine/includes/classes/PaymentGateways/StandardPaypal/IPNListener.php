@@ -19,6 +19,7 @@
  */
 
 namespace WPTravelEngine\PaymentGateways\StandardPaypal;
+
 /**
  * PayPalIPNListener
  *
@@ -73,11 +74,11 @@ class IPNListener {
 	private $_errors = array();
 	private $post_data;
 	private $rawPostData;               // raw data from php://input
-	private $post_uri = '';
+	private $post_uri        = '';
 	private $response_status = '';
-	private $response = '';
+	private $response        = '';
 
-	const PAYPAL_HOST = 'www.paypal.com';
+	const PAYPAL_HOST  = 'www.paypal.com';
 	const SANDBOX_HOST = 'www.sandbox.paypal.com';
 
 	/**
@@ -91,7 +92,6 @@ class IPNListener {
 	 * @param string  The post data as a URL encoded string
 	 *
 	 * @todo add URL param so function is more dynamic
-	 *
 	 */
 	protected function curlPost( $encoded_data ) {
 		if ( $this->use_ssl ) {
@@ -113,7 +113,7 @@ class IPNListener {
 
 		} else {
 
-			curl_setopt( $ch, CURLOPT_CAINFO, dirname( __FILE__ ) . '/cert/api_cert_chain.crt' );
+			curl_setopt( $ch, CURLOPT_CAINFO, __DIR__ . '/cert/api_cert_chain.crt' );
 
 		}
 
@@ -149,7 +149,6 @@ class IPNListener {
 	 * @param string  The post data as a URL encoded string
 	 *
 	 * @todo add URL param so function is more dynamic
-	 *
 	 */
 	protected function fsockPost( $encoded_data ) {
 		if ( $this->use_ssl ) {
@@ -169,7 +168,7 @@ class IPNListener {
 			throw new \Exception( "fsockopen error: [$errno] $errstr" );
 		}
 
-		$header = "POST /cgi-bin/webscr HTTP/1.1\r\n";
+		$header  = "POST /cgi-bin/webscr HTTP/1.1\r\n";
 		$header .= 'Host: ' . $this->getPaypalHost() . "\r\n";
 		$header .= "Content-Type: application/x-www-form-urlencoded\r\n";
 		$header .= 'Content-Length: ' . strlen( $encoded_data ) . "\r\n";
@@ -180,7 +179,7 @@ class IPNListener {
 		while ( ! feof( $fp ) ) {
 			if ( empty( $this->response ) ) {
 				// extract HTTP status from first line
-				$this->response        .= $status = fgets( $fp, 1024 );
+				$this->response       .= $status = fgets( $fp, 1024 );
 				$this->response_status = trim( substr( $status, 9, 4 ) );
 			} else {
 				$this->response .= fgets( $fp, 1024 );
@@ -201,7 +200,7 @@ class IPNListener {
 	}
 
 	private function addError( $error ) {
-		$this->_errors[] .= $error;
+		$this->_errors[] = $error;
 	}
 
 	public function getPostData() {
@@ -262,7 +261,7 @@ class IPNListener {
 		$r = '';
 
 		// date and POST url
-		for ( $i = 0; $i < 80; $i ++ ) {
+		for ( $i = 0; $i < 80; $i++ ) {
 			$r .= '-';
 		}
 		$r .= "\n[" . date( 'm/d/Y g:i A' ) . '] - ' . $this->getPostUri();
@@ -273,13 +272,13 @@ class IPNListener {
 		}
 
 		// HTTP Response
-		for ( $i = 0; $i < 80; $i ++ ) {
+		for ( $i = 0; $i < 80; $i++ ) {
 			$r .= '-';
 		}
 		$r .= "\n{$this->getResponse()}\n";
 
 		// POST vars
-		for ( $i = 0; $i < 80; $i ++ ) {
+		for ( $i = 0; $i < 80; $i++ ) {
 			$r .= '-';
 		}
 		$r .= "\n";
@@ -331,7 +330,7 @@ class IPNListener {
 				foreach ( $raw_post_array as $keyval ) {
 					$keyval = explode( '=', $keyval );
 					if ( count( $keyval ) == 2 ) {
-						$myPost[ $keyval[ 0 ] ] = urldecode( $keyval[ 1 ] );
+						$myPost[ $keyval[0] ] = urldecode( $keyval[1] );
 					}
 				}
 			}
@@ -341,7 +340,7 @@ class IPNListener {
 
 			foreach ( $myPost as $key => $value ) {
 				$value = urlencode( stripslashes( $value ) );
-				$req   .= "&$key=$value";
+				$req  .= "&$key=$value";
 			}
 
 			if ( $this->use_curl ) {
@@ -359,7 +358,7 @@ class IPNListener {
 			$res    = trim( end( $tokens ) );
 			if ( strcmp( $res, 'VERIFIED' ) == 0 ) {
 				return true;
-			} else if ( strcmp( $res, 'INVALID' ) == 0 ) {
+			} elseif ( strcmp( $res, 'INVALID' ) == 0 ) {
 				return false;
 			} else {
 				throw new \Exception( 'Unexpected response from PayPal.' );
@@ -386,5 +385,4 @@ class IPNListener {
 			throw new \Exception( 'Invalid HTTP request method.' );
 		}
 	}
-
 }

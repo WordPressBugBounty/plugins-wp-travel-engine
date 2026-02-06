@@ -8,7 +8,7 @@
  * @subpackage Wp_Travel_Engine/includes/templates
  * @since 6.0
  */
-use  WPTravelEngine\Core\Models\Post\Trip;
+use WPTravelEngine\Core\Models\Post\Trip;
 use WPTravelEngine\Core\Models\Settings\PluginSettings;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -21,47 +21,47 @@ if ( isset( $details ) ) {
 }
 
 global $post;
-$trip_instance 				= new Trip( $post );
-$plugin_settings_instance 	= new PluginSettings();
-$plugin_settings 			= $plugin_settings_instance->get();
+$trip_instance            = new Trip( $post );
+$plugin_settings_instance = new PluginSettings();
+$plugin_settings          = $plugin_settings_instance->get();
 
-$is_featured 				= 'yes' === $trip_instance->get_meta( 'wp_travel_engine_featured_trip' );
-$related_new_trip_listing 	= 'yes' === ( $plugin_settings['related_display_new_trip_listing'] ?? '' );
-$new_trip_listing 			= 'yes' === ( $plugin_settings['display_new_trip_listing'] ?? '' );
-$wpte_trip_images         	= $trip_instance->get_meta( 'wpte_gallery_id' );
-$wp_travel_engine_setting 	= $trip_instance->get_meta( 'wp_travel_engine_setting' );
+$is_featured              = 'yes' === $trip_instance->get_meta( 'wp_travel_engine_featured_trip' );
+$related_new_trip_listing = 'yes' === ( $plugin_settings['related_display_new_trip_listing'] ?? '' );
+$new_trip_listing         = 'yes' === ( $plugin_settings['display_new_trip_listing'] ?? '' );
+$wpte_trip_images         = $trip_instance->get_meta( 'wpte_gallery_id' );
+$wp_travel_engine_setting = $trip_instance->get_meta( 'wp_travel_engine_setting' );
 
-$related_trip 				= ( '' === $view_mode );
+$related_trip = ( '' === $view_mode );
 
-$trip_carousel				= $related_trip ? $show_related_trip_carousel : $show_trip_carousel;
-$trip_listing				= $related_trip ? $related_new_trip_listing : $new_trip_listing;
-$display_available_months	= $related_trip ? $show_related_available_months : $show_available_months;
-$display_map				= $related_trip ? $show_related_map : $show_map;
-$display_wishlist			= $related_trip ? $show_related_wishlist : $show_wishlist;
-$display_trip_tags 			= $related_trip ? $show_related_trip_tags : $show_trip_tags;
-$display_difficulty_tax 	= $related_trip ? $show_related_difficulty_tax : $show_difficulty_tax;
-$display_date_layout		= $related_trip ? $show_related_date_layout : $show_date_layout;
-$featured_tag				= $related_trip ? $show_related_featured_tag : $show_featured_tag;
+$trip_carousel            = $related_trip ? $show_related_trip_carousel : $show_trip_carousel;
+$trip_listing             = $related_trip ? $related_new_trip_listing : $new_trip_listing;
+$display_available_months = $related_trip ? $show_related_available_months : $show_available_months;
+$display_map              = $related_trip ? $show_related_map : $show_map;
+$display_wishlist         = $related_trip ? $show_related_wishlist : $show_wishlist;
+$display_trip_tags        = $related_trip ? $show_related_trip_tags : $show_trip_tags;
+$display_difficulty_tax   = $related_trip ? $show_related_difficulty_tax : $show_difficulty_tax;
+$display_date_layout      = $related_trip ? $show_related_date_layout : $show_date_layout;
+$featured_tag             = $related_trip ? $show_related_featured_tag : $show_featured_tag;
 
-$new_date_layout 			= ( $trip_listing && $display_available_months ) || ( ! $trip_listing && ! $display_available_months );
-$new_date_layout			= ! isset( $plugin_settings['display_new_trip_listing'] ) || ( isset( $plugin_settings['display_new_trip_listing'] ) && $new_date_layout );
+$new_date_layout = ( $trip_listing && $display_available_months ) || ( ! $trip_listing && ! $display_available_months );
+$new_date_layout = ! isset( $plugin_settings['display_new_trip_listing'] ) || ( isset( $plugin_settings['display_new_trip_listing'] ) && $new_date_layout );
 
-$set_duration_type 			= ( '' === ( $plugin_settings['set_duration_type'] ?? '' ) ) ? 'days' : $plugin_settings['set_duration_type'];
+$set_duration_type = ( '' === ( $plugin_settings['set_duration_type'] ?? '' ) ) ? 'days' : $plugin_settings['set_duration_type'];
 
-$display_new_trip_listing 	= $related_trip ? ( $plugin_settings['related_display_new_trip_listing'] ?? false ) : ( $plugin_settings['display_new_trip_listing'] ?? false );
+$display_new_trip_listing = $related_trip ? ( $plugin_settings['related_display_new_trip_listing'] ?? false ) : ( $plugin_settings['display_new_trip_listing'] ?? false );
 
-$featured					= ( !isset( $display_new_trip_listing) || 'no' === $display_new_trip_listing ) && $is_featured;
+$featured = ( ! isset( $display_new_trip_listing ) || 'no' === $display_new_trip_listing ) && $is_featured;
 
-$trip_thumbnail				= $trip_carousel && $wpte_trip_images['enable'] == 1 && count( $wpte_trip_images ) > 1;
+$trip_thumbnail = $trip_carousel && $wpte_trip_images['enable'] == 1 && count( $wpte_trip_images ) > 1;
 
-$fsds 						= apply_filters( 'trip_card_fixed_departure_dates', $post->ID );
+$fsds = apply_filters( 'trip_card_fixed_departure_dates', $post->ID );
 
 if ( $display_wishlist && is_array( $user_wishlists ?? '' ) ) {
 	$active_class    = in_array( $post->ID, $user_wishlists ) ? ' active' : '';
 	$title_attribute = in_array( $post->ID, $user_wishlists ) ? __( 'Already in wishlist', 'wp-travel-engine' ) : __( 'Add to wishlist', 'wp-travel-engine' );
 }
 
-if ( $trip_listing && ( in_array( $view_mode, array( '', 'list','grid' ) ) ) ) {
+if ( $trip_listing && ( in_array( $view_mode, array( '', 'list', 'grid' ) ) ) ) {
 	wp_enqueue_script( 'wte-popper' );
 	wp_enqueue_script( 'wte-tippyjs' );
 }
@@ -109,7 +109,7 @@ echo $trip_listing ? ' wpte_new-layout' : '';
 			if ( $display_map ) :
 				wte_get_template( 'layouts/display-map.php', array( 'post_id' => $post->ID ) );
 			endif;
-		?>
+			?>
 		</figure>
 
 		<div class="category-trip-content-wrap">
@@ -140,31 +140,31 @@ echo $trip_listing ? ' wpte_new-layout' : '';
 					<div class="category-trip-desti">
 						<?php
 							$tag_terms = get_the_terms( $post->ID, 'trip_tag' );
-							if ( $display_trip_tags && ! empty( $tag_terms ) && ! is_wp_error( $tag_terms ) ) :
-						?>
+						if ( $display_trip_tags && ! empty( $tag_terms ) && ! is_wp_error( $tag_terms ) ) :
+							?>
 								<span class="category-trip-wtetags">
-									<?php
-									foreach ( $tag_terms as $term ) :
-										$tags_description 	= term_description( $term->term_id );
-										$tags_attribute   	= $tags_description ? 'data-content="' . $tags_description . '"' : '';
-										printf(
-											'<span class="%s" %s><a rel="tag" target="_self" href="%s">%s</a></span>',
-											esc_attr( ( '' != ( $tags_attribute ?? '' ) ) ? 'tippy-exist' : '' ),
-											wp_kses_post( ( '' != ( $tags_attribute ?? '' ) ) ? $tags_attribute : '' ),
-											esc_url( get_term_link( $term ) ),
-											esc_html( $term->name )
-										);
-									endforeach;
-									?>
+								<?php
+								foreach ( $tag_terms as $term ) :
+									$tags_description = term_description( $term->term_id );
+									$tags_attribute   = $tags_description ? 'data-content="' . $tags_description . '"' : '';
+									printf(
+										'<span class="%s" %s><a rel="tag" target="_self" href="%s">%s</a></span>',
+										esc_attr( ( '' != ( $tags_attribute ?? '' ) ) ? 'tippy-exist' : '' ),
+										wp_kses_post( ( '' != ( $tags_attribute ?? '' ) ) ? $tags_attribute : '' ),
+										esc_url( get_term_link( $term ) ),
+										esc_html( $term->name )
+									);
+								endforeach;
+								?>
 								</span>
-						<?php
+							<?php
 							endif;
-							if ( ! empty( $destination ) ) :
-								wte_get_template( 'layouts/destination.php', compact( 'destination' ) );
+						if ( ! empty( $destination ) ) :
+							wte_get_template( 'layouts/destination.php', compact( 'destination' ) );
 							endif;
 							wte_get_template( 'components/content-trip-card-duration.php', compact( 'trip_duration_unit', 'trip_duration', 'trip_duration_nights', 'set_duration_type' ) );
-							if ( ! empty( $pax ) ) :
-						?>
+						if ( ! empty( $pax ) ) :
+							?>
 							<span class="category-trip-pax">
 								<i><svg width="18" height="13" viewBox="0 0 18 13" fill="none"
 										xmlns="http://www.w3.org/2000/svg"><path
@@ -172,57 +172,58 @@ echo $trip_listing ? ' wpte_new-layout' : '';
 											fill="currentColor" /></svg></i>
 								<span><?php printf( __( '%s People', 'wp-travel-engine' ), implode( '-', $pax ) ); ?></span>
 							</span>
-						<?php
+							<?php
 							endif;
-							$tax_terms   = $trip_instance->get_trip_difficulty_term( $post->ID );
-							if ( $display_difficulty_tax && ! empty( $tax_terms ) ) :
-								foreach ( $tax_terms as $value ) {
-									?>
+							$tax_terms = $trip_instance->get_trip_difficulty_term( $post->ID );
+						if ( $display_difficulty_tax && ! empty( $tax_terms ) ) :
+							foreach ( $tax_terms as $value ) {
+								?>
 									<span class="category-trip-difficulty">
-										<?php
-											if ( isset( $value[ 'term_id' ] ) ) {
-												if ( 0 != ( $value[ 'term_thumbnail' ] ?? 0 ) ) {
-													?>
+									<?php
+									if ( isset( $value['term_id'] ) ) {
+										if ( 0 != ( $value['term_thumbnail'] ?? 0 ) ) {
+											?>
 													<i>
-														<?php $value[ 'term_thumbnail' ] && print( \wp_get_attachment_image(
-																	$value[ 'term_thumbnail' ],
-																	array( '16', '16' ),
-																	false,
-																	array( 'itemprop' => 'image' )
-																)
-															);
-														?>
+												<?php
+													$value['term_thumbnail'] && print( \wp_get_attachment_image(
+														$value['term_thumbnail'],
+														array( '16', '16' ),
+														false,
+														array( 'itemprop' => 'image' )
+													)
+													);
+												?>
 													</i>
-													<?php
-												} else {
-													?>
+												<?php
+										} else {
+											?>
 													<i>
 														<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
 															<path d="M3.33333 13.3334V9.33335H5.33333V13.3334H3.33333ZM7.33333 13.3334V6.00002H9.33333V13.3334H7.33333ZM11.3333 13.3334V2.66669H13.3333V13.3334H11.3333Z" fill="currentColor" />
 														</svg>
 													</i>
-													<?php
-												}
-											}
-										?>
+											<?php
+										}
+									}
+									?>
 										<?php
-											printf(
-												'<span class="%s" %s><a rel="difficulty" target="_self" href="%s">%s</a></span>',
-												esc_attr( $value[ 'difficulty_span_class' ] ),
-												wp_kses_post( $value[ 'difficulty_data_content' ] ),
-												esc_url( $value[ 'difficulty_link' ] ),
-												esc_html( $value[ 'difficulty_name' ] ),
-												wp_kses_post( $value[ 'difficulty_levels' ] )
-											);
+										printf(
+											'<span class="%s" %s><a rel="difficulty" target="_self" href="%s">%s</a></span>',
+											esc_attr( $value['difficulty_span_class'] ),
+											wp_kses_post( $value['difficulty_data_content'] ),
+											esc_url( $value['difficulty_link'] ),
+											esc_html( $value['difficulty_name'] ),
+											wp_kses_post( $value['difficulty_levels'] )
+										);
 										?>
 									</span>
 									<?php
-								}
+							}
 							endif;
-							if ( $trip_listing && $show_excerpt && $display_date_layout ) :
+						if ( $trip_listing && $show_excerpt && $display_date_layout ) :
 							?>
 								<div class="category-trip-desc">
-									<?php wptravelengine_the_trip_excerpt(); ?>
+								<?php wptravelengine_the_trip_excerpt(); ?>
 								</div>
 						<?php endif; ?>
 					</div>
@@ -249,13 +250,20 @@ echo $trip_listing ? ' wpte_new-layout' : '';
 								<?php
 							endif;
 							if ( $display_date_layout && $fsds && is_array( $fsds ) ) {
-								wte_get_template( 'layouts/date-layout.php', array( 'fsds' => $fsds, 'is_fsds' => true, 'list_count' => (int) PluginSettings::make()->get( 'trip_dates.number', 3 )  ) );
+								wte_get_template(
+									'layouts/date-layout.php',
+									array(
+										'fsds'       => $fsds,
+										'is_fsds'    => true,
+										'list_count' => (int) PluginSettings::make()->get( 'trip_dates.number', 3 ),
+									)
+								);
 							}
 							if ( $display_date_layout && ( empty( $fsds ) || is_numeric( $fsds ) ) ) {
-								if ( '' !== $view_mode ){
+								if ( '' !== $view_mode ) {
 									wte_get_template( 'layouts/date-layout.php', array( 'is_fsds' => false ) );
 								} else {
-								?>
+									?>
 									<div class="category-trip-dates">
 										<span class="trip-dates-title"><?php echo esc_html__( 'Next Departure', 'wp-travel-engine' ); ?></span>
 										<?php
@@ -270,7 +278,7 @@ echo $trip_listing ? ' wpte_new-layout' : '';
 										}
 										?>
 									</div>
-								<?php
+									<?php
 								}
 							}
 							?>
@@ -279,14 +287,14 @@ echo $trip_listing ? ' wpte_new-layout' : '';
 				</div>
 				<?php
 				if ( ( ! $trip_listing || ! $display_date_layout ) && $show_excerpt ) :
-				?>
+					?>
 					<div class="category-trip-desc">
 						<?php wptravelengine_the_trip_excerpt(); ?>
 					</div>
-				<?php
+					<?php
 				endif;
 				if ( 'list' !== $view_mode ) :
-				?>
+					?>
 					<div class="wpte_trip-details-btn-wrap">
 						<a href="<?php the_permalink(); ?>" class="button category-trip-viewmre-btn"><?php echo esc_html( apply_filters( 'wp_travel_engine_view_detail_txt', __( 'View Details', 'wp-travel-engine' ) ) ); ?></a>
 				<?php endif; ?>
@@ -296,11 +304,11 @@ echo $trip_listing ? ' wpte_new-layout' : '';
 			if ( $new_date_layout && false !== $fsds ) :
 				echo '<div class="category-trip-aval-time">';
 					$new_date_layout_atts = compact( 'fsds', 'view_mode', 'trip_listing', 'show_excerpt', 'trip_instance' );
-					if ( false !== $fsds ) :
-						if ( ( $fsds == get_the_ID() || empty( $fsds ) ) ) :
-							$new_date_layout_atts += compact( 'display_available_months' );
+				if ( false !== $fsds ) :
+					if ( ( $fsds == get_the_ID() || empty( $fsds ) ) ) :
+						$new_date_layout_atts += compact( 'display_available_months' );
 						elseif ( is_array( $fsds ) && count( $fsds ) > 0 ) :
-							$new_date_layout_atts += compact( 'dates_layout', 'related_trip', 'show_available_dates', 'display_available_months',  'show_related_available_dates' );
+							$new_date_layout_atts += compact( 'dates_layout', 'related_trip', 'show_available_dates', 'display_available_months', 'show_related_available_dates' );
 						endif;
 					endif;
 					wte_get_template( 'layouts/new-date-layout.php', $new_date_layout_atts );

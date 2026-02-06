@@ -40,7 +40,7 @@ abstract class AssetsAbstract {
 	/**
 	 * @param string|AssetInterface $asset
 	 * @param $type
-	 * @param bool $enqueue
+	 * @param bool                  $enqueue
 	 *
 	 * @return $this
 	 */
@@ -137,12 +137,12 @@ abstract class AssetsAbstract {
 	 */
 	public function localize_script( $handle, $object_name, $l10n ): AssetsAbstract {
 
-		static $cache = [];
+		static $cache = array();
 
-		if (  ! isset( $cache[$handle] ) || ! in_array( $object_name, $cache[$handle], true ) ) {
-			$cache[$handle][] = $object_name;
+		if ( ! isset( $cache[ $handle ] ) || ! in_array( $object_name, $cache[ $handle ], true ) ) {
+			$cache[ $handle ][] = $object_name;
 
-			$l10n = is_array( $l10n ) ? wp_json_encode( $l10n ) : $l10n;
+			$l10n   = is_array( $l10n ) ? wp_json_encode( $l10n ) : $l10n;
 			$script = ";(function(){
 				var {$object_name} = window[{$object_name}] || {};
 				if(! window.{$object_name}){

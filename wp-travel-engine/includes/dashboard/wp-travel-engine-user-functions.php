@@ -63,7 +63,7 @@ if ( ! function_exists( 'wp_travel_engine_create_new_customer' ) ) {
 
 			while ( username_exists( $username ) ) {
 				$username = $o_username . $append;
-				$append++;
+				++$append;
 			}
 		}
 
@@ -219,7 +219,6 @@ function wte_get_custom_avatar( $avatar, $id_or_email, $size, $default, $alt ) {
 		$avatar = "<img alt='{$alt}' src='{$src}' class='avatar avatar-{$size} photo' height='{$size}' width='{$size}' />";
 	endif;
 	return $avatar;
-
 }
 
 add_filter( 'get_avatar', 'wte_get_custom_avatar', 1, 5 );
@@ -232,7 +231,6 @@ function wte_get_custom_avatar_url( $url, $id_or_email, $args ) {
 		$url = ( isset( $url[0] ) && $url[0] ? $url[0] : $url );
 	endif;
 	return $url;
-
 }
 
 add_filter( 'get_avatar_url', 'wte_get_custom_avatar_url', 1, 3 );

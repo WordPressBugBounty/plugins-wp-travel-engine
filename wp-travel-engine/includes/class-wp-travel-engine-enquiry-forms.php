@@ -146,4 +146,3 @@ class WP_Travel_Engine_Enquiry_Forms {
 		wp_update_post( $post_data );
 	}
 }
-

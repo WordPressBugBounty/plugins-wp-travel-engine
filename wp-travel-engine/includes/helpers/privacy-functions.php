@@ -27,7 +27,8 @@ function wp_travel_engine_plugin_eraser( $email_address, $page = 1 ) {
 	if ( $the_query->have_posts() ) {
 		while ( $the_query->have_posts() ) {
 			$the_query->the_post();
-			$wp_travel_engine_setting = get_post_meta( $post->ID, 'wp_travel_engine_setting', true );
+			$wp_travel_engine_setting         = get_post_meta( $post->ID, 'wp_travel_engine_setting', true );
+			$wp_travel_engine_booking_setting = get_post_meta( $post->ID, 'wp_travel_engine_booking_setting', true ) ?: array();
 			if ( isset( $wp_travel_engine_booking_setting['place_order']['booking']['email'] ) && $wp_travel_engine_booking_setting['place_order']['booking']['email'] == $email_address ) {
 				wp_delete_post( $post->ID, true );
 			}

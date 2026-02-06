@@ -50,10 +50,16 @@
 						</div>
 					</td>
 					<td>
+						<?php
+						$display_value = $line_item['value'] ?? 0;
+						if ( $display_value <= 0 ) {
+							$display_value = $cart_info->get_totals( 'total_' . $line_item['name'] );
+						}
+						?>
 						<input type="number"
 								name="fees[value][]"
 								aria-label="Total fee amount"
-								value="<?php echo esc_attr( ( $line_item['value'] ?? 0 ) > 0 ? $line_item['value'] : $cart_info->get_totals( 'total_' . $line_item['name'] ) ); ?>"
+								value="<?php echo esc_attr( $display_value ); ?>"
 								style="flex: 0 0 80px;"
 								step="any"
 								<?php echo $is_booking_edit_enabled ? '' : 'readonly'; ?>>

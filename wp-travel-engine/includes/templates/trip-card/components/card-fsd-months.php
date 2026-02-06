@@ -10,52 +10,52 @@
  */
 
 $show_available_months = $related_query ? $show_related_available_months : $show_available_months;
-$show_available_dates = $related_query ? $show_related_available_dates : $show_available_dates;
+$show_available_dates  = $related_query ? $show_related_available_dates : $show_available_dates;
 
 if ( false === $fsds || ! $show_available_months || ! $has_date ) {
-    return;
+	return;
 }
 
 $availability_txt = apply_filters( 'wte_available_throughout_txt', __( 'Availability:', 'wp-travel-engine' ) );
 
-$fsds = is_numeric( $fsds ) ? [] : $fsds;
-$available_months = [];
-$available_dates_in_month = [];
+$fsds                     = is_numeric( $fsds ) ? array() : $fsds;
+$available_months         = array();
+$available_dates_in_month = array();
 
 foreach ( $fsds as $index => $fsd ) {
-    $month = date_i18n( 'n', strtotime( $fsd['start_date'] ) );
-    $available_months[$month] ??= $index;
-    $available_dates_in_month[$month] = ( $available_dates_in_month[$month] ?? 0 ) + 1;
+	$month                              = date_i18n( 'n', strtotime( $fsd['start_date'] ) );
+	$available_months[ $month ]       ??= $index;
+	$available_dates_in_month[ $month ] = ( $available_dates_in_month[ $month ] ?? 0 ) + 1;
 }
 
 ?>
 
 <div class="category-trip-aval-time">
-    <div class="category-trip-avl-tip-inner-wrap new-layout">
-    <span class="category-available-trip-text"> <?php echo esc_html( $availability_txt ); ?> </span>
-    <ul class="category-available-months">
+	<div class="category-trip-avl-tip-inner-wrap new-layout">
+	<span class="category-available-trip-text"> <?php echo esc_html( $availability_txt ); ?> </span>
+	<ul class="category-available-months">
 <?php
 
 $current_month = date_i18n( 'n' );
 
 foreach ( range( 1, 12 ) as $month_number ) {
 
-	$timestamp    = strtotime( "2025-{$month_number}-01" );
-	$month_label  = esc_html( date_i18n( 'M', $timestamp ) );
-	$month_value  = (int) date_i18n( 'n', $timestamp );
+	$timestamp   = strtotime( "2025-{$month_number}-01" );
+	$month_label = esc_html( date_i18n( 'M', $timestamp ) );
+	$month_value = (int) date_i18n( 'n', $timestamp );
 
-    if ( $month_value < $current_month ) {
-        echo '<li><a href="#" class="disabled">' . $month_label . '</a></li>';
-        continue;
-    }
+	if ( $month_value < $current_month ) {
+		echo '<li><a href="#" class="disabled">' . $month_label . '</a></li>';
+		continue;
+	}
 
 	if ( empty( $available_months ) ) {
 		echo '<li>' . $month_label . '</li>';
 		continue;
 	}
 
-	$dates_attribute   = '';
-	$classname         = '';
+	$dates_attribute = '';
+	$classname       = '';
 
 	if ( isset( $available_dates_in_month[ $month_value ], $available_months[ $month_number ] ) ) {
 		$dates_available = $available_dates_in_month[ $month_value ];
@@ -69,7 +69,7 @@ foreach ( range( 1, 12 ) as $month_number ) {
 					__( 'available', 'wp-travel-engine' )
 				)
 			) . '"';
-			$classname = 'wte-dates-available tippy-exist';
+			$classname       = 'wte-dates-available tippy-exist';
 		} else {
 			$classname = 'wte-dates-available';
 		}
@@ -93,6 +93,6 @@ foreach ( range( 1, 12 ) as $month_number ) {
 }
 
 ?>
-    </ul>
-    </div>
+	</ul>
+	</div>
 </div>

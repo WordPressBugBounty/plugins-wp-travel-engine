@@ -77,18 +77,66 @@ final class Container {
 	}
 
 	/**
-	 * @return void
+	 * Get or create a PostModel instance.
+	 *
+	 * @param array  $args             Constructor arguments (first arg should be post ID).
+	 * @param string $post_model_class The PostModel class name.
+	 *
+	 * @return PostModel The post model instance.
 	 */
 	public static function post( $args, string $post_model_class ) {
-		$post = get_post( $args[ 0 ] );
+		$post = get_post( $args[0] );
 
-		$instance = Container::$instances[ $post->post_type ] ?? null;
+		$instance = self::$instances[ $post->post_type ] ?? null;
 
 		if ( ! is_subclass_of( $instance, PostModel::class ) || $post->ID !== $instance->get_id() ) {
-			Container::$instances[ $post->post_type ] = new $post_model_class( ...$args );
+			self::$instances[ $post->post_type ] = new $post_model_class( ...$args );
 		}
 
-		return Container::$instances[ $post->post_type ];
+		return self::$instances[ $post->post_type ];
 	}
 
+	/**
+	 * Check if an instance exists.
+	 *
+	 * @param string $key
+	 * @return bool
+	 * @since 6.7.0
+	 */
+	public static function has_instance( string $key ): bool {
+		return isset( self::$instances[ $key ] );
+	}
+
+	/**
+	 * Check if a class exists.
+	 *
+	 * @param string $key
+	 * @return bool
+	 * @since 6.7.0
+	 */
+	public static function has_class( string $key ): bool {
+		return isset( self::$classes[ $key ] );
+	}
+
+	/**
+	 * Remove an instance.
+	 *
+	 * @param string $key
+	 * @return void
+	 * @since 6.7.0
+	 */
+	public static function remove_instance( string $key ): void {
+		unset( self::$instances[ $key ] );
+	}
+
+	/**
+	 * Remove a class.
+	 *
+	 * @param string $key
+	 * @return void
+	 * @since 6.7.0
+	 */
+	public static function remove_class( string $key ): void {
+		unset( self::$classes[ $key ] );
+	}
 }

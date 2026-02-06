@@ -4,7 +4,7 @@ global $wte_cart;
 $booking_metas           = get_post_meta( $booking, 'wp_travel_engine_booking_setting', true );
 $booking_meta            = booking_meta_details( $booking );
 $global_settings         = wptravelengine_settings()->get();
-$default_payment_gateway = isset( $global_settings[ 'default_gateway' ] ) && ! empty( $global_settings[ 'default_gateway' ] ) ? $global_settings[ 'default_gateway' ] : 'booking_only';
+$default_payment_gateway = isset( $global_settings['default_gateway'] ) && ! empty( $global_settings['default_gateway'] ) ? $global_settings['default_gateway'] : 'booking_only';
 $user_account_page_id    = wp_travel_engine_get_dashboard_page_id();
 
 $booking_object = get_post( $booking );
@@ -16,7 +16,7 @@ if ( empty( $booking_object->payments ) ) {
 	if ( wte_array_get( $booking_metas, 'place_order.due', 0 ) <= 0 ) {
 		wp_safe_redirect( get_permalink( $user_account_page_id ) );
 	}
-} else if ( $booking_object->due_amount <= 0 ) {
+} elseif ( $booking_object->due_amount <= 0 ) {
 	wp_safe_redirect( get_permalink( $user_account_page_id ) );
 }
 
@@ -45,7 +45,7 @@ if ( empty( $booking_object->payments ) ) {
 			<td>
 				<span class="lrf-td-title"><?php esc_html_e( 'Total', 'wp-travel-engine' ); ?></span>
 				<span
-					class="lrf-td-desc"><?php echo wte_esc_price( wte_get_formated_price_html( $booking_object->cart_info[ 'total' ] ) ); ?></span>
+					class="lrf-td-desc"><?php echo wte_esc_price( wte_get_formated_price_html( $booking_object->cart_info['total'] ) ); ?></span>
 			</td>
 			<td>
 				<span class="lrf-td-title"><?php esc_html_e( 'Paid', 'wp-travel-engine' ); ?></span>
@@ -64,8 +64,8 @@ if ( empty( $booking_object->payments ) ) {
 	if ( ! empty( $active_payment_methods ) ) :
 		?>
 		<form id="wp-travel-engine-new-checkout-form" method="POST" name="wp_travel_engine_new_checkout_form" action=""
-			  enctype="multipart/form-data" novalidate=""
-			  class="">
+				enctype="multipart/form-data" novalidate=""
+				class="">
 			<div class="wpte-bf-field wpte-bf-radio">
 				<label for="" class="wpte-bf-label">
 					<?php esc_html_e( 'Payment Method', 'wp-travel-engine' ); ?>
@@ -78,18 +78,18 @@ if ( empty( $booking_object->payments ) ) {
 					?>
 					<div class="wpte-bf-radio-wrap">
 						<input <?php checked( $default_payment_gateway, $key ); ?> type="radio"
-																				   name="wpte_checkout_paymnet_method"
-																				   value="<?php echo esc_attr( $key ); ?>"
-																				   id="wpte-checkout-paymnet-method-<?php echo esc_attr( $key ); ?>">
+																					name="wpte_checkout_paymnet_method"
+																					value="<?php echo esc_attr( $key ); ?>"
+																					id="wpte-checkout-paymnet-method-<?php echo esc_attr( $key ); ?>">
 						<label for="wpte-checkout-paymnet-method-<?php echo esc_attr( $key ); ?>">
 							<?php
-							if ( isset( $payment_method[ 'icon_url' ] ) && ! empty( $payment_method[ 'icon_url' ] ) ) :
+							if ( isset( $payment_method['icon_url'] ) && ! empty( $payment_method['icon_url'] ) ) :
 								?>
-								<img src="<?php echo esc_url( $payment_method[ 'icon_url' ] ); ?>"
-									 alt="<?php echo esc_attr( $payment_method[ 'label' ] ); ?>">
-							<?php
+								<img src="<?php echo esc_url( $payment_method['icon_url'] ); ?>"
+									alt="<?php echo esc_attr( $payment_method['label'] ); ?>">
+								<?php
 							else :
-								echo esc_html( $payment_method[ 'label' ] );
+								echo esc_html( $payment_method['label'] );
 							endif;
 							?>
 						</label>
@@ -98,7 +98,7 @@ if ( empty( $booking_object->payments ) ) {
 			</div>
 			<div class="wpte-bf-field wpte-bf-submit">
 				<input type="submit" name="wp_travel_engine_nw_bkg_submit"
-					   value="<?php esc_attr_e( 'Pay Now', 'wp-travel-engine' ); ?>">
+						value="<?php esc_attr_e( 'Pay Now', 'wp-travel-engine' ); ?>">
 			</div>
 			<?php wp_nonce_field( 'nonce_checkout_partial_payment_remaining_action', 'nonce_checkout_partial_payment_remaining_field' ); ?>
 			<input type="hidden" name="currency" value="<?php echo wp_travel_engine_get_currency_code(); ?> ">
@@ -115,15 +115,15 @@ if ( empty( $booking_object->payments ) ) {
 </div>
 <div class="wpte-lrf-btn-wrap">
 	<a target="_blank" class="wpte-lrf-btn"
-	   href="<?php echo esc_url( get_post_type_archive_link( 'trip' ) ); ?>"><?php esc_html_e( 'Book More Trips', 'wp-travel-engine' ); ?></a>
+		href="<?php echo esc_url( get_post_type_archive_link( 'trip' ) ); ?>"><?php esc_html_e( 'Book More Trips', 'wp-travel-engine' ); ?></a>
 	<?php
 	$user_account_page_id = wp_travel_engine_get_dashboard_page_id();
 	if ( ! empty( $booking_metas ) ) : // phpcs:ignore
 		if ( ! empty( $user_account_page_id ) ) :
 			?>
 			<a class="wpte-lrf-btn cancel-btn"
-			   href="<?php echo esc_url( get_permalink( $user_account_page_id ) ); ?>"><?php esc_html_e( 'Cancel', 'wp-travel-engine' ); ?></a>
-		<?php
+				href="<?php echo esc_url( get_permalink( $user_account_page_id ) ); ?>"><?php esc_html_e( 'Cancel', 'wp-travel-engine' ); ?></a>
+			<?php
 		endif;
 	endif;
 	?>

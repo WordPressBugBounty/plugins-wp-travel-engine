@@ -56,7 +56,7 @@ abstract class LicenseManager {
 	/**
 	 * @var string
 	 */
-	protected string $author = "WP Travel Engine";
+	protected string $author = 'WP Travel Engine';
 
 	/**
 	 * @var bool
@@ -97,12 +97,12 @@ abstract class LicenseManager {
 			)
 		);
 
-		$this->version   = $_args[ 'version' ];
-		$this->license   = $_args[ 'license' ];
-		$this->item_id   = $_args[ 'item_id' ];
-		$this->author    = $_args[ 'author' ];
-		$this->beta      = $_args[ 'beta' ];
-		$this->plugin    = $_args[ 'plugin' ];
+		$this->version   = $_args['version'];
+		$this->license   = $_args['license'];
+		$this->item_id   = $_args['item_id'];
+		$this->author    = $_args['author'];
+		$this->beta      = $_args['beta'];
+		$this->plugin    = $_args['plugin'];
 		$this->store_url = WP_TRAVEL_ENGINE_STORE_URL;
 
 		$this->args = $_args;
@@ -154,7 +154,6 @@ abstract class LicenseManager {
 	 * Initialize Updater.
 	 *
 	 * @param array $args
-	 *
 	 */
 	abstract public function initialize_updater( array $args = array() );
 
@@ -166,5 +165,4 @@ abstract class LicenseManager {
 	public function verify_ssl(): bool {
 		return (bool) apply_filters( 'edd_sl_api_request_verify_ssl', true );
 	}
-
 }

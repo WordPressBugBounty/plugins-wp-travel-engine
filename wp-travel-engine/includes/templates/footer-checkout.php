@@ -1,6 +1,6 @@
 <?php
 /**
-* Checkout V2 Footer Template.
+ * Checkout V2 Footer Template.
  *
  * @since 6.3.0
  */
@@ -15,6 +15,6 @@ wptravelengine_get_template( 'template-checkout/content-footer.php' );
 <?php
 // Include footer if enabled in settings
 if ( $attributes['footer'] == 'default' ) {
-    get_footer();
+	get_footer();
 }
 ?>

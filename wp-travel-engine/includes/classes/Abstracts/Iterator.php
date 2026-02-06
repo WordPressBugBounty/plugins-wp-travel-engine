@@ -60,7 +60,7 @@ abstract class Iterator implements \Iterator, \Countable {
 	 */
 	#[\ReturnTypeWillChange]
 	public function next() {
-		++ $this->position;
+		++$this->position;
 	}
 
 	/**
@@ -98,5 +98,4 @@ abstract class Iterator implements \Iterator, \Countable {
 	public function count(): int {
 		return count( $this->data );
 	}
-
 }

@@ -96,7 +96,7 @@ if ( $render->is_editor() ) {
     </script>
 	<?php
 }
-if( is_array( $gallery ) && count ( $gallery ) >= 1  ):?>
+if ( is_array( $gallery ) && count ( $gallery ) >= 1  ):?>
     <div <?php echo esc_attr( $attributes_parser->wrapper_attributes() ); ?>>
     <div class="wpte-gallery-wrapper <?php echo $attributes_parser->get( 'iconType' ) == 'rounded' ? 'splide-nav-rounded ' : 'splide-nav-square ';
     echo $attributes_parser->get( 'showDots' ) == true ? 'splide-dots-enabled ' : '';
@@ -105,7 +105,7 @@ if( is_array( $gallery ) && count ( $gallery ) >= 1  ):?>
         <div class="splide__track">
             <ul class="splide__list">
                 <?php
-                if( is_array( $gallery ) ) {
+                if ( is_array( $gallery ) ) {
                     foreach( $gallery as $imagedetail => $image ) {
                         ?>
                         <li class="splide__slide">

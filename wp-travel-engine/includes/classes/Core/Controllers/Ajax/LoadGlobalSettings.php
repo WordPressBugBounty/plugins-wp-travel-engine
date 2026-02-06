@@ -32,7 +32,7 @@ class LoadGlobalSettings extends AjaxController {
 			require_once plugin_dir_path( WP_TRAVEL_ENGINE_FILE_PATH ) . 'includes/class-wp-travel-engine-settings.php';
 		}
 
-		$tab_details     = $post_data['tab_details'] ?? false;
+		$tab_details = $post_data['tab_details'] ?? false;
 
 		if ( $tab_details ) {
 			ob_start();
@@ -127,5 +127,4 @@ class LoadGlobalSettings extends AjaxController {
 		}
 		wp_send_json_error( array( 'message' => esc_html__( 'Invalid Tab Data', 'wp-travel-engine' ) ) );
 	}
-	
 }

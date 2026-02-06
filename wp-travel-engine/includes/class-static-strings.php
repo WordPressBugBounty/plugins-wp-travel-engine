@@ -2,7 +2,6 @@
 /**
  * String Translation.
  *
- *
  * @since 5.7.3
  */
 namespace WPTravelEngine;
@@ -27,7 +26,7 @@ class StaticStrings {
 
 		add_filter( 'gettext_wp-travel-engine', array( __CLASS__, 'translateString' ), 11, 3 );
 
-		add_action( 'wpte_after_save_global_settings_data', [ __CLASS__, 'save_custom_strings_settings' ] );
+		add_action( 'wpte_after_save_global_settings_data', array( __CLASS__, 'save_custom_strings_settings' ) );
 	}
 
 	/**
@@ -38,18 +37,18 @@ class StaticStrings {
 	 * @since 5.7.3
 	 */
 	public static function save_custom_strings_settings( $posted_data ) {
-		if ( isset( $posted_data[self::$option_key] ) ) {
-			if ( is_string( $posted_data[self::$option_key] ) ) {
+		if ( isset( $posted_data[ self::$option_key ] ) ) {
+			if ( is_string( $posted_data[ self::$option_key ] ) ) {
 				update_option( self::$option_key, array() );
 				return;
 			}
 			$custom_strings = array();
-			foreach ( $posted_data[self::$option_key] as $value ) {
-				$label_key      = sanitize_key( $value['initial_label'] );
+			foreach ( $posted_data[ self::$option_key ] as $value ) {
+				$label_key = sanitize_key( $value['initial_label'] );
 
 				$custom_strings[ $label_key ] = array(
-					'initial_label' => sanitize_text_field( $value['initial_label'] ),
-					'modified_label' => sanitize_text_field( $value['modified_label'] )
+					'initial_label'  => sanitize_text_field( $value['initial_label'] ),
+					'modified_label' => sanitize_text_field( $value['modified_label'] ),
 				);
 			}
 			update_option( self::$option_key, $custom_strings );
@@ -79,12 +78,11 @@ class StaticStrings {
 	 */
 	public static function translateString( $translated, $original, $domain ) {
 		$custom_strings = static::$custom_strings;
-		$key = sanitize_key( $translated );
+		$key            = sanitize_key( $translated );
 
 		return isset( $custom_strings[ $key ] ) ? $custom_strings[ $key ]['modified_label'] : $translated;
-
 	}
 }
 
 // Register the hooks.
-//add_action( 'init', [ __NAMESPACE__ . '\\StaticStrings', 'init' ] );
+// add_action( 'init', [ __NAMESPACE__ . '\\StaticStrings', 'init' ] );

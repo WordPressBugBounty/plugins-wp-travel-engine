@@ -11,30 +11,30 @@ use WPTravelEngine\Helpers\Functions;
 			<h4 class="wpte-title"><?php esc_html_e( 'Customer Details', 'wp-travel-engine' ); ?></h4>
 			<div class="wpte-button-wrap wpte-edit-bkng">
 				<a href="#" class="wpte-btn-transparent wpte-btn-sm">
-					<?php wptravelengine_svg_by_fa_icon( "fas fa-pencil-alt" ); ?>
+					<?php wptravelengine_svg_by_fa_icon( 'fas fa-pencil-alt' ); ?>
 					<?php esc_html_e( 'Edit', 'wp-travel-engine' ); ?>
 				</a>
 			</div>
 		</div>
 		<div class="wpte-block-content">
 			<ul class="wpte-list">
-				<?php if ( isset( $booking_metas[ 'place_order' ][ 'booking' ] ) ) : ?>
+				<?php if ( isset( $booking_metas['place_order']['booking'] ) ) : ?>
 					<li>
 						<b><?php esc_html_e( 'Customer ID', 'wp-travel-engine' ); ?></b>
 						<?php
-						$cid = wptravelengine_get_page_by_title( $booking_metas[ 'place_order' ][ 'booking' ][ 'email' ], OBJECT, 'customer' );
+						$cid = wptravelengine_get_page_by_title( $booking_metas['place_order']['booking']['email'], OBJECT, 'customer' );
 						?>
 						<span><a target="_blank"
-								 href="<?php echo esc_url( get_edit_post_link( $cid->ID, 'display' ) ); ?>"><?php echo esc_attr( $cid->ID ); ?></a></span>
+								href="<?php echo esc_url( get_edit_post_link( $cid->ID, 'display' ) ); ?>"><?php echo esc_attr( $cid->ID ); ?></a></span>
 					</li>
-				<?php
+					<?php
 				endif;
-				if ( isset( $billing_options[ 'booking' ] ) && ! empty( $billing_options[ 'booking' ] ) ) :
-					foreach ( $billing_options[ 'booking' ] as $key => $value ) :
+				if ( isset( $billing_options['booking'] ) && ! empty( $billing_options['booking'] ) ) :
+					foreach ( $billing_options['booking'] as $key => $value ) :
 						$booking_key = 'booking_' . $key;
 						if ( 'fname' === $key ) {
 							$booking_key = 'booking_first_name';
-						} else if ( 'lname' === $key ) {
+						} elseif ( 'lname' === $key ) {
 							$booking_key = 'booking_last_name';
 						}
 						if ( 'survey' === $key ) {
@@ -47,7 +47,7 @@ use WPTravelEngine\Helpers\Functions;
 							<b><?php echo esc_html( $data_label ); ?></b>
 							<span><?php echo isset( $value ) ? esc_attr( $value ) : ''; ?></span>
 						</li>
-					<?php
+						<?php
 					endforeach;
 				else :
 					esc_html_e( 'Customer details not found. Click "Edit" to fill details.', 'wp-travel-engine' );
@@ -73,12 +73,12 @@ use WPTravelEngine\Helpers\Functions;
 		<div style="display:none;" class="wpte-block-content-edit edit-customer-info">
 			<ul class="wpte-list">
 				<?php
-				if ( isset( $billing_options[ 'booking' ] ) && ! empty( $billing_options[ 'booking' ] ) ) :
-					foreach ( $billing_options[ 'booking' ] as $key => $value ) :
+				if ( isset( $billing_options['booking'] ) && ! empty( $billing_options['booking'] ) ) :
+					foreach ( $billing_options['booking'] as $key => $value ) :
 						$booking_key = 'booking_' . $key;
 						if ( 'fname' === $key ) {
 							$booking_key = 'booking_first_name';
-						} else if ( 'lname' === $key ) {
+						} elseif ( 'lname' === $key ) {
 							$booking_key = 'booking_last_name';
 						}
 						if ( 'survey' === $key ) {
@@ -89,20 +89,20 @@ use WPTravelEngine\Helpers\Functions;
 						<li>
 							<b><?php echo esc_attr( $data_label ); ?></b>
 							<span>
-					<?php
-					// Switch type.
-					switch ( $key ) {
-						case 'email':
-							?>
+						<?php
+						// Switch type.
+						switch ( $key ) {
+							case 'email':
+								?>
 							<div class="wpte-field wpte-email">
 						<input type="email"
-							   name="wp_travel_engine_booking_setting[place_order][booking][<?php echo esc_attr( $key ); ?>]"
-							   value="<?php echo isset( $value ) ? esc_attr( $value ) : ''; ?>">
+								name="wp_travel_engine_booking_setting[place_order][booking][<?php echo esc_attr( $key ); ?>]"
+								value="<?php echo isset( $value ) ? esc_attr( $value ) : ''; ?>">
 					</div>
-							<?php
-							break;
-						case 'country':
-							?>
+								<?php
+								break;
+							case 'country':
+								?>
 							<div class="wpte-field wpte-select">
 								<select class="wpte-enhanced-select"
 										name="wp_travel_engine_booking_setting[place_order][booking][<?php echo esc_attr( $key ); ?>]">
@@ -110,28 +110,28 @@ use WPTravelEngine\Helpers\Functions;
 									$country_options = Functions::get_countries();
 									foreach ( $country_options as $key => $country ) {
 										$selected = selected( $value, $key, false );
-										echo '<option ' . $selected . " value='" . esc_attr( $key ) . "'>" . esc_html( $country ) . "</option>"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+										echo '<option ' . $selected . " value='" . esc_attr( $key ) . "'>" . esc_html( $country ) . '</option>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 									}
 									?>
 								</select>
 							</div>
-							<?php
-							break;
+								<?php
+								break;
 
-						default:
-							?>
+							default:
+								?>
 							<div class="wpte-field wpte-text">
 								<input type="text"
-									   name="wp_travel_engine_booking_setting[place_order][booking][<?php echo esc_attr( $key ); ?>]"
-									   value="<?php echo isset( $value ) ? esc_attr( $value ) : ''; ?>">
+										name="wp_travel_engine_booking_setting[place_order][booking][<?php echo esc_attr( $key ); ?>]"
+										value="<?php echo isset( $value ) ? esc_attr( $value ) : ''; ?>">
 							</div>
-							<?php
-							break;
-					}
-					?>
+								<?php
+								break;
+						}
+						?>
 				</span>
 						</li>
-					<?php
+						<?php
 					endforeach;
 				else :
 					$checkout_fields = WTE_Default_Form_Fields::booking();
@@ -145,7 +145,7 @@ use WPTravelEngine\Helpers\Functions;
 
 					$checkout_fields = array_map(
 						function ( $field ) {
-							$field[ 'wrapper_class' ] = 'wpte-field wpte-floated';
+							$field['wrapper_class'] = 'wpte-field wpte-floated';
 
 							return $field;
 						},
@@ -165,8 +165,8 @@ use WPTravelEngine\Helpers\Functions;
 								<span>
 					<div class="wpte-field wpte-text">
 						<input type="text"
-							   name="wp_travel_engine_booking_setting[additional_fields][<?php echo esc_attr( $key ); ?>]"
-							   value="<?php echo isset( $value ) ? esc_attr( $value ) : ''; ?>">
+								name="wp_travel_engine_booking_setting[additional_fields][<?php echo esc_attr( $key ); ?>]"
+								value="<?php echo isset( $value ) ? esc_attr( $value ) : ''; ?>">
 					</div>
 				</span>
 							</li>

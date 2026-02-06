@@ -93,7 +93,7 @@ function wte_advanced_search_cost_and_duration( $attr, $type ) {
 
 /**
  * Check if search fields should be hidden in Search Page - FILTER BY Section
- * 
+ *
  * @updated 6.6.0
  */
 function wte_advanced_search_hide_filters_in_search_page( $search_field ) {

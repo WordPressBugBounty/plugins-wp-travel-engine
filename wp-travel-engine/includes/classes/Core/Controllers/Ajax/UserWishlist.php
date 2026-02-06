@@ -41,7 +41,7 @@ class UserWishlist extends AjaxController {
 
 		if ( 'GET' === $request_method ) {
 			list( $markup, $pagination, $max_page ) = $this->get_wishlist_markup( $args );
-			wp_send_json_success( compact( 'message',  'markup', 'pagination', 'max_page' ) );
+			wp_send_json_success( compact( 'message', 'markup', 'pagination', 'max_page' ) );
 			wp_die();
 		}
 
@@ -64,7 +64,7 @@ class UserWishlist extends AjaxController {
 			WTE()->session->set( 'user_wishlists', $user_wishlists );
 		}
 
-		$args['post__in'] = $user_wishlists;
+		$args['post__in']                       = $user_wishlists;
 		list( $markup, $pagination, $max_page ) = $this->get_wishlist_markup( $args );
 
 		wp_send_json_success(
@@ -86,43 +86,44 @@ class UserWishlist extends AjaxController {
 
 	/**
 	 * Get the user wishlist markup.
-	 * 
+	 *
 	 * @param array $args The query arguments.
-	 * 
+	 *
 	 * @return array
 	 */
 	private function get_wishlist_markup( $args ): array {
 		$query = new \WP_Query( $args );
-	
+
 		ob_start();
 		while ( $query->have_posts() ) :
 			$query->the_post();
-			$details = wte_get_trip_details( get_the_ID() );
+			$details                   = wte_get_trip_details( get_the_ID() );
 			$details['user_wishlists'] = $args['post__in'];
 			wptravelengine_get_template( 'content-grid.php', $details );
 		endwhile;
 		$markup = ob_get_clean();
 
-		$original_query       = $GLOBALS['wp_query'];
-		$GLOBALS['wp_query']  = $query;
-	
+		$original_query      = $GLOBALS['wp_query'];
+		$GLOBALS['wp_query'] = $query;
+
 		$pagination = '';
-		$max_page 	= $query->max_num_pages;
+		$max_page   = $query->max_num_pages;
 		if ( $max_page > 1 ) {
 			ob_start();
-			the_posts_pagination( [
-				'prev_text'          => esc_html__( 'Previous', 'wp-travel-engine' ),
-				'next_text'          => esc_html__( 'Next', 'wp-travel-engine' ),
-				'before_page_number' => '<span class="meta-nav screen-reader-text">' . esc_html__( 'Page', 'wp-travel-engine' ) . ' </span>',
-			] );
+			the_posts_pagination(
+				array(
+					'prev_text'          => esc_html__( 'Previous', 'wp-travel-engine' ),
+					'next_text'          => esc_html__( 'Next', 'wp-travel-engine' ),
+					'before_page_number' => '<span class="meta-nav screen-reader-text">' . esc_html__( 'Page', 'wp-travel-engine' ) . ' </span>',
+				)
+			);
 			$pagination = ob_get_clean();
 		}
 
 		$GLOBALS['wp_query'] = $original_query;
 
 		wp_reset_postdata();
-	
+
 		return array( $markup, $pagination, $max_page );
 	}
-	
 }

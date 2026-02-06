@@ -34,7 +34,7 @@ class Enquiry extends PostModel {
 	 */
 	public function get_enquiry_data(): array {
 		if ( empty( $enquiry_data = $this->get_meta( 'wp_travel_engine_enquiry_formdata' ) ) ) {
-			$enquiry_data = $this->get_meta( 'wp_travel_engine_setting' )[ 'enquiry' ] ?? array();
+			$enquiry_data = $this->get_meta( 'wp_travel_engine_setting' )['enquiry'] ?? array();
 		}
 
 		return $enquiry_data;
@@ -46,7 +46,7 @@ class Enquiry extends PostModel {
 	 * @return string Package name
 	 */
 	public function get_package_name(): string {
-		return $this->get_enquiry_data()[ 'pname' ] ?? '';
+		return $this->get_enquiry_data()['pname'] ?? '';
 	}
 
 	/**
@@ -55,7 +55,7 @@ class Enquiry extends PostModel {
 	 * @return string Customer name
 	 */
 	public function get_customer_name(): string {
-		return $this->get_enquiry_data()[ 'enquiry_name' ] ?? $this->get_enquiry_data()[ 'name' ] ?? '';
+		return $this->get_enquiry_data()['enquiry_name'] ?? $this->get_enquiry_data()['name'] ?? '';
 	}
 
 	/**
@@ -64,7 +64,7 @@ class Enquiry extends PostModel {
 	 * @return string Customer email
 	 */
 	public function get_customer_email(): string {
-		return $this->get_enquiry_data()[ 'enquiry_email' ] ?? $this->get_enquiry_data()[ 'email' ] ?? '';
+		return $this->get_enquiry_data()['enquiry_email'] ?? $this->get_enquiry_data()['email'] ?? '';
 	}
 
 	/**
@@ -73,7 +73,7 @@ class Enquiry extends PostModel {
 	 * @return string Customer country
 	 */
 	public function get_customer_country(): string {
-		return $this->get_enquiry_data()[ 'enquiry_country' ] ?? '';
+		return $this->get_enquiry_data()['enquiry_country'] ?? '';
 	}
 
 	/**
@@ -82,7 +82,7 @@ class Enquiry extends PostModel {
 	 * @return string Customer contact
 	 */
 	public function get_customer_contact(): string {
-		return $this->get_enquiry_data()[ 'enquiry_contact' ] ?? '';
+		return $this->get_enquiry_data()['enquiry_contact'] ?? '';
 	}
 
 	/**
@@ -91,7 +91,7 @@ class Enquiry extends PostModel {
 	 * @return string Customer message
 	 */
 	public function get_customer_message(): string {
-		return $this->get_enquiry_data()[ 'enquiry_message' ] ?? $this->get_enquiry_data()[ 'message' ] ?? '';
+		return $this->get_enquiry_data()['enquiry_message'] ?? $this->get_enquiry_data()['message'] ?? '';
 	}
 
 	/**
@@ -103,11 +103,14 @@ class Enquiry extends PostModel {
 	public static function insert( array $data ) {
 
 		// Insert the post into the database.
-		$post_id = wp_insert_post( array(
-			'post_title'  => 'enquiry ',
-			'post_status' => 'publish',
-			'post_type'   => 'enquiry',
-		), true );
+		$post_id = wp_insert_post(
+			array(
+				'post_title'  => 'enquiry ',
+				'post_status' => 'publish',
+				'post_type'   => 'enquiry',
+			),
+			true
+		);
 
 		if ( is_wp_error( $post_id ) ) {
 			return $post_id;
@@ -122,11 +125,11 @@ class Enquiry extends PostModel {
 
 		$arr = array();
 
-		$arr[ 'enquiry' ] = array(
-			'name'    => $data[ 'enquiry_name' ],
-			'email'   => $data[ 'enquiry_email' ],
-			'message' => $data[ 'enquiry_message' ],
-			'pname'   => $data[ 'package_id' ],
+		$arr['enquiry'] = array(
+			'name'    => $data['enquiry_name'],
+			'email'   => $data['enquiry_email'],
+			'message' => $data['enquiry_message'],
+			'pname'   => $data['package_id'],
 		);
 
 		add_post_meta( $post_id, 'wp_travel_engine_setting', $arr );
@@ -135,7 +138,7 @@ class Enquiry extends PostModel {
 
 		$post_data = array(
 			'ID'         => $post_id,
-			'post_title' => $data[ 'enquiry_name' ],
+			'post_title' => $data['enquiry_name'],
 		);
 
 		// Update the post into the database.
@@ -175,10 +178,10 @@ class Enquiry extends PostModel {
 			),
 		);
 
-		$trip_id = $this->get_enquiry_data()[ 'pname' ] ?? $this->get_enquiry_data()[ 'package_id' ] ?? 0;
+		$trip_id = $this->get_enquiry_data()['pname'] ?? $this->get_enquiry_data()['package_id'] ?? 0;
 
 		if ( is_numeric( $trip_id ) && ( $trip = get_post( $trip_id ) ) ) {
-			$data[ 'trip' ] = array(
+			$data['trip'] = array(
 				'id'    => $trip->ID,
 				'title' => get_the_title( $trip->ID ),
 				'url'   => get_permalink( $trip->ID ),
@@ -186,6 +189,5 @@ class Enquiry extends PostModel {
 		}
 
 		return $data;
-
 	}
 }

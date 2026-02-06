@@ -28,7 +28,7 @@ class ExtensionRegistry extends Registrable {
 	 */
 	public function register( string $class_name ): \WPTravelEngine\Interfaces\Registrable {
 
-		$this->items[ $class_name::ID ] = new $class_name;
+		$this->items[ $class_name::ID ] = new $class_name();
 
 		return $this;
 	}

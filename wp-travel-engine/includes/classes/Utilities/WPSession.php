@@ -73,9 +73,9 @@ final class WPSession extends RecursiveArrayAccess {
 			$cookie        = sanitize_text_field( wp_unslash( $_COOKIE[ WP_TRAVEL_ENGINE_SESSION_COOKIE ] ) );
 			$cookie_crumbs = explode( '||', $cookie );
 
-			$this->session_id  = $cookie_crumbs[ 0 ];
-			$this->expires     = $cookie_crumbs[ 1 ];
-			$this->exp_variant = $cookie_crumbs[ 2 ];
+			$this->session_id  = $cookie_crumbs[0];
+			$this->expires     = $cookie_crumbs[1];
+			$this->exp_variant = $cookie_crumbs[2];
 
 			// Update the session expiration if we're past the variant time
 			if ( time() > $this->exp_variant ) {
@@ -90,7 +90,6 @@ final class WPSession extends RecursiveArrayAccess {
 		}
 
 		$this->read_data();
-
 	}
 
 	/**
@@ -204,7 +203,7 @@ final class WPSession extends RecursiveArrayAccess {
 	 * @return bool
 	 */
 	public function session_started(): bool {
-		return ! ! self::$instance;
+		return (bool) self::$instance;
 	}
 
 	/**

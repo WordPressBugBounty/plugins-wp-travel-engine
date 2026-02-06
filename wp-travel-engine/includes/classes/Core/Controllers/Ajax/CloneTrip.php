@@ -20,6 +20,7 @@ class CloneTrip extends AjaxController {
 	const NONCE_KEY    = 'security';
 	const NONCE_ACTION = 'wte_clone_post_nonce';
 	const ACTION       = 'wte_fxn_clone_trip_data';
+	const ALLOW_NOPRIV = false;
 
 	/**
 	 * Process request.

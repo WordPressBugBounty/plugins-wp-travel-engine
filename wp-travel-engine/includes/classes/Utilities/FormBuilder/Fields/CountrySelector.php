@@ -24,7 +24,7 @@ class CountrySelector extends Select {
 	 */
 	public function init( array $field ): Base {
 
-		$field[ 'options' ] = [ '' => __( 'Choose a country', 'wp-travel-engine' ) ] + Countries::list();
+		$field['options'] = array( '' => __( 'Choose a country', 'wp-travel-engine' ) ) + Countries::list();
 
 		return parent::init( $field );
 	}

@@ -75,12 +75,12 @@ class Base {
 
 		$this->field = $field;
 
-		$this->field_id              = $field[ 'id' ] ?? '';
-		$this->field_name            = $field[ 'name' ] ?? '';
-		$this->field_value           = $field[ 'default' ] ?? '';
-		$this->field_classnames      = $field[ 'class' ] ?? '';
-		$this->attributes            = $field[ 'attributes' ] ?? [];
-		$this->validation_attributes = $field[ 'validations' ] ?? [];
+		$this->field_id              = $field['id'] ?? '';
+		$this->field_name            = $field['name'] ?? '';
+		$this->field_value           = $field['default'] ?? '';
+		$this->field_classnames      = $field['class'] ?? '';
+		$this->attributes            = $field['attributes'] ?? array();
+		$this->validation_attributes = $field['validations'] ?? array();
 
 		return $this;
 	}
@@ -115,13 +115,13 @@ class Base {
 		return array_merge(
 			$this->attributes,
 			$this->validation_attributes,
-			[
+			array(
 				'id'    => $this->field_id,
 				'name'  => $this->field_name,
 				'type'  => $this->field_type,
 				'value' => $this->field_value,
 				'class' => $this->field_classnames,
-			],
+			),
 		);
 	}
 
@@ -132,8 +132,8 @@ class Base {
 	 */
 	protected function before_field(): string {
 		$before_field = '';
-		if ( $this->field[ 'before_field' ] ?? false ) {
-			$before_field = sprintf( '<span class="%1$s">%2$s</span>', $this->field[ 'before_field_class' ] ?? '', $this->field[ 'before_field' ] );
+		if ( $this->field['before_field'] ?? false ) {
+			$before_field = sprintf( '<span class="%1$s">%2$s</span>', $this->field['before_field_class'] ?? '', $this->field['before_field'] );
 		}
 
 		return $before_field;
@@ -146,8 +146,8 @@ class Base {
 	 */
 	protected function after_field(): string {
 		$after_field = '';
-		if ( $this->field[ 'after_field' ] ?? false ) {
-			$after_field = sprintf( '<span class="%1$s">%2$s</span>', $this->field[ 'after_field_class' ] ?? '', $this->field[ 'after_field' ] );
+		if ( $this->field['after_field'] ?? false ) {
+			$after_field = sprintf( '<span class="%1$s">%2$s</span>', $this->field['after_field_class'] ?? '', $this->field['after_field'] );
 		}
 
 		return $after_field;
@@ -198,6 +198,6 @@ class Base {
 	 * @since 6.0.0
 	 */
 	public function is_required(): bool {
-		return in_array( ( $this->field[ 'validations' ][ 'required' ] ?? false ), [ 'true', true, '1' ], true );
+		return in_array( ( $this->field['validations']['required'] ?? false ), array( 'true', true, '1' ), true );
 	}
 }

@@ -60,28 +60,32 @@ class WTE_Ajax {
 
 		/**
 		 * For Archive Page
+		 *
 		 * @since 6.6.0
 		 */
 		$ajax_registry->register( Ajax\FilterTripsHtml::class );
 		$ajax_registry->register( Ajax\UserWishlist::class );
 		$ajax_registry->register( Ajax\LoadMoreDestination::class );
 
-		add_action( 'wp_ajax_nopriv_email_test', function () {
+		add_action(
+			'wp_ajax_nopriv_email_test',
+			function () {
 
-			$booking_email = new \WTE_Booking_Emails();
+				$booking_email = new \WTE_Booking_Emails();
 
-			try {
-				$result = $booking_email
+				try {
+					$result = $booking_email
 					->prepare( 247, 'order_confirmation' )
 					->to( 'customer' )
 					->send();
 
-			} catch ( \InvalidArgumentException $e ) {
-				$result = $e->getMessage();
-			}
+				} catch ( \InvalidArgumentException $e ) {
+					$result = $e->getMessage();
+				}
 
-			wp_send_json_success( $result );
-		} );
+				wp_send_json_success( $result );
+			}
+		);
 
 		/**
 		 * Clone Existing Trips
@@ -110,21 +114,27 @@ class WTE_Ajax {
 		);
 
 		// Onboard Dynamic Recommendation
-		add_action( 'wp_ajax_wte_onboard_dynamic_recommendation', array(
-			'\WP_TRAVEL_ENGINE_ONBOARDING_PROCESS',
-			'wte_onboard_dynamic_recommendation_callback',
-		) );
-		add_action( 'wp_ajax_nopriv_wte_onboard_dynamic_recommendation', array(
-			'\WP_TRAVEL_ENGINE_ONBOARDING_PROCESS',
-			'wte_onboard_dynamic_recommendation_callback',
-		) );
+		add_action(
+			'wp_ajax_wte_onboard_dynamic_recommendation',
+			array(
+				'\WP_TRAVEL_ENGINE_ONBOARDING_PROCESS',
+				'wte_onboard_dynamic_recommendation_callback',
+			)
+		);
+		add_action(
+			'wp_ajax_nopriv_wte_onboard_dynamic_recommendation',
+			array(
+				'\WP_TRAVEL_ENGINE_ONBOARDING_PROCESS',
+				'wte_onboard_dynamic_recommendation_callback',
+			)
+		);
 
 		$actions = array(
 			// 'wte_enquiry_send_mail'                 => array(
-			// 	'callback' => array(
-			// 		'\WP_Travel_Engine_Enquiry_Form_Shortcodes',
-			// 		'wte_enquiry_send_mail',
-			// 	),
+			// 'callback' => array(
+			// '\WP_Travel_Engine_Enquiry_Form_Shortcodes',
+			// 'wte_enquiry_send_mail',
+			// ),
 			// ),
 			// [x]
 			'wpte_onboard_save_function'            => array(
@@ -142,17 +152,17 @@ class WTE_Ajax {
 			),
 			// [x]
 			// 'wte_show_ajax_result'                  => array(
-			// 	'callback' => array(
-			// 		'\WPTravelEngine\Modules\TripSearch',
-			// 		'filter_trips_html',
-			// 	),
+			// 'callback' => array(
+			// '\WPTravelEngine\Modules\TripSearch',
+			// 'filter_trips_html',
+			// ),
 			// ),
 			// // [x]
 			// 'wte_show_ajax_result_load'             => array(
-			// 	'callback' => array(
-			// 		'\WPTravelEngine\Modules\TripSearch',
-			// 		'load_trips_html',
-			// 	),
+			// 'callback' => array(
+			// '\WPTravelEngine\Modules\TripSearch',
+			// 'load_trips_html',
+			// ),
 			// ),
 			// [x]
 			'wp_travel_engine_check_coupon_code'    => array(
@@ -162,12 +172,12 @@ class WTE_Ajax {
 				),
 			),
 			// [x]
-			//			'wte_session_cart_apply_coupon'         => array(
-			//				'callback' => array(
-			//					'\WPTravelEngine\Modules\CouponCode\Ajax',
-			//					'apply_coupon',
-			//				),
-			//			),
+			// 'wte_session_cart_apply_coupon'         => array(
+			// 'callback' => array(
+			// '\WPTravelEngine\Modules\CouponCode\Ajax',
+			// 'apply_coupon',
+			// ),
+			// ),
 			// [x]
 			'wte_session_cart_reset_coupon'         => array(
 				'callback' => array(
@@ -220,25 +230,25 @@ class WTE_Ajax {
 			),
 			// [x]
 			// 'wp_add_trip_cart'                      => array( 'callback' => array( '\Wp_Travel_Engine_Public', 'wp_add_trip_cart' ) ),
-			'wte_remove_order'                      => array(
-				'callback' => array(
-					'\Wp_Travel_Engine_Public',
-					'wte_remove_from_cart',
-				),
-			),
-			'wte_update_cart'                       => array(
-				'callback' => array(
-					'\Wp_Travel_Engine_Public',
-					'wte_ajax_update_cart',
-				),
-			),
+			// 'wte_remove_order'                      => array(
+			// 'callback' => array(
+			// '\Wp_Travel_Engine_Public',
+			// 'wte_remove_from_cart',
+			// ),
+			// ),
+			// 'wte_update_cart'                       => array(
+			// 'callback' => array(
+			// '\Wp_Travel_Engine_Public',
+			// 'wte_ajax_update_cart',
+			// ),
+			// ),
 			'wpte_ajax_load_more'                   => array(
 				'callback'     => array( '\Wp_Travel_Engine_Public', 'wpte_ajax_load_more' ),
 				'nonce_action' => 'wpte-be-load-more-nonce',
 			),
 			// 'wpte_ajax_load_more_destination'       => array(
-			// 	'callback'     => array( '\Wp_Travel_Engine_Public', 'wpte_ajax_load_more_destination' ),
-			// 	'nonce_action' => 'wpte-be-load-more-nonce',
+			// 'callback'     => array( '\Wp_Travel_Engine_Public', 'wpte_ajax_load_more_destination' ),
+			// 'nonce_action' => 'wpte-be-load-more-nonce',
 			// ),
 			'wte_payment_gateway'                   => array(
 				'callback'     => array( '\Wp_Travel_Engine_Public', 'wte_payment_gateway' ),
@@ -249,8 +259,8 @@ class WTE_Ajax {
 				'nonce_action' => 'wp_xhr',
 			),
 			// 'wte_user_wishlist'                     => array(
-			// 	'callback'     => array( __CLASS__, 'wte_user_wishlist' ),
-			// 	'nonce_action' => 'wp_xhr',
+			// 'callback'     => array( __CLASS__, 'wte_user_wishlist' ),
+			// 'nonce_action' => 'wp_xhr',
 			// ),
 		);
 
@@ -258,19 +268,19 @@ class WTE_Ajax {
 			add_action(
 				"wp_ajax_{$action}",
 				function () use ( $args, $action ) {
-					if ( isset( $_REQUEST[ '_nonce' ] ) || isset( $_REQUEST[ 'nonce' ] ) ) {
-						$nonce = isset( $_REQUEST[ '_nonce' ] ) ? sanitize_text_field( wp_unslash( $_REQUEST[ '_nonce' ] ) ) : sanitize_text_field( wp_unslash( $_REQUEST[ 'nonce' ] ) );
+					if ( isset( $_REQUEST['_nonce'] ) || isset( $_REQUEST['nonce'] ) ) {
+						$nonce = isset( $_REQUEST['_nonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_nonce'] ) ) : sanitize_text_field( wp_unslash( $_REQUEST['nonce'] ) );
 
-						$nonce_action = isset( $args[ 'nonce_action' ] ) ? $args[ 'nonce_action' ] : $action;
+						$nonce_action = isset( $args['nonce_action'] ) ? $args['nonce_action'] : $action;
 						if ( ! wp_verify_nonce( $nonce, $nonce_action ) ) {
 							wp_send_json_error( new \WP_Error( 'WTE_INVALID_NONCE', __( 'Invalid nonce or nonce expired.', 'wp-travel-engine' ) ) );
 						}
-						if ( isset( $args[ 'sanitization_callback' ] ) ) {
-							$post_data = call_user_func( $args[ 'sanitization_callback' ], $_REQUEST );
+						if ( isset( $args['sanitization_callback'] ) ) {
+							$post_data = call_user_func( $args['sanitization_callback'], $_REQUEST );
 						} else {
 							$post_data = wte_clean( wp_unslash( $_REQUEST ) );
 						}
-						call_user_func( $args[ 'callback' ], $post_data );
+						call_user_func( $args['callback'], $post_data );
 					} else {
 						wp_send_json_error( new \WP_Error( 'WTE_NONCE_MISSING', __( 'Nonce Missing.', 'wp-travel-engine' ) ) );
 					}
@@ -292,18 +302,18 @@ class WTE_Ajax {
 				add_action(
 					"wp_ajax_nopriv_{$action}",
 					function () use ( $args, $action ) {
-						if ( isset( $_REQUEST[ '_nonce' ] ) || isset( $_REQUEST[ 'nonce' ] ) ) {
-							$nonce        = isset( $_REQUEST[ '_nonce' ] ) ? sanitize_text_field( wp_unslash( $_REQUEST[ '_nonce' ] ) ) : sanitize_text_field( wp_unslash( $_REQUEST[ 'nonce' ] ) );
-							$nonce_action = isset( $args[ 'nonce_action' ] ) ? $args[ 'nonce_action' ] : $action;
+						if ( isset( $_REQUEST['_nonce'] ) || isset( $_REQUEST['nonce'] ) ) {
+							$nonce        = isset( $_REQUEST['_nonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_nonce'] ) ) : sanitize_text_field( wp_unslash( $_REQUEST['nonce'] ) );
+							$nonce_action = isset( $args['nonce_action'] ) ? $args['nonce_action'] : $action;
 							if ( ! wp_verify_nonce( $nonce, $nonce_action ) ) {
 								wp_send_json_error( new \WP_Error( 'WTE_INVALID_NONCE', __( 'Invalid nonce or nonce expired.', 'wp-travel-engine' ) ) );
 							}
-							if ( isset( $args[ 'sanitization_callback' ] ) ) {
-								$post_data = call_user_func( $args[ 'sanitization_callback' ], $_REQUEST );
+							if ( isset( $args['sanitization_callback'] ) ) {
+								$post_data = call_user_func( $args['sanitization_callback'], $_REQUEST );
 							} else {
 								$post_data = wte_clean( wp_unslash( $_REQUEST ) );
 							}
-							call_user_func( $args[ 'callback' ], $post_data );
+							call_user_func( $args['callback'], $post_data );
 						} else {
 							wp_send_json_error( new \WP_Error( 'WTE_NONCE_MISSING', __( 'Nonce Missing.', 'wp-travel-engine' ) ) );
 						}
@@ -312,39 +322,38 @@ class WTE_Ajax {
 				);
 			}
 		}
-
 	}
 
 	/**
 	 * Sends test email.
 	 */
 	public function send_test_email() {
-		if ( ! isset( $_POST[ 'nonce' ] ) ) {
+		if ( ! isset( $_POST['nonce'] ) ) {
 			wp_send_json_error( array( 'message' => __( 'Missing required parameters.', 'wp-travel-engine' ) ) );
 		}
 
-		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST[ 'nonce' ] ) ), 'wptravelengine_test_email_nonce' ) ) {
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wptravelengine_test_email_nonce' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Security Error! Nonce verification failed', 'wp-travel-engine' ) ) );
 			die;
 		}
-		if ( isset( $_POST[ 'id' ] ) && isset( $_POST[ 'tab' ] ) ) {
+		if ( isset( $_POST['id'] ) && isset( $_POST['tab'] ) ) {
 			// Support for WPML Email Translation support @since 6.6.6.
 			Translators::set_wpml_language();
 
 			$global_settings = new PluginSettings();
-			$subject         = $global_settings->get( $_POST[ 'tab' ] . '_email_notify_tabs' )[ $_POST[ 'id' ] ][ 'subject' ];
-			$content         = $global_settings->get( $_POST[ 'tab' ] . '_email_notify_tabs' )[ $_POST[ 'id' ] ][ 'content' ];
+			$subject         = $global_settings->get( $_POST['tab'] . '_email_notify_tabs' )[ $_POST['id'] ]['subject'];
+			$content         = $global_settings->get( $_POST['tab'] . '_email_notify_tabs' )[ $_POST['id'] ]['content'];
 		} else {
-			$subject = get_bloginfo( 'name' ) . " Test Email: Confirming Server Configuration";
+			$subject = get_bloginfo( 'name' ) . ' Test Email: Confirming Server Configuration';
 			$content = "This is a test email to confirm that your email server configuration is set up correctly. You should have received this email shortly after initiating the test from our system.\n\nIf you are reading this message, it means that your server is properly configured for email sending. Congratulations!";
 		}
-		$to = sanitize_email( $_POST[ 'email' ] ?? wp_get_current_user()->user_email );
+		$to = sanitize_email( $_POST['email'] ?? wp_get_current_user()->user_email );
 
 		$email = new Email();
 		$email->set( 'to', $to )
-		      ->set( 'my_subject', $subject )
-		      ->set( 'template', $_POST[ 'id' ] ?? '' )
-		      ->set( 'content', $content );
+				->set( 'my_subject', $subject )
+				->set( 'template', $_POST['id'] ?? '' )
+				->set( 'content', $content );
 
 		if ( $email->send() ) {
 			wp_send_json_success( array( 'message' => 'Test Email Sent Successfully. Please check your inbox.' ) );
@@ -360,20 +369,20 @@ class WTE_Ajax {
 	 */
 	public static function set_difficulty_term_level( $post_data ) {
 		// save in options.
-		$difficulty_level                          = get_option( 'difficulty_level_by_terms', array() );
-		$term                                      = get_term( $post_data[ 'term_id' ] );
-		$difficulty_level[ $post_data[ 'level' ] ] = array(
-			'level'   => $post_data[ 'level' ],
-			'term_id' => $post_data[ 'term_id' ],
+		$difficulty_level                        = get_option( 'difficulty_level_by_terms', array() );
+		$term                                    = get_term( $post_data['term_id'] );
+		$difficulty_level[ $post_data['level'] ] = array(
+			'level'   => $post_data['level'],
+			'term_id' => $post_data['term_id'],
 			'label'   => $term->name,
 		);
 		foreach ( $difficulty_level as $key => $val ) {
-			if ( ( $post_data[ 'level' ] != $key && $post_data[ 'term_id' ] == $val[ 'term_id' ] ) || ( $post_data[ 'level' ] == '' && $post_data[ 'term_id' ] == $val[ 'term_id' ] ) ) {
+			if ( ( $post_data['level'] != $key && $post_data['term_id'] == $val['term_id'] ) || ( $post_data['level'] == '' && $post_data['term_id'] == $val['term_id'] ) ) {
 				unset( $difficulty_level[ $key ] );
 			}
 		}
 		if ( array_key_exists( 'Select Level', $difficulty_level ) ) {
-			unset( $difficulty_level[ 'Select Level' ] );
+			unset( $difficulty_level['Select Level'] );
 		}
 		update_option( 'difficulty_level_by_terms', $difficulty_level );
 		wp_send_json_success( $difficulty_level );
@@ -403,7 +412,6 @@ class WTE_Ajax {
 				return $package_id;
 			}
 		}
-
 	}
 
 	/**
@@ -416,7 +424,7 @@ class WTE_Ajax {
 		// Nonce checks.
 		check_ajax_referer( 'wte_clone_post_nonce', 'security' );
 
-		if ( ! isset( $_POST[ 'post_id' ] ) ) {
+		if ( ! isset( $_POST['post_id'] ) ) {
 			return;
 		}
 
@@ -480,7 +488,6 @@ class WTE_Ajax {
 			);
 			die;
 		}
-
 	}
 
 	/**
@@ -531,14 +538,14 @@ class WTE_Ajax {
 
 		if ( isset( $cart_data->{'pricingOptions'} ) && is_array( $cart_data->{'pricingOptions'} ) ) {
 			foreach ( $cart_data->{'pricingOptions'} as $cid => $info ) {
-				if ( (int) $info[ 'pax' ] < 1 ) {
+				if ( (int) $info['pax'] < 1 ) {
 					continue;
 				}
-				$category_total_cost   = isset( $info[ 'categoryInfo' ][ 'pricingType' ] ) && 'per-person' === $info[ 'categoryInfo' ][ 'pricingType' ] ? (float) $info[ 'pax' ] * $info[ 'cost' ] : (float) $info[ 'cost' ];
-				$pax[ $cid ]           = $info[ 'pax' ];
+				$category_total_cost   = isset( $info['categoryInfo']['pricingType'] ) && 'per-person' === $info['categoryInfo']['pricingType'] ? (float) $info['pax'] * $info['cost'] : (float) $info['cost'];
+				$pax[ $cid ]           = $info['pax'];
 				$pax_cost[ $cid ]      = $category_total_cost;
-				$category_info[ $cid ] = $info[ 'categoryInfo' ];
-				$only_trip_price       += $category_total_cost;
+				$category_info[ $cid ] = $info['categoryInfo'];
+				$only_trip_price      += $category_total_cost;
 			}
 		}
 
@@ -569,13 +576,13 @@ class WTE_Ajax {
 
 		if ( ! empty( $partial_payment_data ) ) :
 
-			if ( 'amount' === $partial_payment_data[ 'type' ] ) :
+			if ( 'amount' === $partial_payment_data['type'] ) :
 
-				$trip_price_partial = $partial_payment_data[ 'value' ];
+				$trip_price_partial = $partial_payment_data['value'];
 
-			elseif ( 'percentage' === $partial_payment_data[ 'type' ] ) :
+			elseif ( 'percentage' === $partial_payment_data['type'] ) :
 
-				$partial            = 100 - $partial_payment_data[ 'value' ];
+				$partial            = 100 - $partial_payment_data['value'];
 				$trip_price_partial = ( $trip_price ) - ( $partial / 100 ) * $trip_price;
 
 			endif;
@@ -583,22 +590,28 @@ class WTE_Ajax {
 		endif;
 
 		// combine additional parameters to attributes insted more params.
-		$attrs[ 'trip_price' ]         = $trip_price;
-		$attrs[ 'trip_price_partial' ] = $trip_price_partial;
-		$attrs[ 'tax_amount' ]         = $tax_amount[ 'value' ];
+		$attrs['trip_price']         = $trip_price;
+		$attrs['trip_price_partial'] = $trip_price_partial;
+		$attrs['tax_amount']         = $tax_amount['value'];
 
 		$price_key = $cart_data->{'packageID'};
 		/**
 		 * Action with data.
 		 */
-		do_action_deprecated( 'wp_travel_engine_before_trip_add_to_cart', array(
-			$trip_id,
-			$trip_price,
-			$trip_price_partial,
-			$pax,
-			$price_key,
-			$attrs,
-		), '4.3.0', 'wte_before_add_to_cart', __( 'deprecated because of more params.', 'wp-travel-engine' ) );
+		do_action_deprecated(
+			'wp_travel_engine_before_trip_add_to_cart',
+			array(
+				$trip_id,
+				$trip_price,
+				$trip_price_partial,
+				$pax,
+				$price_key,
+				$attrs,
+			),
+			'4.3.0',
+			'wte_before_add_to_cart',
+			__( 'deprecated because of more params.', 'wp-travel-engine' )
+		);
 		do_action( 'wte_before_add_to_cart', $trip_id, $attrs );
 
 		// Get any errors/ notices added.
@@ -631,8 +644,8 @@ class WTE_Ajax {
 	** Get request method
 	 */
 	public static function get_current_request_method() {
-		if ( isset( $_SERVER[ 'REQUEST_METHOD' ] ) ) {
-			return sanitize_text_field( wp_unslash( $_SERVER[ 'REQUEST_METHOD' ] ) );
+		if ( isset( $_SERVER['REQUEST_METHOD'] ) ) {
+			return sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) );
 		}
 
 		return 'GET';
@@ -659,13 +672,13 @@ class WTE_Ajax {
 
 		$flipped = array_flip( $user_wishlists );
 		if ( 'POST' === $request_method ) {
-			$flipped[ $data[ 'wishlist' ] ] = trim( $data[ 'wishlist' ] );
-			$message                        = __( 'Trip is added to wishlists.', 'wp-travel-engine' );
-		} else if ( 'DELETE' === $request_method ) {
-			if ( $data[ 'wishlist' ] == 'all' ) {
+			$flipped[ $data['wishlist'] ] = trim( $data['wishlist'] );
+			$message                      = __( 'Trip is added to wishlists.', 'wp-travel-engine' );
+		} elseif ( 'DELETE' === $request_method ) {
+			if ( $data['wishlist'] == 'all' ) {
 				$flipped = array();
 			} else {
-				$explode = explode( ',', $data[ 'wishlist' ] );
+				$explode = explode( ',', $data['wishlist'] );
 				foreach ( $explode as $ex ) {
 					unset( $flipped[ $ex ] );
 				}
@@ -687,7 +700,7 @@ class WTE_Ajax {
 			array(
 				'message'        => $message,
 				'user_wishlists' => $user_wishlists,
-				'refresh'        => $data[ 'wishlist' ] == 'all',
+				'refresh'        => $data['wishlist'] == 'all',
 				'partials'       => array(
 					'[data-wptravelengine-wishlist-count]' => ! empty( $user_wishlists ) ? sprintf( _n( '<strong>%d</strong> item in the wishlist', '<strong>%d</strong> items in the wishlist', count( $user_wishlists ), 'wp-travel-engine' ), count( $user_wishlists ) ) : '',
 				),
@@ -730,37 +743,37 @@ class WTE_Ajax {
 
 		$posted_data = wte_clean( wp_unslash( $_POST ) );
 		// phpcs:enable
-		$trip_id            = $posted_data[ 'trip-id' ];
-		$trip_date          = isset( $posted_data[ 'trip-date' ] ) ? $posted_data[ 'trip-date' ] : '';
-		$trip_time          = isset( $posted_data[ 'trip-time' ] ) ? $posted_data[ 'trip-time' ] : '';
-		$travelers          = isset( $posted_data[ 'travelers' ] ) ? $posted_data[ 'travelers' ] : 1;
-		$travelers_cost     = isset( $posted_data[ 'travelers-cost' ] ) ? $posted_data[ 'travelers-cost' ] : 0;
-		$child_travelers    = isset( $posted_data[ 'child-travelers' ] ) ? $posted_data[ 'child-travelers' ] : 0;
-		$child_cost         = isset( $posted_data[ 'child-travelers-cost' ] ) ? $posted_data[ 'child-travelers-cost' ] : 0;
-		$trip_extras        = isset( $posted_data[ 'extra_service' ] ) ? $posted_data[ 'extra_service' ] : array();
-		$trip_price         = isset( $posted_data[ 'trip-cost' ] ) ? $posted_data[ 'trip-cost' ] : 0;
+		$trip_id            = $posted_data['trip-id'];
+		$trip_date          = isset( $posted_data['trip-date'] ) ? $posted_data['trip-date'] : '';
+		$trip_time          = isset( $posted_data['trip-time'] ) ? $posted_data['trip-time'] : '';
+		$travelers          = isset( $posted_data['travelers'] ) ? $posted_data['travelers'] : 1;
+		$travelers_cost     = isset( $posted_data['travelers-cost'] ) ? $posted_data['travelers-cost'] : 0;
+		$child_travelers    = isset( $posted_data['child-travelers'] ) ? $posted_data['child-travelers'] : 0;
+		$child_cost         = isset( $posted_data['child-travelers-cost'] ) ? $posted_data['child-travelers-cost'] : 0;
+		$trip_extras        = isset( $posted_data['extra_service'] ) ? $posted_data['extra_service'] : array();
+		$trip_price         = isset( $posted_data['trip-cost'] ) ? $posted_data['trip-cost'] : 0;
 		$price_key          = '';
 		$trip_price_partial = 0;
 
 		// Additional cart params.
-		$attrs[ 'trip_date' ]   = $trip_date;
-		$attrs[ 'trip_time' ]   = $trip_time;
-		$attrs[ 'trip_extras' ] = $trip_extras;
+		$attrs['trip_date']   = $trip_date;
+		$attrs['trip_time']   = $trip_time;
+		$attrs['trip_extras'] = $trip_extras;
 
 		$pax      = array();
 		$pax_cost = array();
 
-		if ( ! empty( $posted_data[ 'pricing_options' ] ) ) :
+		if ( ! empty( $posted_data['pricing_options'] ) ) :
 
-			foreach ( $posted_data[ 'pricing_options' ] as $key => $option ) :
+			foreach ( $posted_data['pricing_options'] as $key => $option ) :
 
-				$pax[ $key ]      = $option[ 'pax' ];
-				$pax_cost[ $key ] = $option[ 'cost' ];
+				$pax[ $key ]      = $option['pax'];
+				$pax_cost[ $key ] = $option['cost'];
 
 			endforeach;
 
 			// Multi-pricing flag
-			$attrs[ 'multi_pricing_used' ] = true;
+			$attrs['multi_pricing_used'] = true;
 
 		else :
 
@@ -776,21 +789,21 @@ class WTE_Ajax {
 
 		endif;
 
-		$attrs[ 'pax' ]      = $pax;
-		$attrs[ 'pax_cost' ] = $pax_cost;
+		$attrs['pax']      = $pax;
+		$attrs['pax_cost'] = $pax_cost;
 
 		$attrs = apply_filters( 'wp_travel_engine_cart_attributes', $attrs );
 
 		$partial_payment_data = wp_travel_engine_get_trip_partial_payment_data( $trip_id );
 		if ( ! empty( $partial_payment_data ) ) :
 
-			if ( 'amount' === $partial_payment_data[ 'type' ] ) :
+			if ( 'amount' === $partial_payment_data['type'] ) :
 
-				$trip_price_partial = $partial_payment_data[ 'value' ];
+				$trip_price_partial = $partial_payment_data['value'];
 
-			elseif ( 'percentage' === $partial_payment_data[ 'type' ] ) :
+			elseif ( 'percentage' === $partial_payment_data['type'] ) :
 
-				$partial            = 100 - (float) $partial_payment_data[ 'value' ];
+				$partial            = 100 - (float) $partial_payment_data['value'];
 				$trip_price_partial = ( $trip_price ) - ( $partial / 100 ) * $trip_price;
 
 			endif;
@@ -798,22 +811,28 @@ class WTE_Ajax {
 		endif;
 
 		// combine additional parameters to attributes insted more params.
-		$attrs[ 'trip_price' ]         = $trip_price;
-		$attrs[ 'trip_price_partial' ] = $trip_price_partial;
-		$attrs[ 'pax' ]                = $pax;
-		$attrs[ 'price_key' ]          = $price_key;
+		$attrs['trip_price']         = $trip_price;
+		$attrs['trip_price_partial'] = $trip_price_partial;
+		$attrs['pax']                = $pax;
+		$attrs['price_key']          = $price_key;
 
 		/**
 		 * Action with data.
 		 */
-		do_action_deprecated( 'wp_travel_engine_before_trip_add_to_cart', array(
-			$trip_id,
-			$trip_price,
-			$trip_price_partial,
-			$pax,
-			$price_key,
-			$attrs,
-		), '4.3.0', 'wte_before_add_to_cart', __( 'deprecated because of more params.', 'wp-travel-engine' ) );
+		do_action_deprecated(
+			'wp_travel_engine_before_trip_add_to_cart',
+			array(
+				$trip_id,
+				$trip_price,
+				$trip_price_partial,
+				$pax,
+				$price_key,
+				$attrs,
+			),
+			'4.3.0',
+			'wte_before_add_to_cart',
+			__( 'deprecated because of more params.', 'wp-travel-engine' )
+		);
 		do_action( 'wte_before_add_to_cart', $trip_id, $attrs );
 
 		// Get any errors/ notices added.
@@ -830,14 +849,20 @@ class WTE_Ajax {
 		/**
 		 * @since 3.0.7
 		 */
-		do_action_deprecated( 'wp_travel_engine_after_trip_add_to_cart', array(
-			$trip_id,
-			$trip_price,
-			$trip_price_partial,
-			$pax,
-			$price_key,
-			$attrs,
-		), '4.3.0', 'wte_after_add_to_cart', __( 'deprecated because of more params.', 'wp-travel-engine' ) );
+		do_action_deprecated(
+			'wp_travel_engine_after_trip_add_to_cart',
+			array(
+				$trip_id,
+				$trip_price,
+				$trip_price_partial,
+				$pax,
+				$price_key,
+				$attrs,
+			),
+			'4.3.0',
+			'wte_after_add_to_cart',
+			__( 'deprecated because of more params.', 'wp-travel-engine' )
+		);
 
 		do_action( 'wte_after_add_to_cart', $trip_id, $attrs );
 
@@ -849,14 +874,13 @@ class WTE_Ajax {
 		);
 
 		die;
-
 	}
 
 	/**
 	 * @return void
 	 */
 	public static function ajax_request_middleware() {
-		if ( ! wp_doing_ajax() || ! isset( $_REQUEST[ 'action' ] ) ) {
+		if ( ! wp_doing_ajax() || ! isset( $_REQUEST['action'] ) ) {
 			return;
 		}
 
@@ -891,8 +915,7 @@ class WTE_Ajax {
 		}
 
 		// Set total from cart, to make proper calculation and security purpose.
-		$_POST[ 'total' ] = $amount;
-
+		$_POST['total'] = $amount;
 	}
 }
 

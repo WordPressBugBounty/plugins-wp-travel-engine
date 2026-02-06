@@ -147,7 +147,7 @@ class WP_Travel_Engine_Emails {
 		$city             = $order_details['place_order']['booking']['city'];
 
 		foreach ( $cart_items as $key => $cart_item ) :
-			$traveller       = array_sum( $cart_item['pax'] );
+			$traveller = array_sum( $cart_item['pax'] );
 			// $child_traveller = isset( $cart_item['pax']['child'] ) ? $cart_item['pax']['child'] : '';
 
 			if ( isset( $cart_item['multi_pricing_used'] ) && $cart_item['multi_pricing_used'] ) :
@@ -681,7 +681,7 @@ class WPTE_Booking_Emails extends WP_Travel_Engine_Emails {
 							<?php esc_html_e( 'Trip Date', 'wp-travel-engine' ); ?>
 						</td>
 						<td class="alignright">
-							<?php echo esc_html( $trip->has_time ? wp_date( 'Y-m-d H:i', strtotime( $trip->datetime ), new DateTimeZone( 'utc' ) ) : wp_date( get_option( 'date-format', 'Y-m-d' ), strtotime( $trip->datetime ), new DateTimeZone('utc') ) ); ?>
+							<?php echo esc_html( $trip->has_time ? wp_date( 'Y-m-d H:i', strtotime( $trip->datetime ), new DateTimeZone( 'utc' ) ) : wp_date( get_option( 'date-format', 'Y-m-d' ), strtotime( $trip->datetime ), new DateTimeZone( 'utc' ) ) ); ?>
 						</td>
 					</tr>
 					<tr>
@@ -962,16 +962,19 @@ class WPTE_Booking_Emails extends WP_Travel_Engine_Emails {
 	}
 
 	public static function get_subject( $email_template_type, $to ) {
-		$options = apply_filters( 'wptravelengine_email_template_subject_options', array(
-			'order_confirmation' => array(
-				'admin'    => 'email.sale_subject',
-				'customer' => 'email.subject',
-			),
-			'order'              => array(
-				'admin'    => 'email.booking_notification_subject_admin',
-				'customer' => 'email.booking_notification_subject_customer',
-			),
-		) );
+		$options = apply_filters(
+			'wptravelengine_email_template_subject_options',
+			array(
+				'order_confirmation' => array(
+					'admin'    => 'email.sale_subject',
+					'customer' => 'email.subject',
+				),
+				'order'              => array(
+					'admin'    => 'email.booking_notification_subject_admin',
+					'customer' => 'email.booking_notification_subject_customer',
+				),
+			)
+		);
 
 		$subject = isset( $options[ $email_template_type ][ $to ] ) ? wptravelengine_settings()->get( $options[ $email_template_type ][ $to ], '' ) : '';
 
@@ -1104,7 +1107,7 @@ class WPTE_Booking_Emails extends WP_Travel_Engine_Emails {
 
 	/**
 	 * @param $payment_id
-	 * @param string     $email_template_type
+	 * @param string $email_template_type
 	 *
 	 * @return $this
 	 */

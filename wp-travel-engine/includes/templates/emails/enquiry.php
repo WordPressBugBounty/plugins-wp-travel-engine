@@ -5,10 +5,10 @@
 use WPTravelEngine\Core\Models\Settings\Options;
 
 $formdata = $args['formdata'];
-if( wptravelengine_toggled( Options::get( 'wte_update_mail_template', false ) ) ) {
+if ( wptravelengine_toggled( Options::get( 'wte_update_mail_template', false ) ) ) {
 	wte_get_template( 'template-emails/enquiry-admin.php', $formdata );
 } else {
-?>
+	?>
 <table class="main" width="100%" cellpadding="0" cellspacing="0">
 	<tr>
 		<td class="content-wrap aligncenter">
@@ -45,7 +45,7 @@ if( wptravelengine_toggled( Options::get( 'wte_update_mail_template', false ) ) 
 															'a' => array( 'href' => array() ),
 															'b' => array(),
 														)
-														);
+													);
 												} else {
 													echo esc_html( $data );
 												}
@@ -63,5 +63,5 @@ if( wptravelengine_toggled( Options::get( 'wte_update_mail_template', false ) ) 
 		</td>
 	</tr>
 </table>
-<?php
+	<?php
 }

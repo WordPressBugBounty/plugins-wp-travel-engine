@@ -11,7 +11,7 @@
 class Wp_Travel_Engine_Mail_Template {
 
 	function wpte_get_client_ip() {
-		 $ipaddress = '';
+		$ipaddress = '';
 		if ( getenv( 'HTTP_CLIENT_IP' ) ) {
 			$ipaddress = getenv( 'HTTP_CLIENT_IP' );
 		} elseif ( getenv( 'HTTP_X_FORWARDED_FOR' ) ) {
@@ -69,11 +69,11 @@ class Wp_Travel_Engine_Mail_Template {
 
 		$from_receipt = $from_name . ' <' . $from_email . '>';
 		// $from_receipt = trim($from_receipt);
-		  // To send HTML mail, the Content-type header must be set
+			// To send HTML mail, the Content-type header must be set
 		$headers_receipt  = 'MIME-Version: 1.0' . "\r\n";
 		$charset          = apply_filters( 'wp_travel_engine_mail_charset', 'Content-type: text/html; charset=UTF-8' );
 		$headers_receipt .= $charset . "\r\n";
-		  // Create email headers
+			// Create email headers
 		$headers_receipt .= 'From:' . $from_receipt . "\r\n" .
 			'Reply-To: ' . $from_receipt . "\r\n" .
 			'X-Mailer: PHP/' . phpversion();
@@ -94,22 +94,20 @@ class Wp_Travel_Engine_Mail_Template {
 		$cost          = isset( $trip_settings['trip_price'] ) ? $trip_settings['trip_price'] : '';
 		if ( $cost != '' && isset( $trip_settings['sale'] ) ) {
 			$tripprice = $cost;
-		} else {
-			if ( isset( $trip_settings['trip_prev_price'] ) && $trip_settings['trip_prev_price'] != '' ) {
+		} elseif ( isset( $trip_settings['trip_prev_price'] ) && $trip_settings['trip_prev_price'] != '' ) {
 				$tripprice = $trip_settings['trip_prev_price'];
-			}
 		}
 
 		$tprice = wte_get_formated_price_html( $tripprice, null, true );
 
 		$city = '';
 		// phpcs:disable
-		if( isset( $_POST["wp_travel_engine_booking_setting"]["place_order"]["booking"]["city"] ) ){
+		if ( isset( $_POST["wp_travel_engine_booking_setting"]["place_order"]["booking"]["city"] ) ){
 			$city = sanitize_text_field( wp_unslash( $_POST["wp_travel_engine_booking_setting"]["place_order"]["booking"]["city"] ) );
 		}
 
 		$country = '';
-		if( isset( $_POST["wp_travel_engine_booking_setting"]["place_order"]["booking"]["country"] ) ){
+		if ( isset( $_POST["wp_travel_engine_booking_setting"]["place_order"]["booking"]["country"] ) ){
 			$country = sanitize_text_field( wp_unslash( $_POST["wp_travel_engine_booking_setting"]["place_order"]["booking"]["country"] ) );
 		}
 		// phpcs:enable
@@ -237,11 +235,11 @@ class Wp_Travel_Engine_Mail_Template {
 		$subject_book = 'New Booking Order #' . $pid;
 		$from_book    = $from_name . ' <' . $from_email . '>';
 		// $from_book = trim($from_book);
-		  // To send HTML mail, the Content-type header must be set
+			// To send HTML mail, the Content-type header must be set
 		$headers_book  = 'MIME-Version: 1.0' . "\r\n";
 		$charset       = apply_filters( 'wp_travel_engine_mail_charset', 'Content-type: text/html; charset=UTF-8' );
 		$headers_book .= $charset . "\r\n";
-		  // Create email headers
+			// Create email headers
 		$headers_book .= 'From: ' . $from_book . "\r\n" .
 			'Reply-To: ' . $from_receipt . "\r\n" .
 			'X-Mailer: PHP/' . phpversion();

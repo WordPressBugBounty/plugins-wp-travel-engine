@@ -13,7 +13,7 @@
 <div class="wpte-checkout__box collapsible open">
 	<?php if ( $show_title ) : ?>
 		<h5 class="wpte-checkout__form-title toggler-wrap">
-			<?php echo __( "Tour Details", 'wp-travel-engine' ); ?>
+			<?php echo __( 'Tour Details', 'wp-travel-engine' ); ?>
 			<button type="button" class="wpte-checkout__box-toggle-button">
 				<svg>
 					<use xlink:href="#chevron-down"></use>

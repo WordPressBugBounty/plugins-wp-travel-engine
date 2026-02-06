@@ -14,11 +14,11 @@
 			?>
 			<div class="site-title">
 				<a class="wpte-checkout__brand" href="<?php echo esc_url( home_url( '/' ) ); ?>"
-				   rel="home"><?php echo esc_html( get_bloginfo( 'name' ) ); ?></a>
+					rel="home"><?php echo esc_html( get_bloginfo( 'name' ) ); ?></a>
 			</div>
 			<?php if ( '' !== get_bloginfo( 'description' ) ) : ?>
 				<p class="site-description"><?php echo esc_html( get_bloginfo( 'description', 'display' ) ); ?></p>
-			<?php
+				<?php
 			endif;
 		}
 		?>

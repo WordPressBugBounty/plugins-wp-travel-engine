@@ -21,7 +21,6 @@ class Wp_Travel_Engine_Meta_Tabs {
 		}
 
 		echo self::generate(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-
 	}
 
 	private static function generate() {
@@ -31,7 +30,6 @@ class Wp_Travel_Engine_Meta_Tabs {
 		$output .= self::tabs();
 		$output .= '</div>';
 		return $output;
-
 	}
 
 	private static function tabs() {

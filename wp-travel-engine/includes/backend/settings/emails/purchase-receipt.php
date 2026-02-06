@@ -6,7 +6,7 @@
  * Disable Customer Notificaton.
  */
 $wp_travel_engine_settings    = get_option( 'wp_travel_engine_settings' );
-$enable_customer_notification = $wp_travel_engine_settings[ 'email' ][ 'enable_cust_notif' ] ?? 'yes';
+$enable_customer_notification = $wp_travel_engine_settings['email']['enable_cust_notif'] ?? 'yes';
 
 if ( ! defined( 'WPTRAVELENGINE_EMAIL_TEMPLATES_VERSION' ) ) {
 	?>
@@ -69,16 +69,16 @@ if ( ! defined( 'WP_TRAVEL_ENGINE_PER_TRIP_EMAILS_VERSION' ) ) {
 ?>
 <div class="wpte-field wpte-checkbox advance-checkbox">
 	<label class="wpte-field-label"
-		   for="enable-customer-notification"><?php echo esc_html( 'Enable Customer Notification', 'wp-travel-engine' ); ?></label>
+			for="enable-customer-notification"><?php echo esc_html( 'Enable Customer Notification', 'wp-travel-engine' ); ?></label>
 	<div class="wpte-checkbox-wrap">
 		<input type="hidden" name="wp_travel_engine_settings[email][enable_cust_notif]" value="no">
 		<input type="checkbox"
-			   data-onchange
-			   data-onchange-toggle-target="[data-customer-email-section]"
-			   data-onchange-toggle-off-value="no"
-			   name="wp_travel_engine_settings[email][enable_cust_notif]"
+				data-onchange
+				data-onchange-toggle-target="[data-customer-email-section]"
+				data-onchange-toggle-off-value="no"
+				name="wp_travel_engine_settings[email][enable_cust_notif]"
 			<?php checked( $enable_customer_notification, 'yes' ); ?>
-			   value="yes" id="enable-customer-notification">
+				value="yes" id="enable-customer-notification">
 		<label for="enable-customer-notification"></label>
 	</div>
 	<span
@@ -86,21 +86,21 @@ if ( ! defined( 'WP_TRAVEL_ENGINE_PER_TRIP_EMAILS_VERSION' ) ) {
 </div>
 
 <div class="<?php wptravelengine_hidden_class( 'no' === $enable_customer_notification, true ); ?>"
-	 data-customer-email-section>
+	data-customer-email-section>
 	<div class="wpte-field wpte-text wpte-floated">
 		<label class="wpte-field-label"
-			   for="wp_travel_engine_settings[email][name]"><?php esc_html_e( 'From Name', 'wp-travel-engine' ); ?></label>
+				for="wp_travel_engine_settings[email][name]"><?php esc_html_e( 'From Name', 'wp-travel-engine' ); ?></label>
 		<input type="text" name="wp_travel_engine_settings[email][name]" id="wp_travel_engine_settings[email][name]"
-			   value="<?php echo ! empty( $wp_travel_engine_settings[ 'email' ][ 'name' ] ) ? esc_attr( $wp_travel_engine_settings[ 'email' ][ 'name' ] ) : esc_attr( get_bloginfo( 'name' ) ); ?>" />
+				value="<?php echo ! empty( $wp_travel_engine_settings['email']['name'] ) ? esc_attr( $wp_travel_engine_settings['email']['name'] ) : esc_attr( get_bloginfo( 'name' ) ); ?>" />
 		<span
 			class="wpte-tooltip"><?php esc_html_e( 'Enter the name the purchase receipts are sent from. This should probably be your site or shop name.', 'wp-travel-engine' ); ?></span>
 	</div>
 
 	<div class="wpte-field wpte-email wpte-floated">
 		<label class="wpte-field-label"
-			   for="wp_travel_engine_settings[email][from]"><?php esc_html_e( 'From Email', 'wp-travel-engine' ); ?></label>
+				for="wp_travel_engine_settings[email][from]"><?php esc_html_e( 'From Email', 'wp-travel-engine' ); ?></label>
 		<input type="text" name="wp_travel_engine_settings[email][from]" id="wp_travel_engine_settings[email][from]"
-			   value="<?php echo ! empty( $wp_travel_engine_settings[ 'email' ][ 'from' ] ) ? esc_attr( $wp_travel_engine_settings[ 'email' ][ 'from' ] ) : esc_attr( get_option( 'admin_email' ) ); ?>" />
+				value="<?php echo ! empty( $wp_travel_engine_settings['email']['from'] ) ? esc_attr( $wp_travel_engine_settings['email']['from'] ) : esc_attr( get_option( 'admin_email' ) ); ?>" />
 		<span
 			class="wpte-tooltip"><?php esc_html_e( 'Enter the mail address from which the purchase receipts will be sent. This will act as as the from and reply-to address.', 'wp-travel-engine' ); ?></span>
 	</div>
@@ -110,16 +110,16 @@ if ( ! defined( 'WP_TRAVEL_ENGINE_PER_TRIP_EMAILS_VERSION' ) ) {
 	?>
 	<div class="wpte-field wpte-text wpte-floated">
 		<label class="wpte-field-label" data-wte-update="wte_new_430"
-			   for="wp_travel_engine_settings[email][booking_notification_subject_customer]"><?php esc_html_e( 'Booking Email Subject', 'wp-travel-engine' ); ?></label>
+				for="wp_travel_engine_settings[email][booking_notification_subject_customer]"><?php esc_html_e( 'Booking Email Subject', 'wp-travel-engine' ); ?></label>
 		<input type="text" name="wp_travel_engine_settings[email][booking_notification_subject_customer]"
-			   id="wp_travel_engine_settings[email][booking_notification_subject_customer]"
-			   value="<?php echo esc_attr( $subject ); ?>" />
+				id="wp_travel_engine_settings[email][booking_notification_subject_customer]"
+				value="<?php echo esc_attr( $subject ); ?>" />
 		<span
 			class="wpte-tooltip"><?php esc_html_e( 'Enter the subject line for the booking notification email. Available Tags: {booking_id}, {payment_id}, {sitename}, {name}, {fullname}', 'wp-travel-engine' ); ?></span>
 	</div>
 	<div class="wpte-field wpte-textarea wpte-floated">
 		<label class="wpte-field-label" data-wte-update="wte_new_430"
-			   for="booking_notification_template_customer"><?php esc_html_e( 'Booking Notification', 'wp-travel-engine' ); ?></label>
+				for="booking_notification_template_customer"><?php esc_html_e( 'Booking Notification', 'wp-travel-engine' ); ?></label>
 		<?php
 		$value_wysiwyg = WTE_Booking_Emails::get_template_content( 'order', 'emails/booking/notification.php', 'customer' ); // $email_class->get_email_template( 'booking', 'admin', true );
 
@@ -148,16 +148,16 @@ if ( ! defined( 'WP_TRAVEL_ENGINE_PER_TRIP_EMAILS_VERSION' ) ) {
 
 	<div class="wpte-field wpte-text wpte-floated">
 		<label class="wpte-field-label"
-			   for="wp_travel_engine_settings[email][subject]"><?php esc_html_e( 'Purchase Email Subject', 'wp-travel-engine' ); ?></label>
+				for="wp_travel_engine_settings[email][subject]"><?php esc_html_e( 'Purchase Email Subject', 'wp-travel-engine' ); ?></label>
 		<input type="text" name="wp_travel_engine_settings[email][subject]"
-			   id="wp_travel_engine_settings[email][subject]"
-			   value="<?php echo esc_attr( $subject ); ?>" />
+				id="wp_travel_engine_settings[email][subject]"
+				value="<?php echo esc_attr( $subject ); ?>" />
 		<span
 			class="wpte-tooltip"><?php esc_html_e( 'Enter the subject line for the purchase receipt email. Available Tags: {booking_id}, {payment_id}, {sitename}, {name}, {fullname}', 'wp-travel-engine' ); ?></span>
 	</div>
 	<div class="wpte-field wpte-textarea wpte-floated">
 		<label class="wpte-field-label" data-wte-update="wte_updated_430"
-			   for="purchase_wpeditor"><?php esc_html_e( 'Purchase Receipt', 'wp-travel-engine' ); ?></label>
+				for="purchase_wpeditor"><?php esc_html_e( 'Purchase Receipt', 'wp-travel-engine' ); ?></label>
 		<?php
 		$value_wysiwyg = WTE_Booking_Emails::get_template_content( 'order_confirmation', '', 'customer' ); // $email_class->get_email_template( 'booking', 'admin', true );
 		$editor_id     = 'purchase_wpeditor';

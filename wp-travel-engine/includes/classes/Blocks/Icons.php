@@ -1,6 +1,7 @@
 <?php
 /**
  * SVG Icons for blocks.
+ *
  * @since 5.8.3
  */
 

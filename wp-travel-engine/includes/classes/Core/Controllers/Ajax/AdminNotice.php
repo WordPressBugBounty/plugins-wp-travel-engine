@@ -16,18 +16,25 @@ use WPTravelEngine\Abstracts\AjaxController;
  */
 class AdminNotice extends AjaxController {
 
-	const NONCE_KEY = 'nonce';
+	const NONCE_KEY    = 'nonce';
 	const NONCE_ACTION = '_wptravelengine_notice_dismiss';
-	const ACTION = 'wptravelengine_notice_dismiss';
+	const ACTION       = 'wptravelengine_notice_dismiss';
+	const ALLOW_NOPRIV = false;
 
 	/**
 	 * Process Request.
+	 *
+	 * @since 6.7.2 Made compatible for local notice too.
 	 */
 	protected function process_request() {
-        $last_updated = $this->request->get_param( 'last_updated' );
+		$last_updated = $this->request->get_param( 'last_updated' );
 		if ( $last_updated ) {
-			update_option( 'wptravelengine_notice_dismissed_at', $last_updated );
+			$type = $this->request->get_param( 'type' );
+			if ( 'server' === $type ) {
+				update_option( 'wptravelengine_notice_dismissed_at', $last_updated );
+			} else {
+				update_option( 'wptravelengine_local_notice_dismissed_at', $last_updated );
+			}
 		}
 	}
-
 }

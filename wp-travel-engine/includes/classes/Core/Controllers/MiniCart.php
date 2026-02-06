@@ -18,7 +18,13 @@ class MiniCart {
 
 	public function render() {
 		do_action( 'wte_booking_before_minicart' );
-		wte_get_template( 'checkout/mini-cart.php', [ 'checkout' => $this->checkout, 'mini_cart' => $this ] );
+		wte_get_template(
+			'checkout/mini-cart.php',
+			array(
+				'checkout'  => $this->checkout,
+				'mini_cart' => $this,
+			)
+		);
 		do_action( 'wte_booking_after_minicart' );
 	}
 
@@ -31,10 +37,9 @@ class MiniCart {
 		$trip_date   = $cart_item->trip_date;
 		$trip_time   = $cart_item->trip_time;
 		if ( ! empty( $trip_time ) ) :
-			$trip_date   = $cart_item->trip_time;
+			$trip_date    = $cart_item->trip_time;
 			$date_format .= ' \a\t ' . get_option( 'time_format', 'g:i a' );
 		endif;
-
 
 		return apply_filters(
 			'wptravelengine_mini_cart_trip_date_time',
@@ -69,7 +74,7 @@ class MiniCart {
 
 			if ( $cart_item->category_info[ $pax_label ] ?? false ) :
 				$pricing_category  = $cart_item->category_info[ $pax_label ];
-				$pax_label_display = $pricing_category[ 'label' ];
+				$pax_label_display = $pricing_category['label'];
 			endif;
 
 			$pax_details .= sprintf(
@@ -84,18 +89,21 @@ class MiniCart {
 		endforeach;
 
 		$content = apply_filters( 'wptravelengine_mini_cart_trip_pax_details', $pax_details, $cart_item );
-		echo wp_kses( $content, array(
-			'table'  => [],
-			'tr'     => [],
-			'td'     => [],
-			'span'   => array(
-				'class' => array(),
-			),
-			'del'    => array(),
-			'em'     => array(),
-			'strong' => array(),
-			'b'      => array(),
-		) );
+		echo wp_kses(
+			$content,
+			array(
+				'table'  => array(),
+				'tr'     => array(),
+				'td'     => array(),
+				'span'   => array(
+					'class' => array(),
+				),
+				'del'    => array(),
+				'em'     => array(),
+				'strong' => array(),
+				'b'      => array(),
+			)
+		);
 	}
 
 	public function tax_details( $cart_item, Tax $tax ) {
@@ -104,7 +112,7 @@ class MiniCart {
 		$content = sprintf(
 			'<tr class="wte-tax-calculation-tr"><td><span>%s</span></td><td><b>+&nbsp;%s</b></td></tr>',
 			$tax->get_tax_label(),
-			wptravelengine_the_price( $wte_cart->get_totals()[ 'total_tax' ], false )
+			wptravelengine_the_price( $wte_cart->get_totals()['total_tax'], false )
 		);
 
 		$content = apply_filters( 'wptravelengine_mini_cart_tax_details', $content, $cart_item, $tax );
@@ -114,10 +122,10 @@ class MiniCart {
 
 	public function extra_services( $cart_item ) {
 		$settings       = get_option( 'wp_travel_engine_settings' );
-		$title          = ! empty( $settings[ 'extra_service_title' ] ) ? $settings[ 'extra_service_title' ] : __( 'Extra Services', 'wp-travel-engine' );
+		$title          = ! empty( $settings['extra_service_title'] ) ? $settings['extra_service_title'] : __( 'Extra Services', 'wp-travel-engine' );
 		$title          = apply_filters( 'wptravelengine_mini_cart_services_title', $title );
 		$extra_services = '';
-		if ( isset( $cart_item->trip_extras[ 0 ] ) ) :
+		if ( isset( $cart_item->trip_extras[0] ) ) :
 			$extra_services .= sprintf(
 				'<tr class="wte-booked-package-name">
 					<td colspan="2">%1$s</td>
@@ -134,31 +142,34 @@ class MiniCart {
 							<b>%3$s</b>
 						</td>
 					</tr>',
-					esc_html( $trip_extra[ 'qty' ] ),
-					esc_html( $trip_extra[ 'extra_service' ] ),
-					wptravelengine_the_price( (int) $trip_extra[ 'qty' ] * (float) $trip_extra[ 'price' ], false )
+					esc_html( $trip_extra['qty'] ),
+					esc_html( $trip_extra['extra_service'] ),
+					wptravelengine_the_price( (int) $trip_extra['qty'] * (float) $trip_extra['price'], false )
 				);
 			endforeach;
 		endif;
 
 		$content = apply_filters( 'wte_mini_cart_extra_services', $extra_services, $cart_item );
 
-		echo wp_kses( $content, array(
-			'table'  => [],
-			'tr'     => array(
-				'class' => array( "wte-booked-package-name" ),
-			),
-			'td'     => array(
-				'colspan' => array( 2 ),
-			),
-			'span'   => array(
-				'class' => array(),
-			),
-			'del'    => array(),
-			'em'     => array(),
-			'strong' => array(),
-			'b'      => array(),
-		) );
+		echo wp_kses(
+			$content,
+			array(
+				'table'  => array(),
+				'tr'     => array(
+					'class' => array( 'wte-booked-package-name' ),
+				),
+				'td'     => array(
+					'colspan' => array( 2 ),
+				),
+				'span'   => array(
+					'class' => array(),
+				),
+				'del'    => array(),
+				'em'     => array(),
+				'strong' => array(),
+				'b'      => array(),
+			)
+		);
 	}
 
 	protected function discount_label( $discount ) {
@@ -180,7 +191,7 @@ class MiniCart {
 
 		return apply_filters(
 			'wptravelengine_mini_cart_discount_value',
-			wptravelengine_the_price( $wte_cart->get_totals()[ 'discount_total' ], false ),
+			wptravelengine_the_price( $wte_cart->get_totals()['discount_total'], false ),
 			$discount
 		);
 	}
@@ -212,7 +223,7 @@ class MiniCart {
 			return;
 		}
 		$settings       = get_option( 'wp_travel_engine_settings', array() );
-		$tax_percentage = $settings[ 'tax_percentage' ];
+		$tax_percentage = $settings['tax_percentage'];
 
 		$content = apply_filters(
 			'wptravelengine_mini_cart_tax_summary',
@@ -224,6 +235,6 @@ class MiniCart {
 			$tax_percentage,
 		);
 
-		echo wp_kses( $content, [ 'span' => [ 'class' => true ] ] );
+		echo wp_kses( $content, array( 'span' => array( 'class' => true ) ) );
 	}
 }

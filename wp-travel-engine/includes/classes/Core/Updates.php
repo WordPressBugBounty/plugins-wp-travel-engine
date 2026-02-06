@@ -49,9 +49,9 @@ class Updates {
 
 		$current_version_parts = explode( '.', WP_TRAVEL_ENGINE_VERSION );
 		$new_version_parts     = explode( '.', $plugin_data->new_version );
-		$new_version_parts     = [ '6', '0', '0' ];
+		$new_version_parts     = array( '6', '0', '0' );
 
-		if ( version_compare( $current_version_parts[ 0 ] . '.' . $current_version_parts[ 1 ], $new_version_parts[ 0 ] . '.' . $new_version_parts[ 1 ], '>=' ) ) {
+		if ( version_compare( $current_version_parts[0] . '.' . $current_version_parts[1], $new_version_parts[0] . '.' . $new_version_parts[1], '>=' ) ) {
 			return;
 		}
 
@@ -60,7 +60,7 @@ class Updates {
 		$minor_untested_plugins = array();
 		$upgrade_type           = '';
 
-		$version = $new_version_parts[ 0 ];
+		$version = $new_version_parts[0];
 
 		$plugins = wte_get_engine_extensions();
 
@@ -70,12 +70,12 @@ class Updates {
 			}
 
 			$plugin_version_parts = explode( '.', $plugin[ self::VERSION_TESTED_HEADER ] );
-			$plugin_version       = $plugin_version_parts[ 0 ];
+			$plugin_version       = $plugin_version_parts[0];
 
 			if ( $plugin_version === 'N/A' || version_compare( $plugin_version . '.0', $version . '.0', '<' ) ) {
 				$upgrade_type                    = 'major';
 				$major_untested_plugins[ $file ] = $plugin;
-			} else if ( version_compare( $plugin_version . '.' . $plugin_version_parts[ 1 ], $version . '.' . $new_version_parts[ 1 ], '<' ) ) {
+			} elseif ( version_compare( $plugin_version . '.' . $plugin_version_parts[1], $version . '.' . $new_version_parts[1], '<' ) ) {
 				$upgrade_type                    = 'minor';
 				$minor_untested_plugins[ $file ] = $plugin;
 			}
@@ -83,7 +83,7 @@ class Updates {
 
 		wp_enqueue_style( 'wte-plugins-php' );
 
-		$new_version = $new_version_parts[ 0 ] . '.' . $new_version_parts[ 1 ];
+		$new_version = $new_version_parts[0] . '.' . $new_version_parts[1];
 
 		if ( ! empty( $major_untested_plugins ) ) {
 			$untested_plugins = $major_untested_plugins;
@@ -100,7 +100,5 @@ class Updates {
 			include plugin_dir_path( WP_TRAVEL_ENGINE_FILE_PATH ) . 'admin/partials/plugin-updates/notice-untested-extensions.php';
 			echo '<p style="display:none">';
 		}
-
 	}
-
 }

@@ -10,6 +10,7 @@ namespace WPTravelEngine\Core\Controllers\RestAPI\V2;
 
 use WP_Error;
 use WP_REST_Posts_Controller;
+use WP_REST_Server;
 use WPTravelEngine\Core\Models\Post;
 
 /**
@@ -29,16 +30,73 @@ class TripPackages extends WP_REST_Posts_Controller {
 	}
 
 	/**
+	 * Registers the routes for posts.
+	 *
+	 * Overrides parent to add schema-level parameter validation.
+	 *
+	 * @see register_rest_route()
+	 */
+	public function register_routes() {
+		parent::register_routes();
+
+		// Override get_items route with proper parameter validation.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_items' ),
+				'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				'args'                => array(
+					'trip_id' => array(
+						'required'          => true,
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+						'validate_callback' => function ( $param ) {
+							return is_numeric( $param ) && $param > 0;
+						},
+					),
+				),
+			)
+		);
+
+		// Override create_item route with proper parameter validation.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'create_item' ),
+				'permission_callback' => array( $this, 'create_item_permissions_check' ),
+				'args'                => array_merge(
+					$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+					array(
+						'trip_id'       => array(
+							'required'          => true,
+							'type'              => 'integer',
+							'sanitize_callback' => 'absint',
+							'validate_callback' => function ( $param ) {
+								return is_numeric( $param ) && $param > 0;
+							},
+						),
+						'clone_package' => array(
+							'required'          => false,
+							'type'              => 'integer',
+							'sanitize_callback' => 'absint',
+							'validate_callback' => function ( $param ) {
+								return empty( $param ) || ( is_numeric( $param ) && $param > 0 );
+							},
+						),
+					)
+				),
+			)
+		);
+	}
+
+	/**
 	 * @inerhitDoc
 	 */
 	public function get_items( $request ) {
-
-		if ( empty( $request[ 'trip_id' ] ) ) {
-			return new WP_Error( 'rest_invalid_request',
-				__( 'Invalid request.', 'wp-travel-engine' ),
-				array( 'status' => 400 )
-			);
-		}
 		$trip_id = $request->get_param( 'trip_id' );
 
 		$packages = array();
@@ -57,24 +115,11 @@ class TripPackages extends WP_REST_Posts_Controller {
 	 * @inerhitDoc
 	 */
 	public function create_item( $request ) {
-		if ( empty( $request[ 'trip_id' ] ) ) {
-			return new WP_Error( 'rest_invalid_request',
-				__( 'Missing Trip ID.', 'wp-travel-engine' ),
-				array( 'status' => 400 )
-			);
-		}
-
 		$response = parent::create_item( $request );
 
 		if ( $cloning_package_id = $request->get_param( 'clone_package' ) ) {
-			if ( ! is_numeric( $cloning_package_id ) ) {
-				return new WP_Error( 'rest_invalid_request',
-					__( 'Cloning package ID must be integer', 'wp-travel-engine' ),
-					array( 'status' => 400 )
-				);
-			}
 
-			$cloned_package_id = $response->data[ 'id' ];
+			$cloned_package_id = $response->data['id'];
 			$cloning_package   = get_post( $cloning_package_id );
 
 			$package_arr = new \stdClass();
@@ -86,16 +131,16 @@ class TripPackages extends WP_REST_Posts_Controller {
 			$meta  = get_post_meta( $cloning_package_id );
 			$_meta = array();
 			foreach ( $meta as $key => $value ) {
-				$_meta[ $key ] = maybe_unserialize( $value[ 0 ] );
+				$_meta[ $key ] = maybe_unserialize( $value[0] );
 			}
 
-			$_meta[ 'trip_ID' ]      = $request->get_param( 'trip_id' );
+			$_meta['trip_ID']        = $request->get_param( 'trip_id' );
 			$package_arr->meta_input = $_meta;
 
 			wp_update_post( $package_arr );
 		}
 
-		$post = get_post( $response->data[ 'id' ] );
+		$post = get_post( $response->data['id'] );
 
 		$response = $this->prepare_item_for_response( $post, $request );
 		$response = rest_ensure_response( $response );
@@ -121,7 +166,7 @@ class TripPackages extends WP_REST_Posts_Controller {
 			$packages = array();
 		}
 
-		$packages[] = $package[ 'id' ];
+		$packages[] = $package['id'];
 
 		update_post_meta( $trip_id, 'packages_ids', array_unique( $packages ) );
 	}
@@ -139,11 +184,11 @@ class TripPackages extends WP_REST_Posts_Controller {
 		 * @var Post\TripPackage $trip_package
 		 * @var Post\Trip $trip
 		 */
-		$data[ 'id' ]          = $trip_package->get_id();
-		$data[ 'name' ]        = $trip_package->get_title();
-		$data[ 'description' ] = $trip_package->get_content();
-		$data[ 'is_primary' ]  = $trip_package->get_id() === (int) $trip_package->get_trip()->get_meta( 'primary_package' );
-		$data[ 'min_pax' ]     = (int) $trip_package->get_trip()->get_minimum_participants();
+		$data['id']          = $trip_package->get_id();
+		$data['name']        = $trip_package->get_title();
+		$data['description'] = $trip_package->get_content();
+		$data['is_primary']  = $trip_package->get_id() === (int) $trip_package->get_trip()->get_meta( 'primary_package' );
+		$data['min_pax']     = (int) $trip_package->get_trip()->get_minimum_participants();
 
 		$package_categories = $trip_package->get_traveler_categories();
 
@@ -156,27 +201,30 @@ class TripPackages extends WP_REST_Posts_Controller {
 
 			$group_pricing = $category->get( 'group_pricing', array() );
 
-			$group_pricing = array_map( function ( $gp ) {
-				return array(
-					'from' => is_numeric( $gp[ 'from' ] ) ? (int) $gp[ 'from' ] : 0,
-					'to'   => is_numeric( $gp[ 'to' ] ) ? (int) $gp[ 'to' ] : '',
-					'price' => is_numeric( $gp[ 'price' ] ) ? (float) $gp[ 'price' ] : 0,
-				);
-			}, $group_pricing );
+			$group_pricing = array_map(
+				function ( $gp ) {
+					return array(
+						'from'  => is_numeric( $gp['from'] ) ? (int) $gp['from'] : 0,
+						'to'    => is_numeric( $gp['to'] ) ? (int) $gp['to'] : '',
+						'price' => is_numeric( $gp['price'] ) ? (float) $gp['price'] : 0,
+					);
+				},
+				$group_pricing
+			);
 
-			$get_pricing_type                = $category->get( 'pricing_type', 'per-person' );
-			$pricing_label                   = wptravelengine_get_pricing_type( false, $get_pricing_type );
-			$price                           = $category->get( 'price', '' );
-			$sale_price                      = $category->get( 'sale_price', '' );
-			$data[ 'traveler_categories' ][] = array(
+			$get_pricing_type              = $category->get( 'pricing_type', 'per-person' );
+			$pricing_label                 = wptravelengine_get_pricing_type( false, $get_pricing_type );
+			$price                         = $category->get( 'price', '' );
+			$sale_price                    = $category->get( 'sale_price', '' );
+			$data['traveler_categories'][] = array(
 				'id'                => (int) $category->get( 'id', 0 ),
 				'label'             => $category->get( 'label', '' ),
 				'price'             => is_numeric( $price ) ? (float) $price : '',
 				'age_group'         => $category->get( 'age_group', '' ),
 				'pricing_type'      => array(
-					'value' 		=> $get_pricing_type,
-					'label' 	 	=> $pricing_label[ 'label' ],
-					'description' 	=> $pricing_label[ 'description' ],
+					'value'       => $get_pricing_type,
+					'label'       => $pricing_label['label'],
+					'description' => $pricing_label['description'],
 				),
 				'sale_price'        => is_numeric( $sale_price ) ? (float) $sale_price : '',
 				'has_sale'          => wptravelengine_toggled( $category->get( 'has_sale', false ) ),
@@ -191,5 +239,4 @@ class TripPackages extends WP_REST_Posts_Controller {
 
 		return apply_filters( 'wptravelengine_rest_prepare_package_data', $data, $trip_package );
 	}
-
 }

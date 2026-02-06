@@ -24,7 +24,7 @@ $checkout_completed_steps = apply_filters(
 
 $trips_with_extras = array_filter(
 	$cart_items,
-	function( $item ) {
+	function ( $item ) {
 		return isset( $item['trip_extras'] ) && ! empty( $item['trip_extras'] );
 	}
 );

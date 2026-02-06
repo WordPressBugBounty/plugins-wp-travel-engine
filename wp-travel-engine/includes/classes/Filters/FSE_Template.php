@@ -46,8 +46,10 @@ class FSE_Template {
 
 		foreach ( $template_files as $plugin_template ) {
 			if ( 'custom' !== $plugin_template->source ) {
-				$template       = $this->build_block_template( (object) $plugin_template );
-				$query_result[] = $template;
+				$template = $this->build_block_template( (object) $plugin_template );
+				if ( null !== $template ) {
+					$query_result[] = $template;
+				}
 				continue;
 			} else {
 				$query_result[] = $plugin_template;
@@ -265,11 +267,22 @@ class FSE_Template {
 	 *
 	 * @param object $template An object containing template details.
 	 *
-	 * @return \WP_Block_Template A WP_Block_Template object fully populated with the details of the template.
+	 * @return ?\WP_Block_Template A WP_Block_Template object fully populated with the details of the template.
 	 */
-	public function build_block_template( object $template ): \WP_Block_Template {
+	public function build_block_template( object $template ) {
+		$template_path = $template->path ?? '';
+
+		// Validate path is within allowed directory
+		$real_path   = realpath( $template_path );
+		$allowed_dir = realpath( $this->directory() );
+
+		if ( ! $real_path || ! $allowed_dir || strpos( $real_path, $allowed_dir ) !== 0 ) {
+			return null;
+		}
+
 		list( $plugin_name, $file_name ) = $this->get_plugins_info();
-		$template_content                = file_get_contents( $template->path ?? '' );
+
+		$template_content = file_get_contents( $real_path );
 
 		$wp_block_template = new \WP_Block_Template(); // Instantiate WP_Block_Template
 
@@ -280,15 +293,15 @@ class FSE_Template {
 		$wp_block_template->theme = $plugin_name . '/' . $file_name;
 		$wp_block_template->theme = $plugin_name . '/' . $file_name;
 		// Retrieve settings to determine the inclusion of header and footer
-		$wptravelengine_settings 	= get_option( 'wp_travel_engine_settings', array() );
-		$is_checkout_page 			= $template->slug === 'template-trip-checkout';
-		$checkout_version 			= $wptravelengine_settings['checkout_page_template'] ?? '1.0';
-		$display_header_footer 		= $wptravelengine_settings['display_header_footer'] ?? 'no';
-		$include_header_footer 		= $is_checkout_page && $checkout_version === '2.0' && $display_header_footer === 'yes';
+		$wptravelengine_settings = get_option( 'wp_travel_engine_settings', array() );
+		$is_checkout_page        = $template->slug === 'template-trip-checkout';
+		$checkout_version        = $wptravelengine_settings['checkout_page_template'] ?? '1.0';
+		$display_header_footer   = $wptravelengine_settings['display_header_footer'] ?? 'no';
+		$include_header_footer   = $is_checkout_page && $checkout_version === '2.0' && $display_header_footer === 'yes';
 
 		// Add header template part conditionally
-		if ( !$is_checkout_page || $include_header_footer ) {
-			$header_template_part = '<!-- wp:template-part {"slug":"header","tagName":"header","theme":"' . esc_attr( $theme_slug ) . '"} /-->';
+		if ( ! $is_checkout_page || $include_header_footer ) {
+			$header_template_part        = '<!-- wp:template-part {"slug":"header","tagName":"header","theme":"' . esc_attr( $theme_slug ) . '"} /-->';
 			$wp_block_template->content .= $header_template_part;
 		}
 
@@ -296,21 +309,21 @@ class FSE_Template {
 		$wp_block_template->content .= $template_content;
 
 		// Add footer template part conditionally
-		if ( !$is_checkout_page || $include_header_footer ) {
-			$footer_template_part = '<!-- wp:template-part {"slug":"footer","tagName":"footer","theme":"' . esc_attr( $theme_slug ) . '"} /-->';
+		if ( ! $is_checkout_page || $include_header_footer ) {
+			$footer_template_part        = '<!-- wp:template-part {"slug":"footer","tagName":"footer","theme":"' . esc_attr( $theme_slug ) . '"} /-->';
 			$wp_block_template->content .= $footer_template_part;
 		}
 
-		$wp_block_template->source = $template->source ?? 'plugin';
-		$wp_block_template->slug = $template->slug ?? '';
-		$wp_block_template->type = 'wp_template';
-		$wp_block_template->title = $template->title ?? '';
-		$wp_block_template->description = $template->description ?? '';
-		$wp_block_template->status = 'publish';
+		$wp_block_template->source         = $template->source ?? 'plugin';
+		$wp_block_template->slug           = $template->slug ?? '';
+		$wp_block_template->type           = 'wp_template';
+		$wp_block_template->title          = $template->title ?? '';
+		$wp_block_template->description    = $template->description ?? '';
+		$wp_block_template->status         = 'publish';
 		$wp_block_template->has_theme_file = true;
-		$wp_block_template->origin = $template->source ?? 'plugin';
-		$wp_block_template->post_types = in_array( $template->slug, ['template-destination', 'template-activities', 'template-trip_types', 'template-searchresultpage', 'template-trip-checkout'], true ) ? ['post', 'page'] : [];
-		$wp_block_template->is_custom = !empty( $wp_block_template->post_types );
+		$wp_block_template->origin         = $template->source ?? 'plugin';
+		$wp_block_template->post_types     = in_array( $template->slug, array( 'template-destination', 'template-activities', 'template-trip_types', 'template-searchresultpage', 'template-trip-checkout' ), true ) ? array( 'post', 'page' ) : array();
+		$wp_block_template->is_custom      = ! empty( $wp_block_template->post_types );
 
 		return $wp_block_template;
 	}
@@ -323,25 +336,25 @@ class FSE_Template {
 	 * @return array|null The template information or null if not found.
 	 */
 	public function get_template_info( string $template_slug ): ?array {
-		//Get the template slug from the template file name.
-		$directory = $this->directory();
+		// Get the template slug from the template file name.
+		$directory      = $this->directory();
 		$template_files = glob( $directory . '/*.html' );
 
-		//If no template files are found then return null.
+		// If no template files are found then return null.
 		if ( empty( $template_files ) ) {
 			return null;
 		}
 
 		$template_info = array();
-		//Get the template slug from the template file name.
+		// Get the template slug from the template file name.
 		foreach ( $template_files as $template_file ) {
 			$template_name = basename( $template_file, '.html' );
 			// Convert dashes and underscores to spaces and capitalize words for the title
-			$template_title = ucwords( str_replace( array('-', '_'), ' ', $template_name ) );
-			if( $template_name === 'template-trip-checkout' ) {
+			$template_title = ucwords( str_replace( array( '-', '_' ), ' ', $template_name ) );
+			if ( $template_name === 'template-trip-checkout' ) {
 				$template_title = __( 'WP Travel Engine - Checkout', 'wp-travel-engine' );
 			}
-			$template_description = sprintf( __( 'Displays a %s template.', 'wp-travel-engine' ), $template_title );
+			$template_description            = sprintf( __( 'Displays a %s template.', 'wp-travel-engine' ), $template_title );
 			$template_info[ $template_name ] = array(
 				'title'       => $template_title,
 				'description' => $template_description,
@@ -431,7 +444,7 @@ class FSE_Template {
 		// Create a template object
 		$template_object = $this->create_block_template_object( $template_path, $template_slug );
 
-		if( ! is_object( $template_object ) ) {
+		if ( ! is_object( $template_object ) ) {
 			return '';
 		}
 

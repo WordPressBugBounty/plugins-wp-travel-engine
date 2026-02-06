@@ -1,10 +1,8 @@
 <?php
 /**
- * @var Booking $booking
+ * @var \WPTravelEngine\Core\Models\Post\Booking $booking
  * @since 6.4.0
  */
-
-use WPTravelEngine\Core\Models\Post\Booking;
 
 ?>
 <div class="wpte-field">

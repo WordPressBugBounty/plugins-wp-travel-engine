@@ -21,7 +21,7 @@ $addons_data = wptravelengine_get_products_from_store( 'addons' );
 			<div class="wpte-list-grid">
 				<?php
 				foreach ( $addons_data as $key => $product ) :
-					$prod_info = $product->info;
+					$prod_info    = $product->info;
 					$product_link = "https://wptravelengine.com/plugins/{$prod_info->slug}/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro";
 					?>
 				<div class="wpte-list-grid-item">

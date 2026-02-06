@@ -5,10 +5,10 @@
  * @since 6.0.5
  */
 
-$optimized_loading = wptravelengine_settings()->get( "enable_optimize_loading", false ) ;
-$lazy_loading = wptravelengine_settings()->get( "enable_lazy_loading", false ) ;
-$map_lazy_loading = wptravelengine_settings()->get( "enable_map_lazy_loading", false ) ;
-$img_lazy_loading = wptravelengine_settings()->get( "enable_img_lazy_loading", false ) ;
+$optimized_loading = wptravelengine_settings()->get( 'enable_optimize_loading', false );
+$lazy_loading      = wptravelengine_settings()->get( 'enable_lazy_loading', false );
+$map_lazy_loading  = wptravelengine_settings()->get( 'enable_map_lazy_loading', false );
+$img_lazy_loading  = wptravelengine_settings()->get( 'enable_img_lazy_loading', false );
 ?>
 <!-- Enable Optimized Loading for better performance. -->
 <div class="wpte-field wpte-checkbox advance-checkbox">

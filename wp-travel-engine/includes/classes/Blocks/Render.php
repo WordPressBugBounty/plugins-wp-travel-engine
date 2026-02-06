@@ -1,6 +1,7 @@
 <?php
 /**
  * Render Class for blocks.
+ *
  * @since 5.8.3
  */
 

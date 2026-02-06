@@ -54,7 +54,7 @@ class Customer extends PostModel {
 	 */
 	public function get_customer_details() {
 		$customer_meta    = $this->get_customer_meta();
-		$customer_details = $customer_meta[ 'place_order' ][ 'booking' ] ?? array();
+		$customer_details = $customer_meta['place_order']['booking'] ?? array();
 
 		return $customer_details;
 	}
@@ -67,7 +67,7 @@ class Customer extends PostModel {
 	public function get_customer_fname() {
 		$customer_details = $this->get_customer_details();
 
-		return $customer_details[ 'fname' ] ?? '';
+		return $customer_details['fname'] ?? '';
 	}
 
 	/**
@@ -78,7 +78,7 @@ class Customer extends PostModel {
 	public function get_customer_lname() {
 		$customer_details = $this->get_customer_details();
 
-		return $customer_details[ 'lname' ] ?? '';
+		return $customer_details['lname'] ?? '';
 	}
 
 	/**
@@ -89,7 +89,7 @@ class Customer extends PostModel {
 	public function get_customer_email() {
 		$customer_details = $this->get_customer_details();
 
-		return $customer_details[ 'email' ] ?? '';
+		return $customer_details['email'] ?? '';
 	}
 
 	/**
@@ -100,7 +100,7 @@ class Customer extends PostModel {
 	public function get_customer_address() {
 		$customer_details = $this->get_customer_details();
 
-		return $customer_details[ 'address' ] ?? '';
+		return $customer_details['address'] ?? '';
 	}
 
 	/**
@@ -111,7 +111,7 @@ class Customer extends PostModel {
 	public function get_customer_city() {
 		$customer_details = $this->get_customer_details();
 
-		return $customer_details[ 'city' ] ?? '';
+		return $customer_details['city'] ?? '';
 	}
 
 	/**
@@ -120,7 +120,7 @@ class Customer extends PostModel {
 	public function get_customer_country() {
 		$customer_details = $this->get_customer_details();
 
-		return $customer_details[ 'country' ] ?? '';
+		return $customer_details['country'] ?? '';
 	}
 
 	/**
@@ -131,7 +131,7 @@ class Customer extends PostModel {
 	public function get_customer_postcode() {
 		$customer_details = $this->get_customer_details();
 
-		return $customer_details[ 'postcode' ] ?? '';
+		return $customer_details['postcode'] ?? '';
 	}
 
 	/**
@@ -141,7 +141,7 @@ class Customer extends PostModel {
 	 * @since 6.4.0
 	 */
 	public function get_customer_avatar() {
-		return get_avatar_url( $this->get_customer_email(), [ 'default' => 'mm' ] );
+		return get_avatar_url( $this->get_customer_email(), array( 'default' => 'mm' ) );
 	}
 
 	/**
@@ -153,7 +153,7 @@ class Customer extends PostModel {
 	public function get_customer_phone() {
 		$customer_details = $this->get_customer_details();
 
-		return $customer_details[ 'phone' ] ?? '';
+		return $customer_details['phone'] ?? '';
 	}
 
 	/**
@@ -165,7 +165,7 @@ class Customer extends PostModel {
 	public function get_customer_state() {
 		$customer_details = $this->get_customer_details();
 
-		return $customer_details[ 'state' ] ?? '';
+		return $customer_details['state'] ?? '';
 	}
 
 	/**
@@ -176,7 +176,7 @@ class Customer extends PostModel {
 	public function get_customer_notes() {
 		$customer_details = $this->get_customer_details();
 
-		return $customer_details[ 'notes' ] ?? '';
+		return $customer_details['notes'] ?? '';
 	}
 
 	/**
@@ -187,12 +187,12 @@ class Customer extends PostModel {
 	public function get_customer_bookings() {
 		$bookings_ids = $this->get_meta( 'wp_travel_engine_bookings' );
 		$bookings     = array();
-		try {
-			foreach ( is_array( $bookings_ids ) ? $bookings_ids : array() as $booking_id ) {
+		foreach ( is_array( $bookings_ids ) ? $bookings_ids : array() as $booking_id ) {
+			try {
 				$bookings[] = new Booking( $booking_id );
+			} catch ( \Exception $e ) {
+				// Do nothing.
 			}
-		} catch ( \Exception $e ) {
-			// Do nothing.
 		}
 
 		return $bookings;
@@ -212,21 +212,20 @@ class Customer extends PostModel {
 	 *
 	 * @return array Customer Detail Info
 	 * @since 6.4.0
-	 *
 	 */
 	public function get_customer_info() {
 		$user = get_user_by( 'email', $this->get_customer_email() );
-		$data = [];
+		$data = array();
 		if ( $user instanceof \WP_User ) {
 			$data = get_user_meta( $user->ID, 'wp_travel_engine_customer_billing_details', true );
 		}
 
-		return [
+		return array(
 			'fname' => $user->first_name ?? $this->get_customer_fname(),
 			'lname' => $user->last_name ?? $this->get_customer_lname(),
 			'email' => $user->user_email ?? $this->get_customer_email(),
-			'phone' => $data[ 'billing_phone' ] ?? $this->get_customer_phone(),
-		];
+			'phone' => $data['billing_phone'] ?? $this->get_customer_phone(),
+		);
 	}
 
 	/**
@@ -234,32 +233,34 @@ class Customer extends PostModel {
 	 *
 	 * @return array Customer Address Info
 	 * @since 6.4.0
-	 *
 	 */
 	public function get_customer_addresses() {
 		$user = get_user_by( 'email', $this->get_customer_email() );
-		$data = [];
+		$data = array();
 		if ( $user instanceof \WP_User ) {
 			$data = get_user_meta( $user->ID, 'wp_travel_engine_customer_billing_details', true );
 		}
 
-		return [
-			'address'  => $data[ 'billing_address' ] ?? $this->get_customer_address(),
-			'city'     => $data[ 'billing_city' ] ?? $this->get_customer_city(),
-			'state'    => $data[ 'billing_state' ] ?? $this->get_customer_state(),
-			'postcode' => $data[ 'billing_zip_code' ] ?? $this->get_customer_postcode(),
-			'country'  => $data[ 'billing_country' ] ?? $this->get_customer_country(),
-		];
+		return array(
+			'address'  => $data['billing_address'] ?? $this->get_customer_address(),
+			'city'     => $data['billing_city'] ?? $this->get_customer_city(),
+			'state'    => $data['billing_state'] ?? $this->get_customer_state(),
+			'postcode' => $data['billing_zip_code'] ?? $this->get_customer_postcode(),
+			'country'  => $data['billing_country'] ?? $this->get_customer_country(),
+		);
 	}
 
 	/**
 	 * @return void
 	 */
-	public function maybe_register_as_user() {
-		if ( wptravelengine_settings()->is( 'generate_user_account', 'yes' ) ) {
+	public function maybe_register_as_user( bool $force = false ) {
+		$register_user = $force || wptravelengine_settings()->is( 'generate_user_account', 'yes' );
+		
+		if ( $register_user ) {
 			$email_address = trim( $this->get_title() );
+			$email_address = sanitize_email( $email_address );
 
-			if ( is_email( trim( $email_address ) ) && ! email_exists( $email_address ) ) {
+			if ( is_email( $email_address ) && ! email_exists( $email_address ) ) {
 				$userdata = apply_filters(
 					'wp_travel_engine_new_customer_data',
 					array(
@@ -273,6 +274,16 @@ class Customer extends PostModel {
 				);
 
 				$user_id = wp_insert_user( $userdata );
+				
+				if ( is_wp_error( $user_id ) ) {
+					error_log( sprintf( 
+						'Failed to create user for customer %d: %s', 
+						$this->get_id(), 
+						$user_id->get_error_message() 
+					) );
+					return;
+				}
+				
 				update_user_meta( $user_id, 'customer_id', $this->get_id() );
 				$data_array = array(
 					'billing_address'  => $this->get_customer_address(),
@@ -323,21 +334,50 @@ class Customer extends PostModel {
 	 */
 	public function update_customer_meta( int $booking_id ): void {
 
-		$meta_mappings = [
+		$meta_mappings = array(
 			'wp_travel_engine_bookings' => 'wp_travel_engine_user_bookings',
-		];
+		);
 
-		if ( is_user_logged_in() ) {
-			$user = wp_get_current_user();
-		} else {
-			$billing_info = get_post_meta( $booking_id, 'wptravelengine_billing_details', true );
-			$user         = get_user_by( 'email', $billing_info[ 'email' ] ?? $this->get_customer_email() );
+		$billing_info = get_post_meta( $booking_id, 'wptravelengine_billing_details', true );
+		$billing_email = $billing_info['email'] ?? $this->get_customer_email();
+
+		if ( empty( $billing_email ) || ! is_email( $billing_email ) ) {
+			return;
 		}
 
+		$user = get_user_by( 'email', $billing_email );
+		$logged_in_user = null;
+
+		if ( is_user_logged_in() ) {
+			$logged_in_user = wp_get_current_user();
+		}
+
+		// Collect users to update (avoid duplicates).
+		$users_to_update = array();
 		if ( $user instanceof \WP_User ) {
-			foreach ( $this->data[ '__changes' ] as $meta_key => $meta_value ) {
-				if ( isset( $meta_mappings[ $meta_key ] ) ) {
-					update_user_meta( $user->ID, $meta_mappings[ $meta_key ], $meta_value );
+			$users_to_update[ $user->ID ] = $user;
+		}
+		if ( $logged_in_user instanceof \WP_User && ! isset( $users_to_update[ $logged_in_user->ID ] ) ) {
+			$users_to_update[ $logged_in_user->ID ] = $logged_in_user;
+		}
+
+		// Update user meta for all relevant users.
+		if ( ! empty( $users_to_update ) ) {
+			foreach ( $this->data['__changes'] as $meta_key => $meta_value ) {
+				if ( isset( $meta_mappings[ $meta_key ] ) && 'wp_travel_engine_bookings' === $meta_key ) {
+					// Get the new bookings array from the customer meta changes
+					$new_bookings = is_array( $meta_value ) ? $meta_value : array();
+					
+					foreach ( $users_to_update as $user_to_update ) {
+						// Get existing user bookings
+						$existing_bookings = get_user_meta( $user_to_update->ID, 'wp_travel_engine_user_bookings', true );
+						$existing_bookings = is_array( $existing_bookings ) ? $existing_bookings : array();
+						
+						// Merge and deduplicate bookings
+						$merged_bookings = array_unique( array_merge( $existing_bookings, $new_bookings ) );
+						
+						update_user_meta( $user_to_update->ID, 'wp_travel_engine_user_bookings', $merged_bookings );
+					}
 				}
 			}
 		}

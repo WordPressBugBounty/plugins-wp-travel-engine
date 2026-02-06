@@ -18,6 +18,7 @@ class AddTripInfo extends AjaxController {
 	const NONCE_KEY    = 'nonce';
 	const NONCE_ACTION = 'wp_add_trip_info';
 	const ACTION       = 'wp_add_trip_info';
+	const ALLOW_NOPRIV = false;
 
 	/**
 	 * Process Request.

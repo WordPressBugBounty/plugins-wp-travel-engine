@@ -12,12 +12,12 @@ use WPTravelEngine\Core\Coupons;
 
 $cart_discounts            = $wte_cart->get_discounts();
 $wp_travel_engine_settings = get_option( 'wp_travel_engine_settings', true );
-$code = isset( $wp_travel_engine_settings[ 'currency_code' ] ) ? $wp_travel_engine_settings[ 'currency_code' ] : 'USD';
+$code                      = isset( $wp_travel_engine_settings['currency_code'] ) ? $wp_travel_engine_settings['currency_code'] : 'USD';
 $currency                  = wp_travel_engine_get_currency_code_or_symbol();
 wp_enqueue_script( 'wp-util' );
 
 if ( Coupons::is_coupon_available() && 'due' !== $wte_cart->get_payment_type() ) :
-?>
+	?>
 	<div class="wte-coupon-whole-wrap" id="wte-checkout-coupon">
 		<div
 			id="wp-travel-engine-coupon-block" <?php echo ( empty( $cart_discounts ) || sizeof( $cart_discounts ) === 0 ) ? 'style="display:block;"' : 'style="display:none;"'; ?>>
@@ -37,7 +37,7 @@ if ( Coupons::is_coupon_available() && 'due' !== $wte_cart->get_payment_type() )
 				if ( is_object( $wte_cart ) && ! empty( $wte_cart ) ) {
 					$cart_items = $wte_cart->getItems();
 					foreach ( $cart_items as $key => $value ) {
-						$trip_array[] = + $value[ 'trip_id' ];
+						$trip_array[] = + $value['trip_id'];
 					}
 				}
 				?>
@@ -62,7 +62,7 @@ if ( Coupons::is_coupon_available() && 'due' !== $wte_cart->get_payment_type() )
 					foreach ( $cart_discounts as $discount_key => $discount_item ) {
 						?>
 						<span
-							class="coupon-response-success"><?php echo sprintf( esc_html__( 'Coupon "%1$s" applied successfully.', 'wp-travel-engine' ), esc_html( $discount_item[ 'name' ] ) ); ?></span>
+							class="coupon-response-success"><?php printf( esc_html__( 'Coupon "%1$s" applied successfully.', 'wp-travel-engine' ), esc_html( $discount_item['name'] ) ); ?></span>
 						<?php
 					}
 				}

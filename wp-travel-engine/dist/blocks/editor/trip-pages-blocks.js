@@ -745,7 +745,7 @@
   background-position: 0 0, 6px 6px;
   background-size: 12px 12px;
   border-radius: 50%;
-`,aa=({color:e,title:t,children:n,interactive:o,placement:i="left",enableReset:a=!1,onChange:l})=>(0,r.createElement)(oa,{className:"cw__color-picker-trigger",color:e},(0,r.createElement)(ia,null,(0,r.createElement)(vi,{content:n,interactive:o,placement:i},(0,r.createElement)(mi,{title:t},(0,r.createElement)("span",{tabIndex:0,className:"cw__color-picker-color-block"},(0,r.createElement)("span",{className:"cw__color-picker-color-block-inner"}))))),a&&e&&(0,r.createElement)(mi,{title:"Reset"},(0,r.createElement)("span",{role:"button",className:"cw__color-picker-reset-button",onClick:()=>l("")},"Reset"))),la=ir.header`
+`,aa=({color:e,title:t,children:n,interactive:o,placement:i="left",enableReset:a=!1,onChange:l})=>(0,r.createElement)(oa,{className:"cw__color-picker-trigger",color:e},(0,r.createElement)(ia,null,(0,r.createElement)(vi,{content:n,interactive:o,placement:i},(0,r.createElement)(mi,{title:t},(0,r.createElement)("span",{tabIndex:0,className:"cw__color-picker-color-block"},(0,r.createElement)("span",{className:"cw__color-picker-color-block-inner"}))))),a&&e&&(0,r.createElement)("span",{role:"button",className:"cw__color-picker-reset-button",onClick:()=>l("")},"Reset")),la=ir.header`
   padding: 5px;
   border: 1px solid var(--cw__border-color);
   border-radius: var(--cw__border-radius);
@@ -766,7 +766,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-`,ua=({colors:e,value:t,onChange:n,...o})=>(0,r.createElement)(da,null,e?.map((({title:e,name:i,colorPalette:a},l)=>(0,r.createElement)(sa,{key:l,value:t[i],title:e,colorPalette:a,onChange:e=>n({...t,[i]:e}),...o})))),pa=e=>Si(ua)(e),fa=(ir.div`
+`,ua=({colors:e=[],value:t,onChange:n,...o})=>(0,r.createElement)(da,null,e.map((({title:e,name:i,colorPalette:a},l)=>(0,r.createElement)(sa,{key:l,value:t[i],colorPalette:a,onChange:e=>n({...t,[i]:e}),...o,title:e})))),pa=e=>Si(ua)(e),fa=(ir.div`
   padding: 10px;
   border: 1px solid var(--cw__border-color);
   border-radius: var(--cw__border-radius);

@@ -29,7 +29,7 @@ if ( isset( $tabs['id'] ) ) : ?>
 			do_action( "wte_single_before_trip_tab_{$field}" );
 			?>
 			<div id="nb-<?php echo esc_attr( $id ); ?>-configurations" class="nb-<?php echo esc_attr( $id ); ?>-configurations nb-configurations"
-					style="order: <?php echo esc_attr($order); ?>;<?php echo ( 0 !== $index && ! $show_all_tabs ) ? 'display:none;' : ''; ?>" >
+					style="order: <?php echo esc_attr( $order ); ?>;<?php echo ( 0 !== $index && ! $show_all_tabs ) ? 'display:none;' : ''; ?>" >
 					<?php do_action( "wte_single_trip_tab_content_{$field}", $id, $field, $tabs['name'][ $id ], $icon ); ?>
 			</div>
 			<?php
@@ -38,7 +38,7 @@ if ( isset( $tabs['id'] ) ) : ?>
 			 * Dynamic hooks after Tab wrapper - for themes to hook content into.
 			 */
 			do_action( "wte_single_after_trip_tab_{$field}" );
-			$order+=2;
+			$order += 2;
 		endforeach;
 		?>
 	</div>

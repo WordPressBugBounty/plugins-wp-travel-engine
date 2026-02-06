@@ -9,7 +9,6 @@
 	<custom-fields>
 		<custom-field action="ignore">wp_fixed_departure_dates_setting</custom-field>
 		<custom-field action="ignore">wte_fixed_departure_dates_setting</custom-field>
-		<custom-field action="ignore">wp_travel_engine_setting</custom-field>
 		<custom-field action="ignore">wp_travel_engine_setting_trip_price</custom-field>
 		<custom-field action="ignore">wp_travel_engine_setting_trip_duration</custom-field>
 		<custom-field action="ignore">wp_travel_engine_setting_trip_prev_price</custom-field>
@@ -18,7 +17,55 @@
 		<custom-field action="ignore">wp_travel_engine_bookings</custom-field>
 		<custom-field action="ignore">wp_travel_engine_booked_trip_setting</custom-field>
 		<custom-field action="ignore">wp_travel_engine_placeorder_setting</custom-field>
+		<custom-field action="translate">wp_travel_engine_setting</custom-field>
 	</custom-fields>
+	<custom-fields-texts>
+		<key name="wp_travel_engine_setting">
+			<key name="overview_section_title"/>
+			<key name="tab_content">
+				<key name="1_wpeditor"/>
+				<key name="*_wpeditor"/>
+			</key>
+			<key name="tab_*_title"/>
+			<key name="cost_tab_sec_title"/>
+			<key name="cost">
+				<key name="includes_title"/>
+				<key name="cost_includes"/>
+				<key name="excludes_title"/>
+				<key name="cost_excludes"/>
+			</key>
+			<key name="map_section_title"/>
+			<key name="trip_highlights_title"/>
+			<key name="trip_highlights">
+				<key name="*">
+					<key name="highlight_text" />
+				</key>
+			</key>
+			<key name="faq_section_title"/>
+			<key name="faq">
+				<key name="faq_title">
+					<key name="*"/>
+				</key>
+				<key name="faq_content">
+					<key name="*"/>
+				</key>
+			</key>
+			<key name="itinerary">
+				<key name="itinerary_title">
+					<key name="*"/>
+				</key>
+				<key name="itinerary_days_label">
+					<key name="*"/>
+				</key>
+				<key name="itinerary_content">
+					<key name="*"/>
+				</key>
+			</key>
+			<key name="trip_itinerary_title"/>
+			<key name="trip_itinerary_description"/>
+			<key name="trip_facts_title"/>
+		</key>
+	</custom-fields-texts>
 	<admin-texts>
 		<key name="wp_travel_engine_settings">
 			<key name="tax_label"></key>
@@ -99,6 +146,8 @@
 			<key name="vgood_label"/>
 			<key name="average_label"/>
 			<key name="poor_label"/>
+			<key name="privacy_policy_msg"/>
+			<key name="footer_copyright"/>
 			<key name="departure">
 				<key name="section_title"/>
 			</key>

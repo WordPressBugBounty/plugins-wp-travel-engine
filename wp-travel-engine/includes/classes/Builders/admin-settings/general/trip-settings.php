@@ -1,7 +1,7 @@
 <?php
 /**
  * Global Trips Settings.
- * 
+ *
  * @since v6.6.4
  */
 

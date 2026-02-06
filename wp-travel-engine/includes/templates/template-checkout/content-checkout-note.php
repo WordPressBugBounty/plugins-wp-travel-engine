@@ -5,7 +5,7 @@
  * @since 6.3.0
  */
 if ( 'hide' === ( $args['attributes']['additional_note'] ?? '' ) ) {
-    return;
+	return;
 }
 ?>
 <!-- Additional Note -->
@@ -19,6 +19,8 @@ if ( 'hide' === ( $args['attributes']['additional_note'] ?? '' ) ) {
 				</svg>
 			</button>
 		</h3>
-	<?php endif;
-	$note_form_fields->render(); ?>
+		<?php
+	endif;
+	$note_form_fields->render();
+	?>
 </div>

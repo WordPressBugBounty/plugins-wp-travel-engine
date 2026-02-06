@@ -37,6 +37,14 @@ abstract class PaymentGateway {
 	abstract public function get_gateway_id(): string;
 
 	/**
+	 * Cart version to be used for processing payment.
+	 *
+	 * @since 6.7.0
+	 */
+	public static string $cart_version = '3.0';
+
+
+	/**
 	 * Process Payment.
 	 *
 	 * @param Booking        $booking Booking.
@@ -47,6 +55,23 @@ abstract class PaymentGateway {
 	 */
 	public function process_payment( Booking $booking, Payment $payment, BookingProcess $booking_instance ) {
 		_doing_it_wrong( __METHOD__, __( 'This method should be overridden in the child class.', 'wp-travel-engine' ), '6.0.0' );
+	}
+
+	/**
+	 * Process Payment V2.
+	 * This method has higher priority than process_payment.
+	 *
+	 * @param Booking        $booking Booking.
+	 * @param Payment        $payment Payment.
+	 * @param BookingProcess $booking_instance Booking Process.
+	 *
+	 * @return void
+	 * @since 6.7.0
+	 */
+	public function process_payment_v2( Booking $booking, Payment $payment, BookingProcess $booking_instance ) {
+		// Process the payment according to cart version 4.0.
+		// If process_payment_v2 is not implemented, then process the payment according to cart version 3.0.
+		$this->process_payment( $booking, $payment, $booking_instance );
 	}
 
 	/**
@@ -121,5 +146,18 @@ abstract class PaymentGateway {
 	 */
 	public function is_test_mode(): bool {
 		return ( defined( 'WP_TRAVEL_ENGINE_PAYMENT_DEBUG' ) && WP_TRAVEL_ENGINE_PAYMENT_DEBUG ) || ! wptravelengine_settings()->is( "{$this->get_gateway_id()}_test_mode", 'no' );
+	}
+
+	/**
+	 * Compare cart version with the provided version.
+	 *
+	 * @param string $op Operator to compare.
+	 * @param string $ver Version to compare with. Default is '4.0'.
+	 *
+	 * @return bool
+	 * @since 6.7.0
+	 */
+	public static function is_curr_cart( string $op = '==', string $ver = '4.0' ): bool {
+		return version_compare( static::$cart_version, $ver, $op );
 	}
 }

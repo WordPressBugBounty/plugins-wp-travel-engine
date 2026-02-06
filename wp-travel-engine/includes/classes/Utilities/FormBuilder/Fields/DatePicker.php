@@ -25,14 +25,14 @@ class DatePicker extends Text {
 		wp_enqueue_script( 'wte-fpickr' );
 		wp_enqueue_style( 'wte-fpickr' );
 
-		$this->attributes[ 'autocomplete' ] = 'off';
-		$this->attributes[ 'data-id' ]      = $this->field_id;
+		$this->attributes['autocomplete'] = 'off';
+		$this->attributes['data-id']      = $this->field_id;
 
 		$output = parent::render( false );
 
-		$max_today = $this->attributes[ 'data-max-today' ] ?? '';
+		$max_today = $this->attributes['data-max-today'] ?? '';
 
-		$output    .= sprintf(
+		$output .= sprintf(
 			'<script>;(function() {
 				window.addEventListener("load",function() {
 					var fpArgs = {
@@ -47,7 +47,7 @@ class DatePicker extends Text {
 					window.flatpickr && window.flatpickr(document.querySelector("[data-id=\'%1$s\']"), fpArgs)
 				})
 			})();</script>',
-			$this->attributes[ 'data-id' ],
+			$this->attributes['data-id'],
 			$max_today
 		);
 
@@ -57,5 +57,4 @@ class DatePicker extends Text {
 
 		return $output;
 	}
-
 }

@@ -17,7 +17,7 @@ return apply_filters(
 				'divider'    => true,
 				'field_type' => 'ALERT',
 				'content'    => sprintf( __( 'Note: Please go through <a href="%s" target="__blank">this</a> doc to learn how to get client id and secret for each of the social login integration', 'wp-travel-engine' ), 'https://docs.wptravelengine.com/docs/social-login' ),
-				'status'       => 'notice',
+				'status'     => 'notice',
 			),
 			array(
 				'divider'    => true,

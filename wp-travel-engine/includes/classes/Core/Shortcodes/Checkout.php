@@ -42,15 +42,15 @@ class Checkout extends Shortcode {
 		// Check if login is required for checkout.
 		$settings = wptravelengine_settings()->get();
 
-		$generate_user_account     = $settings[ 'generate_user_account' ] ?? 'yes';
-		$require_login_to_checkout = $settings[ 'enable_checkout_customer_registration' ] ?? 'no';
+		$generate_user_account     = $settings['generate_user_account'] ?? 'yes';
+		$require_login_to_checkout = $settings['enable_checkout_customer_registration'] ?? 'no';
 
 		if ( 'no' === $generate_user_account && 'yes' === $require_login_to_checkout && ! is_user_logged_in() ) {
-			
+
 			Assets::instance()
 			->enqueue_style( 'my-account' )
 			->enqueue_script( 'my-account' );
-			
+
 			wte_get_template( 'account/form-login.php' );
 
 			return ob_get_clean();

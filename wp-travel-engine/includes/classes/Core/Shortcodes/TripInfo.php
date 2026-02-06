@@ -10,7 +10,7 @@
 namespace WPTravelEngine\Core\Shortcodes;
 
 use WPTravelEngine\Core\Models\Settings\PluginSettings;
-use WPTravelEngine\Core\Models\Post\Trip as Trip;
+use WPTravelEngine\Core\Models\Post\Trip;
 /**
  * Class TripInfo.
  *

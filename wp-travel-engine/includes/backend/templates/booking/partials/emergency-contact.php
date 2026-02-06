@@ -6,12 +6,11 @@
 
 use WPTravelEngine\Builders\FormFields\EmergencyEditFormFields;
 
-?>
-<div class="wpte-form-section" data-target-id="emergency-contact">
-	<?php if ( 'edit' === $template_mode || ! empty( $emergency_contacts_form_fields ) ) : ?>
+if ( 'edit' === $template_mode || ! empty( $emergency_contacts_form_fields ) ) : ?>
+	<div class="wpte-form-section" data-target-id="emergency-contact">
 		<div class="wpte-accordion">
 			<div class="wpte-accordion-header">
-				<h3 class="wpte-accordion-title"><?php echo __( 'Emergency Contact', 'wp-travel-engine' ); ?></h3>
+				<h3 class="wpte-accordion-title"><?php echo __( 'Emergency Details', 'wp-travel-engine' ); ?></h3>
 				<button type="button" class="wpte-accordion-toggle">
 					<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.66667" stroke-linecap="round"
@@ -19,35 +18,35 @@ use WPTravelEngine\Builders\FormFields\EmergencyEditFormFields;
 					</svg>
 				</button>
 			</div>
-			<div class="wpte-accordion-content" data-emergency-contact-section>
-				<?php
-				foreach ( $emergency_contacts_form_fields as $index => $emergency_contact_form_fields ) :
-					?>
-					<?php if ( $index > 0 ) : ?>
-						<hr>
-					<?php endif; ?>
-					<h5 class="wpte-accordion-subtitle"><?php printf( 'Emergency Contact %d', $index + 1 ); ?></h5>
-					<div class="wpte-fields-grid" data-columns="2">
-						<?php $emergency_contact_form_fields->render(); ?>
-					</div>
+			<div class="wpte-accordion-content">
+				<div data-emergency-contact-section>
 					<?php
-				endforeach;
-				?>
-			</div>
-			<?php if ( 'edit' === $template_mode ) : ?>
-				<div style="padding:16px;">
-					<button class="wpte-button wpte-link"
-						data-type="add"
-						data-total-count="<?php echo count( $emergency_contacts_form_fields ); ?>"
-						data-template="emergency-contact-template"
-						data-target="[data-emergency-contact-section]">
-						<?php echo __( '+ Add Emergency Contact', 'wp-travel-engine' ); ?>
-					</button>
+					foreach ( $emergency_contacts_form_fields as $index => $emergency_contact_form_fields ) :
+						?>
+						<?php if ( $index > 0 ) : ?>
+							<hr>
+						<?php endif; ?>
+						<h5 class="wpte-accordion-subtitle"><?php printf( 'Emergency Contact %d', $index + 1 ); ?></h5>
+						<div class="wpte-fields-grid" data-columns="2">
+							<?php $emergency_contact_form_fields->render(); ?>
+						</div>
+						<?php
+					endforeach;
+					?>
 				</div>
-			<?php endif ?>
+				<?php if ( 'edit' === $template_mode ) : ?>
+					<div style="padding:16px;">
+						<button class="wpte-button wpte-link" data-type="add"
+							data-total-count="<?php echo count( $emergency_contacts_form_fields ); ?>"
+							data-template="emergency-contact-template" data-target="[data-emergency-contact-section]">
+							<?php echo __( '+ Add Emergency Contact', 'wp-travel-engine' ); ?>
+						</button>
+					</div>
+				<?php endif ?>
+			</div>
 		</div>
-	<?php endif; ?>
-</div>
+	</div>
+<?php endif; ?>
 <script type="text/html" id="tmpl-emergency-contact-template">
 	<hr>
 	<div class="wpte-traveller-wrapper">

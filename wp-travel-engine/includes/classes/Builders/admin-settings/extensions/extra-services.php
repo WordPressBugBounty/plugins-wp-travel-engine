@@ -20,7 +20,7 @@ return apply_filters(
 		'fields'    => array(
 			array(
 				'field_type' => 'ALERT',
-				'content'    => sprintf( __( 'The extra services have been moved from here to separate post-type for advanced features. %1$sView Extra Services%2$s', 'wp-travel-engine' ), '<a href=" '. get_admin_url() . 'edit.php?post_type=wte-services"  target="_blank">', '</a>' ),
+				'content'    => sprintf( __( 'The extra services have been moved from here to separate post-type for advanced features. %1$sView Extra Services%2$s', 'wp-travel-engine' ), '<a href=" ' . get_admin_url() . 'edit.php?post_type=wte-services"  target="_blank">', '</a>' ),
 			),
 			array(
 				'divider'     => true,

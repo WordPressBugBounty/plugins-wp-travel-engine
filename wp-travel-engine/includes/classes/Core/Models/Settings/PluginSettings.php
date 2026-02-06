@@ -34,6 +34,7 @@ class PluginSettings extends BaseSetting {
 
 		/**
 		 * Clear cached settings and reload fresh data from the database to ensure current values.
+		 *
 		 * @since 6.6.6
 		 */
 		$this->load_settings();
@@ -61,7 +62,7 @@ class PluginSettings extends BaseSetting {
 	 * Get the default settings.
 	 *
 	 * @param string|null $key The key of the default setting in dot-seperated path.
-	 * @param mixed $default_value
+	 * @param mixed       $default_value
 	 *
 	 * @return mixed
 	 * @since 6.2.0
@@ -70,13 +71,11 @@ class PluginSettings extends BaseSetting {
 
 		if ( isset( $this->callbacks[ $key ] ) ) {
 			$value = call_user_func( $this->callbacks[ $key ] );
-		} else {
-			if ( is_null( $key ) || wptravelengine_key_exists( parent::get(), explode( '.', $key ) ) ) {
+		} elseif ( is_null( $key ) || wptravelengine_key_exists( parent::get(), explode( '.', $key ) ) ) {
 				$value = parent::get( $key );
-			} else {
-				$this->set( $key, $default_value );
-				$value = $default_value;
-			}
+		} else {
+			$this->set( $key, $default_value );
+			$value = $default_value;
 		}
 
 		return $value;
@@ -131,26 +130,26 @@ class PluginSettings extends BaseSetting {
 		if ( $is_trip_tabs_set ) {
 			$tabs = parent::get( 'trip_tabs' );
 		} else {
-			$tabs             = wte_get_default_settings_tab();
-			$tabs[ 'enable' ] = array_fill_keys( array_keys( $tabs[ 'id' ] ), 'yes' );
+			$tabs           = wte_get_default_settings_tab();
+			$tabs['enable'] = array_fill_keys( array_keys( $tabs['id'] ), 'yes' );
 		}
 
-		if ( ! empty( array_filter( $tabs[ 'icon' ] ?? (array) '', 'is_string' ) ) ) {
+		if ( ! empty( array_filter( $tabs['icon'] ?? (array) '', 'is_string' ) ) ) {
 			$temp_arr = array();
 			foreach (
-				$tabs[ 'icon' ] ?? array_fill(
-				1,
-				count( $tabs[ 'id' ] ),
-				array()
-			) as $key => $val
+				$tabs['icon'] ?? array_fill(
+					1,
+					count( $tabs['id'] ),
+					array()
+				) as $key => $val
 			) {
 				$temp_arr[ $key ] = array(
-					'icon'     => $val[ 'icon' ] ?? ( is_string( $val ) ? $val : ( $val[ 0 ] ?? '' ) ),
-					'view_box' => $val[ 'view_box' ] ?? '',
-					'path'     => $val[ 'path' ] ?? '',
+					'icon'     => $val['icon'] ?? ( is_string( $val ) ? $val : ( $val[0] ?? '' ) ),
+					'view_box' => $val['view_box'] ?? '',
+					'path'     => $val['path'] ?? '',
 				);
 			}
-			$tabs[ 'icon' ] = $temp_arr;
+			$tabs['icon'] = $temp_arr;
 		}
 
 		if ( ! $is_trip_tabs_set || isset( $temp_arr ) ) {
@@ -202,11 +201,11 @@ class PluginSettings extends BaseSetting {
 			);
 
 			foreach ( $default_infos as $key => $value ) {
-				$icon = $def_icons[ $value[ 'field_icon' ] ] ?? $value[ 'field_icon' ] ?? '';
+				$icon = $def_icons[ $value['field_icon'] ] ?? $value['field_icon'] ?? '';
 				if ( is_array( $icon ) ) {
-					$value[ 'field_icon' ] = $icon;
+					$value['field_icon'] = $icon;
 				} else {
-					$value[ 'field_icon' ] = array(
+					$value['field_icon'] = array(
 						'icon'     => $icon,
 						'view_box' => '',
 						'path'     => '',
@@ -231,7 +230,7 @@ class PluginSettings extends BaseSetting {
 
 		$trashable_infos = parent::get( 'trip_facts' ) ?? wptravelengine_get_trip_facts_options();
 
-		$field_icons = $trashable_infos[ 'field_icon' ] ?? array();
+		$field_icons = $trashable_infos['field_icon'] ?? array();
 		if ( ! empty( array_filter( $field_icons, 'is_string' ) ) || is_null( parent::get( 'trip_facts' ) ) ) {
 
 			$trashable_arr = array(
@@ -374,12 +373,12 @@ class PluginSettings extends BaseSetting {
 			);
 
 			$temp_arr = array();
-			foreach ( $trashable_infos[ 'fid' ] as $fid ) {
+			foreach ( $trashable_infos['fid'] as $fid ) {
 				if ( ! is_array( $field_icons[ $fid ] ?? '' ) ) {
 					$temp_arr[ $fid ] = array(
-						'icon'     => $trashable_arr[ $field_icons[ $fid ] ][ 'icon' ] ?? $field_icons[ $fid ] ?? '',
-						'view_box' => $trashable_arr[ $field_icons[ $fid ] ][ 'view_box' ] ?? '',
-						'path'     => $trashable_arr[ $field_icons[ $fid ] ][ 'path' ] ?? '',
+						'icon'     => $trashable_arr[ $field_icons[ $fid ] ]['icon'] ?? $field_icons[ $fid ] ?? '',
+						'view_box' => $trashable_arr[ $field_icons[ $fid ] ]['view_box'] ?? '',
+						'path'     => $trashable_arr[ $field_icons[ $fid ] ]['path'] ?? '',
 					);
 				} else {
 					$temp_arr[ $fid ] = $field_icons[ $fid ];
@@ -388,7 +387,7 @@ class PluginSettings extends BaseSetting {
 
 			unset( $trashable_arr );
 
-			$trashable_infos[ 'field_icon' ] = $temp_arr;
+			$trashable_infos['field_icon'] = $temp_arr;
 
 			$this->set( 'trip_facts', $trashable_infos );
 		}
@@ -562,7 +561,7 @@ class PluginSettings extends BaseSetting {
 		$terms[] = (object) wp_insert_term( 'Adult', $pricing_taxonomy, array( 'slug' => 'adult' ) );
 		$terms[] = (object) wp_insert_term( 'Child', $pricing_taxonomy, array( 'slug' => 'child' ) );
 
-		Options::update( 'primary_pricing_category', $terms[ 0 ]->term_id );
+		Options::update( 'primary_pricing_category', $terms[0]->term_id );
 
 		return $terms;
 	}
@@ -573,7 +572,10 @@ class PluginSettings extends BaseSetting {
 	 * @return WP_Term[]
 	 */
 	public function get_traveler_categories( array $args = array() ): array {
-		$default = array( 'taxonomy' => 'trip-packages-categories', 'hide_empty' => false );
+		$default = array(
+			'taxonomy'   => 'trip-packages-categories',
+			'hide_empty' => false,
+		);
 		$terms   = get_terms( wp_parse_args( $args, $default ) );
 		if ( empty( $terms ) ) {
 			$terms = array_map(
@@ -584,7 +586,7 @@ class PluginSettings extends BaseSetting {
 			);
 		}
 
-		return is_wp_error( $terms ) ? [] : $terms;
+		return is_wp_error( $terms ) ? array() : $terms;
 	}
 
 	/**
@@ -605,7 +607,7 @@ class PluginSettings extends BaseSetting {
 
 		$terms = $this->get_traveler_categories();
 
-		return $terms[ 0 ];
+		return $terms[0];
 	}
 
 	/**
@@ -614,7 +616,7 @@ class PluginSettings extends BaseSetting {
 	 * @return void
 	 */
 	private function set_defaults() {
-		if( is_null( Options::get( 'wte_update_mail_template' ) ) ){
+		if ( is_null( Options::get( 'wte_update_mail_template' ) ) ) {
 			Options::update(
 				'wte_update_mail_template',
 				wptravelengine_replace(
@@ -630,5 +632,4 @@ class PluginSettings extends BaseSetting {
 			);
 		}
 	}
-
 }

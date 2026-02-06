@@ -29,7 +29,7 @@ $payment_status_arr = array(
 		<h4 class="wpte-title"><?php esc_html_e( 'Payment Details', 'wp-travel-engine' ); ?></h4>
 		<div class="wpte-button-wrap wpte-edit-bkng">
 			<a href="#" class="wpte-btn-transparent wpte-btn-sm">
-				<?php wptravelengine_svg_by_fa_icon( "fas fa-pencil-alt" ); ?>
+				<?php wptravelengine_svg_by_fa_icon( 'fas fa-pencil-alt' ); ?>
 				<?php esc_html_e( 'Edit', 'wp-travel-engine' ); ?>
 			</a>
 		</div>

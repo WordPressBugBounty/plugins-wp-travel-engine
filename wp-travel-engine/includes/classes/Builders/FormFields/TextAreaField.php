@@ -6,7 +6,7 @@ namespace WPTravelEngine\Builders\FormFields;
  *
  * @since 6.3.0
  */
-class TextAreaField extends \WP_Travel_Engine_Form_Field_Textarea{
+class TextAreaField extends \WP_Travel_Engine_Form_Field_Textarea {
 	/**
 	 * Render form template
 	 *

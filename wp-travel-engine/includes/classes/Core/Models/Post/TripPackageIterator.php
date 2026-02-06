@@ -42,20 +42,20 @@ class TripPackageIterator extends Iterator {
 	public function __construct( Trip $trip ) {
 		$this->trip = $trip;
 
-		$package_ids 		= (array) $this->trip->get_meta( 'packages_ids' );
+		$package_ids        = (array) $this->trip->get_meta( 'packages_ids' );
 		$primary_package_id = $this->trip->get_meta( 'primary_package' );
 
 		if ( ! empty( $primary_package_id ) ) {
 			if ( ! in_array( $primary_package_id, $package_ids ) ) {
 				update_post_meta( $this->trip->get_id(), 'primary_package', $package_ids[0] );
 			}
-			$package_ids 		= array_diff( $package_ids, array( $primary_package_id ) );
+			$package_ids = array_diff( $package_ids, array( $primary_package_id ) );
 			array_unshift( $package_ids, $primary_package_id );
 		}
 
 		foreach ( $package_ids as $package_id ) {
 			if ( is_numeric( $package_id ) ) {
-				$package = get_post( $package_id );
+				$package            = get_post( $package_id );
 				$package_categories = get_post_meta( $package_id, 'package-categories', true );
 				if ( $package && $package_categories ) {
 					$this->packages[] = new TripPackage( $package_id, $this->trip );
@@ -65,5 +65,4 @@ class TripPackageIterator extends Iterator {
 
 		parent::__construct( $this->packages );
 	}
-
 }

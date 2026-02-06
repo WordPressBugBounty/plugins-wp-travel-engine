@@ -34,7 +34,7 @@ if ( isset( $wp_travel_engine_setting['trip_prev_price'] ) && $wp_travel_engine_
 							}
 							echo "<strike style='color:red'>";
 							echo "<span class='currency-code'>" . esc_attr( $code ) . '</span>&nbsp;<span class="currency">' . esc_attr( $currency ) . '&nbsp;</span>';
-							echo '<span class="trip-cost">' . wte_esc_price( $obj->wp_travel_engine_price_format( $prev_cost )) . '</span>';
+							echo '<span class="trip-cost">' . wte_esc_price( $obj->wp_travel_engine_price_format( $prev_cost ) ) . '</span>';
 							echo '</strike>';
 						}
 						?>
@@ -47,7 +47,7 @@ if ( isset( $wp_travel_engine_setting['trip_prev_price'] ) && $wp_travel_engine_
 								echo '<span class="currency-code">' . esc_attr( $code ) . '</span>&nbsp;';
 								echo '<span class="currency">' . esc_attr( $currency ) . '</span>&nbsp;';
 								echo '<strong class="trip-cost-holder">' . esc_attr( $obj->wp_travel_engine_price_format( $cost ) ) . '</strong>';
-								echo '<span class="per-person">' . esc_html( $person_format ). '</span>';
+								echo '<span class="per-person">' . esc_html( $person_format ) . '</span>';
 							?>
 						</strong>
 						<?php
@@ -61,7 +61,7 @@ if ( isset( $wp_travel_engine_setting['trip_prev_price'] ) && $wp_travel_engine_
 							}
 								echo '<span class="currency-code">' . esc_attr( $code ) . '</span>&nbsp;';
 								echo '<span class="currency">' . esc_attr( $currency ) . '</span>&nbsp;';
-								echo '<strong class="trip-cost-holder">' . ( wte_esc_price( $obj->wp_travel_engine_price_format( $prev_cost )) ) . '</strong>';
+								echo '<strong class="trip-cost-holder">' . ( wte_esc_price( $obj->wp_travel_engine_price_format( $prev_cost ) ) ) . '</strong>';
 								echo '<span class="per-person">' . esc_html( $person_format ) . '</span>';
 							?>
 						</strong>
@@ -121,14 +121,14 @@ if ( isset( $wp_travel_engine_setting['trip_prev_price'] ) && $wp_travel_engine_
 					?>
 					<span class="hidden-price"><?php echo esc_attr( $cost ); ?></span>
 					<div class="total-amt"><b><?php esc_html_e( 'Total', 'wp-travel-engine' ); ?></b>
-						<?php echo '<span class="currency">' . esc_attr( $currency ) . '</span>' . ' '; ?><span class="total"><?php echo wte_esc_price( $obj->wp_travel_engine_price_format( $cost )); ?></span><?php echo ' ' . '<span class="currency-code">' . esc_attr( $code ) . '</span>'; ?>
+						<?php echo '<span class="currency">' . esc_attr( $currency ) . '</span>' . ' '; ?><span class="total"><?php echo wte_esc_price( $obj->wp_travel_engine_price_format( $cost ) ); ?></span><?php echo ' ' . '<span class="currency-code">' . esc_attr( $code ) . '</span>'; ?>
 					</div>
 					<?php
 				} else {
 					?>
 					<span class="hidden-price"><?php echo esc_attr( $prev_cost ); ?></span>
 					<div class="total-amt"><b><?php esc_html_e( 'Total', 'wp-travel-engine' ); ?></b>
-						<?php echo '<span class="currency">' . esc_attr( $currency ) . '</span>' . ' '; ?><span class="total"><?php echo wte_esc_price( $obj->wp_travel_engine_price_format( $prev_cost )); ?></span><?php echo ' ' . '<span class="currency-code">' . esc_attr( $code ) . '</span>'; ?>
+						<?php echo '<span class="currency">' . esc_attr( $currency ) . '</span>' . ' '; ?><span class="total"><?php echo wte_esc_price( $obj->wp_travel_engine_price_format( $prev_cost ) ); ?></span><?php echo ' ' . '<span class="currency-code">' . esc_attr( $code ) . '</span>'; ?>
 					</div>
 				<?php } ?>
 				<?php

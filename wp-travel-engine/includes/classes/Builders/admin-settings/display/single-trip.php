@@ -29,7 +29,7 @@ foreach ( array(
 }
 
 $trip_banner_layouts = array();
-//Banner Layouts
+// Banner Layouts
 foreach ( array(
 	'banner-default',
 	'banner-layout-1',
@@ -38,7 +38,7 @@ foreach ( array(
 	'banner-layout-4',
 	'banner-layout-5',
 	'banner-layout-6',
-) as $layout => $value) {
+) as $layout => $value ) {
 	$trip_banner_layouts[] = array(
 		'value' => $value,
 		'image' => esc_url( WP_TRAVEL_ENGINE_FILE_URL . '/public/images/trip-banner/' . esc_attr( $value ) . '.svg' ),
@@ -67,27 +67,27 @@ return apply_filters(
 			),
 			array(
 				'field_type' => 'TAB',
-				'tabs'    => array(
+				'tabs'       => array(
 					array(
-						'title' => __('General', 'wp-travel-engine'),
-						'id' => 'general',
+						'title'  => __( 'General', 'wp-travel-engine' ),
+						'id'     => 'general',
 						'fields' => array(
 							array(
 								'field_type' => 'TITLE',
 								'title'      => __( 'Banner Layouts', 'wp-travel-engine' ),
 							),
 							array(
-								'divider'     => true,
-								'field_type'  => 'IMAGE_SELECTOR',
-								'name'        => 'trip_banner_layout',
-								'options'     => $trip_banner_layouts,
+								'divider'    => true,
+								'field_type' => 'IMAGE_SELECTOR',
+								'name'       => 'trip_banner_layout',
+								'options'    => $trip_banner_layouts,
 								// 'label'       => __( 'Select The Banner Layout', 'wp-travel-engine'),
-								'isNew' 	  => WP_TRAVEL_ENGINE_VERSION === '6.3.3',
-								'direction'   => 'vertical'
+								'isNew'      => WP_TRAVEL_ENGINE_VERSION === '6.3.3',
+								'direction'  => 'vertical',
 							),
 							array(
-								'label'      => __( 'Display Fullwidth', 'wp-travel-engine'),
-								'help'       => __( 'Stretch banner image to fit the screen width.', 'wp-travel-engine'),
+								'label'      => __( 'Display Fullwidth', 'wp-travel-engine' ),
+								'help'       => __( 'Stretch banner image to fit the screen width.', 'wp-travel-engine' ),
 								'field_type' => 'SWITCH',
 								'name'       => 'display_banner_fullwidth',
 								'condition'  => 'trip_banner_layout === banner-layout-1',
@@ -201,16 +201,16 @@ return apply_filters(
 							),
 							array(
 								'label'       => __( 'FSE Template', 'wp-travel-engine' ),
-								'description' => sprintf( __( 'Enable to use the new Full Site Editing (FSE) templates provided by WP Travel Engine. For more details, refer to the %1$s documentation%2$s which guides you on how to set up these templates.', 'wp-travel-engine' ), '<a target="_blank" href="https://docs.wptravelengine.com/article/wp-travel-engine-blocks-patterns-templates/?utm_source=free_plugin&utm_medium=dashboard&utm_campaign=docs">','</a>' ),
+								'description' => sprintf( __( 'Enable to use the new Full Site Editing (FSE) templates provided by WP Travel Engine. For more details, refer to the %1$s documentation%2$s which guides you on how to set up these templates.', 'wp-travel-engine' ), '<a target="_blank" href="https://docs.wptravelengine.com/article/wp-travel-engine-blocks-patterns-templates/?utm_source=free_plugin&utm_medium=dashboard&utm_campaign=docs">', '</a>' ),
 								'field_type'  => 'SWITCH',
 								'name'        => 'enable_fse',
 								'divider'     => true,
 							),
 							array(
-								'label'       => __( 'Show warning message in booking modal', 'wp-travel-engine' ),
-								'field_type'  => 'SWITCH',
-								'name'        => 'show_modal_warning',
-								'isNew'       => version_compare( WP_TRAVEL_ENGINE_VERSION, '6.7.0', '<' ),
+								'label'      => __( 'Show warning message in booking modal', 'wp-travel-engine' ),
+								'field_type' => 'SWITCH',
+								'name'       => 'show_modal_warning',
+								'isNew'      => version_compare( WP_TRAVEL_ENGINE_VERSION, '6.7.0', '<' ),
 							),
 							array(
 								'field_type' => 'GROUP',
@@ -228,8 +228,8 @@ return apply_filters(
 						),
 					),
 					array(
-						'title' => __('Pricing Widget', 'wp-travel-engine'),
-						'id' => 'pricing-widget',
+						'title'  => __( 'Pricing Widget', 'wp-travel-engine' ),
+						'id'     => 'pricing-widget',
 						'fields' => array(
 							array(
 								'field_type' => 'TITLE',
@@ -291,18 +291,18 @@ return apply_filters(
 								'placeholder' => __( 'Need help with booking? [[Send Us A Message]]', 'wp-travel-engine' ),
 							),
 							// array(
-							// 	'isNew'       => WP_TRAVEL_ENGINE_VERSION <= '6.6.8',
-							// 	'label'       => __( 'Enquiry Link Label', 'wp-travel-engine' ),
-							// 	'field_type'  => 'TEXT',
-							// 	'name'        => 'pricing_widget.enquiry_link_label',
-							// 	'placeholder' => __( 'Send us a message', 'wp-travel-engine' ),
-							// 	'divider'     => true,
+							// 'isNew'       => WP_TRAVEL_ENGINE_VERSION <= '6.6.8',
+							// 'label'       => __( 'Enquiry Link Label', 'wp-travel-engine' ),
+							// 'field_type'  => 'TEXT',
+							// 'name'        => 'pricing_widget.enquiry_link_label',
+							// 'placeholder' => __( 'Send us a message', 'wp-travel-engine' ),
+							// 'divider'     => true,
 							// ),
 						),
 					),
 					array(
-						'title' => __('Enquiry Form', 'wp-travel-engine'),
-						'id' => 'enquiry-form',
+						'title'  => __( 'Enquiry Form', 'wp-travel-engine' ),
+						'id'     => 'enquiry-form',
 						'fields' => array(
 							array(
 								'label'       => __( 'Show Enquiry Form', 'wp-travel-engine' ),
@@ -340,12 +340,12 @@ return apply_filters(
 										),
 									),
 									array(
-										'label'      => __( 'Enquiry Form Link', 'wp-travel-engine' ),
-										'field_type' => 'TEXT',
-										'condition'  => 'inquiry_form.link_type === custom',
-										'name'       => 'inquiry_form.link',
-										'description' => __( 'Replace the default form with a custom form using a shortcode.', 'wp-travel-engine' ),
-										'divider'    => true,
+										'label'       => __( 'Enquiry Form Link', 'wp-travel-engine' ),
+										'field_type'  => 'TEXT',
+										'condition'   => 'inquiry_form.link_type === custom',
+										'name'        => 'inquiry_form.link',
+										'description' => __( 'Add the URL where users will be redirected after clicking the enquiry link.', 'wp-travel-engine' ),
+										'divider'     => true,
 									),
 								),
 							),
@@ -383,8 +383,8 @@ return apply_filters(
 						),
 					),
 					array(
-						'title' => __('Related Trips', 'wp-travel-engine'),
-						'id' => 'related-trips',
+						'title'  => __( 'Related Trips', 'wp-travel-engine' ),
+						'id'     => 'related-trips',
 						'fields' => array(
 							array(
 								'label'       => __( 'Show Related Trips', 'wp-travel-engine' ),
@@ -428,10 +428,10 @@ return apply_filters(
 							),
 							array(
 								'condition'  => 'related_trips.enable === true',
-								'label'       => __( 'New Layout for Related Trips', 'wp-travel-engine' ),
+								'label'      => __( 'New Layout for Related Trips', 'wp-travel-engine' ),
 								// 'description' => __( 'Enable to display new design in related trip section.', 'wp-travel-engine' ),
-								'field_type'  => 'SWITCH',
-								'name'        => 'related_trip_new_layout.enable',
+								'field_type' => 'SWITCH',
+								'name'       => 'related_trip_new_layout.enable',
 							),
 							array(
 								'field_type' => 'GROUP',
@@ -445,11 +445,11 @@ return apply_filters(
 										'divider'     => true,
 									),
 									array(
-										'label'       => __( 'Enable Featured Tag on Card', 'wp-travel-engine' ),
+										'label'      => __( 'Enable Featured Tag on Card', 'wp-travel-engine' ),
 										// 'description' => __( 'Enable to show featured tag on card.', 'wp-travel-engine' ),
-										'field_type'  => 'SWITCH',
-										'name'        => 'related_trip_new_layout.enable_featured_tag',
-										'divider'     => true,
+										'field_type' => 'SWITCH',
+										'name'       => 'related_trip_new_layout.enable_featured_tag',
+										'divider'    => true,
 									),
 									array(
 										'label'       => __( 'Enable Wishlist', 'wp-travel-engine' ),
@@ -466,11 +466,11 @@ return apply_filters(
 										'divider'     => true,
 									),
 									array(
-										'label'       => __( 'Show Excerpt', 'wp-travel-engine' ),
+										'label'      => __( 'Show Excerpt', 'wp-travel-engine' ),
 										// 'description' => __( 'Enable to display related trip excerpt.', 'wp-travel-engine' ),
-										'field_type'  => 'SWITCH',
-										'name'        => 'related_trip_new_layout.enable_excerpt',
-										'divider'     => true,
+										'field_type' => 'SWITCH',
+										'name'       => 'related_trip_new_layout.enable_excerpt',
+										'divider'    => true,
 									),
 									array(
 										'label'       => __( 'Enable Difficulty', 'wp-travel-engine' ),
@@ -487,18 +487,18 @@ return apply_filters(
 										'divider'     => true,
 									),
 									array(
-										'label'       => __( 'Enable Next Departure Dates', 'wp-travel-engine' ),
+										'label'      => __( 'Enable Next Departure Dates', 'wp-travel-engine' ),
 										// 'description' => __( 'Enable to show next departure dates.', 'wp-travel-engine' ),
-										'field_type'  => 'SWITCH',
-										'name'        => 'related_trip_new_layout.enable_fsd',
-										'divider'     => true,
+										'field_type' => 'SWITCH',
+										'name'       => 'related_trip_new_layout.enable_fsd',
+										'divider'    => true,
 									),
 									array(
-										'label'       => __( 'Enable Available Months', 'wp-travel-engine' ),
+										'label'      => __( 'Enable Available Months', 'wp-travel-engine' ),
 										// 'description' => __( 'Enable to show available months on card.', 'wp-travel-engine' ),
-										'field_type'  => 'SWITCH',
-										'name'        => 'related_trip_new_layout.enable_available_months',
-										'divider'     => true,
+										'field_type' => 'SWITCH',
+										'name'       => 'related_trip_new_layout.enable_available_months',
+										'divider'    => true,
 									),
 									array(
 										'visibility'  => 'related_trip_new_layout.enable_available_months === true',

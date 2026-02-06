@@ -1,31 +1,11 @@
 <?php
 /**
  * @var array $remaining_payment
- * @var Booking $booking
+ * @var WPTravelEngine\Core\Models\Post\Booking $booking
  */
+$payment_link = $booking->get_due_payment_link();
 
-use WPTravelEngine\Core\Models\Post\Booking;
-use WPTravelEngine\Core\Models\Post\Payment;
-
-$_cart_info              = $booking->get_meta( 'cart_info' );
-$is_booking_edit_enabled = isset( $_cart_info['items'] );
-$due_amount = $booking->get_total_due_amount();
-if( round( $due_amount, 2 ) <= 0 ){
-	return;
-}
-$payments = $booking->get_payment_detail();
-$payment_amount = 0;
-if ( is_array( $payments ) && count( $payments ) > 0 ) {
-	foreach( $payments as $payment ){
-		$payment_id = Payment::make( $payment );
-		$payment_amount += $payment_id->get_amount();
-	}
-}
-$is_customized_reservation = $booking->get_meta( '_user_edited' );
-if( $payment_amount >= $due_amount && $is_customized_reservation ){
-	return;
-}
-if ( ! $is_booking_edit_enabled || ! $booking->has_due_payment() || ! $booking->get_order_items() ) {
+if ( empty( $payment_link ) || $booking->get_total_due_amount() <= 0 ) {
 	return;
 }
 ?>
@@ -33,7 +13,7 @@ if ( ! $is_booking_edit_enabled || ! $booking->has_due_payment() || ! $booking->
 <div class="wpte-field">
 	<label for=""><?php echo __( 'Remaining Payment Link', 'wp-travel-engine' ); ?></label>
 	<div class="wpte-copy-field">
-		<input type="url" name="" id="" value="<?php echo esc_url( $booking->get_due_payment_link() ); ?>" readonly>
+		<input type="url" name="" id="" value="<?php echo esc_url( $payment_link ); ?>" readonly>
 		<button type="button" class="wpte-button wpte-link wpte-tooltip" data-content="Copy Link">
 			<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 				<path

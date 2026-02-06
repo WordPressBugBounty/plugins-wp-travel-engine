@@ -49,7 +49,7 @@ class Trip extends WP_REST_Posts_Controller {
 	 * Error object.
 	 *
 	 * @access protected
-	 * @var WP_Error
+	 * @var ?WP_Error
 	 */
 	protected $errors;
 
@@ -78,12 +78,20 @@ class Trip extends WP_REST_Posts_Controller {
 	public $trip_settings;
 
 	/**
+	 * Maximum number of recurring date instances to generate.
+	 * This limit prevents performance issues with unbounded recurrence rules.
+	 *
+	 * @var int
+	 * @since 6.7.4
+	 */
+	public static $recurring_date_count_limit = 10;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $post_type Post type.
 	 *
 	 * @since 4.7.0
-	 *
 	 */
 	public function __construct( $post_type ) {
 		parent::__construct( $post_type );
@@ -178,9 +186,9 @@ class Trip extends WP_REST_Posts_Controller {
 
 		$schema = $this->get_item_schema();
 
-		if ( ! empty( $schema[ 'properties' ] ) ) {
-			foreach ( $schema[ 'properties' ] as &$property ) {
-				unset( $property[ 'arg_options' ] );
+		if ( ! empty( $schema['properties'] ) ) {
+			foreach ( $schema['properties'] as &$property ) {
+				unset( $property['arg_options'] );
 			}
 		}
 
@@ -203,12 +211,22 @@ class Trip extends WP_REST_Posts_Controller {
 		$this->errors->add(
 			$error_code,
 			$error_message ?? 'Bad Request.',
-			[
+			array(
 				'status'  => 400,
 				'param'   => $error_param,
 				'details' => strip_tags( $error_message ),
-			]
+			)
 		);
+	}
+
+	/**
+	 * Has errors.
+	 *
+	 * @return bool
+	 * @since 6.7.0
+	 */
+	public function has_errors(): bool {
+		return isset( $this->errors ) && $this->errors->has_errors();
 	}
 
 	/**
@@ -249,9 +267,9 @@ class Trip extends WP_REST_Posts_Controller {
 	 */
 	public function delete_package( WP_REST_Request $request ) {
 		try {
-			if ( wp_delete_post( $request[ 'package_id' ], true ) ) {
+			if ( wp_delete_post( $request['package_id'], true ) ) {
 				$trip = new Post\Trip( $request->get_param( 'id' ) );
-				if ( (int) $trip->get_meta( 'primary_package' ) === (int) $request[ 'package_id' ] ) {
+				if ( (int) $trip->get_meta( 'primary_package' ) === (int) $request['package_id'] ) {
 					$trip->delete_meta( 'primary_package' );
 				}
 				$default_package = $trip->default_package();
@@ -261,18 +279,18 @@ class Trip extends WP_REST_Posts_Controller {
 					$trip->update_meta( '_s_price', 0 );
 				}
 				$previous           = $this->prepare_item_for_response( $trip->post, $request );
-				$remaining_packages = array_diff( (array) $trip->get_meta( 'packages_ids' ), [ $request[ 'package_id' ] ] );
+				$remaining_packages = array_diff( (array) $trip->get_meta( 'packages_ids' ), array( $request['package_id'] ) );
 				$trip->set_meta( 'packages_ids', empty( $remaining_packages ) ? '' : $remaining_packages )->save();
 
-				return new WP_REST_Response( [
+				return new WP_REST_Response(
+					array(
 						'deleted'  => true,
 						'previous' => $previous->get_data(),
-					]
+					)
 				);
 			} else {
 				throw new \Exception();
 			}
-
 		} catch ( \Exception $e ) {
 			// error_log( $e->getMessage() );
 			return new WP_Error(
@@ -290,7 +308,6 @@ class Trip extends WP_REST_Posts_Controller {
 	 *
 	 * @return WP_Error|WP_REST_Response
 	 * @since 6.2.0
-	 *
 	 */
 	public function update_item( $request ) {
 
@@ -320,7 +337,6 @@ class Trip extends WP_REST_Posts_Controller {
 		$this->trip->save();
 
 		return $this->prepare_item_for_response( $this->trip->post, $request );
-
 	}
 
 	/**
@@ -330,7 +346,6 @@ class Trip extends WP_REST_Posts_Controller {
 	 *
 	 * @return void
 	 * @since 6.2.2
-	 *
 	 */
 	protected function set_core_settings( WP_REST_Request $request ): void {
 
@@ -341,173 +356,173 @@ class Trip extends WP_REST_Posts_Controller {
 			$request->set_param( 'trip_code', $trip->get_trip_code() );
 		}
 
-		if ( isset( $request[ 'trip_code' ] ) ) {
-			if ( $request[ 'trip_code' ] !== '' ) {
-				$this->trip_settings->set( 'trip_code', $request[ 'trip_code' ] );
+		if ( isset( $request['trip_code'] ) ) {
+			if ( $request['trip_code'] !== '' ) {
+				$this->trip_settings->set( 'trip_code', $request['trip_code'] );
 			} else {
-				$this->set_bad_request( 'invalid_trip_code', sprintf( __( '%sTrip Code%s is required.', 'wp-travel-engine' ), '<strong>', '</strong>' ) );
+				$this->set_bad_request( 'invalid_trip_code', sprintf( __( '%1$sTrip Code%2$s is required.', 'wp-travel-engine' ), '<strong>', '</strong>' ) );
 			}
 		}
 
 		if ( isset( $request['duration'] ) ) {
-			$duration_unit = $request[ 'duration' ][ 'unit' ] ?? $trip_settings->get( 'trip_duration_unit', 'days' );
+			$duration_unit = $request['duration']['unit'] ?? $trip_settings->get( 'trip_duration_unit', 'days' );
 			if ( in_array( $duration_unit, array( 'days', 'hours' ) ) ) {
 				$trip_settings->set( 'trip_duration_unit', $duration_unit );
 			}
-			$duration_period = $request[ 'duration' ][ 'period' ] ?? $trip_settings->get( 'trip_duration' );
+			$duration_period = $request['duration']['period'] ?? $trip_settings->get( 'trip_duration' );
 			if ( is_numeric( $duration_period ) ) {
 				$trip_settings->set( 'trip_duration', $duration_period );
 				$duration = $duration_unit === 'days' ? $duration_period * 24 : $duration_period;
 				$trip->set_meta( 'wp_travel_engine_setting_trip_duration', $duration );
 				$trip->set_meta( '_s_duration', $duration );
 			} else {
-				$this->set_bad_request( 'invalid_duration_unit', sprintf( __( '%sDuration%s must be a number.', 'wp-travel-engine' ), '<strong>', '</strong>' ) );
+				$this->set_bad_request( 'invalid_duration_unit', sprintf( __( '%1$sDuration%2$s must be a number.', 'wp-travel-engine' ), '<strong>', '</strong>' ) );
 			}
 		}
 
-		if ( isset( $request[ 'duration' ][ 'nights' ] ) ) {
-			if ( $request[ 'duration' ][ 'nights' ] >= 0 ) {
-				$trip_settings->set( 'trip_duration_nights', $request[ 'duration' ][ 'nights' ] );
+		if ( isset( $request['duration']['nights'] ) ) {
+			if ( $request['duration']['nights'] >= 0 ) {
+				$trip_settings->set( 'trip_duration_nights', $request['duration']['nights'] );
 			} else {
-				$this->set_bad_request( 'invalid_trip_duration_nights', sprintf( __( '%sTrip Duration Night%s must be greater than or equal to 0.', 'wp-travel-engine' ), '<strong>', '</strong>' ) );
+				$this->set_bad_request( 'invalid_trip_duration_nights', sprintf( __( '%1$sTrip Duration Night%2$s must be greater than or equal to 0.', 'wp-travel-engine' ), '<strong>', '</strong>' ) );
 			}
 		}
 
-		if ( isset( $request[ 'cut_off_time' ][ 'enable' ] ) ) {
-			$trip_settings->set( 'trip_cutoff_enable', $request[ 'cut_off_time' ][ 'enable' ] );
+		if ( isset( $request['cut_off_time']['enable'] ) ) {
+			$trip_settings->set( 'trip_cutoff_enable', $request['cut_off_time']['enable'] );
 		}
 
-		if ( isset( $request[ 'cut_off_time' ][ 'period' ] ) ) {
-			$cut_off_unit = $request[ 'cut_off_time' ][ 'unit' ] ?? $trip_settings->get( 'trip_cut_off_unit' );
-			if ( 'hours' === $cut_off_unit && ( $request[ 'cut_off_time' ][ 'period' ] > 24 || $request[ 'cut_off_time' ][ 'period' ] < 0 ) ) {
-				$this->set_bad_request( 'invalid_cut_off_time_period', sprintf( __( '%sCut-off Time Period%s must fall within the range of 0 to 24 hours.', 'wp-travel-engine' ), '<strong>', '</strong>' ) );
-			} else if ( 'days' === $cut_off_unit && $request[ 'cut_off_time' ][ 'period' ] < 0 ) {
-				$this->set_bad_request( 'invalid_cut_off_time_period', sprintf( __( '%sCut-off Time Period%s must be greater than or equal to 0.', 'wp-travel-engine' ), '<strong>', '</strong>' ) );
+		if ( isset( $request['cut_off_time']['period'] ) ) {
+			$cut_off_unit = $request['cut_off_time']['unit'] ?? $trip_settings->get( 'trip_cut_off_unit' );
+			if ( 'hours' === $cut_off_unit && ( $request['cut_off_time']['period'] > 24 || $request['cut_off_time']['period'] < 0 ) ) {
+				$this->set_bad_request( 'invalid_cut_off_time_period', sprintf( __( '%1$sCut-off Time Period%2$s must fall within the range of 0 to 24 hours.', 'wp-travel-engine' ), '<strong>', '</strong>' ) );
+			} elseif ( 'days' === $cut_off_unit && $request['cut_off_time']['period'] < 0 ) {
+				$this->set_bad_request( 'invalid_cut_off_time_period', sprintf( __( '%1$sCut-off Time Period%2$s must be greater than or equal to 0.', 'wp-travel-engine' ), '<strong>', '</strong>' ) );
 			}
 
 			if ( ! $this->errors ) {
-				$trip_settings->set( 'trip_cut_off_time', $request[ 'cut_off_time' ][ 'period' ] );
+				$trip_settings->set( 'trip_cut_off_time', $request['cut_off_time']['period'] );
 			}
 		}
 
-		if ( isset( $request[ 'cut_off_time' ][ 'unit' ] ) ) {
-			if ( in_array( $request[ 'cut_off_time' ][ 'unit' ], array( 'days', 'hours' ) ) ) {
-				$trip_settings->set( 'trip_cut_off_unit', $request[ 'cut_off_time' ][ 'unit' ] );
+		if ( isset( $request['cut_off_time']['unit'] ) ) {
+			if ( in_array( $request['cut_off_time']['unit'], array( 'days', 'hours' ) ) ) {
+				$trip_settings->set( 'trip_cut_off_unit', $request['cut_off_time']['unit'] );
 			} else {
-				$this->set_bad_request( 'invalid_cut_off_time_unit', sprintf( __( '%sCut-off Time Unit%s must be either \'days\' or \'hours\'.', 'wp-travel-engine' ), '<strong>', '</strong>' ) );
+				$this->set_bad_request( 'invalid_cut_off_time_unit', sprintf( __( '%1$sCut-off Time Unit%2$s must be either \'days\' or \'hours\'.', 'wp-travel-engine' ), '<strong>', '</strong>' ) );
 			}
 		}
 
-		if ( isset( $request[ 'age_limit' ][ 'enable' ] ) ) {
-			$trip_settings->set( 'min_max_age_enable', (string) ( $request[ 'age_limit' ][ 'enable' ] ? 'true' : 'false' ) );
+		if ( isset( $request['age_limit']['enable'] ) ) {
+			$trip_settings->set( 'min_max_age_enable', (string) ( $request['age_limit']['enable'] ? 'true' : 'false' ) );
 		}
 
-		if ( isset( $request[ 'age_limit' ][ 'min' ] ) ) {
-			if ( $request[ 'age_limit' ][ 'min' ] >= 0 ) {
-				$trip->set_meta( 'wp_travel_engine_trip_min_age', $request[ 'age_limit' ][ 'min' ] );
+		if ( isset( $request['age_limit']['min'] ) ) {
+			if ( $request['age_limit']['min'] >= 0 ) {
+				$trip->set_meta( 'wp_travel_engine_trip_min_age', $request['age_limit']['min'] );
 			} else {
-				$this->set_bad_request( 'invalid_age_limit_min', sprintf( __( '%sMinimum Age Limit%s must be greater than or equal to 0.', 'wp-travel-engine' ), '<strong>', '</strong>' ) );
+				$this->set_bad_request( 'invalid_age_limit_min', sprintf( __( '%1$sMinimum Age Limit%2$s must be greater than or equal to 0.', 'wp-travel-engine' ), '<strong>', '</strong>' ) );
 			}
 		}
 
-		if ( isset( $request[ 'age_limit' ][ 'max' ] ) ) {
-			if ( $request[ 'age_limit' ][ 'max' ] > 0 ) {
-				$trip->set_meta( 'wp_travel_engine_trip_max_age', $request[ 'age_limit' ][ 'max' ] );
+		if ( isset( $request['age_limit']['max'] ) ) {
+			if ( $request['age_limit']['max'] > 0 ) {
+				$trip->set_meta( 'wp_travel_engine_trip_max_age', $request['age_limit']['max'] );
 			} else {
-				$this->set_bad_request( 'invalid_age_limit_max', sprintf( __( '%sMaximum Age Limit%s must be greater than 0.', 'wp-travel-engine' ), '<strong>', '</strong>' ) );
+				$this->set_bad_request( 'invalid_age_limit_max', sprintf( __( '%1$sMaximum Age Limit%2$s must be greater than 0.', 'wp-travel-engine' ), '<strong>', '</strong>' ) );
 			}
 		}
 
 		// if ( isset( $request[ 'participants' ][ 'enable' ] ) ) {
-		// 	$trip_settings->set( 'minmax_pax_enable', (string) ( $request[ 'participants' ][ 'enable' ] ? 'true' : 'false' ) );
+		// $trip_settings->set( 'minmax_pax_enable', (string) ( $request[ 'participants' ][ 'enable' ] ? 'true' : 'false' ) );
 		// }
 
-		if ( isset( $request[ 'participants' ][ 'min' ] ) ) {
-			if ( $request[ 'participants' ][ 'min' ] >= 0 ) {
-				$trip->set_meta( '_s_min_pax', $request[ 'participants' ][ 'min' ] );
-				$trip_settings->set( 'trip_minimum_pax', $request[ 'participants' ][ 'min' ] );
+		if ( isset( $request['participants']['min'] ) ) {
+			if ( $request['participants']['min'] >= 0 ) {
+				$trip->set_meta( '_s_min_pax', $request['participants']['min'] );
+				$trip_settings->set( 'trip_minimum_pax', $request['participants']['min'] );
 			} else {
-				$this->set_bad_request( 'invalid_participants_min', sprintf( __( '%sMinimum Participants%s must be greater than or equal to 0.', 'wp-travel-engine' ), '<strong>', '</strong>' ) );
+				$this->set_bad_request( 'invalid_participants_min', sprintf( __( '%1$sMinimum Participants%2$s must be greater than or equal to 0.', 'wp-travel-engine' ), '<strong>', '</strong>' ) );
 			}
 		}
 
-		if ( isset( $request[ 'participants' ][ 'max' ] ) ) {
-			if ( $request[ 'participants' ][ 'max' ] > 0 || $request[ 'participants' ][ 'max' ] === '' ) {
-				$trip->set_meta( '_s_max_pax', $request[ 'participants' ][ 'max' ] );
-				$trip->set_meta( 'total_travellers_per_day', $request[ 'participants' ][ 'max' ] );
+		if ( isset( $request['participants']['max'] ) ) {
+			if ( $request['participants']['max'] > 0 || $request['participants']['max'] === '' ) {
+				$trip->set_meta( '_s_max_pax', $request['participants']['max'] );
+				$trip->set_meta( 'total_travellers_per_day', $request['participants']['max'] );
 			} else {
-				$this->set_bad_request( 'invalid_participants_max', sprintf( __( '%sMaximum Participants%s must be greater than 0.', 'wp-travel-engine' ), '<strong>', '</strong>' ) );
+				$this->set_bad_request( 'invalid_participants_max', sprintf( __( '%1$sMaximum Participants%2$s must be greater than 0.', 'wp-travel-engine' ), '<strong>', '</strong>' ) );
 			}
 		}
 
-		if ( isset( $request[ 'overview_title' ] ) ) {
-			$trip_settings->set( 'overview_section_title', $request[ 'overview_title' ] );
+		if ( isset( $request['overview_title'] ) ) {
+			$trip_settings->set( 'overview_section_title', $request['overview_title'] );
 		}
 
-		if ( isset( $request[ 'overview' ] ) ) {
-			$trip_settings->set( 'tab_content.1_wpeditor', $request[ 'overview' ] );
+		if ( isset( $request['overview'] ) ) {
+			$trip_settings->set( 'tab_content.1_wpeditor', $request['overview'] );
 		}
 
-		if ( isset( $request[ 'highlights_title' ] ) ) {
-			$trip_settings->set( 'trip_highlights_title', $request[ 'highlights_title' ] );
+		if ( isset( $request['highlights_title'] ) ) {
+			$trip_settings->set( 'trip_highlights_title', $request['highlights_title'] );
 		}
 
-		if ( isset( $request[ 'highlights' ] ) && is_array( $request[ 'highlights' ] ) ) {
-			$trip_highlights = [];
-			foreach ( $request[ 'highlights' ] as $highlight ) {
-				$trip_highlights[][ 'highlight_text' ] = $highlight;
+		if ( isset( $request['highlights'] ) && is_array( $request['highlights'] ) ) {
+			$trip_highlights = array();
+			foreach ( $request['highlights'] as $highlight ) {
+				$trip_highlights[]['highlight_text'] = $highlight;
 			}
 			$trip_settings->set( 'trip_highlights', $trip_highlights );
 		}
 
-		if ( isset( $request[ 'itinerary_title' ] ) ) {
-			$trip_settings->set( 'trip_itinerary_title', $request[ 'itinerary_title' ] );
+		if ( isset( $request['itinerary_title'] ) ) {
+			$trip_settings->set( 'trip_itinerary_title', $request['itinerary_title'] );
 		}
-		if ( isset( $request[ 'itinerary_description' ] ) ) {
-			$trip_settings->set( 'trip_itinerary_description', $request[ 'itinerary_description' ] );
+		if ( isset( $request['itinerary_description'] ) ) {
+			$trip_settings->set( 'trip_itinerary_description', $request['itinerary_description'] );
 		}
 
-		if ( isset( $request[ 'itineraries' ] ) ) {
-			$itineraries = $request[ 'itineraries' ];
+		if ( isset( $request['itineraries'] ) ) {
+			$itineraries = $request['itineraries'];
 			if ( empty( $itineraries ) ) {
-				$trip_settings->set( 'itinerary', [] );
-				$trip->set_meta( 'wte_advanced_itinerary', [] );
+				$trip_settings->set( 'itinerary', array() );
+				$trip->set_meta( 'wte_advanced_itinerary', array() );
 				$trip->set_meta( 'trip_itinerary_chart_data', '' );
 			} else {
 				$itinerary_arr_range = range( 1, count( $itineraries ) );
-				$basic_itinerary     = [
+				$basic_itinerary     = array(
 					'itinerary_title'      => array_combine( $itinerary_arr_range, array_column( $itineraries, 'title' ) ),
 					'itinerary_days_label' => array_combine( $itinerary_arr_range, array_column( $itineraries, 'label' ) ),
 					'itinerary_content'    => array_combine( $itinerary_arr_range, array_column( $itineraries, 'content' ) ),
-				];
+				);
 				$trip_settings->set( 'itinerary', $basic_itinerary );
 
 				if ( defined( 'WTEAD_FILE_PATH' ) ) {
 					$imgs               = array_column( $itineraries, 'images' );
 					$sleep_modes        = array_column( $itineraries, 'sleep_mode' );
 					$overnights         = array_column( $itineraries, 'overnights' );
-					$advanced_itinerary = [
+					$advanced_itinerary = array(
 						'itinerary_duration'               => array_combine( $itinerary_arr_range, array_column( $itineraries, 'period' ) ),
 						'itinerary_duration_type'          => array_combine( $itinerary_arr_range, array_column( $itineraries, 'unit' ) ),
 						'sleep_modes'                      => array_combine( $itinerary_arr_range, array_column( $sleep_modes, 'field_id' ) ),
 						'itinerary_sleep_mode_description' => array_combine( $itinerary_arr_range, array_column( $sleep_modes, 'description' ) ),
 						'meals_included'                   => array_filter( array_combine( $itinerary_arr_range, array_column( $itineraries, 'meals_included' ) ) ),
 						'itinerary_image_max_count'        => array_combine( $itinerary_arr_range, array_map( 'count', $imgs ) ),
-					];
+					);
 
 					$chart_data = array();
 					foreach ( $itinerary_arr_range as $key => $val ) {
-						$advanced_itinerary[ 'itinerary_image' ][ $val ] = array_column( $imgs[ $key ] ?? [], 'id' );
-						$advanced_itinerary[ 'overnight' ][ $val ]       = [
-							'at'       => $overnights[ $key ][ 0 ][ 'location' ] ?? '',
-							'altitude' => $overnights[ $key ][ 0 ][ 'altitude' ] ?? 0,
-						];
-						if ( ! empty( $advanced_itinerary[ 'overnight' ][ $val ][ 'at' ] ?? '' ) ) {
-							$chart_data[ $val ] = $advanced_itinerary[ 'overnight' ][ $val ];
+						$advanced_itinerary['itinerary_image'][ $val ] = array_column( $imgs[ $key ] ?? array(), 'id' );
+						$advanced_itinerary['overnight'][ $val ]       = array(
+							'at'       => $overnights[ $key ][0]['location'] ?? '',
+							'altitude' => $overnights[ $key ][0]['altitude'] ?? 0,
+						);
+						if ( ! empty( $advanced_itinerary['overnight'][ $val ]['at'] ?? '' ) ) {
+							$chart_data[ $val ] = $advanced_itinerary['overnight'][ $val ];
 						}
 					}
 
-					$trip->set_meta( 'wte_advanced_itinerary', [ 'advanced_itinerary' => $advanced_itinerary ] );
+					$trip->set_meta( 'wte_advanced_itinerary', array( 'advanced_itinerary' => $advanced_itinerary ) );
 
 					if ( isset( $chart_data ) ) {
 						$trip->set_meta( 'trip_itinerary_chart_data', wp_unslash( wp_json_encode( $chart_data, JSON_UNESCAPED_UNICODE ) ) );
@@ -518,237 +533,266 @@ class Trip extends WP_REST_Posts_Controller {
 			}
 		}
 
-		if ( isset( $request[ 'cost_title' ] ) ) {
-			$trip_settings->set( 'cost_tab_sec_title', $request[ 'cost_title' ] );
+		if ( isset( $request['cost_title'] ) ) {
+			$trip_settings->set( 'cost_tab_sec_title', $request['cost_title'] );
 		}
 
-		if ( isset( $request[ 'cost_includes_title' ] ) ) {
-			$trip_settings->set( 'cost.includes_title', $request[ 'cost_includes_title' ] );
+		if ( isset( $request['cost_includes_title'] ) ) {
+			$trip_settings->set( 'cost.includes_title', $request['cost_includes_title'] );
 		}
 
-		if ( isset( $request[ 'cost_includes' ] ) ) {
-			$trip_settings->set( 'cost.cost_includes', implode( "\n", $request[ 'cost_includes' ] ) );
+		if ( isset( $request['cost_includes'] ) ) {
+			$trip_settings->set( 'cost.cost_includes', implode( "\n", $request['cost_includes'] ) );
 		}
 
-		if ( isset( $request[ 'cost_excludes_title' ] ) ) {
-			$trip_settings->set( 'cost.excludes_title', $request[ 'cost_excludes_title' ] );
+		if ( isset( $request['cost_excludes_title'] ) ) {
+			$trip_settings->set( 'cost.excludes_title', $request['cost_excludes_title'] );
 		}
 
-		if ( isset( $request[ 'cost_excludes' ] ) ) {
-			$trip_settings->set( 'cost.cost_excludes', implode( "\n", $request[ 'cost_excludes' ] ) );
+		if ( isset( $request['cost_excludes'] ) ) {
+			$trip_settings->set( 'cost.cost_excludes', implode( "\n", $request['cost_excludes'] ) );
 		}
 
-		if ( isset( $request[ 'trip_info_title' ] ) ) {
-			$trip_settings->set( 'trip_facts_title', $request[ 'trip_info_title' ] );
+		if ( isset( $request['trip_info_title'] ) ) {
+			$trip_settings->set( 'trip_facts_title', $request['trip_info_title'] );
 		}
 
-		if ( isset( $request[ 'trip_info' ] ) ) {
-			$trip_facts = [];
-			foreach ( $request[ 'trip_info' ] as $info ) {
-				if ( isset( $trip_facts[ $info[ 'id' ] ] ) ) {
+		if ( isset( $request['trip_info'] ) ) {
+			$trip_facts = array();
+			foreach ( $request['trip_info'] as $info ) {
+				if ( isset( $trip_facts[ $info['id'] ] ) ) {
 					continue;
 				}
-				$trip_facts[ 'field_id' ][ $info[ 'id' ] ]   = $info[ 'label' ];
-				$trip_facts[ 'field_type' ][ $info[ 'id' ] ] = $info[ 'type' ];
-				$trip_facts[ $info[ 'id' ] ]                 = [ $info[ 'id' ] => $info[ 'content' ] ];
+				$trip_facts['field_id'][ $info['id'] ]   = $info['label'];
+				$trip_facts['field_type'][ $info['id'] ] = $info['type'];
+				$trip_facts[ $info['id'] ]               = array( $info['id'] => $info['content'] );
 			}
 			$trip_settings->set( 'trip_facts', $trip_facts );
 		}
 
-		if ( isset( $request[ 'gallery' ] ) || isset( $request[ 'gallery_enable' ] ) ) {
+		if ( isset( $request['gallery'] ) || isset( $request['gallery_enable'] ) ) {
 			$gallery        = $trip->get_meta( 'wpte_gallery_id' );
-			$gallery        = empty( $gallery ) ? [] : $gallery;
+			$gallery        = empty( $gallery ) ? array() : $gallery;
 			$enable_gallery = $gallery ? array_shift( $gallery ) : false;
-			$trip->set_meta( 'wpte_gallery_id', array_merge(
-				[ 'enable' => isset( $request[ 'gallery_enable' ] ) ? ( $request[ 'gallery_enable' ] ? '1' : null ) : $enable_gallery ],
-				isset( $request[ 'gallery' ] ) ? array_unique( array_column( $request[ 'gallery' ], 'id' ) ) : $gallery
-			) );
+			$trip->set_meta(
+				'wpte_gallery_id',
+				array_merge(
+					array( 'enable' => isset( $request['gallery_enable'] ) ? ( $request['gallery_enable'] ? '1' : null ) : $enable_gallery ),
+					isset( $request['gallery'] ) ? array_unique( array_column( $request['gallery'], 'id' ) ) : $gallery
+				)
+			);
 		}
 
-		if ( isset( $request[ 'video_gallery_enable' ] ) ) {
-			$trip_settings->set( 'enable_video_gallery', $request[ 'video_gallery_enable' ] );
+		if ( isset( $request['video_gallery_enable'] ) ) {
+			$trip_settings->set( 'enable_video_gallery', $request['video_gallery_enable'] );
 		}
 
-		if ( isset( $request[ 'video_gallery' ] ) ) {
-			$video_gallery = [];
+		if ( isset( $request['video_gallery'] ) ) {
+			$video_gallery = array();
 			$youtube_regex = '/(?:youtube\.com\/.*v=|youtu\.be\/)([a-zA-Z0-9_-]+)/';
 			$vimeo_regex   = '/vimeo\.com\/([0-9]+)/';
-			foreach ( $request[ 'video_gallery' ] as $video ) {
-				if ( preg_match( $youtube_regex, $video[ 'url' ] ?? '', $matches ) ) {
-					$video_id = $matches[ 1 ];
+			foreach ( $request['video_gallery'] as $video ) {
+				if ( preg_match( $youtube_regex, $video['url'] ?? '', $matches ) ) {
+					$video_id = $matches[1];
 					$type     = 'youtube';
-				} else if ( preg_match( $vimeo_regex, $video[ 'url' ] ?? '', $matches ) ) {
-					$video_id = $matches[ 1 ];
+				} elseif ( preg_match( $vimeo_regex, $video['url'] ?? '', $matches ) ) {
+					$video_id = $matches[1];
 					$type     = 'vimeo';
 				}
-				$video_gallery[] = [
+				$video_gallery[] = array(
 					'id'    => $video_id ?? '',
 					'type'  => $type ?? '',
-					'thumb' => $video[ 'thumbnail' ],
-				];
+					'thumb' => $video['thumbnail'],
+				);
 			}
 			$trip->set_meta( 'wpte_vid_gallery', $video_gallery );
 		}
 
-		if ( isset( $request[ 'map_title' ] ) ) {
-			$trip_settings->set( 'map_section_title', $request[ 'map_title' ] );
+		if ( isset( $request['map_title'] ) ) {
+			$trip_settings->set( 'map_section_title', $request['map_title'] );
 		}
 
-		if ( isset( $request[ 'trip_map' ] ) || isset( $request[ 'map_iframe' ] ) ) {
+		if ( isset( $request['trip_map'] ) || isset( $request['map_iframe'] ) ) {
 			$map        = $trip->get_nested_setting( 'map', '' );
-			$map_url    = isset( $request[ 'trip_map' ][ 'images' ] ) ? array_column( $request[ 'trip_map' ][ 'images' ], 'id' ) : (array) ( $map[ 'image_url' ] ?? [ '' ] );
-			$map_iframe = $request[ 'trip_map' ][ 'iframe' ] ?? $map[ 'iframe' ] ?? '';
+			$map_url    = isset( $request['trip_map']['images'] ) ? array_column( $request['trip_map']['images'], 'id' ) : (array) ( $map['image_url'] ?? array( '' ) );
+			$map_iframe = $request['trip_map']['iframe'] ?? $map['iframe'] ?? '';
 
-			$trip_settings->set( 'map', [
-				'image_url' => $map_url[ 0 ] ?? '',
-				'iframe'    => $map_iframe,
-			] );
+			$trip_settings->set(
+				'map',
+				array(
+					'image_url' => $map_url[0] ?? '',
+					'iframe'    => $map_iframe,
+				)
+			);
 		}
 
-		if ( isset( $request[ 'faqs_title' ] ) ) {
-			$trip_settings->set( 'faq_section_title', $request[ 'faqs_title' ] );
+		if ( isset( $request['faqs_title'] ) ) {
+			$trip_settings->set( 'faq_section_title', $request['faqs_title'] );
 		}
 
-		if ( isset( $request[ 'faqs' ] ) ) {
-			$trip_settings->set( 'faq', array(
-				'faq_title'   => array_column( $request[ 'faqs' ], 'question' ),
-				'faq_content' => array_column( $request[ 'faqs' ], 'answer' ),
-			) );
+		if ( isset( $request['faqs'] ) ) {
+			$trip_settings->set(
+				'faq',
+				array(
+					'faq_title'   => array_column( $request['faqs'], 'question' ),
+					'faq_content' => array_column( $request['faqs'], 'answer' ),
+				)
+			);
 		}
 
-		if ( isset( $request[ 'packages' ] ) ) {
+		if ( isset( $request['packages'] ) ) {
 
 			$primary_package_id = $trip->get_meta( 'primary_package' );
 
-			foreach ( $request[ 'packages' ] ?? [] as $key => $package ) {
+			foreach ( $request['packages'] ?? array() as $key => $package ) {
 
-				if ( ! ( $package[ '_changed' ] ?? false ) && ! is_null( $package[ 'id' ] ?? null ) ) {
+				if ( ! ( $package['_changed'] ?? false ) && ! is_null( $package['id'] ?? null ) ) {
 					continue;
 				}
 
-				$package[ 'name' ] = empty( $package[ 'name' ] ?? '' ) ? wptravelengine_get_num_suffix( ++ $key ) : $package[ 'name' ];
+				$package['name'] = empty( $package['name'] ?? '' ) ? wptravelengine_get_num_suffix( ++$key ) : $package['name'];
 
-				if ( is_null( $package[ 'id' ] ?? null ) ) {
-					$package[ 'id' ] = wp_insert_post( [
-						'post_title'   => $package[ 'name' ],
-						'post_content' => $package[ 'description' ] ?? '',
-						'post_type'    => 'trip-packages',
-						'post_status'  => 'publish',
-						'post_author'  => get_current_user_id(),
-					] );
+				if ( is_null( $package['id'] ?? null ) ) {
+					$package['id'] = wp_insert_post(
+						array(
+							'post_title'   => $package['name'],
+							'post_content' => $package['description'] ?? '',
+							'post_type'    => 'trip-packages',
+							'post_status'  => 'publish',
+							'post_author'  => get_current_user_id(),
+						)
+					);
 				}
 
-				if ( $package[ 'is_primary' ] || empty( $primary_package_id ) ) {
-					$primary_package_id = $package[ 'id' ];
+				if ( $package['is_primary'] || empty( $primary_package_id ) ) {
+					$primary_package_id = $package['id'];
 				}
 
 				$group_pricing = null;
-				foreach ( array_column( $package[ 'traveler_categories' ], 'group_pricing', 'id' ) ?? [] as $id => $group_princings ) {
-					$group_pricing[ $id ] = array_map( fn ( $gp ) => [
-						'from'  => $gp[ 'from' ],
-						'to'    => $gp[ 'to' ],
-						'price' => $gp[ 'price' ],
-					], $group_princings );
+				foreach ( array_column( $package['traveler_categories'], 'group_pricing', 'id' ) ?? array() as $id => $group_princings ) {
+					$group_pricing[ $id ] = array_map(
+						fn ( $gp ) => array(
+							'from'  => $gp['from'],
+							'to'    => $gp['to'],
+							'price' => $gp['price'],
+						),
+						$group_princings
+					);
 				}
 
-				$weekdays_map = array_combine( range( 1, 7 ), [ 'MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU' ] );
-				$stored_dates = get_post_meta( $package[ 'id' ], 'package-dates' );
-				foreach ( $package[ 'dates' ] ?? [] as $dates ) {
-					$package_dates [ str_replace( '-', '', $dates[ 'start_date' ] ) ] = array_filter( [
-						'dtstart'            => $dates[ 'start_date' ],
-						'times'              => $dates[ 'times' ],
-						'is_recurring'       => $dates[ 'enable_repeat' ] ? '1' : null,
-						'rrule'              => array_filter( [
-							'r_frequency' => $dates[ 'repeat' ][ 'frequency' ],
-							'r_weekdays'  => $dates[ 'repeat' ][ 'frequency' ] === 'WEEKLY'
-								? array_intersect( $weekdays_map, $dates[ 'repeat' ][ 'weekdays' ] )
-								: ( $stored_dates[ 'rrule' ][ 'r_weekdays' ] ?? null ),
-							'r_months'    => $dates[ 'repeat' ][ 'frequency' ] === 'MONTHLY'
-								? array_combine( $dates[ 'repeat' ][ 'months' ], $dates[ 'repeat' ][ 'months' ] )
-								: ( $stored_dates[ 'rrule' ][ 'r_months' ] ?? null ),
-							'r_until'     => empty( $dates[ 'repeat' ][ 'until' ] ) ? wp_date( 'Y-m-d', strtotime( '+1 year' ) ) : $dates[ 'repeat' ][ 'until' ],
-							'r_count'     => empty( $dates[ 'repeat' ][ 'limit' ] ) ? 10 : $dates[ 'repeat' ][ 'limit' ],
-						] ),
-						'seats'              => $dates[ 'total_seats' ] ?? 0,
-						'availability_label' => $dates[ 'availability_label' ],
-					], fn ( $v ) => $v !== null );
+				$weekdays_map = array_combine( range( 1, 7 ), array( 'MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU' ) );
+				$stored_dates = get_post_meta( $package['id'], 'package-dates' );
+				foreach ( $package['dates'] ?? array() as $dates ) {
+					$start_date = $dates['start_date'];
+					$package_dates [ str_replace( '-', '', $start_date ) ] = array_filter(
+						array(
+							'dtstart'            => $start_date,
+							'times'              => $dates['times'],
+							'is_recurring'       => $dates['enable_repeat'] ? '1' : null,
+							'rrule'              => array_filter(
+								array(
+									'r_frequency' => $dates['repeat']['frequency'],
+									'r_weekdays'  => $dates['repeat']['frequency'] === 'WEEKLY'
+										? array_intersect( $weekdays_map, $dates['repeat']['weekdays'] )
+										: ( $stored_dates['rrule']['r_weekdays'] ?? null ),
+									'r_months'    => $dates['repeat']['frequency'] === 'MONTHLY'
+										? array_combine( $dates['repeat']['months'], $dates['repeat']['months'] )
+										: ( $stored_dates['rrule']['r_months'] ?? null ),
+									'r_until'     => empty( $dates['repeat']['until'] ) ? wp_date( 'Y-m-d', strtotime( "{$start_date} +3 years" ) ) : $dates['repeat']['until'],
+									'r_count'     => self::$recurring_date_count_limit,
+								)
+							),
+							'seats'              => $dates['total_seats'] ?? 0,
+							'availability_label' => $dates['availability_label'],
+							'addon_metas'        => is_array( $dates['addon_metas'] ?? null ) ? $dates['addon_metas'] : array(),
+						),
+						fn ( $v ) => $v !== null
+					);
 				}
 
-				$package_ids   				= array_column( $package[ 'traveler_categories' ], 'id', 'id' );
-				$primary_category_index 	= array_search( true, array_column( $package[ 'traveler_categories' ], 'is_primary' ) );
-				$primary_category_id 		= $package[ 'traveler_categories' ][ $primary_category_index ][ 'id' ];
+				$package_ids            = array_column( $package['traveler_categories'], 'id', 'id' );
+				$primary_category_index = array_search( true, array_column( $package['traveler_categories'], 'is_primary' ) );
+				$primary_category_id    = $package['traveler_categories'][ $primary_category_index ]['id'];
 
-				$meta_inputs[] = apply_filters( 'wptravelengine_package_meta_inputs', [
-					'package_id'               => $package[ 'id' ],
-					'package_name'             => $package[ 'name' ],
-					'package_description'      => $package[ 'description' ] ?? '',
-					'trip_ID'                  => $trip->ID,
-					'enable_weekly_time_slots' => isset( $package[ 'time_slots_enable' ] ) ? ( $package[ 'time_slots_enable' ] ? 'yes' : 'no' ) : 'no',
-					'weekly_time_slots'        => empty( $package[ 'time_slots' ] ) ? null : array_filter( array_combine( range( 1, 7 ), $package[ 'time_slots' ] ) ),
-					'enable_week_days'         => $package[ 'enable_week_days' ] ?? array_combine( array_values( $weekdays_map ), array_fill( 0, 7, false ) ),
-					'package-categories'       => array_filter( [
-						'c_ids'                  => $package_ids,
-						'labels'                 => array_column( $package[ 'traveler_categories' ], 'label', 'id' ),
-						'prices'                 => array_column( $package[ 'traveler_categories' ], 'price', 'id' ),
-						'pricing_types'          => array_combine( $package_ids, array_column( array_column( $package[ 'traveler_categories' ], 'pricing_type' ), 'value' ) ),
-						'enabled_sale'           => array_filter( array_combine( $package_ids, array_map( fn ( $val ) => $val ? '1' : null, array_column( $package[ 'traveler_categories' ], 'has_sale' ) ) ) ),
-						'sale_prices'            => array_column( $package[ 'traveler_categories' ], 'sale_price', 'id' ),
-						'min_paxes'              => array_column( $package[ 'traveler_categories' ], 'min_pax', 'id' ),
-						// 'max_paxes'              => array_column( $package[ 'traveler_categories' ], 'max_pax', 'id' ),
-						'enabled_group_discount' => array_filter( array_combine( $package_ids, array_map( fn ( $val ) => $val ? '1' : null, array_column( $package[ 'traveler_categories' ], 'has_group_pricing' ) ) ) ),
-					], fn ( $v ) => $v !== null && ! empty( $v ) ),
-					'group-pricing'            	=> $group_pricing,
-					'package-dates'            	=> $package_dates ?? [],
-					'_primary_category_id' 		=> $primary_category_id,
-				], $package, $this );
+				$meta_inputs[] = apply_filters(
+					'wptravelengine_package_meta_inputs',
+					array(
+						'package_id'               => $package['id'],
+						'package_name'             => $package['name'],
+						'package_description'      => $package['description'] ?? '',
+						'trip_ID'                  => $trip->ID,
+						'enable_weekly_time_slots' => isset( $package['time_slots_enable'] ) ? ( $package['time_slots_enable'] ? 'yes' : 'no' ) : 'no',
+						'weekly_time_slots'        => empty( $package['time_slots'] ) ? null : array_filter( array_combine( range( 1, 7 ), $package['time_slots'] ) ),
+						'enable_week_days'         => $package['enable_week_days'] ?? array_combine( array_values( $weekdays_map ), array_fill( 0, 7, false ) ),
+						'package-categories'       => array_filter(
+							array(
+								'c_ids'                  => $package_ids,
+								'labels'                 => array_column( $package['traveler_categories'], 'label', 'id' ),
+								'prices'                 => array_column( $package['traveler_categories'], 'price', 'id' ),
+								'pricing_types'          => array_combine( $package_ids, array_column( array_column( $package['traveler_categories'], 'pricing_type' ), 'value' ) ),
+								'enabled_sale'           => array_filter( array_combine( $package_ids, array_map( fn ( $val ) => $val ? '1' : null, array_column( $package['traveler_categories'], 'has_sale' ) ) ) ),
+								'sale_prices'            => array_column( $package['traveler_categories'], 'sale_price', 'id' ),
+								'min_paxes'              => array_column( $package['traveler_categories'], 'min_pax', 'id' ),
+								// 'max_paxes'              => array_column( $package[ 'traveler_categories' ], 'max_pax', 'id' ),
+								'enabled_group_discount' => array_filter( array_combine( $package_ids, array_map( fn ( $val ) => $val ? '1' : null, array_column( $package['traveler_categories'], 'has_group_pricing' ) ) ) ),
+							),
+							fn ( $v ) => $v !== null && ! empty( $v )
+						),
+						'group-pricing'            => $group_pricing,
+						'package-dates'            => $package_dates ?? array(),
+						'_primary_category_id'     => $primary_category_id,
+					),
+					$package,
+					$this
+				);
 
 				$last_meta_input   = end( $meta_inputs );
-				$common_plain_text = sprintf( __( 'must be greater than or equal to 0 in \'%s Package\'.', 'wp-travel-engine' ), $package[ 'name' ] );
+				$common_plain_text = sprintf( __( 'must be greater than or equal to 0 in \'%s Package\'.', 'wp-travel-engine' ), $package['name'] );
 
-				if ( '' === $last_meta_input[ 'package-categories' ][ 'prices' ][ $primary_category_id ] ) {
-					$this->set_bad_request( 'invalid_param', sprintf( __( 'The %1$s%3$s%2$s category in the %1$s%4$s%2$s Package requires a valid price.', 'wp-travel-engine' ), '<strong>', '</strong>', $last_meta_input[ 'package-categories' ][ 'labels' ][ $primary_category_id ], $package[ 'name' ] ) );
+				if ( '' === $last_meta_input['package-categories']['prices'][ $primary_category_id ] ) {
+					$this->set_bad_request( 'invalid_param', sprintf( __( 'The %1$s%3$s%2$s category in the %1$s%4$s%2$s Package requires a valid price.', 'wp-travel-engine' ), '<strong>', '</strong>', $last_meta_input['package-categories']['labels'][ $primary_category_id ], $package['name'] ) );
 				}
 
-				if ( '1' === ( $last_meta_input[ 'package-categories' ][ 'enabled_sale' ][ $primary_category_id ] ?? '' ) ) {
-					$sale = $last_meta_input[ 'package-categories' ][ 'sale_prices' ][ $primary_category_id ] ?? '';
-					if ( $sale === "" ) {
-						$this->set_bad_request( 'invalid_param', sprintf( __( 'The %1$s%3$s%2$s category in the %1$s%4$s%2$s Package requires a valid sale price.', 'wp-travel-engine' ), '<strong>', '</strong>', $last_meta_input[ 'package-categories' ][ 'labels' ][ $primary_category_id ], $package[ 'name' ] ) );
+				if ( '1' === ( $last_meta_input['package-categories']['enabled_sale'][ $primary_category_id ] ?? '' ) ) {
+					$sale = $last_meta_input['package-categories']['sale_prices'][ $primary_category_id ] ?? '';
+					if ( $sale === '' ) {
+						$this->set_bad_request( 'invalid_param', sprintf( __( 'The %1$s%3$s%2$s category in the %1$s%4$s%2$s Package requires a valid sale price.', 'wp-travel-engine' ), '<strong>', '</strong>', $last_meta_input['package-categories']['labels'][ $primary_category_id ], $package['name'] ) );
 					}
 				}
 
-				$regular_vs_sale_prices = ! ! array_filter( $last_meta_input[ 'package-categories' ][ 'prices' ] ?? [], fn ( $val, $key ) => '' !== $val ? ( $val > 0 && ( $val <= $last_meta_input[ 'package-categories' ][ 'sale_prices' ][ $key ] ?? 0 ) ) : false, ARRAY_FILTER_USE_BOTH );
+				$regular_vs_sale_prices = (bool) array_filter( $last_meta_input['package-categories']['prices'] ?? array(), fn ( $val, $key ) => '' !== $val ? ( $val > 0 && ( $val <= $last_meta_input['package-categories']['sale_prices'][ $key ] ?? 0 ) ) : false, ARRAY_FILTER_USE_BOTH );
 				if ( $regular_vs_sale_prices ) {
-					$this->set_bad_request( 'invalid_param', sprintf( __( '%1$sSale price%2$s must be less than %1$sRegular price%2$s in \'%3$s Package\'.', 'wp-travel-engine' ), '<strong>', '</strong>', $package[ 'name' ] ), "{$package['name']}_sale_price" );
+					$this->set_bad_request( 'invalid_param', sprintf( __( '%1$sSale price%2$s must be less than %1$sRegular price%2$s in \'%3$s Package\'.', 'wp-travel-engine' ), '<strong>', '</strong>', $package['name'] ), "{$package['name']}_sale_price" );
 				}
 
-				$are_counts_valid = ! ! array_filter( array_column( $last_meta_input[ 'package-dates' ][ 'rrule' ] ?? [], 'r_count' ), fn ( $val ) => $val < 0 );
-				if ( $are_counts_valid ) {
-					$this->set_bad_request( 'invalid_param', sprintf( __( '%sRepeat Limit%s %s', 'wp-travel-engine' ), '<strong>', '</strong>', $common_plain_text ), "{$package['name']}_repeat_limit" );
-				}
+				// $are_counts_valid = (bool) array_filter( array_column( $last_meta_input['package-dates']['rrule'] ?? array(), 'r_count' ), fn ( $val ) => $val < 0 );
+				// if ( $are_counts_valid ) {
+				// $this->set_bad_request( 'invalid_param', sprintf( __( '%1$sRepeat Limit%2$s %3$s', 'wp-travel-engine' ), '<strong>', '</strong>', $common_plain_text ), "{$package['name']}_repeat_limit" );
+				// }
 
-				$are_seats_valid = ! ! array_filter( array_column( $last_meta_input[ 'package-dates' ] ?? [], 'seats' ), fn ( $val ) => ( $val < 0 && '' !== $val ) );
+				$are_seats_valid = (bool) array_filter( array_column( $last_meta_input['package-dates'] ?? array(), 'seats' ), fn ( $val ) => ( $val < 0 && '' !== $val ) );
 				if ( $are_seats_valid ) {
-					$this->set_bad_request( 'invalid_param', sprintf( __( '%sTotal Seats%s %s', 'wp-travel-engine' ), '<strong>', '</strong>', $common_plain_text ), "{$package['name']}_total_seats" );
+					$this->set_bad_request( 'invalid_param', sprintf( __( '%1$sTotal Seats%2$s %3$s', 'wp-travel-engine' ), '<strong>', '</strong>', $common_plain_text ), "{$package['name']}_total_seats" );
 				}
 
-				$are_prices_valid = ! ! array_filter( $last_meta_input[ 'package-categories' ][ 'prices' ] ?? [], fn ( $val ) => '' !== $val ? $val < 0 : false );
+				$are_prices_valid = (bool) array_filter( $last_meta_input['package-categories']['prices'] ?? array(), fn ( $val ) => '' !== $val ? $val < 0 : false );
 				if ( $are_prices_valid ) {
-					$this->set_bad_request( 'invalid_param', sprintf( __( '%sPrice%s %s', 'wp-travel-engine' ), '<strong>', '</strong>', $common_plain_text ), "{$package['name']}_price" );
+					$this->set_bad_request( 'invalid_param', sprintf( __( '%1$sPrice%2$s %3$s', 'wp-travel-engine' ), '<strong>', '</strong>', $common_plain_text ), "{$package['name']}_price" );
 				}
 
-				$are_sale_prices_valid = ! ! array_filter( $last_meta_input[ 'package-categories' ][ 'sale_prices' ] ?? [], fn ( $val ) => '' !== $val ? $val < 0 : false );
+				$are_sale_prices_valid = (bool) array_filter( $last_meta_input['package-categories']['sale_prices'] ?? array(), fn ( $val ) => '' !== $val ? $val < 0 : false );
 				if ( $are_sale_prices_valid ) {
-					$this->set_bad_request( 'invalid_param', sprintf( __( '%sSale Price%s %s', 'wp-travel-engine' ), '<strong>', '</strong>', $common_plain_text ), "{$package['name']}_sale_price" );
+					$this->set_bad_request( 'invalid_param', sprintf( __( '%1$sSale Price%2$s %3$s', 'wp-travel-engine' ), '<strong>', '</strong>', $common_plain_text ), "{$package['name']}_sale_price" );
 				}
 
-				$are_min_paxes_valid = ! ! array_filter( $last_meta_input[ 'package-categories' ][ 'min_paxes' ] ?? [], fn ( $val ) => $val < 0 );
+				$are_min_paxes_valid = (bool) array_filter( $last_meta_input['package-categories']['min_paxes'] ?? array(), fn ( $val ) => $val < 0 );
 				if ( $are_min_paxes_valid ) {
-					$this->set_bad_request( 'invalid_param', sprintf( __( '%sMinimum Pax%s %s', 'wp-travel-engine' ), '<strong>', '</strong>', $common_plain_text ), "{$package['name']}_min_pax" );
+					$this->set_bad_request( 'invalid_param', sprintf( __( '%1$sMinimum Pax%2$s %3$s', 'wp-travel-engine' ), '<strong>', '</strong>', $common_plain_text ), "{$package['name']}_min_pax" );
 				}
 
 				// $are_max_paxes_valid = ! ! array_filter( $last_meta_input[ 'package-categories' ][ 'max_paxes' ] ?? [], fn ( $val ) => ( $val <= 0 && '' !== $val ) );
 				// if ( $are_max_paxes_valid ) {
-				// 	$this->set_bad_request( 'invalid_param', sprintf( __( '%sMaximum Pax%s %s must be greater than 0 in \'%s Package\'.', 'wp-travel-engine' ), '<strong>', '</strong>', $package[ 'name' ] ), "{$package['name']}_max_pax" );
+				// $this->set_bad_request( 'invalid_param', sprintf( __( '%sMaximum Pax%s %s must be greater than 0 in \'%s Package\'.', 'wp-travel-engine' ), '<strong>', '</strong>', $package[ 'name' ] ), "{$package['name']}_max_pax" );
 				// }
 
 				unset( $group_pricing, $package_dates, $package_ids, $last_meta_input, $common_plain_text, $regular_vs_sale_prices, $are_counts_valid, $are_seats_valid, $are_prices_valid, $are_sale_prices_valid, $are_min_paxes_valid, $are_max_paxes_valid );
@@ -756,33 +800,46 @@ class Trip extends WP_REST_Posts_Controller {
 
 			$trip->set_meta( 'primary_package', $primary_package_id );
 
-			$trip_package_ids = array_unique( array_merge(
-				array_filter( array_column( $request[ 'packages' ], 'id' ) )
-				, array_column( $meta_inputs ?? array(), 'package_id' )
-			) );
+			$trip_package_ids = array_unique(
+				array_merge(
+					array_filter( array_column( $request['packages'], 'id' ) ),
+					array_column( $meta_inputs ?? array(), 'package_id' )
+				)
+			);
 
 			if ( ! isset( $this->errors ) ) {
 				$trip->set_meta( 'packages_ids', $trip_package_ids );
-				foreach ( $meta_inputs ?? [] as $meta_input ) {
-					$ID 			= array_shift( $meta_input );
-					$post_title 	= array_shift( $meta_input );
-					$post_content 	= array_shift( $meta_input );
-					$package_dates 	= $meta_input['package-dates'];
-					$meta_input 	= array_filter( $meta_input, fn ( $v ) => $v !== null );
+				foreach ( $meta_inputs ?? array() as $meta_input ) {
+					$ID           = array_shift( $meta_input );
+					$post_title   = array_shift( $meta_input );
+					$post_content = array_shift( $meta_input );
+					$meta_input   = array_filter( $meta_input, fn ( $v ) => $v !== null );
 
 					wp_update_post( compact( 'ID', 'post_title', 'post_content', 'meta_input' ) );
+				}
 
-					$available_months = array_values( array_unique(
-						call_user_func_array(
-							'array_merge',
-							array_map( function ( $string ) use ( $ID, $trip, $package_dates ) {
-								return ( new PackageDateParser(
-									new TripPackage( $ID, $trip ),
-									$package_dates[ $string ]
-								) )->get_unique_dates( false, array(), 'ym' );
-							}, array_keys( $package_dates ) )
+				$available_months = array();
+				foreach ( $trip_package_ids as $package_id ) {
+					$package_dates    = get_post_meta( $package_id, 'package-dates', true ) ?: array();
+					$available_months = array_merge(
+						$available_months,
+						array_values(
+							array_unique(
+								call_user_func_array(
+									'array_merge',
+									array_map(
+										function ( $string ) use ( $package_id, $trip, $package_dates ) {
+											return ( new PackageDateParser(
+												new TripPackage( $package_id, $trip ),
+												$package_dates[ $string ]
+											) )->get_unique_dates( false, array(), 'ym' );
+										},
+										array_keys( $package_dates )
+									)
+								)
+							)
 						)
-					) );
+					);
 				}
 
 				if ( isset( $available_months ) ) {
@@ -801,16 +858,16 @@ class Trip extends WP_REST_Posts_Controller {
 			}
 		}
 
-		if ( isset( $request[ 'custom_tabs' ] ) ) {
-			$tab_content = $trip_settings->get( 'tab_content', [] );
-			$settings    = Options::get( 'wp_travel_engine_settings', [] );
-			foreach ( $settings[ 'trip_tabs' ][ 'id' ] ?? [] as $key => $i ) {
+		if ( isset( $request['custom_tabs'] ) ) {
+			$tab_content = $trip_settings->get( 'tab_content', array() );
+			$settings    = Options::get( 'wp_travel_engine_settings', array() );
+			foreach ( $settings['trip_tabs']['id'] ?? array() as $key => $i ) {
 				$i = (int) $i;
-				if ( isset( $request[ 'custom_tabs' ][ 'tab_' . $i ][ 'title' ] ) ) {
-					$trip_settings->set( 'tab_' . $i . '_title', $request[ 'custom_tabs' ][ 'tab_' . $i ][ 'title' ] );
+				if ( isset( $request['custom_tabs'][ 'tab_' . $i ]['title'] ) ) {
+					$trip_settings->set( 'tab_' . $i . '_title', $request['custom_tabs'][ 'tab_' . $i ]['title'] );
 				}
-				if ( isset( $request[ 'custom_tabs' ][ 'tab_' . $i ][ 'content' ] ) ) {
-					$tab_content[ $i . '_wpeditor' ] = $request[ 'custom_tabs' ][ 'tab_' . $i ][ 'content' ];
+				if ( isset( $request['custom_tabs'][ 'tab_' . $i ]['content'] ) ) {
+					$tab_content[ $i . '_wpeditor' ] = $request['custom_tabs'][ 'tab_' . $i ]['content'];
 				}
 			}
 			$trip_settings->set( 'tab_content', $tab_content );
@@ -819,13 +876,12 @@ class Trip extends WP_REST_Posts_Controller {
 		if ( ! $trip->get_meta( '_s_price' ) ) {
 			$trip->set_meta( '_s_price', $trip->get_price() );
 		}
-
 	}
 
 	/**
 	 * Get single trip data.
 	 *
-	 * @param WP_Post $item Post object as ID is valid.
+	 * @param WP_Post         $item Post object as ID is valid.
 	 * @param WP_REST_Request $request Full details about the request.
 	 * TODO: Create methods in trip modal to get these values, like $trip->get_code, $trip->get_duration, etc.
 	 *
@@ -833,59 +889,63 @@ class Trip extends WP_REST_Posts_Controller {
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 
-		remove_filter( "rest_prepare_{$this->post_type}", array(
-			\WPTravelEngine\Core\REST_API::class,
-			'filter_rest_data_trip',
-		), 10 );
+		remove_filter(
+			"rest_prepare_{$this->post_type}",
+			array(
+				\WPTravelEngine\Core\REST_API::class,
+				'filter_rest_data_trip',
+			),
+			10
+		);
 
 		$data = parent::prepare_item_for_response( $item, $request )->get_data();
 
 		$this->trip = $trip = new Post\Trip( $item->ID );
 
 		// Fixed starting dates data.
-		$data[ 'fsd' ] = [
+		$data['fsd'] = array(
 			'title' => '',
 			'hide'  => false,
-		];
+		);
 
-		$data[ 'trip_code' ] = (string) $trip->get_trip_code();
+		$data['trip_code'] = (string) $trip->get_trip_code();
 
-		$data[ 'overview_title' ] = (string) $trip->get_setting( 'overview_section_title', '' );
-		$data[ 'overview' ]       = (string) $trip->get_setting( 'tab_content.1_wpeditor', '' );
+		$data['overview_title'] = (string) $trip->get_setting( 'overview_section_title', '' );
+		$data['overview']       = (string) $trip->get_setting( 'tab_content.1_wpeditor', '' );
 
-		$data[ 'cost_title' ] = (string) $trip->get_setting( 'cost_tab_sec_title', '' );
+		$data['cost_title'] = (string) $trip->get_setting( 'cost_tab_sec_title', '' );
 
-		$data[ 'cost_includes_title' ] = (string) $trip->get_setting( 'cost.includes_title', '' );
-		$data[ 'cost_includes' ]       = array_values( array_filter( explode( "\n", $trip->get_setting( 'cost.cost_includes', '' ) ), fn ( $val ) => ! empty( $val ) ) );
+		$data['cost_includes_title'] = (string) $trip->get_setting( 'cost.includes_title', '' );
+		$data['cost_includes']       = array_values( array_filter( explode( "\n", $trip->get_setting( 'cost.cost_includes', '' ) ), fn ( $val ) => ! empty( $val ) ) );
 
-		$data[ 'cost_excludes_title' ] = (string) $trip->get_setting( 'cost.excludes_title', '' );
-		$data[ 'cost_excludes' ]       = array_values( array_filter( explode( "\n", $trip->get_setting( 'cost.cost_excludes', '' ) ), fn ( $val ) => ! empty( $val ) ) );
+		$data['cost_excludes_title'] = (string) $trip->get_setting( 'cost.excludes_title', '' );
+		$data['cost_excludes']       = array_values( array_filter( explode( "\n", $trip->get_setting( 'cost.cost_excludes', '' ) ), fn ( $val ) => ! empty( $val ) ) );
 
-		$data[ 'duration' ] = array(
+		$data['duration']    = array(
 			'period' => (int) $trip->get_setting( 'trip_duration', 1 ),
 			'unit'   => (string) $trip->get_setting( 'trip_duration_unit', 'days' ),
 			'nights' => (int) $trip->get_setting( 'trip_duration_nights', 0 ),
 		);
-		$duration = ( 'days' === ( $data[ 'duration' ][ 'unit' ] ?? 'days' ) ) ? $data[ 'duration' ][ 'period' ] * 24 : $data[ 'duration' ][ 'period' ];
-		$data[ '_s_duration' ]          = $trip->search_in_meta( '_s_duration', $duration );
+		$duration            = ( 'days' === ( $data['duration']['unit'] ?? 'days' ) ) ? $data['duration']['period'] * 24 : $data['duration']['period'];
+		$data['_s_duration'] = $trip->search_in_meta( '_s_duration', $duration );
 
-		$data[ 'age_limit' ] = [
+		$data['age_limit'] = array(
 			'enable' => wptravelengine_toggled( $trip->get_setting( 'min_max_age_enable', false ) ),
 			'min'    => (int) $trip->get_meta( 'wp_travel_engine_trip_min_age' ) ?? 0,
 			'max'    => (int) $trip->get_meta( 'wp_travel_engine_trip_max_age' ) ?? 0,
-		];
+		);
 
-		$data[ 'cut_off_time' ] = [
+		$data['cut_off_time'] = array(
 			'enable' => wptravelengine_toggled( $trip->get_setting( 'trip_cutoff_enable', false ) ),
 			'period' => (int) $trip->get_setting( 'trip_cut_off_time', 0 ),
 			'unit'   => (string) $trip->get_setting( 'trip_cut_off_unit', 'days' ),
-		];
+		);
 
-		$data[ 'participants' ] = [
+		$data['participants'] = array(
 			// 'enable' => wptravelengine_toggled( $trip->get_setting( 'minmax_pax_enable', false ) ),
-			'min'    => (int) $trip->get_setting( 'trip_minimum_pax', 1 ),
-			'max'    => $trip->get_maximum_participants(),
-		];
+			'min' => (int) $trip->get_setting( 'trip_minimum_pax', 1 ),
+			'max' => $trip->get_maximum_participants(),
+		);
 
 		$map_img_id = $trip->get_setting( 'map.image_url', array() );
 		$trip_imgs  = array();
@@ -896,35 +956,35 @@ class Trip extends WP_REST_Posts_Controller {
 			$trip_imgs[] = compact( 'id', 'alt', 'url' );
 		}
 
-		$data[ 'map_title' ] = (string) $trip->get_setting( 'map_section_title', '' );
-		$data[ 'trip_map' ]  = [
+		$data['map_title'] = (string) $trip->get_setting( 'map_section_title', '' );
+		$data['trip_map']  = array(
 			'images' => $trip_imgs,
 			'iframe' => (string) $trip->get_setting( 'map.iframe', '' ),
-		];
+		);
 
-		$data[ 'highlights_title' ] = (string) $trip->get_setting( 'trip_highlights_title', '' );
-		$highlights                 = (array) ( $trip->get_setting( 'trip_highlights', array() ) );
-		$data[ 'highlights' ]       = array();
+		$data['highlights_title'] = (string) $trip->get_setting( 'trip_highlights_title', '' );
+		$highlights               = (array) ( $trip->get_setting( 'trip_highlights', array() ) );
+		$data['highlights']       = array();
 		foreach ( $highlights as $highlight ) {
-			$data[ 'highlights' ][] = (string) $highlight[ 'highlight_text' ];
+			$data['highlights'][] = (string) $highlight['highlight_text'];
 		}
 
-		$data[ 'faqs' ]       = array();
-		$data[ 'faqs_title' ] = (string) $trip->get_setting( 'faq_section_title', '' );
-		$faqs                 = (array) $trip->get_setting( 'faq.faq_title', array() );
+		$data['faqs']       = array();
+		$data['faqs_title'] = (string) $trip->get_setting( 'faq_section_title', '' );
+		$faqs               = (array) $trip->get_setting( 'faq.faq_title', array() );
 		foreach ( $faqs as $key => $faq ) {
 			$answer = (string) $trip->get_setting( 'faq.faq_content.' . $key, '' );
 
-			$data[ 'faqs' ][] = [
+			$data['faqs'][] = array(
 				'question' => (string) $faq,
 				'answer'   => (string) $answer,
-			];
+			);
 		}
 
-		$data[ 'gallery_enable' ] = wptravelengine_toggled( $trip->search_in_meta( 'wpte_gallery_id.enable', false ) );
-		$data[ 'gallery' ]        = array();
-		$i                        = 0;
-		$gallery                  = empty( $trip->get_meta( 'wpte_gallery_id' ) ) ? [] : $trip->get_meta( 'wpte_gallery_id' );
+		$data['gallery_enable'] = wptravelengine_toggled( $trip->search_in_meta( 'wpte_gallery_id.enable', false ) );
+		$data['gallery']        = array();
+		$i                      = 0;
+		$gallery                = empty( $trip->get_meta( 'wpte_gallery_id' ) ) ? array() : $trip->get_meta( 'wpte_gallery_id' );
 		foreach ( (array) $gallery as $index => $id ) {
 			if ( 'enable' === $index ) {
 				continue;
@@ -933,25 +993,25 @@ class Trip extends WP_REST_Posts_Controller {
 			$alt = get_post_meta( $id, '_wp_attachment_image_alt', true );
 			$url = wp_get_attachment_image_url( $id, 'full' );
 
-			$data[ 'gallery' ][ $i ++ ] = compact( 'id', 'alt', 'url' );
+			$data['gallery'][ $i++ ] = compact( 'id', 'alt', 'url' );
 		}
 
-		$data[ 'video_gallery_enable' ] = wptravelengine_toggled( $trip->get_setting( 'enable_video_gallery', false ) );
-		$data[ 'video_gallery' ]        = array();
-		$video_gallery                  = empty( $trip->get_meta( 'wpte_vid_gallery' ) ) ? [] : $trip->get_meta( 'wpte_vid_gallery' );
+		$data['video_gallery_enable'] = wptravelengine_toggled( $trip->get_setting( 'enable_video_gallery', false ) );
+		$data['video_gallery']        = array();
+		$video_gallery                = empty( $trip->get_meta( 'wpte_vid_gallery' ) ) ? array() : $trip->get_meta( 'wpte_vid_gallery' );
 		foreach ( (array) $video_gallery as $key => $value ) {
-			$id        = (string) ( $value[ 'id' ] ?? '' );
-			$type      = (string) ( $value[ 'type' ] ?? '' );
-			$thumbnail = (string) ( $value[ 'thumb' ] ?? '' );
+			$id        = (string) ( $value['id'] ?? '' );
+			$type      = (string) ( $value['type'] ?? '' );
+			$thumbnail = (string) ( $value['thumb'] ?? '' );
 			$url       = ( 'youtube' === $type ) ? '//www.youtube.com/watch?v=' . $id : '//vimeo.com/' . $id;
 
-			$data[ 'video_gallery' ][] = compact( 'url', 'thumbnail' );
+			$data['video_gallery'][] = compact( 'url', 'thumbnail' );
 		}
 
-		$itinerary_title           = (array) $trip->get_setting( 'itinerary.itinerary_title', array() );
-		$data[ 'itinerary_title' ] = (string) $trip->get_setting( 'trip_itinerary_title', '' );
-		$data[ 'itinerary_description' ] = (string) $trip->get_setting( 'trip_itinerary_description', '' );
-		$data[ 'itineraries' ]     = array();
+		$itinerary_title               = (array) $trip->get_setting( 'itinerary.itinerary_title', array() );
+		$data['itinerary_title']       = (string) $trip->get_setting( 'trip_itinerary_title', '' );
+		$data['itinerary_description'] = (string) $trip->get_setting( 'trip_itinerary_description', '' );
+		$data['itineraries']           = array();
 		foreach ( $itinerary_title as $key => $itinerary ) {
 			$label   = (string) ( $trip->get_setting( 'itinerary.itinerary_days_label.' . $key, '' ) );
 			$content = (string) ( $trip->get_setting( 'itinerary.itinerary_content.' . $key, '' ) );
@@ -960,93 +1020,103 @@ class Trip extends WP_REST_Posts_Controller {
 				continue;
 			}
 
-			$data[ 'itineraries' ][] = [
+			$data['itineraries'][] = array(
 				'title'          => (string) $itinerary,
 				'label'          => (string) $label,
 				'content'        => (string) $content,
 				'period'         => 0,
 				'unit'           => 'hour',
-				'sleep_mode'     => [
+				'sleep_mode'     => array(
 					'field_id'    => '',
 					'description' => '',
-				],
-				'meals_included' => [],
-				'images'         => [],
-				'overnights'     => [
-					[ 'location' => '', 'altitude' => 0 ],
-				],
-			];
+				),
+				'meals_included' => array(),
+				'images'         => array(),
+				'overnights'     => array(
+					array(
+						'location' => '',
+						'altitude' => 0,
+					),
+				),
+			);
 		}
 		// Advance Itinerary
 		if ( defined( 'WTEAD_FILE_PATH' ) ) {
 			$advanced_itinerary = (array) $trip->search_in_meta( 'wte_advanced_itinerary.advanced_itinerary', array() );
 			$all_overnights     = array();
-			foreach ( $advanced_itinerary[ 'overnight' ] ?? [] as $key => $overnight ) {
-				$all_overnights[ $key ] = [
-					'location' => (string) ( $overnight[ 'at' ] ?? '' ),
-					'altitude' => (float) ( $overnight[ 'altitude' ] ?? '' ),
-				];
+			foreach ( $advanced_itinerary['overnight'] ?? array() as $key => $overnight ) {
+				$all_overnights[ $key ] = array(
+					'location' => (string) ( $overnight['at'] ?? '' ),
+					'altitude' => (float) ( $overnight['altitude'] ?? '' ),
+				);
 			}
 			$img = $trip->search_in_meta( 'wte_advanced_itinerary.advanced_itinerary.itinerary_image', array() );
-			foreach ( $advanced_itinerary[ 'itinerary_duration' ] ?? [] as $key => $value ) {
-				if ( ! isset( $data[ 'itineraries' ][ $key - 1 ] ) ) {
+			foreach ( $advanced_itinerary['itinerary_duration'] ?? array() as $key => $value ) {
+				if ( ! isset( $data['itineraries'][ $key - 1 ] ) ) {
 					continue;
 				}
-				$temp_img       = empty( $img[ $key ] ) ? [] : array_values( array_unique( $img[ $key ] ) );
-				$images         = array_values( array_filter( array_map( function ( $id ) {
-					$id = (int) $id;
-					if ( ! wp_attachment_is_image( $id ) ) {
-						return null;
-					}
-					$alt = get_post_meta( $id, '_wp_attachment_image_alt', true );
-					$url = wp_get_attachment_image_url( $id, 'full' );
+				$temp_img       = empty( $img[ $key ] ) ? array() : array_values( array_unique( $img[ $key ] ) );
+				$images         = array_values(
+					array_filter(
+						array_map(
+							function ( $id ) {
+								$id = (int) $id;
+								if ( ! wp_attachment_is_image( $id ) ) {
+										return null;
+								}
+								$alt = get_post_meta( $id, '_wp_attachment_image_alt', true );
+								$url = wp_get_attachment_image_url( $id, 'full' );
 
-					return compact( 'id', 'alt', 'url' );
-				}, $temp_img ) ) );
-				$period         = (float) ( $advanced_itinerary[ 'itinerary_duration' ][ $key ] ?? 0 );
-				$meals_included = (array) ( $advanced_itinerary[ 'meals_included' ][ $key ] ?? [] );
-				$unit           = (string) ( $advanced_itinerary[ 'itinerary_duration_type' ][ $key ] ?? 'hour' );
+								return compact( 'id', 'alt', 'url' );
+							},
+							$temp_img
+						)
+					)
+				);
+				$period         = (float) ( $advanced_itinerary['itinerary_duration'][ $key ] ?? 0 );
+				$meals_included = (array) ( $advanced_itinerary['meals_included'][ $key ] ?? array() );
+				$unit           = (string) ( $advanced_itinerary['itinerary_duration_type'][ $key ] ?? 'hour' );
 				$sleep_mode     = array(
-					'field_id'    => (string) ( $advanced_itinerary[ 'sleep_modes' ][ $key ] ?? '' ),
-					'description' => (string) ( $advanced_itinerary[ 'itinerary_sleep_mode_description' ][ $key ] ?? '' ),
+					'field_id'    => (string) ( $advanced_itinerary['sleep_modes'][ $key ] ?? '' ),
+					'description' => (string) ( $advanced_itinerary['itinerary_sleep_mode_description'][ $key ] ?? '' ),
 				);
 
-				$overnights = [ (array) $all_overnights[ $key ] ?? [] ];
+				$overnights = array( (array) $all_overnights[ $key ] ?? array() );
 
-				$data[ 'itineraries' ][ $key - 1 ] = array_merge( $data[ 'itineraries' ][ $key - 1 ] ?? array(), compact( 'period', 'unit', 'sleep_mode', 'meals_included', 'images', 'overnights' ) );
+				$data['itineraries'][ $key - 1 ] = array_merge( $data['itineraries'][ $key - 1 ] ?? array(), compact( 'period', 'unit', 'sleep_mode', 'meals_included', 'images', 'overnights' ) );
 			}
 		}
 
-		$trip_facts                = $trip->get_setting( 'trip_facts', array() );
-		$data[ 'trip_info_title' ] = (string) $trip->get_setting( 'trip_facts_title', '' );
-		$data[ 'trip_info' ]       = array();
-		$global_trip_facts         = wptravelengine_get_trip_facts_options();
-		foreach ( $trip_facts[ 'field_id' ] ?? [] as $key => $field_name ) {
-			if ( isset( $trip_facts[ $key ][ $key ] ) && ( $global_trip_facts[ 'field_id' ][ $key ] ?? '' ) === $field_name ) {
-				$data[ 'trip_info' ][] = [
+		$trip_facts              = $trip->get_setting( 'trip_facts', array() );
+		$data['trip_info_title'] = (string) $trip->get_setting( 'trip_facts_title', '' );
+		$data['trip_info']       = array();
+		$global_trip_facts       = wptravelengine_get_trip_facts_options();
+		foreach ( $trip_facts['field_id'] ?? array() as $key => $field_name ) {
+			if ( isset( $trip_facts[ $key ][ $key ] ) && ( $global_trip_facts['field_id'][ $key ] ?? '' ) === $field_name ) {
+				$data['trip_info'][] = array(
 					'id'      => (int) $key,
 					'label'   => (string) $field_name,
 					'content' => (string) $trip->get_setting( 'trip_facts.' . $key . '.' . $key, '' ),
 					'type'    => (string) $trip->get_setting( 'trip_facts.field_type.' . $key, '' ),
-					'options' => (array) ( isset( $global_trip_facts[ 'select_options' ] ) ? explode( ',', $global_trip_facts[ 'select_options' ][ $key ] ) : [] ),
-				];
+					'options' => (array) ( isset( $global_trip_facts['select_options'] ) ? explode( ',', $global_trip_facts['select_options'][ $key ] ) : array() ),
+				);
 			}
 		}
 
-		$data[ 'file_downloads' ] = array();
+		$data['file_downloads'] = array();
 
-		$data[ 'trip_extra_services' ] = array();
+		$data['trip_extra_services'] = array();
 
-		$primary_package   	= (int) $trip->get_meta( 'primary_package' );
-		$trip_packages      = new Post\TripPackages( $trip );
-		$data[ 'packages' ] = [];
+		$primary_package  = (int) $trip->get_meta( 'primary_package' );
+		$trip_packages    = new Post\TripPackages( $trip );
+		$data['packages'] = array();
 		foreach ( $trip_packages as $key => $trip_package ) {
 			/** @var Post\TripPackage $trip_package */
-			$data[ 'packages' ][ $key ]                 = $this->prepare_package( $trip_package );
-			$data[ 'packages' ][ $key ][ 'is_primary' ] = $primary_package === $trip_package->ID;
+			$data['packages'][ $key ]               = $this->prepare_package( $trip_package );
+			$data['packages'][ $key ]['is_primary'] = $primary_package === $trip_package->ID;
 		}
 
-		$settings = Options::get( 'wp_travel_engine_settings', [] );
+		$settings      = Options::get( 'wp_travel_engine_settings', array() );
 		$pricing_label = wptravelengine_get_pricing_type( true );
 
 		$pricing_type = array();
@@ -1054,17 +1124,17 @@ class Trip extends WP_REST_Posts_Controller {
 			$pricing_type[ $key ] = __( 'Per', 'wp-travel-engine' ) . ' ' . $item['label'];
 		}
 		$data['price_types'] = $pricing_type;
-		$def_tabs = array( 'itinerary', 'cost', 'dates', 'faqs', 'map', 'review' );
-		foreach ( $settings[ 'trip_tabs' ][ 'id' ] ?? [] as $key => $i ) {
+		$def_tabs            = array( 'itinerary', 'cost', 'dates', 'faqs', 'map', 'review' );
+		foreach ( $settings['trip_tabs']['id'] ?? array() as $key => $i ) {
 			$i     = (int) $i;
-			$field = $settings[ 'trip_tabs' ][ 'field' ][ $i ] ?? '';
+			$field = $settings['trip_tabs']['field'][ $i ] ?? '';
 			if ( 1 === $i || in_array( $field, $def_tabs ) ) {
 				continue;
 			}
-			$data[ 'custom_tabs' ][ 'tab_' . $i ] = [
+			$data['custom_tabs'][ 'tab_' . $i ] = array(
 				'title'   => (string) $trip->get_setting( 'tab_' . $i . '_title', '' ),
 				'content' => (string) $trip->get_setting( 'tab_content.' . $i . '_wpeditor', '' ),
-			];
+			);
 		}
 
 		$data = apply_filters( 'wptravelengine_rest_prepare_trip', $data, $request, $this );
@@ -1082,62 +1152,68 @@ class Trip extends WP_REST_Posts_Controller {
 	 * @return array
 	 */
 	public function prepare_package( $trip_package ) {
-		$return_data = [
+		$return_data = array(
 			'time_slots_enable' => false,
-			'time_slots'        => array_combine( array(
-				'MO',
-				'TU',
-				'WE',
-				'TH',
-				'FR',
-				'SA',
-				'SU',
-			), array_fill( 0, 7, [] ) ),
-			'enable_week_days'  => array_combine( array(
-				'MO',
-				'TU',
-				'WE',
-				'TH',
-				'FR',
-				'SA',
-				'SU',
-			), array_fill( 0, 7, false ) ),
+			'time_slots'        => array_combine(
+				array(
+					'MO',
+					'TU',
+					'WE',
+					'TH',
+					'FR',
+					'SA',
+					'SU',
+				),
+				array_fill( 0, 7, array() )
+			),
+			'enable_week_days'  => array_combine(
+				array(
+					'MO',
+					'TU',
+					'WE',
+					'TH',
+					'FR',
+					'SA',
+					'SU',
+				),
+				array_fill( 0, 7, false )
+			),
 			'dates'             => array(),
-		];
+		);
 		if ( class_exists( 'WTE_Fixed_Starting_Dates' ) ) {
-			foreach ( $trip_package->get_meta( 'package-dates' ) ?? [] as $date_data ) {
-				$times = [];
-				foreach ( $date_data[ 'times' ] ?? [] as $time ) {
-					$times[] = [
-						'from' => (string) $time[ 'from' ],
-						'to'   => (string) $time[ 'to' ],
-					];
+			foreach ( $trip_package->get_meta( 'package-dates' ) ?? array() as $date_data ) {
+				$times = array();
+				foreach ( $date_data['times'] ?? array() as $time ) {
+					$times[] = array(
+						'from' => (string) $time['from'],
+						'to'   => (string) $time['to'],
+					);
 				}
-				$repeat = [];
-				if ( isset( $date_data[ 'rrule' ] ) ) {
-					$repeat = [
-						'frequency' => (string) ( $date_data[ 'rrule' ][ 'r_frequency' ] ?? '' ),
-						'months'    => (array) array_values( $date_data[ 'rrule' ][ 'r_months' ] ?? [] ),
-						'weekdays'  => (array) array_values( $date_data[ 'rrule' ][ 'r_weekdays' ] ?? [] ),
-						'until'     => (string) $date_data[ 'rrule' ][ 'r_until' ] ?? $date_data[ 'dtstart' ] ?? wp_date( 'Y-m-d' ),
-						'limit'     => (int) $date_data[ 'rrule' ][ 'r_count' ] ?? 1,
-					];
+				$repeat = array();
+				if ( isset( $date_data['rrule'] ) ) {
+					$repeat = array(
+						'frequency' => (string) ( $date_data['rrule']['r_frequency'] ?? '' ),
+						'months'    => (array) array_values( $date_data['rrule']['r_months'] ?? array() ),
+						'weekdays'  => (array) array_values( $date_data['rrule']['r_weekdays'] ?? array() ),
+						'until'     => (string) $date_data['rrule']['r_until'] ?? $date_data['dtstart'] ?? wp_date( 'Y-m-d' ),
+						'limit'     => self::$recurring_date_count_limit,
+					);
 				}
-				$return_data[ 'dates' ][] = [
-					'start_date'         => (string) ( $date_data[ 'dtstart' ] ?? wp_date( 'Y-m-d' ) ),
+				$return_data['dates'][] = array(
+					'start_date'         => (string) ( $date_data['dtstart'] ?? wp_date( 'Y-m-d' ) ),
 					'times'              => (array) $times,
-					'enable_repeat'      => (bool) wptravelengine_toggled( $date_data[ 'is_recurring' ] ?? false ),
+					'enable_repeat'      => (bool) wptravelengine_toggled( $date_data['is_recurring'] ?? false ),
 					'repeat'             => (array) $repeat,
-					'total_seats'        => $date_data[ 'seats' ] ?? '',
-					'availability_label' => (string) $date_data[ 'availability_label' ] ?? 'guaranteed',
-				];
+					'total_seats'        => $date_data['seats'] ?? '',
+					'availability_label' => (string) $date_data['availability_label'] ?? 'guaranteed',
+				);
 			}
-		} else if ( 'hours' === $trip_package->get_trip()->get_setting( 'trip_duration_unit' ) ) {
-			$return_data[ 'time_slots_enable' ] = wptravelengine_toggled( $trip_package->get_meta( 'enable_weekly_time_slots' ) );
-			$return_data[ 'enable_week_days' ]  = ! empty( $trip_package->get_meta( 'enable_week_days' ) ) ? $trip_package->get_meta( 'enable_week_days' ) : $return_data[ 'enable_week_days' ];
-			$weekly_time_slots                  = $trip_package->get_meta( 'weekly_time_slots' );
+		} elseif ( 'hours' === $trip_package->get_trip()->get_setting( 'trip_duration_unit' ) ) {
+			$return_data['time_slots_enable'] = wptravelengine_toggled( $trip_package->get_meta( 'enable_weekly_time_slots' ) );
+			$return_data['enable_week_days']  = ! empty( $trip_package->get_meta( 'enable_week_days' ) ) ? $trip_package->get_meta( 'enable_week_days' ) : $return_data['enable_week_days'];
+			$weekly_time_slots                = $trip_package->get_meta( 'weekly_time_slots' );
 			foreach ( array( 'MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU' ) as $index => $day ) {
-				$return_data[ 'time_slots' ][ $day ] = $weekly_time_slots[ ++ $index ] ?? [];
+				$return_data['time_slots'][ $day ] = $weekly_time_slots[ ++$index ] ?? array();
 			}
 		}
 
@@ -1180,7 +1256,7 @@ class Trip extends WP_REST_Posts_Controller {
 		$trip_packages = new Post\TripPackages( $trip );
 
 		$from = $request->get_param( 'from' ) ?? wp_date( 'Y-m-d' );
-		$to   = $request->get_param( 'to' ) ?? wp_date( 'Y-m-d', strtotime( '+1 year' ) );
+		$to   = $request->get_param( 'to' ) ?? wp_date( 'Y-m-d', strtotime( "{$from} +3 years" ) );
 
 		$dates = array();
 		foreach ( $trip_packages as $trip_package ) {
@@ -1210,10 +1286,10 @@ class Trip extends WP_REST_Posts_Controller {
 		 * @var Post\TripPackage $trip_package
 		 * @var Post\Trip $trip
 		 */
-		$data[ 'id' ]          = $trip_package->get_id();
-		$data[ 'name' ]        = $trip_package->get_title();
-		$data[ 'description' ] = $trip_package->get_content();
-		$data[ 'is_primary' ]  = $trip_package->get_id() === (int) $trip_package->get_trip()->get_meta( 'primary_package' );
+		$data['id']          = $trip_package->get_id();
+		$data['name']        = $trip_package->get_title();
+		$data['description'] = $trip_package->get_content();
+		$data['is_primary']  = $trip_package->get_id() === (int) $trip_package->get_trip()->get_meta( 'primary_package' );
 
 		$package_categories = $trip_package->get_traveler_categories();
 
@@ -1226,20 +1302,23 @@ class Trip extends WP_REST_Posts_Controller {
 
 			$group_pricing = $category->get( 'group_pricing', array() );
 
-			$group_pricing = array_map( function ( $gp ) {
-				return array(
-					'from'  => is_numeric( $gp[ 'from' ] ) ? (int) $gp[ 'from' ] : 0,
-					'to'    => is_numeric( $gp[ 'to' ] ) ? (int) $gp[ 'to' ] : '',
-					'price' => is_numeric( $gp[ 'price' ] ) ? (float) $gp[ 'price' ] : 0,
-				);
-			}, $group_pricing );
+			$group_pricing = array_map(
+				function ( $gp ) {
+					return array(
+						'from'  => is_numeric( $gp['from'] ) ? (int) $gp['from'] : 0,
+						'to'    => is_numeric( $gp['to'] ) ? (int) $gp['to'] : '',
+						'price' => is_numeric( $gp['price'] ) ? (float) $gp['price'] : 0,
+					);
+				},
+				$group_pricing
+			);
 
-			$get_pricing_type                = $category->get( 'pricing_type', 'per-person' );
-			$pricing_label                   = wptravelengine_get_pricing_type( false, $get_pricing_type );
-			$label                           = sprintf( __( 'Per %s', 'wp-travel-engine' ), $pricing_label[ 'label' ] );
-			$price                           = $category->get( 'price', '' );
-			$sale_price                      = $category->get( 'sale_price', '' );
-			$data[ 'traveler_categories' ][] = array(
+			$get_pricing_type              = $category->get( 'pricing_type', 'per-person' );
+			$pricing_label                 = wptravelengine_get_pricing_type( false, $get_pricing_type );
+			$label                         = sprintf( __( 'Per %s', 'wp-travel-engine' ), $pricing_label['label'] );
+			$price                         = $category->get( 'price', '' );
+			$sale_price                    = $category->get( 'sale_price', '' );
+			$data['traveler_categories'][] = array(
 				'id'                => (int) $category->get( 'id', 0 ),
 				'label'             => $category->get( 'label', '' ),
 				'price'             => is_numeric( $price ) ? (float) $price : '',
@@ -1286,7 +1365,7 @@ class Trip extends WP_REST_Posts_Controller {
 
 		$schema = parent::get_item_schema();
 
-		$properties = $schema[ 'properties' ] ?? array();
+		$properties = $schema['properties'] ?? array();
 
 		$item_properties = array(
 			// Trip specific properties.
@@ -1360,16 +1439,16 @@ class Trip extends WP_REST_Posts_Controller {
 				'type'        => 'object',
 				'properties'  => array(
 					// 'enable' => array(
-					// 	'description' => __( 'Pax enabled.', 'wp-travel-engine' ),
-					// 	'type'        => 'boolean',
-					// 	'enum'        => array( true, false ),
-					// 	'context'     => array( 'edit' ),
+					// 'description' => __( 'Pax enabled.', 'wp-travel-engine' ),
+					// 'type'        => 'boolean',
+					// 'enum'        => array( true, false ),
+					// 'context'     => array( 'edit' ),
 					// ),
-					'min'    => array(
+					'min' => array(
 						'description' => __( 'Minimum pax.', 'wp-travel-engine' ),
 						'type'        => array( 'integer', 'string' ),
 					),
-					'max'    => array(
+					'max' => array(
 						'description' => __( 'Maximum pax.', 'wp-travel-engine' ),
 						'type'        => array( 'integer', 'string' ),
 					),
@@ -1567,21 +1646,21 @@ class Trip extends WP_REST_Posts_Controller {
 				'type'        => 'array',
 				'items'       => array(
 					'type'       => 'object',
-					'properties' => [
-						'id'  => [
+					'properties' => array(
+						'id'  => array(
 							'description' => __( 'Attachment ID.', 'wp-travel-engine' ),
 							'type'        => 'integer',
-						],
-						'alt' => [
+						),
+						'alt' => array(
 							'description' => __( 'Image alt text.', 'wp-travel-engine' ),
 							'type'        => 'string',
-						],
-						'url' => [
+						),
+						'url' => array(
 							'description' => __( 'Image URL.', 'wp-travel-engine' ),
 							'type'        => 'string',
-						],
-					],
-					'context'    => [ 'view' ],
+						),
+					),
+					'context'    => array( 'view' ),
 				),
 			),
 			'video_gallery_enable' => array(
@@ -1718,11 +1797,11 @@ class Trip extends WP_REST_Posts_Controller {
 										'properties'  => array(
 											'value' => array(
 												'description' => __( 'Pricing type value.', 'wp-travel-engine' ),
-												'type'        => 'string',
+												'type' => 'string',
 											),
 											'label' => array(
 												'description' => __( 'Pricing type label.', 'wp-travel-engine' ),
-												'type'        => 'string',
+												'type' => 'string',
 											),
 										),
 									),
@@ -1748,15 +1827,15 @@ class Trip extends WP_REST_Posts_Controller {
 											'properties' => array(
 												'from'  => array(
 													'description' => __( 'Group pricing from.', 'wp-travel-engine' ),
-													'type'        => 'integer',
+													'type' => 'integer',
 												),
 												'to'    => array(
 													'description' => __( 'Group pricing to.', 'wp-travel-engine' ),
-													'type'        => array( 'integer', 'string' ),
+													'type' => array( 'integer', 'string' ),
 												),
 												'price' => array(
 													'description' => __( 'Group pricing price.', 'wp-travel-engine' ),
-													'type'        => 'float',
+													'type' => 'float',
 												),
 											),
 										),
@@ -1871,11 +1950,11 @@ class Trip extends WP_REST_Posts_Controller {
 											'properties' => array(
 												'from' => array(
 													'description' => __( 'Package time from.', 'wp-travel-engine' ),
-													'type'        => 'string',
+													'type' => 'string',
 												),
 												'to'   => array(
 													'description' => __( 'Package time to.', 'wp-travel-engine' ),
-													'type'        => 'string',
+													'type' => 'string',
 												),
 											),
 										),
@@ -1891,29 +1970,29 @@ class Trip extends WP_REST_Posts_Controller {
 										'properties'  => array(
 											'frequency' => array(
 												'description' => __( 'Package repeated frequency.', 'wp-travel-engine' ),
-												'type'        => 'string',
+												'type' => 'string',
 											),
 											'weekdays'  => array(
 												'description' => __( 'Package repeated weekdays.', 'wp-travel-engine' ),
-												'type'        => 'array',
-												'items'       => array(
+												'type'  => 'array',
+												'items' => array(
 													'type' => 'string',
 												),
 											),
 											'months'    => array(
 												'description' => __( 'Package repeated months.', 'wp-travel-engine' ),
-												'type'        => 'array',
-												'items'       => array(
+												'type'  => 'array',
+												'items' => array(
 													'type' => 'integer',
 												),
 											),
 											'until'     => array(
 												'description' => __( 'Package repeated until.', 'wp-travel-engine' ),
-												'type'        => 'string',
+												'type' => 'string',
 											),
 											'limit'     => array(
 												'description' => __( 'Package repeated limit.', 'wp-travel-engine' ),
-												'type'        => array( 'integer', 'string' ),
+												'type' => array( 'integer', 'string' ),
 											),
 										),
 									),
@@ -1952,10 +2031,9 @@ class Trip extends WP_REST_Posts_Controller {
 
 		$item_properties = apply_filters( 'wptravelengine_trip_api_schema', $item_properties, $this );
 
-		$schema[ 'properties' ] = array_merge( $properties, $item_properties );
+		$schema['properties'] = array_merge( $properties, $item_properties );
 
 		return $schema;
-
 	}
 
 	/**
@@ -1969,10 +2047,10 @@ class Trip extends WP_REST_Posts_Controller {
 			);
 
 			foreach ( $images as $image ) {
-				$attachment_id = isset( $image[ 'id' ] ) ? absint( $image[ 'id' ] ) : 0;
+				$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
 
-				if ( 0 === $attachment_id && isset( $image[ 'src' ] ) ) {
-					$attachment_id = $this->upload_image( $image[ 'src' ] );
+				if ( 0 === $attachment_id && isset( $image['src'] ) ) {
+					$attachment_id = $this->upload_image( $image['src'] );
 				}
 
 				if ( wp_attachment_is_image( $attachment_id ) ) {
@@ -1997,7 +2075,7 @@ class Trip extends WP_REST_Posts_Controller {
 		$upload_dir = wp_upload_dir();
 		$filename   = basename( $src );
 		$filename   = sanitize_file_name( $filename );
-		$filename   = wp_unique_filename( $upload_dir[ 'path' ], $filename );
+		$filename   = wp_unique_filename( $upload_dir['path'], $filename );
 
 		$contents = wp_remote_retrieve_body( wp_remote_get( $src ) );
 
@@ -2007,7 +2085,7 @@ class Trip extends WP_REST_Posts_Controller {
 
 		$upload = wp_upload_bits( $filename, null, $contents );
 
-		if ( ! empty( $upload[ 'error' ] ) ) {
+		if ( ! empty( $upload['error'] ) ) {
 			return 0;
 		}
 
@@ -2020,12 +2098,15 @@ class Trip extends WP_REST_Posts_Controller {
 			'webp'         => 'image/webp',
 		);
 
-		$attachment_id = wp_insert_attachment( array(
-			'post_mime_type' => wp_check_filetype( $upload[ 'file' ], $allowed_mime_types )[ 'type' ],
-			'post_title'     => preg_replace( '/\.[^.]+$/', '', $filename ),
-			'post_content'   => '',
-			'post_status'    => 'inherit',
-		), $upload[ 'file' ] );
+		$attachment_id = wp_insert_attachment(
+			array(
+				'post_mime_type' => wp_check_filetype( $upload['file'], $allowed_mime_types )['type'],
+				'post_title'     => preg_replace( '/\.[^.]+$/', '', $filename ),
+				'post_content'   => '',
+				'post_status'    => 'inherit',
+			),
+			$upload['file']
+		);
 
 		if ( is_wp_error( $attachment_id ) ) {
 			return 0;
@@ -2044,13 +2125,13 @@ class Trip extends WP_REST_Posts_Controller {
 	 */
 	public function filter_by_context( $response_data ) {
 
-		if ( ! current_user_can( 'edit_posts', $response_data[ 'id' ] ?? null ) ) {
+		if ( ! current_user_can( 'edit_posts', $response_data['id'] ?? null ) ) {
 
 			$filter_recursive = function ( &$data, $schema ) use ( &$filter_recursive ) {
 
 				foreach ( $data as $key => &$value ) {
 
-					$current_context = $schema[ $key ][ 'context' ] ?? $schema[ 'context' ] ?? array();
+					$current_context = $schema[ $key ]['context'] ?? $schema['context'] ?? array();
 
 					if ( in_array( 'edit', array_merge_recursive( $current_context ), true ) && ! in_array( 'view', $current_context, true ) ) {
 						unset( $data[ $key ] );
@@ -2058,21 +2139,18 @@ class Trip extends WP_REST_Posts_Controller {
 					}
 
 					if ( is_array( $value ) ) {
-						$current_items = $schema[ $key ][ 'items' ] ?? $schema[ 'items' ] ?? array();
-						$current_props = $schema[ $key ][ 'properties' ] ?? $schema[ 'properties' ] ?? null;
+						$current_items = $schema[ $key ]['items'] ?? $schema['items'] ?? array();
+						$current_props = $schema[ $key ]['properties'] ?? $schema['properties'] ?? null;
 						$filter_recursive( $value, $current_props ?? $current_items );
 					}
-
 				}
-
 			};
 
-			$filter_recursive( $response_data, $this->get_item_schema()[ 'properties' ] );
+			$filter_recursive( $response_data, $this->get_item_schema()['properties'] );
 
 		}
 
 		return $response_data;
-
 	}
 
 	/**
@@ -2090,15 +2168,15 @@ class Trip extends WP_REST_Posts_Controller {
 		foreach ( $params as $key => $value ) {
 			if ( is_array( $value ) ) {
 				$sanitized_params[ $key ] = $this->sanitize_params_recursive( $value );
-			} else if ( is_int( $value ) ) {
+			} elseif ( is_int( $value ) ) {
 				$sanitized_params[ $key ] = intval( $value );
-			} else if ( is_float( $value ) ) {
+			} elseif ( is_float( $value ) ) {
 				$sanitized_params[ $key ] = floatval( $value );
-			} else if ( is_bool( $value ) ) {
+			} elseif ( is_bool( $value ) ) {
 				$sanitized_params[ $key ] = filter_var( $value, FILTER_VALIDATE_BOOLEAN );
-			} else if ( is_email( $value ) ) {
+			} elseif ( is_email( $value ) ) {
 				$sanitized_params[ $key ] = sanitize_email( $value );
-			} else if ( filter_var( $value, FILTER_VALIDATE_URL ) ) {
+			} elseif ( filter_var( $value, FILTER_VALIDATE_URL ) ) {
 				$sanitized_params[ $key ] = esc_url_raw( $value );
 			} else {
 				$sanitized_params[ $key ] = $value;

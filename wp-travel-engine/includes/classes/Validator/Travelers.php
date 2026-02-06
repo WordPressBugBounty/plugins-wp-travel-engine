@@ -331,14 +331,13 @@ class Travelers extends Validator {
 
 		$this->process_traveler_fields( $lead_traveler_fields, $data, $field_name_mapping );
 		$this->process_traveler_fields( $traveler_fields, $data, $field_name_mapping );
-
 	}
 
 	/**
 	 * Process the traveler fields and set the data to travelers array.
 	 *
 	 * @param array $traveler_fields Traveler fields.
-	 * @param array $data Data.	
+	 * @param array $data Data.
 	 * @param array $field_name_mapping Field name mapping.
 	 * @since 6.4.3
 	 */

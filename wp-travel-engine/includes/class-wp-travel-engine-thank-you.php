@@ -31,7 +31,6 @@ class WTE_Booking_Response {
 		}
 
 		return '';
-
 	}
 
 	public function __construct() {
@@ -71,7 +70,6 @@ class WTE_Booking_Response {
 	public function __isset( $key ) {
 		return isset( $this->data[ $key ] );
 	}
-
 }
 
 class Wp_Travel_Engine_Thank_You {
@@ -82,7 +80,7 @@ class Wp_Travel_Engine_Thank_You {
 	 * @since 1.0.0
 	 */
 	function init() {
-//		ShortcodeRegistry::create()->register( ThankYou::class );
+		// ShortcodeRegistry::create()->register( ThankYou::class );
 	}
 
 	function add_thankyou_body_class( $classes ) {
@@ -133,12 +131,11 @@ class Wp_Travel_Engine_Thank_You {
 			return __( 'Thank you for booking the trip. Please check your email for confirmation.', 'wp-travel-engine' );
 		}
 
-		if ( is_array( $data ) && isset( $data[ 'bid' ] ) ) {
-			$booking_id = $data[ 'bid' ];
-			$payment_id = $data[ 'pid' ];
+		if ( is_array( $data ) && isset( $data['bid'] ) ) {
+			$booking_id = $data['bid'];
+			$payment_id = $data['pid'];
 		}
 
 		return self::get_booking_details_html( $payment_id, $booking_id );
-
 	}
 }

@@ -15,9 +15,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 global $post;
 $tabs                    = get_post_meta( $post->ID, 'wp_travel_engine_setting', true );
 $wptravelengine_settings = get_option( 'wp_travel_engine_settings' );
-$inner_content           = ! empty( $tabs [ 'itinerary' ][ 'itinerary_content_inner' ] ) ? $tabs [ 'itinerary' ][ 'itinerary_content_inner' ] : $tabs [ 'itinerary' ][ 'itinerary_content' ];
-$itineraries             = $tabs [ 'itinerary' ][ 'itinerary_title' ];
-$enabled_expand_all      = ! isset( $wptravelengine_settings[ 'wte_advance_itinerary' ][ 'enable_expand_all' ] ) || $wptravelengine_settings[ 'wte_advance_itinerary' ][ 'enable_expand_all' ] === 'yes';
+$inner_content           = ! empty( $tabs ['itinerary']['itinerary_content_inner'] ) ? $tabs ['itinerary']['itinerary_content_inner'] : $tabs ['itinerary']['itinerary_content'];
+$itineraries             = $tabs ['itinerary']['itinerary_title'];
+$enabled_expand_all      = ! isset( $wptravelengine_settings['wte_advance_itinerary']['enable_expand_all'] ) || $wptravelengine_settings['wte_advance_itinerary']['enable_expand_all'] === 'yes';
 $active_check            = $enabled_expand_all ? 'active' : '';
 
 do_action( 'wte_before_itinerary_content' );
@@ -37,15 +37,15 @@ do_action( 'wte_itinerary_tab_title' );
 					<div class="title">
 						<?php
 						/* translators: %s: Day number */
-						if ( isset( $tabs[ 'itinerary' ][ 'itinerary_days_label' ][ $key ] ) && ! empty( $tabs[ 'itinerary' ][ 'itinerary_days_label' ][ $key ] ) ) {
-							echo esc_attr( $tabs[ 'itinerary' ][ 'itinerary_days_label' ][ $key ] ) . ' :';
+						if ( isset( $tabs['itinerary']['itinerary_days_label'][ $key ] ) && ! empty( $tabs['itinerary']['itinerary_days_label'][ $key ] ) ) {
+							echo esc_attr( $tabs['itinerary']['itinerary_days_label'][ $key ] ) . ' :';
 						} else {
 							printf( esc_html__( 'Day %s :', 'wp-travel-engine' ), esc_attr( $key ) );
 						}
 						?>
 					</div>
 					<span class="accordion-tabs-toggle <?php echo( esc_attr( $active_check ) ); ?>"
-						  href="javascript:void(0);">
+							href="javascript:void(0);">
 					<?php if ( ! empty( $inner_content[ $key ] ) ) : ?>
 						<span
 							class="dashicons dashicons-arrow-down custom-toggle-tabs rotator <?php echo $enabled_expand_all ? 'open' : ''; ?>"></span>
@@ -71,7 +71,7 @@ do_action( 'wte_itinerary_tab_title' );
 					</div>
 				</div>
 			</div>
-		<?php
+			<?php
 		endforeach;
 		?>
 	</div>

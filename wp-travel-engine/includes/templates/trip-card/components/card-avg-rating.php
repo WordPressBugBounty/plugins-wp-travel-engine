@@ -4,13 +4,13 @@
  */
 
 if ( ! defined( 'WTE_TRIP_REVIEW_VERSION' ) || ! function_exists( 'wptravelengine_reviews_get_trip_reviews' ) ) {
-    return '';
+	return '';
 }
 
 $trip_reviews = wptravelengine_reviews_get_trip_reviews( $trip_id );
 
 if ( ! isset( $trip_reviews['average'] ) || $trip_reviews['average'] <= 0 ) {
-    return '';
+	return '';
 }
 
 // phpcs:disable

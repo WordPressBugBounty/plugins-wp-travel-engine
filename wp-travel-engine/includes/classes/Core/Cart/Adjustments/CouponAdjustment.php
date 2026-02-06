@@ -19,7 +19,7 @@ class CouponAdjustment extends BaseCartAdjustment {
 	 * Apply the adjustment.
 	 *
 	 * @param float $total
-	 * @param Item $cart_item
+	 * @param Item  $cart_item
 	 *
 	 * @return float
 	 */
@@ -29,11 +29,14 @@ class CouponAdjustment extends BaseCartAdjustment {
 			return $total * $this->percentage / 100;
 		}
 
-		$total_line_items = array_reduce( $cart_item->get_additional_line_items(), function( $carry, $items ) {
-			return $carry + count( $items );
-		}, 0 );
+		$total_line_items = array_reduce(
+			$cart_item->get_additional_line_items(),
+			function ( $carry, $items ) {
+				return $carry + count( $items );
+			},
+			0
+		);
 
-		return $total_line_items > 0 ? (float) ($this->percentage / $total_line_items) : 0;
+		return $total_line_items > 0 ? (float) ( $this->percentage / $total_line_items ) : 0;
 	}
-
 }

@@ -33,7 +33,7 @@ class JWK {
 	 * @uses parseKey
 	 */
 	public static function parseKeySet( array $jwks ) {
-		 $keys = array();
+		$keys = array();
 
 		if ( ! isset( $jwks['keys'] ) ) {
 			throw new UnexpectedValueException( '"keys" member must exist in the JWK Set' );
@@ -111,7 +111,7 @@ class JWK {
 	 * @uses encodeLength
 	 */
 	private static function createPemFromModulusAndExponent( $n, $e ) {
-		 $modulus       = JWT::urlsafeB64Decode( $n );
+		$modulus        = JWT::urlsafeB64Decode( $n );
 		$publicExponent = JWT::urlsafeB64Decode( $e );
 
 		$components = array(

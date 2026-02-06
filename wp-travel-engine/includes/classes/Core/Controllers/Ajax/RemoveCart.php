@@ -24,24 +24,9 @@ class RemoveCart extends AjaxController {
 	 * Callback function for update to cart ajax.
 	 *
 	 * @since    1.0.0
+	 * TODO: Implement the logic properly to remove the cart if required else remove this controller.
 	 */
 	public function process_request() {
-		$request = $this->request->get_params();
-
-		// phpcs:disable
-		if ( isset( $request[ 'trip_id' ] ) && isset( $_SESSION[ 'cart_item' ] ) ) {
-			unset( $_SESSION[ 'cart_item' ][ $request[ 'trip_id' ] ] );
-			$result[ 'type' ] = 'success';
-		} else {
-			$result[ 'type' ] = 'error';
-		}
-		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
-			echo wp_json_encode( $result ); // phpcs:ignore
-		} else {
-			header( 'Location: ' . $_SERVER[ 'HTTP_REFERER' ] );
-		}
-
-		die();
-		// phpcs:enable
+		return wp_send_json_error( array( 'message' => 'Cart remove is not implemented yet' ) );
 	}
 }

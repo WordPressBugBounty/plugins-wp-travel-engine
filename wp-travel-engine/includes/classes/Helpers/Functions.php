@@ -36,16 +36,14 @@ class Functions {
 	public function trip_price( $post_id ) {
 		$wp_travel_engine_setting = \get_post_meta( $post_id, 'wp_travel_engine_setting', true );
 
-		$cost = isset( $wp_travel_engine_setting[ 'trip_price' ] ) ? $wp_travel_engine_setting[ 'trip_price' ] : '';
+		$cost = isset( $wp_travel_engine_setting['trip_price'] ) ? $wp_travel_engine_setting['trip_price'] : '';
 
-		$prev_cost = isset( $wp_travel_engine_setting[ 'trip_prev_price' ] ) ? $wp_travel_engine_setting[ 'trip_prev_price' ] : '';
+		$prev_cost = isset( $wp_travel_engine_setting['trip_prev_price'] ) ? $wp_travel_engine_setting['trip_prev_price'] : '';
 
-		if ( $cost != '' && isset( $wp_travel_engine_setting[ 'sale' ] ) ) {
+		if ( $cost != '' && isset( $wp_travel_engine_setting['sale'] ) ) {
 			return $cost;
-		} else {
-			if ( $prev_cost != '' ) {
+		} elseif ( $prev_cost != '' ) {
 				$cost = $prev_cost;
-			}
 		}
 
 		return $cost;
@@ -55,11 +53,14 @@ class Functions {
 		add_filter(
 			'pre_term_description',
 			function ( $value, $taxonomy ) {
-				$taxonomies = apply_filters( 'wp_travel_engine_taxonomies', array(
-					'destination',
-					'activities',
-					'trip_types',
-				) );
+				$taxonomies = apply_filters(
+					'wp_travel_engine_taxonomies',
+					array(
+						'destination',
+						'activities',
+						'trip_types',
+					)
+				);
 				if ( in_array( $taxonomy, $taxonomies ) ) {
 					/**
 					 * The taxonomies uses wp editor for as term description
@@ -100,7 +101,6 @@ class Functions {
 		add_filter( 'pll_get_taxonomies', array( __CLASS__, 'wte_add_tax_to_pll' ), 10, 2 );
 		add_filter( 'wp_travel_engine_setting', 'do_shortcode', 10 );
 		add_action( 'wp_ajax_wte_user_profile_image_upload', array( __CLASS__, 'upload_user_profile_image' ) );
-
 	}
 
 	/**
@@ -110,33 +110,37 @@ class Functions {
 	 */
 	public static function upload_user_profile_image() {
 
-		if ( ! empty( $_FILES ) && wp_verify_nonce( $_REQUEST[ 'nonce' ], 'wte-user-profile-image-nonce' ) ) :
+		if ( ! empty( $_FILES ) && wp_verify_nonce( $_REQUEST['nonce'], 'wte-user-profile-image-nonce' ) ) :
 
 			$allowed_filetypes = array( 'image/jpeg', 'image/png', 'image/gif' );
 
 			$uploaddir    = wp_upload_dir();
-			$wte_temp_dir = trailingslashit( $uploaddir[ 'basedir' ] ) . 'wp-travel-engine/tmp';
-			$wte_temp_url = str_replace( array(
-				'http://',
-				'https://',
-			), '//', trailingslashit( $uploaddir[ 'baseurl' ] ) . 'wp-travel-engine/tmp' );
+			$wte_temp_dir = trailingslashit( $uploaddir['basedir'] ) . 'wp-travel-engine/tmp';
+			$wte_temp_url = str_replace(
+				array(
+					'http://',
+					'https://',
+				),
+				'//',
+				trailingslashit( $uploaddir['baseurl'] ) . 'wp-travel-engine/tmp'
+			);
 
-			$source            = $_FILES[ 'file' ][ 'tmp_name' ];
-			$salt              = md5( $_FILES[ 'file' ][ 'name' ] . time() );
-			$file_name         = $salt . '-' . $_FILES[ 'file' ][ 'name' ];
+			$source            = $_FILES['file']['tmp_name'];
+			$salt              = md5( $_FILES['file']['name'] . time() );
+			$file_name         = $salt . '-' . $_FILES['file']['name'];
 			$img_file_location = trailingslashit( $wte_temp_dir ) . $file_name;
 
 			$upload_url        = trailingslashit( $wte_temp_url ) . $file_name;
 			$uploaded_filetype = wp_check_filetype( basename( $img_file_location ), null );
 
-			$uploaded_filesize = $_FILES[ 'file' ][ 'size' ];
+			$uploaded_filesize = $_FILES['file']['size'];
 			$max_upload_size   = wp_max_upload_size();
 
 			if ( $uploaded_filesize > $max_upload_size ) {
 				wp_send_json_error( array( 'message' => __( 'File size too large.', 'wp-travel-engine' ) ) );
 			}
 
-			if ( ! in_array( $uploaded_filetype[ 'type' ], $allowed_filetypes ) ) {
+			if ( ! in_array( $uploaded_filetype['type'], $allowed_filetypes ) ) {
 				wp_send_json_error( array( 'message' => __( 'Unsupported file type uploaded.', 'wp-travel-engine' ) ) );
 			}
 
@@ -160,15 +164,15 @@ class Functions {
 
 	public static function wte_add_cpt_to_pll( $post_types, $is_settings ) {
 		if ( $is_settings ) {
-			unset( $post_types[ 'my_cpt' ] );
-			unset( $post_types[ 'my_cpt1' ] );
-			unset( $post_types[ 'my_cpt2' ] );
-			unset( $post_types[ 'my_cpt3' ] );
+			unset( $post_types['my_cpt'] );
+			unset( $post_types['my_cpt1'] );
+			unset( $post_types['my_cpt2'] );
+			unset( $post_types['my_cpt3'] );
 		} else {
-			$post_types[ 'my_cpt' ]  = 'trip';
-			$post_types[ 'my_cpt1' ] = 'booking';
-			$post_types[ 'my_cpt2' ] = 'customer';
-			$post_types[ 'my_cpt3' ] = 'enquiry';
+			$post_types['my_cpt']  = 'trip';
+			$post_types['my_cpt1'] = 'booking';
+			$post_types['my_cpt2'] = 'customer';
+			$post_types['my_cpt3'] = 'enquiry';
 		}
 
 		return $post_types;
@@ -177,13 +181,13 @@ class Functions {
 
 	public static function wte_add_tax_to_pll( $taxonomies, $is_settings ) {
 		if ( $is_settings ) {
-			unset( $taxonomies[ 'my_tax' ] );
-			unset( $taxonomies[ 'my_tax1' ] );
-			unset( $taxonomies[ 'my_tax2' ] );
+			unset( $taxonomies['my_tax'] );
+			unset( $taxonomies['my_tax1'] );
+			unset( $taxonomies['my_tax2'] );
 		} else {
-			$taxonomies[ 'my_tax' ]  = 'destination';
-			$taxonomies[ 'my_tax1' ] = 'activities';
-			$taxonomies[ 'my_tax2' ] = 'trip_types';
+			$taxonomies['my_tax']  = 'destination';
+			$taxonomies['my_tax1'] = 'activities';
+			$taxonomies['my_tax2'] = 'trip_types';
 		}
 
 		return $taxonomies;
@@ -195,15 +199,15 @@ class Functions {
 		if ( class_exists( 'Vendor_Wp_Travel_Engine' ) && $user && in_array( 'trip_vendor', $user->roles ) ) {
 			$userid = $user->ID;
 			$user   = get_user_meta( $userid, 'wpte_vendor', true );
-			if ( isset( $user[ 'currency_code' ] ) && $user[ 'currency_code' ] != '' ) {
-				$code = $user[ 'currency_code' ];
+			if ( isset( $user['currency_code'] ) && $user['currency_code'] != '' ) {
+				$code = $user['currency_code'];
 			}
-		} else if ( isset( $wp_travel_engine_setting_option_setting[ 'currency_code' ] ) && $wp_travel_engine_setting_option_setting[ 'currency_code' ] != '' ) {
-			$code = esc_attr( $wp_travel_engine_setting_option_setting[ 'currency_code' ] );
+		} elseif ( isset( $wp_travel_engine_setting_option_setting['currency_code'] ) && $wp_travel_engine_setting_option_setting['currency_code'] != '' ) {
+			$code = esc_attr( $wp_travel_engine_setting_option_setting['currency_code'] );
 		} else {
 			$code = 'USD';
 		}
-		$apiKey = isset( $wp_travel_engine_setting_option_setting[ 'currency_converter_api' ] ) && $wp_travel_engine_setting_option_setting[ 'currency_converter_api' ] != '' ? esc_attr( $wp_travel_engine_setting_option_setting[ 'currency_converter_api' ] ) : '';
+		$apiKey = isset( $wp_travel_engine_setting_option_setting['currency_converter_api'] ) && $wp_travel_engine_setting_option_setting['currency_converter_api'] != '' ? esc_attr( $wp_travel_engine_setting_option_setting['currency_converter_api'] ) : '';
 
 		if ( class_exists( 'Wte_Trip_Currency_Converter_Init' ) && $apiKey != '' ) {
 			$obj  = new \Wte_Trip_Currency_Converter_Init();
@@ -221,17 +225,17 @@ class Functions {
 		if ( $user && in_array( 'trip_vendor', $user->roles ) ) {
 			$userid = $user->ID;
 			$user   = get_user_meta( $userid, 'wpte_vendor', true );
-			if ( isset( $user[ 'currency_code' ] ) && $user[ 'currency_code' ] != '' ) {
-				$code = $user[ 'currency_code' ];
+			if ( isset( $user['currency_code'] ) && $user['currency_code'] != '' ) {
+				$code = $user['currency_code'];
 			}
-		} else if ( isset( $wp_travel_engine_setting_option_setting[ 'currency_code' ] ) && $wp_travel_engine_setting_option_setting[ 'currency_code' ] != '' ) {
-			$code = esc_attr( $wp_travel_engine_setting_option_setting[ 'currency_code' ] );
+		} elseif ( isset( $wp_travel_engine_setting_option_setting['currency_code'] ) && $wp_travel_engine_setting_option_setting['currency_code'] != '' ) {
+			$code = esc_attr( $wp_travel_engine_setting_option_setting['currency_code'] );
 		}
 
 		$global_code = $code;
 		$obj         = new \Wte_Trip_Currency_Converter_Init();
 		$code        = $obj->wte_trip_currency_code_converter( $global_code );
-		$apiKey      = isset( $wp_travel_engine_setting_option_setting[ 'currency_converter_api' ] ) && $wp_travel_engine_setting_option_setting[ 'currency_converter_api' ] != '' ? esc_attr( $wp_travel_engine_setting_option_setting[ 'currency_converter_api' ] ) : '';
+		$apiKey      = isset( $wp_travel_engine_setting_option_setting['currency_converter_api'] ) && $wp_travel_engine_setting_option_setting['currency_converter_api'] != '' ? esc_attr( $wp_travel_engine_setting_option_setting['currency_converter_api'] ) : '';
 
 		if ( $global_code != $code && $apiKey != '' ) {
 			$trip_price = $obj->wte_trip_price_converter( $userid, $global_code, $code, $trip_price );
@@ -247,7 +251,7 @@ class Functions {
 	 */
 	public function wp_travel_engine_currency() {
 		$option        = get_option( 'wp_travel_engine_settings', array() );
-		$currency_type = $option[ 'currency_code' ] ?? 'USD';
+		$currency_type = $option['currency_code'] ?? 'USD';
 
 		return apply_filters( 'wp_travel_engine_currency', $currency_type );
 	}
@@ -294,7 +298,7 @@ class Functions {
 		$pagination_type = get_theme_mod( 'pagination_type' );
 		if ( $pagination_type == 'pagination_type-radio-numbered' ) {
 			\wptravelengine_functions()->pagination_bar();
-		} else if ( $pagination_type == 'pagination_type-radio-default' ) {
+		} elseif ( $pagination_type == 'pagination_type-radio-default' ) {
 			$args = array(
 				'base'               => '%_%',
 				'format'             => '?paged=%#%',
@@ -324,7 +328,7 @@ class Functions {
 	function wte_trip_symbol_options( $code, $currency, $cost ) {
 		$obj      = \wptravelengine_functions();
 		$settings = get_option( 'wp_travel_engine_settings' );
-		$option   = isset( $settings[ 'currency_option' ] ) && $settings[ 'currency_option' ] != '' ? esc_attr( $settings[ 'currency_option' ] ) : 'symbol';
+		$option   = isset( $settings['currency_option'] ) && $settings['currency_option'] != '' ? esc_attr( $settings['currency_option'] ) : 'symbol';
 
 		if ( isset( $option ) && $option == 'symbol' ) {
 			return '<span class="price-holder"><span>' . esc_attr( $currency ) . '&nbsp;' . esc_attr( $obj->wp_travel_engine_price_format( $cost ) ) . '</span></span>';
@@ -462,10 +466,10 @@ class Functions {
 
 	function getLen( $var ) {
 		$settings            = get_option( 'wp_travel_engine_settings' );
-		$thousands_separator = isset( $settings[ 'thousands_separator' ] ) && $settings[ 'thousands_separator' ] != '' ? esc_attr( $settings[ 'thousands_separator' ] ) : ',';
+		$thousands_separator = isset( $settings['thousands_separator'] ) && $settings['thousands_separator'] != '' ? esc_attr( $settings['thousands_separator'] ) : ',';
 		$tmp                 = explode( $thousands_separator, $var );
 		if ( count( $tmp ) > 1 ) {
-			return strlen( $tmp[ 1 ] );
+			return strlen( $tmp[1] );
 		}
 	}
 
@@ -478,7 +482,7 @@ class Functions {
 	 */
 	function wp_travel_engine_price_format( $cost = '' ) {
 		$settings            = get_option( 'wp_travel_engine_settings' );
-		$thousands_separator = isset( $settings[ 'thousands_separator' ] ) && $settings[ 'thousands_separator' ] != '' ? esc_attr( $settings[ 'thousands_separator' ] ) : ',';
+		$thousands_separator = isset( $settings['thousands_separator'] ) && $settings['thousands_separator'] != '' ? esc_attr( $settings['thousands_separator'] ) : ',';
 		// $formatted_cost = number_format($cost, $this->getLen($cost));
 		$formatted_cost = number_format( (int) $cost, 0, '', apply_filters( 'wp_travel_engine_default_separator', $thousands_separator ) );
 
@@ -739,7 +743,6 @@ class Functions {
 	 *
 	 * @return (array) the sanitized array
 	 * @uses htmlspecialchars
-	 *
 	 */
 	function wte_sanitize_array( $data = array() ) {
 		if ( ! is_array( $data ) || ! count( $data ) ) {
@@ -787,7 +790,7 @@ class Functions {
 	 * Return template.
 	 *
 	 * @param String $template_name Path of template.
-	 * @param array $args arguments.
+	 * @param array  $args arguments.
 	 *
 	 * @return Mixed
 	 */
@@ -832,5 +835,4 @@ class Functions {
 	public function wp_travel_engine_currencies(): array {
 		return static::get_currencies();
 	}
-
 }

@@ -5,7 +5,7 @@
 
 use WPTravelEngine\Helpers\Functions;
 
-wp_enqueue_script( "jquery-ui-datepicker" );
+wp_enqueue_script( 'jquery-ui-datepicker' );
 
 global $post;
 ?>
@@ -16,10 +16,11 @@ global $post;
 			</div>
 			<div class="wpte-block-content wpte-floated">
 				<?php
-					if( isset( $traveller_information ) && is_array( $traveller_information ) ) :?>
+				if ( isset( $traveller_information ) && is_array( $traveller_information ) ) :
+					?>
 				<div class="wpte-toggle-item-wrap wpte-col2">
 					<?php
-					for ( $i = 1; $i <= count( $traveller_information ); $i ++ ) {
+					for ( $i = 1; $i <= count( $traveller_information ); $i++ ) {
 						?>
 						<div class="wpte-toggle-item">
 							<div class="wpte-toggle-title">
@@ -29,7 +30,7 @@ global $post;
 								<div class="wpte-prsnl-dtl-blk wpte-floated">
 									<div class="wpte-button-wrap wpte-rightalign wpte-edit-prsnl-details">
 										<a href="#" class="wpte-btn-transparent wpte-btn-sm">
-											<?php wptravelengine_svg_by_fa_icon( "fas fa-pencil-alt" ); ?>
+											<?php wptravelengine_svg_by_fa_icon( 'fas fa-pencil-alt' ); ?>
 											<?php esc_html_e( 'Edit', 'wp-travel-engine' ); ?>
 										</a>
 									</div>
@@ -38,23 +39,23 @@ global $post;
 											<?php do_action( 'wptravelengine_before_travellers_information', $traveller_information, $post->ID ); ?>
 											<ul class="wpte-list">
 												<?php
-												foreach ( $traveller_information[$i - 1] as $data_label => $data_value ) :
-                                                    $key_map = [
-                                                        'title' => 'Title',
-                                                        'fname'   => 'First Name',
-                                                        'lname'   => 'Last Name',
-                                                        'email'   => 'Email',
-                                                        'phone'   => 'Phone',
-                                                        'address' => 'Address',
-                                                        'city'    => 'City',
-                                                        'country' => 'Country',
-                                                        'postcode' => 'Postcode',
-                                                        'dob'     => 'Date of Birth',
-                                                        'passport' => 'Passport Number',
-                                                    ];
-                                                    if( array_key_exists( $data_label, $key_map ) ) {
-                                                        $data_label = $key_map[$data_label];
-                                                    }
+												foreach ( $traveller_information[ $i - 1 ] as $data_label => $data_value ) :
+													$key_map = array(
+														'title' => 'Title',
+														'fname'   => 'First Name',
+														'lname'   => 'Last Name',
+														'email'   => 'Email',
+														'phone'   => 'Phone',
+														'address' => 'Address',
+														'city'    => 'City',
+														'country' => 'Country',
+														'postcode' => 'Postcode',
+														'dob'     => 'Date of Birth',
+														'passport' => 'Passport Number',
+													);
+													if ( array_key_exists( $data_label, $key_map ) ) {
+														$data_label = $key_map[ $data_label ];
+													}
 
 													if ( is_array( $data_value ) ) {
 														$data_value = implode( ',', $data_value );
@@ -67,11 +68,11 @@ global $post;
 															if ( 'dob' === $key ) :
 																$data_value = wte_get_formated_date( $data_value );
 															endif;
-                                                            switch ( $data_label ) {
-                                                                case 'dob':
-                                                                    $data_value = wte_get_formated_date( $data_value );
-                                                                    ?>
-                                                                    <span>
+															switch ( $data_label ) {
+																case 'dob':
+																	$data_value = wte_get_formated_date( $data_value );
+																	?>
+																	<span>
 																		<div class="wpte-field wpte-text">
 																			<input
 																				class="wp-travel-engine-datetime hasDatepicker"
@@ -80,11 +81,11 @@ global $post;
 																				value="<?php echo esc_attr( $date_value ); ?>">
 																		</div>
 																		</span>
-                                                                    <?php
-                                                                    break;
-                                                                case 'country':
-                                                                    ?>
-                                                                    <span>
+																	<?php
+																	break;
+																case 'country':
+																	?>
+																	<span>
 																			<div class="wpte-field wpte-select">
 																			<select class="wpte-enhanced-select"
 																					name="travelers[<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
@@ -98,16 +99,16 @@ global $post;
 																		</select>
 																		</div>
 																	</span>
-                                                                    <?php
-                                                                    break;
-                                                                default:
-                                                                    ?>
-                                                                    <span><?php echo esc_html( $data_value ); ?></span>
-                                                                <?php
-                                                            }
+																	<?php
+																	break;
+																default:
+																	?>
+																	<span><?php echo esc_html( $data_value ); ?></span>
+																	<?php
+															}
 															?>
 														</li>
-													<?php
+														<?php
 													endif;
 												endforeach;
 												?>
@@ -115,26 +116,26 @@ global $post;
 											<?php do_action( 'wptravelengine_after_travellers_information', $traveller_information, $post->ID ); ?>
 										</div>
 										<div style="display:none;"
-											 class="wpte-prsnl-dtl-blk-content-edit edit-personal-info">
-                                             <ul class="wpte-list">
+											class="wpte-prsnl-dtl-blk-content-edit edit-personal-info">
+											<ul class="wpte-list">
 												<?php
-												foreach ( $traveller_information[$i - 1] as $data_label => $data_value ) :
-                                                    $key_map = [
-                                                        'title' => 'Title',
-                                                        'fname'   => 'First Name',
-                                                        'lname'   => 'Last Name',
-                                                        'email'   => 'Email',
-                                                        'phone'   => 'Phone',
-                                                        'address' => 'Address',
-                                                        'city'    => 'City',
-                                                        'country' => 'Country',
-                                                        'postcode' => 'Postcode',
-                                                        'dob'     => 'Date of Birth',
-                                                        'passport' => 'Passport Number',
-                                                    ];
-                                                    if( array_key_exists( $data_label, $key_map ) ) {
-                                                        $data_label = $key_map[$data_label];
-                                                    }
+												foreach ( $traveller_information[ $i - 1 ] as $data_label => $data_value ) :
+													$key_map = array(
+														'title' => 'Title',
+														'fname'   => 'First Name',
+														'lname'   => 'Last Name',
+														'email'   => 'Email',
+														'phone'   => 'Phone',
+														'address' => 'Address',
+														'city'    => 'City',
+														'country' => 'Country',
+														'postcode' => 'Postcode',
+														'dob'     => 'Date of Birth',
+														'passport' => 'Passport Number',
+													);
+													if ( array_key_exists( $data_label, $key_map ) ) {
+														$data_label = $key_map[ $data_label ];
+													}
 
 													if ( is_array( $data_value ) ) {
 														$data_value = implode( ',', $data_value );
@@ -147,11 +148,11 @@ global $post;
 															if ( 'dob' === $data_label ) :
 																$data_value = wte_get_formated_date( $data_value );
 															endif;
-                                                            switch ( $data_label ) {
-                                                                case 'dob':
-                                                                    $data_value = wte_get_formated_date( $data_value );
-                                                                    ?>
-                                                                    <span>
+															switch ( $data_label ) {
+																case 'dob':
+																	$data_value = wte_get_formated_date( $data_value );
+																	?>
+																	<span>
 																		<div class="wpte-field wpte-text">
 																			<input
 																				class="wp-travel-engine-datetime hasDatepicker"
@@ -160,11 +161,11 @@ global $post;
 																				value="<?php echo esc_attr( $date_value ); ?>">
 																		</div>
 																		</span>
-                                                                    <?php
-                                                                    break;
-                                                                case 'country':
-                                                                    ?>
-                                                                    <span>
+																	<?php
+																	break;
+																case 'country':
+																	?>
+																	<span>
 																			<div class="wpte-field wpte-select">
 																			<select class="wpte-enhanced-select"
 																					name="travelers[<?php echo esc_attr( $data_label ); ?>][<?php echo esc_attr( $i ); ?>]">
@@ -178,33 +179,33 @@ global $post;
 																		</select>
 																		</div>
 																	</span>
-                                                                    <?php
-                                                                    break;
-                                                                default:
-                                                                    ?>
-                                                                    <span>
+																	<?php
+																	break;
+																default:
+																	?>
+																	<span>
 																		<div class="wpte-field wpte-text">
 																			<input type="text"
-																				   name="travelers[<?php echo esc_attr( $data_label ); ?>][<?php echo esc_attr( $i ); ?>]"
-																				   value="<?php echo esc_attr( $data_value ); ?>">
+																					name="travelers[<?php echo esc_attr( $data_label ); ?>][<?php echo esc_attr( $i ); ?>]"
+																					value="<?php echo esc_attr( $data_value ); ?>">
 																			</div>
 																		</span>
-                                                                <?php
-                                                            }
+																	<?php
+															}
 															?>
 														</li>
-													<?php
+														<?php
 													endif;
 												endforeach;
 												?>
 											</ul>
 										</div>
 								</div>
-                                <?php if ( isset( $emergency_contact ) && is_array( $emergency_contact ) && $i == 1 ) : ?>
+								<?php if ( isset( $emergency_contact ) && is_array( $emergency_contact ) && $i == 1 ) : ?>
 								<div class="wpte-prsnl-dtl-blk wpte-floated">
 									<div class="wpte-button-wrap wpte-rightalign wpte-edit-prsnl-details">
 										<a href="#" class="wpte-btn-transparent wpte-btn-sm">
-											<?php wptravelengine_svg_by_fa_icon( "fas fa-pencil-alt" ); ?>
+											<?php wptravelengine_svg_by_fa_icon( 'fas fa-pencil-alt' ); ?>
 											<?php esc_html_e( 'Edit', 'wp-travel-engine' ); ?>
 										</a>
 									</div>
@@ -215,7 +216,7 @@ global $post;
 											<ul class="wpte-list">
 												<?php
 													// Map keys to more readable formats
-													$key_map = [
+													$key_map = array(
 														'title' => 'Title',
 														'fname'   => 'First Name',
 														'lname'   => 'Last Name',
@@ -225,32 +226,32 @@ global $post;
 														'city'    => 'City',
 														'country' => 'Country',
 														'relation' => 'Relation',
-													];
+													);
 
-												foreach ( $emergency_contact as $key => $data_value ) :
-													if ( array_key_exists( $key, $key_map ) ) {
-														$key = $key_map[ $key ];
-													}
-													if ( is_array( $data_value ) ) {
-														$data_value = implode( ',', $data_value );
-													}
+													foreach ( $emergency_contact as $key => $data_value ) :
+														if ( array_key_exists( $key, $key_map ) ) {
+															$key = $key_map[ $key ];
+														}
+														if ( is_array( $data_value ) ) {
+															$data_value = implode( ',', $data_value );
+														}
 														?>
 														<li>
-															<b><?php echo esc_html(  $key ); ?></b>
-                                                            <span><?php echo esc_html( $data_value ); ?></span>
+															<b><?php echo esc_html( $key ); ?></b>
+															<span><?php echo esc_html( $data_value ); ?></span>
 														</li>
 														<?php
 													endforeach;
-												?>
+													?>
 											</ul>
 											<?php do_action( 'wptravelengine_after_emergency_contact_information', $emergency_contact, $post->ID ); ?>
 										</div>
 										<div style="display:none;"
-											 class="wpte-prsnl-dtl-blk-content-edit edit-relation-info">
+											class="wpte-prsnl-dtl-blk-content-edit edit-relation-info">
 											<ul class="wpte-list">
 												<?php
 													// Map keys to more readable formats
-													$key_map = [
+													$key_map = array(
 														'title' => 'Title',
 														'fname'   => 'First Name',
 														'lname'   => 'Last Name',
@@ -260,21 +261,21 @@ global $post;
 														'city'    => 'City',
 														'country' => 'Country',
 														'relation' => 'Relation',
-													];
-													foreach( $emergency_contact as $key => $data_value ) :
+													);
+													foreach ( $emergency_contact as $key => $data_value ) :
 														if ( array_key_exists( $key, $key_map ) ) {
 															$key = $key_map[ $key ];
 														}
 														?>
-														<?php if( isset( $data_value ) && !empty( $data_value ) ): ?>
+														<?php if ( isset( $data_value ) && ! empty( $data_value ) ) : ?>
 														<li>
 															<b><?php echo esc_html( $key ); ?></b>
-                                                            <?php
-                                                            switch ( $key ) {
-                                                                case 'dob':
-                                                                    $data_value = wte_get_formated_date( $data_value );
-                                                                    ?>
-                                                                    <span>
+															<?php
+															switch ( $key ) {
+																case 'dob':
+																	$data_value = wte_get_formated_date( $data_value );
+																	?>
+																	<span>
 																			<div class="wpte-field wpte-select">
 																			<select class="wpte-enhanced-select"
 																					name="emergency[<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
@@ -288,11 +289,11 @@ global $post;
 																		</select>
 																		</div>
 																	</span>
-                                                                    <?php
-                                                                    break;
-                                                                case 'country':
-                                                                    ?>
-                                                                    <span>
+																	<?php
+																	break;
+																case 'country':
+																	?>
+																	<span>
 																			<div class="wpte-field wpte-select">
 																			<select class="wpte-enhanced-select"
 																					name="emergency[<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
@@ -306,30 +307,30 @@ global $post;
 																		</select>
 																		</div>
 																	</span>
-                                                                    <?php
-                                                                    break;
-                                                                default:
-                                                                    ?>
-                                                                    <span>
+																	<?php
+																	break;
+																default:
+																	?>
+																	<span>
 																			<div class="wpte-field wpte-text">
 																				<input type="text"
-																					   name="emergency[<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
-																					   value="<?php echo esc_attr( $data_value ); ?>">
+																						name="emergency[<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
+																						value="<?php echo esc_attr( $data_value ); ?>">
 																				</div>
 																			</span>
-                                                                <?php
-                                                            }
+																	<?php
+															}
 															?>
 														</li>
 													<?php endif; ?>
-												<?php
+														<?php
 												endforeach;
-												?>
+													?>
 											</ul>
 										</div>
 									<?php endif; ?>
 								</div>
-                                <?php endif; ?>
+								<?php endif; ?>
 							</div>
 						</div>
 						<?php
@@ -339,7 +340,7 @@ global $post;
 					}
 					?>
 				</div>
-				<?php endif;?>
+				<?php endif; ?>
 
 			</div>
 		</div> <!-- .wpte-block -->

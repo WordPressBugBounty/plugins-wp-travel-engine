@@ -18,13 +18,13 @@ if ( empty( $cart_items ) ) {
 		<header class="cart-header cf">
 			<strong><?php esc_html_e( 'Cart Trips', 'wp-travel-engine' ); ?></strong>
 			<a href="<?php echo esc_url( wptravelengine_get_checkout_url() ); ?>"
-			   class="btn"><?php esc_html_e( 'Checkout', 'wp-travel-engine' ); ?></a>
+				class="btn"><?php esc_html_e( 'Checkout', 'wp-travel-engine' ); ?></a>
 		</header>
 		<div class="cart-table">
 			<ul>
 				<?php
 				foreach ( $cart_items as $key => $item ) :
-					$trip_id = $item[ 'trip_id' ];
+					$trip_id   = $item['trip_id'];
 					$thumbnail = get_the_post_thumbnail_url( $trip_id, 'thumbnail' );
 					$trip_name = get_the_title( $trip_id );
 					?>
@@ -37,17 +37,17 @@ if ( empty( $cart_items ) ) {
 									<span class="title"><?php echo esc_html( $trip_name ); ?></span>
 									<span class="itemno">#<?php echo esc_html( $trip_id ); ?></span>
 									<span class="styles">
-									<span><strong><?php _e( 'Start Date:', 'wp-travel-engine' ); ?></strong><?php echo esc_html( $item[ 'trip_date' ] ); ?></span>
+									<span><strong><?php _e( 'Start Date:', 'wp-travel-engine' ); ?></strong><?php echo esc_html( $item['trip_date'] ); ?></span>
 								</div>
 							</div>
 							<div class="item-block ib-qty">
 								<span class="qty">1</span>
 								<span
-									class="price"><span>x</span> <?php echo wte_esc_price( wte_get_formated_price_html( $item[ 'trip_price' ] ) ); ?></span>
+									class="price"><span>x</span> <?php echo wte_esc_price( wte_get_formated_price_html( $item['trip_price'] ) ); ?></span>
 							</div>
 							<div class="item-block ib-total-price">
 								<span
-									class="tp-price"><?php echo wte_esc_price( wte_get_formated_price_html( $item[ 'trip_price' ] ) ); ?></span>
+									class="tp-price"><?php echo wte_esc_price( wte_get_formated_price_html( $item['trip_price'] ) ); ?></span>
 							</div>
 						</div>
 					</li>
@@ -60,26 +60,26 @@ if ( empty( $cart_items ) ) {
 				<ul>
 					<li class="subtotal"><span
 							class="sb-label"><?php esc_html_e( 'Cart Total', 'wp-travel-engine' ); ?></span><span
-							class="sb-value"><?php echo wte_esc_price( wte_get_formated_price_html( $totals[ 'cart_total' ] ) ); ?></span>
+							class="sb-value"><?php echo wte_esc_price( wte_get_formated_price_html( $totals['cart_total'] ) ); ?></span>
 					</li>
 					<li class="subtotal"><span
 							class="sb-label"><?php esc_html_e( 'Discount', 'wp-travel-engine' ); ?></span><span
-							class="sb-value"><?php echo wte_esc_price( wte_get_formated_price_html( $totals[ 'discount' ] ) ); ?></span>
+							class="sb-value"><?php echo wte_esc_price( wte_get_formated_price_html( $totals['discount'] ) ); ?></span>
 					</li>
 					<li class="subtotal"><span
 							class="sb-label"><?php esc_html_e( 'Subtotal', 'wp-travel-engine' ); ?></span><span
-							class="sb-value"><?php echo wte_esc_price( wte_get_formated_price_html( $totals[ 'sub_total' ] ) ); ?></span>
+							class="sb-value"><?php echo wte_esc_price( wte_get_formated_price_html( $totals['sub_total'] ) ); ?></span>
 					</li>
 					<li class="grand-total"><span
 							class="sb-label"><?php esc_html_e( 'Total', 'wp-travel-engine' ); ?></span><span
-							class="sb-value"><?php echo wte_esc_price( wte_get_formated_price_html( $totals[ 'total' ] ) ); ?></span>
+							class="sb-value"><?php echo wte_esc_price( wte_get_formated_price_html( $totals['total'] ) ); ?></span>
 					</li>
 				</ul>
 			</div>
 		</div>
 		<div class="cart-footer cf">
 			<a href="<?php echo esc_url( wptravelengine_get_checkout_url() ); ?>"
-			   class="btn"><?php esc_html_e( 'Checkout', 'wp-travel-engine' ); ?></a>
+				class="btn"><?php esc_html_e( 'Checkout', 'wp-travel-engine' ); ?></a>
 			<a href="<?php echo esc_url( get_post_type_archive_link( 'trip' ) ); ?>" class="cont-shopping"><i
 					class="i-angle-left"></i><?php esc_html_e( 'Book another trip', 'wp-travel-engine' ); ?></a>
 		</div>

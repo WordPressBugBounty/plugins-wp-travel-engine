@@ -38,7 +38,7 @@ class CurrencyPicker extends Select {
 	 */
 	public function init( array $field ): Base {
 
-		$field[ 'options' ] = [ '' => __( 'Currency', 'wp-travel-engine' ) ] + $this->get_options();
+		$field['options'] = array( '' => __( 'Currency', 'wp-travel-engine' ) ) + $this->get_options();
 
 		return parent::init( $field );
 	}

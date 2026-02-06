@@ -35,30 +35,30 @@ $tablists = apply_filters(
 					<?php
 					$tabindex = 0; // Used for tab switching when clicked on tab navigation link.
 					foreach ( $tablists as $tab ) : // foreachtlast.
-						if ( ! isset( $tab[ 'content_callback' ] ) ) {
+						if ( ! isset( $tab['content_callback'] ) ) {
 							continue;
 						}
 						?>
-						<li class="wte-process-nav-item" data-target="#<?php echo esc_attr( $tab[ 'id' ] ); ?>">
-							<a href="#<?php echo esc_attr( $tab[ 'id' ] ); ?>"
-							   data-tab-index="<?php echo (float) $tabindex; ?>">
+						<li class="wte-process-nav-item" data-target="#<?php echo esc_attr( $tab['id'] ); ?>">
+							<a href="#<?php echo esc_attr( $tab['id'] ); ?>"
+								data-tab-index="<?php echo (float) $tabindex; ?>">
 								<span class="wte-icon">
 									<?php echo wte_array_get( $tab, 'tab_icon', '' ); ?>
 								</span>
 								<?php echo esc_html( wte_array_get( $tab, 'tab_title', __( 'Untitled', 'wp-travel-engine' ) ) ); ?>
 								<span class="arrow">
 									<svg xmlns="http://www.w3.org/2000/svg" width="5.81" height="10.121"
-										 viewBox="0 0 5.81 10.121">
+										viewBox="0 0 5.81 10.121">
 										<path id="Path_23963" data-name="Path 23963" d="M3290.465,368.331l4,4-4,4"
-											  transform="translate(-3289.404 -367.271)" fill="none"
-											  stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-											  opacity="0.8" />
+												transform="translate(-3289.404 -367.271)" fill="none"
+												stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+												opacity="0.8" />
 									</svg>
 								</span>
 							</a>
 						</li>
 						<?php
-						$tabindex ++;
+						++$tabindex;
 					endforeach; // endforeachtlast.
 					?>
 				</ul>
@@ -80,17 +80,17 @@ $tablists = apply_filters(
 							?>
 						</div>
 					</div>
-				<?php
+					<?php
 				endforeach; // endforeachtcastc
 				?>
 				<div class="wte-process-tab-controller">
 					<button type="button" id="wteProcessPrev" class="wte-process-btn wte-process-btn-prev"
 							data-step="-1" style="display:none">
 						<svg xmlns="http://www.w3.org/2000/svg" width="5.811" height="10.121"
-							 viewBox="0 0 5.811 10.121">
+							viewBox="0 0 5.811 10.121">
 							<path id="Path_23952" data-name="Path 23952" d="M3294.464,368.331l-4,4,4,4"
-								  transform="translate(-3289.714 -367.271)" fill="none" stroke="#147dfe"
-								  stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" />
+									transform="translate(-3289.714 -367.271)" fill="none" stroke="#147dfe"
+									stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" />
 						</svg>
 						<?php esc_html_e( 'Back', 'wp-travel-engine' ); ?>
 					</button>

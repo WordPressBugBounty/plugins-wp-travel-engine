@@ -30,13 +30,23 @@ abstract class BookingEditFormFields extends FormField {
 	}
 
 	protected function map_field( $field ) {
-		$field[ 'wrapper_class' ] = 'wpte-field';
+		$field['wrapper_class'] = 'wpte-field';
 
 		return $field;
 	}
 
 	protected function map_fields( $fields ): array {
 		return array_map( array( $this, 'map_field' ), $fields );
+	}
+
+	/**
+	 * Get defaults array.
+	 *
+	 * @return array Defaults array.
+	 * @since 6.7.0
+	 */
+	public function get_defaults(): array {
+		return $this->defaults;
 	}
 
 	abstract static function structure( string $mode = 'edit' );

@@ -14,7 +14,6 @@ namespace WPTravelEngine\Validator;
  * Class Checkout
  *
  * This class is responsible for validating checkout data.
- *
  */
 class Checkout extends Validator {
 
@@ -30,9 +29,9 @@ class Checkout extends Validator {
 
 		$checkout_fields = apply_filters( 'wp_travel_engine_booking_fields_display', \WTE_Default_Form_Fields::booking() );
 
-		$booking_data = $data[ 'wp_travel_engine_booking_setting' ][ 'place_order' ][ 'booking' ] ?? $data['billing'] ?? [];
+		$booking_data = $data['wp_travel_engine_booking_setting']['place_order']['booking'] ?? $data['billing'] ?? array();
 
-		$field_name_mapping = [
+		$field_name_mapping = array(
 			'booking_first_name' => 'fname',
 			'booking_last_name'  => 'lname',
 			'booking_email'      => 'email',
@@ -40,14 +39,14 @@ class Checkout extends Validator {
 			'booking_address'    => 'address',
 			'booking_city'       => 'city',
 			'booking_country'    => 'country',
-		];
+		);
 
 		foreach ( $checkout_fields as $field_key => $field ) {
-			$field[ 'required_field' ] = $field[ 'validations' ][ 'required' ] ?? $field[ 'required_field' ] ?? false;
+			$field['required_field'] = $field['validations']['required'] ?? $field['required_field'] ?? false;
 
 			if ( method_exists( $this, $field_key ) ) {
-				$value = $booking_data[ $field_name_mapping[ $field_key ] ] ?? $data[ $field[ 'name' ] ] ?? '';
-				if ( empty( $value ) && ! in_array( $field[ 'required_field' ], array( 'false', false ) ) ) {
+				$value = $booking_data[ $field_name_mapping[ $field_key ] ] ?? $data[ $field['name'] ] ?? '';
+				if ( empty( $value ) && ! in_array( $field['required_field'], array( 'false', false ) ) ) {
 					$this->errors[ $field_key ] = self::REQUIRED;
 					continue;
 				}
@@ -59,7 +58,6 @@ class Checkout extends Validator {
 		}
 
 		return $this;
-
 	}
 
 	/**
@@ -73,16 +71,16 @@ class Checkout extends Validator {
 	 */
 	protected function booking_first_name( string $value ) {
 
-//		if ( ! $this->validate_name( $value ) ) {
-//			$this->errors[ 'booking_first_name' ] = static::ILLEGAL_CHARACTERS;
-//
-//			return;
-//		}
+		// if ( ! $this->validate_name( $value ) ) {
+		// $this->errors[ 'booking_first_name' ] = static::ILLEGAL_CHARACTERS;
+		//
+		// return;
+		// }
 
-		$this->data[ 'booking' ][ 'fname' ] = sanitize_text_field( $value );
+		$this->data['booking']['fname'] = sanitize_text_field( $value );
 		// For new checkout page, use of new functionality to set billing data.
-		if( isset( $_POST['billing'] ) ){
-			$this->data[ 'billing' ][ 'fname' ] = sanitize_text_field( $value );
+		if ( isset( $_POST['billing'] ) ) {
+			$this->data['billing']['fname'] = sanitize_text_field( $value );
 		}
 	}
 
@@ -96,10 +94,10 @@ class Checkout extends Validator {
 	 * @return void
 	 */
 	protected function booking_last_name( string $value ) {
-		$this->data[ 'booking' ][ 'lname' ] = sanitize_text_field( $value );
+		$this->data['booking']['lname'] = sanitize_text_field( $value );
 		// For new checkout page, use of new functionality to set billing data.
-		if( isset( $_POST['billing'] ) ){
-			$this->data[ 'billing' ][ 'lname' ] = sanitize_text_field( $value );
+		if ( isset( $_POST['billing'] ) ) {
+			$this->data['billing']['lname'] = sanitize_text_field( $value );
 		}
 	}
 
@@ -115,17 +113,15 @@ class Checkout extends Validator {
 	protected function booking_email( string $value ) {
 		if ( ! $this->validate_email( $value ) ) {
 
-			$this->errors[ 'booking_email' ] = static::INVALID_VALUE;
-
-
+			$this->errors['booking_email'] = static::INVALID_VALUE;
 
 			return;
 
 		}
-		$this->data[ 'booking' ][ 'email' ] = sanitize_email( $value );
+		$this->data['booking']['email'] = sanitize_email( $value );
 		// For new checkout page, use of new functionality to set billing data.
-		if( isset( $_POST['billing'] ) ){
-			$this->data[ 'billing' ][ 'email' ] = sanitize_email( $value );
+		if ( isset( $_POST['billing'] ) ) {
+			$this->data['billing']['email'] = sanitize_email( $value );
 		}
 	}
 
@@ -137,10 +133,10 @@ class Checkout extends Validator {
 	 * @return void
 	 */
 	protected function booking_phone( $value ) {
-		$this->data[ 'booking' ][ 'phone' ] = $this->sanitize_phone( $value );
+		$this->data['booking']['phone'] = $this->sanitize_phone( $value );
 		// For new checkout page, use of new functionality to set billing data.
-		if( isset( $_POST['billing'] ) ){
-			$this->data[ 'billing' ][ 'phone' ] = $this->sanitize_phone( $value );
+		if ( isset( $_POST['billing'] ) ) {
+			$this->data['billing']['phone'] = $this->sanitize_phone( $value );
 		}
 	}
 
@@ -152,10 +148,10 @@ class Checkout extends Validator {
 	 * @return void
 	 */
 	protected function booking_address( string $value ) {
-		$this->data[ 'booking' ][ 'address' ] = sanitize_text_field( $value );
+		$this->data['booking']['address'] = sanitize_text_field( $value );
 		// For new checkout page, use of new functionality to set billing data.
-		if( isset( $_POST['billing'] ) ){
-			$this->data[ 'billing' ][ 'address' ] = sanitize_text_field( $value );
+		if ( isset( $_POST['billing'] ) ) {
+			$this->data['billing']['address'] = sanitize_text_field( $value );
 		}
 	}
 
@@ -167,16 +163,16 @@ class Checkout extends Validator {
 	 * @return void
 	 */
 	protected function booking_city( string $value ) {
-//		if ( ! $this->validate_name( $value ) ) {
-//			$this->errors[ 'booking_city' ] = self::ILLEGAL_CHARACTERS;
-//
-//			return;
-//		}
+		// if ( ! $this->validate_name( $value ) ) {
+		// $this->errors[ 'booking_city' ] = self::ILLEGAL_CHARACTERS;
+		//
+		// return;
+		// }
 
-		$this->data[ 'booking' ][ 'city' ] = sanitize_text_field( $value );
+		$this->data['booking']['city'] = sanitize_text_field( $value );
 		// For new checkout page, use of new functionality to set billing data.
-		if( isset( $_POST['billing'] ) ){
-			$this->data[ 'billing' ][ 'city' ] = sanitize_text_field( $value );
+		if ( isset( $_POST['billing'] ) ) {
+			$this->data['billing']['city'] = sanitize_text_field( $value );
 		}
 	}
 
@@ -191,13 +187,13 @@ class Checkout extends Validator {
 
 		$value = $this->sanitize_country( $value );
 		if ( empty( $value ) ) {
-			$this->errors[ 'booking_country' ] = static::INVALID_VALUE;
+			$this->errors['booking_country'] = static::INVALID_VALUE;
 			return;
 		}
-		$this->data[ 'booking' ][ 'country' ] = $value;
+		$this->data['booking']['country'] = $value;
 		// For new checkout page, use of new functionality to set billing data.
-		if( isset( $_POST['billing'] ) ){
-			$this->data[ 'billing' ][ 'country' ] = $value;
+		if ( isset( $_POST['billing'] ) ) {
+			$this->data['billing']['country'] = $value;
 		}
 	}
 
@@ -214,33 +210,31 @@ class Checkout extends Validator {
 	 * @return void
 	 */
 	protected function default( array $data, array $settings ) {
-		$name = $settings[ 'name' ];
+		$name = $settings['name'];
 
-		if ( $settings[ 'type' ] === 'file' ) {
-			if ( ! isset( $_FILES[ $name ] ) || ! is_uploaded_file( $_FILES[ $name ][ 'tmp_name' ] ) ) {
-				if ( $settings[ 'required_field' ] !== 'false' ) {
+		if ( $settings['type'] === 'file' ) {
+			if ( ! isset( $_FILES[ $name ] ) || ! is_uploaded_file( $_FILES[ $name ]['tmp_name'] ) ) {
+				if ( $settings['required_field'] !== 'false' ) {
 					$this->errors[ $name ] = self::REQUIRED;
 				}
 				return;
 			}
 			$data[ $name ] = $this->upload_file( $_FILES[ $name ] );
-			if( isset( $data['billing'] ) ){
+			if ( isset( $data['billing'] ) ) {
 				$data['billing'][ $name ] = $data[ $name ];
 			}
 		}
 
-		if( isset( $data['billing'] ) && isset( $data['billing'][ $name ] ) && !empty( $data['billing'][ $name ] ) ){
+		if ( isset( $data['billing'] ) && isset( $data['billing'][ $name ] ) && ! empty( $data['billing'][ $name ] ) ) {
 			$this->set_default_value( $data, $settings );
 			return;
-		} else{
-			if ( empty( $data[ $name ] ) && $settings[ 'required_field' ] !== 'false' ) {
+		} elseif ( empty( $data[ $name ] ) && $settings['required_field'] !== 'false' ) {
 				$this->errors[ $name ] = self::REQUIRED;
 				return;
-			}
 		}
 
-		$value = $data[$name] ?? '';
-    	$this->data['booking'][$name] = is_array( $value ) ? array_map( 'sanitize_text_field', $value ) : sanitize_text_field( $value );
+		$value                          = $data[ $name ] ?? '';
+		$this->data['booking'][ $name ] = is_array( $value ) ? array_map( 'sanitize_text_field', $value ) : sanitize_text_field( $value );
 	}
 
 	/**
@@ -253,20 +247,20 @@ class Checkout extends Validator {
 	 */
 	public function set_default_value( array $data, array $settings ) {
 
-		$name = $settings[ 'name' ];
+		$name = $settings['name'];
 
-		if( isset( $data['billing'] ) && isset( $data['billing'][ $name ] ) && '' == $data['billing'][ $name ] ){
+		if ( isset( $data['billing'] ) && isset( $data['billing'][ $name ] ) && '' == $data['billing'][ $name ] ) {
 			$this->errors[ $name ] = self::REQUIRED;
 			return;
-		} else if( isset( $data['emergency'] ) && isset( $data['emergency'][ $name ] ) && '' == $data['emergency'][ $name ] ){
+		} elseif ( isset( $data['emergency'] ) && isset( $data['emergency'][ $name ] ) && '' == $data['emergency'][ $name ] ) {
 			$this->errors[ $name ] = self::REQUIRED;
 			return;
-		} else if( isset( $data['travellers'] ) && isset( $data['travellers'][ $name ] ) && '' == $data['travellers'][ $name ] ){
+		} elseif ( isset( $data['travellers'] ) && isset( $data['travellers'][ $name ] ) && '' == $data['travellers'][ $name ] ) {
 			$this->errors[ $name ] = self::REQUIRED;
 			return;
 		}
-		if( isset( $data['billing'] ) ) {
-			$value = $data['billing'][ $name ] ?? '';
+		if ( isset( $data['billing'] ) ) {
+			$value                          = $data['billing'][ $name ] ?? '';
 			$this->data['billing'][ $name ] = is_array( $value ) ? array_map( 'sanitize_text_field', $value ) : sanitize_text_field( $value );
 		}
 	}
@@ -282,17 +276,16 @@ class Checkout extends Validator {
 	private function upload_file( array $file ) {
 
 		if ( ! function_exists( 'wp_handle_upload' ) ) {
-			require_once( ABSPATH . 'wp-admin/includes/file.php' );
+			require_once ABSPATH . 'wp-admin/includes/file.php';
 		}
 
 		$upload_data = wp_handle_upload( $file, array( 'test_form' => false ) );
 
-		if ( isset( $upload_data[ 'error' ] ) ) {
-			$this->errors[ 'file_upload_error' ] = $upload_data[ 'error' ];
+		if ( isset( $upload_data['error'] ) ) {
+			$this->errors['file_upload_error'] = $upload_data['error'];
 			return '';
 		}
 
-		return $upload_data[ 'url' ] ?? '';
-
+		return $upload_data['url'] ?? '';
 	}
 }

@@ -39,7 +39,7 @@ $trip_id = isset( $_POST['post_id'] ) ? (int) $_POST['post_id'] : 0;
 				'type'        => 'textarea',
 				'value'       => '{{tripPackage.content.raw}}',
 				'placeholder' => 'Add short description for pricing package..',
-				'id'       => 'wpte-package-description-editor_{{tripPackage.id}}'
+				'id'          => 'wpte-package-description-editor_{{tripPackage.id}}',
 			),
 		);
 
@@ -54,7 +54,7 @@ $trip_id = isset( $_POST['post_id'] ) ? (int) $_POST['post_id'] : 0;
 				$packages_selector_options = array();
 				foreach ( $original_packages as $original_package ) {
 					$packages_selector_options[ $original_package ] = array(
-						'label' => get_the_title( $original_package )
+						'label' => get_the_title( $original_package ),
 					);
 				}
 				$build_args[] = array(

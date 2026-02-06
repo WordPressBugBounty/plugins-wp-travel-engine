@@ -11,15 +11,26 @@ namespace WPTravelEngine\Helpers;
 class Translators {
 
 	public function __construct() {
-		add_filter( 'wpml_pre_save_pro_translation', function ( $postarr, $job ) {
+		add_filter(
+			'wpml_pre_save_pro_translation',
+			function ( $postarr, $job ) {
 
-			if ( WP_TRAVEL_ENGINE_POST_TYPE !== ( $postarr[ 'post_type' ] ?? false ) ) {
-				return $postarr;
-			}
+				if ( WP_TRAVEL_ENGINE_POST_TYPE !== ( $postarr['post_type'] ?? false ) ) {
+					return $postarr;
+				}
 
-			return static::wpml_pre_save_pro_translation( $postarr, $job );
+				return static::wpml_pre_save_pro_translation( $postarr, $job );
+			},
+			10,
+			2
+		);
 
-		}, 10, 2 );
+		/**
+		 * This filter is used to modify the attributes and extradata of the translation units for WPML Advanced Translation Editor.
+		 *
+		 * @since 6.6.9
+		 */
+		add_filter( 'wpml_tm_adjust_translation_job', array( __CLASS__, 'wpml_ate_translation_adjust' ) );
 	}
 
 	public static function wpml_pre_save_pro_translation( $postarr, $job ) {
@@ -27,23 +38,22 @@ class Translators {
 		$original_trip_id = $job->original_doc_id;
 		$post_metas       = get_post_meta( $original_trip_id );
 
-		$meta_input = $postarr[ 'meta_input' ] ?? array();
+		$meta_input = $postarr['meta_input'] ?? array();
 		foreach ( $post_metas as $key => $value ) {
-			if ( preg_match( "#^_wpml_#", $key ) ) {
+			if ( preg_match( '#^_wpml_#', $key ) ) {
 				continue;
 			}
 
-			$meta_input[ $key ] = maybe_unserialize( $value[ 0 ] );
+			$meta_input[ $key ] = maybe_unserialize( $value[0] );
 		}
 
-		$postarr[ 'meta_input' ] = $meta_input;
+		$postarr['meta_input'] = $meta_input;
 
 		return $postarr;
 	}
 
 	/**
 	 * @return array[]|false|mixed|null
-	 *
 	 */
 	public static function get_current_language() {
 		if ( function_exists( 'pll_current_language' ) ) {
@@ -67,6 +77,7 @@ class Translators {
 
 	/**
 	 * Summary of set_wpml_language.
+	 *
 	 * @param string|null $lang
 	 * @return void
 	 * @since 6.6.6
@@ -120,5 +131,23 @@ class Translators {
 				wpml_st_parse_config( $config_file );
 			}
 		}
+	}
+
+	/**
+	 * This function is used to modify the attributes and extradata of the translation units for WPML Advanced Translation Editor.
+	 *
+	 * @since 6.6.9
+	 * @param array $translation_units Translation units.
+	 * @return array Translation units.
+	 */
+	public static function wpml_ate_translation_adjust( $translation_units ) {
+		foreach ( $translation_units as $key => $value ) {
+			if ( ! isset( $value['attributes']['id'] ) || strpos( $value['attributes']['id'], 'field-wp_travel_engine_setting' ) === false ) {
+				continue;
+			}
+			$translation_units[ $key ]['attributes']['resname'] = '';
+			$translation_units[ $key ]['extradata']['unit']     = '';
+		}
+		return $translation_units;
 	}
 }

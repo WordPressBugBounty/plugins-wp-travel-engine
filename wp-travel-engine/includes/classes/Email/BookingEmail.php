@@ -136,8 +136,8 @@ class BookingEmail extends Email {
 	 */
 	public function get_my_subject(): string {
 		$plugin_settings = new PluginSettings();
-		$subject = $plugin_settings->get( "{$this->sendto}_email_notify_tabs." . $this->template . '.subject', '' );
-		$subject = apply_filters( "wptravelengine_{$this->email_template_type}_email_template_subject_{$this->sendto}", $subject, $this );
+		$subject         = $plugin_settings->get( "{$this->sendto}_email_notify_tabs." . $this->template . '.subject', '' );
+		$subject         = apply_filters( "wptravelengine_{$this->email_template_type}_email_template_subject_{$this->sendto}", $subject, $this );
 		return $subject;
 	}
 
@@ -217,8 +217,8 @@ class BookingEmail extends Email {
 	 */
 	public function set_content() {
 		$plugin_settings = new PluginSettings();
-		$content = $plugin_settings->get( $this->sendto . '_email_notify_tabs.' . $this->template . '.content', '' );
-		$content = apply_filters( "wptravelengine_{$this->email_template_type}_email_template_content_{$this->sendto}", $content, $this );
+		$content         = $plugin_settings->get( $this->sendto . '_email_notify_tabs.' . $this->template . '.content', '' );
+		$content         = apply_filters( "wptravelengine_{$this->email_template_type}_email_template_content_{$this->sendto}", $content, $this );
 		$this->set( 'content', $content );
 		return $this;
 	}
@@ -343,5 +343,4 @@ class BookingEmail extends Email {
 
 		return array();
 	}
-
 }

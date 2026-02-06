@@ -23,9 +23,9 @@ use WTE_Default_Form_Fields;
  */
 class EnquiryMail extends AjaxController {
 
-	const NONCE_KEY = 'nonce';
+	const NONCE_KEY    = 'nonce';
 	const NONCE_ACTION = 'wte_enquiry_send_mail';
-	const ACTION = 'wte_enquiry_send_mail';
+	const ACTION       = 'wte_enquiry_send_mail';
 
 	/**
 	 * @param array $data
@@ -35,33 +35,33 @@ class EnquiryMail extends AjaxController {
 	 * @since 6.5.2
 	 */
 	protected function sanitize_form_data( array $data ): array {
-		$form_fields = WTE_Default_Form_Fields::enquiry();
+		$form_fields    = WTE_Default_Form_Fields::enquiry();
 		$sanitized_data = array();
 		foreach ( $form_fields as $form_field ) {
-			if ( isset( $form_field[ 'validations' ][ 'required' ] ) && $form_field[ 'validations' ][ 'required' ] == 'true' && empty( $data[ $form_field[ 'name' ] ] ) ) {
-				throw new Exception( sprintf( __( 'Missing required fields: %s', 'wp-travel-engine' ), $form_field[ 'field_label' ] ) );
+			if ( isset( $form_field['validations']['required'] ) && $form_field['validations']['required'] == 'true' && empty( $data[ $form_field['name'] ] ) ) {
+				throw new Exception( sprintf( __( 'Missing required fields: %s', 'wp-travel-engine' ), $form_field['field_label'] ) );
 			}
-			if ( isset( $form_field[ 'name' ] ) && isset( $data[ $form_field[ 'name' ] ] ) ) {
-				switch ( $form_field[ 'type' ] ) {
+			if ( isset( $form_field['name'] ) && isset( $data[ $form_field['name'] ] ) ) {
+				switch ( $form_field['type'] ) {
 					case 'number':
-						$value = (float) $data[ $form_field[ 'name' ] ];
+						$value = abs( (float) $data[ $form_field['name'] ] );
 						break;
 					case 'email':
-						$value = sanitize_email( $data[ $form_field[ 'name' ] ] );
+						$value = sanitize_email( $data[ $form_field['name'] ] );
 						break;
 					case 'tel':
 					case 'checkbox':
 					case 'text':
 					default:
-						$value = sanitize_text_field( $data[ $form_field[ 'name' ] ] );
+						$value = sanitize_text_field( $data[ $form_field['name'] ] );
 				}
 
-				$sanitized_data[ $form_field[ 'name' ] ] = $value;
+				$sanitized_data[ $form_field['name'] ] = $value;
 			}
 		}
 
-		if ( isset( $data[ 'package_id' ] ) ) {
-			$sanitized_data[ 'package_id' ] = absint( $data[ 'package_id' ] );
+		if ( isset( $data['package_id'] ) ) {
+			$sanitized_data['package_id'] = absint( $data['package_id'] );
 		}
 
 		return $sanitized_data;
@@ -136,20 +136,13 @@ class EnquiryMail extends AjaxController {
 		}
 
 		$ipaddress = '';
-		if ( getenv( 'HTTP_CLIENT_IP' ) ) {
-			$ipaddress = getenv( 'HTTP_CLIENT_IP' );
-		} else if ( getenv( 'HTTP_X_FORWARDED_FOR' ) ) {
-			$ipaddress = getenv( 'HTTP_X_FORWARDED_FOR' );
-		} else if ( getenv( 'HTTP_X_FORWARDED' ) ) {
-			$ipaddress = getenv( 'HTTP_X_FORWARDED' );
-		} else if ( getenv( 'HTTP_FORWARDED_FOR' ) ) {
-			$ipaddress = getenv( 'HTTP_FORWARDED_FOR' );
-		} else if ( getenv( 'HTTP_FORWARDED' ) ) {
-			$ipaddress = getenv( 'HTTP_FORWARDED' );
-		} else if ( getenv( 'REMOTE_ADDR' ) ) {
-			$ipaddress = getenv( 'REMOTE_ADDR' );
-		} else {
-			$ipaddress = 'UNKNOWN';
+		if ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
+			$ipaddress = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+		
+			// Validate IP format
+			if ( ! filter_var( $ipaddress, FILTER_VALIDATE_IP ) ) {
+				$ipaddress = '';
+			}
 		}
 
 		$remove_keys = array(
@@ -181,10 +174,39 @@ class EnquiryMail extends AjaxController {
 		}
 		$uploadedfile = $_FILES;
 		$attachments  = array();
+
+		// Define allowed file types once.
+		$allowed_mimes = array(
+			'jpg|jpeg|jpe' => 'image/jpeg',
+			'png'          => 'image/png',
+			'gif'          => 'image/gif',
+			'pdf'          => 'application/pdf',
+		);
+
 		foreach ( $uploadedfile as $key => $file ) {
-			$upload_file = wp_handle_upload( $file, array( 'test_form' => false ) );
-			if ( $upload_file && ! isset( $upload_file[ 'error' ] ) ) {
-				$attachments[ $key ] = $upload_file[ 'file' ];
+			// Skip if no file was uploaded or there was an upload error.
+			if ( empty( $file['name'] ) || ! empty( $file['error'] ) ) {
+				continue;
+			}
+
+			// Validate file type early.
+			$file_type = wp_check_filetype( $file['name'], $allowed_mimes );
+			if ( ! $file_type['type'] ) {
+				continue;
+			}
+
+			// Handle the file upload.
+			$upload_file = wp_handle_upload(
+				$file,
+				array(
+					'test_form' => false,
+					'mimes'     => $allowed_mimes,
+				)
+			);
+
+			// Add to attachments if successful.
+			if ( $upload_file && ! isset( $upload_file['error'] ) ) {
+				$attachments[ $key ] = $upload_file['file'];
 			}
 		}
 

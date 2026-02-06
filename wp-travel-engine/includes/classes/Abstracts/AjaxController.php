@@ -30,6 +30,13 @@ abstract class AjaxController {
 	const NONCE_ACTION = '';
 
 	/**
+	 * Allow non-priv users.
+	 *
+	 * @var bool
+	 */
+	const ALLOW_NOPRIV = true;
+
+	/**
 	 * Post REST Request.
 	 *
 	 * @var \WP_REST_Request $request
@@ -41,7 +48,10 @@ abstract class AjaxController {
 	 */
 	public function __construct() {
 		add_action( 'wp_ajax_' . static::ACTION, array( static::class, 'handle' ) );
-		add_action( 'wp_ajax_nopriv_' . static::ACTION, array( static::class, 'handle' ) );
+		// If ALLOW_NOPRIV is true, add the action for non-priv users.
+		if ( static::ALLOW_NOPRIV ) {
+			add_action( 'wp_ajax_nopriv_' . static::ACTION, array( static::class, 'handle' ) );
+		}
 	}
 
 	/**
@@ -95,12 +105,12 @@ abstract class AjaxController {
 	public static function create( RequestParser $request ): AjaxController {
 		$instance = new static();
 
-		if( wp_verify_nonce( $request->get_param( '_nonce' ), "wte_add_trip_to_cart" ) ) {
+		if ( wp_verify_nonce( $request->get_param( '_nonce' ), 'wte_add_trip_to_cart' ) ) {
 			$instance->request = $request;
 		}
-		//TODO: need to verify this later.
+		// TODO: need to verify this later.
 		// if ( $instance->authorize_request() ) {
-		// 	$instance->request = $request;
+		// $instance->request = $request;
 		// }
 
 		return $instance;

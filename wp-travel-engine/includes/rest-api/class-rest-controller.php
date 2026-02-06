@@ -14,5 +14,4 @@ class Controller extends \WP_REST_Controller {
 	public function __construct() {
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 	}
-
 }

@@ -17,7 +17,7 @@ abstract class DataStore {
 	 *
 	 * @var array
 	 */
-	protected array $data = [];
+	protected array $data = array();
 
 	/**
 	 *
@@ -46,6 +46,5 @@ abstract class DataStore {
 		}
 
 		return null;
-
 	}
 }

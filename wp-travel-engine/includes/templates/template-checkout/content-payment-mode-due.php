@@ -14,12 +14,15 @@ global $wte_cart;
 	</label>
 	<div class="wpte-checkout__form-control">
 		<input type="radio" name="wp_travel_engine_payment_mode"
-			   value="remaining_payment"
-			   id="wp_travel_engine_payment_mode-partial" checked>
+				value="remaining_payment"
+				id="wp_travel_engine_payment_mode-partial" checked>
 		<label for="wp_travel_engine_payment_mode-partial">
 			<?php
-			echo sprintf( apply_filters( 'wptravelengine_checkout_due_pay_label',
-				__( 'Due payment(%s)', 'wp-travel-engine' ) ),
+			printf(
+				apply_filters(
+					'wptravelengine_checkout_due_pay_label',
+					__( 'Remaining Amount (%s)', 'wp-travel-engine' )
+				),
 				wptravelengine_the_price( $due_payment_amount, false )
 			);
 			?>

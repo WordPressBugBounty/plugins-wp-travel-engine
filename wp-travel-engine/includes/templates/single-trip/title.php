@@ -17,29 +17,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<h1 class="entry-title" itemprop="name">
 		<?php the_title(); ?>
 	</h1>
-	<!-- Display duration -->
-	<span class="wte-title-duration">
-		<?php if ( ! empty( $duration ) ) { ?>
-
-				<span class="duration">
-					<?php echo esc_html( number_format_i18n( $duration ) ); ?>
-				</span>
-				<span class="days">
-					<?php
-						if ( 'days' === $duration_unit ) printf( esc_html( _nx( 'Day', 'Days', $duration, 'days', 'wp-travel-engine' ) ) );
-						if ( 'hours' === $duration_unit ) printf( esc_html( _nx( 'Hour', 'Hours', $duration, 'hours', 'wp-travel-engine' ) ) );
-					?>
-			</span>
-		<?php } ?>
-	</span>
-
-	<?php if( 'days_and_nights' === $trip_duration_format && ! empty( $nights ) && 'hours' !== $duration_unit ) { ?>
-		<span class="wte-title-duration wte-duration-night">
+	<?php if ( ! empty( $duration ) ) { ?>
+		<!-- Display duration -->
+		<span class="wte-title-duration">
 			<span class="duration">
-				<?php echo esc_html( number_format_i18n( $nights) ); ?>
+				<?php echo esc_html( number_format_i18n( $duration ) ); ?>
 			</span>
 			<span class="days">
-				<?php printf( esc_html( _nx( 'Night', 'Nights', $nights , 'nights', 'wp-travel-engine' ) ) ); ?>
+				<?php
+				if ( 'days' === $duration_unit ) {
+					printf( esc_html( _nx( 'Day', 'Days', $duration, 'days', 'wp-travel-engine' ) ) );
+				}
+				if ( 'hours' === $duration_unit ) {
+					printf( esc_html( _nx( 'Hour', 'Hours', $duration, 'hours', 'wp-travel-engine' ) ) );
+				}
+				?>
+			</span>
+		</span>
+	<?php } ?>
+
+	<?php if ( 'days_and_nights' === $trip_duration_format && ! empty( $nights ) && 'hours' !== $duration_unit ) { ?>
+		<span class="wte-title-duration wte-duration-night">
+			<span class="duration">
+				<?php echo esc_html( number_format_i18n( $nights ) ); ?>
+			</span>
+			<span class="days">
+				<?php printf( esc_html( _nx( 'Night', 'Nights', $nights, 'nights', 'wp-travel-engine' ) ) ); ?>
 			</span>
 		</span>
 	<?php } ?>

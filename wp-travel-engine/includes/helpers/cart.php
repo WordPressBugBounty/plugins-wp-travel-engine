@@ -18,17 +18,26 @@ use WPTravelEngine\Core\Cart\Cart;
 function wptravelengine_update_cart( array $args ): Cart {
 	global $wte_cart;
 
-	$mappings = [
+	$mappings = array(
 		'full'              => 'full',
 		'due'               => 'due',
 		'partial'           => 'partial',
 		'full_payment'      => 'full',
 		'remaining_payment' => 'due',
-	];
+	);
 
-	$payment_type = $args[ 'payment_type' ] ?? false;
-	if ( ! empty( $args[ 'payment_gateway' ] ) ) {
-		$wte_cart->set_payment_gateway( $args[ 'payment_gateway' ] );
+	/**
+	 * @since 6.7.1
+	 * @description Filter for the cart update payment mode mappings.
+	 * @param array $mappings The payment mode mappings.
+	 * @param array $args The arguments for the filter.
+	 * @return array
+	 */
+	$mappings = apply_filters( 'wptravelengine_cart_update_payment_mode_mappings', $mappings, $args );
+
+	$payment_type = $args['payment_type'] ?? false;
+	if ( ! empty( $args['payment_gateway'] ) ) {
+		$wte_cart->set_payment_gateway( $args['payment_gateway'] );
 	}
 
 	if ( $payment_type && isset( $mappings[ $payment_type ] ) ) {
@@ -50,8 +59,8 @@ function wptravelengine_cart_zero_decimal_currencies(): array {
 	return apply_filters(
 		'wptravelengine_cart_zero_decimal_currencies',
 		array_merge(
-			[ 'BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA' ],
-			[ 'PYG', 'RWF', 'VND', 'VUV', 'XAF', 'XOF', 'XPF' ]
+			array( 'BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA' ),
+			array( 'PYG', 'RWF', 'VND', 'VUV', 'XAF', 'XOF', 'XPF' )
 		)
 	);
 }

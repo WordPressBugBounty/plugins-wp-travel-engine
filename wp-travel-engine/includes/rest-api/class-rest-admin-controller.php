@@ -131,7 +131,7 @@ class Admin_Controller extends Controller {
 		$response = wp_safe_remote_get( $this->api_url . 'wp-json/wte-api/v1/themes?per_page=100' );
 
 		if ( is_wp_error( $response ) ) {
-			return  array();
+			return array();
 		}
 
 		$items = wp_remote_retrieve_body( $response );
@@ -168,7 +168,7 @@ class Admin_Controller extends Controller {
 			$response = json_decode( $has_changelog );
 		} else {
 
-			$response = wp_safe_remote_get( 'https://plugins.svn.wordpress.org/wp-travel-engine/trunk/changelog.txt' );
+			$response  = wp_safe_remote_get( 'https://plugins.svn.wordpress.org/wp-travel-engine/trunk/changelog.txt' );
 			$stream    = wp_remote_retrieve_body( $response );
 			$changelog = preg_split( '/\r?\n\r?\n/', $stream );
 
@@ -258,7 +258,7 @@ class Admin_Controller extends Controller {
 			$data = json_decode( $data, true );
 		}
 
-		static $index = -1;
+		static $index     = -1;
 		$categories_order = array();
 		if ( is_array( $data ) ) {
 			foreach ( $data as $object ) {
@@ -268,7 +268,7 @@ class Admin_Controller extends Controller {
 					if ( ! isset( $categories_order[ $_category_id ] ) ) {
 						$categories_order[ $_category_id ] = ++$index;
 					}
-					$data_index = $categories_order[ $_category_id ];
+					$data_index                      = $categories_order[ $_category_id ];
 					$_data[ $data_index ]['label']   = $categories[ $_category_id ]['name'];
 					$_data[ $data_index ]['items'][] = array(
 						'content_type' => isset( $object['content_type'] ) ? $object['content_type'] : 'youtube',
@@ -280,7 +280,6 @@ class Admin_Controller extends Controller {
 		}
 		$response = rest_ensure_response( $_data );
 		return $response;
-
 	}
 
 	/**

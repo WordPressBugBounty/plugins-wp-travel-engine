@@ -9,7 +9,7 @@ return apply_filters(
 	'payment_paypal_standard',
 	array(
 		'title'  => __( 'PayPal Standard', 'wp-travel-engine' ),
-		'order'  => 25,
+		'order'  => 13,
 		'id'     => 'payment-paypal-standard',
 		'fields' => array(
 			array(

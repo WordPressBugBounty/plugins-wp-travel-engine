@@ -3633,11 +3633,11 @@ function wptravelengine_analytics_dashboard_data() {
 	$todays_data = wptravelengine_get_results(
 		$wpdb->prepare(
 			"SELECT SUM(pm.meta_value) AS total_amount,
-				SUM(CASE WHEN pm.meta_key = 'paid_amount' THEN pm.meta_value ELSE 0 END) AS total_earnings,
+				SUM(CASE WHEN pm.meta_key = 'total_paid_amount' THEN pm.meta_value ELSE 0 END) AS total_earnings,
 				COUNT(DISTINCT p.ID) AS total_bookings
 		FROM {$wpdb->postmeta} pm
 		INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
-		WHERE pm.meta_key IN ('paid_amount', 'due_amount') AND
+		WHERE pm.meta_key IN ('total_paid_amount', 'total_due_amount') AND
 			  p.post_type = %s AND
 			  p.post_status IN ('publish', 'draft') AND
 			  DATE_FORMAT(p.post_date, %s) = DATE_FORMAT(NOW(), %s)",
@@ -3651,11 +3651,11 @@ function wptravelengine_analytics_dashboard_data() {
 	$current_month_data = wptravelengine_get_results(
 		$wpdb->prepare(
 			"SELECT SUM(pm.meta_value) AS total_amount,
-				SUM(CASE WHEN pm.meta_key = 'paid_amount' THEN pm.meta_value ELSE 0 END) AS total_earnings,
+				SUM(CASE WHEN pm.meta_key = 'total_paid_amount' THEN pm.meta_value ELSE 0 END) AS total_earnings,
 				COUNT(DISTINCT p.ID) AS total_bookings
 		FROM {$wpdb->postmeta} pm
 		INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
-		WHERE pm.meta_key IN ('paid_amount', 'due_amount') AND
+		WHERE pm.meta_key IN ('total_paid_amount', 'total_due_amount') AND
 			  p.post_type = %s AND
 			  p.post_status IN ('publish', 'draft') AND
 			  MONTH(p.post_date) = MONTH(NOW()) AND
@@ -3668,11 +3668,11 @@ function wptravelengine_analytics_dashboard_data() {
 	$last_month_data = wptravelengine_get_results(
 		$wpdb->prepare(
 			"SELECT SUM(pm.meta_value) AS total_amount,
-				SUM(CASE WHEN pm.meta_key = 'paid_amount' THEN pm.meta_value ELSE 0 END) AS total_earnings,
+				SUM(CASE WHEN pm.meta_key = 'total_paid_amount' THEN pm.meta_value ELSE 0 END) AS total_earnings,
 				COUNT(DISTINCT p.ID) AS total_bookings
 		FROM {$wpdb->postmeta} pm
 		INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
-		WHERE pm.meta_key IN ('paid_amount', 'due_amount') AND
+		WHERE pm.meta_key IN ('total_paid_amount', 'total_due_amount') AND
 			  p.post_type = %s AND
 			  p.post_status IN ('publish', 'draft') AND
 			  YEAR(p.post_date) = YEAR(DATE_SUB(NOW(), INTERVAL 1 MONTH)) AND
@@ -3685,11 +3685,11 @@ function wptravelengine_analytics_dashboard_data() {
 	$overall_data = wptravelengine_get_results(
 		$wpdb->prepare(
 			"SELECT SUM(pm.meta_value) AS total_amount,
-				SUM(CASE WHEN pm.meta_key = 'paid_amount' THEN pm.meta_value ELSE 0 END) AS total_earnings,
+				SUM(CASE WHEN pm.meta_key = 'total_paid_amount' THEN pm.meta_value ELSE 0 END) AS total_earnings,
 				COUNT(DISTINCT p.ID) AS total_bookings
 		FROM {$wpdb->postmeta} pm
 		INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
-		WHERE pm.meta_key IN ('paid_amount', 'due_amount') AND
+		WHERE pm.meta_key IN ('total_paid_amount', 'total_due_amount') AND
 			  p.post_type = %s AND
 			  p.post_status IN ('publish', 'draft')",
 			'booking'
@@ -3701,7 +3701,7 @@ function wptravelengine_analytics_dashboard_data() {
 		$wpdb->prepare(
 			"SELECT pm.meta_value AS booking_meta_value,
 					(pmpa.meta_value + pmda.meta_value) AS cost,
-					pmpa.meta_value AS paid_amount,
+					pmpa.meta_value AS total_paid_amount,
 					DATE_FORMAT(p.post_date, '%%Y-%%m-%%d') AS booking_date,
 					p.ID AS booking_id
 			FROM {$wpdb->postmeta} AS pm
@@ -3816,7 +3816,7 @@ function wptravelengine_analytics_dashboard_data() {
 			$first_name   = $booking_meta['place_order']['booking']['fname'] ?? '';
 			$last_name    = $booking_meta['place_order']['booking']['lname'] ?? '';
 			$trip_cost    = $data->cost;
-			$paid_amount  = $data->paid_amount;
+			$paid_amount  = $data->paid_amount ?? $data->total_paid_amount;
 			$date         = $data->booking_date;
 			$booked_date  = wp_date( 'M d,Y', strtotime( $date ) );
 			$id           = $data->booking_id;

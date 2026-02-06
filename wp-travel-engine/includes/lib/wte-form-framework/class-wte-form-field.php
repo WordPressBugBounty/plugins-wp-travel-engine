@@ -36,7 +36,7 @@ class WP_Travel_Engine_Form_Field {
 
 		$this->fields = $fields;
 
-		if ( ! empty( $args[ 'single' ] ) && true === $args[ 'single' ] ) {
+		if ( ! empty( $args['single'] ) && true === $args['single'] ) {
 
 			$this->fields = array( $fields );
 
@@ -53,7 +53,7 @@ class WP_Travel_Engine_Form_Field {
 	 * @return void
 	 */
 	private function includes() {
-		
+
 		$field_types = $this->register_field_types();
 
 		foreach ( $field_types as $type => $field ) :
@@ -67,7 +67,6 @@ class WP_Travel_Engine_Form_Field {
 			endif;
 
 		endforeach;
-
 	}
 
 	/**
@@ -150,6 +149,10 @@ class WP_Travel_Engine_Form_Field {
 				'field_label' => __( 'Currency Picker', 'wp-travel-engine' ),
 				'field_class' => 'WP_Travel_Engine_Form_Field_Currency_Picker',
 			),
+			'trips_select'     => array(
+				'field_label' => __( 'Trips Select', 'wp-travel-engine' ),
+				'field_class' => 'WP_Travel_Engine_Form_Field_Trips_Select',
+			),
 		);
 
 		return apply_filters( 'wp_travel_engine_form_field_types', $field_types );
@@ -176,13 +179,13 @@ class WP_Travel_Engine_Form_Field {
 	 */
 	protected function add_error_messages( array $fields ): array {
 		foreach ( $fields as &$field ) {
-			if ( ! isset( $field[ 'attributes' ] ) ) {
-				$fields[ 'attributes' ] = array();
+			if ( ! isset( $field['attributes'] ) ) {
+				$fields['attributes'] = array();
 			}
 
-			if ( isset( $field[ 'validations' ][ 'required' ] ) && true === $field[ 'validations' ][ 'required' ] ) {
-				$field[ 'attributes' ][ 'data-parsley-required' ]         = 'true';
-				$field[ 'attributes' ][ 'data-parsley-required-message' ] = __( 'This value is required', 'wp-travel-engine' );
+			if ( isset( $field['validations']['required'] ) && true === $field['validations']['required'] ) {
+				$field['attributes']['data-parsley-required']         = 'true';
+				$field['attributes']['data-parsley-required-message'] = __( 'This value is required', 'wp-travel-engine' );
 			}
 		}
 
@@ -215,10 +218,14 @@ class WP_Travel_Engine_Form_Field {
 				if ( $field ) :
 
 					$content = $this->process_single( $field );
-					$output  .= ( in_array( $field[ 'type' ], array(
-						'hidden',
-						'heading',
-					), true ) ) ? $content : $this->template( $field, $content );
+					$output .= ( in_array(
+						$field['type'],
+						array(
+							'hidden',
+							'heading',
+						),
+						true
+					) ) ? $content : $this->template( $field, $content );
 
 				endif;
 
@@ -232,7 +239,7 @@ class WP_Travel_Engine_Form_Field {
 	/**
 	 * Form field render template.
 	 *
-	 * @param array $field
+	 * @param array         $field
 	 * @param field content $content
 	 *
 	 * @return mixed $content
@@ -241,15 +248,15 @@ class WP_Travel_Engine_Form_Field {
 
 		ob_start();
 
-		$classes = ( isset( $field[ 'wrapper_class' ] ) ) ? $field[ 'wrapper_class' ] : '';
+		$classes = ( isset( $field['wrapper_class'] ) ) ? $field['wrapper_class'] : '';
 		?>
 		<div class="<?php echo esc_attr( $classes ); ?>">
-			<label class="<?php echo esc_attr( $field[ 'label_class' ] ); ?>"
-				   for="<?php echo esc_attr( $field[ 'id' ] ); ?>">
+			<label class="<?php echo esc_attr( $field['label_class'] ); ?>"
+					for="<?php echo esc_attr( $field['id'] ); ?>">
 
-				<?php echo esc_attr( $field[ 'field_label' ] ); ?>
+				<?php echo esc_attr( $field['field_label'] ); ?>
 
-				<?php if ( isset( $field[ 'validations' ][ 'required' ] ) && ! empty( $field[ 'field_label' ] ) ) : ?>
+				<?php if ( isset( $field['validations']['required'] ) && ! empty( $field['field_label'] ) ) : ?>
 
 					<span class="required">*</span>
 
@@ -274,7 +281,6 @@ class WP_Travel_Engine_Form_Field {
 	function render() {
 
 		echo $this->process();
-
 	}
 
 	/**
@@ -304,9 +310,9 @@ class WP_Travel_Engine_Form_Field {
 
 		$field = $this->form_arguments( $field );
 
-		if ( $field && class_exists( $this->field_types[ $field[ 'type' ] ] ) ) {
+		if ( $field && class_exists( $this->field_types[ $field['type'] ] ) ) {
 
-			$field_init = new $this->field_types[ $field[ 'type' ] ]();
+			$field_init = new $this->field_types[ $field['type'] ]();
 
 			return $field_init->init( $field )->render( false );
 
@@ -322,36 +328,36 @@ class WP_Travel_Engine_Form_Field {
 	 */
 	function form_arguments( $field ) {
 
-		if ( ! empty( $field[ 'type' ] ) && array_key_exists( $field[ 'type' ], $this->field_types ) ) {
+		if ( ! empty( $field['type'] ) && array_key_exists( $field['type'], $this->field_types ) ) {
 
-			$field[ 'field_label' ]   = isset( $field[ 'field_label' ] ) ? $field[ 'field_label' ] : '';
-			$field[ 'name' ]          = isset( $field[ 'name' ] ) ? $field[ 'name' ] : '';
-			$field[ 'id' ]            = isset( $field[ 'id' ] ) ? $field[ 'id' ] : $field[ 'name' ];
-			$field[ 'label_class' ]   = isset( $field[ 'label_class' ] ) ? $field[ 'label_class' ] : '';
-			$field[ 'class' ]         = isset( $field[ 'class' ] ) ? $field[ 'class' ] : '';
-			$field[ 'placeholder' ]   = isset( $field[ 'placeholder' ] ) ? $field[ 'placeholder' ] : '';
-			$field[ 'wrapper_class' ] = isset( $field[ 'wrapper_class' ] ) ? $field[ 'wrapper_class' ] : '';
-			$field[ 'wrapper_class' ] = ( 'text_info' === $field[ 'type' ] ) ? $field[ 'wrapper_class' ] . ' wp-travel-engine-info-field' : $field[ 'wrapper_class' ];
-			$field[ 'default' ]       = isset( $field[ 'default' ] ) ? $field[ 'default' ] : '';
-			$field[ 'attributes' ]    = isset( $field[ 'attributes' ] ) ? $field[ 'attributes' ] : array();
-			$field[ 'remove_wrap' ]   = isset( $field[ 'remove_wrap' ] ) ? $field[ 'remove_wrap' ] : false;
+			$field['field_label']   = isset( $field['field_label'] ) ? $field['field_label'] : '';
+			$field['name']          = isset( $field['name'] ) ? $field['name'] : '';
+			$field['id']            = isset( $field['id'] ) ? $field['id'] : $field['name'];
+			$field['label_class']   = isset( $field['label_class'] ) ? $field['label_class'] : '';
+			$field['class']         = isset( $field['class'] ) ? $field['class'] : '';
+			$field['placeholder']   = isset( $field['placeholder'] ) ? $field['placeholder'] : '';
+			$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
+			$field['wrapper_class'] = ( 'text_info' === $field['type'] ) ? $field['wrapper_class'] . ' wp-travel-engine-info-field' : $field['wrapper_class'];
+			$field['default']       = isset( $field['default'] ) ? $field['default'] : '';
+			$field['attributes']    = isset( $field['attributes'] ) ? $field['attributes'] : array();
+			$field['remove_wrap']   = isset( $field['remove_wrap'] ) ? $field['remove_wrap'] : false;
 
-			if ( isset( $field[ 'validations' ][ 'required' ] ) && ( false === $field[ 'validations' ][ 'required' ] || '' === $field[ 'validations' ][ 'required' ] || 'false' === $field[ 'validations' ][ 'required' ] ) ) {
-				unset( $field[ 'validations' ][ 'required' ] );
+			if ( isset( $field['validations']['required'] ) && ( false === $field['validations']['required'] || '' === $field['validations']['required'] || 'false' === $field['validations']['required'] ) ) {
+				unset( $field['validations']['required'] );
 			} else {
-				$field[ 'attributes' ][ 'data-parsley-required-message' ] = __( 'This value is required', 'wp-travel-engine' );
+				$field['attributes']['data-parsley-required-message'] = __( 'This value is required', 'wp-travel-engine' );
 			}
 
-			if ( empty( $field[ 'attributes' ][ 'placeholder' ] ) && ! empty( $field[ 'placeholder' ] ) ) {
-				$field[ 'attributes' ][ 'placeholder' ] = $field[ 'placeholder' ];
+			if ( empty( $field['attributes']['placeholder'] ) && ! empty( $field['placeholder'] ) ) {
+				$field['attributes']['placeholder'] = $field['placeholder'];
 			}
 
-			if ( empty( $field[ 'attributes' ][ 'rows' ] ) && ! empty( $field[ 'rows' ] ) ) {
-				$field[ 'attributes' ][ 'rows' ] = $field[ 'rows' ];
+			if ( empty( $field['attributes']['rows'] ) && ! empty( $field['rows'] ) ) {
+				$field['attributes']['rows'] = $field['rows'];
 			}
 
-			if ( empty( $field[ 'attributes' ][ 'cols' ] ) && ! empty( $field[ 'cols' ] ) ) {
-				$field[ 'attributes' ][ 'cols' ] = $field[ 'cols' ];
+			if ( empty( $field['attributes']['cols'] ) && ! empty( $field['cols'] ) ) {
+				$field['attributes']['cols'] = $field['cols'];
 			}
 
 			return $field;
@@ -366,31 +372,31 @@ class WP_Travel_Engine_Form_Field_Admin extends WP_Travel_Engine_Form_Field {
 	/**
 	 * Form field render template.
 	 *
-	 * @param array $field
+	 * @param array         $field
 	 * @param field content $content
 	 *
 	 * @return mixed $content
 	 */
 	function template( $field, $content ) {
 		ob_start();
-		$classes = ( isset( $field[ 'wrapper_class' ] ) ) ? $field[ 'wrapper_class' ] : '';
+		$classes = ( isset( $field['wrapper_class'] ) ) ? $field['wrapper_class'] : '';
 		?>
 		<div class="<?php echo esc_attr( $classes ); ?>">
-			<label class="wpte-field-label <?php echo esc_attr( $field[ 'label_class' ] ); ?>"
-				   for="<?php echo esc_attr( $field[ 'id' ] ); ?>">
-				<?php echo esc_attr( $field[ 'field_label' ] ); ?>
-				<?php if ( isset( $field[ 'validations' ][ 'required' ] ) && ! empty( $field[ 'field_label' ] ) ) : ?>
+			<label class="wpte-field-label <?php echo esc_attr( $field['label_class'] ); ?>"
+					for="<?php echo esc_attr( $field['id'] ); ?>">
+				<?php echo esc_attr( $field['field_label'] ); ?>
+				<?php if ( isset( $field['validations']['required'] ) && ! empty( $field['field_label'] ) ) : ?>
 					<span class="required">*</span>
 				<?php endif; ?>
 			</label>
 			<?php
 			echo $content;
-			if ( isset( $field[ 'tooltip' ] ) ) {
+			if ( isset( $field['tooltip'] ) ) {
 				?>
 				<span class="wpte-tooltip">
 					<?php
 					echo wp_kses(
-						$field[ 'tooltip' ],
+						$field['tooltip'],
 						array(
 							'b'      => array(),
 							'strong' => array(),

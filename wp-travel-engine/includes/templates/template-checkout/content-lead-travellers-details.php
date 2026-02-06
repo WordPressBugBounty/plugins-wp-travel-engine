@@ -5,10 +5,10 @@
  * @since 6.4.3
  */
 if ( 'hide' === ( $args['attributes']['lead-travellers'] ?? '' ) ) {
-    return;
+	return;
 }
 // Lead Traveller's Details Form
-if( isset( $lead_travellers_form_fields ) && isset( $lead_travellers_form_fields[0]->fields ) && empty( $lead_travellers_form_fields[0]->fields ) ) {
+if ( isset( $lead_travellers_form_fields ) && isset( $lead_travellers_form_fields[0]->fields ) && empty( $lead_travellers_form_fields[0]->fields ) ) {
 	return;
 }
 ?>

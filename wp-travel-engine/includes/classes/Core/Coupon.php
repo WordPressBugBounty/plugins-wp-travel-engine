@@ -66,9 +66,8 @@ class Coupon {
 		$this->id    = $coupon_id;
 		$this->name  = get_the_title( $coupon_id );
 		$this->code  = get_post_meta( $coupon_id, 'wp_travel_engine_coupon_code', true );
-		$this->type  = $this->settings[ 'general' ][ 'coupon_type' ] ?? '';
-		$this->value = $this->settings[ 'general' ][ 'coupon_value' ] ?? 0;
-
+		$this->type  = $this->settings['general']['coupon_type'] ?? '';
+		$this->value = $this->settings['general']['coupon_value'] ?? 0;
 	}
 
 	/**
@@ -93,9 +92,9 @@ class Coupon {
 
 		$post_ids = get_posts( $args );
 
-		if ( isset( $post_ids[ 0 ] ) ) {
+		if ( isset( $post_ids[0] ) ) {
 			try {
-				return new self( (int) $post_ids[ 0 ] );
+				return new self( (int) $post_ids[0] );
 			} catch ( \InvalidArgumentException $e ) {
 				return new \WP_Error( 'coupon_not_found', __( 'Coupon not found', 'wp-travel-engine' ) );
 			}
@@ -129,19 +128,19 @@ class Coupon {
 	}
 
 	public function start_date() {
-		return $this->settings[ 'general' ][ 'coupon_start_date' ] ?? '';
+		return $this->settings['general']['coupon_start_date'] ?? '';
 	}
 
 	public function expiry_date() {
-		return $this->settings[ 'general' ][ 'coupon_expiry_date' ] ?? '';
+		return $this->settings['general']['coupon_expiry_date'] ?? '';
 	}
 
 	public function limit() {
-		return $this->settings[ 'restriction' ][ 'coupon_limit_number' ] ?? INF;
+		return $this->settings['restriction']['coupon_limit_number'] ?? INF;
 	}
 
 	public function allowed_trips() {
-		return $this->settings[ 'restriction' ][ 'restricted_trips' ] ?? array();
+		return $this->settings['restriction']['restricted_trips'] ?? array();
 	}
 
 	public function is_expired(): bool {
@@ -188,9 +187,9 @@ class Coupon {
 	/**
 	 * Calculate discount amount by coupon type and value.
 	 *
-	 * @param float $total
+	 * @param float  $total
 	 * @param string $coupon_type percentage|fixed
-	 * @param float $coupon_value
+	 * @param float  $coupon_value
 	 *
 	 * @return float
 	 * @since 6.0.0
@@ -212,5 +211,4 @@ class Coupon {
 	public function set_type( $type ) {
 		$this->type = $type;
 	}
-
 }

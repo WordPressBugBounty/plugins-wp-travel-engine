@@ -2,26 +2,26 @@
 
 use WPTravelEngine\Helpers\Functions;
 
-wp_enqueue_script( "jquery-ui-datepicker" );
+wp_enqueue_script( 'jquery-ui-datepicker' );
 
 global $post;
 $wp_travel_engine_option_settings  = get_option( 'wp_travel_engine_settings', true );
 $wp_travel_engine_settings         = get_post_meta( $post->ID, 'wp_travel_engine_placeorder_setting', true );
 $wp_travel_engine_booking_settings = get_post_meta( $post->ID, 'wp_travel_engine_booking_setting', true );
 
-if ( ! isset( $wp_travel_engine_settings[ 'place_order' ] ) || $wp_travel_engine_settings[ 'place_order' ] == '' ) {
+if ( ! isset( $wp_travel_engine_settings['place_order'] ) || $wp_travel_engine_settings['place_order'] == '' ) {
 	esc_html_e( 'Travellers info not available.', 'wp-travel-engine' );
 
 	return;
 }
-$pno              = $wp_travel_engine_booking_settings[ 'place_order' ][ 'traveler' ];
-$billing_options  = $wp_travel_engine_settings[ 'place_order' ];
-$personal_options = $wp_travel_engine_settings[ 'place_order' ];
-$relation_options = $wp_travel_engine_settings[ 'place_order' ];
+$pno              = $wp_travel_engine_booking_settings['place_order']['traveler'];
+$billing_options  = $wp_travel_engine_settings['place_order'];
+$personal_options = $wp_travel_engine_settings['place_order'];
+$relation_options = $wp_travel_engine_settings['place_order'];
 ?>
 <div class="place-order-form-primary-wrapper">
 	<?php
-	for ( $i = 1; $i <= $pno; $i ++ ) {
+	for ( $i = 1; $i <= $pno; $i++ ) {
 		?>
 		<div class='wp-travel-engine-personal-details-wrapper'>
 			<div class='personal-options-title'>
@@ -32,7 +32,7 @@ $relation_options = $wp_travel_engine_settings[ 'place_order' ];
 			</div>
 			<div class='wp-travel-engine-personal-details-inner-wrapper'>
 				<?php
-				foreach ( $personal_options[ 'travelers' ] as $key => $value ) {
+				foreach ( $personal_options['travelers'] as $key => $value ) {
 					if ( ! isset( $value[ $i ] ) ) :
 						continue;
 					endif;
@@ -66,9 +66,9 @@ $relation_options = $wp_travel_engine_settings[ 'place_order' ];
 								<label
 									for="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"><?php esc_html_e( 'First Name', 'wp-travel-engine' ); ?></label>
 								<input type="text"
-									   value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
-									   name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
-									   id="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
+										value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
+										name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
+										id="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
 								<?php
 								break;
 
@@ -77,9 +77,9 @@ $relation_options = $wp_travel_engine_settings[ 'place_order' ];
 								<label
 									for="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"><?php esc_html_e( 'Last Name', 'wp-travel-engine' ); ?></label>
 								<input type="text"
-									   value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
-									   name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
-									   id="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
+										value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
+										name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
+										id="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
 								<?php
 								break;
 
@@ -88,9 +88,9 @@ $relation_options = $wp_travel_engine_settings[ 'place_order' ];
 								<label
 									for="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"><?php esc_html_e( 'Email', 'wp-travel-engine' ); ?></label>
 								<input type="email"
-									   value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
-									   name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
-									   id="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
+										value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
+										name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
+										id="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
 								<?php
 								break;
 
@@ -99,9 +99,9 @@ $relation_options = $wp_travel_engine_settings[ 'place_order' ];
 								<label
 									for="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"><?php esc_html_e( 'Address', 'wp-travel-engine' ); ?></label>
 								<input type="text"
-									   value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
-									   name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
-									   id="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
+										value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
+										name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
+										id="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
 								<?php
 								break;
 
@@ -110,9 +110,9 @@ $relation_options = $wp_travel_engine_settings[ 'place_order' ];
 								<label
 									for="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"><?php esc_html_e( 'City', 'wp-travel-engine' ); ?></label>
 								<input type="text"
-									   value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
-									   name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
-									   id="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
+										value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
+										name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
+										id="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
 								<?php
 								break;
 
@@ -144,9 +144,9 @@ $relation_options = $wp_travel_engine_settings[ 'place_order' ];
 								<label
 									for="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"><?php esc_html_e( 'Post-code', 'wp-travel-engine' ); ?></label>
 								<input type="number"
-									   value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
-									   name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
-									   id="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
+										value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
+										name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
+										id="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
 								<?php
 								break;
 
@@ -155,9 +155,9 @@ $relation_options = $wp_travel_engine_settings[ 'place_order' ];
 								<label
 									for="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"><?php esc_html_e( 'Phone', 'wp-travel-engine' ); ?></label>
 								<input type="tel"
-									   value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
-									   name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
-									   id="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
+										value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
+										name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
+										id="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
 								<?php
 								break;
 
@@ -166,9 +166,9 @@ $relation_options = $wp_travel_engine_settings[ 'place_order' ];
 								<label
 									for="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"><?php esc_html_e( 'Passport Number', 'wp-travel-engine' ); ?></label>
 								<input type="text"
-									   value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
-									   name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
-									   id="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
+										value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
+										name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
+										id="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
 								<?php
 								break;
 
@@ -177,10 +177,10 @@ $relation_options = $wp_travel_engine_settings[ 'place_order' ];
 								<label
 									for="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"><?php esc_html_e( 'Date of Birth', 'wp-travel-engine' ); ?></label>
 								<input class="wp-travel-engine-datetime"
-									   value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
-									   type="text"
-									   name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
-									   id="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
+										value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
+										type="text"
+										name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
+										id="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
 								<?php
 								break;
 
@@ -209,10 +209,10 @@ $relation_options = $wp_travel_engine_settings[ 'place_order' ];
 								<label
 									for="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"><?php echo esc_html( $label_data ); ?></label>
 								<input class="wp-travel-engine"
-									   value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
-									   type="text"
-									   name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
-									   id="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
+										value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
+										type="text"
+										name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
+										id="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
 								<?php
 								break;
 						}
@@ -224,7 +224,7 @@ $relation_options = $wp_travel_engine_settings[ 'place_order' ];
 			</div>
 		</div>
 		<?php
-		if ( isset( $relation_options[ 'relation' ] ) && $relation_options[ 'relation' ] != '' ) {
+		if ( isset( $relation_options['relation'] ) && $relation_options['relation'] != '' ) {
 			?>
 			<div class='wp-travel-engine-relation-details-wrapper'>
 				<div class='relation-options-title'>
@@ -235,7 +235,7 @@ $relation_options = $wp_travel_engine_settings[ 'place_order' ];
 				</div>
 				<div class='wp-travel-engine-relation-details-inner-wrapper'>
 					<?php
-					foreach ( $relation_options[ 'relation' ] as $key => $value ) {
+					foreach ( $relation_options['relation'] as $key => $value ) {
 						?>
 						<div class='wp-travel-engine-relation-details'>
 							<?php
@@ -265,9 +265,9 @@ $relation_options = $wp_travel_engine_settings[ 'place_order' ];
 									<label
 										for="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"><?php esc_html_e( 'First Name', 'wp-travel-engine' ); ?></label>
 									<input type="text"
-										   value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
-										   name="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
-										   id="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
+											value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
+											name="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
+											id="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
 									<?php
 									break;
 
@@ -276,9 +276,9 @@ $relation_options = $wp_travel_engine_settings[ 'place_order' ];
 									<label
 										for="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"><?php esc_html_e( 'Last Name', 'wp-travel-engine' ); ?></label>
 									<input type="text"
-										   value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
-										   name="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
-										   id="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
+											value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
+											name="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
+											id="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
 									<?php
 									break;
 
@@ -287,9 +287,9 @@ $relation_options = $wp_travel_engine_settings[ 'place_order' ];
 									<label
 										for="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"><?php esc_html_e( 'Address', 'wp-travel-engine' ); ?></label>
 									<input type="text"
-										   value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
-										   name="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
-										   id="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
+											value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
+											name="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
+											id="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
 									<?php
 									break;
 
@@ -298,9 +298,9 @@ $relation_options = $wp_travel_engine_settings[ 'place_order' ];
 									<label
 										for="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"><?php esc_html_e( 'Post-code', 'wp-travel-engine' ); ?></label>
 									<input type="text"
-										   value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
-										   name="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
-										   id="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
+											value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
+											name="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
+											id="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
 									<?php
 									break;
 
@@ -309,9 +309,9 @@ $relation_options = $wp_travel_engine_settings[ 'place_order' ];
 									<label
 										for="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"><?php esc_html_e( 'Phone', 'wp-travel-engine' ); ?></label>
 									<input type="tel"
-										   value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
-										   name="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
-										   id="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
+											value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
+											name="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
+											id="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
 									<?php
 									break;
 
@@ -320,9 +320,9 @@ $relation_options = $wp_travel_engine_settings[ 'place_order' ];
 									<label
 										for="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"><?php esc_html_e( 'Relation', 'wp-travel-engine' ); ?></label>
 									<input type="text"
-										   value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
-										   name="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
-										   id="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
+											value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
+											name="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
+											id="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
 									<?php
 									break;
 								default:
@@ -331,10 +331,10 @@ $relation_options = $wp_travel_engine_settings[ 'place_order' ];
 									<label
 										for="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"><?php echo esc_html( $label_data ); ?></label>
 									<input class="wp-travel-engine"
-										   value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
-										   type="text"
-										   name="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
-										   id="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
+											value="<?php echo isset( $value[ $i ] ) ? esc_attr( $value[ $i ] ) : ''; ?>"
+											type="text"
+											name="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
+											id="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
 									<?php
 									break;
 							}
@@ -348,9 +348,9 @@ $relation_options = $wp_travel_engine_settings[ 'place_order' ];
 			<?php
 		}
 		$wp_travel_engine_tabs = get_option( 'wp_travel_engine_settings' );
-		if ( isset( $wp_travel_engine_tabs[ 'placeorder' ][ 'medication' ] ) && ! empty( $wp_travel_engine_tabs[ 'placeorder' ][ 'medication' ] ) ) {
-			$maxlen   = max( array_keys( $wp_travel_engine_tabs[ 'placeorder' ][ 'medication' ] ) );
-			$arr_keys = array_keys( $wp_travel_engine_tabs[ 'placeorder' ][ 'medication' ] );
+		if ( isset( $wp_travel_engine_tabs['placeorder']['medication'] ) && ! empty( $wp_travel_engine_tabs['placeorder']['medication'] ) ) {
+			$maxlen   = max( array_keys( $wp_travel_engine_tabs['placeorder']['medication'] ) );
+			$arr_keys = array_keys( $wp_travel_engine_tabs['placeorder']['medication'] );
 			?>
 			<div class="wp-travel-engine-medical-details-wrapper">
 				<div class='relation-options-title'>
@@ -364,13 +364,13 @@ $relation_options = $wp_travel_engine_settings[ 'place_order' ];
 					?>
 					<div class="wte-medication-form-list-li">
 						<input type="checkbox" class="medication_check"
-							   name="wp_travel_engine_placeorder_setting[place_order][medication_check][<?php echo esc_attr( $i ); ?>][<?php echo esc_attr( $value ); ?>]"
-							   id="wp_travel_engine_placeorder_setting[place_order][medication_check][<?php echo esc_attr( $i ); ?>][<?php echo esc_attr( $value ); ?>]"
-							<?php $j = isset( $wp_travel_engine_settings[ 'place_order' ][ 'medication_check' ][ $i ][ $value ] ) ? esc_attr( $wp_travel_engine_settings[ 'place_order' ][ 'medication_check' ][ $i ][ $value ] ) : '0'; ?>
-							   value="1" <?php checked( $j, true ); ?>/>
+								name="wp_travel_engine_placeorder_setting[place_order][medication_check][<?php echo esc_attr( $i ); ?>][<?php echo esc_attr( $value ); ?>]"
+								id="wp_travel_engine_placeorder_setting[place_order][medication_check][<?php echo esc_attr( $i ); ?>][<?php echo esc_attr( $value ); ?>]"
+							<?php $j = isset( $wp_travel_engine_settings['place_order']['medication_check'][ $i ][ $value ] ) ? esc_attr( $wp_travel_engine_settings['place_order']['medication_check'][ $i ][ $value ] ) : '0'; ?>
+								value="1" <?php checked( $j, true ); ?>/>
 						<label
 							for="wp_travel_engine_placeorder_setting[place_order][medication_check][<?php echo esc_attr( $i ); ?>][<?php echo esc_attr( $value ); ?>]">
-							<?php echo isset( $wp_travel_engine_tabs[ 'placeorder' ][ 'medication' ][ $value ] ) ? esc_attr( $wp_travel_engine_tabs[ 'placeorder' ][ 'medication' ][ $value ] ) : ''; ?>
+							<?php echo isset( $wp_travel_engine_tabs['placeorder']['medication'][ $value ] ) ? esc_attr( $wp_travel_engine_tabs['placeorder']['medication'][ $value ] ) : ''; ?>
 						</label>
 					</div>
 				<?php } ?>

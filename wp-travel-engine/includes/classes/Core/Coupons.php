@@ -18,69 +18,70 @@ class Coupons {
 	 * Checks available coupons in specific trip.
 	 *
 	 * @return boolean
+	 * @since 6.7.1 Refined the query to improve performance.
 	 */
 	public static function is_coupon_available() {
-		global $wpdb, $wte_cart;
+		global $wte_cart;
+		$trip_id = $wte_cart->get_cart_trip_ids()[0] ?? '';
 
-		// Generate a unique cache key based on the trip ID.
-		$trip_id   = $wte_cart->get_cart_trip_ids()[ 0 ] ?? '';
-		$cache_key = 'wte_coupon_available_' . $trip_id;
+		$args = array(
+			'post_type'   => 'wte-coupon',
+			'post_status' => 'publish',
+			'numberposts' => -1,
+			'meta_query'  => array(
+				array(
+					'key'     => 'wp_travel_engine_coupon_metas',
+					'compare' => 'EXISTS',
+				),
+			),
+		);
 
-		// Try to get the cached result.
-		$cached_result = wp_cache_get( $cache_key, 'wptravelengine' );
+		$coupons = get_posts( $args );
 
-		// If the result is cached, return it.
-		if ( false !== $cached_result ) {
-			return $cached_result === 'yes';
+		$valid_coupon_exists = false;
+		$today               = wp_date( 'Y-m-d' );
+
+		foreach ( $coupons as $coupon ) {
+
+			$meta = get_post_meta( $coupon->ID, 'wp_travel_engine_coupon_metas', true );
+
+			if ( ! is_array( $meta ) ) {
+				continue;
+			}
+
+			// Usage count
+			$usage_count = (int) get_post_meta( $coupon->ID, 'wp_travel_engine_coupon_usage_count', true );
+
+			// Coupon limit
+			$limit = isset( $meta['restriction']['coupon_limit_number'] ) ? (int) $meta['restriction']['coupon_limit_number'] : '';
+
+			if ( $limit !== '' && $limit !== 0 && $usage_count >= $limit ) {
+				continue;
+			}
+
+			// Expiry date
+			$expiry = $meta['general']['coupon_expiry_date'] ?? '';
+			if ( $expiry && $expiry < $today ) {
+				continue;
+			}
+
+			// Start date
+			$start = $meta['general']['coupon_start_date'] ?? '';
+			if ( $start && $start > $today ) {
+				continue;
+			}
+
+			// Trip restriction
+			$restricted_trips = $meta['restriction']['restricted_trips'] ?? array();
+
+			if ( ! empty( $restricted_trips ) && ! in_array( (string) $trip_id, array_map( 'strval', (array) $restricted_trips ), true ) ) {
+				continue;
+			}
+
+			$valid_coupon_exists = true;
+			break;
 		}
 
-		$keys = [
-			'wp_travel_engine_coupon_metas',
-			'publish',
-			'wte-coupon',
-			'wp_travel_engine_coupon_usage_count',
-			'',
-			'',
-			$wte_cart->get_cart_trip_ids()[ 0 ] ?? '',
-		];
-
-		$sql = "SELECT EXISTS (
-                    SELECT 1
-                    FROM $wpdb->postmeta pm1
-                    JOIN $wpdb->posts po ON pm1.post_id = po.id
-                    WHERE pm1.meta_key = %s
-                    AND po.post_status = %s
-                    AND po.post_type = %s
-                    AND (
-                        SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(pm1.meta_value, ':\"coupon_limit_number\";s:', -1), '\"', 2), '\"', -1) > (
-                            SELECT COALESCE (
-                                (
-                                    SELECT pm2.meta_value
-                                    FROM $wpdb->postmeta pm2
-                                    WHERE pm2.meta_key = %s
-                                    AND pm2.post_id = pm1.post_id
-                                ),
-                                0
-                            )
-                        )
-                        OR SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(pm1.meta_value, ':\"coupon_limit_number\";s:', -1), '\"', 2), '\"', -1) = %s
-                    )
-                    AND (
-                        SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(pm1.meta_value, ':\"coupon_expiry_date\";s:', -1), '\"', 2), '\"', -1) >= CURDATE()
-                        OR SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(pm1.meta_value, ':\"coupon_expiry_date\";s:', -1), '\"', 2), '\"', -1) = %s
-                    )
-                    AND SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(pm1.meta_value, ':\"coupon_start_date\";s:', -1), '\"', 2), '\"', -1) <= CURDATE()
-                    AND (
-                        SUBSTRING_INDEX(SUBSTRING_INDEX(pm1.meta_value, ':\"restriction\";a:', -1), ':', 1) = 1
-                        OR LOCATE(CONCAT('\"', %s, '\"'), SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(pm1.meta_value, ':\"restricted_trips\";a:', -1), '{', -1), '}', 1)) > 0
-                    )
-                ) AS data_exists";
-
-		$result = ( $wpdb->get_results( $wpdb->prepare( $sql, $keys ) )[ 0 ]->data_exists == 1 );
-
-		// Cache the result for future use.
-		wp_cache_set( $cache_key, $result ? 'yes' : 'no', 'wptravelengine' );
-
-		return $result;
+		return $valid_coupon_exists;
 	}
 }

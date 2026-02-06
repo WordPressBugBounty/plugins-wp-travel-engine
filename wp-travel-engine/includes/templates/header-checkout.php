@@ -7,7 +7,7 @@
  * @since 6.1.3
  */
 // Include header if enabled in settings
-if( $attributes['header'] == 'default' ){
+if ( $attributes['header'] == 'default' ) {
 	get_header();
 }
 ?>

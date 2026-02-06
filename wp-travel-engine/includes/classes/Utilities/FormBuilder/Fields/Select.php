@@ -39,12 +39,12 @@ class Select extends Base {
 	 */
 	public function init( array $field ): Base {
 
-		if ( ! empty( $field[ 'options' ] ) && ! is_array( $field[ 'options' ] ) ) {
-			$this->options = json_decode( $field[ 'options' ], true );
+		if ( ! empty( $field['options'] ) && ! is_array( $field['options'] ) ) {
+			$this->options = json_decode( $field['options'], true );
 		} else {
-			$this->options = $field[ 'options' ] ?? [];
+			$this->options = $field['options'] ?? array();
 		}
-		$this->option_attributes = $field[ 'option_attributes' ] ?? [];
+		$this->option_attributes = $field['option_attributes'] ?? array();
 
 		return parent::init( $field );
 	}
@@ -56,12 +56,12 @@ class Select extends Base {
 	 */
 	protected function select_options(): string {
 
-		$options = [];
+		$options = array();
 		foreach ( $this->options as $name => $value ) {
 			$options[] = sprintf(
 				'<option value="%s" %s>%s</option>',
 				$name,
-				$this->concat_attributes( $this->option_attributes, [ 'value' ] ),
+				$this->concat_attributes( $this->option_attributes, array( 'value' ) ),
 				$value,
 			);
 		}
@@ -78,7 +78,7 @@ class Select extends Base {
 
 		$output = sprintf(
 			'<select %s>%s</select>',
-			$this->concat_attributes( $this->field_attributes(), [ 'placeholder', 'value' ] ),
+			$this->concat_attributes( $this->field_attributes(), array( 'placeholder', 'value' ) ),
 			$this->select_options(),
 		);
 
@@ -87,7 +87,6 @@ class Select extends Base {
 		}
 
 		return $output;
-
 	}
 
 	/**

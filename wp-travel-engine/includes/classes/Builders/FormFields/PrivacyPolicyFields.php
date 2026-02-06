@@ -25,5 +25,4 @@ class PrivacyPolicyFields extends FormField {
 	public function render() {
 		parent::render();
 	}
-
 }

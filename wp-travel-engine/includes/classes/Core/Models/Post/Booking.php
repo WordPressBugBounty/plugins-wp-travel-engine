@@ -16,6 +16,8 @@ use WPTravelEngine\Core\Booking\Inventory;
 use WPTravelEngine\Helpers\CartInfoParser;
 use WPTravelEngine\Helpers\Functions;
 use WPTravelEngine\Utilities\ArrayUtility;
+use WPTravelEngine\Utilities\PaymentCalculator;
+use WPTravelEngine\Filters\Events;
 
 /**
  * Class Booking.
@@ -44,6 +46,14 @@ class Booking extends PostModel {
 	 * @var bool
 	 */
 	protected $trashed = false;
+
+	/**
+	 * Payments data.
+	 *
+	 * @var array
+	 * @since 6.7.0
+	 */
+	public array $payments_data = array();
 
 	/**
 	 * Retrieves booking status.
@@ -87,7 +97,7 @@ class Booking extends PostModel {
 	public function get_trip_id() {
 		$order_trips = $this->get_order_items();
 
-		return $order_trips[ 'trip_id' ] ?? $order_trips[ 0 ][ 'ID' ] ?? $this->get_cart_info( 'items' )[ 0 ][ 'trip_id' ] ?? 0;
+		return $order_trips['trip_id'] ?? $order_trips[0]['ID'] ?? $this->get_cart_info( 'items' )[0]['trip_id'] ?? 0;
 	}
 
 	/**
@@ -109,7 +119,7 @@ class Booking extends PostModel {
 	public function get_trip_cost() {
 		$order_trips = $this->get_order_items();
 
-		return $order_trips[ 'cost' ] ?? 0;
+		return $order_trips['cost'] ?? 0;
 	}
 
 	/**
@@ -120,7 +130,7 @@ class Booking extends PostModel {
 	public function get_partial_cost() {
 		$order_trips = $this->get_order_items();
 
-		return $order_trips[ 'partial_cost' ] ?? 0;
+		return $order_trips['partial_cost'] ?? 0;
 	}
 
 	/**
@@ -131,7 +141,7 @@ class Booking extends PostModel {
 	public function get_trip_datetime() {
 		$order_trips = $this->get_order_items();
 
-		return $order_trips[ 'datetime' ] ?? $order_trips[ 0 ][ 'datetime' ] ?? gmdate( 'Y-m-d' );
+		return $order_trips['datetime'] ?? $order_trips[0]['datetime'] ?? gmdate( 'Y-m-d' );
 	}
 
 	/**
@@ -142,7 +152,7 @@ class Booking extends PostModel {
 	public function get_trip_pax() {
 		$order_trips = $this->get_order_items();
 
-		return $order_trips[ 'pax' ] ?? $order_trips[ 0 ][ 'pax' ] ?? array();
+		return $order_trips['pax'] ?? $order_trips[0]['pax'] ?? array();
 	}
 
 	/**
@@ -153,7 +163,7 @@ class Booking extends PostModel {
 	public function get_trip_pax_cost() {
 		$order_trips = $this->get_order_items();
 
-		return $order_trips[ 'pax_cost' ] ?? array();
+		return $order_trips['pax_cost'] ?? array();
 	}
 
 	/**
@@ -164,7 +174,7 @@ class Booking extends PostModel {
 	public function get_trip_extras() {
 		$order_trips = $this->get_order_items();
 
-		return $order_trips[ 'trip_extras' ] ?? array();
+		return $order_trips['trip_extras'] ?? array();
 	}
 
 	/**
@@ -178,8 +188,8 @@ class Booking extends PostModel {
 
 		if ( is_array( $order_trips ) && ! empty( $order_trips ) ) {
 			foreach ( $order_trips as $order_trip ) {
-				if ( isset( $order_trip[ 'package_name' ] ) && ! empty( $order_trip[ 'package_name' ] ) ) {
-					return $order_trip[ 'package_name' ];
+				if ( isset( $order_trip['package_name'] ) && ! empty( $order_trip['package_name'] ) ) {
+					return $order_trip['package_name'];
 				}
 			}
 		}
@@ -196,7 +206,7 @@ class Booking extends PostModel {
 	public function get_trip_has_time() {
 		$order_trips = $this->get_order_items();
 
-		return $order_trips[ 'has_time' ] ?? false;
+		return $order_trips['has_time'] ?? false;
 	}
 
 	/**
@@ -205,9 +215,9 @@ class Booking extends PostModel {
 	 * @return float Due Amount.
 	 */
 	public function get_due_amount(): float {
-		$amount = $this->get_meta( 'due_amount' ) ?? 0;
+		$amount = floatval( $this->get_meta( 'due_amount' ) ?: 0 );
 
-		return (float) number_format( ! $amount ? 0 : $amount, 2, '.', '' );
+		return (float) number_format( $amount, 2, '.', '' );
 	}
 
 	/**
@@ -234,8 +244,8 @@ class Booking extends PostModel {
 		}
 
 		if ( (bool) $cart_info ) {
-			if ( ! isset( $cart_info[ 'items' ] ) ) {
-				$cart_info[ 'items' ] = $this->get_order_items();
+			if ( ! isset( $cart_info['items'] ) ) {
+				$cart_info['items'] = $this->get_order_items();
 			}
 		}
 
@@ -250,7 +260,7 @@ class Booking extends PostModel {
 	public function get_currency() {
 		$cart_info = $this->get_cart_info();
 
-		return $cart_info[ 'currency' ] ?? '';
+		return $cart_info['currency'] ?? '';
 	}
 
 	/**
@@ -261,7 +271,7 @@ class Booking extends PostModel {
 	public function get_subtotal() {
 		$cart_info = $this->get_cart_info();
 
-		return $cart_info[ 'totals' ][ 'subtotal' ] ?? 0;
+		return $cart_info['totals']['subtotal'] ?? 0;
 	}
 
 	/**
@@ -269,10 +279,10 @@ class Booking extends PostModel {
 	 *
 	 * @return float Total
 	 */
-	public function get_total() {
+	public function get_total(): float {
 		$cart_info = $this->get_cart_info();
 
-		return $cart_info[ 'totals' ][ 'total' ] ?? 0;
+		return (float) ( $cart_info['totals']['total'] ?? 0 );
 	}
 
 	/**
@@ -280,10 +290,10 @@ class Booking extends PostModel {
 	 *
 	 * @return float Cart Partial
 	 */
-	public function get_cart_partial() {
+	public function get_cart_partial(): float {
 		$cart_info = $this->get_cart_info();
 
-		return $cart_info[ 'totals' ][ 'partial_total' ] ?? 0;
+		return (float) ( $cart_info['totals']['partial_total'] ?? 0 );
 	}
 
 	/**
@@ -294,7 +304,7 @@ class Booking extends PostModel {
 	public function get_discounts() {
 		$cart_info = $this->get_cart_info();
 
-		return $cart_info[ 'discounts' ] ?? array();
+		return $cart_info['discounts'] ?? array();
 	}
 
 	/**
@@ -305,7 +315,7 @@ class Booking extends PostModel {
 	public function get_tax_amount() {
 		$cart_info = $this->get_cart_info();
 
-		return $cart_info[ 'tax_amount' ] ?? 0;
+		return $cart_info['tax_amount'] ?? 0;
 	}
 
 	/**
@@ -434,9 +444,9 @@ class Booking extends PostModel {
 	 * @return Payment[]
 	 */
 	public function get_payments(): array {
-		if ( $this->has_meta( 'payments' ) ) {
-			$payments = $this->get_meta( 'payments' ) ?? array();
+		$payments = $this->get_meta( 'payments' ) ?: array();
 
+		if ( count( $payments ) > 0 ) {
 			$this->payments = array_map(
 				function ( $payment ) {
 					return wptravelengine_get_payment( $payment );
@@ -490,8 +500,8 @@ class Booking extends PostModel {
 		// Check for legacy format.
 		$traveler_info = $this->get_meta( 'wp_travel_engine_placeorder_setting' );
 
-		if ( ! empty( $traveler_info[ 'place_order' ][ 'travelers' ] ) ) {
-			return ArrayUtility::normalize( $traveler_info[ 'place_order' ][ 'travelers' ], 'fname' );
+		if ( ! empty( $traveler_info['place_order']['travelers'] ) ) {
+			return ArrayUtility::normalize( $traveler_info['place_order']['travelers'], 'fname' );
 		}
 
 		return array();
@@ -505,7 +515,7 @@ class Booking extends PostModel {
 	public function get_emergency_contacts(): array {
 		if ( $this->has_meta( 'wptravelengine_emergency_details' ) ) {
 			$emergency_contacts = $this->get_meta( 'wptravelengine_emergency_details' );
-			if ( ! isset( $emergency_contacts[ 0 ] ) ) {
+			if ( ! isset( $emergency_contacts[0] ) ) {
 				$emergency_contacts = array( $emergency_contacts );
 			}
 
@@ -515,8 +525,8 @@ class Booking extends PostModel {
 		// Check for legacy format first.
 		$emergency_info = $this->get_meta( 'wp_travel_engine_placeorder_setting' );
 
-		if ( ! empty( $emergency_info[ 'place_order' ][ 'relation' ] ) ) {
-			return ArrayUtility::normalize( $emergency_info[ 'place_order' ][ 'relation' ] );
+		if ( ! empty( $emergency_info['place_order']['relation'] ) ) {
+			return ArrayUtility::normalize( $emergency_info['place_order']['relation'] );
 		}
 
 		return array();
@@ -615,9 +625,9 @@ class Booking extends PostModel {
 	/**
 	 * Save Booking.
 	 *
-	 * @param int $post_id Post ID.
+	 * @param int     $post_id Post ID.
 	 * @param WP_POST $post Post Object.
-	 * @param bool $update Update Flag.
+	 * @param bool    $update Update Flag.
 	 */
 	public static function save_post_booking( int $post_id, WP_Post $post, bool $update = false ) {
 
@@ -637,28 +647,27 @@ class Booking extends PostModel {
 		}
 
 		// Sets Traveler's Information.
-		$traveler_info = $request->get_param( 'wp_travel_engine_placeorder_setting' )[ 'place_order' ] ?? false;
+		$traveler_info = $request->get_param( 'wp_travel_engine_placeorder_setting' )['place_order'] ?? false;
 		if ( ! $traveler_info ) {
-			$traveler_info = $request->get_param( 'wp_travel_engine_booking_setting' )[ 'place_order' ] ?? false;
+			$traveler_info = $request->get_param( 'wp_travel_engine_booking_setting' )['place_order'] ?? false;
 		}
-
 
 		if ( is_array( $traveler_info ) && ! empty( $traveler_info ) ) {
 			$travelers = array();
-			if ( isset( $traveler_info[ 'travelers' ] ) && is_array( $traveler_info[ 'travelers' ] ) ) {
-				foreach ( $traveler_info[ 'travelers' ] as $key => $value ) {
-					$travelers[ 'travelers' ][ $key ] = array_map( 'sanitize_text_field', wp_unslash( $value ) );
+			if ( isset( $traveler_info['travelers'] ) && is_array( $traveler_info['travelers'] ) ) {
+				foreach ( $traveler_info['travelers'] as $key => $value ) {
+					$travelers['travelers'][ $key ] = array_map( 'sanitize_text_field', wp_unslash( $value ) );
 				}
 			}
-			if ( isset( $traveler_info[ 'relation' ] ) && is_array( $traveler_info[ 'relation' ] ) ) {
-				foreach ( $traveler_info[ 'relation' ] as $key => $value ) {
-					$travelers[ 'relation' ][ $key ] = array_map( 'sanitize_text_field', wp_unslash( $value ) );
+			if ( isset( $traveler_info['relation'] ) && is_array( $traveler_info['relation'] ) ) {
+				foreach ( $traveler_info['relation'] as $key => $value ) {
+					$travelers['relation'][ $key ] = array_map( 'sanitize_text_field', wp_unslash( $value ) );
 				}
 			}
 
 			// Backward Compatibility with Old Travelers Information Page.
-			$travelers_detail   = $traveler_info[ 'travelers' ] ?? [];
-			$emergency_contacts = $traveler_info[ 'relation' ] ?? [];
+			$travelers_detail   = $traveler_info['travelers'] ?? array();
+			$emergency_contacts = $traveler_info['relation'] ?? array();
 
 			if ( ! empty( $travelers_detail ) ) {
 				$travelers_detail = static::sanitize_data_array( $travelers_detail );
@@ -686,34 +695,34 @@ class Booking extends PostModel {
 				}
 				$cart_data = $order_trips[ $cart_id ];
 
-				if ( isset( $cart_data[ 'ID' ] ) ) {
-					$_data[ $cart_id ][ 'ID' ]    = sanitize_text_field( $cart_data[ 'ID' ] );
-					$_data[ $cart_id ][ 'title' ] = get_the_title( $_data[ $cart_id ][ 'ID' ] );
+				if ( isset( $cart_data['ID'] ) ) {
+					$_data[ $cart_id ]['ID']    = sanitize_text_field( $cart_data['ID'] );
+					$_data[ $cart_id ]['title'] = get_the_title( $_data[ $cart_id ]['ID'] );
 				}
-				if ( isset( $cart_data[ 'datetime' ] ) ) {
-					$_data[ $cart_id ][ 'datetime' ] = sanitize_text_field( $cart_data[ 'datetime' ] );
-				}
-
-				if ( isset( $cart_data[ 'end_datetime' ] ) ) {
-					$_data[ $cart_id ][ 'end_datetime' ] = sanitize_text_field( $cart_data[ 'end_datetime' ] );
+				if ( isset( $cart_data['datetime'] ) ) {
+					$_data[ $cart_id ]['datetime'] = sanitize_text_field( $cart_data['datetime'] );
 				}
 
-				if ( isset( $cart_data[ 'pax' ] ) ) {
-					$_data[ $cart_id ][ 'pax' ] = array_map( 'absint', $cart_data[ 'pax' ] );
+				if ( isset( $cart_data['end_datetime'] ) ) {
+					$_data[ $cart_id ]['end_datetime'] = sanitize_text_field( $cart_data['end_datetime'] );
 				}
 
-				if ( isset( $cart_data[ 'pax_cost' ] ) ) {
-					foreach ( $cart_data[ 'pax_cost' ] as $_id => $pax_cost ) {
-						if ( ! isset( $_data[ $cart_id ][ 'pax' ][ $_id ] ) ) {
+				if ( isset( $cart_data['pax'] ) ) {
+					$_data[ $cart_id ]['pax'] = array_map( 'absint', $cart_data['pax'] );
+				}
+
+				if ( isset( $cart_data['pax_cost'] ) ) {
+					foreach ( $cart_data['pax_cost'] as $_id => $pax_cost ) {
+						if ( ! isset( $_data[ $cart_id ]['pax'][ $_id ] ) ) {
 							continue;
 						}
-						$pax_count                               = (int) $_data[ $cart_id ][ 'pax' ][ $_id ];
-						$_data[ $cart_id ][ 'pax_cost' ][ $_id ] = $pax_count * (float) $pax_cost;
+						$pax_count                             = (int) $_data[ $cart_id ]['pax'][ $_id ];
+						$_data[ $cart_id ]['pax_cost'][ $_id ] = $pax_count * (float) $pax_cost;
 					}
 				}
 
-				if ( isset( $cart_data[ 'cost' ] ) ) {
-					$_data[ $cart_id ][ 'cost' ] = sanitize_text_field( $cart_data[ 'cost' ] );
+				if ( isset( $cart_data['cost'] ) ) {
+					$_data[ $cart_id ]['cost'] = sanitize_text_field( $cart_data['cost'] );
 				}
 
 				$_data[ $cart_id ] = wp_parse_args( $_data[ $cart_id ], $current_order_trips[ $cart_id ] );
@@ -760,7 +769,7 @@ class Booking extends PostModel {
 	 * @since 6.5.0
 	 */
 	public static function sanitize_data_array( array $form_data ): array {
-		$sanitized = [];
+		$sanitized = array();
 		foreach ( $form_data as $key => $value ) {
 			if ( is_array( $value ) && ! empty( $value ) ) {
 				foreach ( array_values( $value ) as $i => $data ) {
@@ -838,19 +847,19 @@ class Booking extends PostModel {
 	public function maybe_update_inventory(): void {
 		$order_trips        = $this->get_meta( 'order_trips' );
 		$cart_data          = $this->get_cart_info();
-		$pricing_line_items = $cart_data[ 'items' ][ 0 ][ 'line_items' ][ 'pricing_category' ] ?? array();
+		$pricing_line_items = $cart_data['items'][0]['line_items']['pricing_category'] ?? array();
 
 		if ( is_array( $order_trips ) ) {
 			foreach ( $order_trips as $cart_id => $order_trip ) {
-				$inventory = new Inventory( $order_trip[ 'ID' ] );
+				$inventory = new Inventory( $order_trip['ID'] );
 				$pax       = 0;
 
 				if ( $this->trashed === true || 'canceled' === $this->get_booking_status() || 'refunded' === $this->get_booking_status() ) {
-					$inventory->update_pax( $cart_id, 0, $order_trip[ 'ID' ], $this->ID );
+					$inventory->update_pax( $cart_id, 0, $order_trip['ID'], $this->ID );
 					continue;
 				}
-				if ( is_array( $order_trip[ 'pax' ] ) ) {
-					$pax = array_sum( $order_trip[ 'pax' ] );
+				if ( is_array( $order_trip['pax'] ) ) {
+					$pax = array_sum( $order_trip['pax'] );
 				}
 				if ( isset( $pricing_line_items ) && ! empty( $pricing_line_items ) && is_array( $pricing_line_items ) ) {
 					$pax = array_sum( array_column( $pricing_line_items, 'quantity' ) );
@@ -860,10 +869,10 @@ class Booking extends PostModel {
 				if ( isset( $records[ $cart_id ][ $this->ID ] ) ) {
 					$recorded_pax = $records[ $cart_id ][ $this->ID ];
 					if ( $recorded_pax !== $pax ) {
-						$inventory->update_pax( $cart_id, $pax, $order_trip[ 'ID' ], $this->ID );
+						$inventory->update_pax( $cart_id, $pax, $order_trip['ID'], $this->ID );
 					}
 				} else {
-					$inventory->update_pax( $cart_id, $pax, $order_trip[ 'ID' ], $this->ID );
+					$inventory->update_pax( $cart_id, $pax, $order_trip['ID'], $this->ID );
 				}
 			}
 		}
@@ -906,7 +915,7 @@ class Booking extends PostModel {
 
 		if ( is_array( $payments ) && count( $payments ) > 0 ) {
 			foreach ( $payments as $payment ) {
-				$payment     = Payment::make( $payment );
+				$payment      = Payment::make( $payment );
 				$paid_amount += $payment->get_amount();
 			}
 		}
@@ -931,7 +940,7 @@ class Booking extends PostModel {
 		$paid_amount = 0;
 		if ( is_array( $payments ) && count( $payments ) > 0 ) {
 			foreach ( $payments as $payment ) {
-				$payment     = Payment::make( $payment );
+				$payment      = Payment::make( $payment );
 				$paid_amount += $payment->get_amount();
 			}
 		}
@@ -985,8 +994,42 @@ class Booking extends PostModel {
 	 * @return string URL for remaining payment or empty string if payment is not pending
 	 */
 	public function get_due_payment_link(): string {
-		$payment_key = wptravelengine_generate_key( $this->get_id() );
+		$payment_key  = wptravelengine_generate_key( $this->get_id() );
+		$payment_link = '';
 
+		$this->set_payment_transient( $payment_key );
+
+		$is_partial_payment = false;
+		foreach ( $this->get_payments() as $payment ) {
+			if ( $payment->get_payment_gateway() === 'booking_only' ) {
+				$is_partial_payment = true;
+				break;
+			}
+		}
+
+		if ( $this->has_due_payment() && ( wp_travel_engine_is_trip_partially_payable( $this->get_trip_id() ) || $is_partial_payment ) ) {
+			$payment_link = add_query_arg(
+				array(
+					'_payment_key' => $payment_key,
+				),
+				home_url()
+			);
+		}
+
+		return apply_filters( 'wptravelengine_due_payment_link', $payment_link, $this->get_id() );
+	}
+
+	/**
+	 * Set Payment Link.
+	 *
+	 * @param ?string $payment_key Payment Link
+	 * @return void
+	 * @since 6.6.10
+	 */
+	public function set_payment_transient( $payment_key = null ): void {
+		$payment_key ??= wptravelengine_generate_key( $this->get_id() );
+
+		// Set expiration to 365 days for remaining payment links so customers can complete payment at any time
 		set_transient(
 			"_payment_key_{$payment_key}",
 			wp_json_encode(
@@ -995,19 +1038,8 @@ class Booking extends PostModel {
 					'booking_id' => $this->get_id(),
 				)
 			),
-			24 * HOUR_IN_SECONDS
+			365 * DAY_IN_SECONDS
 		);
-
-		if ( $this->has_due_payment() ) {
-			return add_query_arg(
-				array(
-					'_payment_key' => $payment_key,
-				),
-				home_url()
-			);
-		}
-
-		return '';
 	}
 
 	/**
@@ -1106,27 +1138,36 @@ class Booking extends PostModel {
 		$cart_info        = $this->get_cart_info();
 		$cart_info_parser = new CartInfoParser( $cart_info );
 
-		$booked_trips = array_map( function ( $item ) {
-			return array(
-				'id'                   => $item->get_trip_id(),
-				'title'                => $item->get_trip_title(),
-				'url'                  => get_permalink( $item->get_trip_id() ),
-				'trip_start_date'      => $item->get_trip_date(),
-				'trip_end_date'        => $item->get_end_date(),
-				'number_of_travellers' => $item->travelers_count(),
-				'line_items'           => array_map( function ( $line_items ) {
-					return array_map( function ( $_line_item ) {
-						$label    = '';
-						$quantity = 0;
-						$price    = 0;
-						$total    = 0;
-						extract( $_line_item );
+		$booked_trips = array_map(
+			function ( $item ) {
+				return array(
+					'id'                   => $item->get_trip_id(),
+					'title'                => $item->get_trip_title(),
+					'url'                  => get_permalink( $item->get_trip_id() ),
+					'trip_start_date'      => $item->get_trip_date(),
+					'trip_end_date'        => $item->get_end_date(),
+					'number_of_travellers' => $item->travelers_count(),
+					'line_items'           => array_map(
+						function ( $line_items ) {
+							return array_map(
+								function ( $_line_item ) {
+									$label    = '';
+									$quantity = 0;
+									$price    = 0;
+									$total    = 0;
+									extract( $_line_item );
 
-						return compact( 'label', 'quantity', 'price', 'total' );
-					}, $line_items );
-				}, $item->get_line_items() ),
-			);
-		}, $cart_info_parser->get_items() );
+									return compact( 'label', 'quantity', 'price', 'total' );
+								},
+								$line_items
+							);
+						},
+						$item->get_line_items()
+					),
+				);
+			},
+			$cart_info_parser->get_items()
+		);
 
 		return array(
 			'id'             => $this->ID,
@@ -1138,15 +1179,18 @@ class Booking extends PostModel {
 			'currency'       => $cart_info_parser->get_currency(),
 			'booked_trips'   => $booked_trips,
 			'customer'       => $this->get_customer(),
-			'payments'       => array_map( function ( $payment ) {
-				return array(
-					'id'              => $payment->ID,
-					'amount'          => $payment->get_amount(),
-					'date'            => $payment->get_transaction_date(),
-					'status'          => $payment->get_payment_status(),
-					'payment_gateway' => $payment->get_payment_gateway(),
-				);
-			}, $this->get_payments() ),
+			'payments'       => array_map(
+				function ( $payment ) {
+					return array(
+						'id'              => $payment->ID,
+						'amount'          => $payment->get_amount(),
+						'date'            => $payment->get_transaction_date(),
+						'status'          => $payment->get_payment_status(),
+						'payment_gateway' => $payment->get_payment_gateway(),
+					);
+				},
+				$this->get_payments()
+			),
 		);
 	}
 
@@ -1170,5 +1214,417 @@ class Booking extends PostModel {
 		}
 
 		return new static( $payment_id );
+	}
+
+	/**
+	 * Ensure payment key is stored for this booking.
+	 * This allows payment links to work independently without requiring the booking details page.
+	 *
+	 * @return string The payment key
+	 * @since 6.7.0
+	 */
+	public function ensure_payment_key(): string {
+		$payment_key = wptravelengine_generate_key( $this->get_id() );
+
+		// Store payment key as post meta for efficient lookups
+		$this->update_meta( '_payment_key', $payment_key );
+
+		return $payment_key;
+	}
+
+	/**
+	 * Compare current cart version with the given version.
+	 *
+	 * @param string $op Operator to compare. Default is '=='.
+	 * @param string $version Version to compare with. Default is '4.0'.
+	 * @return bool
+	 * @since 6.7.0
+	 */
+	public function is_curr_cart( string $op = '==', string $version = '4.0' ): bool {
+		global $current_screen;
+		if ( $current_screen && $current_screen->id === 'booking' && $current_screen->action === 'add' && $current_screen->base === 'post' ) {
+			return true;
+		}
+		return version_compare( $this->get_cart_version(), $version, $op );
+	}
+
+	/**
+	 * Retrieves booking cart info - Version.
+	 *
+	 * @return string Version
+	 * @since 6.7.0
+	 */
+	public function get_cart_version(): string {
+		return (string) ( $this->get_cart_info( 'version' ) ?? '3.0' );
+	}
+
+	/**
+	 * Get fees data.
+	 *
+	 * @return array Fees data.
+	 * @since 6.7.0
+	 */
+	public function get_fees(): array {
+		return $this->get_cart_info( 'fees' ) ?? array();
+	}
+
+	/**
+	 * Get Payment by ID.
+	 *
+	 * @param int $payment_id The payment ID.
+	 *
+	 * @return ?Payment
+	 * @since 6.7.0
+	 */
+	public function get_payment_by_id( int $payment_id ) {
+		foreach ( $this->get_payments() as $payment ) {
+			if ( $payment->ID === $payment_id ) {
+				return $payment;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Get fees by type.
+	 *
+	 * @return array
+	 * @since 6.7.0
+	 */
+	public function get_fee_types(): array {
+		$fees         = $this->get_fees();
+		$fees_by_type = array();
+
+		foreach ( $fees as $fee ) {
+			$apply_tax = $fee['apply_tax'] ?? true;
+			if ( 'tax' === $fee['name'] ) {
+				$fees_by_type['tax'] = $fee;
+			} elseif ( $apply_tax ) {
+				$fees_by_type['tax_inclusive'][] = $fee;
+			} else {
+				$fees_by_type['tax_exclusive'][] = $fee;
+			}
+		}
+
+		return $fees_by_type;
+	}
+
+	/**
+	 * Get payments data.
+	 *
+	 * @param bool $success Whether to include successful payments only. Default true.
+	 *
+	 * @return array Payments data.
+	 * {
+	 *  'totals' => array<mixed>,
+	 *  'payments' => array<mixed>,
+	 * }
+	 * @since 6.7.0
+	 * @since 6.7.1 Skips calculation for failed payments.
+	 */
+	public function get_payments_data( bool $success = true ): array {
+
+		$key = $success ? 'success' : 'not_success';
+
+		if ( isset( $this->payments_data[ $key ] ) ) {
+			return $this->payments_data[ $key ];
+		}
+
+		$totals    = array(
+			'total_deposit'   => '0',
+			'total_paid'      => '0',
+			'total_exclusive' => '0',
+			'total_discount'  => '0',
+			'due_exclusive'   => '0',
+		);
+		$payments  = array();
+		$fee_types = $this->get_fee_types();
+
+		$calculator = PaymentCalculator::for( $this->get_currency() );
+
+		$discounts = $this->get_discounts();
+
+		foreach ( $this->get_payments() as $payment ) {
+			$cart_totals = $payment->get_cart_totals();
+
+			if ( ! $cart_totals || $payment->is_failed() || ( $success && ! $payment->is_completed() ) ) {
+				continue;
+			}
+
+			foreach ( $discounts as $_key => $_ ) {
+				if ( isset( $cart_totals[ 'total_' . $_key ] ) ) {
+					$totals['total_discount'] = $calculator->add( $totals['total_discount'], (string) $cart_totals[ 'total_' . $_key ] );
+				}
+			}
+
+			$p_id = $payment->ID;
+
+			foreach ( $fee_types['tax_inclusive'] ?? array() as $fee ) {
+				$payments[ $p_id ][ $fee['name'] ]                = (string) ( $cart_totals[ 'total_' . $fee['name'] ] ?? '0.00' );
+				$totals['tax_inclusive'][ $fee['name'] ]['label'] = $fee['label'];
+				$totals['tax_inclusive'][ $fee['name'] ]['value'] = $calculator->add(
+					$totals['tax_inclusive'][ $fee['name'] ]['value'] ?? '0.00',
+					$payments[ $p_id ][ $fee['name'] ]
+				);
+			}
+
+			foreach ( $fee_types['tax_exclusive'] ?? array() as $fee ) {
+				$payments[ $p_id ][ $fee['name'] ]                = (string) ( $cart_totals[ 'total_' . $fee['name'] ] ?? '0.00' );
+				$totals['tax_exclusive'][ $fee['name'] ]['label'] = $fee['label'];
+				$totals['tax_exclusive'][ $fee['name'] ]['value'] = $calculator->add(
+					$totals['tax_exclusive'][ $fee['name'] ]['value'] ?? '0.00',
+					$payments[ $p_id ][ $fee['name'] ]
+				);
+			}
+
+			if ( isset( $fee_types['tax'], $cart_totals['total_tax'] ) ) {
+				$payments[ $p_id ]['tax'] = (string) ( $cart_totals['total_tax'] ?? '0.00' );
+				$totals['tax']            = array(
+					'label' => $fee_types['tax']['label'],
+					'value' => $calculator->add(
+						$totals['tax']['value'] ?? '0.00',
+						$payments[ $p_id ]['tax']
+					),
+				);
+			}
+
+			$payments[ $p_id ]['total']   = (string) $payment->get_amount();
+			$payments[ $p_id ]['deposit'] = (string) ( $cart_totals['deposit'] ?? '0.00' );
+
+			$totals['total_paid']    = $calculator->add(
+				$totals['total_paid'] ?? '0.00',
+				$payments[ $p_id ]['total']
+			);
+			$totals['total_deposit'] = $calculator->add(
+				$totals['total_deposit'] ?? '0.00',
+				$payments[ $p_id ]['deposit']
+			);
+		}
+
+		$totals['total_exclusive'] = (string) $this->get_total();
+		$totals['due_exclusive']   = $calculator->subtract(
+			$totals['total_exclusive'],
+			$totals['total_deposit']
+		);
+		$totals['subtotal']        = $calculator->add( $totals['total_exclusive'], $totals['total_discount'] );
+
+		$this->payments_data[ $key ] = compact( 'totals', 'payments' );
+
+		return $this->payments_data[ $key ];
+	}
+
+	/**
+	 * Syncs metas to the Payment and Booking posts.
+	 *
+	 * @param int   $payment_id The payment ID.
+	 * @param float $paid_amount The paid amount received from the payment gateway response.
+	 * @param array $args The arguments for payment, booking metadata to sync and whether to send booking emails.
+	 * {
+	 *  'payment_metadata'    => array<mixed>,
+	 *  'booking_metadata'    => array<mixed>,
+	 *  'send_booking_emails' => bool,
+	 *  'send_payment_emails' => bool,
+	 * }
+	 * @return void
+	 * @since 6.7.0
+	 * @since 6.7.1 Added support for send_booking_emails, send_payment_emails arguments and payment event trigger.
+	 */
+	public function sync_payment_success_metas( int $payment_id, float $paid_amount, array $args = array() ): void {
+		$args = wp_parse_args(
+			$args,
+			array(
+				'payment_metadata'    => array(),
+				'booking_metadata'    => array(),
+				'send_booking_emails' => false,
+				'send_payment_emails' => false,
+			)
+		);
+
+		/** @var PaymentCalculator $calculator */
+		$calculator = PaymentCalculator::for( $this->get_currency() );
+
+		$_payment            = null;
+		$total_paid_amount   = (string) $paid_amount;
+		$total_extra_charges = '0.00';
+
+		$payments = $this->get_payments();
+
+		foreach ( $payments as $payment ) {
+			if ( $payment->ID === $payment_id ) {
+				$_payment = $payment;
+			} elseif ( ! $payment->is_completed() ) {
+				continue;
+			} else {
+				$total_paid_amount = $calculator->add( $total_paid_amount, (string) $payment->get_amount() );
+			}
+			$total_extra_charges = $calculator->add( $total_extra_charges, (string) $payment->get_cart_totals( 'total_extra_charges' ) );
+		}
+
+		if ( ! ( $_payment instanceof Payment ) ) {
+			throw new InvalidArgumentException( 'Payment ID #' . $payment_id . ' is not found in the booking #' . $this->get_id() . '.' );
+		}
+
+		$args['payment_metadata'] = is_array( $args['payment_metadata'] ) ? $args['payment_metadata'] : array();
+		$args['booking_metadata'] = is_array( $args['booking_metadata'] ) ? $args['booking_metadata'] : array();
+
+		$payable_amount = $calculator->subtract(
+			(string) $_payment->get_payable_amount(),
+			(string) $paid_amount
+		);
+
+		$previous_payment_status = $_payment->get_payment_status();
+
+		$_payment_metas = array(
+			'payable'              => array(
+				'amount'   => $payable_amount,
+				'currency' => $this->get_currency(),
+			),
+			'payment_amount'       => array(
+				'value'    => $paid_amount,
+				'currency' => $this->get_currency(),
+			),
+			'_prev_payment_status' => $previous_payment_status,
+			'payment_status'       => 'completed',
+		);
+
+		$_payment->sync_metas( array_merge( $args['payment_metadata'], $_payment_metas ) );
+
+		$total_due_amount = $calculator->subtract(
+			$calculator->add( (string) $this->get_total(), (string) $total_extra_charges ),
+			(string) $total_paid_amount
+		);
+
+		$_booking_metas = array(
+			'total_paid_amount'                       => $total_paid_amount,
+			'total_due_amount'                        => $total_due_amount,
+			'_prev_booking_status'                    => $this->get_booking_status(),
+			'wp_travel_engine_booking_payment_status' => 'completed',
+			'wp_travel_engine_booking_status'         => 'booked',
+		);
+
+		$this->sync_metas( array_merge( $args['booking_metadata'], $_booking_metas ) );
+
+		if ( $args['send_booking_emails'] ) {
+			wptravelengine_send_booking_emails( $payment_id, 'order', 'all' );
+		}
+
+		if ( $args['send_payment_emails'] ) {
+			wptravelengine_send_booking_emails( $payment_id, 'order_confirmation', 'all' );
+		}
+
+		if ( 'completed' !== $previous_payment_status ) {
+			Events::add_event( 'wptravelengine.booking.payment.completed', $_payment->get_id(), $_payment->get_post_type() );
+		}
+	}
+
+	/**
+	 * Syncs metas to the Payment and Booking posts.
+	 *
+	 * @param int   $payment_id The payment ID.
+	 * @param float $paid_amount The paid amount received from the payment gateway response.
+	 * @param array $args The arguments with payment and booking IDs and its respective metadata to sync.
+	 * {
+	 *  'payment_metadata' => array<mixed>,
+	 *  'booking_metadata' => array<mixed>,
+	 * }
+	 * @return void
+	 * @since 6.7.0
+	 * @since 6.7.1 Added support for payment event trigger and _prev_payment_status updation.
+	 */
+	public function sync_payment_pending_metas( int $payment_id, float $amount, array $args = array() ): void {
+		$_payment = $this->get_payment_by_id( $payment_id );
+
+		if ( ! ( $_payment instanceof Payment ) ) {
+			throw new InvalidArgumentException( 'Payment ID #' . $payment_id . ' is not found in the booking #' . $this->get_id() . '.' );
+		}
+
+		$args = wp_parse_args(
+			$args,
+			array(
+				'payment_metadata' => array(),
+				'booking_metadata' => array(),
+			)
+		);
+
+		$previous_payment_status = $_payment->get_payment_status();
+
+		$_payment_metas = array(
+			'payable'              => array(
+				'currency' => $this->get_currency(),
+				'amount'   => $amount,
+			),
+			'payment_status'       => 'pending',
+			'_prev_payment_status' => $previous_payment_status,
+		);
+
+		$_payment->sync_metas( array_merge( $args['payment_metadata'], $_payment_metas ) );
+
+		$_booking_metas = array(
+			'_prev_booking_status'                    => $this->get_booking_status(),
+			'wp_travel_engine_booking_payment_status' => 'pending',
+			'wp_travel_engine_booking_status'         => 'pending',
+		);
+
+		$this->sync_metas( array_merge( $args['booking_metadata'], $_booking_metas ) );
+
+		if ( 'pending' !== $previous_payment_status ) {
+			Events::add_event( 'wptravelengine.booking.payment.pending', $_payment->get_id(), $_payment->get_post_type() );
+		}
+	}
+
+	/**
+	 * Syncs metas to the Payment and Booking posts.
+	 *
+	 * @param int   $payment_id The payment ID.
+	 * @param float $paid_amount The paid amount received from the payment gateway response.
+	 * @param array $args The arguments with payment and booking IDs and its respective metadata to sync.
+	 * {
+	 *  'payment_metadata' => array<mixed>,
+	 *  'booking_metadata' => array<mixed>,
+	 * }
+	 * @return void
+	 * @since 6.7.0
+	 * @since 6.7.1 Added support for payment event trigger and _prev_payment_status updation.
+	 */
+	public function sync_payment_failed_metas( int $payment_id, float $amount, array $args = array() ): void {
+
+		$_payment = $this->get_payment_by_id( $payment_id );
+
+		if ( ! ( $_payment instanceof Payment ) ) {
+			throw new InvalidArgumentException( 'Payment ID #' . $payment_id . ' is not found in the booking #' . $this->get_id() . '.' );
+		}
+
+		$args = wp_parse_args(
+			$args,
+			array(
+				'payment_metadata' => array(),
+				'booking_metadata' => array(),
+			)
+		);
+
+		$previous_payment_status = $_payment->get_payment_status();
+
+		$_payment_metas = array(
+			'payable'              => array(
+				'currency' => $this->get_currency(),
+				'amount'   => $amount,
+			),
+			'payment_status'       => 'failed',
+			'_prev_payment_status' => $previous_payment_status,
+		);
+
+		$_payment->sync_metas( array_merge( $args['payment_metadata'], $_payment_metas ) );
+
+		$_booking_metas = array(
+			'_prev_booking_status'                    => $this->get_booking_status(),
+			'wp_travel_engine_booking_payment_status' => 'failed',
+			'wp_travel_engine_booking_status'         => 'canceled',
+		);
+
+		$this->sync_metas( array_merge( $args['booking_metadata'], $_booking_metas ) );
+
+		if ( 'failed' !== $previous_payment_status ) {
+			Events::add_event( 'wptravelengine.booking.payment.failed', $_payment->get_id(), $_payment->get_post_type() );
+		}
 	}
 }

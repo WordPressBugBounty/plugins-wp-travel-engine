@@ -12,7 +12,7 @@ use WPTravelEngine\Core\Models\Post\Booking;
 ?>
 
 <div>
-	<button type="button" class="wpte-button wpte-outlined"
+	<button type="button" class="wpte-button wpte-outlined wpte-button-full"
 			data-booking-id="<?php echo esc_attr( $booking->get_id() ); ?>" id="wte-resend-purchase-receipt"
 			data-nonce="<?php echo wp_create_nonce( 'wte_resend_purchase_receipt' ); ?>">
 		<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -508,26 +508,26 @@ class EDD_SL_Plugin_Updater {
 		global $edd_plugin_data;
 		// phpcs:disable
 
-		if( empty( $_REQUEST['edd_sl_action'] ) || 'view_plugin_changelog' != $_REQUEST['edd_sl_action'] ) {
+		if ( empty( $_REQUEST['edd_sl_action'] ) || 'view_plugin_changelog' != $_REQUEST['edd_sl_action'] ) {
 			return;
 		}
 
-		if( empty( $_REQUEST['plugin'] ) ) {
+		if ( empty( $_REQUEST['plugin'] ) ) {
 			return;
 		}
 
-		if( empty( $_REQUEST['slug'] ) ) {
+		if ( empty( $_REQUEST['slug'] ) ) {
 			return;
 		}
 
-		if( ! current_user_can( 'update_plugins' ) ) {
+		if ( ! current_user_can( 'update_plugins' ) ) {
 			wp_die( esc_html__( 'You do not have permission to install plugin updates', 'wp-travel-engine' ), esc_html__( 'Error', 'wp-travel-engine' ), array( 'response' => 403 ) );
 		}
 
 		$data         = $edd_plugin_data[ wte_clean( wp_unslash( $_REQUEST['slug'] ) ) ];
 		$version_info = $this->get_cached_version_info();
 
-		if( false === $version_info ) {
+		if ( false === $version_info ) {
 
 			$api_params = array(
 				'edd_action' => 'get_version',
@@ -552,7 +552,7 @@ class EDD_SL_Plugin_Updater {
 				$version_info = false;
 			}
 
-			if( ! empty( $version_info ) ) {
+			if ( ! empty( $version_info ) ) {
 				foreach( $version_info->sections as $key => $section ) {
 					$version_info->$key = (array) $section;
 				}

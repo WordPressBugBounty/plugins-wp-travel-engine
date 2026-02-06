@@ -95,14 +95,14 @@ class WP_Travel_Engine_Enquiry_Form_Shortcodes {
 				get_posts(
 					array(
 						'post_type'      => WP_TRAVEL_ENGINE_POST_TYPE,
-						'post_status' => 'publish',
+						'post_status'    => 'publish',
 						'posts_per_page' => -1,
 					)
 				),
 				'post_title',
 				'ID'
 			);
-			$trip_select_options = [ '' => __( 'Select Trip', 'wp-travel-engine' ) ] + $trip_select_options;
+			$trip_select_options = array( '' => __( 'Select Trip', 'wp-travel-engine' ) ) + $trip_select_options;
 			$attributes          = array();
 			if ( ! empty( $args['trip_id'] ) ) {
 				$attributes['disabled'] = true;
@@ -269,15 +269,15 @@ class WP_Travel_Engine_Enquiry_Form_Shortcodes {
 		$subject               = str_replace( $enquirer_tags, $enquirer_replace_tags, $subject );
 		$admin_email           = get_option( 'admin_email' );
 
-		if ( ! empty ( $wp_travel_engine_settings['email']['enquiry_emailaddress'] ) ) {
+		if ( ! empty( $wp_travel_engine_settings['email']['enquiry_emailaddress'] ) ) {
 			$enquiry_emailaddress = $wp_travel_engine_settings['email']['enquiry_emailaddress'];
 
-			$explode_email 	= explode( ',', $enquiry_emailaddress );
-			$to = array_map( 'sanitize_email', $explode_email );
+			$explode_email = explode( ',', $enquiry_emailaddress );
+			$to            = array_map( 'sanitize_email', $explode_email );
 
 		} else {
 			$emails = array_filter( array_map( 'sanitize_email', explode( ',', $wp_travel_engine_settings['email']['emails'] ) ) );
-			$to = ! empty( $emails ) ? $emails : array( sanitize_email( $admin_email ) );
+			$to     = ! empty( $emails ) ? $emails : array( sanitize_email( $admin_email ) );
 		}
 
 		$ipaddress = '';
@@ -342,12 +342,17 @@ class WP_Travel_Engine_Enquiry_Form_Shortcodes {
 
 		foreach ( $to as $val ) {
 			$admin_sent = new Email();
-			$admin_sent->add_headers( array( "from" => "From: {$name}<{$email}>", "reply_to" => "Reply-To: {$email}" ) )
-					   ->set( 'to', $val )
-					   ->set( 'my_subject', esc_html( $subject ) )
-					   ->set( 'attachments', $attachments )
-					   ->set( 'content', $admin_email_template_content )
-					   ->send();
+			$admin_sent->add_headers(
+				array(
+					'from'     => "From: {$name}<{$email}>",
+					'reply_to' => "Reply-To: {$email}",
+				)
+			)
+						->set( 'to', $val )
+						->set( 'my_subject', esc_html( $subject ) )
+						->set( 'attachments', $attachments )
+						->set( 'content', $admin_email_template_content )
+						->send();
 		}
 
 		if ( isset( $wp_travel_engine_settings['email']['cust_notif'] ) && $wp_travel_engine_settings['email']['cust_notif'] == '1' ) {
@@ -358,9 +363,9 @@ class WP_Travel_Engine_Enquiry_Form_Shortcodes {
 			);
 			$mail = new UserEmail( $user );
 			$mail->set( 'to', $email )
-				 ->set( 'my_subject', wptravelengine_settings()->get( 'customer_email_notify_tabs.enquiry.subject', __( 'Enquiry Sent.', 'wp-travel-engine' ) ) )
-				 ->set( 'content', wptravelengine_settings()->get( 'customer_email_notify_tabs.enquiry.content', '' ) )
-				 ->send();
+				->set( 'my_subject', wptravelengine_settings()->get( 'customer_email_notify_tabs.enquiry.subject', __( 'Enquiry Sent.', 'wp-travel-engine' ) ) )
+				->set( 'content', wptravelengine_settings()->get( 'customer_email_notify_tabs.enquiry.content', '' ) )
+				->send();
 		}
 
 		if ( $admin_sent == 1 ) {

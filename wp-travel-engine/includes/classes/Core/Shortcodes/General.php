@@ -48,8 +48,8 @@ class General extends Shortcode {
 	 */
 	public function output( $atts ): string {
 		ob_start();
-		if ( isset( $atts[ 'template' ] ) ) {
-			$template = $atts[ 'template' ];
+		if ( isset( $atts['template'] ) ) {
+			$template = $atts['template'];
 			wte_get_template(
 				$template,
 				$atts

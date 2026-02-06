@@ -84,7 +84,7 @@ class WTE_Session {
 	 * Set data in session.
 	 *
 	 * @param string $key session data key.
-	 * @param mixed $value session data.
+	 * @param mixed  $value session data.
 	 *
 	 * @return mixed
 	 */

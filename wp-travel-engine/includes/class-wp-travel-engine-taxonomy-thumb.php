@@ -74,7 +74,6 @@ if ( ! class_exists( 'Wp_Travel_Engine_Taxonomy_Thumb' ) ) {
 			add_action( 'edited_destination', array( $this, 'updated_shortdesc_in_wte' ) );
 			add_action( 'edited_activities', array( $this, 'updated_shortdesc_in_wte' ) );
 			add_action( 'edited_trip_types', array( $this, 'updated_shortdesc_in_wte' ) );
-
 		}
 
 		public function wpte_load_media() {
@@ -88,7 +87,7 @@ if ( ! class_exists( 'Wp_Travel_Engine_Taxonomy_Thumb' ) ) {
 		public function wpte_add_category_image( $taxonomy ) {
 			?>
 			<div class="form-field term-group">
-				<?php if ( $taxonomy == 'difficulty' ) {?>
+				<?php if ( $taxonomy == 'difficulty' ) { ?>
 					<label for="category-image-id"><?php esc_html_e( 'Icon', 'wp-travel-engine' ); ?></label>
 					<input type="hidden" id="category-image-id" name="category-image-id" class="custom_media_url" value="">
 					<div id="category-image-wrapper"></div>
@@ -96,8 +95,9 @@ if ( ! class_exists( 'Wp_Travel_Engine_Taxonomy_Thumb' ) ) {
 						<input type="button" class="button button-secondary ct_tax_media_button" id="ct_tax_media_button" name="ct_tax_media_button" value="<?php esc_html_e( 'Add Icon', 'wp-travel-engine' ); ?>" />
 						<input type="button" class="button button-secondary ct_tax_media_remove" id="ct_tax_media_remove" name="ct_tax_media_remove" value="<?php esc_html_e( 'Remove Icon', 'wp-travel-engine' ); ?>" />
 					</p>
-				<?php }
-				else {?>
+					<?php
+				} else {
+					?>
 				<label for="category-image-id"><?php esc_html_e( 'Image', 'wp-travel-engine' ); ?></label>
 				<input type="hidden" id="category-image-id" name="category-image-id" class="custom_media_url" value="">
 				<div id="category-image-wrapper"></div>
@@ -105,7 +105,7 @@ if ( ! class_exists( 'Wp_Travel_Engine_Taxonomy_Thumb' ) ) {
 					<input type="button" class="button button-secondary ct_tax_media_button" id="ct_tax_media_button" name="ct_tax_media_button" value="<?php esc_html_e( 'Add Image', 'wp-travel-engine' ); ?>" />
 					<input type="button" class="button button-secondary ct_tax_media_remove" id="ct_tax_media_remove" name="ct_tax_media_remove" value="<?php esc_html_e( 'Remove Image', 'wp-travel-engine' ); ?>" />
 				</p>
-				<?php }?>
+				<?php } ?>
 			</div>
 			<?php
 		}
@@ -234,12 +234,13 @@ if ( ! class_exists( 'Wp_Travel_Engine_Taxonomy_Thumb' ) ) {
 			?>
 			<tr class="form-field term-group-wrap">
 				<th scope="row">
-				<?php if ( $taxonomy == 'difficulty' ) {?>
+				<?php if ( $taxonomy == 'difficulty' ) { ?>
 					<label for="category-image-id"><?php esc_html_e( 'Icon', 'wp-travel-engine' ); ?></label>
-				<?php } else{ ?>
+				<?php } else { ?>
 					<label for="category-image-id"><?php esc_html_e( 'Image', 'wp-travel-engine' ); ?></label>
 					<?php
-				}?>
+				}
+				?>
 				</th>
 				<td>
 					<?php $image_id = get_term_meta( $term->term_id, 'category-image-id', true ); ?>
@@ -252,13 +253,13 @@ if ( ! class_exists( 'Wp_Travel_Engine_Taxonomy_Thumb' ) ) {
 						?>
 					</div>
 					<p>
-					<?php if ( $taxonomy == 'difficulty' ) {?>
+					<?php if ( $taxonomy == 'difficulty' ) { ?>
 						<input type="button" class="button button-secondary ct_tax_media_button" id="ct_tax_media_button" name="ct_tax_media_button" value="<?php esc_html_e( 'Add Icon', 'wp-travel-engine' ); ?>" />
 						<input type="button" class="button button-secondary ct_tax_media_remove" id="ct_tax_media_remove" name="ct_tax_media_remove" value="<?php esc_html_e( 'Remove Icon', 'wp-travel-engine' ); ?>" />
 					<?php } else { ?>
 						<input type="button" class="button button-secondary ct_tax_media_button" id="ct_tax_media_button" name="ct_tax_media_button" value="<?php esc_html_e( 'Add Image', 'wp-travel-engine' ); ?>" />
 						<input type="button" class="button button-secondary ct_tax_media_remove" id="ct_tax_media_remove" name="ct_tax_media_remove" value="<?php esc_html_e( 'Remove Image', 'wp-travel-engine' ); ?>" />
-						<?php }?>
+						<?php } ?>
 					</p>
 				</td>
 			</tr>
@@ -357,7 +358,7 @@ if ( ! class_exists( 'Wp_Travel_Engine_Taxonomy_Thumb' ) ) {
 						// Thanks: http://stackoverflow.com/questions/15281995/wordpress-create-category-ajax-response
 						$(document).ajaxComplete(function(event, xhr, settings) {
 							var queryStringArr = settings.data.split('&');
-							if( $.inArray('action=add-tag', queryStringArr) !== -1 ){
+							if ( $.inArray('action=add-tag', queryStringArr) !== -1 ){
 								var xml = xhr.responseXML;
 								$response = $(xml).find('term_id').text();
 								if($response!=""){
@@ -371,7 +372,6 @@ if ( ! class_exists( 'Wp_Travel_Engine_Taxonomy_Thumb' ) ) {
 				<?php
 			}
 		}
-
 	}
 	$wte_taxonomy_thumb = new \Wp_Travel_Engine_Taxonomy_Thumb();
 	$wte_taxonomy_thumb->init();

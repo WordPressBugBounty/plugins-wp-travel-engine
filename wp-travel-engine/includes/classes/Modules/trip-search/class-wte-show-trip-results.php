@@ -211,12 +211,12 @@ if ( ! class_exists( 'WTE_Show_Trip_Results' ) ) {
 									<ul class="wte-view-mode-selection-lists">
 										<li class="wte-view-mode-selection <?php echo ( 'grid' === $view_mode ) ? 'active' : ''; ?>" data-mode="grid" >
 											<a href="<?php echo esc_url( add_query_arg( 'view_mode', 'grid', $current_url ) ); ?>">
-												<?php wptravelengine_svg_by_fa_icon( "fas fa-th" ); ?>
+												<?php wptravelengine_svg_by_fa_icon( 'fas fa-th' ); ?>
 											</a>
 										</li>
 										<li class="wte-view-mode-selection <?php echo ( 'list' === $view_mode ) ? 'active' : ''; ?>" data-mode="list" >
 											<a href="<?php echo esc_url( add_query_arg( 'view_mode', 'list', $current_url ) ); ?>">
-												<?php wptravelengine_svg_by_fa_icon( "fas fa-list" ); ?>
+												<?php wptravelengine_svg_by_fa_icon( 'fas fa-list' ); ?>
 											</a>
 										</li>
 									</ul>
@@ -259,16 +259,16 @@ if ( ! class_exists( 'WTE_Show_Trip_Results' ) ) {
 
 							echo '<div class="category-main-wrap ' . esc_attr( $view_class ) . '">';
 							$user_wishlists = wptravelengine_user_wishlists();
-							$template_name	= wptravelengine_get_template_by_view_mode( $view_mode );
+							$template_name  = wptravelengine_get_template_by_view_mode( $view_mode );
 
 							while ( $query->have_posts() ) {
 								$query->the_post();
-								$details      = wte_get_trip_details( get_the_ID() );
-								$details['j'] = $j;
+								$details                   = wte_get_trip_details( get_the_ID() );
+								$details['j']              = $j;
 								$details['user_wishlists'] = $user_wishlists;
 
 								wptravelengine_get_template( $template_name, $details );
-								$j++;
+								++$j;
 							}
 								wp_reset_postdata();
 							echo '</div>';

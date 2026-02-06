@@ -13,26 +13,26 @@ wp_enqueue_script( 'wte-edit--coupon' );
 
 // General Tab Data.
 $coupon_metas = get_post_meta( $post->ID, 'wp_travel_engine_coupon_metas', true );
-$general_tab  = isset( $coupon_metas[ 'general' ] ) ? $coupon_metas[ 'general' ] : array();
+$general_tab  = isset( $coupon_metas['general'] ) ? $coupon_metas['general'] : array();
 $coupon_code  = get_post_meta( $post->ID, 'wp_travel_engine_coupon_code', true );
 
 // Field Values.
-$coupon_active = isset( $general_tab[ 'coupon_active' ] ) ? $general_tab[ 'coupon_active' ] : 'yes';
+$coupon_active = isset( $general_tab['coupon_active'] ) ? $general_tab['coupon_active'] : 'yes';
 $coupon_code   = ! empty( $coupon_code ) ? $coupon_code : '';
-$coupon_type   = isset( $general_tab[ 'coupon_type' ] ) ? $general_tab[ 'coupon_type' ] : 'fixed';
-$coupon_value  = isset( $general_tab[ 'coupon_value' ] ) ? $general_tab[ 'coupon_value' ] : '';
+$coupon_type   = isset( $general_tab['coupon_type'] ) ? $general_tab['coupon_type'] : 'fixed';
+$coupon_value  = isset( $general_tab['coupon_value'] ) ? $general_tab['coupon_value'] : '';
 
 $date_format = get_option( 'date_format' );
 
-$coupon_expiry_date = isset( $general_tab[ 'coupon_expiry_date' ] ) ? $general_tab[ 'coupon_expiry_date' ] : '';
+$coupon_expiry_date = isset( $general_tab['coupon_expiry_date'] ) ? $general_tab['coupon_expiry_date'] : '';
 
 try {
-	$coupon_expiry_date = ! empty( $general_tab[ 'coupon_expiry_date' ] ) ? ( new \DateTime( $general_tab[ 'coupon_expiry_date' ] ) )->format( 'Y-m-d' ) : '';
+	$coupon_expiry_date = ! empty( $general_tab['coupon_expiry_date'] ) ? ( new \DateTime( $general_tab['coupon_expiry_date'] ) )->format( 'Y-m-d' ) : '';
 } catch ( \Exception $e ) {
 	$coupon_expiry_date = '';
 }
 try {
-	$coupon_start_date = isset( $general_tab[ 'coupon_start_date' ] ) ? ( new \DateTime( $general_tab[ 'coupon_start_date' ] ) )->format( 'Y-m-d' ) : gmdate( 'Y-m-d' );
+	$coupon_start_date = isset( $general_tab['coupon_start_date'] ) ? ( new \DateTime( $general_tab['coupon_start_date'] ) )->format( 'Y-m-d' ) : gmdate( 'Y-m-d' );
 } catch ( \Exception $e ) {
 	$coupon_start_date = gmdate( 'Y-m-d' );
 }
@@ -41,7 +41,7 @@ $coupon_id = CouponCode::coupon_id_by_code( $coupon_code );
 
 $wp_travel_engine_settings = get_option( 'wp_travel_engine_settings', true );
 
-$code = ! empty( $wp_travel_engine_settings[ 'currency_code' ] ) ? $wp_travel_engine_settings[ 'currency_code' ] : 'USD';
+$code = ! empty( $wp_travel_engine_settings['currency_code'] ) ? $wp_travel_engine_settings['currency_code'] : 'USD';
 
 $currency = Functions::currency_symbol_by_code( $code );
 ?>
@@ -193,11 +193,11 @@ $currency = Functions::currency_symbol_by_code( $code );
 		</div>
 		<?php
 		// Get Restrictions Tab Data.
-		$restrictions_tab = isset( $coupon_metas[ 'restriction' ] ) ? $coupon_metas[ 'restriction' ] : array();
+		$restrictions_tab = isset( $coupon_metas['restriction'] ) ? $coupon_metas['restriction'] : array();
 
 		// Field Values.
-		$restricted_trips    = isset( $restrictions_tab[ 'restricted_trips' ] ) ? $restrictions_tab[ 'restricted_trips' ] : array();
-		$coupon_limit_number = isset( $restrictions_tab[ 'coupon_limit_number' ] ) ? $restrictions_tab[ 'coupon_limit_number' ] : '';
+		$restricted_trips    = isset( $restrictions_tab['restricted_trips'] ) ? $restrictions_tab['restricted_trips'] : array();
+		$coupon_limit_number = isset( $restrictions_tab['coupon_limit_number'] ) ? $restrictions_tab['coupon_limit_number'] : '';
 		?>
 		<div class="wpte-field wpte-floated wpte-select">
 			<label

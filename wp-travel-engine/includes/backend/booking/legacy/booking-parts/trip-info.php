@@ -2,14 +2,14 @@
 /**
  * Trip Info
  */
-wp_enqueue_script( "jquery-ui-datepicker" );
+wp_enqueue_script( 'jquery-ui-datepicker' );
 ?>
 <div class="wpte-block wpte-col3">
 	<div class="wpte-title-wrap">
 		<h4 class="wpte-title"><?php esc_html_e( 'Trip Info', 'wp-travel-engine' ); ?></h4>
 		<div class="wpte-button-wrap wpte-edit-bkng">
 			<a href="#" class="wpte-btn-transparent wpte-btn-sm">
-				<?php wptravelengine_svg_by_fa_icon( "fas fa-pencil-alt" ); ?>
+				<?php wptravelengine_svg_by_fa_icon( 'fas fa-pencil-alt' ); ?>
 				<?php esc_html_e( 'Edit', 'wp-travel-engine' ); ?>
 			</a>
 		</div>
@@ -66,7 +66,7 @@ wp_enqueue_script( "jquery-ui-datepicker" );
 							$trips_options = wp_travel_engine_get_trips_array();
 							foreach ( $trips_options as $key => $trip ) {
 								$selected = selected( $trip_id, $key, false );
-								echo '<option ' . esc_attr( $selected ) . " value='" . esc_attr( $key ) . "'>" . esc_html( $trip ) . "</option>";
+								echo '<option ' . esc_attr( $selected ) . " value='" . esc_attr( $key ) . "'>" . esc_html( $trip ) . '</option>';
 							}
 							?>
 						</select>

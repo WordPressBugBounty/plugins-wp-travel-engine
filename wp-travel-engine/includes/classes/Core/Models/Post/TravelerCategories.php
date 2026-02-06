@@ -49,7 +49,7 @@ class TravelerCategories extends Iterator {
 	/**
 	 * Traveler Categories Model Constructor.
 	 *
-	 * @param Trip $trip The trip object.
+	 * @param Trip        $trip The trip object.
 	 * @param TripPackage $package The trip package object.
 	 */
 	public function __construct( Trip $trip, TripPackage $package ) {
@@ -60,16 +60,22 @@ class TravelerCategories extends Iterator {
 
 		$group_pricing = $this->package->get_meta( 'group-pricing' ) ?? array();
 
-		$categories[ 'enabled_group_discount' ] = $categories[ 'enabled_group_discount' ] ?? array();
-		$categories[ 'group_pricing' ]          = array_map( function ( $gp ) {
-			return array_map( function ( $p ) {
-				return [
-					'from' => is_numeric( $p[ 'from' ] ) ? (int) $p[ 'from' ] : '',
-					'to'   => is_numeric( $p[ 'to' ] ) ? (int) $p[ 'to' ] : '',
-					'rate' => (float) $p[ 'price' ],
-				];
-			}, $gp );
-		}, is_array( $group_pricing ) ? $group_pricing : array() );
+		$categories['enabled_group_discount'] = $categories['enabled_group_discount'] ?? array();
+		$categories['group_pricing']          = array_map(
+			function ( $gp ) {
+				return array_map(
+					function ( $p ) {
+						return array(
+							'from' => is_numeric( $p['from'] ) ? (int) $p['from'] : '',
+							'to'   => is_numeric( $p['to'] ) ? (int) $p['to'] : '',
+							'rate' => (float) $p['price'],
+						);
+					},
+					$gp
+				);
+			},
+			is_array( $group_pricing ) ? $group_pricing : array()
+		);
 
 		$_categories = array();
 
@@ -78,7 +84,7 @@ class TravelerCategories extends Iterator {
 		/**
 		 * This is temporary max. pax. as the max. pax for each pricing category is not set
 		 * This can be replaced if max. pax. per pricing category is set in the future.
-		 * 
+		 *
 		 * @since 6.6.7
 		 */
 		$max_pax = wptravelengine_normalize_numeric_val( $this->trip->get_maximum_participants() );
@@ -87,48 +93,48 @@ class TravelerCategories extends Iterator {
 			foreach ( $categories as $key => $values ) {
 				switch ( $key ) {
 					case 'c_ids':
-						$_categories[ $id ][ 'c_ids' ] = $id;
+						$_categories[ $id ]['c_ids'] = $id;
 						break;
 					case 'labels':
-						$_categories[ $id ][ 'labels' ] = $label;
+						$_categories[ $id ]['labels'] = $label;
 						break;
 					case 'prices':
-						$_categories[ $id ][ 'prices' ] = $values[ $id ] ?? '';
+						$_categories[ $id ]['prices'] = $values[ $id ] ?? '';
 						break;
 					case 'pricing_types':
-						$_categories[ $id ][ 'pricing_types' ] = $values[ $id ] ?? 'per-person';
+						$_categories[ $id ]['pricing_types'] = $values[ $id ] ?? 'per-person';
 						break;
 					case 'sale_prices':
-						$_categories[ $id ][ 'sale_prices' ] = $values[ $id ] ?? '';
+						$_categories[ $id ]['sale_prices'] = $values[ $id ] ?? '';
 						break;
 					case 'min_paxes':
-						$_categories[ $id ][ 'min_paxes' ] = $values[ $id ] ?? '';
+						$_categories[ $id ]['min_paxes'] = $values[ $id ] ?? '';
 						break;
 					// case 'max_paxes':
 						// $_categories[ $id ][ 'max_paxes' ] = $values[ $id ] ?? '';
 						// break;
 					case 'enabled_sale':
-						$_categories[ $id ][ 'enabled_sale' ] = (bool) ( $values[ $id ] ?? false );
+						$_categories[ $id ]['enabled_sale'] = (bool) ( $values[ $id ] ?? false );
 						break;
 					case 'enabled_group_discount':
-						$_categories[ $id ][ 'enabled_group_discount' ] = (bool) ( $values[ $id ] ?? false );
+						$_categories[ $id ]['enabled_group_discount'] = (bool) ( $values[ $id ] ?? false );
 						break;
 					case 'group_pricing':
-						$_categories[ $id ][ 'group_pricing' ] = ( $_categories[ $id ][ 'enabled_group_discount' ] ?? false ) ? ( $values[ $id ] ?? array() ) : array();
+						$_categories[ $id ]['group_pricing'] = ( $_categories[ $id ]['enabled_group_discount'] ?? false ) ? ( $values[ $id ] ?? array() ) : array();
 						break;
 					default:
 						$_categories[ $id ][ $key ] = $values[ $id ] ?? '';
 						break;
 				}
 			}
-			$_categories[ $id ][ 'max_paxes' ] = $max_pax;
-			$_categories[ $id ][ 'age_group' ] = (string) ( get_term_meta( $id )[ 'age_group' ][ 0 ] ?? '' );
+			$_categories[ $id ]['max_paxes'] = $max_pax;
+			$_categories[ $id ]['age_group'] = (string) ( get_term_meta( $id )['age_group'][0] ?? '' );
 		}
 
 		$primary_category = $this->get_primary_category_id();
 
 		if ( isset( $_categories[ $primary_category ] ) ) {
-			$_categories = [ $primary_category => $_categories[ $primary_category ] ] + array_diff_key( $_categories, [ $primary_category => true ] );
+			$_categories = array( $primary_category => $_categories[ $primary_category ] ) + array_diff_key( $_categories, array( $primary_category => true ) );
 		}
 
 		$data = array_map(
@@ -170,18 +176,18 @@ class TravelerCategories extends Iterator {
 	 */
 	public function get_primary_category_id(): int {
 
-		$term_ids = [
+		$term_ids = array(
 			$this->package->get_meta( '_primary_category_id' ),
 			$this->trip->get_meta( 'primary_category' ),
 			wptravelengine_settings()->get_primary_pricing_category()->term_id,
-		];
+		);
 
 		foreach ( $term_ids as $id ) {
 			if ( $id && isset( $this->available_categories[ $id ] ) ) {
 				return (int) $id;
 			}
 		}
-		
+
 		return 0;
 	}
 
@@ -201,7 +207,7 @@ class TravelerCategories extends Iterator {
 			}
 		}
 
-		return $this->data[ 0 ];
+		return $this->data[0];
 	}
 
 	/**

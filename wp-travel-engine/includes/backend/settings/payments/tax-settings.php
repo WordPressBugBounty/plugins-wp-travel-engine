@@ -6,7 +6,7 @@ $wp_travel_engine_settings = get_option( 'wp_travel_engine_settings', true );
 $tax_enable                = isset( $wp_travel_engine_settings['tax_enable'] ) ? $wp_travel_engine_settings['tax_enable'] : 'no';
 $tax_label                 = isset( $wp_travel_engine_settings['tax_label'] ) ? $wp_travel_engine_settings['tax_label'] : __( 'Tax (%s%%)', 'wp-travel-engine' );
 $tax_option                = isset( $wp_travel_engine_settings['tax_type_option'] ) ? $wp_travel_engine_settings['tax_type_option'] : 'exclusive';
-$tax_percentage 		   = isset($wp_travel_engine_settings['tax_percentage'] ) && !empty($wp_travel_engine_settings['tax_percentage'])?  $wp_travel_engine_settings['tax_percentage']  : 13;
+$tax_percentage            = isset( $wp_travel_engine_settings['tax_percentage'] ) && ! empty( $wp_travel_engine_settings['tax_percentage'] ) ? $wp_travel_engine_settings['tax_percentage'] : 13;
 ?>
 <div class="wpte-field wpte-checkbox advance-checkbox">
 	<label class="wpte-field-label" for="wp_travel_engine_settings[tax_enable]"><?php esc_html_e( 'Enable Tax', 'wp-travel-engine' ); ?></label>

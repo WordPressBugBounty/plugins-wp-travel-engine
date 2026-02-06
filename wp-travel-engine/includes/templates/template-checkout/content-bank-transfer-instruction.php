@@ -16,13 +16,13 @@
 		<div class="wte-bank-transfer-instructions">
 			<?php echo wp_kses_post( $instruction ); ?>
 		</div>
-		<?php if ( isset( $bank_details[ 0 ] ) ) : ?>
+		<?php if ( isset( $bank_details[0] ) ) : ?>
 			<?php foreach ( $bank_details as $bank ) : ?>
 				<table>
 					<?php foreach ( array_chunk( $bank, 2 ) as $bank_detail ) : ?>
 						<tr>
-							<td><?php printf( '<strong>%s</strong><br/>%s', esc_html( $bank_detail[ 0 ][ 'label' ] ), esc_html( $bank_detail[ 0 ][ 'value' ] ) ); ?></td>
-							<td><?php isset( $bank_detail[ 1 ] ) && printf( '<strong>%s</strong><br/>%s', esc_html( $bank_detail[ 1 ][ 'label' ] ), esc_html( $bank_detail[ 1 ][ 'value' ] ) ); ?></td>
+							<td><?php printf( '<strong>%s</strong><br/>%s', esc_html( $bank_detail[0]['label'] ), esc_html( $bank_detail[0]['value'] ) ); ?></td>
+							<td><?php isset( $bank_detail[1] ) && printf( '<strong>%s</strong><br/>%s', esc_html( $bank_detail[1]['label'] ), esc_html( $bank_detail[1]['value'] ) ); ?></td>
 						</tr>
 					<?php endforeach; ?>
 				</table>

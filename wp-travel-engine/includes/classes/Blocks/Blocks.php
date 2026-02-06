@@ -58,14 +58,14 @@ class Blocks {
 	 * This function returns the settings for the core blocks.
 	 *
 	 * @param array $attributes The attributes for the block.
-	 * @param bool $elementor Whether the block is being used in Elementor.
+	 * @param bool  $elementor Whether the block is being used in Elementor.
 	 * @return array The parsed arguments.
 	 */
 	public function get_core_blocks_settings( $attributes = array(), $elementor = false ) {
 		return wp_parse_args(
 			$attributes,
 			array(
-				'trip-search'  => array(
+				'trip-search' => array(
 					'title'      => __( 'WP Travel Engine - Trip Search', 'wp-travel-engine' ),
 					'attributes' => array(
 						'title'                 => array(
@@ -144,7 +144,7 @@ class Blocks {
 							),
 						),
 					),
-				)
+				),
 			)
 		);
 	}
@@ -185,9 +185,9 @@ class Blocks {
 			foreach ( $dir as $fileinfo ) {
 				if ( ! $fileinfo->isDot() ) {
 					$block = $fileinfo->getPathname() .
-					(( defined( 'WTE_FIXED_DEPARTURE_VERSION' ) && WTE_FIXED_DEPARTURE_VERSION >= '2.4.0' && file_exists($fileinfo->getPathname() . '/modified/block.json'))
+					( ( defined( 'WTE_FIXED_DEPARTURE_VERSION' ) && WTE_FIXED_DEPARTURE_VERSION >= '2.4.0' && file_exists( $fileinfo->getPathname() . '/modified/block.json' ) )
 						? '/modified/block.json'
-						: '/block.json');
+						: '/block.json' );
 
 					if ( file_exists( $block ) ) {
 						$this->set( $block );
@@ -210,11 +210,11 @@ class Blocks {
 
 		foreach ( $blocks as $block ) {
 
-			 // Skip registering 'trip-fsd-date-selector' block if version >= 2.4.0
-			 if ( ( 'wptravelenginetripblocks/trip-fsd-date-selector' === $block || 'wptravelenginetripblocks/trip-fsd-loadmore' === $block ) && defined( 'WTE_FIXED_DEPARTURE_VERSION' ) && WTE_FIXED_DEPARTURE_VERSION >= '2.4.0') {
+			// Skip registering 'trip-fsd-date-selector' block if version >= 2.4.0
+			if ( ( 'wptravelenginetripblocks/trip-fsd-date-selector' === $block || 'wptravelenginetripblocks/trip-fsd-loadmore' === $block ) && defined( 'WTE_FIXED_DEPARTURE_VERSION' ) && WTE_FIXED_DEPARTURE_VERSION >= '2.4.0' ) {
 				continue;
 			}
-			$template_dir = dirname( $block ) . '/';
+			$template_dir  = dirname( $block ) . '/';
 			$template_file = ( defined( 'WTE_FIXED_DEPARTURE_VERSION' ) && WTE_FIXED_DEPARTURE_VERSION >= '2.4.0' && file_exists( $template_dir . 'modified/block.php' ) )
 				? 'modified/block.php'
 				: 'block.php';
@@ -338,7 +338,7 @@ class Blocks {
 	public function print_booking_script_template() {
 		global $post;
 		$wp_travel_engine_settings = get_option( 'wp_travel_engine_settings', array() );
-		$is_enabled_fse_template = $wp_travel_engine_settings['enable_fse_template'] ?? 'no';
+		$is_enabled_fse_template   = $wp_travel_engine_settings['enable_fse_template'] ?? 'no';
 		if ( $post !== null && $post->post_type == \WP_TRAVEL_ENGINE_POST_TYPE && ( current_theme_supports( 'wptravelengine-templates' ) || ( wp_is_block_theme() && $is_enabled_fse_template == 'yes' ) ) ) {
 			wte_get_template( 'script-templates/booking-process/wte-booking.php' );
 			wp_enqueue_script( 'wte-redux' );

@@ -42,18 +42,7 @@ if ( 'yes' === $hide_booking_form ) {
 
 $global_settings = wptravelengine_settings();
 
-$trip_booking_data = apply_filters(
-	'wptravelengine_trip_booking_modal_data',
-	array(
-		'tripID'      => $wtetrip->post->ID,
-		'nonce'       => wp_create_nonce( 'wte_add_trip_to_cart' ),
-		'wpXHR'       => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
-		'cartVersion' => '2.0',
-		'buttonLabel' => wp_kses_post( $attributes_parser->get( 'text' ) ),
-		'showModalWarning' 		=> wptravelengine_toggled( $global_settings->get( 'show_booking_modal_warning', true ) ),
-		'modalWarningMessage' 	=> $global_settings->get( 'booking_modal_warning_message', '' ),
-	)
-);
+$trip_booking_data = wptravelengine_trip_booking_modal_data( $wtetrip->post->ID );
 
 ?>
 <div <?php echo esc_attr( $attributes_parser->wrapper_attributes() ); ?>>

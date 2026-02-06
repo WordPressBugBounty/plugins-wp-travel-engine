@@ -10,9 +10,5 @@ class WP_Travel_Engine {
 	protected $group = 'wte';
 
 	public function get_data( $key, $group ) {
-
 	}
-
-
-
 }

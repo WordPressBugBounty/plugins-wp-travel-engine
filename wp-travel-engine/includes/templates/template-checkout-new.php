@@ -16,9 +16,9 @@ $cart_totals    = $wte_cart->get_totals( false );
 $trip_total     = $wte_cart->get_totals();
 $wte_settings   = get_option( 'wp_travel_engine_settings' );
 $cart_discounts = $wte_cart->get_discounts();
-//$cart_data               = wptravelengine_get_newcost( $cart_discounts, $trip_total, $cart_totals );
+// $cart_data               = wptravelengine_get_newcost( $cart_discounts, $trip_total, $cart_totals );
 $global_settings         = wptravelengine_settings()->get();
-$default_payment_gateway = isset( $global_settings[ 'default_gateway' ] ) && ! empty( $global_settings[ 'default_gateway' ] ) ? $global_settings[ 'default_gateway' ] : 'booking_only';
+$default_payment_gateway = isset( $global_settings['default_gateway'] ) && ! empty( $global_settings['default_gateway'] ) ? $global_settings['default_gateway'] : 'booking_only';
 
 $cart_items = wptravelengine_cart()->getItems( true );
 /**
@@ -50,8 +50,8 @@ $cart_item = reset( $cart_items );
 					<div
 						class="wpte-bf-title"><?php echo esc_html( apply_filters( 'wpte_billings_details_title', esc_html__( 'Billing Details', 'wp-travel-engine' ) ) ); ?></div>
 					<form id="wp-travel-engine-new-checkout-form" method="POST"
-						  name="wp_travel_engine_new_checkout_form" action="" enctype="multipart/form-data"
-						  class="">
+							name="wp_travel_engine_new_checkout_form" action="" enctype="multipart/form-data"
+							class="">
 						<input type="hidden" name="action" value="wp_travel_engine_new_booking_process_action">
 						<?php
 						// Create booking process action nonce for security.
@@ -66,27 +66,27 @@ $cart_item = reset( $cart_items );
 								<div class="wpte-bf-field wpte-bf-radio wpte-bf_downpayment-options">
 									<label for="" class="wpte-bf-label">
 										<?php
-										echo apply_filters( 'wte_checkout_partial_pay_heading', __( 'Payment options', 'wp-travel-engine' ) );
+										echo wp_kses_post( apply_filters( 'wte_checkout_partial_pay_heading', __( 'Payment options', 'wp-travel-engine' ) ) );
 										?>
 									</label>
 									<?php if ( 'due' === $wte_cart->get_payment_type() ) : ?>
 										<div class="wpte-bf-radio-wrap">
 											<input type="radio" name="wp_travel_engine_payment_mode"
-												   value="remaining_payment"
-												   id="wp_travel_engine_payment_mode-partial" checked>
+													value="remaining_payment"
+													id="wp_travel_engine_payment_mode-partial" checked>
 											<label for="wp_travel_engine_payment_mode-partial">
 												<?php
 												/* @var Booking $booking */
 												$booking    = Booking::make( $wte_cart->get_booking_ref() );
 												$due_amount = wte_get_formated_price( $booking->get_due_amount() );
-												echo esc_html( apply_filters( 'wte_checkout_due_pay_label', sprintf( __( 'Due payment(%s)', 'wp-travel-engine' ), $due_amount ) ) );
+												echo esc_html( apply_filters( 'wte_checkout_due_pay_label', sprintf( __( 'Remaining Amount (%s)', 'wp-travel-engine' ), $due_amount ) ) );
 												?>
 											</label>
 										</div>
-									<?php else: ?>
+									<?php else : ?>
 										<div class="wpte-bf-radio-wrap">
 											<input type="radio" name="wp_travel_engine_payment_mode" value="partial"
-												   id="wp_travel_engine_payment_mode-partial" <?php checked( 'partial' === $wte_cart->get_payment_type() ) ?>>
+													id="wp_travel_engine_payment_mode-partial" <?php checked( 'partial' === $wte_cart->get_payment_type() ); ?>>
 											<label for="wp_travel_engine_payment_mode-partial">
 												<?php
 												$down_payment_settings = $cart_item->down_payment_settings();
@@ -100,28 +100,29 @@ $cart_item = reset( $cart_items );
 										 *
 										 * @since 5.7.1
 										 */
-										if ( $down_payment_settings[ 'trip_full_payment' ] && $down_payment_settings[ 'global_full_payment' ] ) :
+										if ( $down_payment_settings['trip_full_payment'] && $down_payment_settings['global_full_payment'] ) :
 											?>
 											<div class="wpte-bf-radio-wrap">
 												<input type="radio" name="wp_travel_engine_payment_mode"
-													   value="full_payment"
-													   id="wp_travel_engine_payment_mode-full"
-													<?php checked( 'full' === $wte_cart->get_payment_type() ) ?>
+														value="full_payment"
+														id="wp_travel_engine_payment_mode-full"
+													<?php checked( 'full' === $wte_cart->get_payment_type() ); ?>
 												>
 												<label for="wp_travel_engine_payment_mode-full">
 													<?php
-													$full_payment_data = $wte_cart->get_totals()[ 'total' ];
+													$full_payment_data = $wte_cart->get_totals()['total'];
 
 													echo wp_kses_post( $checkout->full_payment_label( $full_payment_data, $down_payment_settings ) );
 													?>
 												</label>
 											</div>
-										<?php
+											<?php
 										endif;
 									endif;
 									?>
 								</div>
-							<?php endif; // Is cart partially payable?
+								<?php
+							endif; // Is cart partially payable?
 							?>
 							<div class="wpte-bf-field wpte-bf-radio wpte-bf_payment-methods">
 								<label for="" class="wpte-bf-label">
@@ -129,14 +130,17 @@ $cart_item = reset( $cart_items );
 								</label>
 								<?php
 								$first_payment_option = true;
-								$payment_gateways = Options::get( 'wptravelengine_payment_gateways' ) ?? array_map( function ( $gateway ) {
-									return [
-										'id' => $gateway['gateway_id'] ?? '',
-										'name' => $gateway['label'] ?? '',
-										'enable' => true
-									];
-								}, $active_payment_methods );
-								$payments_order       = array_flip( array_column( array_filter( $payment_gateways, fn ( $v ) => $v[ 'enable' ] ), 'id' ) );
+								$payment_gateways     = Options::get( 'wptravelengine_payment_gateways' ) ?? array_map(
+									function ( $gateway ) {
+										return array(
+											'id'     => $gateway['gateway_id'] ?? '',
+											'name'   => $gateway['label'] ?? '',
+											'enable' => true,
+										);
+									},
+									$active_payment_methods
+								);
+								$payments_order       = array_flip( array_column( array_filter( $payment_gateways, fn ( $v ) => $v['enable'] ), 'id' ) );
 								$sorted_gateways      = array_filter( array_replace( $payments_order, array_intersect_key( $active_payment_methods, $payments_order ) ), 'is_array' );
 								foreach ( $sorted_gateways as $key => $payment_method ) :
 									$default_gateway = $default_payment_gateway === $key ? true : $first_payment_option;
@@ -148,21 +152,21 @@ $cart_item = reset( $cart_items );
 											value="<?php echo esc_attr( $key ); ?>"
 											id="wpte-checkout-paymnet-method-<?php echo esc_attr( $key ); ?>">
 										<label for="wpte-checkout-paymnet-method-<?php echo esc_attr( $key ); ?>">
-											<?php if ( isset( $payment_method[ 'icon_url' ] ) && filter_var( $payment_method[ 'icon_url' ], FILTER_VALIDATE_URL ) ) : ?>
-												<img src="<?php echo esc_url( $payment_method[ 'icon_url' ] ); ?>"
-													 alt="<?php echo esc_attr( $payment_method[ 'label' ] ); ?>">
-											<?php
+											<?php if ( isset( $payment_method['icon_url'] ) && filter_var( $payment_method['icon_url'], FILTER_VALIDATE_URL ) ) : ?>
+												<img src="<?php echo esc_url( $payment_method['icon_url'] ); ?>"
+													alt="<?php echo esc_attr( $payment_method['label'] ); ?>">
+												<?php
 											else :
-												echo esc_html( $payment_method[ 'label' ] );
+												echo esc_html( $payment_method['label'] );
 											endif;
 											?>
 										</label>
 										<?php
-										if ( ! empty( $payment_method[ 'description' ] ) ) :
+										if ( ! empty( $payment_method['description'] ) ) :
 											?>
 											<div id="wpte__checkout-info--<?php echo esc_attr( $key ); ?>"
-												 class="wpte-checkout-payment-info<?php echo esc_attr( $first_payment_option ? '' : ' hidden' ); ?>"><?php echo wp_kses_post( $payment_method[ 'description' ] ); ?></div>
-										<?php
+												class="wpte-checkout-payment-info<?php echo esc_attr( $first_payment_option ? '' : ' hidden' ); ?>"><?php echo wp_kses_post( $payment_method['description'] ); ?></div>
+											<?php
 										endif;
 										?>
 									</div>
@@ -171,7 +175,7 @@ $cart_item = reset( $cart_items );
 								endforeach;
 								?>
 							</div>
-						<?php
+							<?php
 						endif; // have active payment methods?
 
 						$checkout->render_privacy_form_fields();

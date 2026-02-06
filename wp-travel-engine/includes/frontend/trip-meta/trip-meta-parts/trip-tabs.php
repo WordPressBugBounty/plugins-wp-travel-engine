@@ -124,7 +124,7 @@
 																		</h2>
 																	</div>
 																	<?php
-																	$count++;
+																	++$count;
 																}
 																break;
 															case 'itinerary':
@@ -138,8 +138,8 @@
 																		<?php
 																		if ( $count == 0 ) {
 																			?>
-																				 nav-tab-active
-																				 <?php
+																				nav-tab-active
+																				<?php
 																		}
 																		?>
 																			" data-configuration="<?php echo esc_attr( $val ); ?>">
@@ -152,7 +152,7 @@
 																			</a></h2>
 																	</div>
 																	<?php
-																	$count++;
+																	++$count;
 																}
 																break;
 															case 'cost':
@@ -166,21 +166,21 @@
 																		<?php
 																		if ( $count == 0 ) {
 																			?>
-																				 nav-tab-active
-																				 <?php
+																				nav-tab-active
+																				<?php
 																		}
 																		?>
 																			" data-configuration="<?php echo esc_attr( $val ); ?>">
-																										 <?php
-																											if ( isset( $saved_tabs['icon'][ $value ] ) && $saved_tabs['icon'][ $value ] != '' ) {
-																												echo '<span class="tab-icon"><i class="' . esc_attr( $saved_tabs['icon'][ $value ] ) . '"></i></span>';
-																											}
-																											?>
-																										 <?php echo esc_attr( $tab_name ); ?>
+																										<?php
+																										if ( isset( $saved_tabs['icon'][ $value ] ) && $saved_tabs['icon'][ $value ] != '' ) {
+																											echo '<span class="tab-icon"><i class="' . esc_attr( $saved_tabs['icon'][ $value ] ) . '"></i></span>';
+																										}
+																										?>
+																										<?php echo esc_attr( $tab_name ); ?>
 																			</a></h2>
 																	</div>
 																	<?php
-																	$count++;
+																	++$count;
 																}
 																break;
 															case 'faqs':
@@ -193,8 +193,8 @@
 																		<?php
 																		if ( $count == 0 ) {
 																			?>
-																				 nav-tab-active
-																				 <?php
+																				nav-tab-active
+																				<?php
 																		}
 																		?>
 																			" data-configuration="<?php echo esc_attr( $val ); ?>">
@@ -207,7 +207,7 @@
 																	</a></h2>
 																	</div>
 																	<?php
-																	$count++;
+																	++$count;
 																}
 																break;
 
@@ -221,21 +221,21 @@
 																		<?php
 																		if ( $count == 0 ) {
 																			?>
-																				 nav-tab-active
-																				 <?php
+																				nav-tab-active
+																				<?php
 																		}
 																		?>
 																			" data-configuration="<?php echo esc_attr( $val ); ?>">
-																										 <?php
-																											if ( isset( $saved_tabs['icon'][ $value ] ) && $saved_tabs['icon'][ $value ] != '' ) {
-																												echo '<span class="tab-icon"><i class="' . esc_attr( $saved_tabs['icon'][ $value ] ) . '"></i></span>';
-																											}
+																										<?php
+																										if ( isset( $saved_tabs['icon'][ $value ] ) && $saved_tabs['icon'][ $value ] != '' ) {
+																											echo '<span class="tab-icon"><i class="' . esc_attr( $saved_tabs['icon'][ $value ] ) . '"></i></span>';
+																										}
 																											echo esc_attr( $tab_name );
-																											?>
+																										?>
 																			</a></h2>
 																	</div>
 																	<?php
-																	$count++;
+																	++$count;
 																}
 																break;
 															case 'guides':
@@ -246,21 +246,21 @@
 																		<?php
 																		if ( $count == 0 ) {
 																			?>
-																				 nav-tab-active
-																				 <?php
+																				nav-tab-active
+																				<?php
 																		}
 																		?>
 																			" data-configuration="<?php echo esc_attr( $val ); ?>">
-																										 <?php
-																											if ( isset( $saved_tabs['icon'][ $value ] ) && $saved_tabs['icon'][ $value ] != '' ) {
-																												echo '<span class="tab-icon"><i class="' . esc_attr( $saved_tabs['icon'][ $value ] ) . '"></i></span>';
-																											}
+																										<?php
+																										if ( isset( $saved_tabs['icon'][ $value ] ) && $saved_tabs['icon'][ $value ] != '' ) {
+																											echo '<span class="tab-icon"><i class="' . esc_attr( $saved_tabs['icon'][ $value ] ) . '"></i></span>';
+																										}
 																											echo esc_attr( $tab_name );
-																											?>
+																										?>
 																			</a></h2>
 																	</div>
 																	<?php
-																	$count++;
+																	++$count;
 																}
 																break;
 															case 'map':
@@ -272,17 +272,17 @@
 																		<?php
 																		if ( $count == 0 ) {
 																			?>
-																				 nav-tab-active
-																				 <?php
+																				nav-tab-active
+																				<?php
 																		}
 																		?>
 																			" data-configuration="<?php echo esc_attr( $val ); ?>">
-																										 <?php
-																											if ( isset( $saved_tabs['icon'][ $value ] ) && $saved_tabs['icon'][ $value ] != '' ) {
-																												echo '<span class="tab-icon"><i class="' . esc_attr( $saved_tabs['icon'][ $value ] ) . '"></i></span>';
-																											}
+																										<?php
+																										if ( isset( $saved_tabs['icon'][ $value ] ) && $saved_tabs['icon'][ $value ] != '' ) {
+																											echo '<span class="tab-icon"><i class="' . esc_attr( $saved_tabs['icon'][ $value ] ) . '"></i></span>';
+																										}
 																											echo esc_attr( $tab_name );
-																											?>
+																										?>
 																			</a></h2>
 																	</div>
 																	<?php
@@ -320,14 +320,14 @@
 														if ( isset( $saved_tabs['id'][ $value ] ) && $saved_tabs['id'][ $value ] != '' ) {
 															?>
 															<div class="nb-<?php echo esc_attr( $first ); ?>-configurations nb-configurations"
-																					  <?php
+																						<?php
 																						if ( $i != 1 ) {
 																							?>
-																 style=" display:none;"
-																							 <?php
+																style=" display:none;"
+																							<?php
 																						}
 																						?>
-																 >
+																>
 																<div class="post-data overview">
 																	<p>
 																		<?php
@@ -340,7 +340,7 @@
 															</div>
 															<?php
 														}
-														$i++;
+														++$i;
 													}
 
 													break;
@@ -351,20 +351,20 @@
 													if ( isset( $wp_travel_engine_tabs['itinerary']['itinerary_title'] ) && ! empty( $wp_travel_engine_tabs['itinerary']['itinerary_title'] ) ) {
 														?>
 														<div class="nb-<?php echo esc_attr( $first ); ?>-configurations nb-configurations"
-																				  <?php
+																					<?php
 																					if ( $i != 1 ) {
 																						?>
-															 style=" display:none;"
-																						 <?php
+															style=" display:none;"
+																						<?php
 																					}
 																					?>
-															 >
-																 <?php
+															>
+																<?php
 																	do_action( 'wp_travel_engine_trip_itinerary_template' );
-																	?>
+																?>
 														</div>
 														<?php
-														$i++;
+														++$i;
 													}
 
 													break;
@@ -373,14 +373,14 @@
 													if ( isset( $wp_travel_engine_tabs['cost']['cost_includes_val'] ) && $wp_travel_engine_tabs['cost']['cost_includes_val'] != '' ) {
 														?>
 														<div class="nb-<?php echo esc_attr( $first ); ?>-configurations nb-configurations"
-																				  <?php
+																					<?php
 																					if ( $i != 1 ) {
 																						?>
-															 style=" display:none;"
-																						 <?php
+															style=" display:none;"
+																						<?php
 																					}
 																					?>
-															 >
+															>
 															<div class="post-data cost">
 																<div class="content">
 																	<?php
@@ -413,7 +413,7 @@
 															</div>
 														</div>
 														<?php
-														$i++;
+														++$i;
 													}
 													break;
 
@@ -421,14 +421,14 @@
 													if ( isset( $wp_travel_engine_tabs['faq']['faq_title'] ) && ! empty( $wp_travel_engine_tabs['faq']['faq_title'] ) ) {
 														?>
 														<div class="nb-<?php echo esc_attr( $first ); ?>-configurations nb-configurations"
-																				  <?php
+																					<?php
 																					if ( $i != 1 ) {
 																						?>
-															 style=" display:none;"
-																						 <?php
+															style=" display:none;"
+																						<?php
 																					}
 																					?>
-															 >
+															>
 															<div class="post-data faq">
 																<a href="#" class="expand-all-faq">
 																	<i class="fa fa-toggle-off" aria-hidden="true"></i>
@@ -470,7 +470,7 @@
 															</div>
 														</div>
 														<?php
-														$i++;
+														++$i;
 													}
 													break;
 
@@ -479,7 +479,7 @@
 														?>
 														<div class="nb-<?php echo esc_attr( $first ); ?>-configurations nb-configurations"
 															<?php if ( $i != 1 ) { ?>
-															 style=" display:none;"
+															style=" display:none;"
 																<?php
 															}
 															?>
@@ -487,7 +487,7 @@
 															<?php do_action( 'wpte_guide_list_single_trip' ); ?>
 														</div>
 														<?php
-														$i++;
+														++$i;
 													}
 													break;
 
@@ -495,14 +495,14 @@
 													if ( class_exists( 'Wte_Trip_Review_Init' ) && ! isset( $wp_travel_engine_settings['trip_reviews']['hide'] ) ) {
 														?>
 														<div class="nb-<?php echo esc_attr( $first ); ?>-configurations nb-configurations"
-																				  <?php
+																					<?php
 																					if ( $i != 1 ) {
 																						?>
-															 style=" display:none;"
-																						 <?php
+															style=" display:none;"
+																						<?php
 																					}
 																					?>
-															 >
+															>
 															<div class="post-data">
 																<div class="content">
 																	<?php
@@ -513,7 +513,7 @@
 																	$obj->show_trip_rating( $post->ID );
 
 																	$obj->show_trip_rating_form();
-																	$i++;
+																	++$i;
 																	?>
 																</div>
 															</div>
@@ -526,10 +526,10 @@
 													if ( isset( $wp_travel_engine_tabs['tab_content'][ $editor_id ] ) && $wp_travel_engine_tabs['tab_content'][ $editor_id ] != '' ) {
 														?>
 														<div class="nb-<?php echo esc_attr( $first ); ?>-configurations nb-configurations"
-																				  <?php
+																					<?php
 																					if ( $i != 1 ) {
 																						?>
-															 style=" display:none;" <?php } ?>>
+															style=" display:none;" <?php } ?>>
 															<div class="post-data">
 																<div class="content">
 																	<?php
@@ -542,7 +542,7 @@
 														</div>
 														<?php
 													}
-													$i++;
+													++$i;
 													break;
 											}
 										} // } // }

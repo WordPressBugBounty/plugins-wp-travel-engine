@@ -25,17 +25,15 @@ class TextInfo extends Base {
 
 		$output = '%s%s';
 
-		if ( ! $this->field[ 'remove_wrap' ] ) :
+		if ( ! $this->field['remove_wrap'] ) :
 			$output = '<div class="wp-travel-engine-info-wrap">%s%s</div>';
 		endif;
-
 
 		$output = sprintf(
 			$output,
 			$this->before_field(),
 			sprintf( '<span class="wp-travel-engine-info" id="%s">%s</span>', $this->field_id, $this->field_value )
 		);
-
 
 		if ( $display ) {
 			echo $output;

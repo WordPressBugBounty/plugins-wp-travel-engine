@@ -508,27 +508,8 @@ class Wp_Travel_Engine_Public {
 	 * @since    1.0.0
 	 */
 	public static function wte_remove_from_cart() {
-		if ( ! wte_nonce_verify( 'nonce', 'wte-remove-nonce' ) ) {
-			die();
-		}
-		// phpcs:disable
-		if ( isset( $_REQUEST[ 'trip_id' ] ) && isset( $_SESSION[ 'cart_item' ] ) ) {
-			unset( $_SESSION[ 'cart_item' ][ $_REQUEST[ 'trip_id' ] ] );
-			$result[ 'type' ] = 'success';
-		} else {
-			$result[ 'type' ] = 'error';
-		}
-
-		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
-			echo wp_json_encode( $result ); // phpcs:ignore
-		} else {
-			header( 'Location: ' . $_SERVER[ 'HTTP_REFERER' ] );
-		}
-
-		die();
-		// phpcs:enable
+		_doing_it_wrong( __FUNCTION__, 'Use WPTravelEngine\Core\Controllers\Ajax\RemoveCart controller instead', '6.7.0' );
 	}
-
 
 	/**
 	 * Callback function for update to cart ajax.
@@ -536,51 +517,7 @@ class Wp_Travel_Engine_Public {
 	 * @since    1.0.0
 	 */
 	public static function wte_ajax_update_cart() {
-		if ( ! wte_nonce_verify( 'nonce', 'update_cart_action_nonce' ) ) {
-			die();
-		}
-		$result[ 'type' ] = 'success';
-
-		if ( defined( 'DOING_AJAX' ) && DOING_AJAX && isset( $_REQUEST[ 'data2' ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			parse_str( wte_clean( wp_unslash( $_REQUEST[ 'data2' ] ) ), $values ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-
-			$cost = '';
-			foreach ( $values[ 'trips' ] as $key => $value ) {
-				$option = get_post_meta( $value, 'wp_travel_engine_setting', true );
-				$cost   = $option[ 'trip_price' ];
-				$cost   += $cost;
-			}
-
-			$travelers = '';
-			foreach ( $values[ 'travelers' ] as $key => $value ) {
-				$travelers = $value;
-				$travelers += $travelers;
-			}
-			$len = sizeof( $values[ 'trips' ] );
-
-			for ( $i = 0; $i < $len; $i ++ ) {
-				$option = get_post_meta( $values[ 'trips' ][ $i ], 'wp_travel_engine_setting', true );
-				$cost   = $option[ 'trip_price' ];
-				$tc     = $tc + ( $cost * $values[ 'travelers' ][ $i ] );
-			}
-
-			$post = max( array_keys( $values[ 'trips' ] ) );
-			$pid  = get_post( $values[ 'trips' ][ $post ] );
-			$slug = $pid->post_title;
-			$arr  = array(
-				'place_order' => array(
-					'travelers' => esc_attr( $travelers ),
-					'trip-cost' => esc_attr( $tc ),
-					'trip-id'   => esc_attr( end( $values[ 'trips' ] ) ),
-					'tname'     => esc_attr( $slug ),
-					'trip-date' => esc_attr( end( $values[ 'trip-date' ] ) ),
-				),
-			);
-		} else {
-			header( 'Location: ' . $_SERVER[ 'HTTP_REFERER' ] ); // phpcs:ignore
-		}
-
-		die();
+		_doing_it_wrong( __FUNCTION__, 'Use WPTravelEngine\Core\Controllers\Ajax\UpdateCart controller instead', '6.7.0' );
 	}
 
 	// Ajax load more on activities

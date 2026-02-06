@@ -65,27 +65,27 @@ return apply_filters(
 				'name'       => 'fsd.show_space_left',
 			),
 			// array(
-			// 	'title'      => __( 'Select The Dates Layout', 'wp-travel-engine' ),
-			// 	'field_type' => 'TITLE',
+			// 'title'      => __( 'Select The Dates Layout', 'wp-travel-engine' ),
+			// 'field_type' => 'TITLE',
 			// ),
 			// array(
-			// 	'divider'     => true,
-			// 	'description' => __( 'Choose a dates list or months layout to display in taxonomy pages.', 'wp-travel-engine' ),
-			// 	'field_type'  => 'IMAGE_SELECTOR',
-			// 	'options'     => array(
-			// 		array(
-			// 			'label' => __( '1. Show dates list', 'wp-travel-engine' ),
-			// 			'value' => 'dates_list',
-			// 			'image' => WP_TRAVEL_ENGINE_URL . '/assets/images/dates-list.png',
-			// 		),
-			// 		array(
-			// 			'label' => __( '2. Show months list', 'wp-travel-engine' ),
-			// 			'value' => 'months_list',
-			// 			'image' => WP_TRAVEL_ENGINE_URL . '/assets/images/months-list.png',
-			// 		),
-			// 	),
-			// 	'default'     => 'dates_list',
-			// 	'name'        => 'fsd.date_layout',
+			// 'divider'     => true,
+			// 'description' => __( 'Choose a dates list or months layout to display in taxonomy pages.', 'wp-travel-engine' ),
+			// 'field_type'  => 'IMAGE_SELECTOR',
+			// 'options'     => array(
+			// array(
+			// 'label' => __( '1. Show dates list', 'wp-travel-engine' ),
+			// 'value' => 'dates_list',
+			// 'image' => WP_TRAVEL_ENGINE_URL . '/assets/images/dates-list.png',
+			// ),
+			// array(
+			// 'label' => __( '2. Show months list', 'wp-travel-engine' ),
+			// 'value' => 'months_list',
+			// 'image' => WP_TRAVEL_ENGINE_URL . '/assets/images/months-list.png',
+			// ),
+			// ),
+			// 'default'     => 'dates_list',
+			// 'name'        => 'fsd.date_layout',
 			// ),
 			array(
 				'divider'    => true,

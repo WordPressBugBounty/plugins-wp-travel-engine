@@ -20,14 +20,17 @@
 	<?php if ( $full_payment_enabled ) : ?>
 		<div class="wpte-checkout__form-control">
 			<input type="radio" name="wp_travel_engine_payment_mode"
-				   value="full_payment"
-				   id="wp_travel_engine_payment_mode-full"
-				<?php checked( 'full' === $payment_mode ) ?>
+					value="full_payment"
+					id="wp_travel_engine_payment_mode-full"
+				<?php checked( 'full' === $payment_mode ); ?>
 			>
 			<label for="wp_travel_engine_payment_mode-full">
 				<?php
-				echo sprintf( apply_filters( 'wptravelengine_checkout_full_pay_label',
-					__( 'Pay Full Amount (%s)', 'wp-travel-engine' ) ),
+				printf(
+					apply_filters(
+						'wptravelengine_checkout_full_pay_label',
+						__( 'Pay Full Amount (%s)', 'wp-travel-engine' )
+					),
 					wptravelengine_the_price( $full_payment_amount, false, false )
 				);
 				?>
@@ -36,14 +39,18 @@
 	<?php endif; ?>
 	<div class="wpte-checkout__form-control">
 		<input type="radio" name="wp_travel_engine_payment_mode" value="partial"
-			   id="wp_travel_engine_payment_mode-partial" <?php checked( 'partial' === $payment_mode ) ?>>
+				id="wp_travel_engine_payment_mode-partial" <?php checked( 'partial' === $payment_mode ); ?>>
 		<label for="wp_travel_engine_payment_mode-partial">
 			<?php
-			echo sprintf( apply_filters( 'wptravelengine_checkout_down_pay_label',
-				__( 'Pay Deposit (%s)', 'wp-travel-engine' ) ),
+			printf(
+				apply_filters(
+					'wptravelengine_checkout_down_pay_label',
+					__( 'Pay Deposit (%s)', 'wp-travel-engine' )
+				),
 				wptravelengine_the_price( $down_payment_amount, false, false )
 			);
 			?>
 		</label>
 	</div>
+	<?php do_action( 'wptravelengine_after_checkout_payment_modes_', $args ); ?>
 </div>

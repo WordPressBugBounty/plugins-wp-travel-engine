@@ -77,11 +77,12 @@ $payment_details = array(
 												<h3 class="alignleft"><?php echo esc_html__( 'Billing Details', 'wp-travel-engine' ); ?></h3>
 											</td>
 										</tr>
-										<?php foreach ( $billing_details as $tag => $label ) :
+										<?php
+										foreach ( $billing_details as $tag => $label ) :
 												$countries_list = Countries::list();
-												if ( isset( $countries_list[ $tag ] ) ) {
-													$tag = $countries_list[ $tag ];
-												}
+											if ( isset( $countries_list[ $tag ] ) ) {
+												$tag = $countries_list[ $tag ];
+											}
 											?>
 											<tr>
 												<td><?php echo esc_html( $label ); ?></td>

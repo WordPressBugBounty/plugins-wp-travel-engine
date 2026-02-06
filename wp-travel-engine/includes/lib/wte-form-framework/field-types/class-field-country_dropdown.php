@@ -31,7 +31,7 @@ class WP_Travel_Engine_Form_Field_Country_Dropdown extends WP_Travel_Engine_Form
 
 		$this->field = $field;
 
-		$this->field[ 'options' ] = $country_options;
+		$this->field['options'] = $country_options;
 
 		return $this;
 	}

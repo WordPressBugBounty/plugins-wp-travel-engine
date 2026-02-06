@@ -1,7 +1,7 @@
 <?php
-wp_enqueue_script( "jquery-ui-datepicker" );
-wp_enqueue_script( "toastr" );
-wp_enqueue_script( "parsley" );
+wp_enqueue_script( 'jquery-ui-datepicker' );
+wp_enqueue_script( 'toastr' );
+wp_enqueue_script( 'parsley' );
 
 $wrapper_classes = apply_filters( 'wpte_bf_outer_wrapper_classes', '' );
 $wte_options     = get_option( 'wp_travel_engine_settings', true );
@@ -57,7 +57,7 @@ $wte_options     = get_option( 'wp_travel_engine_settings', true );
 																						d="M24.707 38.101L4.908 57.899c-4.686 4.686-4.686 12.284 0 16.971L185.607 256 4.908 437.13c-4.686 4.686-4.686 12.284 0 16.971L24.707 473.9c4.686 4.686 12.284 4.686 16.971 0l209.414-209.414c4.686-4.686 4.686-12.284 0-16.971L41.678 38.101c-4.687-4.687-12.285-4.687-16.971 0z"></path></svg>
 				</span>
 				<?php
-				$first_el++;
+				++$first_el;
 			endforeach;
 			?>
 			</div>

@@ -9,6 +9,7 @@
 namespace WPTravelEngine\PaymentGateways;
 
 use WPTravelEngine\Core\Models\Post\Booking;
+use WPTravelEngine\Core\Booking\BookingProcess;
 use WPTravelEngine\Core\Models\Post\Payment;
 
 /**
@@ -17,6 +18,12 @@ use WPTravelEngine\Core\Models\Post\Payment;
  * @since 6.0.0
  */
 class CheckPayment extends BaseGateway {
+
+	/**
+	 * @inheritDoc
+	 */
+	public static string $cart_version = '4.0';
+
 	/**
 	 * Get gateway id.
 	 *
@@ -86,26 +93,58 @@ class CheckPayment extends BaseGateway {
 
 	/**
 	 * @inheritDoc
+	 * @updated 6.7.0
 	 */
-	public function process_payment( Booking $booking, Payment $payment, $booking_instance ): void {
+	public function process_payment( Booking $booking, Payment $payment, BookingProcess $booking_instance ): void {
+		if ( $booking->is_curr_cart( '<' ) ) {
+			$this->process_payment_before_v4( $booking, $payment, $booking_instance );
+		} else {
+			$this->process_payment_in_v4( $booking, $payment, $booking_instance );
+		}
+	}
+
+	/**
+	 * Process payment before v4.
+	 *
+	 * @param Booking        $booking Booking object.
+	 * @param Payment        $payment Payment object.
+	 * @param BookingProcess $booking_instance Booking process object.
+	 * @return void
+	 */
+	protected function process_payment_before_v4( Booking $booking, Payment $payment, BookingProcess $booking_instance ): void {
 		update_post_meta( $booking->get_id(), 'wp_travel_engine_booking_payment_gateway', __( 'Check Payment', 'wp-travel-engine' ) );
-        update_post_meta( $booking->get_id(), 'wp_travel_engine_booking_payment_status', 'check-waiting' );
-        $payment->set_status( 'check-waiting' );
-        $payment->set_payment_gateway( 'check_payments' );
-        $payable = $payment->get_meta('payable');
-        $amount = [
-            'value'    => (float) $payable['amount'],
-            'currency' => $payable['currency'],
-        ];
-        $payment->set_meta('payment_status', 'check-waiting');
-        $payment->set_payment_gateway($this->get_gateway_id());
-        $payment->set_meta('payment_amount', $amount);
-        $payment->save();
-        $paid_amount  = (float) $booking->get_paid_amount();
-        $due_amount   = (float) $booking->get_due_amount();
-        $booking->set_meta( 'paid_amount', $paid_amount + $amount['value'] );
-        $booking->set_meta( 'due_amount', max( $due_amount - $amount['value'], 0 ) );
-        $booking->save();
+		update_post_meta( $booking->get_id(), 'wp_travel_engine_booking_payment_status', 'check-waiting' );
+		$payment->set_status( 'check-waiting' );
+		$payment->set_payment_gateway( 'check_payments' );
+		$payable = $payment->get_meta( 'payable' );
+		$amount  = array(
+			'value'    => (float) $payable['amount'],
+			'currency' => $payable['currency'],
+		);
+		$payment->set_meta( 'payment_status', 'check-waiting' );
+		$payment->set_payment_gateway( $this->get_gateway_id() );
+		$payment->set_meta( 'payment_amount', $amount );
+		$payment->save();
+		$paid_amount = (float) $booking->get_paid_amount();
+		$due_amount  = (float) $booking->get_due_amount();
+		$booking->set_meta( 'paid_amount', $paid_amount + $amount['value'] );
+		$booking->set_meta( 'due_amount', max( $due_amount - $amount['value'], 0 ) );
+		$booking->save();
+	}
+
+	/**
+	 * Process payment in v4.
+	 *
+	 * @param Booking        $booking Booking object.
+	 * @param Payment        $payment Payment object.
+	 * @param BookingProcess $booking_instance Booking process object.
+	 * @return void
+	 * @since 6.7.0
+	 */
+	protected function process_payment_in_v4( Booking $booking, Payment $payment, BookingProcess $booking_instance ): void {
+		global $wte_cart;
+		$amount = $wte_cart->get_total_payable_amount();
+		$booking->sync_payment_pending_metas( $payment->ID, $amount );
 	}
 
 	/**

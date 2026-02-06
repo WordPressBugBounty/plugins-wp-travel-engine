@@ -51,7 +51,7 @@ return apply_filters(
 			array(
 				'field_type' => 'ALERT',
 				'content'    => sprintf( __( 'Need more payment gateways to receive payment from customers? We support several payment gateways to empower travel agencies to sell travel packages. %s', 'wp-travel-engine' ), sprintf( '<a target="_blank" href="https://wptravelengine.com/plugins/category/payment-gateways/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro" rel="nofollow">%s</a>', __( 'See all the supported payment gateways here.', 'wp-travel-engine' ) ) ),
-				'status'       => 'upgrade',
+				'status'     => 'upgrade',
 			),
 		),
 	)

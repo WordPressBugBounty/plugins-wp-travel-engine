@@ -160,7 +160,7 @@ abstract class PostModel {
 	 */
 	public function has_meta( string $meta_key ): bool {
 		$meta_value = get_post_meta( $this->ID, $meta_key );
-		return count($meta_value) > 0;
+		return count( $meta_value ) > 0;
 	}
 
 	/**
@@ -170,7 +170,7 @@ abstract class PostModel {
 	 * @return $this
 	 */
 	public function set_meta( $meta_key, $meta_value ): PostModel {
-		$this->data[ '__changes' ][ $meta_key ] = $meta_value;
+		$this->data['__changes'][ $meta_key ] = $meta_value;
 
 		return $this;
 	}
@@ -195,9 +195,9 @@ abstract class PostModel {
 	 * Deletes metadata from a post.
 	 *
 	 * @param string $meta_key Metadata name.
-	 * @param mixed $meta_value Optional. Metadata value. If provided,
-	 *                           rows will only be removed that match the value.
-	 *                           Must be serializable if non-scalar. Default empty.
+	 * @param mixed  $meta_value Optional. Metadata value. If provided,
+	 *                            rows will only be removed that match the value.
+	 *                            Must be serializable if non-scalar. Default empty.
 	 *
 	 * @return bool True on success, false on failure.
 	 * @since 6.1.2
@@ -213,11 +213,11 @@ abstract class PostModel {
 	 * @return object
 	 */
 	public function save(): object {
-		foreach ( $this->data[ '__changes' ] as $meta_key => $meta_value ) {
+		foreach ( $this->data['__changes'] as $meta_key => $meta_value ) {
 			$this->update_meta( $meta_key, $meta_value );
 			unset( $this->data[ $meta_key ] );
 		}
-		$this->data[ '__changes' ] = array();
+		$this->data['__changes'] = array();
 
 		return $this;
 	}
@@ -261,8 +261,26 @@ abstract class PostModel {
 	 * @return int|WP_Error The post-ID on success. The value 0 or WP_Error on failure.
 	 */
 	public function update_post( array $postarr ) {
-		$postarr[ 'ID' ] = $this->ID;
+		$postarr['ID'] = $this->ID;
 
 		return wp_update_post( $postarr );
+	}
+
+	/**
+	 * Syncs metas to the post.
+	 *
+	 * @param array<mixed> $metadata Key-value pairs of metadata to be synced.
+	 *
+	 * @return void
+	 * @since 6.7.0
+	 */
+	public function sync_metas( array $metadata = array() ) {
+		if ( empty( $metadata ) ) {
+			return;
+		}
+
+		foreach ( $metadata as $key => $value ) {
+			update_post_meta( $this->ID, $key, $value );
+		}
 	}
 }

@@ -18,9 +18,10 @@ use WPTravelEngine\Core\Models\Settings\StaticStrings;
  */
 class SaveGlobalSettings extends AjaxController {
 
-	const NONCE_KEY = 'nonce';
+	const NONCE_KEY    = 'nonce';
 	const NONCE_ACTION = 'wpte_global_tabs_save_data';
-	const ACTION = 'wpte_global_tabs_save_data';
+	const ACTION       = 'wpte_global_tabs_save_data';
+	const ALLOW_NOPRIV = false;
 
 	/**
 	 * Process request.
@@ -38,8 +39,8 @@ class SaveGlobalSettings extends AjaxController {
 				$plugin_settings->set( $key, $value );
 			}
 
-			if ( isset( $new_settings[ 'pages' ][ 'search' ] ) ) {
-				Options::update( 'wp_travel_engine_search_page_id', (int) $new_settings[ 'pages' ][ 'search' ] );
+			if ( isset( $new_settings['pages']['search'] ) ) {
+				Options::update( 'wp_travel_engine_search_page_id', (int) $new_settings['pages']['search'] );
 			}
 
 			$plugin_settings->save();
@@ -50,7 +51,7 @@ class SaveGlobalSettings extends AjaxController {
 		}
 
 		if ( $value = $this->request->get_param( 'wptravelengine_trip_view_mode' ) ) {
-			if ( in_array( $value, [ 'list', 'grid' ], true ) ) {
+			if ( in_array( $value, array( 'list', 'grid' ), true ) ) {
 				Options::update( 'wptravelengine_trip_view_mode', sanitize_text_field( wp_unslash( $value ) ) );
 			}
 		}
@@ -62,9 +63,9 @@ class SaveGlobalSettings extends AjaxController {
 			$static_strings->update( $new_strings );
 		}
 
-		if ( isset( $posted_data[ 'wp_travel_engine_settings' ] ) ) {
+		if ( isset( $posted_data['wp_travel_engine_settings'] ) ) {
 
-			$active_tab = $posted_data[ 'tab' ];
+			$active_tab = $posted_data['tab'];
 
 			if ( 'wpte-payment' === $active_tab ) {
 				// Payment checkboxes.
@@ -105,7 +106,7 @@ class SaveGlobalSettings extends AjaxController {
 								'select_options' => array(
 									'type'  => 'array',
 									'items' => array(
-										'type'              => 'string',
+										'type' => 'string',
 										'sanitize_callback' => 'sanitize_textarea_field',
 									),
 								),
@@ -122,11 +123,11 @@ class SaveGlobalSettings extends AjaxController {
 						'email'            => array(
 							'type'       => 'array',
 							'properties' => array(
-								'booking_notification_template_admin'    => array(
+								'booking_notification_template_admin' => array(
 									'type'              => 'string',
 									'sanitize_callback' => 'wp_kses_post',
 								),
-								'sales_wpeditor'                         => array(
+								'sales_wpeditor'    => array(
 									'type'              => 'string',
 									'sanitize_callback' => 'wp_kses_post',
 								),
@@ -134,7 +135,7 @@ class SaveGlobalSettings extends AjaxController {
 									'type'              => 'string',
 									'sanitize_callback' => 'wp_kses_post',
 								),
-								'purchase_wpeditor'                      => array(
+								'purchase_wpeditor' => array(
 									'type'              => 'string',
 									'sanitize_callback' => 'wp_kses_post',
 								),

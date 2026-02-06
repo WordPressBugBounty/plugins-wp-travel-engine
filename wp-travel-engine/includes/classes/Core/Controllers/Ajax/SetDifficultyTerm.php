@@ -18,6 +18,7 @@ class SetDifficultyTerm extends AjaxController {
 	const NONCE_KEY    = '_nonce';
 	const NONCE_ACTION = 'wp_xhr';
 	const ACTION       = 'wte_set_difficulty_term_level';
+	const ALLOW_NOPRIV = false;
 
 	/**
 	 * Process Request.

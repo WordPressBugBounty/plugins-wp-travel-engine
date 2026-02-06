@@ -40,7 +40,7 @@ class BaseGateway extends PaymentGateway {
 	 * @return string
 	 */
 	public function get_icon(): string {
-		return $this->args[ 'icon_url' ] ?? '';
+		return $this->args['icon_url'] ?? '';
 	}
 
 
@@ -50,7 +50,7 @@ class BaseGateway extends PaymentGateway {
 	 * @return string
 	 */
 	public function get_display_icon(): string {
-		return $this->args[ 'display_icon' ] ?? '';
+		return $this->args['display_icon'] ?? '';
 	}
 
 	/**
@@ -59,7 +59,7 @@ class BaseGateway extends PaymentGateway {
 	 * @return string
 	 */
 	public function get_info(): string {
-		return $this->args[ 'info_text' ] ?? '';
+		return $this->args['info_text'] ?? '';
 	}
 
 	/**
@@ -83,14 +83,14 @@ class BaseGateway extends PaymentGateway {
 	 * @inheritDoc
 	 */
 	public function get_label(): string {
-		return $this->args[ 'label' ] ?? '';
+		return $this->args['label'] ?? '';
 	}
 
 	/**
 	 * @inheritDoc
 	 */
 	public function get_public_label(): string {
-		return $this->args[ 'public_label' ] ?? '';
+		return $this->args['public_label'] ?? '';
 	}
 
 	/**
@@ -122,8 +122,8 @@ class BaseGateway extends PaymentGateway {
 
 	/**
 	 * @param Payment $payment
-	 * @param string $callback_type success|cancel|notification
-	 * @param array $query_args
+	 * @param string  $callback_type success|cancel|notification
+	 * @param array   $query_args
 	 *
 	 * @return string
 	 */
@@ -137,7 +137,7 @@ class BaseGateway extends PaymentGateway {
 			$base_url = defined( 'WPTRAVELENGINE_TUNNEL_URL' ) ? WPTRAVELENGINE_TUNNEL_URL : $base_url;
 		}
 
-		$url      = add_query_arg( array_merge( compact( 'payment_key', 'callback_type' ), $query_args ), $base_url );
+		$url = add_query_arg( array_merge( compact( 'payment_key', 'callback_type' ), $query_args ), $base_url );
 
 		return apply_filters( 'wptravelengine_payment_gateway_callback_url', $url, $payment, $callback_type );
 	}

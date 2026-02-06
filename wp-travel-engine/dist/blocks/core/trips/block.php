@@ -8,28 +8,28 @@ $results = array();
 $query = array(
 	'post_type'      => WP_TRAVEL_ENGINE_POST_TYPE,
 	'posts_per_page' => isset( $attributes['filters']['tripsCount'] ) ? (int) $attributes['filters']['tripsCount'] : 6,
-	'post_status'    => 'publish'
+	'post_status'    => 'publish',
 );
 
-if( $attributes['tripExcludeCurrentTrip'] ){
-	$query[ 'post__not_in' ] = array( get_the_ID() );
+if ( $attributes['tripExcludeCurrentTrip'] ) {
+	$query['post__not_in'] = array( get_the_ID() );
 }
 
 if ( empty( $attributes['filters']['tripsToDisplay'] ) ) {
-	switch( $attributes['filters']['listby'] ) {
-		case 'featured' :
-			$query['meta_key'] = 'wp_travel_engine_featured_trip';
+	switch ( $attributes['filters']['listby'] ) {
+		case 'featured':
+			$query['meta_key']   = 'wp_travel_engine_featured_trip';
 			$query['meta_value'] = 'yes';
 			break;
-		case 'onsale' :
-			$query['meta_key'] = '_s_has_sale';
+		case 'onsale':
+			$query['meta_key']   = '_s_has_sale';
 			$query['meta_value'] = 'yes';
-		case 'byterms' :
+		case 'byterms':
 			if ( isset( $attributes['filters']['terms'] ) ) {
 				$query['tax_query'] = array(
-					'relation' =>  isset( $attributes['filters']['tax_relation'] ) ? $attributes['filters']['tax_relation'] : 'AND',
+					'relation' => isset( $attributes['filters']['tax_relation'] ) ? $attributes['filters']['tax_relation'] : 'AND',
 				);
-				foreach( $attributes['filters']['terms'] as $query_terms ) {
+				foreach ( $attributes['filters']['terms'] as $query_terms ) {
 					if ( isset( $query_terms['terms'][0] ) ) {
 						$query['tax_query'][] = array(
 							'taxonomy' => $query_terms['taxonomy'],
@@ -37,16 +37,14 @@ if ( empty( $attributes['filters']['tripsToDisplay'] ) ) {
 						);
 					}
 				}
-
 			}
 		default:
 			break;
 	}
-
 } else {
-	$query['order']   = 'DESC';
-	$query['orderby'] = 'post__in';
-	$query['post__in'] = $attributes['filters']['tripsToDisplay'];
+	$query['order']          = 'DESC';
+	$query['orderby']        = 'post__in';
+	$query['post__in']       = $attributes['filters']['tripsToDisplay'];
 	$query['posts_per_page'] = -1;
 }
 
@@ -115,21 +113,22 @@ if ( $results && is_array( $results ) ) :
 	<div class="<?php echo esc_attr( "category-{$layout} wte-d-flex wte-col-{$column} wpte-trip-list-wrapper columns-{$column}" ); ?>">
 	<?php
 	( 'slider' === $layout ) && print( '<div class="wpte-swiper swiper" data-swiper-options="' . esc_attr( wp_json_encode( $slider_settings ) ) . '"><div class="wpte-swiper-wrapper swiper-wrapper">' );
-	$position = 1;
+	$position   = 1;
 	$wte_global = get_option( 'wp_travel_engine_settings', array() );
-	$details      = wte_get_trip_details( get_the_ID() );
+	$details    = wte_get_trip_details( get_the_ID() );
 	foreach ( $results as $trip ) :
 		// if ( ! isset( $results[ $trip_id ] ) ) {
-		// 	continue;
+		// continue;
 		// }
 		// $trip        = $results[ $trip_id ];
 		$is_featured = wte_is_trip_featured( $trip->ID );
 		$meta        = \wte_trip_get_trip_rest_metadata( $trip->ID );
-		$args        = array( $attributes, $trip, $results, $meta, $is_featured, $wte_global, $details );
+		$pax_label   = wptravelengine_get_label_by_slug( 'person', ! empty( $meta->max_pax ) ? $meta->max_pax : $meta->min_pax );
+		$args        = array( $attributes, $trip, $results, $meta, $is_featured, $wte_global, $details, $pax_label );
 		( 'slider' === $layout ) && print( '<div class="swiper-slide">' );
 		include __DIR__ . "/layouts/layout-{$attributes['cardlayout']}.php";
 		( 'slider' === $layout ) && print( '</div>' );
-		$position++;
+		++$position;
 			endforeach;
 	if ( 'slider' === $layout ) :
 		?>

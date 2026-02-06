@@ -215,7 +215,7 @@ $wp_travel_engine_settings = get_option( 'wp_travel_engine_settings', array() );
 			var addBtn = document.querySelector( '.wpte-add-trip-highlights' );
 
 			document.addEventListener('click', function(e) {
-				if( e.target.classList.contains('wpte-delete-trip-highlights') )
+				if ( e.target.classList.contains('wpte-delete-trip-highlights') )
 					document.querySelector(e.target.dataset.target).remove()
 			})
 			addBtn.addEventListener('click', function(e) {

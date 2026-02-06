@@ -15,14 +15,14 @@ class Styles {
 		'mobile'  => '@media(max-width: 767px)',
 	);
 
-	protected array $styles = array();
+	protected array $styles     = array();
 	protected array $classnames = array();
 	protected ?\WP_Block_Type $block;
 
 	protected string $classname = 'default';
 
 	public function __construct() {
-		$this->block = \WP_Block_Type_Registry::get_instance()->get_registered( \WP_Block_Supports::$block_to_render[ 'blockName' ] );
+		$this->block = \WP_Block_Type_Registry::get_instance()->get_registered( \WP_Block_Supports::$block_to_render['blockName'] );
 	}
 
 	public function map_styles( $styles ): array {
@@ -58,10 +58,10 @@ class Styles {
 				}
 
 				if ( is_scalar( $value ) ) {
-					$css[ 'desktop' ][ $selector ] = $css[ 'desktop' ][ $selector ] ?? '';
-					$css[ 'desktop' ][ $selector ] .= "{$style}:{$value};";
-				} else if ( isset( static::SCREENS[ $style ] ) ) {
-					$css[ $style ][ $selector ] = $css[ $style ][ $selector ] ?? '';
+					$css['desktop'][ $selector ]  = $css['desktop'][ $selector ] ?? '';
+					$css['desktop'][ $selector ] .= "{$style}:{$value};";
+				} elseif ( isset( static::SCREENS[ $style ] ) ) {
+					$css[ $style ][ $selector ]  = $css[ $style ][ $selector ] ?? '';
 					$css[ $style ][ $selector ] .= implode(
 						'',
 						array_map(
@@ -119,7 +119,6 @@ class Styles {
 			esc_attr( $block_id ),
 			strip_tags( str_replace( '%WRAPPER%', ".{$block_id}", $output_css ) )
 		);
-
 	}
 
 	/**
@@ -139,9 +138,9 @@ class Styles {
 
 	protected function parse_attribute( $key, $value, $settings ): void {
 
-		$control_type = $settings[ 'control' ][ 'type' ] ?? false;
+		$control_type = $settings['control']['type'] ?? false;
 
-		if ( ! ( $settings[ 'control' ][ 'type' ] ?? false ) ) {
+		if ( ! ( $settings['control']['type'] ?? false ) ) {
 			return;
 		}
 
@@ -168,7 +167,7 @@ class Styles {
 				$instance = Styles\Typography::parse( $key, $value, $settings );
 				break;
 			default:
-				if ( $settings[ 'control' ][ 'style' ] ?? false ) {
+				if ( $settings['control']['style'] ?? false ) {
 					$instance = Styles\Style::parse( $key, $value, $settings );
 				} else {
 					return;

@@ -268,7 +268,7 @@ class WP_TRAVEL_ENGINE_ONBOARDING_PROCESS {
 	}
 
 	/** Add class in body for travel engine pages/posts */
-	function wpte_onboard_body_class_before_header_callback() {
+	function wpte_onboard_body_class_before_header_callback( $classes ) {
 		$screen = get_current_screen();
 		if ( ( isset( $_GET['page'] ) && $_GET['page'] == 'wp-travel-engine-onboard' ) || $screen->id == 'wp-travel-engine-onboard' ) { // phpcs:ignore
 			$classes .= 'wpte-activated';
@@ -281,8 +281,6 @@ class WP_TRAVEL_ENGINE_ONBOARDING_PROCESS {
 	public static function add_query_arguements( $args ) {
 		return esc_url( add_query_arguements( $args ) );
 	}
-
-
 }
 $obj = new WP_TRAVEL_ENGINE_ONBOARDING_PROCESS( $this->get_plugin_name(), $this->get_version() );
 $obj->init();

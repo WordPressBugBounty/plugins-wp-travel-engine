@@ -80,10 +80,27 @@ abstract class CartAdjustment implements CartAdjustmentInterface {
 	public string $type;
 
 	/**
+	 * Whether to apply tax to this adjustment.
+	 *
+	 * @var bool
+	 * @since 6.7.0
+	 */
+	public bool $apply_tax = true;
+
+	/**
+	 * Whether to apply this total amount in first installment.
+	 *
+	 * @var bool
+	 * @since 6.7.0
+	 */
+	public bool $apply_upfront = false;
+
+	/**
 	 * Constructor.
 	 *
-	 * @param Cart $cart The cart instance.
+	 * @param Cart  $cart The cart instance.
 	 * @param array $args The arguments for the item.
+	 * @updated 6.7.0
 	 */
 	public function __construct( Cart $cart, array $args = array() ) {
 		$this->cart = $cart;
@@ -101,19 +118,23 @@ abstract class CartAdjustment implements CartAdjustmentInterface {
 				'apply_to_actual_subtotal' => false,
 				'value'                    => 0,
 				'type'                     => '',
+				'apply_tax'                => true,
+				'apply_upfront'            => false,
 			)
 		);
 
-		$this->name                     = (string) $args[ 'name' ];
-		$this->label                    = (string) $args[ 'label' ];
-		$this->description              = (string) $args[ 'description' ] ?? '';
-		$this->percentage               = (float) $args[ 'percentage' ];
-		$this->adjustment_type          = (string) $args[ 'adjustment_type' ];
-		$this->applies_to               = (array) $args[ 'applies_to' ];
-		$this->order                    = (int) $args[ 'order' ];
-		$this->apply_to_actual_subtotal = (bool) $args[ 'apply_to_actual_subtotal' ];
+		$this->name                     = (string) $args['name'];
+		$this->label                    = (string) $args['label'];
+		$this->description              = (string) $args['description'] ?? '';
+		$this->percentage               = (float) $args['percentage'];
+		$this->adjustment_type          = (string) $args['adjustment_type'];
+		$this->applies_to               = (array) $args['applies_to'];
+		$this->order                    = (int) $args['order'];
+		$this->apply_to_actual_subtotal = (bool) $args['apply_to_actual_subtotal'];
 		$this->value                    = (float) $args['value'] ?? 0;
 		$this->type                     = (string) $args['type'] ?? '';
+		$this->apply_tax                = wptravelengine_toggled( $args['apply_tax'] );
+		$this->apply_upfront            = wptravelengine_toggled( $args['apply_upfront'] );
 	}
 
 	/**
@@ -127,7 +148,7 @@ abstract class CartAdjustment implements CartAdjustmentInterface {
 
 	/**
 	 * @param float $total
-	 * @param Item $cart_item
+	 * @param Item  $cart_item
 	 *
 	 * @return float
 	 */
@@ -136,7 +157,7 @@ abstract class CartAdjustment implements CartAdjustmentInterface {
 			return $total * $this->percentage / 100;
 		}
 
-		return (float) $this->percentage / count( $cart_item->get_additional_line_items() );
+		return (float) $this->percentage / ( count( $cart_item->get_additional_line_items() ) ?: 1 );
 	}
 
 	/**
@@ -155,15 +176,17 @@ abstract class CartAdjustment implements CartAdjustmentInterface {
 			'applies_to'               => $this->applies_to,
 			'value'                    => $this->value,
 			'type'                     => $this->type,
+			'apply_tax'                => $this->apply_tax,
+			'apply_upfront'            => $this->apply_upfront,
 		);
 	}
 
 	/*
-	   * Render.
-	   *
-	   * @return string
-	   * @since 6.3.5
-	   */
+		* Render.
+		*
+		* @return string
+		* @since 6.3.5
+		*/
 	public function render(): string {
 		if ( ! isset( $this->cart->get_totals()[ "total_{$this->name}" ] ) ) {
 			return '';
@@ -177,16 +200,15 @@ abstract class CartAdjustment implements CartAdjustmentInterface {
 			$this->label,
 			! empty( $this->description )
 				? sprintf(
-				'<span id="%s-tooltip" class="wpte-checkout__tooltip" data-content="%s">
+					'<span id="%s-tooltip" class="wpte-checkout__tooltip" data-content="%s">
 						<svg><use xlink:href="#help"></use></svg>
 					</span>',
-				$this->name,
-				$this->description
-			)
+					$this->name,
+					$this->description
+				)
 				: '',
 			'coupon' === $this->name ? '-' : '+',
 			wptravelengine_the_price( $this->cart->get_totals()[ "total_{$this->name}" ], false )
 		);
 	}
-
 }

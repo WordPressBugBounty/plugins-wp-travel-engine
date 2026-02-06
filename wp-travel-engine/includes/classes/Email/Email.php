@@ -145,7 +145,7 @@ class Email extends TemplateTags {
 	 */
 	protected function get_body( $content = null, $template = null ): string {
 
-		$update_mail_template = wptravelengine_toggled( get_option( 'wte_update_mail_template', false ) );
+		$update_mail_template  = wptravelengine_toggled( get_option( 'wte_update_mail_template', false ) );
 		$use_new_header_footer = ! in_array( $template ?? $this->template, array( 'booking_confirmation', 'payment_confirmation' ) ) || $update_mail_template;
 
 		$body  = '';
@@ -216,6 +216,5 @@ class Email extends TemplateTags {
 			echo $this->get_body();
 			exit;
 		}
-
 	}
 }

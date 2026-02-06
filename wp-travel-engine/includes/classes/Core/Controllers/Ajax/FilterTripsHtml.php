@@ -54,8 +54,8 @@ class FilterTripsHtml extends AjaxController {
 	 * @updated 6.6.0
 	 */
 	protected function process_request() {
-		self::$post_data  = $this->request->get_params();
-		$this->query = \Wp_Travel_Engine_Archive_Hooks::$query = new \WP_Query( TripSearch::get_query_args( true ) );
+		self::$post_data = $this->request->get_params();
+		$this->query     = \Wp_Travel_Engine_Archive_Hooks::$query = new \WP_Query( TripSearch::get_query_args( true ) );
 
 		if ( ! $this->query->have_posts() ) {
 			return wp_send_json_success(
@@ -66,12 +66,11 @@ class FilterTripsHtml extends AjaxController {
 			);
 		}
 
-		$is_load_more 	= wptravelengine_toggled( self::$post_data['is_load_more'] ?? false );
-		$show_featured 	= wptravelengine_toggled( self::$post_data['show_featured'] );
+		$is_load_more   = wptravelengine_toggled( self::$post_data['is_load_more'] ?? false );
 		$posts_per_page = get_option( 'posts_per_page', 10 );
-		$view_mode 		= wp_travel_engine_get_archive_view_mode();
+		$view_mode      = wp_travel_engine_get_archive_view_mode();
 		$has_more_posts = $this->query->found_posts > $posts_per_page;
-		$_show_more_ 	= get_option( 'wptravelengine_archive_display_mode', 'pagination' ) === 'load_more';
+		$_show_more_    = get_option( 'wptravelengine_archive_display_mode', 'pagination' ) === 'load_more';
 		$show_load_more = $_show_more_ && $has_more_posts;
 
 		ob_start();
@@ -81,9 +80,6 @@ class FilterTripsHtml extends AjaxController {
 		} else {
 			$show_sidebar = wptravelengine_toggled( get_option( 'wptravelengine_show_trip_search_sidebar', 'yes' ) );
 			echo '<div class="category-main-wrap ' . esc_attr( $view_mode === 'grid' ? ( $show_sidebar ? 'col-2 category-grid' : 'col-3 category-grid' ) : 'category-list' ) . '">';
-			if ( $show_featured ) {
-				do_action( 'wp_travel_engine_featured_trips_sticky', $view_mode );
-			}
 			$this->render_posts( $view_mode );
 			echo '</div>';
 			if ( $show_load_more ) {
@@ -98,11 +94,11 @@ class FilterTripsHtml extends AjaxController {
 
 		return wp_send_json_success(
 			array(
-				'foundposts'      => $foundposts,
-				'data'            => ob_get_clean(),
-				'max_page'        => $this->query->max_num_pages,
-				'current_page'    => self::$post_data['paged'] ?? 1,
-				'pagination'      => (!$_show_more_ && $has_more_posts) ? $this->get_pagination() : '',
+				'foundposts'   => $foundposts,
+				'data'         => ob_get_clean(),
+				'max_page'     => $this->query->max_num_pages,
+				'current_page' => self::$post_data['paged'] ?? 1,
+				'pagination'   => ( ! $_show_more_ && $has_more_posts ) ? $this->get_pagination() : '',
 			)
 		);
 	}
@@ -111,26 +107,17 @@ class FilterTripsHtml extends AjaxController {
 	 * Render Posts HTML.
 	 *
 	 * @param string $view_mode The view mode (grid/list).
-	 * 
+	 *
 	 * @return void
 	 * @since 6.6.0
 	 */
 	private function render_posts( $view_mode ): void {
-		$post_ids = array();
-
 		$user_wishlists = wptravelengine_user_wishlists();
-		$template_name	= wptravelengine_get_template_by_view_mode( $view_mode );
+		$template_name  = wptravelengine_get_template_by_view_mode( $view_mode );
 
 		while ( $this->query->have_posts() ) :
 			$this->query->the_post();
-			$post_id = get_the_ID();
-
-			if ( in_array( $post_id, $post_ids, true ) ) {
-				continue;
-			}
-
-			$post_ids[] 			   = $post_id;
-			$details                   = wte_get_trip_details( $post_id );
+			$details                   = wte_get_trip_details( get_the_ID() );
 			$details['user_wishlists'] = $user_wishlists;
 
 			wptravelengine_get_template( $template_name, $details );
@@ -148,15 +135,15 @@ class FilterTripsHtml extends AjaxController {
 	private function get_pagination(): string {
 		global $wp_query;
 		$original_query = $wp_query;
-		$wp_query 		= $this->query;
-		$pagination 	= get_the_posts_pagination(
+		$wp_query       = $this->query;
+		$pagination     = get_the_posts_pagination(
 			array(
 				'prev_text'          => esc_html__( 'Previous', 'wp-travel-engine' ),
 				'next_text'          => esc_html__( 'Next', 'wp-travel-engine' ),
 				'before_page_number' => '<span class="meta-nav screen-reader-text">' . esc_html__( 'Page', 'wp-travel-engine' ) . ' </span>',
 			)
 		);
-		$wp_query = $original_query;
+		$wp_query       = $original_query;
 
 		return $pagination;
 	}

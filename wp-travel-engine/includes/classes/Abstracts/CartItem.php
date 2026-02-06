@@ -59,9 +59,9 @@ abstract class CartItem implements CartItemInterface {
 			)
 		);
 
-		$this->label    = (string) $this->args[ 'label' ];
-		$this->quantity = (int) $this->args[ 'quantity' ];
-		$this->price    = (float) $this->args[ 'price' ];
+		$this->label    = (string) $this->args['label'];
+		$this->quantity = (int) $this->args['quantity'];
+		$this->price    = (float) $this->args['price'];
 		$this->total    = isset( $this->args['total'] ) && $this->args['total'] > 0 ? $this->args['total'] : ( $this->args['total'] = $this->quantity * $this->price );
 	}
 
@@ -95,7 +95,7 @@ abstract class CartItem implements CartItemInterface {
 			'subtotal' => $subtotal,
 		);
 
-//		$this->totals[ 'total' ] = $this->apply_fees( $this->apply_discounts( $subtotal ) );
+		// $this->totals[ 'total' ] = $this->apply_fees( $this->apply_discounts( $subtotal ) );
 
 		$this->calculated_totals = true;
 	}
@@ -109,25 +109,25 @@ abstract class CartItem implements CartItemInterface {
 	 *
 	 * @return float
 	 */
-//	protected function apply_adjustments( array $adjustment_items, float $subtotal, string $type = 'fee' ): float {
-//		$_subtotal = $subtotal;
-//		foreach ( $adjustment_items as $item ) {
-//			if ( ! empty( $item->applies_to ) && ! in_array( $this->item_type, $item->applies_to ) ) {
-//				continue;
-//			}
-//			$deduct_value = $item->apply_to_actual_subtotal ? $item->apply( $subtotal ) : $item->apply( $_subtotal );
-//
-//			$this->totals[ "total_{$item->name}" ] = $deduct_value;
-//
-//			if ( $type === 'discount' ) {
-//				$_subtotal = $_subtotal - $deduct_value;
-//			} else {
-//				$_subtotal = $_subtotal + $deduct_value;
-//			}
-//		}
-//
-//		return $_subtotal;
-//	}
+	// protected function apply_adjustments( array $adjustment_items, float $subtotal, string $type = 'fee' ): float {
+	// $_subtotal = $subtotal;
+	// foreach ( $adjustment_items as $item ) {
+	// if ( ! empty( $item->applies_to ) && ! in_array( $this->item_type, $item->applies_to ) ) {
+	// continue;
+	// }
+	// $deduct_value = $item->apply_to_actual_subtotal ? $item->apply( $subtotal ) : $item->apply( $_subtotal );
+	//
+	// $this->totals[ "total_{$item->name}" ] = $deduct_value;
+	//
+	// if ( $type === 'discount' ) {
+	// $_subtotal = $_subtotal - $deduct_value;
+	// } else {
+	// $_subtotal = $_subtotal + $deduct_value;
+	// }
+	// }
+	//
+	// return $_subtotal;
+	// }
 
 	/**
 	 * Apply discounts.
@@ -136,9 +136,9 @@ abstract class CartItem implements CartItemInterface {
 	 *
 	 * @return float
 	 */
-//	protected function apply_discounts( float $subtotal ): float {
-//		return $this->apply_adjustments( $this->cart->get_deductible_items(), $subtotal, 'discount' );
-//	}
+	// protected function apply_discounts( float $subtotal ): float {
+	// return $this->apply_adjustments( $this->cart->get_deductible_items(), $subtotal, 'discount' );
+	// }
 
 	/**
 	 * Apply fees.
@@ -147,9 +147,9 @@ abstract class CartItem implements CartItemInterface {
 	 *
 	 * @return float
 	 */
-//	protected function apply_fees( float $subtotal ): float {
-//		return $this->apply_adjustments( $this->cart->get_fees(), $subtotal );
-//	}
+	// protected function apply_fees( float $subtotal ): float {
+	// return $this->apply_adjustments( $this->cart->get_fees(), $subtotal );
+	// }
 
 	public function calculate_subtotal(): float {
 		return (float) $this->total && $this->total > 0 ? (float) $this->total : (float) $this->price * $this->quantity;
@@ -180,7 +180,7 @@ abstract class CartItem implements CartItemInterface {
 	public function data(): array {
 		return array_merge(
 			$this->args,
-			[ '_class_name' => get_class( $this ) ]
+			array( '_class_name' => get_class( $this ) )
 		);
 	}
 

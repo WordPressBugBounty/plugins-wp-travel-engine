@@ -29,9 +29,11 @@ class Optimizer {
 	 */
 	public static function start() {
 		if ( ! is_embed() && ! is_feed() && ! is_preview() && is_singular( WP_TRAVEL_ENGINE_POST_TYPE ) ) {
-			ob_start( function ( $html ) {
-				return apply_filters( 'wptravelengine_output_buffer_template_redirect', $html );
-			} );
+			ob_start(
+				function ( $html ) {
+					return apply_filters( 'wptravelengine_output_buffer_template_redirect', $html );
+				}
+			);
 		}
 	}
 
@@ -52,7 +54,7 @@ class Optimizer {
 			'/<img\s+([^>]+)>/i',
 			function ( $matches ) {
 
-				$img_tag = $matches[ 0 ];
+				$img_tag = $matches[0];
 
 				// Add 'lazy' class if not present.
 				if ( strpos( $img_tag, 'class=' ) !== false ) {

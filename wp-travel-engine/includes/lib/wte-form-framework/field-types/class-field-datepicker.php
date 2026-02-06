@@ -10,8 +10,8 @@ class WP_Travel_Engine_Form_Field_Date extends WP_Travel_Engine_Form_Field_Text 
 	protected $field_type = 'text';
 
 	function init( $field ) {
-		$this->field                                   = $field;
-		$this->field[ 'attributes' ][ 'autocomplete' ] = 'off';
+		$this->field                               = $field;
+		$this->field['attributes']['autocomplete'] = 'off';
 
 		if ( ! isset( $this->field['attributes']['data-id'] ) ) {
 			$this->field['attributes']['data-id'] = $field['id'];
@@ -25,12 +25,15 @@ class WP_Travel_Engine_Form_Field_Date extends WP_Travel_Engine_Form_Field_Text 
 		wp_enqueue_script( 'wte-fpickr' );
 		wp_enqueue_style( 'wte-fpickr' );
 
-		$max_today = isset( $this->field[ 'attributes' ] ) && isset( $this->field[ 'attributes' ][ 'data-max-today' ] ) ? $this->field[ 'attributes' ][ 'data-max-today' ] : '';
-		$output    .= sprintf(
+		// Localization for flatpickr.
+		$locale    = explode( '_', get_locale() )[0] ?? 'en';
+		$max_today = isset( $this->field['attributes'] ) && isset( $this->field['attributes']['data-max-today'] ) ? $this->field['attributes']['data-max-today'] : '';
+		$output   .= sprintf(
 			'<script>;(function() {
 				window.addEventListener("load",function() {
 					var fpArgs = {
-						dateFormat: "Y-m-d"
+						dateFormat: "Y-m-d",
+						locale: "%3$s"
 					}
 					if("%2$s" == "false") {
 						fpArgs["minDate"] = new Date()
@@ -41,8 +44,9 @@ class WP_Travel_Engine_Form_Field_Date extends WP_Travel_Engine_Form_Field_Text 
 					window.flatpickr && window.flatpickr(document.querySelector("[data-id=\'%1$s\']"), fpArgs)
 				})
 			})();</script>',
-			$this->field[ 'attributes' ][ 'data-id' ],
-			$max_today
+			$this->field['attributes']['data-id'],
+			$max_today,
+			$locale
 		);
 
 		// $output .= '<script>';
@@ -65,5 +69,4 @@ class WP_Travel_Engine_Form_Field_Date extends WP_Travel_Engine_Form_Field_Text 
 
 		echo $output;
 	}
-
 }

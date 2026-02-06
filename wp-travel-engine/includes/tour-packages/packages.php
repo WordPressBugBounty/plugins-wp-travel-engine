@@ -68,21 +68,21 @@ class TourPackages {
 
 				$i = 0;
 
-				if ( ! isset( $submenu[ 'edit.php?post_type=trip' ] ) ) {
+				if ( ! isset( $submenu['edit.php?post_type=trip'] ) ) {
 					return;
 				}
-				foreach ( $submenu[ 'edit.php?post_type=trip' ] as $key => $menu_arg ) {
+				foreach ( $submenu['edit.php?post_type=trip'] as $key => $menu_arg ) {
 					if ( $key > 15 ) {
-						$key = 20 + ( 5 * $i ++ );
+						$key = 20 + ( 5 * $i++ );
 					}
-					if ( 'custom-filters' === $menu_arg[ 2 ] ) {
-						$modified_submenu[ 39 ] = $menu_arg;
+					if ( 'custom-filters' === $menu_arg[2] ) {
+						$modified_submenu[39] = $menu_arg;
 					} else {
 						$modified_submenu[ $key ] = $menu_arg;
 					}
 				}
 
-				$modified_submenu[ 13 ] = array(
+				$modified_submenu[13] = array(
 					__( 'Pricing Categories', 'wp-travel-engine' ),
 					'manage_categories',
 					'edit-tags.php?taxonomy=trip-packages-categories&amp;post_type=trip',
@@ -92,7 +92,7 @@ class TourPackages {
 
 				wptravelengine_add_admin_menu_separator( 30 );
 
-				$submenu[ 'edit.php?post_type=trip' ] = $modified_submenu;
+				$submenu['edit.php?post_type=trip'] = $modified_submenu;
 			},
 			1000
 		);
@@ -107,9 +107,9 @@ class TourPackages {
 				if ( ! defined( 'USE_WTE_LEGACY_VERSION' ) && ( get_post_meta( $post->ID, 'trip_version', true ) === '2.0.0' ) || 'draft' === $post->post_status ) {
 					wp_enqueue_script( 'wte-rxjs' );
 					wp_enqueue_script( 'wte-redux' );
-					unset( $trip_edit_tabs[ 'wpte-availability' ] );
-					$trip_edit_tabs[ 'wpte-pricing' ][ 'tab_label' ]    = __( 'Date and Price', 'wp-travel-engine' );
-					$trip_edit_tabs[ 'wpte-pricing' ][ 'content_path' ] = WTE_PRICING_TAB_PARTIALS_DIR . 'tab-pricing.php';
+					unset( $trip_edit_tabs['wpte-availability'] );
+					$trip_edit_tabs['wpte-pricing']['tab_label']    = __( 'Date and Price', 'wp-travel-engine' );
+					$trip_edit_tabs['wpte-pricing']['content_path'] = WTE_PRICING_TAB_PARTIALS_DIR . 'tab-pricing.php';
 				}
 
 				return $trip_edit_tabs;
@@ -132,7 +132,7 @@ class TourPackages {
 
 				$trip_version = get_post_meta( $post->ID, 'trip_version', true );
 
-				$data[ 'wteEdit' ] = array(
+				$data['wteEdit'] = array(
 					'handle' => 'wp-travel-engine',
 					'l10n'   => array(
 						'tripID'                        => $post->ID,
@@ -160,19 +160,19 @@ class TourPackages {
 					foreach (
 						array(
 							'trip-edit-tab__dates-pricings' => array(),
-							'packages_ids'                  => array(),
-							'packages_titles'               => array(),
-							'packages_descriptions'         => array( 'sanitize_callback' => 'wp_kses_post' ),
-							'categories'                    => array(),
-							'packages_primary_category'     => array(),
+							'packages_ids'              => array(),
+							'packages_titles'           => array(),
+							'packages_descriptions'     => array( 'sanitize_callback' => 'wp_kses_post' ),
+							'categories'                => array(),
+							'packages_primary_category' => array(),
 						) as $key => $args
 					) {
 						if ( isset( $_POST[ $key ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-							if ( isset( $args[ 'sanitize_callback' ] ) ) {
+							if ( isset( $args['sanitize_callback'] ) ) {
 								if ( is_array( $_POST[ $key ] ) ) {
-									$posted_data[ $key ] = array_map( $args[ 'sanitize_callback' ], $_POST[ $key ] );
-								} else if ( is_scalar( $_POST[ $key ] ) ) {
-									$posted_data[ $key ] = call_user_func( $args[ 'sanitize_callback' ], wp_unslash( $_POST[ $key ] ) );
+									$posted_data[ $key ] = array_map( $args['sanitize_callback'], $_POST[ $key ] );
+								} elseif ( is_scalar( $_POST[ $key ] ) ) {
+									$posted_data[ $key ] = call_user_func( $args['sanitize_callback'], wp_unslash( $_POST[ $key ] ) );
 								} else {
 									$posted_data[ $key ] = sanitize_text_field( wp_unslash( $_POST[ $key ] ) );
 								}
@@ -209,7 +209,7 @@ class TourPackages {
 					</th>
 					<td>
 						<input type="checkbox" <?php checked( $tag->term_id, $meta_value ); ?>
-							   name="is_primary_pricing_catgory" value="1" id="package-primary-catgory">
+								name="is_primary_pricing_catgory" value="1" id="package-primary-catgory">
 						<p><?php esc_html_e( 'If checked, this category will be treated as primary pricing category in packages and trip price will be the price of this category.', 'wp-travel-engine' ); ?></p>
 					</td>
 				</tr>
@@ -219,7 +219,7 @@ class TourPackages {
 					</th>
 					<td>
 						<input type="text" placeholder="16-30" name="age_group"
-							   value="<?php echo esc_attr( $age_group ); ?>" id="category-age-group">
+								value="<?php echo esc_attr( $age_group ); ?>" id="category-age-group">
 						<p><?php esc_html_e( 'Age Group of the category.', 'wp-travel-engine' ); ?></p>
 					</td>
 				</tr>
@@ -237,11 +237,11 @@ class TourPackages {
 							</th>
 							<td>
 								<input type="text" name="pll_category_name[<?php echo esc_attr( $language ); ?>]"
-									   value="<?php echo esc_attr( $translated_name ); ?>" id="category-pll-name">
+										value="<?php echo esc_attr( $translated_name ); ?>" id="category-pll-name">
 								<p><?php esc_html_e( 'Translated name for the category.', 'wp-travel-engine' ); ?></p>
 							</td>
 						</tr>
-					<?php
+						<?php
 					endforeach;
 				endif;
 			},
@@ -293,17 +293,17 @@ class TourPackages {
 				echo '<div class="notice notice-' . esc_attr( $type ) . '">';
 				foreach ( $messages as $message ) {
 					echo '<p>' . wp_kses(
-							$message,
-							array(
-								'code' => array(),
-								'a'    => array(
-									'href'   => array(),
-									'class'  => array(),
-									'id'     => array(),
-									'target' => array(),
-								),
-							)
-						) . '</p>';
+						$message,
+						array(
+							'code' => array(),
+							'a'    => array(
+								'href'   => array(),
+								'class'  => array(),
+								'id'     => array(),
+								'target' => array(),
+							),
+						)
+					) . '</p>';
 				}
 				echo '</div>';
 			}
@@ -406,18 +406,18 @@ class TourPackages {
 						),
 					),
 					'get_callback' => function ( $prepared, $field ) {
-						$trip_id            = get_post_meta( $prepared[ 'id' ], 'trip_ID', true );
+						$trip_id            = get_post_meta( $prepared['id'], 'trip_ID', true );
 						$trip_duration_unit = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
-						if ( ! empty( $trip_duration_unit[ 'trip_duration_unit' ] ) ) {
-							$trip_duration_unit = $trip_duration_unit[ 'trip_duration_unit' ];
+						if ( ! empty( $trip_duration_unit['trip_duration_unit'] ) ) {
+							$trip_duration_unit = $trip_duration_unit['trip_duration_unit'];
 						} else {
 							$trip_duration_unit = 'days';
 						}
-						$enabled = get_post_meta( $prepared[ 'id' ], 'enable_weekly_time_slots', true ) === 'yes' && 'hours' === $trip_duration_unit;
+						$enabled = get_post_meta( $prepared['id'], 'enable_weekly_time_slots', true ) === 'yes' && 'hours' === $trip_duration_unit;
 						if ( ! $enabled ) {
 							return array();
 						}
-						$dates = get_post_meta( $prepared[ 'id' ], $field, true );
+						$dates = get_post_meta( $prepared['id'], $field, true );
 
 						return empty( $dates ) ? array() : $dates;
 					},
@@ -430,16 +430,16 @@ class TourPackages {
 					'get_callback' => function ( $prepared, $field ) {
 						global $wpdb;
 
-						if ( ! empty( $_REQUEST[ 'lang' ] ) ) {
-							$locale = sanitize_text_field( wp_unslash( $_REQUEST[ 'lang' ] ) );
+						if ( ! empty( $_REQUEST['lang'] ) ) {
+							$locale = sanitize_text_field( wp_unslash( $_REQUEST['lang'] ) );
 						}
 
 						$categories = Packages\get_packages_pricing_categories();
 
-						$package_categories = get_post_meta( $prepared[ 'id' ], $field, true );
+						$package_categories = get_post_meta( $prepared['id'], $field, true );
 						$new_categories     = array();
 						foreach ( $categories as $category ) {
-							if ( ! isset( $package_categories[ 'c_ids' ][ $category->term_id ] ) ) {
+							if ( ! isset( $package_categories['c_ids'][ $category->term_id ] ) ) {
 								$new_categories[ $category->term_id ] = array(
 									'label'                => $category->name,
 									'price'                => '',
@@ -455,29 +455,33 @@ class TourPackages {
 							}
 							foreach (
 								array(
-									'labels'                 => array( 'label', '' ),
-									'prices'                 => array( 'price', '' ),
-									'enabled_sale'           => array( 'enabledSale', ! 1 ),
-									'sale_prices'            => array( 'salePrice', 0 ),
-									'min_paxes'              => array( 'minPax', 0 ),
-									'max_paxes'              => array( 'maxPax', '' ),
-									'group-pricings'         => array( 'groupPricing', array() ),
+									'labels'         => array( 'label', '' ),
+									'prices'         => array( 'price', '' ),
+									'enabled_sale'   => array( 'enabledSale', ! 1 ),
+									'sale_prices'    => array( 'salePrice', 0 ),
+									'min_paxes'      => array( 'minPax', 0 ),
+									'max_paxes'      => array( 'maxPax', '' ),
+									'group-pricings' => array( 'groupPricing', array() ),
 									'enabled_group_discount' => array( 'enabledGroupDiscount', ! 1 ),
-									'pricing_types'          => array( 'pricingType', 'per-person' ),
+									'pricing_types'  => array( 'pricingType', 'per-person' ),
 								) as $key => $args
 							) {
 								if ( isset( $package_categories[ $key ][ $category->term_id ] ) ) {
 									$value = $package_categories[ $key ][ $category->term_id ];
-									if ( in_array( $key, array(
-										'prices',
-										'sale_prices',
-										'min_paxes',
-										'max_paxes',
-									), true ) ) {
+									if ( in_array(
+										$key,
+										array(
+											'prices',
+											'sale_prices',
+											'min_paxes',
+											'max_paxes',
+										),
+										true
+									) ) {
 										$value = '' === $value ? '' : (float) $value;
-									} else if ( 'enabled_group_discount' === $key ) {
+									} elseif ( 'enabled_group_discount' === $key ) {
 										$value = 1 === (int) $value;
-									} else if ( 'labels' === $key ) {
+									} elseif ( 'labels' === $key ) {
 										if ( ! empty( $locale ) ) {
 											$term_meta = get_term_meta( $category->term_id, 'pll_category_name', true );
 											if ( isset( $term_meta[ $locale ] ) ) {
@@ -489,9 +493,9 @@ class TourPackages {
 											$value = $category->name;
 										}
 									}
-									$new_categories[ $category->term_id ][ $args[ 0 ] ] = $value;
+									$new_categories[ $category->term_id ][ $args[0] ] = $value;
 								} else {
-									$new_categories[ $category->term_id ][ $args[ 0 ] ] = $args[ 1 ];
+									$new_categories[ $category->term_id ][ $args[0] ] = $args[1];
 								}
 							}
 						}
@@ -514,13 +518,13 @@ class TourPackages {
 						'type' => 'array',
 					),
 					'get_callback' => function ( $prepared, $field ) {
-						return (int) get_post_meta( $prepared[ 'id' ], $field, true );
+						return (int) get_post_meta( $prepared['id'], $field, true );
 					},
 				),
 				'trip_ID'                  => array(
 					'type'         => 'number',
 					'get_callback' => function ( $prepared, $field ) {
-						return (int) get_post_meta( $prepared[ 'id' ], $field, true );
+						return (int) get_post_meta( $prepared['id'], $field, true );
 					},
 					'schema'       => array(
 						'type' => 'number',
@@ -532,7 +536,7 @@ class TourPackages {
 						'type' => 'array',
 					),
 					'get_callback' => function ( $prepared, $field ) {
-						$value = get_post_meta( $prepared[ 'id' ], $field, true );
+						$value = get_post_meta( $prepared['id'], $field, true );
 						if ( empty( $value ) ) {
 							$value = array(
 								1 => array(),
@@ -554,7 +558,7 @@ class TourPackages {
 						'type' => 'boolean',
 					),
 					'get_callback' => function ( $prepared, $field ) {
-						$enabled = get_post_meta( $prepared[ 'id' ], 'enable_weekly_time_slots', true ) === 'yes';
+						$enabled = get_post_meta( $prepared['id'], 'enable_weekly_time_slots', true ) === 'yes';
 
 						return true && $enabled;
 					},
@@ -568,13 +572,17 @@ class TourPackages {
 				$packages_post_type,
 				$attribute,
 				array(
-					'get_callback'    => wte_array_get( $args, 'get_callback', array(
-						'\WPTravelEngine\Core\REST_API',
-						'default_rest_field_get_callback',
-					) ),
+					'get_callback'    => wte_array_get(
+						$args,
+						'get_callback',
+						array(
+							'\WPTravelEngine\Core\REST_API',
+							'default_rest_field_get_callback',
+						)
+					),
 					'update_callback' => function () {
 					},
-					'schema'          => $args[ 'schema' ],
+					'schema'          => $args['schema'],
 				)
 			);
 		}
@@ -604,7 +612,7 @@ class TourPackages {
 						'schema' => array( 'items' => 'number' ),
 					),
 					'get_callback' => function ( $object, $field_name, $default ) {
-						$trip_settings = get_post_meta( $object[ 'id' ], 'wp_travel_engine_setting', true );
+						$trip_settings = get_post_meta( $object['id'], 'wp_travel_engine_setting', true );
 
 						return array(
 							'enabled'       => (bool) wte_array_get( $trip_settings, 'trip_cutoff_enable', ! 1 ),
@@ -619,7 +627,7 @@ class TourPackages {
 						if ( ! defined( 'WTE_FIXED_DEPARTURE_VERSION' ) ) {
 							return array();
 						}
-						$booked_seats = \WPTravelEngine\Core\Booking_Inventory::booking_inventory( null, $prepared[ 'id' ] );
+						$booked_seats = \WPTravelEngine\Core\Booking_Inventory::booking_inventory( null, $prepared['id'] );
 
 						return ! empty( $booked_seats ) ? $booked_seats : array();
 					},
@@ -635,13 +643,17 @@ class TourPackages {
 				\WP_TRAVEL_ENGINE_POST_TYPE,
 				$attribute,
 				array(
-					'get_callback'    => wte_array_get( $args, 'get_callback', array(
-						'\WPTravelEngine\Core\REST_API',
-						'default_rest_field_get_callback',
-					) ),
+					'get_callback'    => wte_array_get(
+						$args,
+						'get_callback',
+						array(
+							'\WPTravelEngine\Core\REST_API',
+							'default_rest_field_get_callback',
+						)
+					),
 					'update_callback' => function () {
 					},
-					'schema'          => $args[ 'schema' ],
+					'schema'          => $args['schema'],
 				)
 			);
 		}
@@ -652,7 +664,7 @@ class TourPackages {
 			'is-primary',
 			array(
 				'get_callback' => function ( $object, $field_name, $default ) {
-					return get_option( 'primary_pricing_category', 0 ) == $object[ 'id' ];
+					return get_option( 'primary_pricing_category', 0 ) == $object['id'];
 				},
 			)
 		);
@@ -852,8 +864,8 @@ class TourPackages {
 				'single'            => wte_array_get( $args, 'type', true ),
 				'show_in_rest'      => wte_array_get( $args, 'show_in_rest', true ),
 			);
-			if ( isset( $args[ 'default' ] ) ) {
-				$_args[ 'default' ] = $args[ 'default' ];
+			if ( isset( $args['default'] ) ) {
+				$_args['default'] = $args['default'];
 			}
 			register_meta(
 				'post',

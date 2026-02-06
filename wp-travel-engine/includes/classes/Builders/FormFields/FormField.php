@@ -28,8 +28,8 @@ class FormField extends \WP_Travel_Engine_Form_Field {
 	public function __construct( $use_legacy_template = true ) {
 		$this->use_legacy_template = $use_legacy_template;
 		if ( ! $use_legacy_template ) {
-			add_filter( 'wp_travel_engine_form_field_types', [ $this, 'modify_form_fields' ] );
-			add_filter( 'wptravelengine_form_field_options', [ $this, 'modify_form_field_options' ] );
+			add_filter( 'wp_travel_engine_form_field_types', array( $this, 'modify_form_fields' ) );
+			add_filter( 'wptravelengine_form_field_options', array( $this, 'modify_form_field_options' ) );
 		}
 	}
 
@@ -53,11 +53,11 @@ class FormField extends \WP_Travel_Engine_Form_Field {
 	 * @return array The modified field types array.
 	 */
 	public function modify_form_fields( $field_types ): array {
-		if ( ! empty( $field_types[ 'textarea' ][ 'field_class' ] ) ) {
-			$field_types[ 'textarea' ][ 'field_class' ] = TextAreaField::class;
+		if ( ! empty( $field_types['textarea']['field_class'] ) ) {
+			$field_types['textarea']['field_class'] = TextAreaField::class;
 		}
-		if ( ! empty( $field_types[ 'checkbox' ][ 'field_class' ] ) ) {
-			$field_types[ 'checkbox' ][ 'field_class' ] = Checkbox::class;
+		if ( ! empty( $field_types['checkbox']['field_class'] ) ) {
+			$field_types['checkbox']['field_class'] = Checkbox::class;
 		}
 
 		return $field_types;
@@ -81,7 +81,7 @@ class FormField extends \WP_Travel_Engine_Form_Field {
 	/**
 	 * Generates the HTML template for the Material UI form field.
 	 *
-	 * @param array $field Field properties.
+	 * @param array  $field Field properties.
 	 * @param string $content Inner content for the field.
 	 *
 	 * @return string Generated HTML content.
@@ -94,28 +94,28 @@ class FormField extends \WP_Travel_Engine_Form_Field {
 		// Start output buffering.
 		ob_start();
 
-		$is_required = wptravelengine_toggled( $field[ 'validations' ][ 'required' ] ?? false );
-		$is_checkbox = in_array( $field[ 'type' ], array( 'checkbox', 'radio', 'file' ) );
+		$is_required = wptravelengine_toggled( $field['validations']['required'] ?? false );
+		$is_checkbox = in_array( $field['type'], array( 'checkbox', 'radio', 'file' ) );
 		?>
-		<?php if ( '' != ( $field[ 'wrapper_parent_class' ] ?? '' ) ): ?>
-			<div class="<?php echo esc_attr( $field[ 'wrapper_parent_class' ] ); ?>">
+		<?php if ( '' != ( $field['wrapper_parent_class'] ?? '' ) ) : ?>
+			<div class="<?php echo esc_attr( $field['wrapper_parent_class'] ); ?>">
 		<?php endif; ?>
 
 		<div
-			class="<?php echo esc_attr( $field[ 'wrapper_class' ] ?? '' ) . ( $field[ 'type' ] == 'file' ? ' full' : '' ); ?>">
+			class="<?php echo esc_attr( $field['wrapper_class'] ?? '' ) . ( $field['type'] == 'file' ? ' full' : '' ); ?>">
 			<div
 				class="wpte-checkout__form-control <?php echo ! $is_checkbox ? 'wpte-material-ui-input-control' : ''; ?>">
 
-				<?php if ( $is_checkbox ): ?>
+				<?php if ( $is_checkbox ) : ?>
 				<div class="<?php echo "wpte-checkout__{$field['type']}-control"; ?>">
 					<?php endif; ?>
 
-					<?php if ( ( $field[ 'name' ] != 'wp_travel_engine_booking_setting[terms_conditions]' ) ): ?>
+					<?php if ( ( $field['name'] != 'wp_travel_engine_booking_setting[terms_conditions]' ) ) : ?>
 						<label
-							for="<?php echo esc_attr( $field[ 'id' ] ); ?>"><?php echo wp_kses_post( $field[ 'field_label' ] ) . ( $is_required ? '<span class="wpte-checkout__field-required">*</span>' : '' ); ?></label>
+							for="<?php echo esc_attr( $field['id'] ); ?>"><?php echo wp_kses_post( $field['field_label'] ) . ( $is_required ? '<span class="wpte-checkout__field-required">*</span>' : '' ); ?></label>
 					<?php endif; ?>
 
-					<?php if ( $field[ 'type' ] == 'file' ): ?>
+					<?php if ( $field['type'] == 'file' ) : ?>
 						<div class="wpte-checkout__file-description">
 							<?php echo esc_html__( 'Max. file size 5MB Supports: JPG, PNG, WebP images', 'wp-travel-engine' ); ?>
 						</div>
@@ -123,24 +123,25 @@ class FormField extends \WP_Travel_Engine_Form_Field {
 
 					<?php echo $content; // Render field content dynamically. ?>
 
-					<?php if ( ! $is_checkbox && ( $field[ 'name' ] != 'wp_travel_engine_booking_setting[terms_conditions]' ) ): ?>
+					<?php if ( ! $is_checkbox && ( $field['name'] != 'wp_travel_engine_booking_setting[terms_conditions]' ) ) : ?>
 						<fieldset>
 							<legend>
-								<span><?php echo wp_kses_post( $field[ 'field_label' ] ) . ( $is_required ? '<span class="wpte-checkout__field-required">*</span>' : '' ); ?></span>
+								<span><?php echo wp_kses_post( $field['field_label'] ) . ( $is_required ? '<span class="wpte-checkout__field-required">*</span>' : '' ); ?></span>
 							</legend>
 						</fieldset>
 					<?php endif; ?>
 
-					<?php if ( $is_checkbox ): ?>
+					<?php if ( $is_checkbox ) : ?>
 				</div>
 			<?php endif; ?>
 
 			</div>
 		</div>
 
-		<?php if ( '' != ( $field[ 'wrapper_parent_class' ] ?? '' ) ): ?>
+		<?php if ( '' != ( $field['wrapper_parent_class'] ?? '' ) ) : ?>
 			</div>
-		<?php endif;
+			<?php
+		endif;
 
 		// Capture and return the generated content.
 		return ob_get_clean();
@@ -152,15 +153,18 @@ class FormField extends \WP_Travel_Engine_Form_Field {
 	 */
 	public function set_default_value( array $form_data ): FormField {
 
-		$this->fields = array_map( function ( $field ) use ( $form_data ) {
-			$name = preg_match( "#\[([^\[]+)]$#", $field[ 'name' ], $matches ) ? $matches[ 1 ] : $field[ 'name' ];
+		$this->fields = array_map(
+			function ( $field ) use ( $form_data ) {
+				$name = preg_match( '#\[([^\[]+)]$#', $field['name'], $matches ) ? $matches[1] : $field['name'];
 
-			$field[ 'field_label' ] = isset( $field[ 'placeholder' ] ) && $field[ 'placeholder' ] !== '' ? $field[ 'placeholder' ] : $field[ 'field_label' ];
-			$field[ 'default' ]     = $form_data[ $name ] ?? $field[ 'default' ] ?? '';
-			$field[ 'value' ]       = $field[ 'default' ];
+				$field['field_label'] = isset( $field['placeholder'] ) && $field['placeholder'] !== '' ? $field['placeholder'] : $field['field_label'];
+				$field['default']     = $form_data[ $name ] ?? $field['default'] ?? '';
+				$field['value']       = $field['default'];
 
-			return $field;
-		}, $this->fields );
+				return $field;
+			},
+			$this->fields
+		);
 
 		return $this;
 	}

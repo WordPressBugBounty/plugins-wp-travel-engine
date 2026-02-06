@@ -511,16 +511,16 @@ $gallery_autoplay = $settings['gallery_autoplay'] ?? 'no';
 $show_trip_duration_days_nights = $settings['show_trip_duration_days_nights'] ?? 'no';
 ?>
 <div class="wpte-field-subfields wpte-field wpte-floated" style="margin-bottom: 0px;padding-bottom: 0px;">
-    <label class="wpte-field-label" data-wte-update="wte_new_6.0.0" for="wp_travel_engine_settings[show_trip_duration_days_nights]"><?php _e( 'Trip Duration', 'wp-travel-engine' ); ?></label>
-    <div class="wte-radio-group">
-        <div class="wte-radio-button">
-            <input type="radio" id="wp_travel_engine_settings_show_trip_duration_days" name="wp_travel_engine_settings[show_trip_duration_days_nights]" value="no" <?php checked( $show_trip_duration_days_nights, 'no' ); ?>>
-            <label for="wp_travel_engine_settings_show_trip_duration_days"><?php _e( 'Days', 'wp-travel-engine' ); ?></label>
-        </div>
-        <div class="wte-radio-button">
-            <input type="radio" id="wp_travel_engine_settings_show_trip_duration_days_nights" name="wp_travel_engine_settings[show_trip_duration_days_nights]" value="yes" <?php checked( $show_trip_duration_days_nights, 'yes' ); ?>>
-            <label for="wp_travel_engine_settings_show_trip_duration_days_nights"><?php _e( 'Days and Nights', 'wp-travel-engine' ); ?></label>
-        </div>
-    </div>
-    <span class="wpte-tooltip"><?php esc_html_e( 'Show the preferred duration format on your single trip.', 'wp-travel-engine' ); ?> </span>
+	<label class="wpte-field-label" data-wte-update="wte_new_6.0.0" for="wp_travel_engine_settings[show_trip_duration_days_nights]"><?php _e( 'Trip Duration', 'wp-travel-engine' ); ?></label>
+	<div class="wte-radio-group">
+		<div class="wte-radio-button">
+			<input type="radio" id="wp_travel_engine_settings_show_trip_duration_days" name="wp_travel_engine_settings[show_trip_duration_days_nights]" value="no" <?php checked( $show_trip_duration_days_nights, 'no' ); ?>>
+			<label for="wp_travel_engine_settings_show_trip_duration_days"><?php _e( 'Days', 'wp-travel-engine' ); ?></label>
+		</div>
+		<div class="wte-radio-button">
+			<input type="radio" id="wp_travel_engine_settings_show_trip_duration_days_nights" name="wp_travel_engine_settings[show_trip_duration_days_nights]" value="yes" <?php checked( $show_trip_duration_days_nights, 'yes' ); ?>>
+			<label for="wp_travel_engine_settings_show_trip_duration_days_nights"><?php _e( 'Days and Nights', 'wp-travel-engine' ); ?></label>
+		</div>
+	</div>
+	<span class="wpte-tooltip"><?php esc_html_e( 'Show the preferred duration format on your single trip.', 'wp-travel-engine' ); ?> </span>
 </div>

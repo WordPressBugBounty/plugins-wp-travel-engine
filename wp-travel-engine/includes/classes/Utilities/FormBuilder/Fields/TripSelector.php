@@ -32,9 +32,9 @@ class TripSelector extends Select {
 				'publish'
 			);
 
-			$trips = array_column( $wpdb->get_results( $query ) ?? [], 'post_title', 'ID', );
+			$trips = array_column( $wpdb->get_results( $query ) ?? array(), 'post_title', 'ID', );
 
-			self::$trips_options = [ '' => __( 'Choose a Trip', 'wp-travel-engine' ) ] + $trips;
+			self::$trips_options = array( '' => __( 'Choose a Trip', 'wp-travel-engine' ) ) + $trips;
 		}
 
 		return self::$trips_options;
@@ -49,7 +49,7 @@ class TripSelector extends Select {
 	 */
 	public function init( array $field ): Base {
 
-		$field[ 'options' ] = [ '' => __( 'Choose a Trip', 'wp-travel-engine' ) ] + $this->get_options();
+		$field['options'] = array( '' => __( 'Choose a Trip', 'wp-travel-engine' ) ) + $this->get_options();
 
 		return parent::init( $field );
 	}

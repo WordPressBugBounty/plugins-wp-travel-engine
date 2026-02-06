@@ -16,9 +16,9 @@ use WPTravelEngine\Core\Models\Post\Coupons;
  */
 class ApplyCoupon extends AjaxController {
 
-	const NONCE_KEY = '_nonce';
+	const NONCE_KEY    = '_nonce';
 	const NONCE_ACTION = 'wte_session_cart_apply_coupon';
-	const ACTION = 'wte_session_cart_apply_coupon';
+	const ACTION       = 'wte_session_cart_apply_coupon';
 
 	/**
 	 * Process Request.
@@ -109,17 +109,18 @@ class ApplyCoupon extends AjaxController {
 
 		/**
 		 * Store form data in session
+		 *
 		 * @since 6.5.5
 		 */
-		if( $this->request->get_param( 'formData' ) ) {
+		if ( $this->request->get_param( 'formData' ) ) {
 			$form_data = stripslashes( $this->request->get_param( 'formData' ) );
-			
-			$form_data = json_decode($form_data, true);
-			
+
+			$form_data = json_decode( $form_data, true );
+
 			WTE()->session->set( 'billing_form_data', $form_data['billing'] ?? array() );
 			WTE()->session->set( 'travellers_form_data', $form_data['travellers'] ?? array() );
 			WTE()->session->set( 'emergency_form_data', $form_data['emergency'] ?? array() );
-			WTE()->session->set( 'additional_note', $this->request->get_param('wptravelengine_additional_note') );
+			WTE()->session->set( 'additional_note', $this->request->get_param( 'wptravelengine_additional_note' ) );
 		}
 
 		wp_send_json_success(

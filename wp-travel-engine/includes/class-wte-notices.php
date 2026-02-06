@@ -31,7 +31,6 @@ class WTE_Notices {
 	 * Class Constructor.
 	 */
 	public function __construct() {
-
 	}
 
 	/**
@@ -145,6 +144,5 @@ class WTE_Notices {
 			return;
 		}
 		return false;
-
 	}
 }

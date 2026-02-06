@@ -81,15 +81,15 @@ return array(
 						'description' => __( 'Company Custom Logo', 'wp-travel-engine' ),
 						'type'        => 'object',
 						'properties'  => array(
-							'id'        => array(
+							'id'  => array(
 								'description' => __( 'ID', 'wp-travel-engine' ),
 								'type'        => 'integer',
 							),
-							'alt'       => array(
+							'alt' => array(
 								'description' => __( 'Alternative String', 'wp-travel-engine' ),
 								'type'        => 'string',
 							),
-							'url'       => array(
+							'url' => array(
 								'description' => __( 'URL', 'wp-travel-engine' ),
 								'type'        => 'string',
 							),
@@ -139,15 +139,15 @@ return array(
 						'description' => __( 'Expert Avatar Image', 'wp-travel-engine' ),
 						'type'        => 'object',
 						'properties'  => array(
-							'id'        => array(
+							'id'  => array(
 								'description' => __( 'ID', 'wp-travel-engine' ),
 								'type'        => 'integer',
 							),
-							'alt'       => array(
+							'alt' => array(
 								'description' => __( 'Alternative String', 'wp-travel-engine' ),
 								'type'        => 'string',
 							),
-							'url'       => array(
+							'url' => array(
 								'description' => __( 'URL', 'wp-travel-engine' ),
 								'type'        => 'string',
 							),
@@ -169,15 +169,15 @@ return array(
 						'description' => __( 'Company Information Page Background Image', 'wp-travel-engine' ),
 						'type'        => 'object',
 						'properties'  => array(
-							'id'        => array(
+							'id'  => array(
 								'description' => __( 'ID', 'wp-travel-engine' ),
 								'type'        => 'integer',
 							),
-							'alt'       => array(
+							'alt' => array(
 								'description' => __( 'Alternative String', 'wp-travel-engine' ),
 								'type'        => 'string',
 							),
-							'url'       => array(
+							'url' => array(
 								'description' => __( 'URL', 'wp-travel-engine' ),
 								'type'        => 'string',
 							),

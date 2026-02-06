@@ -30,6 +30,22 @@ class Wp_Travel_Engine_Archive_Hooks {
 	public static $query = null;
 
 	/**
+	 * Query args for trip filters.
+	 *
+	 * @var array
+	 * @since 6.7.3
+	 */
+	public static array $query_args = array();
+
+	/**
+	 * Featured trips post IDs.
+	 *
+	 * @var int[]
+	 * @since 6.7.3
+	 */
+	protected static array $featured_trip_ids = array();
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 1.0.0
@@ -83,9 +99,9 @@ class Wp_Travel_Engine_Archive_Hooks {
 				$sort_args['orderby'] = 'date';
 				break;
 			// case 'dates':
-			// 	$sort_args['order']   = 'ASC';
-			// 	$sort_args['orderby'] = 'date';
-			// 	break;
+			// $sort_args['order']   = 'ASC';
+			// $sort_args['orderby'] = 'date';
+			// break;
 			case 'rating':
 				$sort_args['order']   = 'DESC';
 				$sort_args['orderby'] = 'comment_count';
@@ -137,11 +153,17 @@ class Wp_Travel_Engine_Archive_Hooks {
 	/**
 	 * Filter query on archive page to sort and list trips properly.
 	 *
-	 * @since 5.5.7
 	 * @param WP_Query $query The WP_Query instance.
+	 *
 	 * @return void
+	 * @since 5.5.7
+	 * @updated 6.7.0
+	 * @since 6.7.3 Added featured trips processing.
 	 */
 	public function archive_pre_get_posts( $query ) {
+
+		$post_not_in = $query->get( 'post__not_in', array() );
+
 		if ( ! is_admin() && $query->is_main_query() ) {
 			if ( $query->is_post_type_archive( WP_TRAVEL_ENGINE_POST_TYPE ) || $query->is_tax ) {
 				if ( $query->is_tax ) {
@@ -155,15 +177,6 @@ class Wp_Travel_Engine_Archive_Hooks {
 				return;
 			}
 
-			// Exclude featured trips on Post Archive only because featured trips queried separately.
-			if ( $query->is_post_type_archive() && $this->show_featured_trips_on_top() ) {
-				$featured_trips = self::get_featured_trips_ids();
-
-				if ( is_array( $featured_trips ) ) {
-					$query->set( 'post__not_in', $featured_trips );
-				}
-			}
-
 			$sort_by   = self::archive_sort_by();
 			$sort_args = self::get_query_args_by_sort( $sort_by );
 			if ( isset( $sort_args['order'] ) ) {
@@ -175,37 +188,112 @@ class Wp_Travel_Engine_Archive_Hooks {
 			if ( isset( $sort_args['orderby'] ) ) {
 				$query->set( 'orderby', $sort_args['orderby'] );
 			}
+
+			self::$query_args = $query->query_vars;
+
+			$query->set( 'wpte_trip_search', true );
 		}
+
+		if ( $query->get( 'wpte_trip_search' ) && wptravelengine_toggled( wptravelengine_settings()->get( 'show_featured_trips_on_top' ) ) ) {
+			$this->process_featured_trips();
+			$post_not_in = array_merge( $post_not_in, self::$featured_trip_ids );
+		}
+
+		$custom_trips = get_option( 'wptravelengine_custom_trips', array() );
+
+		$query->set( 'post__not_in', array_unique( array_merge( $post_not_in, $custom_trips ) ) );
+	}
+
+	/**
+	 * Process featured trips.
+	 *
+	 * @since 6.7.3
+	 * @return void
+	 */
+	private function process_featured_trips() {
+		static $filter_added = false;
+
+		if ( $filter_added ) {
+			return;
+		}
+
+		global $wp_query;
+
+		self::$query ??= $wp_query;
+
+		$trips_array   = wte_get_featured_trips_array( true );
+		$feat_trip_num = (int) wptravelengine_settings()->get( 'feat_trip_num', 2 );
+
+		if ( empty( $trips_array ) || empty( $feat_trip_num ) || empty( self::$query_args ) ) {
+			return;
+		}
+
+		$args = array_merge(
+			self::$query_args,
+			array(
+				'post__in'         => $trips_array,
+				'paged'            => 1,
+				'posts_per_page'   => $feat_trip_num,
+				'wpte_trip_search' => false,
+			)
+		);
+
+		$featured_query = new \WP_Query( $args );
+		wp_reset_postdata();
+
+		if ( empty( $featured_query->posts ) ) {
+			return;
+		}
+
+		self::$featured_trip_ids = wp_list_pluck( $featured_query->posts, 'ID' );
+
+		add_filter(
+			'the_posts',
+			function ( $posts, $query ) use ( $featured_query ) {
+				if ( ! $query->get( 'wpte_trip_search' ) || intval( $query->get( 'paged' ) ) > 1 ) {
+					return $posts;
+				}
+				$merged_posts      = array_merge( $featured_query->posts, $posts );
+				$query->post_count = count( $merged_posts );
+				return $merged_posts;
+			},
+			10,
+			2
+		);
+
+		$filter_added = true;
 	}
 
 	/**
 	 * Get featured trips IDs.
 	 *
+	 * @param bool $get_all Get all featured trips.
 	 * @since 5.5.7
 	 * @return array
+	 * @since 6.7.3 Added $get_all parameter to get all featured trips.
 	 */
-	public static function get_featured_trips_ids() {
+	public static function get_featured_trips_ids( bool $get_all = false ) {
 		global $wpdb;
 
-		$featured_trips = wp_cache_get( 'featured_trip_ids', 'wptravelengine' );
+		$featured_trips = wp_cache_get( 'featured_trip_ids_' . (int) $get_all, 'wptravelengine' );
 
-		if ( !!$featured_trips ) {
+		if ( (bool) $featured_trips ) {
 			return $featured_trips;
 		}
 
-		$wte_global    = get_option( 'wp_travel_engine_settings', true );
-		$feat_trip_num = isset( $wte_global['feat_trip_num'] ) ? (int) $wte_global['feat_trip_num'] : 2;
+		$prepare    = "SELECT `post_id` FROM {$wpdb->postmeta} WHERE `meta_key` = %s AND `meta_value` = %s";
+		$meta_value = array( 'wp_travel_engine_featured_trip', 'yes' );
 
-		$prepared_statement = $wpdb->prepare(
-			"SELECT `post_id` FROM {$wpdb->postmeta} WHERE `meta_key` = %s AND `meta_value` = %s LIMIT %d",
-			'wp_travel_engine_featured_trip',
-			'yes',
-			$feat_trip_num
-		);
+		if ( ! $get_all ) {
+			$prepare     .= ' LIMIT %d';
+			$meta_value[] = (int) wptravelengine_settings()->get( 'feat_trip_num', 2 );
+		}
+
+		$prepared_statement = $wpdb->prepare( $prepare, ...$meta_value );
 
 		$results = $wpdb->get_col( $prepared_statement );
 
-		wp_cache_add( 'featured_trip_ids', $results, 'wptravelengine' );
+		wp_cache_add( 'featured_trip_ids_' . (int) $get_all, $results, 'wptravelengine' );
 
 		$args = array(
 			'post_type'   => 'trip',
@@ -244,7 +332,7 @@ class Wp_Travel_Engine_Archive_Hooks {
 		$featured_query = new \WP_Query( $args );
 
 		$user_wishlists = wptravelengine_user_wishlists();
-		$template_name	= wptravelengine_get_template_by_view_mode( $view_mode );
+		$template_name  = wptravelengine_get_template_by_view_mode( $view_mode );
 
 		while ( $featured_query->have_posts() ) :
 			$featured_query->the_post();
@@ -263,10 +351,10 @@ class Wp_Travel_Engine_Archive_Hooks {
 	 * @return void
 	 */
 	public static function archive_filters_sub_options() {
-		$view_mode = wp_travel_engine_get_archive_view_mode();
-		$orderby = self::archive_sort_by();
+		$view_mode       = wp_travel_engine_get_archive_view_mode();
+		$orderby         = self::archive_sort_by();
 		$sorting_options = wptravelengine_get_sorting_options();
-		$orderby_label = 'Latest';
+		$orderby_label   = 'Latest';
 
 		foreach ( $sorting_options as $key => $val ) {
 			if ( $key === $orderby && ! is_array( $val ) ) {
@@ -279,7 +367,7 @@ class Wp_Travel_Engine_Archive_Hooks {
 		}
 
 		$current_url = '';
-		$protocol = ( ! empty( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] === 'on' ) ? 'https://' : 'http://';
+		$protocol    = ( ! empty( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] === 'on' ) ? 'https://' : 'http://';
 		if ( ! empty( $_SERVER['HTTP_HOST'] ) ) {
 			$current_url .= esc_url_raw( wp_unslash( $protocol . $_SERVER['HTTP_HOST'] ) );
 		}
@@ -347,15 +435,15 @@ class Wp_Travel_Engine_Archive_Hooks {
 
 				<?php
 					global $wp_query;
-					self::$query ??= $wp_query;
-					$foundpostss = '<div class="wte-filter-foundposts">';
-					$show_found_posts = !empty( array_diff( array_keys( $_GET ), array( 'view_mode', 'wte_orderby' ) ) );
-					if ( $show_found_posts && self::$query ) {
-						$foundpostss .= sprintf(
-							_nx( '%1$s Trip Found', '%1$s Trips Found', self::$query->found_posts, 'number of trips', 'wp-travel-engine' ),
-							'<strong>' . number_format_i18n( self::$query->found_posts ) . '</strong>'
-						);
-					}
+					self::$query    ??= $wp_query;
+					$foundpostss      = '<div class="wte-filter-foundposts">';
+					$show_found_posts = ! empty( array_diff( array_keys( $_GET ), array( 'view_mode', 'wte_orderby' ) ) );
+				if ( $show_found_posts && self::$query ) {
+					$foundpostss .= sprintf(
+						_nx( '%1$s Trip Found', '%1$s Trips Found', self::$query->found_posts, 'number of trips', 'wp-travel-engine' ),
+						'<strong>' . number_format_i18n( self::$query->found_posts ) . '</strong>'
+					);
+				}
 					$foundpostss .= '</div>';
 					echo $foundpostss;
 				?>
@@ -461,15 +549,18 @@ class Wp_Travel_Engine_Archive_Hooks {
 		if ( ! wp_script_is( 'wte-trip-search', 'enqueued' ) ) {
 			TripSearch::enqueue_scripts();
 		}
+
 		if ( ! wp_style_is( 'wpte-trip-archive', 'enqueued' ) ) {
 			TripSearch::enqueue_styles();
 		}
+
 		global $wp_query;
 		if ( is_tax( get_object_taxonomies( 'trip', 'names' ) ) ) {
 			self::$query = $wp_query;
 		} else {
 			self::$query = new \WP_Query( TripSearch::get_query_args() );
 		}
+
 		$show_sidebar = wptravelengine_toggled( get_option( 'wptravelengine_show_trip_search_sidebar', 'yes' ) );
 		?>
 		<div class="wp-travel-engine-archive-outer-wrap collapsible-filter-panel">
@@ -493,30 +584,21 @@ class Wp_Travel_Engine_Archive_Hooks {
 				 */
 				do_action( 'wp_travel_engine_header_filters' );
 				?>
-				<div class="wte-category-outer-wrap is-loading" data-filter-nonce="<?php echo esc_attr(wp_create_nonce('wte_show_ajax_result')); ?>">
+				<div class="wte-category-outer-wrap is-loading" data-filter-nonce="<?php echo esc_attr( wp_create_nonce( 'wte_show_ajax_result' ) ); ?>">
 					<?php
-					$j         = 1;
-					$view_mode = wp_travel_engine_get_archive_view_mode();
-					$classes    = apply_filters( 'wte_advanced_search_trip_results_grid_classes', class_exists( 'Wte_Advanced_Search' ) ? ( $show_sidebar ? 'wte-col-2 category-grid' : 'wte-col-3 category-grid' ) : 'wte-col-3 category-grid' );
-					$view_class = 'grid' === $view_mode ? $classes : 'category-list';
+					$j              = 1;
+					$view_mode      = wp_travel_engine_get_archive_view_mode();
+					$classes        = apply_filters( 'wte_advanced_search_trip_results_grid_classes', class_exists( 'Wte_Advanced_Search' ) ? ( $show_sidebar ? 'wte-col-2 category-grid' : 'wte-col-3 category-grid' ) : 'wte-col-3 category-grid' );
+					$view_class     = 'grid' === $view_mode ? $classes : 'category-list';
 
 					echo '<div class="category-main-wrap ' . esc_attr( $view_class ) . '">';
-					/**
-					 * wp_travel_engine_featured_trips_sticky hook
-					 * Hook for the featured trips sticky section
-					 *
-					 * @hooked wte_featured_trips_sticky
-					 */
-					if ( empty( array_diff( array_keys( $_GET ), array( 'view_mode' ) ) ) ) {
-						do_action( 'wp_travel_engine_featured_trips_sticky', $view_mode );
-					}
 
 					if ( ! self::$query->have_posts() ) {
 						echo apply_filters( 'no_result_found_message', __( 'No results found!', 'wp-travel-engine' ) );
 					}
 
 					$user_wishlists = wptravelengine_user_wishlists();
-					$template_name	= wptravelengine_get_template_by_view_mode( $view_mode );
+					$template_name  = wptravelengine_get_template_by_view_mode( $view_mode );
 
 					while ( self::$query->have_posts() ) {
 						self::$query->the_post();
@@ -525,7 +607,7 @@ class Wp_Travel_Engine_Archive_Hooks {
 							$details['j']              = $j;
 							$details['user_wishlists'] = $user_wishlists;
 							wptravelengine_get_template( $template_name, $details );
-							$j++;
+							++$j;
 						}
 					}
 					echo '</div>';
@@ -543,7 +625,7 @@ class Wp_Travel_Engine_Archive_Hooks {
 					<div class="trip-pagination" data-max-page="<?php echo esc_attr( self::$query->max_num_pages ); ?>" <?php echo $show_load_more ? 'style="display: none;"' : ''; ?>>
 						<?php
 							$original_query = $wp_query;
-							$wp_query = self::$query;
+							$wp_query       = self::$query;
 							the_posts_pagination(
 								array(
 									'prev_text'          => esc_html__( 'Previous', 'wp-travel-engine' ),
@@ -579,7 +661,7 @@ class Wp_Travel_Engine_Archive_Hooks {
 		?>
 		</div><!-- wp-travel-inner-wrapper -->
 	</div><!-- .wp-travel-trip-wrapper -->
-	<?php
+		<?php
 	}
 }
 

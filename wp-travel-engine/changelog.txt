@@ -1,5 +1,53 @@
 == Changelog ==
 
+= 6.7.5 - 4th February 2026 =
+* Fixed: Ensured non-logged-in users can access public features as expected after changes introduced in version 6.7.4.
+
+= 6.7.4 - 4th February 2026 =
+* Improved: Updated the booking export so CSV files include all expected columns for newer versions.
+* Improved: Added a 'Free' label to pricing categories with a zero price for better clarity.
+* Improved: Made small improvements to trip edit settings for a smoother experience.
+* Fixed: Corrected pricing category labels when using WPML translations.
+
+= 6.7.3 - 2nd February 2026 =
+* Improved: Automatically creates and links a customer account when an admin completes a manual booking.
+* Improved: Admins can now edit the transaction ID, payment date, and gateway response for manually added payments.
+* Improved: Featured trips now display correctly in trip search results and trip archive pages.
+* Improved: Multiple Enquiry forms can now be added and used on any page.
+* Improved: Booking Confirmation emails are no longer sent during due payment checkouts.
+* Fixed: Lead traveller additional fields now correctly copy over to billing details.
+* Fixed: Booked trips no longer disappear when using different billing details on the same account.
+
+= 6.7.2 - 15th January 2026 =
+* Improved: Ensured the relevant payment option is correctly applied when switching payment gateways.
+* Fixed: Resolved minor issues in manual bookings.
+
+= 6.7.1 - 13th January 2026 =
+* Improved: Addressed minor issues in manual bookings.
+* Improved: Updated the booking flow to better support the installment payments add-on.
+* Fixed: Resolved an issue where canceled bookings were incorrectly shown in the upcoming tour bookings list.
+* Fixed: Discount amounts now display correctly with consistent formatting across all trip prices.
+* Fixed: Corrected layout and styling issues when using right-to-left (RTL) languages.
+
+= 6.7.0 - 15th December 2025 =
+* Security: Fixed multiple security vulnerabilities across the platform.
+* New Feature: Introduced a new checkout pricing logic for clearer and more accurate payment calculations.
+* Improved: Launched a redesigned booking details interface for a more intuitive and streamlined user experience.
+* Fixed: Resolved several issues in the new booking details UI to ensure accurate information display.
+
+= 6.6.10 - 2nd December 2025 =
+* Fixed: Resolved a script translation compatibility issue introduced in WordPress 6.9.
+* Fixed: Corrected an issue where Extra Service selections in the trip editor did not match the options shown to customers on the front end.
+* Changed: Extended the validity period of remaining payment links to 365 days, giving customers more time to complete their payments.
+
+= 6.6.9 - 27th September 2025 =
+* Improved: Enabled translation support for Trip Data using WPML Advanced Translation Editor.
+* Improved: Side filters in the Trip Search page are now sorted alphabetically for easier navigation.
+* Improved: SEO Analysis now supports content created with the default Block Editor in the Trip Edit page.
+* Changed: Removed the decimal digit setting from the core plugin.
+* Changed: Amounts now display exactly as entered, while checkout calculations are rounded to two decimal places.
+* Fixed: Resolved an issue where the selected featured image for a trip was not displaying correctly on the frontend, ensuring it now consistently appears as intended across all trip views.
+
 = 6.6.8 - 16th September 2025 =
 * Security: Fixed multiple vulnerabilities to ensure safer use of file uploads.
 * Fixed: Improved reliability when uploading and processing files.

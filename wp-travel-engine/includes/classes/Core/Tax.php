@@ -16,10 +16,10 @@ class Tax implements TaxInterface {
 	protected float $tax_percentage = 0;
 
 	public function __construct() {
-		$settings = get_option( 'wp_travel_engine_settings', array() );
+		$settings       = get_option( 'wp_travel_engine_settings', array() );
 		$this->settings = is_array( $settings ) ? $settings : array();
 
-		$this->tax_percentage = (float) ( $this->settings[ 'tax_percentage' ] ?? 0 );
+		$this->tax_percentage = (float) ( $this->settings['tax_percentage'] ?? 0 );
 	}
 
 	/**
@@ -30,7 +30,7 @@ class Tax implements TaxInterface {
 	 * @return string
 	 */
 	public function get_tax_label( $tax_percentage = null ): string {
-		$label_format = $this->settings[ 'tax_label' ] ?? __( 'Tax (%s%%)', 'wp-travel-engine' );
+		$label_format = $this->settings['tax_label'] ?? __( 'Tax (%s%%)', 'wp-travel-engine' );
 
 		if ( is_null( $tax_percentage ) ) {
 			$tax_percentage = $this->tax_percentage;
@@ -62,15 +62,15 @@ class Tax implements TaxInterface {
 	}
 
 	public function is_inclusive(): bool {
-		return ( $this->settings[ 'tax_type_option' ] ?? false ) === 'inclusive';
+		return ( $this->settings['tax_type_option'] ?? false ) === 'inclusive';
 	}
 
 	public function is_exclusive(): bool {
-		return ( $this->settings[ 'tax_type_option' ] ?? false ) === 'exclusive';
+		return ( $this->settings['tax_type_option'] ?? false ) === 'exclusive';
 	}
 
 	public function is_taxable(): bool {
-		return ( $this->settings[ 'tax_enable' ] ?? 'no' ) === 'yes';
+		return ( $this->settings['tax_enable'] ?? 'no' ) === 'yes';
 	}
 
 	/**
@@ -81,5 +81,4 @@ class Tax implements TaxInterface {
 	public function set_tax_percentage( float $percentage ) {
 		$this->tax_percentage = $percentage;
 	}
-
 }

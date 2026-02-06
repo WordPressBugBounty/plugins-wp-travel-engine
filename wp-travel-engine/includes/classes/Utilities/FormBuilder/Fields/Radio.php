@@ -17,9 +17,9 @@ class Radio extends Checkbox {
 	 */
 	protected function options(): string {
 
-		$options     = [];
+		$options     = array();
 		$index       = 0;
-		$field_value = is_scalar( $this->field_value ) ? [ $this->field_value ] : $this->field_value;
+		$field_value = is_scalar( $this->field_value ) ? array( $this->field_value ) : $this->field_value;
 
 		$option_attributes = $this->concat_attributes( $this->option_attributes );
 		foreach ( $this->options as $value => $label ) {
@@ -30,7 +30,7 @@ class Radio extends Checkbox {
 						</div>',
 				$this->field_name . '[]',
 				$value,
-				$this->field_id . '_' . $index ++,
+				$this->field_id . '_' . $index++,
 				$option_attributes,
 				$label,
 				checked( in_array( $value, $field_value, true ), true, false )
@@ -39,5 +39,4 @@ class Radio extends Checkbox {
 
 		return implode( '', $options ) . '<div id="error_container-' . $this->field_id . '"></div>';
 	}
-
 }

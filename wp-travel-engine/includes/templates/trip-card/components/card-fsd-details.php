@@ -10,51 +10,54 @@
 $show_date_layout = $related_query ? $show_related_date_layout : $show_date_layout;
 
 if ( ! $trip_instance->has_package() || ! $has_date || ! $show_date_layout || false === $fsds ) {
-    return;
+	return;
 }
 
 if ( is_numeric( $fsds ) || empty( $fsds ) ) {
-    $fsds = [
-        wp_date( 'Y-m-d' ),
-        wp_date( 'Y-m-d', strtotime( '+1 day' ) ),
-        wp_date( 'Y-m-d', strtotime( '+2 day' ) ),
-    ];
+	$start_date = $trip_instance->plain_start_date;
+
+	$fsds = array(
+		$start_date,
+		wp_date( 'Y-m-d', strtotime( "{$start_date} +1 day" ) ),
+		wp_date( 'Y-m-d', strtotime( "{$start_date} +2 days" ) ),
+	);
 }
 
-$i = 0;
-$content = '';
+$i          = 0;
+$content    = '';
+$list_count = intval( $engine_settings['trip_dates']['number'] ?? 3 );
 foreach ( $fsds as $fsd ) :
 
-    $seats_left = $fsd['seats_left'] ?? '';
+	$seats_left = $fsd['seats_left'] ?? '';
 
-    if ( '' !== $seats_left && 0 >= $seats_left && $i <= 2 ) {
-        continue;
-    }
+	if ( '' !== $seats_left && 0 >= $seats_left && $i < $list_count ) {
+		continue;
+	}
 
-    $content .= '<span class="category-trip-start-date"><span>';
-    $content .= wte_get_new_formated_date( $fsd['start_date'] ?? $fsd, get_option( 'date_format' ) );
+	$content .= '<span class="category-trip-start-date"><span>';
+	$content .= wte_get_new_formated_date( $fsd['start_date'] ?? $fsd, get_option( 'date_format' ) );
 
-    if ( empty( $seats_left ) ) {
-        $content .= ' <em>('.esc_html__( 'Available', 'wp-travel-engine' ).')</em>';
-    } else {
-        $content .= ' <em>('. $seats_left .' '._n( 'Seat Available', 'Seats Available', $seats_left, 'wp-travel-engine' ).')</em>';
-    }
+	if ( empty( $seats_left ) ) {
+		$content .= ' <em>(' . esc_html__( 'Available', 'wp-travel-engine' ) . ')</em>';
+	} else {
+		$content .= ' <em>(' . $seats_left . ' ' . _n( 'Seat Available', 'Seats Available', $seats_left, 'wp-travel-engine' ) . ')</em>';
+	}
 
-    $content .= '</span></span>';
-    
-    if ( ++$i > 2 ) {
-        break;
-    }
+	$content .= '</span></span>';
+
+	if ( ++$i >= $list_count ) {
+		break;
+	}
 
 endforeach;
 
 if ( empty( $content ) ) {
-    return;
+	return;
 }
 
 ?>
 
 <div class="category-trip-dates">
-    <span class="trip-dates-title"><?php echo esc_html__('Next Departures', 'wp-travel-engine'); ?></span>
-    <?php echo $content; ?>
+	<span class="trip-dates-title"><?php echo esc_html__( 'Next Departures', 'wp-travel-engine' ); ?></span>
+	<?php echo $content; ?>
 </div>

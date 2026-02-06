@@ -15,5 +15,4 @@ class PricingCategory extends CartItem {
 	 * @inheritdoc
 	 */
 	public string $item_type = 'pricing_category';
-
 }

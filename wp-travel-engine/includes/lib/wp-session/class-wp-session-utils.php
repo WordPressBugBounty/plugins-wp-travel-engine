@@ -11,7 +11,6 @@ class WP_Session_Utils {
 	 *
 	 * @return int
 	 * @global wpdb $wpdb
-	 *
 	 */
 	public static function count_sessions() {
 		global $wpdb;
@@ -96,7 +95,7 @@ class WP_Session_Utils {
 				update_option( '_wptravelengine_leftover_cached_cleared', 'yes' );
 			}
 
-			$loop_count ++;
+			++$loop_count;
 		} while ( ! empty( $option_names ) && $loop_count < $max_loops );
 	}
 
@@ -139,12 +138,12 @@ class WP_Session_Utils {
 	 * @TODO: Implement this feature later.
 	 */
 	public static function prepare_abandoned_cart_data( object $cart_data ) {
-		$cart_data = json_decode( $cart_data[ "wpte_trip_cart" ] );
+		$cart_data = json_decode( $cart_data['wpte_trip_cart'] );
 		if ( is_object( $cart_data ) ) {
 			return $cart_data;
 		}
 
-		return [];
+		return array();
 	}
 
 	/**
@@ -154,7 +153,6 @@ class WP_Session_Utils {
 	 *
 	 * @return int Sessions deleted.
 	 * @global wpdb $wpdb
-	 *
 	 */
 	public static function delete_old_sessions( int $limit = 1000 ) {
 		global $wpdb;
@@ -163,9 +161,9 @@ class WP_Session_Utils {
 			static::clear_leftover_cache_data();
 		}
 
-		$expired_sessions = WP_Session_Utils::get_expired_sessions();
+		$expired_sessions = self::get_expired_sessions();
 
-		$expired = [];
+		$expired = array();
 		foreach ( $expired_sessions as $expired_session ) {
 			$session_data = maybe_unserialize( $expired_session->value );
 			$expired[]    = "_wp_session_{$expired_session->session_id}";
@@ -174,18 +172,19 @@ class WP_Session_Utils {
 			 * @TODO: Implement this feature later.
 			 * Don't remove this code, as it may be needed in the future.
 			 */
-//			if ( isset( $session_data[ "wpte_trip_cart" ] ) ) {
-//				$cart_data = json_decode( $session_data[ "wpte_trip_cart" ] );
-//				if ( is_object( $cart_data ) ) {
-//					do_action( "wptravelengine.cart.abandoned", static::prepare_abandoned_cart_data( $cart_data ) );
-//				}
-//			}
+			// if ( isset( $session_data[ "wpte_trip_cart" ] ) ) {
+			// $cart_data = json_decode( $session_data[ "wpte_trip_cart" ] );
+			// if ( is_object( $cart_data ) ) {
+			// do_action( "wptravelengine.cart.abandoned", static::prepare_abandoned_cart_data( $cart_data ) );
+			// }
+			// }
 		}
 
 		// Delete expired sessions
 		if ( ! empty( $expired ) ) {
-			$names = implode( "','", $expired );
-			return $wpdb->query( "DELETE FROM $wpdb->options WHERE option_name IN ('{$names}')" );
+			$placeholders = implode( ', ', array_fill( 0, count( $expired ), '%s' ) );
+			$prepare      = $wpdb->prepare( "DELETE FROM $wpdb->options WHERE option_name IN ($placeholders)", $expired );
+			$wpdb->query( $prepare );
 		}
 
 		return 0;
@@ -196,7 +195,6 @@ class WP_Session_Utils {
 	 *
 	 * @return int Sessions deleted
 	 * @global wpdb $wpdb
-	 *
 	 */
 	public static function delete_all_sessions(): int {
 		global $wpdb;

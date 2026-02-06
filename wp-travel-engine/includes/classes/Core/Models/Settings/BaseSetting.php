@@ -50,7 +50,7 @@ class BaseSetting {
 	 * Constructor to set the option name and optional default settings.
 	 *
 	 * @param string $option_name The name of the option.
-	 * @param array $default_settings The default settings array.
+	 * @param array  $default_settings The default settings array.
 	 */
 	public function __construct( string $option_name, $default_settings ) {
 		$this->option_name      = $option_name;
@@ -63,7 +63,7 @@ class BaseSetting {
 	 * Retrieves a specific setting value from the settings array.
 	 *
 	 * @param string|null $key The key of the setting to retrieve.
-	 * @param mixed $default_value The default value to return if the key is not found.
+	 * @param mixed       $default_value The default value to return if the key is not found.
 	 *
 	 * @return mixed The value of the setting, or the default value if not found.
 	 */
@@ -79,7 +79,7 @@ class BaseSetting {
 	 * Checks if the default value is equal to the setting value.
 	 *
 	 * @param string $key The key of the setting to retrieve.
-	 * @param mixed $default_value The default value for the setting.
+	 * @param mixed  $default_value The default value for the setting.
 	 *
 	 * @return bool Returns true if retrieved value is equal to setting value, otherwise returns false.
 	 */
@@ -102,16 +102,15 @@ class BaseSetting {
 	 * Updates a specific setting value in the settings array.
 	 *
 	 * @param string|null $key The key of the setting to update.
-	 * @param mixed $value The new value for the setting.
-	 *
+	 * @param mixed       $value The new value for the setting.
 	 */
 	public function set( ?string $key, $value ) {
-//		if ( isset( $this->setting_types[ $key ] ) ) {
-//			$type = $this->setting_types[ $key ];
-//			if ( ! settype( $value, $type ) ) {
-//				throw new Exception( sprintf( "Setting '%s' type validation failed. Expected '%s'.", esc_html( $key ), esc_html( $type ) ) );
-//			}
-//		}
+		// if ( isset( $this->setting_types[ $key ] ) ) {
+		// $type = $this->setting_types[ $key ];
+		// if ( ! settype( $value, $type ) ) {
+		// throw new Exception( sprintf( "Setting '%s' type validation failed. Expected '%s'.", esc_html( $key ), esc_html( $type ) ) );
+		// }
+		// }
 		if ( is_null( $key ) ) {
 			$this->settings = ArrayUtility::make( $value );
 		} else {

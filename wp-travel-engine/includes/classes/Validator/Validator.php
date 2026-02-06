@@ -33,17 +33,17 @@ class Validator {
 	/**
 	 * @var array $raw_data An empty array to store raw data
 	 */
-	protected array $raw_data = [];
+	protected array $raw_data = array();
 
 	/**
 	 * @var array $errors An empty array to store errors
 	 */
-	protected array $errors = [];
+	protected array $errors = array();
 
 	/**
 	 * @var array $data An empty array to store data
 	 */
-	protected array $data = [];
+	protected array $data = array();
 
 	/**
 	 * Check if there are errors.
@@ -117,5 +117,4 @@ class Validator {
 	public function sanitized(): array {
 		return $this->data;
 	}
-
 }

@@ -15,7 +15,7 @@
 		<div class="wpte-accordion-content">
 			<div class="wpte-customer-profile-details">
 				<div class="wpte-customer-avatar">
-					<img src="<?php echo $avatar; ?>" alt="">
+					<img src="<?php echo esc_url( $avatar ); ?>">
 					<?php
 					if ( ! empty( $customer_id ) ) :
 						$edit_user_url = add_query_arg(
@@ -39,12 +39,12 @@
 									<div class="<?php echo esc_attr( $info['class'] ); ?>">
 									<?php
 									if ( ! empty( $info['icon'] ) ) :
-										echo $info['icon'];
+										echo wptravelengine_display_icon( $info['icon'] );
 										endif;
 									?>
 										<div>
-											<span class="label"><?php echo $info['label']; ?></span>
-											<span class="value"><?php echo $info['value']; ?></span>
+											<span class="label"><?php echo esc_html( $info['label'] ); ?></span>
+											<span class="value"><?php echo esc_html( $info['value'] ); ?></span>
 										</div>
 									</div>
 									<?php
@@ -57,10 +57,10 @@
 							foreach ( $addresses as $address ) {
 								?>
 									<div class="<?php echo esc_attr( $address['class'] ); ?>">
-									<?php echo $address['icon']; ?>
+									<?php echo wptravelengine_display_icon( $address['icon'] ); ?>
 										<div>
-											<span class="label"><?php echo $address['label']; ?></span>
-											<span class="value"><?php echo $address['value']; ?></span>
+											<span class="label"><?php echo esc_html( $address['label'] ); ?></span>
+											<span class="value"><?php echo esc_html( $address['value'] ); ?></span>
 										</div>
 									</div>
 									<?php

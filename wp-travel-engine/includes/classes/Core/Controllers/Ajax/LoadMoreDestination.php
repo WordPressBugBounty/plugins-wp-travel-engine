@@ -31,7 +31,7 @@ class LoadMoreDestination extends AjaxController {
 		$args = json_decode( wte_clean( wp_unslash( $post['query'] ) ), true );
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 
-		$post_page 			 = intval( $post['page'] );
+		$post_page           = intval( $post['page'] );
 		$args['paged']       = ( 0 === $post_page ) ? 2 : ( $post_page + 1 );
 		$args['post_status'] = 'publish';
 
@@ -47,10 +47,12 @@ class LoadMoreDestination extends AjaxController {
 
 		wp_reset_postdata();
 
-		return wp_send_json_success( array(
-			'data' => ob_get_clean(),
-			'current_page' => $args['paged'],
-			'remove_button' => $query->max_num_pages <= $args['paged'],
-		) );
+		return wp_send_json_success(
+			array(
+				'data'          => ob_get_clean(),
+				'current_page'  => $args['paged'],
+				'remove_button' => $query->max_num_pages <= $args['paged'],
+			)
+		);
 	}
 }

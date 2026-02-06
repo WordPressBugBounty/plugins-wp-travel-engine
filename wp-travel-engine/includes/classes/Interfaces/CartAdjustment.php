@@ -15,7 +15,7 @@ interface CartAdjustment {
 	 * Apply the adjustment.
 	 *
 	 * @param float $total The total to apply the adjustment to.
-	 * @param Item $cart_item
+	 * @param Item  $cart_item
 	 *
 	 * @return float The adjusted total.
 	 */

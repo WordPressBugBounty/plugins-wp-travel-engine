@@ -8,7 +8,6 @@
 
 namespace WPTravelEngine\Core\Controllers\RestAPI\V2;
 
-
 use WP_Error;
 use WP_REST_Posts_Controller;
 use WP_REST_Request;
@@ -69,12 +68,14 @@ class Booking extends WP_REST_Posts_Controller {
 
 		$items_query = new \WP_Query();
 
-		$query_result = $items_query->query( [
-			'post_type'      => $this->post_type,
-			'posts_per_page' => $request[ 'per_page' ] ?? 10,
-			'paged'          => $request[ 'page' ] ?? 1,
-			'post_status'    => 'publish',
-		] );
+		$query_result = $items_query->query(
+			array(
+				'post_type'      => $this->post_type,
+				'posts_per_page' => $request['per_page'] ?? 10,
+				'paged'          => $request['page'] ?? 1,
+				'post_status'    => 'publish',
+			)
+		);
 
 		$items = array();
 		foreach ( $query_result as $item ) {
@@ -107,7 +108,7 @@ class Booking extends WP_REST_Posts_Controller {
 	 * @since 6.5.2
 	 */
 	public function get_item_permissions_check( $request ) {
-		$post = $this->get_post( $request[ 'id' ] );
+		$post = $this->get_post( $request['id'] );
 		if ( is_wp_error( $post ) ) {
 			return $post;
 		}
@@ -121,12 +122,11 @@ class Booking extends WP_REST_Posts_Controller {
 
 	/**
 	 * @inheritDoc
+	 * @return bool|WP_Error
 	 * @since 6.5.2
 	 */
 	public function check_read_permission( $post ) {
-		$post_type = get_post_type_object( $this->post_type );
-
-		if ( ! current_user_can( $post_type->cap->edit_posts ) ) {
+		if ( ! current_user_can( 'edit_post', $post->ID ) ) {
 			return new WP_Error(
 				'rest_forbidden_context',
 				__( 'Sorry, you are not allowed to view this resource.', 'wp-travel-engine' ),

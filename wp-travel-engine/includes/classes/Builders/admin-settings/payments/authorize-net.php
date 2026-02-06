@@ -32,7 +32,7 @@ return apply_filters(
 				'label'      => __( 'Transaction Key', 'wp-travel-engine' ),
 				'field_type' => 'TEXT',
 				'name'       => 'authorize_net.transaction_key',
-				'type'		 => 'password'
+				'type'       => 'password',
 			),
 			array(
 				'field_type' => 'ALERT',

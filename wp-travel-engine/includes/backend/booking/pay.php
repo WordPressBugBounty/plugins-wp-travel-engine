@@ -8,16 +8,16 @@ $wp_travel_engine_postmeta_settings = get_post_meta( $post->ID, 'wp_travel_engin
  * @return string
  */
 function payment_status_options() {
-	 $options = array(
-		 'publish'   => 'Publish',
-		 'refunded'  => 'Refunded',
-		 'failed'    => 'Failed',
-		 'abandoned' => 'Abandoned',
-		 'revoked'   => 'Revoked',
-		 'pending'   => 'Pending',
-	 );
-	 $options = apply_filters( 'wp_travel_engine_payment_status_options', $options );
-	 return $options;
+	$options = array(
+		'publish'   => 'Publish',
+		'refunded'  => 'Refunded',
+		'failed'    => 'Failed',
+		'abandoned' => 'Abandoned',
+		'revoked'   => 'Revoked',
+		'pending'   => 'Pending',
+	);
+	$options = apply_filters( 'wp_travel_engine_payment_status_options', $options );
+	return $options;
 }
 ?>
 <div class="trip-info-meta">

@@ -14,7 +14,6 @@ interface Asset {
 	 * Set dependencies.
 	 *
 	 * @param array|string $dependencies Dependencies.
-	 *
 	 */
 	public function dependencies( $dependencies );
 

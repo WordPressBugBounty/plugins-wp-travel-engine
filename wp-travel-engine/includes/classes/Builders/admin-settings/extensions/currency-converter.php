@@ -114,12 +114,12 @@ return apply_filters(
 				'name'       => 'currency_converter.auto_update',
 			),
 			array(
-				'condition' => 'currency_converter.api_key !== EMPTY',
+				'condition'  => 'currency_converter.api_key !== EMPTY',
 				'title'      => __( 'Add Currency', 'wp-travel-engine' ),
 				'field_type' => 'TITLE',
 			),
 			array(
-				'condition' => 'currency_converter.api_key !== EMPTY',
+				'condition'  => 'currency_converter.api_key !== EMPTY',
 				'field_type' => 'CURRENCY_CONVERTER',
 				'options'    => $currencies,
 				'name'       => 'currency_converter.currency_rate',

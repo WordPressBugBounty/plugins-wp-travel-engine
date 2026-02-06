@@ -19,9 +19,9 @@ use WTE_PayU_Money_Admin;
  * Handles cart related requests.
  */
 class Checkout extends AjaxController {
-	const NONCE_KEY = '_nonce';
+	const NONCE_KEY    = '_nonce';
 	const NONCE_ACTION = 'wp_xhr';
-	const ACTION = 'wptravelengine_page_checkout';
+	const ACTION       = 'wptravelengine_page_checkout';
 
 	/**
 	 * @inheritDoc
@@ -34,10 +34,12 @@ class Checkout extends AjaxController {
 
 		switch ( $cart_action ) {
 			case 'update_cart':
-				wptravelengine_update_cart( array(
-					'payment_type'    => $this->request->get_param( 'payment_mode' ),
-					'payment_gateway' => $this->request->get_param( 'payment_method' ),
-				) );
+				wptravelengine_update_cart(
+					array(
+						'payment_type'    => $this->request->get_param( 'payment_mode' ),
+						'payment_gateway' => $this->request->get_param( 'payment_method' ),
+					)
+				);
 
 				if ( $formData = $this->request->get_param( 'formData' ) ) {
 					$request = new RequestParser( 'POST' );
@@ -59,22 +61,34 @@ class Checkout extends AjaxController {
 				do_action( 'wptravelengine_checkout_payment_modes' );
 				$payment_modes = ob_get_clean();
 
+				/**
+				 * @since 6.7.1
+				 * @description This is the action for the payment methods fragments update.
+				 * @return void
+				 */
+				ob_start();
+				do_action( 'wptravelengine_checkout_payment_methods' );
+				$payment_methods = ob_get_clean();
+
 				global $wte_cart;
 
-				wp_send_json( apply_filters(
-					"wptravelengine_page_checkout_{$cart_action}_response",
-					array(
-						'success'   => true,
-						'message'   => __( 'Cart updated successfully.', 'wp-travel-engine' ),
-						'cart'      => $wte_cart,
-						'cart_totals' => $wte_cart->get_totals(),
-						'fragments' => array(
-							'[data-checkout-form-submit]'   => $submit_button,
-							'[data-cart-summary]'           => $cart_summary,
-							'[data-checkout-payment-modes]' => $payment_modes,
-						),
+				wp_send_json(
+					apply_filters(
+						"wptravelengine_page_checkout_{$cart_action}_response",
+						array(
+							'success'     => true,
+							'message'     => __( 'Cart updated successfully.', 'wp-travel-engine' ),
+							'cart'        => $wte_cart,
+							'cart_totals' => $wte_cart->get_totals(),
+							'fragments'   => array(
+								'[data-checkout-form-submit]' => $submit_button,
+								'[data-cart-summary]' => $cart_summary,
+								'[data-checkout-payment-modes]' => $payment_modes,
+								'[data-checkout-payment-methods-details]' => $payment_methods,
+							),
+						)
 					)
-				) );
+				);
 				break;
 			case 'stripe_create_session':
 				$this->stripe_create_session();
@@ -96,7 +110,6 @@ class Checkout extends AjaxController {
 			default:
 				wp_send_json_error( new WP_Error( 'INVALID_CART_ACTION', __( 'Invalid cart action.', 'wp-travel-engine' ) ) );
 		}
-
 	}
 
 	/**
@@ -107,10 +120,12 @@ class Checkout extends AjaxController {
 
 		// Set your secret key. Remember to switch to your live secret key in production.
 		// See your keys here: https://dashboard.stripe.com/apikeys
-		$stripe = new \Stripe\StripeClient( [
-			"api_key"        => wptravelengine_settings()->get( 'stripe_secret' ),
-			"stripe_version" => "2024-12-18.acacia; custom_checkout_beta=v1;",
-		] );
+		$stripe = new \Stripe\StripeClient(
+			array(
+				'api_key'        => wptravelengine_settings()->get( 'stripe_secret' ),
+				'stripe_version' => '2024-12-18.acacia; custom_checkout_beta=v1;',
+			)
+		);
 
 		global $wte_cart;
 
@@ -137,22 +152,28 @@ class Checkout extends AjaxController {
 			);
 		}
 		try {
-			$response = $stripe->checkout->sessions->create( [
-				'line_items' => $line_items,
-				'mode'       => 'payment',
-				'ui_mode'    => 'custom',
-				'return_url' => get_bloginfo( 'url' ),
-			] );
+			$response = $stripe->checkout->sessions->create(
+				array(
+					'line_items' => $line_items,
+					'mode'       => 'payment',
+					'ui_mode'    => 'custom',
+					'return_url' => get_bloginfo( 'url' ),
+				)
+			);
 
-			wp_send_json( array(
-				'success' => true,
-				'data'    => $response,
-			) );
+			wp_send_json(
+				array(
+					'success' => true,
+					'data'    => $response,
+				)
+			);
 		} catch ( ApiErrorException $e ) {
-			wp_send_json( array(
-				'success' => false,
-				'error'   => $e->getMessage(),
-			) );
+			wp_send_json(
+				array(
+					'success' => false,
+					'error'   => $e->getMessage(),
+				)
+			);
 		}
 	}
 
@@ -167,11 +188,11 @@ class Checkout extends AjaxController {
 		global $wte_cart;
 
 		if ( 'partial' == $wte_cart->get_payment_type() ) {
-			$order_amount = $wte_cart->get_totals()[ 'partial_total' ];
-		} else if ( 'due' == $wte_cart->get_payment_type() ) {
-			$order_amount = $wte_cart->get_totals()[ 'due_total' ];
+			$order_amount = $wte_cart->get_totals()['partial_total'];
+		} elseif ( 'due' == $wte_cart->get_payment_type() ) {
+			$order_amount = $wte_cart->get_totals()['due_total'];
 		} else {
-			$order_amount = $wte_cart->get_totals()[ 'total' ];
+			$order_amount = $wte_cart->get_totals()['total'];
 		}
 
 		$currency = wptravelengine_settings()->get( 'currency_code' );
@@ -183,30 +204,35 @@ class Checkout extends AjaxController {
 		}
 
 		try {
-			$payment_intent = \Stripe\PaymentIntent::create( [
-				'amount'   => $order_amount,
-				'currency' => $currency,
-				'metadata' => array( 'integration_check' => 'accept_a_payment' ),
-			] );
+			$payment_intent = \Stripe\PaymentIntent::create(
+				array(
+					'amount'   => $order_amount,
+					'currency' => $currency,
+					'metadata' => array( 'integration_check' => 'accept_a_payment' ),
+				)
+			);
 
-			wp_send_json( array(
-				'success' => true,
-				'data'    => array(
-					'client_secret' => $payment_intent->client_secret,
-					'id'            => $payment_intent->id,
-					'return_url'    => get_bloginfo( 'url' ),
-					'amount'        => $order_amount,
-					'currency'      => $currency,
-					'payment_mode'  => $wte_cart->get_payment_type(),
-				),
-			) );
+			wp_send_json(
+				array(
+					'success' => true,
+					'data'    => array(
+						'client_secret' => $payment_intent->client_secret,
+						'id'            => $payment_intent->id,
+						'return_url'    => get_bloginfo( 'url' ),
+						'amount'        => $order_amount,
+						'currency'      => $currency,
+						'payment_mode'  => $wte_cart->get_payment_type(),
+					),
+				)
+			);
 		} catch ( ApiErrorException $e ) {
-			wp_send_json( array(
-				'success' => false,
-				'error'   => $e->getMessage(),
-			) );
+			wp_send_json(
+				array(
+					'success' => false,
+					'error'   => $e->getMessage(),
+				)
+			);
 		}
-
 	}
 
 	/**
@@ -216,11 +242,11 @@ class Checkout extends AjaxController {
 	 */
 	public function get_payable_amount( \WPTravelEngine\Core\Cart\Cart $cart ): float {
 		if ( 'partial' == $cart->get_payment_type() ) {
-			$order_amount = $cart->get_totals()[ 'partial_total' ];
-		} else if ( in_array( $cart->get_payment_type(), array( 'due', 'remaining_payment' ) ) ) {
-			$order_amount = $cart->get_totals()[ 'due_total' ];
+			$order_amount = $cart->get_totals()['partial_total'];
+		} elseif ( in_array( $cart->get_payment_type(), array( 'due', 'remaining_payment' ) ) ) {
+			$order_amount = $cart->get_totals()['due_total'];
 		} else {
-			$order_amount = $cart->get_totals()[ 'total' ];
+			$order_amount = $cart->get_totals()['total'];
 		}
 
 		return (int) round( $order_amount, 2 );
@@ -232,26 +258,31 @@ class Checkout extends AjaxController {
 	public function midtrans_snap_token() {
 		global $wte_cart;
 
-		$snap_token = \Wte_Midtrans_Helper::get_instance()->get_snap_token( array(
-			'transaction_details' => array(
-				'order_id'     => rand(),
-				'gross_amount' => round( $this->get_payable_amount( $wte_cart ) ),
-			),
-			'custom_field1'       => 'midtrans',
-			'customer_details'    => array(
-				'first_name' => $this->request->get_param( 'billing[fname]' ),
-				'last_name'  => $this->request->get_param( 'billing[lname]' ),
-				'email'      => $this->request->get_param( 'billing[email]' ),
-			),
-			'credit_card'         => array(
-				'save_card' => \Wte_Midtrans_Helper::get_instance()->is_save_card_enabled(),
-			),
-		) );
+		$amount = $wte_cart->get_total_payable_amount();
 
-		wp_send_json( array(
-			'success' => true,
-			'data'    => compact( 'snap_token' ),
-		) );
+		$snap_token = \Wte_Midtrans_Helper::get_instance()->get_snap_token(
+			array(
+				'transaction_details' => array(
+					'order_id'     => rand(),
+					'gross_amount' => round( $amount ),
+				),
+				'custom_field1'       => 'midtrans',
+				'customer_details'    => array(
+					'first_name' => $this->request->get_param( 'billing[fname]' ),
+					'last_name'  => $this->request->get_param( 'billing[lname]' ),
+					'email'      => $this->request->get_param( 'billing[email]' ),
+				),
+				'credit_card'         => array(
+					'save_card' => \Wte_Midtrans_Helper::get_instance()->is_save_card_enabled(),
+				),
+			)
+		);
 
+		wp_send_json(
+			array(
+				'success' => true,
+				'data'    => compact( 'snap_token' ),
+			)
+		);
 	}
 }

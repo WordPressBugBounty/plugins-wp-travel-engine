@@ -1040,7 +1040,7 @@ class SettingsAPISchema {
 		}
 
 		// if ( isset( $fsd['date_layout'] ) ) {
-		// 	$this->plugin_settings->set( 'fsd_dates_layout', $fsd['date_layout'] );
+		// $this->plugin_settings->set( 'fsd_dates_layout', $fsd['date_layout'] );
 		// }
 
 		if ( isset( $fsd['number_of_dates'] ) ) {

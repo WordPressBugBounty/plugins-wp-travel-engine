@@ -137,8 +137,8 @@ class Login extends UserAccount {
 			),
 			'scope'                    => 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
 			'authorize_url_parameters' => array(
-				'prompt'		=> 'select_account',
-				'access_type'	=> 'offline',
+				'prompt'      => 'select_account',
+				'access_type' => 'offline',
 
 			),
 		);
@@ -157,7 +157,7 @@ class Login extends UserAccount {
 				echo esc_html( $e->getMessage() );
 			}
 		} catch ( \Exception $e ) {
-			echo 'Oops, we ran into an issue! ' . esc_html( $e->getMessage() );
+			echo esc_html__( 'Oops, we ran into an issue!', 'wp-travel-engine' ) . ' ' . esc_html( $e->getMessage() );
 		}
 
 		if ( ! empty( $userProfile ) ) {
@@ -216,7 +216,7 @@ class Login extends UserAccount {
 				echo esc_html( $e->getMessage() );
 			}
 		} catch ( \Exception $e ) {
-			echo 'Oops, we ran into an issue! ' . esc_html( $e->getMessage() );
+			echo esc_html__( 'Oops, we ran into an issue!', 'wp-travel-engine' ) . ' ' . esc_html( $e->getMessage() );
 		}
 
 		if ( ! empty( $userProfile ) ) {
@@ -233,7 +233,6 @@ class Login extends UserAccount {
 			$result->status = 'FAIL';
 		}
 		return $result;
-
 	}
 
 
@@ -277,7 +276,7 @@ class Login extends UserAccount {
 				echo esc_html( $e->getMessage() );
 			}
 		} catch ( \Exception $e ) {
-			echo 'Oops, we ran into an issue! ' . esc_html( $e->getMessage() );
+			echo esc_html__( 'Oops, we ran into an issue!', 'wp-travel-engine' ) . ' ' . esc_html( $e->getMessage() );
 		}
 
 		if ( ! empty( $userProfile ) ) {

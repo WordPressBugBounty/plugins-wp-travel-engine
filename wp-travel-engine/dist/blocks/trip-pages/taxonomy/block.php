@@ -61,7 +61,7 @@ wp_enqueue_style( 'wp-travel-engine' );
 								<h1 class="page-title" data-id="<?php echo esc_attr( $taxonomy ); ?>"><?php the_title(); ?></h1>
 								<?php
 								endif;
-							if( isset( $post->ID ) ):?>
+							if ( isset( $post->ID ) ):?>
 							<div class="page-feat-image">
 								<?php
 								$image_id    = get_post_thumbnail_id( $post->ID );

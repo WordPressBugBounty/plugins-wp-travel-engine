@@ -15,7 +15,7 @@ use WPTravelEngine\Utilities\FormBuilder\Fields\Base;
 ?>
 <div class="<?php echo esc_attr( $wrapper_classnames ); ?>">
 	<label class="<?php echo esc_attr( $label_classnames ); ?>"
-		   for="<?php echo esc_attr( $field_id ); ?>">
+			for="<?php echo esc_attr( $field_id ); ?>">
 		<?php echo esc_html( $field_label ); ?>
 		<?php if ( $renderer->is_required() && $field_label ) : ?>
 			<span class="required">*</span>

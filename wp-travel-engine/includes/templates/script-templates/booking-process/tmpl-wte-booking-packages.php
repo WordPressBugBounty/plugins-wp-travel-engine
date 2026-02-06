@@ -44,7 +44,7 @@
 			}
 			for( var pcid of _pcids ) { /*  forpcidipc */
 				var pc = packageCategories[pcid]
-				if( pc.price.length < 1 ) {
+				if ( pc.price.length < 1 ) {
 					continue;
 				}
 

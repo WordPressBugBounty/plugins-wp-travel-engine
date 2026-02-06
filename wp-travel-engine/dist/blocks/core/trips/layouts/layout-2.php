@@ -2,7 +2,7 @@
 /**
  * Trip Card Layout - 2
  */
-list( $settings, $trip, $results, $meta, $is_featured, $wte_global, $details ) = $args;
+list( $settings, $trip, $results, $meta, $is_featured, $wte_global, $details, $pax_label ) = $args;
 
 ?>
 <!-- Layout 2 -->
@@ -11,7 +11,7 @@ list( $settings, $trip, $results, $meta, $is_featured, $wte_global, $details ) =
 		<div class="wpte-trip-image-wrap">
 			<?php if ( wte_array_get( $settings, 'layoutFilters.showDiscount', false ) && $meta->discount_percent ) : ?>
 				<div class="discount-text-wrap">
-					<span class="discount-percent"><?php echo sprintf( esc_html__( '%1$s%% Off', 'wp-travel-engine' ), (float) $meta->discount_percent ); ?></span>
+					<span class="discount-percent"><?php printf( esc_html__( '%1$s%% Off', 'wp-travel-engine' ), (float) $meta->discount_percent ); ?></span>
 				</div>
 			<?php endif; ?>
 
@@ -51,8 +51,8 @@ list( $settings, $trip, $results, $meta, $is_featured, $wte_global, $details ) =
 			<div class="wpte-trip-header-wrap">
 				<?php
 				if ( wte_array_get( $settings, 'layoutFilters.showTitle', true ) ) :
-				$taglevel = wte_array_get( $settings, 'tripTitleHeadingLevel', 2 );
-				?>
+					$taglevel = wte_array_get( $settings, 'tripTitleHeadingLevel', 2 );
+					?>
 					<div class="wpte-trip-title-wrap">
 						<h<?php echo esc_attr( $taglevel ); ?> class="wpte-trip-title" itemprop="name">
 							<a itemprop="url" href="<?php echo esc_url( get_the_permalink( $trip ) ); ?>"><?php echo esc_html( $trip->post_title ); ?></a>
@@ -75,16 +75,21 @@ list( $settings, $trip, $results, $meta, $is_featured, $wte_global, $details ) =
 			<div class="wpte-trip-budget-wrap justify-content-between align-items-end">
 				<div class="wpte-trip-meta-list">
 
-					<?php if ( wte_array_get( $settings, 'layoutFilters.showDuration', false ) && ( ! empty( $meta->duration['days'] ) || ! empty( $meta->duration['days'] ) ) ) :
-						wte_get_template( 'components/content-trip-card-duration.php', [
-							'trip_instance' => $trip,
-							'trip_duration_unit' => $meta->duration['duration_unit'],
-							'trip_duration' => $meta->duration['days'],
-							'trip_duration_nights' => $meta->duration['nights'],
-							'set_duration_type' => $details ? $details['set_duration_type'] : 'both',
-							'is_block_layout'  => true,
-						] );
-					endif; ?>
+					<?php
+					if ( wte_array_get( $settings, 'layoutFilters.showDuration', false ) && ( ! empty( $meta->duration['days'] ) || ! empty( $meta->duration['days'] ) ) ) :
+						wte_get_template(
+							'components/content-trip-card-duration.php',
+							array(
+								'trip_instance'        => $trip,
+								'trip_duration_unit'   => $meta->duration['duration_unit'],
+								'trip_duration'        => $meta->duration['days'],
+								'trip_duration_nights' => $meta->duration['nights'],
+								'set_duration_type'    => $details ? $details['set_duration_type'] : 'both',
+								'is_block_layout'      => true,
+							)
+						);
+					endif;
+					?>
 
 					<?php if ( wte_array_get( $settings, 'layoutFilters.showGroupSize', false ) && (int) $meta->min_pax ) : ?>
 					<span class="wpte-trip-meta wpte-trip-pax">
@@ -102,7 +107,10 @@ list( $settings, $trip, $results, $meta, $is_featured, $wte_global, $details ) =
 								/>
 							</svg>
 						</i>
-						<?php printf( esc_html__( '%s People', 'wp-travel-engine' ), (int) $meta->max_pax ? esc_html($meta->min_pax . '-' . $meta->max_pax) : esc_html($meta->min_pax) ); ?>
+						<?php
+						/* translators: 1: Pax count, 2: Person label */
+						printf( esc_html__( '%1$s %2$s', 'wp-travel-engine' ), (int) $meta->max_pax ? esc_html( $meta->min_pax . '-' . $meta->max_pax ) : esc_html( $meta->min_pax ), esc_html( $pax_label ) );
+						?>
 					</span>
 					<?php endif; ?>
 

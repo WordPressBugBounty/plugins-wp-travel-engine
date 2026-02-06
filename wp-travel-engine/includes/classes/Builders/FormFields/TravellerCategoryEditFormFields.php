@@ -6,7 +6,6 @@
 
 namespace WPTravelEngine\Builders\FormFields;
 
-
 use WPTravelEngine\Abstracts\BookingEditFormFields;
 use WPTravelEngine\Core\Models\Post\Booking;
 
@@ -31,7 +30,7 @@ class TravellerCategoryEditFormFields extends BookingEditFormFields {
 					<input type="number"
 						name="traveller_pricing[quantity][]"
 						placeholder="3"
-						 min="0"> ×
+						min="0"> ×
 					<input type="number"
 						name="traveller_pricing[price][]"
 						placeholder="100"
@@ -46,8 +45,7 @@ class TravellerCategoryEditFormFields extends BookingEditFormFields {
 		</tr>
 		
 		<?php
-		return ;
-		
+		return;
 	}
 
 	public static function create( ...$args ): TravellerCategoryEditFormFields {

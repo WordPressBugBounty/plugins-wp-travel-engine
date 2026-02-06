@@ -9,7 +9,7 @@ return apply_filters(
 	'payment_tax',
 	array(
 		'title'  => __( 'Tax Settings', 'wp-travel-engine' ),
-		'order'  => 10,
+		'order'  => 9,
 		'id'     => 'payment-tax',
 		'fields' => array(
 			array(
@@ -30,6 +30,7 @@ return apply_filters(
 						'field_type'  => 'TEXT',
 						'name'        => 'tax.custom_label',
 						'default'     => 'Tax (%s%%)',
+						'style'       => array( 'width' => '50%' ),
 					),
 					array(
 						'divider'    => true,
@@ -51,12 +52,28 @@ return apply_filters(
 					),
 					array(
 						'divider'    => true,
-						'label'      => __( 'Tax Percentage', 'wp-travel-engine' ),
+						'label'      => __( 'Percentage', 'wp-travel-engine' ),
 						'help'       => __( 'Trip Tax percentage added to trip price.', 'wp-travel-engine' ),
 						'field_type' => 'NUMBER',
 						'default'    => '13',
 						'name'       => 'tax.percentage',
-						'min'        => 0,
+						'rules'      => array(
+							'required' => 'Tax percentage is required',
+							'min'      => array(
+								'value'   => 0,
+								'message' => 'Tax percentage must be greater than 0',
+							),
+						),
+						'style'      => array( 'width' => '50%' ),
+						'suffix'     => array(
+							'type'    => 'field',
+							'field'   => array(
+								'defaultValue' => __( '%', 'wp-travel-engine' ),
+								'type'         => 'TEXT',
+								'readOnly'     => true,
+							),
+							'variant' => 'solid',
+						),
 					),
 				),
 			),

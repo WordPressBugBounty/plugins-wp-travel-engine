@@ -72,7 +72,7 @@ class TripPackages extends TripPackageIterator {
 		}
 
 		if ( count( $this->packages ) === 1 ) {
-			return $this->packages[ 0 ];
+			return $this->packages[0];
 		}
 
 		return $this->lowest_price_package();
@@ -96,5 +96,4 @@ class TripPackages extends TripPackageIterator {
 
 		return null;
 	}
-
 }

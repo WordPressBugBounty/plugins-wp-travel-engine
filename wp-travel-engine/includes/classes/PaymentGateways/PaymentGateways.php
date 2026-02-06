@@ -23,7 +23,7 @@ class PaymentGateways {
 	/**
 	 * Payment Gateways.
 	 *
-	 * @var PaymentGateway[]
+	 * @var PaymentGateway[]|BaseGateway[]
 	 */
 	protected static array $payment_gateways = array();
 
@@ -67,11 +67,19 @@ class PaymentGateways {
 	 * @param bool $to_array
 	 *
 	 * @return array
+	 * @updated 6.7.0
 	 */
 	public function get_active_payment_gateways( bool $to_array = false ): array {
+		global $wte_cart;
 		$active_gateways = array();
-		$currency = wptravelengine_settings()->get( 'currency_code', 'USD' );
+		$currency        = wptravelengine_settings()->get( 'currency_code', 'USD' );
+
 		foreach ( self::$payment_gateways as $gateway ) {
+
+			if ( $wte_cart->get_booking_ref() && $wte_cart->is_curr_cart( '>', $gateway::$cart_version ) ) {
+				continue;
+			}
+
 			if ( $gateway->is_active() && $gateway->is_supports_currency( $currency ) ) {
 				$active_gateways[ $gateway->get_gateway_id() ] = $to_array ? $gateway->get_args() : $gateway;
 			}
@@ -110,7 +118,7 @@ class PaymentGateways {
 			'check_payments'       => new CheckPayment(),
 		);
 
-		$gateways = apply_filters_deprecated( 'wp_travel_engine_available_payment_gateways', [ array() ], '6.0.0' );
+		$gateways = apply_filters_deprecated( 'wp_travel_engine_available_payment_gateways', array( array() ), '6.0.0' );
 
 		foreach ( $gateways as $gateway_id => $gateway ) {
 			if ( is_array( $gateway ) ) {
@@ -130,5 +138,4 @@ class PaymentGateways {
 
 		do_action( 'wptravelengine_payment_gateways_registered', $this );
 	}
-
 }

@@ -21,11 +21,11 @@ $payment_currency = array_map(
 
 $currency_options = array(
 	array(
-		'label' => 'Currency Symbol ( e.g. $ )',
+		'label' => __( 'Currency Symbol ( e.g. $ )', 'wp-travel-engine' ),
 		'value' => 'symbol',
 	),
 	array(
-		'label' => 'Currency Code ( e.g. USD )',
+		'label' => __( 'Currency Code ( e.g. USD )', 'wp-travel-engine' ),
 		'value' => 'code',
 	),
 );
@@ -58,14 +58,6 @@ return apply_filters(
 				'description' => __( 'Amount Display format. Available tags: <code>%CURRENCY_CODE%</code>, <code>%CURRENCY_SYMBOL%</code>, <code>%AMOUNT%</code>, <code>%FORMATED_AMOUNT%</code>', 'wp-travel-engine' ),
 				'field_type'  => 'TEXT',
 				'name'        => 'amount_format',
-				'divider'     => true,
-			),
-			array(
-				'label'       => __( 'Decimal digits', 'wp-travel-engine' ),
-				'description' => __( 'Number of Decimal digits.', 'wp-travel-engine' ),
-				'field_type'  => 'NUMBER',
-				'default'     => '0',
-				'name'        => 'decimal_digits',
 				'divider'     => true,
 			),
 			array(

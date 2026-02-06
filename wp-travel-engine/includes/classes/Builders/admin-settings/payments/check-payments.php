@@ -9,7 +9,7 @@ return apply_filters(
 	'payment_check',
 	array(
 		'title'  => __( 'Check Payments', 'wp-travel-engine' ),
-		'order'  => 15,
+		'order'  => 11,
 		'id'     => 'payment-check',
 		'fields' => array(
 			array(

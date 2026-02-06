@@ -10,10 +10,10 @@ if ( empty( wptravelengine_settings()->get( 'pages.search' ) ) ) {
 
 // Search label filters.
 $labels = array(
-	'destination' => apply_filters('wte_search_destination_label', __('Destination', 'wp-travel-engine')),
-	'activities' => apply_filters('wte_search_activities_label', __('Activities', 'wp-travel-engine')),
-	'duration' => apply_filters('wte_search_duration_label', __('Duration', 'wp-travel-engine')),
-	'price' => apply_filters('wte_search_budget_label', __('Budget', 'wp-travel-engine')),
+	'destination' => apply_filters( 'wte_search_destination_label', __( 'Destination', 'wp-travel-engine' ) ),
+	'activities'  => apply_filters( 'wte_search_activities_label', __( 'Activities', 'wp-travel-engine' ) ),
+	'duration'    => apply_filters( 'wte_search_duration_label', __( 'Duration', 'wp-travel-engine' ) ),
+	'price'       => apply_filters( 'wte_search_budget_label', __( 'Budget', 'wp-travel-engine' ) ),
 );
 
 $icons = array(
@@ -26,23 +26,40 @@ $icons = array(
 
 $search_filters = get_object_taxonomies( 'trip', 'objects' );
 
-array_splice( $search_filters, 2, 0, [(object) [
-	// 'show'  => ! wte_advanced_search_hide_filters_in_search_page( 'duration' ),
-    'label' => $labels['duration'],
-    'name'  => 'duration',
-]] );
+array_splice(
+	$search_filters,
+	2,
+	0,
+	array(
+		(object) array(
+			// 'show'  => ! wte_advanced_search_hide_filters_in_search_page( 'duration' ),
+			'label' => $labels['duration'],
+			'name'  => 'duration',
+		),
+	)
+);
 
-array_splice( $search_filters, 4, 0, [(object) [
-	'show'  => ! wte_advanced_search_hide_filters_in_search_page( 'budget' ),
-    'label' => $labels['price'],
-    'name'  => 'price',
-]] );
+array_splice(
+	$search_filters,
+	4,
+	0,
+	array(
+		(object) array(
+			'show'  => ! wte_advanced_search_hide_filters_in_search_page( 'budget' ),
+			'label' => $labels['price'],
+			'name'  => 'price',
+		),
+	)
+);
 
-array_push( $search_filters, (object) [
-	'show'  => ! wte_advanced_search_hide_filters_in_search_page( 'dates' ),
-    'label' =>  apply_filters( 'wte-fixed-departure-dates-title', __( 'Departure Dates', 'wp-travel-engine' ) ),
-    'name'  => 'dates',
-] );
+array_push(
+	$search_filters,
+	(object) array(
+		'show'  => ! wte_advanced_search_hide_filters_in_search_page( 'dates' ),
+		'label' => apply_filters( 'wte-fixed-departure-dates-title', __( 'Departure Dates', 'wp-travel-engine' ) ),
+		'name'  => 'dates',
+	)
+);
 
 $search_filters = apply_filters( 'wptravelengine_search_form_filters', $search_filters );
 
@@ -56,11 +73,11 @@ $search_filters = apply_filters( 'wptravelengine_search_form_filters', $search_f
 			foreach ( $search_filters as $_taxonomy => $args ) {
 
 				$_args = array(
-					'show' 	=> $args->show ?? ! wte_advanced_search_hide_filters_in_search_page( $args->name ),
-					'label' => $labels[$args->name] ?? $args->label,
-					'icon' 	=> array(
-						'value' 	=> '',
-						'library' 	=> '',
+					'show'  => $args->show ?? ! wte_advanced_search_hide_filters_in_search_page( $args->name ),
+					'label' => $labels[ $args->name ] ?? $args->label,
+					'icon'  => array(
+						'value'   => '',
+						'library' => '',
 					),
 				);
 
@@ -80,14 +97,14 @@ $search_filters = apply_filters( 'wptravelengine_search_form_filters', $search_f
 				}
 
 				if ( 'dates' !== $args->name ) {
-					$terms = wte_get_terms_by_id( $_taxonomy );					
+					$terms = wte_get_terms_by_id( $_taxonomy );
 				} else {
-					if ( wptravelengine_is_addon_active( 'fixed-starting-dates') && class_exists( '\WTE_Fixed_Starting_Dates_Functions' ) ){
+					if ( wptravelengine_is_addon_active( 'fixed-starting-dates' ) && class_exists( '\WTE_Fixed_Starting_Dates_Functions' ) ) {
 						$today  = new \DateTime();
 						$months = \WTE_Fixed_Starting_Dates_Functions::get_trips_available_year_months();
 						?>
 						<div class="wpte-trip__adv-field wpte__select-field">
-							<span class="icon"> <?php echo wte_esc_svg( $icons[$args->name] ?? $icons['default'] ); ?> </span>
+							<span class="icon"> <?php echo wte_esc_svg( $icons[ $args->name ] ?? $icons['default'] ); ?> </span>
 							<input type="text" class="wpte__input" placeholder="<?php echo esc_attr( $_args['label'] ); ?>" />
 							<input type="hidden" id="wptravelengine_search_form_field_<?php echo esc_attr( $args->name ); ?>" class="wpte__input-value" name="trip-date-select" />
 							<div class="wpte__select-options">
@@ -111,7 +128,7 @@ $search_filters = apply_filters( 'wptravelengine_search_form_filters', $search_f
 				if ( is_array( $terms ) && count( $terms ) > 0 ) {
 					?>
 					<div class="wpte-trip__adv-field wpte__select-field">
-						<span class="icon"> <?php echo wte_esc_svg( $icons[$_taxonomy] ?? $icons['default'] ); ?> </span>
+						<span class="icon"> <?php echo wte_esc_svg( $icons[ $_taxonomy ] ?? $icons['default'] ); ?> </span>
 						<input type="text" class="wpte__input" placeholder="<?php echo esc_attr( $_args['label'] ); ?>" />
 						<input type="hidden" id="<?php echo esc_attr( $_taxonomy ); ?>" class="wpte__input-value" name="<?php echo esc_attr( $_taxonomy ); ?>" />
 						<div class="wpte__select-options">

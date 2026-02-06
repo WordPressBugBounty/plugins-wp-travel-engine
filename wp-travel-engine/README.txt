@@ -3,13 +3,13 @@ Contributors: wptravelengine
 Plugin link: https://wptravelengine.com/
 Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
-Tested up to: 6.8
+Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 6.6.8
+Stable tag: 6.7.5
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-WP Travel Engine is the most popular tour and travel booking WordPress plugin. Used by over 10,000 travel agency websites.
+WP Travel Engine is the most popular tour and travel booking WordPress plugin. Used by over 20,000 travel agency websites.
 
 == Description ==
 
@@ -93,20 +93,29 @@ WP Travel Engine offers many add-ons to expand your website's features to sell t
 * **[Email Customizer](https://wptravelengine.com/plugins/email-customizer/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro&utm_id=wporg)** — You can create customisable and personalised email templates for booking and payment notifications that reflect your brand’s unique identity.
 * **[Currency Converter](https://wptravelengine.com/plugins/currency-converter/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro&utm_id=wporg)** — It automatically converts the tour price to local currency by detecting the guests’ location.
 * **[Trip Weather Forecast](https://wptravelengine.com/plugins/trip-weather-forecast/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro&utm_id=wporg)** — You can add weather forecast information to each trip.
+* **[Conditional Price](https://wptravelengine.com/plugins/conditional-price?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro&utm_id=wporg)** — This add-on lets you set different prices for specific dates such as peak seasons, holidays, or special events. Guests see transparent, date-based rates without you having to make any changes.
+* **[Activity Tour Booking](https://wptravelengine.com/plugins/activity-tour-booking?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro&utm_id=wporg)** — You can create hour-by-hour itineraries for single-day activities such as city walks, cooking classes, or adventure outings.
+* **[Pickup Points](https://wptravelengine.com/plugins/pickup-points?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro&utm_id=wporg)** — This add-on lets you set multiple pickup and drop-off locations for each trip, such as hotels, airports, or bus stops. This gives guests flexibility while helping add value to your trips.
 
 #### Upsell (Increase Average Order Value)
 
 * **[Group Discount](https://wptravelengine.com/plugins/group-discount/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro&utm_id=wporg)** — The ability to offer group discounts can help increase revenue by increasing the average order value (AOV). Additionally, this feature can help you fill up trip dates that might otherwise be empty.
 * **[Extra Services](https://wptravelengine.com/plugins/extra-services/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro&utm_id=wporg)** — You can sell additional services to the guests, such as airport pickup/drop, room upgrades and so on, which will help increase the average order value (AOV).
+* **[Accommodation](https://wptravelengine.com/plugins/accommodation?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro&utm_id=wporg)** — You can offer different room options such as shared, standard, deluxe, or private stays. Guests can upgrade during booking for more comfort, improving their experience and adding to your average order value (AOV).
+* **[Travel Insurance](https://wptravelengine.com/plugins/travel-insurance/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro&utm_id=wporg)** — You can offer travel insurance as a mandatory or optional add-on with all your trips. Set up your own coverage plans or use affiliate links to partners or trusted insurance providers.
 
 #### Marketing
 * **[Partial Payment](https://wptravelengine.com/plugins/partial-payment/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro&utm_id=wporg)** — You can require an upfront payment (percentage or fixed amount) for tours. It allows guests to pay a portion of the total cost upfront while booking and the remaining amount later.
 * **[User History](https://wptravelengine.com/plugins/user-history/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro&utm_id=wporg)** — This add-on lets you see your guests' paths on your website before they book. You'll know which pages they visit and how long they stay on each one.
 * **[Trips Embedder](https://wptravelengine.com/plugins/trips-embedder/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro&utm_id=wporg)** — This feature allows you to embed your tours in your website’s blog posts and those of others (such as an influencer or affiliate marketer). By embedding your trip in high-traffic blog posts, you can attract traffic to your trip pages from various sources and increase your bookings.
+* **[Advanced Analytics](https://wptravelengine.com/plugins/advanced-analytics?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro&utm_id=wporg)** — You can track bookings, revenue, and customer behavior with visual charts and reports. Gain clear insights into your top-performing tours and uncover opportunities to grow your business.
+* **[SliceWP Integration](https://wptravelengine.com/plugins/slicewp-integration?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro&utm_id=wporg)** — This add-on lets you run your own affiliate program directly on your site. Affiliates promote your tours while referrals, commissions, and performance are tracked automatically.
+* **[Booking Fee](https://wptravelengine.com/plugins/booking-fee?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro&utm_id=wporg)** — This add-on allows you to add a small extra fee to each booking, such as service or processing charges. It helps boost your revenue while keeping pricing transparent at checkout.
 
 #### Lead Capture
 * **[Itinerary Downloader](https://wptravelengine.com/plugins/itinerary-downloader/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro&utm_id=wporg)** — The add-on automatically creates tour brochures (PDF) that guests can download and read offline. It saves time and money on design costs! Guests can download the leaflet by providing an email address (or without).
 * **[File Downloads](https://wptravelengine.com/plugins/file-downloads/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro&utm_id=wporg)** — You can add downloadable files to trips for guests to download. They can choose to enter their email address (optional) to get the download. You can also collect email addresses for future promotions by making them necessary for downloads.
+* **[Custom Booking Link](https://wptravelengine.com/plugins/custom-booking-link?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro&utm_id=wporg)** — This add-on lets you override the default WP Travel Engine booking system with external links, such as partner sites, third-party platforms, or custom checkout pages.
 
 #### Conversion
 * **[Legal Documents](https://wptravelengine.com/plugins/legal-documents/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro&utm_id=wporg)** — You can add physical and legal documents to the site. Display them on pages, posts, or widgets using shortcodes for users to view or download.
@@ -116,6 +125,7 @@ WP Travel Engine offers many add-ons to expand your website's features to sell t
 
 #### Automation
 * **[Zapier](https://wptravelengine.com/plugins/zapier/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro&utm_id=wporg)** — You can integrate WP Travel Engine with the Zapier automation platform.
+* **[Advanced Email Automator](https://wptravelengine.com/plugins/advanced-email-automator?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro&utm_id=wporg)** — This add-on lets you automate booking confirmations, reminders, and follow-ups. Guests get timely updates while you save time and effort.
 
 ### Payment Gateways Supported
 
@@ -135,6 +145,7 @@ WP Travel Engine integrates seamlessly with WooCommerce, the leading online shop
 * **[PayU Biz Payment Gateway](https://wptravelengine.com/plugins/payu-biz-payment-gateway/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro&utm_id=wporg)** (India)
 * **[PayHere Payment Gateway](https://wptravelengine.com/plugins/payhere-payment-gateway/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro&utm_id=wporg)** (Sri Lanka)
 * **[We Travel Integration](https://wptravelengine.com/plugins/we-travel/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro&utm_id=wporg)** (Globally)
+* **[Razorpay Payment Gateway](https://wptravelengine.com/plugins/razor-pay/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro&utm_id=wporg)** (India)
 
 WP Travel Engine also supports **PayPal Standard**, **Book Now Pay Later**, **Direct Bank Transfer** and **Check** payments methods.
 
@@ -254,31 +265,6 @@ WP Travel Engine offers 24 widgets for Elementor via the [WP Travel Engine - Ele
 * Beach holidays websites
 * Luxury travel websites
 
-### Step-by-Step Video Tutorials
-
-**How To Install And Activate WP Travel Engine Plugin?**
-[youtube https://www.youtube.com/watch?v=-fxfvroB7Jo]
-
-**How to Create a New Trip?**
-[youtube https://www.youtube.com/watch?v=xOC5C23vl1c]
-
-**How To Configure Global Settings?**
-[youtube https://www.youtube.com/watch?v=8AEIutYKosg]
-
-**How to Use Advanced Trip Search?**
-[youtube https://www.youtube.com/watch?v=M8IQWPUer7k]
-
-**How To Use Custom Filters In Search?**
-[youtube https://www.youtube.com/watch?v=VVoaqpdEfzo]
-
-**How To Create A Trip Listing Page?**
-[youtube https://www.youtube.com/watch?v=nQTSang3LFI]
-
-**How To Create A Trip Packages?**
-[youtube https://www.youtube.com/watch?v=KI00GacIkHU]
-
-[Visit our YouTube channel for WP Travel Engine tutorial videos.](https://www.youtube.com/@wptravelengine/videos)
-
 ### Get Help
 
 We have created step-by-step tutorials about using WP Travel Engine. The tutorials below answer most of your questions.
@@ -286,12 +272,7 @@ We have created step-by-step tutorials about using WP Travel Engine. The tutoria
 * [Video Tutorials](https://wptravelengine.com/tutorials/?utm_source=wp.org&utm_medium=wp.org&utm_campaign=wp_profile)
 * [Text Documentation](https://docs.wptravelengine.com/?utm_source=wp.org&utm_medium=wp.org&utm_campaign=wp_profile)
 * [WP Travel Engine Youtube Channel](https://www.youtube.com/@wptravelengine/videos)
-
-If you cannot find the answer to your questions, we encourage you to contact our support team via chat or [support ticket](https://wptravelengine.com/support-ticket/?utm_source=free_plugin&utm_medium=wporg&utm_campaign=support).
-
-### Join Our Community (1,200 Travel Agency Owners)
-
-We have a [Facebook Community of WP Travel Engine](https://www.facebook.com/groups/wptravelengine),which 1,200 travel agency owners like you have joined. We discuss about upcoming features, marketing and many other travel related things. We encourage you to join the community.
+* [Support Ticket](https://wptravelengine.com/support-ticket/?utm_source=free_plugin&utm_medium=wporg&utm_campaign=support)
 
 == Installation ==
 
@@ -368,186 +349,9 @@ Please send us an email via [support ticket](https://wptravelengine.com/support-
 
 == Changelog ==
 
-= 6.6.8 - 16th September 2025 =
-* Security: Fixed multiple vulnerabilities to ensure safer use of file uploads.
-* Fixed: Improved reliability when uploading and processing files.
+= 6.7.5 - 4th February 2026 =
 
-= 6.6.7 - 9th September 2025 =
-* New Feature: Added global seat allocation that automatically syncs across categories, dates, and timeslots to prevent overbookings.
-* Changed: Replaced Maximum and Minimum Participants with Minimum Travellers Per Booking and Total Travellers Seat for clearer control.
-* Changed: Updated pricing categories to use Minimum Pax per category, removing the maximum option to avoid conflicts with overall trip limits.
-* Improved: Enhanced date and timeslot logic so all timeslots follow the date's total seats and align with the global trip limit.
-
-= 6.6.6 - 2nd September 2025 =
-* Improved: Email templates can now be translated using WPML.
-* Improved: Updated notice banner design across the admin area for better visibility.
-* Improved: Added loading feedback and prevented duplicate clicks on the 'Confirm Booking' button to ensure a smoother checkout experience and proper redirection to the thank you page.
-* Fixed: Section titles are now optional — leaving the field blank no longer shows a heading on the trip page, keeping layouts cleaner.
-
-= 6.6.5 - 18th August 2025 =
-* New: Introduced a global setting to configure the discount display type.
-* Enhancement: Reorganized the global settings for the Single Trip tab to improve clarity and usability.
-* Enhancement: Added billing details and emergency details on the Thank You page.
-* Fix: Fixed issue where coupon code was not applying correctly when the discount value was greater than the cart total.
-* Fix: Fixed issue where on adding invalid coupon code, the button was not resetting to its original state.
-
-= 6.6.4 - 29th July 2025 =
-* Feature: Added support for additional pricing types to offer flexibility.
-* Enhancement: Manually created bookings are now visible on the customer's dashboard.
-* Enhancement: Enhanced the final payment process to prevent duplicate payments and provide clearer communication.
-* Fix: Payment link generation issue for manually added bookings has been fixed.
-
-= 6.6.3 - 24th July 2025 =
-* New: Added a quick link in settings for seamless access to key resources.
-* Enhancement: Refined 'Sold Out' logic to handle specific trip conditions more accurately.
-* Enhancement: Optimized asset loading on the checkout page to improve performance.
-
-= 6.6.2 - 21st July 2025 =
-* Enhancement: Display of pricing in the booking modal has been improved for better alignment with the related addons.
-* Enhancement: Trips without configured booking dates will now show as unavailable, and the 'Check Availability' button will be disabled accordingly.
-* Fix: The Open Graph metadata output is now compatible with Facebook Debugger, ensuring correct detection of `og:image` for social sharing.
-* Fix: Corrected the amount displayed on the checkout page when the Full Payment option is disabled.
-
-= 6.6.1 - 14th July 2025 =
-* New: Added an Appearance tab under the Display section in Settings for color customization.
-* Enhancement: Addressed minor bugs in the Trip Search functionality.
-* Enhancement: Improved SEO schema with cleaner and more accurate markup.
-* Fix: Fixed issue where 'Check Availability' occasionally failed with Optimized Loading enabled.
-* Fix: Corrected the %Amount% display format not rendering properly for trips with zero price.
-
-= 6.6.0 - 7th July 2025 =
-* New: Introduced a comprehensive set of new settings for the archive page, allowing greater flexibility and control over its display and behavior.
-* Enhancement: Streamlined asset loading on the archive page to enhance performance.
-* Enhancement: Refactored archive page settings for improved clarity and better organization.
-* Enhancement: Redesigned the trip search results and archive page interface for a more refined user experience.
-* Fix: Resolved issue with My Account assets not loading on multilingual sites.
-* Fix: Resolved the issue where the Booking Summary was accessible to clients via the WP Admin Dashboard.
-
-= 6.5.7 - 2nd July 2025 =
-* New: Introduced a new admin notice system to display notifications within the WordPress dashboard.
-* Fix: Addressed WooCommerce checkout compatibility issue with the form editor.
-* Fix: Fixed an issue where fields containing country codes were incorrectly displaying country names.
-
-= 6.5.6 - 25th June 2025 =
-* Fix: Resolved a fatal error occurring in admin sub-menus.
-
-= 6.5.5 - 25th June 2025 =
-* Fix: Resolved issue where the Catalan language file was not loading correctly in Flatpickr.
-* Fix: Corrected an issue with currency symbol parsing in the search filter, ensuring accurate price filtering.
-* Enhancement: Introduced a field description for the Itinerary tab in the Trip Edit page.
-* Enhancement: The checkout page now accurately reflects data for logged-in customers, ensuring personalized and consistent user experience.
-
-= 6.5.4 - 23rd June 2025 =
-* Fix: Incorrect price shown in {price} email tag when using Book Now, Pay Later.
-* Fix: Edited tour details from the booking details page not reflected on the Checkout and My Account pages.
-* Fix: Data reset issue on the checkout page when applying a coupon code.
-* Fix: Issue where the same coupon could be applied multiple times.
-* Fix: Corrected min/max participant validation with proper priority between general and pricing category settings.
-* Fix: Resolved issue where the Email Disabled feature was not functioning as expected.
-* Refactor: Set paid amount and due amount for Direct Bank Transfer and Check Payment methods to improve visibility and support for subsequent payments.
-* Enhancement: Relocated the Analytics page under the WP Travel Engine submenu for improved navigation and organization.
-
-= 6.5.3 - 6th June 2025 =
-* Fix: Resolved an issue where the Stripe payment form was not mounted on the initial load of the checkout page.
-* Fix: Removed due amount display on the checkout page for the 'Book Now, Pay Later' option, as it doesn't support partial payments.
-* Fix: Updated Google OAuth 2.0 parameters to include account selection prompt.
-* Fix: Resolved missing data problem during booking export.
-
-= 6.5.2 - 3rd June 2025 =
-* New: Introduced a cron job framework for scheduled tasks.
-* Enhancement: Enabled support for applying discount coupons through URL parameters.
-* Fix: Adjusted sticky tab content positioning to maintain accuracy after tab switches across all devices.
-* Fix: Booking widget error on single trip page after demo import.
-* Fix: Set the appropriate Reply-To email header to ensure proper handling of user responses.
-* Fix: Compatibility issue with JWT Authentication Plugin.
-* Fix: Special characters display issue in the Booking Summary.
-* Fix: Text translation issue in the related trips section.
-* Fix: Difficulty level now properly saves after assignment.
-
-= 6.5.1 - 13th May 2025 =
-* Feature: Allow users to display pricing from any category independently, improving flexibility in booking forms.
-* Fix: Resolved an issue with the 'Load More' button not appearing when displaying trips using shortcodes.
-* Fix: Corrected due balance showing as 0 in payment confirmation email for partial payments.
-* Fix: Fixed incorrect payable and paid amounts displayed in the old checkout flow.
-* Fix: Deprecated 'Show Trip Featured Image' and 'Show Featured Image in Image Gallery' options for proper functionality.
-* Fix: Resolved visibility issues with disabled Trip Info fields still appearing in the backend interface.
-* Fix: Show Trip Featured Image and Show Featured Image in Image Gallery options not working correctly.
-
-= 6.5.0 - 28th April 2025 =
-* Enhancement: Improved email management by adding Notifications and Settings tabs and introducing a new tag `{trip_booking_details}`.
-* Enhancement: Revamped user dashboard with new design and improved account management mechanism.
-* Enhancement: Skips the Traveler’s Information form from checkout during subsequent payments.
-* Fix: Resolved layout issues affecting single trip pages.
-* Fix: Corrected minimum passenger settings after updates.
-* Fix: Ensured booked-out dates are hidden in the trip front end.
-* Fix: Addressed UI breaks caused by the WPTE Elementor widget.
-* Fix: Displayed Traveler's Information on the Thank You page correctly after checkout.
-* Fix: Ensured Traveler's Information is included in the exported CSV file of bookings.
-* Fix: Adjusted the display of the booking modal when all seats for a specific date are booked.
-* Fix: Fixed the duration range slider to correctly show the minimum number of days based on trip data.
-
-**Check out the release note for version [6.5.0](https://wptravelengine.com/new-release-version-6-5-0/).**
-
-= 6.4.3 - 17th April 2025 =
-* Feature: Introduced a new sub-menu labeled 'Upcoming Tours' to display the list of upcoming trips.
-* Enhancement: Added an option to copy lead traveler details to billing details on the checkout page.
-* Fix: Email tags for custom fields in billing details now work correctly with the New Checkout.
-* Fix: Resolved the incorrect currency format issue for the paid amount in Payment Details.
-* Fix: Recurring dates now display correctly on the trip archive page.
-* Fix: Trips now appear in the Trip Archive page even if the duration is not updated.
-* Fix: Error in Trips block caused by Trip Fixed Starting Date.
-* Fix: Time slot selection in the booking modal is now working as expected.
-* Enhancement: Added a method to clear leftover cache data in WP_Session_Utils and integrated it into the delete_old_sessions method. Updated write_data method to check session expiration correctly.
-
-= 6.4.2 - 3rd April 2025 =
-* Fix: Resolve react-hook-form package compatibility issue with addons.
-
-= 6.4.1 - 31st March 2025 =
-* Enhancement: Revamped the single trip page design for a better user experience.
-* Enhancement: Added a dedicated archive page for trip tags.
-* Fix: Fixed an issue with invalid taxonomy slugs in custom filters.
-* Fix: Resolved the booking inventory update issue.
-* Fix: Made the Trip Name field optional in the enquiry form.
-
-= 6.4.0 - 18th March 2025 =
-* Fix: Resolved issue with custom cookies being stripped by the CDN.
-* Fix: Resolved incorrect package selection in the booking modal.
-* Feature: Enabled editing of booking summaries, traveler details, and payment information.
-* Feature: Added option to effortlessly resend purchase receipts and facilitate due payments via the remaining payment link.
-* Enhancement: Optimized booking details page for a more organized and efficient layout.
-* Enhancement: Updated trip listing page to display booking counts and revenue for quick insights.
-* Enhancement: Enhanced export feature with additional filters for more precise data extraction.
-* Enhancement: Introduced a redesigned layout for the Customer Details page
-
-**Check out the release note for version [6.4.0](https://wptravelengine.com/new-release-version-6-4-0/).**
-
-= 6.3.6 - 11th March 2025 =
-* Fix: Corrected group discount pricing issue when modifying the traveler count.
-* Fix: Resolved an unauthenticated Local File Inclusion (LFI) vulnerability.
-* Fix: Unexpected behavior with Continue option in booking modal due to available times.
-* Enhancement: Optimized global settings search for better efficiency.
-
-= 6.3.5 - 25th February 2025 =
-* Fix: Resolved banner layout display issue on the single trip page.
-* Fix: Corrected an issue causing erroneous booking modal calculations and unexpected closures in certain scenarios.
-* Fix: Resolved the problem with the date picker not functioning on the new checkout page.
-* Fix: Addressed inaccuracies in end time calculations on both the thank you page and the new checkout page.
-* Enhancement: Improved SEO for related trips.
-* Enhancement: Adjusted functionality to keep the expand all button visible in the itinerary section even when the itinerary title is empty.
-
-= 6.3.4 - 10th February 2025 =
-* Fix: FSD addon date selection now works on mobile devices.
-* Fix: Theme font family no longer overridden by plugins.
-* Fix: Map image can now be removed in trip edit.
-* Fix: Months list in trip search form is now translation-ready.
-* Fix: 'Requires Registration for booking' feature fixed.
-* Enhancement: Added HTML block and table to custom editor fields.
-* Enhancement: Form validation errors are now translatable.
-* Enhancement: Added filter for FSD availability select options.
-* Enhancement: Updated icons in Itinerary and FAQs accordion.
-* Enhancement: Replaced trip search block/widget icon.
-* Enhancement: Lightbox URL removed when gallery is disabled.
-* Enhancement: Removed unnecessary banner image printing for better performance.
+* Fixed: Ensured non-logged-in users can access public features as expected after changes introduced in version 6.7.4.
 
 [See changelog for all versions](https://plugins.svn.wordpress.org/wp-travel-engine/trunk/changelog.txt).
 

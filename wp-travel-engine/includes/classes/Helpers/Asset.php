@@ -64,11 +64,10 @@ class Asset implements \WPTravelEngine\Interfaces\Asset {
 
 		if ( file_exists( $script_asset_path ) ) {
 			$assets             = include_once $script_asset_path;
-			$this->dependencies = array_merge( $this->dependencies, $assets[ 'dependencies' ] ?? [] );
+			$this->dependencies = array_merge( $this->dependencies, $assets['dependencies'] ?? array() );
 
 			$this->version( $assets['version'] ?? '' );
 		}
-
 	}
 
 	/**
@@ -141,5 +140,4 @@ class Asset implements \WPTravelEngine\Interfaces\Asset {
 	public static function register( $handle, $source ): Asset {
 		return new static( $handle, $source );
 	}
-
 }

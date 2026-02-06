@@ -85,16 +85,18 @@ $is_featured_widget = true;
 				<span class="category-trip-loc">
 					<i>
 						<svg xmlns="http://www.w3.org/2000/svg" width="11.213" height="15.81"
-							 viewBox="0 0 11.213 15.81">
+							viewBox="0 0 11.213 15.81">
 							<path id="Path_23393" data-name="Path 23393" d="M5.607,223.81c1.924-2.5,5.607-7.787,5.607-10.2a5.607,5.607,0,0,0-11.213,0C0,216.025,3.682,221.31,5.607,223.81Zm0-13.318a2.492,2.492,0,1,1-2.492,2.492A2.492,2.492,0,0,1,5.607,210.492Zm0,0" transform="translate(0 -208)" opacity="0.8"/>
 						</svg>
 					</i>
 					<span><?php echo wp_kses_post( $destination ); ?></span>
 				</span>
 				<?php endif; ?>
-				<?php if ( $trip_duration ):
-					wte_get_template( 'components/content-trip-card-duration.php', compact( 'trip_duration_unit', 'trip_duration', 'trip_duration_nights', 'set_duration_type' , 'is_featured_widget' ) );
-				endif; ?>
+				<?php
+				if ( $trip_duration ) :
+					wte_get_template( 'components/content-trip-card-duration.php', compact( 'trip_duration_unit', 'trip_duration', 'trip_duration_nights', 'set_duration_type', 'is_featured_widget' ) );
+				endif;
+				?>
 			</div>
 			<div class="category-trip-review">
 				<div class="rating-rev rating-layout-1 smaller-ver">

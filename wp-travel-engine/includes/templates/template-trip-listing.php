@@ -79,26 +79,29 @@ if ( isset( $sort_args['orderby'] ) ) {
 	$wte_trip_tax_post_args['orderby'] = $sort_args['orderby'];
 }
 
-if ( ! empty( $_GET[ 'wte_orderby' ] ) && isset( $wte_orderby[ $_GET[ 'wte_orderby' ] ] ) ) {
-	$get_wte_order_by = $wte_orderby[ wte_clean( wp_unslash( $_GET[ 'wte_orderby' ] ) ) ];
+if ( ! empty( $_GET['wte_orderby'] ) && isset( $wte_orderby[ $_GET['wte_orderby'] ] ) ) {
+	$get_wte_order_by = $wte_orderby[ wte_clean( wp_unslash( $_GET['wte_orderby'] ) ) ];
 	$wte_trip_tax_post_args;
-	if ( isset( $get_wte_order_by[ 'meta_key' ] ) ) {
-		$wte_trip_tax_post_args[ 'meta_key' ] = $get_wte_order_by[ 'meta_key' ];
+	if ( isset( $get_wte_order_by['meta_key'] ) ) {
+		$wte_trip_tax_post_args['meta_key'] = $get_wte_order_by['meta_key'];
 	}
-	$wte_trip_tax_post_args[ 'order' ]   = $get_wte_order_by[ 'order' ];
-	$wte_trip_tax_post_args[ 'orderby' ] = $get_wte_order_by[ 'orderby' ];
+	$wte_trip_tax_post_args['order']   = $get_wte_order_by['order'];
+	$wte_trip_tax_post_args['orderby'] = $get_wte_order_by['orderby'];
 }
 
 $options = get_option( 'wp_travel_engine_settings', array() );
-if ( isset( $options[ 'reorder' ][ 'flag' ] ) ) {
-	$wte_trip_tax_post_args[ 'order' ]   = 'ASC';
-	$wte_trip_tax_post_args[ 'orderby' ] = 'menu_order';
+if ( isset( $options['reorder']['flag'] ) ) {
+	$wte_trip_tax_post_args['order']   = 'ASC';
+	$wte_trip_tax_post_args['orderby'] = 'menu_order';
 }
 
-if ( defined( 'WTE_FIXED_DEPARTURE_VERSION' ) && in_array( 'dates', array(
-		$_GET[ 'wte_orderby' ] ?? '',
-		$wte_trip_tax_post_args[ '_trip_sort' ],
-	) ) ) {
+if ( defined( 'WTE_FIXED_DEPARTURE_VERSION' ) && in_array(
+	'dates',
+	array(
+		$_GET['wte_orderby'] ?? '',
+		$wte_trip_tax_post_args['_trip_sort'],
+	)
+) ) {
 	$post__in            = WTE_Fixed_Starting_Dates_Functions::get_indexed_trip_by_dates();
 	$trips_without_dates = array();
 
@@ -107,22 +110,25 @@ if ( defined( 'WTE_FIXED_DEPARTURE_VERSION' ) && in_array( 'dates', array(
 			continue;
 		}
 		unset( $post__in[ $trip_id ] );
-		if ( ! isset( $global_settings[ 'hide_trips_without_dates' ] ) || 'yes' !== $global_settings[ 'hide_trips_without_dates' ] ) {
+		if ( ! isset( $global_settings['hide_trips_without_dates'] ) || 'yes' !== $global_settings['hide_trips_without_dates'] ) {
 			$trips_without_dates[ $trip_id ] = $timestamp;
 		}
 	}
-	uksort( $post__in, function ( $key1, $key2 ) use ( $post__in ) {
-		$value1 = $post__in[ $key1 ];
-		$value2 = $post__in[ $key2 ];
+	uksort(
+		$post__in,
+		function ( $key1, $key2 ) use ( $post__in ) {
+			$value1 = $post__in[ $key1 ];
+			$value2 = $post__in[ $key2 ];
 
-		if ( $value1 == $value2 ) {
-			return 0;
+			if ( $value1 == $value2 ) {
+				return 0;
+			}
+
+			return ( $value1 < $value2 ) ? - 1 : 1;
 		}
-
-		return ( $value1 < $value2 ) ? - 1 : 1;
-	} );
-	$wte_trip_tax_post_args[ 'orderby' ]  = 'post__in';
-	$wte_trip_tax_post_args[ 'post__in' ] = array_merge( array_keys( $trips_without_dates ), array_keys( $post__in ) );
+	);
+	$wte_trip_tax_post_args['orderby']  = 'post__in';
+	$wte_trip_tax_post_args['post__in'] = array_merge( array_keys( $trips_without_dates ), array_keys( $post__in ) );
 }
 
 \Wp_Travel_Engine_Archive_Hooks::$query = $wte_trip_tax_post_qry = new WP_Query( $wte_trip_tax_post_args );
@@ -177,22 +183,22 @@ if ( $wte_trip_tax_post_qry->have_posts() ) :
 						$view_mode = wp_travel_engine_get_archive_view_mode();
 						if ( 'grid' === $view_mode ) {
 							$show_sidebar = wptravelengine_toggled( get_option( 'wptravelengine_show_trip_search_sidebar', 'yes' ) );
-							$view_class = class_exists( 'Wte_Advanced_Search' ) ? ( $show_sidebar ? 'wte-col-2 category-grid' : 'wte-col-3 category-grid' ) : 'wte-col-3 category-grid';
+							$view_class   = class_exists( 'Wte_Advanced_Search' ) ? ( $show_sidebar ? 'wte-col-2 category-grid' : 'wte-col-3 category-grid' ) : 'wte-col-3 category-grid';
 						} else {
 							$view_class = 'category-list';
 						}
 						echo '<div class="category-main-wrap ' . esc_attr( $view_class ) . '">';
 						$user_wishlists = wptravelengine_user_wishlists();
-						$template_name	= wptravelengine_get_template_by_view_mode( $view_mode );
+						$template_name  = wptravelengine_get_template_by_view_mode( $view_mode );
 
 						while ( $wte_trip_tax_post_qry->have_posts() ) :
 							$wte_trip_tax_post_qry->the_post();
-							$details                     = wte_get_trip_details( get_the_ID() );
-							$details[ 'j' ]              = $j;
-							$details[ 'user_wishlists' ] = $user_wishlists;
+							$details                   = wte_get_trip_details( get_the_ID() );
+							$details['j']              = $j;
+							$details['user_wishlists'] = $user_wishlists;
 
 							wptravelengine_get_template( $template_name, $details );
-							$j ++;
+							++$j;
 						endwhile;
 						wp_reset_postdata();
 						echo '</div>';
@@ -211,6 +217,6 @@ if ( $wte_trip_tax_post_qry->have_posts() ) :
 			</div>
 		</div>
 	</div>
-<?php
+	<?php
 endif;
 get_footer();

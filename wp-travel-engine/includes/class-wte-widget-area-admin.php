@@ -17,7 +17,7 @@ class Wte_Widget_Area_Admin {
 		$args = array(
 			'name'          => __( 'WP Travel Engine Sidebar', 'wp-travel-engine' ),
 			'id'            => 'wte-sidebar-id',
-			'description'   => 'This is the widget area for single trip page.',
+			'description'   => __( 'This is the widget area for single trip page.', 'wp-travel-engine' ),
 			'class'         => '',
 			'before_widget' => '<div id="%1$s" class="widget %2$s">',
 			'after_widget'  => '</div>',
@@ -41,4 +41,3 @@ class Wte_Widget_Area_Admin {
 }
 
 Wte_Widget_Area_Admin::instance();
-

@@ -9,7 +9,7 @@ return apply_filters(
 	'payment_direct_bank_transfer',
 	array(
 		'title'  => __( 'Direct bank transfer', 'wp-travel-engine' ),
-		'order'  => 20,
+		'order'  => 12,
 		'id'     => 'payment-bank-transfer',
 		'fields' => array(
 			array(

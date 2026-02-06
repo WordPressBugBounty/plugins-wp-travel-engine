@@ -17,13 +17,15 @@
 			<strong><?php echo esc_html__( 'Enquiry Details', 'wp-travel-engine' ); ?></strong>
 		</td>
 	</tr>
-	<?php foreach ( $args as $key => $data ) :
+	<?php
+	foreach ( $args as $key => $data ) :
 			$data        = is_array( $data ) ? implode( ', ', $data ) : $data;
 			$field_label = wp_travel_engine_get_enquiry_field_label_by_name( $key );
-			?>
+		?>
 		<tr>
 			<td style="color: #566267;"><?php echo esc_html( $field_label ); ?></td>
-			<td style="width: 50%;text-align: right;"><strong><?php
+			<td style="width: 50%;text-align: right;"><strong>
+			<?php
 			if ( in_array( $key, array( 'package_name', 'enquiry_message' ) ) ) {
 				echo wp_kses(
 					$data,
@@ -31,11 +33,12 @@
 						'a' => array( 'href' => array() ),
 						'b' => array(),
 					)
-					);
+				);
 			} else {
 				echo esc_html( $data );
 			}
-			?></strong></td>
+			?>
+			</strong></td>
 		</tr>
 	<?php endforeach; ?>
 </table>

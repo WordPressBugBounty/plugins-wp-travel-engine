@@ -23,7 +23,7 @@ class Options {
 	 * Get option value.
 	 *
 	 * @param string $option_name Option Name.
-	 * @param mixed $default_value Option Value to update.
+	 * @param mixed  $default_value Option Value to update.
 	 *
 	 * @return mixed
 	 */
@@ -39,7 +39,7 @@ class Options {
 	 * Update option value.
 	 *
 	 * @param string $option_name Option Name.
-	 * @param mixed $value Option Value to update.
+	 * @param mixed  $value Option Value to update.
 	 *
 	 * @return bool
 	 */
@@ -76,7 +76,7 @@ class Options {
 	 * This returns instance of Base Settings.
 	 *
 	 * @param string $option_name Option Name.
-	 * @param mixed $default_settings Default settings.
+	 * @param mixed  $default_settings Default settings.
 	 *
 	 * @return BaseSetting
 	 */

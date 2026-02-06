@@ -7,6 +7,7 @@
  */
 
 namespace WPTravelEngine\Builders;
+
 class AdminSettings {
 
 	public function tabs(): array {
@@ -23,33 +24,40 @@ class AdminSettings {
 
 			$tab_settings = include $directory->getPathname();
 
-			if( ! is_array( $tab_settings ) || ! isset( $tab_settings[ 'id' ] ) ) {
+			if ( ! is_array( $tab_settings ) || ! isset( $tab_settings['id'] ) ) {
 				continue;
 			}
 
-			if ( isset( $tab_settings[ 'sub_tabs' ] ) ) {
-				$sub_tabs = $tab_settings[ 'sub_tabs' ];
+			if ( isset( $tab_settings['sub_tabs'] ) ) {
+				$sub_tabs = $tab_settings['sub_tabs'];
 				if ( is_string( $sub_tabs ) && is_dir( $sub_tabs ) ) {
-					$tab_settings[ 'sub_tabs' ] = $this->get_sub_tabs( $sub_tabs );
+					$tab_settings['sub_tabs'] = $this->get_sub_tabs( $sub_tabs );
 				}
 			}
 
-			$tab_settings = apply_filters( "wptravelengine_settings:tabs:" . $tab_settings[ 'id' ], $tab_settings );
+			$tab_settings = apply_filters( 'wptravelengine_settings:tabs:' . $tab_settings['id'], $tab_settings );
 
-			if ( 'extensions' === $tab_settings[ 'id' ] ) {
-				usort( $tab_settings[ 'sub_tabs' ], function ( $a, $b ) {
-					return $a[ 'title' ] <=> $b[ 'title' ];
-				} );
-			}
+			usort(
+				$tab_settings['sub_tabs'],
+				function ( $a, $b ) use ( $tab_settings ) {
+					if ( 'extensions' === $tab_settings['id'] ) {
+						return strtolower( $a['title'] ) <=> strtolower( $b['title'] );
+					}
+					return $a['order'] <=> $b['order'];
+				}
+			);
 
 			$tabs[] = $tab_settings;
 		}
 
 		$tabs = apply_filters( 'wptravelengine_settings_ui_config', $tabs );
 
-		usort( $tabs, function ( $a, $b ) {
-			return $a[ 'order' ] - $b[ 'order' ];
-		} );
+		usort(
+			$tabs,
+			function ( $a, $b ) {
+				return $a['order'] - $b['order'];
+			}
+		);
 
 		return $tabs;
 	}
@@ -77,25 +85,32 @@ class AdminSettings {
 				continue;
 			}
 
-			$tab_settings = apply_filters( "wptravelengine_settings:sub_tabs:" . $tab_settings[ 'id' ], $tab_settings );
+			$tab_settings = apply_filters( 'wptravelengine_settings:sub_tabs:' . $tab_settings['id'], $tab_settings );
 
 			$tabs[] = $tab_settings;
 
 		}
 
-		usort( $tabs, function ( $a, $b ) {
-			//check if order is set.
-			if ( ! isset( $a[ 'order' ] ) || ! isset( $b[ 'order' ] ) ) {
-				return 100;
+		usort(
+			$tabs,
+			function ( $a, $b ) {
+				// check if order is set.
+				if ( ! isset( $a['order'] ) || ! isset( $b['order'] ) ) {
+					return 100;
+				}
+
+				return $a['order'] - $b['order'];
 			}
+		);
 
-			return $a[ 'order' ] - $b[ 'order' ];
-
-		} );
-
-		$tabs = array_values( array_filter( $tabs, function ( $tab ) {
-			return ! empty( $tab );
-		} ) );
+		$tabs = array_values(
+			array_filter(
+				$tabs,
+				function ( $tab ) {
+					return ! empty( $tab );
+				}
+			)
+		);
 
 		return $tabs;
 	}

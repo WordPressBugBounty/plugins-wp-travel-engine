@@ -298,7 +298,7 @@ class Metadata {
 					$metadata['attributes']['layoutFilters']['default']['showViewAll'] = false;
 				case 'trip-search':
 					if ( isset( $metadata['attributes']['searchFilters']['default'] ) ) {
-						if( defined( 'WTE_FIXED_DEPARTURE_VERSION' ) ){
+						if ( defined( 'WTE_FIXED_DEPARTURE_VERSION' ) ) {
 							$metadata['attributes']['searchFilters']['default']['date'] = array(
 								'label'   => __( 'Date', 'wp-travel-engine' ),
 								'default' => __( 'Date', 'wp-travel-engine' ),
@@ -315,8 +315,8 @@ class Metadata {
 							);
 							$metadata['attributes']['searchFilters']['default'][ $filter['slug'] ] = $search_filter;
 						}
-					}	
-				break;
+					}
+					break;
 			}
 		}
 

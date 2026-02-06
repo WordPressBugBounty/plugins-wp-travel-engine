@@ -14,7 +14,6 @@ use WPTravelEngine\Core\Models\Post\Payment;
 use WPTravelEngine\Core\Models\Post\Trip;
 use WPTravelEngine\Core\Models\Settings\PluginSettings;
 use WPTravelEngine\Helpers\Functions as HelperFunctions;
-
 require_once __DIR__ . '/tax.php';
 require_once __DIR__ . '/helpers-analytics.php';
 require_once __DIR__ . '/helpers-prices.php';
@@ -22,8 +21,99 @@ require_once __DIR__ . '/wp-travel-engine-form-fields.php';
 require_once __DIR__ . '/cart.php';
 
 /**
+ * Defined successful payment status.
+ *
+ * @return array
+ * @since 6.7.0
+ */
+function wptravelengine_success_payment_status() {
+	$options = array(
+		'completed'        => __( 'Completed', 'wp-travel-engine' ),
+		'complete'         => __( 'Completed', 'wp-travel-engine' ),
+		'captured'         => __( 'Captured', 'wp-travel-engine' ),
+		'capture'          => __( 'Captured', 'wp-travel-engine' ),
+		'check-received'   => __( 'Check Received', 'wp-travel-engine' ),
+		'partially-paid'   => __( 'Partially Paid', 'wp-travel-engine' ),
+		'settlement'       => __( 'Settlement', 'wp-travel-engine' ),
+		'success'          => __( 'Success', 'wp-travel-engine' ),
+		'voucher-received' => __( 'Voucher Received', 'wp-travel-engine' ),
+	);
+
+	$options = apply_filters( 'wptravelengine_success_payment_status_options', $options );
+
+	return $options;
+}
+
+/**
+ * Defined pending payment status.
+ *
+ * @return array
+ * @since 6.7.0
+ */
+function wptravelengine_pending_payment_status() {
+	$options = array(
+		'check-waiting'    => __( 'Waiting for Check', 'wp-travel-engine' ),
+		'pending'          => __( 'Pending', 'wp-travel-engine' ),
+		'voucher-waiting'  => __( 'Waiting for Voucher', 'wp-travel-engine' ),
+		'voucher-awaiting' => __( 'Waiting for Voucher', 'wp-travel-engine' ),
+	);
+
+	$options = apply_filters( 'wptravelengine_pending_payment_status_options', $options );
+
+	return $options;
+}
+
+/**
+ * Defined failed payment status.
+ *
+ * @return array
+ * @since 6.7.0
+ */
+function wptravelengine_failed_payment_status() {
+	$options = array(
+		'abandoned' => __( 'Abandoned', 'wp-travel-engine' ),
+		'cancelled' => __( 'Cancelled', 'wp-travel-engine' ),
+		'cancel'    => __( 'Cancelled', 'wp-travel-engine' ),
+		'failed'    => __( 'Failed', 'wp-travel-engine' ),
+		'deny'      => __( 'Denied', 'wp-travel-engine' ),
+		'expire'    => __( 'Expired', 'wp-travel-engine' ),
+		'revoked'   => __( 'Revoked', 'wp-travel-engine' ),
+	);
+
+	$options = apply_filters( 'wptravelengine_failed_payment_status_options', $options );
+
+	return $options;
+}
+
+/**
+ * Get trip booking data.
+ *
+ * @param int|string $trip_id Trip ID.
+ *
+ * @return array
+ * @since 6.7.0
+ */
+function wptravelengine_trip_booking_modal_data( $trip_id ) {
+	global $wte_cart;
+	$global_settings = wptravelengine_settings();
+
+	return apply_filters(
+		'wptravelengine_trip_booking_modal_data',
+		array(
+			'tripID'              => $trip_id,
+			'nonce'               => wp_create_nonce( 'wte_add_trip_to_cart' ),
+			'wpXHR'               => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
+			'cartVersion'         => $wte_cart->version,
+			'buttonLabel'         => esc_html__( 'Check Availability', 'wp-travel-engine' ),
+			'showModalWarning'    => wptravelengine_toggled( $global_settings->get( 'show_booking_modal_warning', true ) ),
+			'modalWarningMessage' => $global_settings->get( 'booking_modal_warning_message', '' ),
+		)
+	);
+}
+
+/**
  * Check if the user is new user.
- * 
+ *
  * @since 6.6.7
  */
 function wptravelengine_is_new_user(): bool {
@@ -60,7 +150,7 @@ function wptravelengine_normalize_numeric_val( $value, $type = 'int' ) {
  * Get the trip duration in array format.
  *
  * @param int|Trip $trip Trip ID or Trip instance.
- * @param string $set_duration_type Set duration type. Accepts: 'days', 'nights', 'both'.
+ * @param string   $set_duration_type Set duration type. Accepts: 'days', 'nights', 'both'.
  *
  * @return array Trip duration in array format.
  *
@@ -74,16 +164,20 @@ function wptravelengine_get_trip_duration_arr( $trip, string $set_duration_type 
 		return array();
 	}
 
-	$trip_duration 	= (int) $trip->get_trip_duration();
-	$trip_type 		= $trip->get_trip_type();
+	$trip_duration = (int) $trip->get_trip_duration();
+	$trip_type     = $trip->get_trip_type();
 
 	$duration_label = array();
 	if ( $trip_duration && in_array( $set_duration_type, array( 'both', 'days' ) ) ) {
-		$duration_label[] = sprintf( __( "%d %s", "wp-travel-engine" ), $trip_duration, wptravelengine_get_label_by_slug( $trip->get_trip_duration_unit(), $trip_duration ) );
+		$duration_label[] = sprintf( __( '%1$d %2$s', 'wp-travel-engine' ), $trip_duration, wptravelengine_get_label_by_slug( $trip->get_trip_duration_unit(), $trip_duration ) );
 	}
 
-	if ( 'multi' === $trip_type && in_array( $set_duration_type, array( 'both', 'nights' ) ) ) {
-		$duration_label[] = $trip->get_trip_nights();
+	$trip_duration_unit = $trip->get_trip_duration_unit();
+	if ( 'days' === $trip_duration_unit && 'multi' === $trip_type && in_array( $set_duration_type, array( 'both', 'nights' ) ) ) {
+		$nights = $trip->get_setting( 'trip_duration_nights' );
+		if ( $nights ) {
+			$duration_label[] = $trip->get_trip_nights();
+		}
 	}
 
 	return apply_filters( 'wptravelengine_trip_duration_arr', $duration_label, $trip, $set_duration_type );
@@ -92,27 +186,48 @@ function wptravelengine_get_trip_duration_arr( $trip, string $set_duration_type 
 /**
  * Get the label of provided slug and count.
  *
- * @param string $slug Slug of the label to get.
+ * @param string     $slug Slug of the label to get.
  * @param int|string $count Count of the label to get.
  *
  * @return string Label of the provided slug.
  * @since 6.4.1
  * @updated 6.5.2
+ * @since 6.7.3 Added support for (person) plural labels.
  */
 function wptravelengine_get_label_by_slug( string $slug, $count = 1 ): string {
 
-	$slug_array = apply_filters( 'wptravelengine_get_label_by_slug', array(
-		'day'    => array( 'single' => __( 'Day', 'wp-travel-engine' ), 'plural' => __( 'Days', 'wp-travel-engine' ) ),
-		'night'  => array( 'single' => __( 'Night', 'wp-travel-engine' ), 'plural' => __( 'Nights', 'wp-travel-engine' ) ),
-		'hour'   => array( 'single' => __( 'Hour', 'wp-travel-engine' ), 'plural' => __( 'Hours', 'wp-travel-engine' ) ),
-		'minute' => array( 'single' => __( 'Minute', 'wp-travel-engine' ), 'plural' => __( 'Minutes', 'wp-travel-engine' ) ),
-	) );
+	$slug_array = apply_filters(
+		'wptravelengine_get_label_by_slug',
+		array(
+			'day'    => array(
+				'single' => __( 'Day', 'wp-travel-engine' ),
+				'plural' => __( 'Days', 'wp-travel-engine' ),
+			),
+			'night'  => array(
+				'single' => __( 'Night', 'wp-travel-engine' ),
+				'plural' => __( 'Nights', 'wp-travel-engine' ),
+			),
+			'hour'   => array(
+				'single' => __( 'Hour', 'wp-travel-engine' ),
+				'plural' => __( 'Hours', 'wp-travel-engine' ),
+			),
+			'minute' => array(
+				'single' => __( 'Minute', 'wp-travel-engine' ),
+				'plural' => __( 'Minutes', 'wp-travel-engine' ),
+			),
+			'person' => array(
+				'single' => __( 'Person', 'wp-travel-engine' ),
+				'plural' => __( 'People', 'wp-travel-engine' ),
+			),
+		)
+	);
 
 	$singular_map = array(
 		'days'    => 'day',
 		'nights'  => 'night',
 		'hours'   => 'hour',
 		'minutes' => 'minute',
+		'people'  => 'person',
 	);
 
 	if ( isset( $singular_map[ $slug ] ) ) {
@@ -123,7 +238,7 @@ function wptravelengine_get_label_by_slug( string $slug, $count = 1 ): string {
 		return '';
 	}
 
-	return $slug_array[ $slug ][ 1 === intval( $count ) ? 'single' : 'plural' ];
+	return $slug_array[ $slug ][ 2 > intval( $count ) ? 'single' : 'plural' ];
 }
 
 /**
@@ -149,16 +264,18 @@ function wptravelengine_get_label_by_slug( string $slug, $count = 1 ): string {
  *                     - booking-fee
  *                     - activity-tour
  *                     - email-automator
- * 					   - conditional-price
- * 					   - stripe
- * 					   - paypal_express
- * 					   - authorize_net
- * 					   - midtrans
- * 					   - payu_money_bolt
+ *                     - conditional-price
+ *                     - stripe
+ *                     - paypal_express
+ *                     - authorize_net
+ *                     - midtrans
+ *                     - payu_money_bolt
+ *                     - accommodation
+ *                     - travel-insurance
+ *                     - waitlist
  *
  * @return ?bool Returns true if addon is active, false if inactive, null if invalid addon
  * @since 6.2.2
- *
  */
 function wptravelengine_is_addon_active( string $addon ) {
 
@@ -184,7 +301,7 @@ function wptravelengine_is_addon_active( string $addon ) {
 		'zapier'               => 'WTE_ZAPIER_PLUGIN_FILE',
 		'custom-booking-link'  => 'WTE_CBL_FILE_PATH',
 		'booking-fee'          => 'WPTRAVELENGINE_BOOKING_FEE_FILE',
-		'activity-tour' 	   => 'WPTRAVELENGINE_ACTIVITY_TOUR_BOOKING_PATH',
+		'activity-tour'        => 'WPTRAVELENGINE_ACTIVITY_TOUR_BOOKING_PATH',
 		'email-automator'      => 'WPTRAVELENGINE_EMAIL_AUTOMATOR_PATH',
 		'conditional-price'    => 'WPTRAVELENGINE_CONDITIONAL_PRICE_PLUGIN_PATH',
 		'stripe'               => 'WTE_STRIPE_GATEWAY_FILE_PATH',
@@ -192,6 +309,10 @@ function wptravelengine_is_addon_active( string $addon ) {
 		'authorize_net'        => 'WP_TRAVEL_ENGINE_AUTHORIZE_NET_FILE_PATH',
 		'midtrans'             => 'WTE_MIDTRANS_ABSPATH',
 		'payu_money_bolt'      => 'WTE_PAYU_MONEY_BOLT_FILE_PATH',
+		'waitlist'             => 'WPTRAVELENGINE_WAITLIST_DIR_PATH',
+		'accommodation'        => 'WPTRAVELENGINE_ACCOMMODATION_DIR_PATH',
+		'travel-insurance'     => 'WPTRAVELENGINE_TRAVEL_INSURANCE_DIR_PATH',
+		'installment-payments' => 'WPTRAVELENGINE_INSTALLMENT_PAYMENTS_PATH',
 	);
 
 	if ( ! isset( $addon_files[ $addon ] ) ) {
@@ -209,7 +330,6 @@ function wptravelengine_is_addon_active( string $addon ) {
  *
  * @return bool
  * @since 6.2.0
- *
  */
 function wptravelengine_key_exists( array $data, array $keys ): bool {
 	$key = array_shift( $keys );
@@ -229,16 +349,15 @@ function wptravelengine_key_exists( array $data, array $keys ): bool {
  * Replaces the target value with a given value in arrays or scalar types.
  * Returns the fallback value if the target is not found.
  *
- * @param mixed $data Data to replace the value in (array or scalar).
- * @param mixed $target_value Value to search for and replace.
- * @param mixed $by Value to replace the target value with.
- * @param mixed $else Value to return if target is not found. Defaults to `null`.
+ * @param mixed      $data Data to replace the value in (array or scalar).
+ * @param mixed      $target_value Value to search for and replace.
+ * @param mixed      $by Value to replace the target value with.
+ * @param mixed      $else Value to return if target is not found. Defaults to `null`.
  * @param string|int $target_key Key in array to replace value in. Defaults to `null`.
  *
  * @return mixed Modified data or fallback value if target is not found.
  * @since 6.2.0
  * @updated 6.2.3
- *
  */
 function wptravelengine_replace( $data, $target_value, $by, $else = null, $target_key = null ) {
 
@@ -250,7 +369,7 @@ function wptravelengine_replace( $data, $target_value, $by, $else = null, $targe
 		return $data;
 	}
 
-	$result 	 = [];
+	$result      = array();
 	$target_keys = array_filter( array_map( 'trim', explode( ',', $target_key ?? '' ) ), 'strlen' );
 
 	foreach ( $data as $key => $value ) {
@@ -307,7 +426,7 @@ function wptravelengine_get_num_suffix( int $num ): string {
 		return $num . 'th';
 	}
 
-	$suffix = [ 'st', 'nd', 'rd' ];
+	$suffix = array( 'st', 'nd', 'rd' );
 
 	return $num . ( $suffix[ ( $num % 10 ) - 1 ] ?? 'th' );
 }
@@ -338,8 +457,8 @@ function wptravelengine_toggled( $value ): bool {
 
 	if ( is_numeric( $value ) ) {
 		return (bool) $value;
-	} else if ( is_string( $value ) ) {
-		return in_array( $value, [ 'yes', 'true', 'on' ], true );
+	} elseif ( is_string( $value ) ) {
+		return in_array( $value, array( 'yes', 'true', 'on' ), true );
 	}
 
 	return (bool) $value;
@@ -376,11 +495,11 @@ function wptravelengine_deprecated_function( $function, $version, $replacement =
 		$buffer = "=== Deprecation Notice ===\n";
 		foreach ( $logs as $log ) {
 			$buffer .= "Deprecated function {$log['function']} called in version {$log['version']}. Use {$log['replacement']} instead.\n";
-			foreach ( $log[ 'backtrace' ] as $index => $trace ) {
-				$file     = $trace[ 'file' ] ?? 'unknown file';
-				$line     = $trace[ 'line' ] ?? 'unknown line';
-				$function = $trace[ 'function' ] ?? 'unknown function';
-				$buffer   .= "#{$index} {$file}({$line}): {$function}()\n";
+			foreach ( $log['backtrace'] as $index => $trace ) {
+				$file     = $trace['file'] ?? 'unknown file';
+				$line     = $trace['line'] ?? 'unknown line';
+				$function = $trace['function'] ?? 'unknown function';
+				$buffer  .= "#{$index} {$file}({$line}): {$function}()\n";
 			}
 			$buffer .= "==========================\n";
 		}
@@ -422,11 +541,11 @@ function wptravelengine_deprecated_class( $class, $version, $replacement = null 
 		$buffer = "=== Deprecation Notice ===\n";
 		foreach ( $logs as $log ) {
 			$buffer .= "Deprecated clas {$log['function']} called in version {$log['version']}. Use {$log['replacement']} instead.\n";
-			foreach ( $log[ 'backtrace' ] as $index => $trace ) {
-				$file     = $trace[ 'file' ] ?? 'unknown file';
-				$line     = $trace[ 'line' ] ?? 'unknown line';
-				$function = $trace[ 'function' ] ?? 'unknown function';
-				$buffer   .= "#{$index} {$file}({$line}): {$function}()\n";
+			foreach ( $log['backtrace'] as $index => $trace ) {
+				$file     = $trace['file'] ?? 'unknown file';
+				$line     = $trace['line'] ?? 'unknown line';
+				$function = $trace['function'] ?? 'unknown function';
+				$buffer  .= "#{$index} {$file}({$line}): {$function}()\n";
 			}
 			$buffer .= "==========================\n";
 		}
@@ -487,8 +606,8 @@ function wptravelengine_set_booking_email_tags( int $booking_id, int $payment_id
  * Send booking email.
  *
  * @param int|Payment $payment Payment Object or ID.
- * @param string $template Template Name (order|order_confirmation).
- * @param string $to Recipient (customer|admin|all).
+ * @param string      $template Template Name (order|order_confirmation).
+ * @param string      $to Recipient (customer|admin|all).
  *
  * @return void
  */
@@ -496,6 +615,10 @@ function wptravelengine_send_booking_emails( $payment, string $template = 'order
 
 	if ( $payment instanceof Payment ) {
 		$payment = $payment->get_id();
+	}
+
+	if ( 'order' === $template && wptravelengine_toggled( get_post_meta( $payment, 'is_due_payment', true ) ) ) {
+		return;
 	}
 
 	if ( ! in_array( $to, array( 'admin', 'customer', 'all' ), true ) ) {
@@ -533,7 +656,7 @@ function wptravelengine_send_booking_emails( $payment, string $template = 'order
  */
 function wptravelengine_map_email_template( string $template_name = 'order' ): string {
 	$map = array(
-		'order' 			 => 'booking_confirmation',
+		'order'              => 'booking_confirmation',
 		'order_confirmation' => 'payment_confirmation',
 	);
 
@@ -633,9 +756,9 @@ function WPTravelEngine(): \WPTravelEngine\Plugin { // phpcs:ignore WordPress.Na
 /**
  * Gets value of provided index.
  *
- * @param array $array Array to pick value from.
+ * @param array  $array Array to pick value from.
  * @param string $index Index.
- * @param mixed $default Default Values.
+ * @param mixed  $default Default Values.
  *
  * @return mixed
  */
@@ -703,9 +826,9 @@ function wte_uniqid( $length = 5 ) {
 	}
 	$token      = '';
 	$characters = implode( range( 'a', 'z' ) ) . implode( range( 'A', 'Z' ) );
-	for ( $i = 0; $i < $length; $i ++ ) {
+	for ( $i = 0; $i < $length; $i++ ) {
 		$random_key = wte_get_random_integer( 0, strlen( $characters ) );
-		$token      .= $characters[ $random_key ];
+		$token     .= $characters[ $random_key ];
 	}
 
 	return $token;
@@ -714,13 +837,13 @@ function wte_uniqid( $length = 5 ) {
 /**
  * Generate JWT.
  *
- * @param array $payload
+ * @param array  $payload
  * @param string $key
  *
  * @return string
  */
 function wte_jwt( array $payload, string $key ): string {
-	if( ! class_exists( 'Firebase\JWT\JWT' ) ) {
+	if ( ! class_exists( 'Firebase\JWT\JWT' ) ) {
 		include_once WP_TRAVEL_ENGINE_BASE_PATH . '/includes/lib/jwt/loader.php';
 	}
 	return JWT::encode( $payload, $key );
@@ -730,7 +853,7 @@ function wte_jwt( array $payload, string $key ): string {
  * Decode JWT.
  */
 function wte_jwt_decode( string $jwt, string $key ) {
-	if( ! class_exists( 'Firebase\JWT\JWT' ) ) {
+	if ( ! class_exists( 'Firebase\JWT\JWT' ) ) {
 		include_once WP_TRAVEL_ENGINE_BASE_PATH . '/includes/lib/jwt/loader.php';
 	}
 	return JWT::decode( $jwt, $key, array( 'HS256' ) );
@@ -867,7 +990,7 @@ function wte_get_timezone_info() {
 	} else {
 		$formatted_gmt_offset = wte_format_gmt_offset( (float) get_option( 'gmt_offset', 0 ) );
 
-		$timezone_info[ 'description' ] = sprintf(
+		$timezone_info['description'] = sprintf(
 		/* translators: 1: UTC abbreviation and offset, 2: UTC offset. */
 			__( 'Your timezone is set to %1$s (Coordinated Universal Time %2$s).', 'wp-travel-engine' ),
 			'<abbr>UTC</abbr>' . $formatted_gmt_offset,
@@ -892,11 +1015,11 @@ function wte_format_gmt_offset( $offset ) {
 
 	preg_match( '/(\+|\-)?(\d+\.\d+)/', $formatted_offset, $matches );
 
-	if ( isset( $matches[ 2 ] ) ) {
-		$formatted_offset = substr( '0000' . $matches[ 2 ], - 5 );
+	if ( isset( $matches[2] ) ) {
+		$formatted_offset = substr( '0000' . $matches[2], - 5 );
 	}
 
-	$formatted_offset = $matches[ 1 ] . $formatted_offset;
+	$formatted_offset = $matches[1] . $formatted_offset;
 
 	$formatted_offset = str_replace(
 		array( '.25', '.50', '.75', '.00' ),
@@ -908,8 +1031,8 @@ function wte_format_gmt_offset( $offset ) {
 }
 
 function wte_get_trip( $trip = null ) {
-	if ( empty( $trip ) && isset( $GLOBALS[ 'wtetrip' ] ) ) {
-		$trip = $GLOBALS[ 'wtetrip' ];
+	if ( empty( $trip ) && isset( $GLOBALS['wtetrip'] ) ) {
+		$trip = $GLOBALS['wtetrip'];
 	}
 
 	if ( $trip instanceof Posttype\Trip ) {
@@ -930,7 +1053,7 @@ function wte_get_engine_extensions() {
 
 	$matches = array();
 	foreach ( $plugins as $file => $plugin ) {
-		if ( 'WordPress Travel Booking Plugin - WP Travel Engine' !== $plugin[ 'Name' ] && ( stristr( $plugin[ 'Name' ], 'wp travel engine' ) || stristr( $plugin[ 'Description' ], 'wp travel engine' ) ) ) {
+		if ( 'WordPress Travel Booking Plugin - WP Travel Engine' !== $plugin['Name'] && ( stristr( $plugin['Name'], 'wp travel engine' ) || stristr( $plugin['Description'], 'wp travel engine' ) ) ) {
 			$matches[ $file ] = $plugin;
 		}
 	}
@@ -984,7 +1107,7 @@ function wptravelengine_functions(): HelperFunctions {
 
 function wte_readonly( $value, $check_against, $echo = true ) {
 	if ( ( is_array( $check_against ) && in_array( $value, $check_against ) )
-		 || ( ! is_array( $check_against ) && $value === $check_against )
+		|| ( ! is_array( $check_against ) && $value === $check_against )
 	) {
 		if ( $echo ) {
 			echo 'readonly=\"readonly\"';
@@ -1019,8 +1142,8 @@ function wte_get_trip_reviews( $trip_id ): array {
 		);
 		$i            = 0;
 		foreach ( $results as $result ) {
-			$_result[ $i ][ 'ID' ]      = (int) $result->comment_ID;
-			$_result[ $i ][ 'content' ] = $result->comment_content;
+			$_result[ $i ]['ID']      = (int) $result->comment_ID;
+			$_result[ $i ]['content'] = $result->comment_content;
 
 			if ( isset( $result->reviews_meta ) && json_decode( $result->reviews_meta ) ) {
 				$_metas = json_decode( $result->reviews_meta );
@@ -1032,7 +1155,7 @@ function wte_get_trip_reviews( $trip_id ): array {
 					}
 				}
 			}
-			++ $i;
+			++$i;
 		}
 	}
 
@@ -1136,13 +1259,13 @@ function wte_get_media_details( $media_id ) {
 	// Ensure empty details is an empty object.
 	if ( empty( $media_details ) ) {
 		$media_details = new \stdClass();
-	} else if ( ! empty( $media_details[ 'sizes' ] ) ) {
+	} elseif ( ! empty( $media_details['sizes'] ) ) {
 
-		foreach ( $media_details[ 'sizes' ] as $size => &$size_data ) {
+		foreach ( $media_details['sizes'] as $size => &$size_data ) {
 
-			if ( isset( $size_data[ 'mime-type' ] ) ) {
-				$size_data[ 'mime_type' ] = $size_data[ 'mime-type' ];
-				unset( $size_data[ 'mime-type' ] );
+			if ( isset( $size_data['mime-type'] ) ) {
+				$size_data['mime_type'] = $size_data['mime-type'];
+				unset( $size_data['mime-type'] );
 			}
 
 			// Use the same method image_downsize() does.
@@ -1151,22 +1274,22 @@ function wte_get_media_details( $media_id ) {
 				continue;
 			}
 
-			$size_data[ 'source_url' ] = $image_src[ 0 ];
+			$size_data['source_url'] = $image_src[0];
 		}
 
 		$full_src = wp_get_attachment_image_src( $media_id, 'full' );
 
 		if ( ! empty( $full_src ) ) {
-			$media_details[ 'sizes' ][ 'full' ] = array(
-				'file'       => wp_basename( $full_src[ 0 ] ),
-				'width'      => $full_src[ 1 ],
-				'height'     => $full_src[ 2 ],
+			$media_details['sizes']['full'] = array(
+				'file'       => wp_basename( $full_src[0] ),
+				'width'      => $full_src[1],
+				'height'     => $full_src[2],
 				// 'mime_type'  => $post->post_mime_type,
-				'source_url' => $full_src[ 0 ],
+				'source_url' => $full_src[0],
 			);
 		}
 	} else {
-		$media_details[ 'sizes' ] = new \stdClass();
+		$media_details['sizes'] = new \stdClass();
 	}
 
 	unset( $media_details->{'image_meta'} );
@@ -1182,7 +1305,7 @@ function wte_has_trip_group_discount( $trip_id ) {
 }
 
 function wte_get_terms_by_id( $taxonomy, $args = array() ) {
-	$terms        = get_terms( $taxonomy, $args );
+	$terms        = get_terms( $taxonomy, array_merge( $args, array( 'pad_counts' => true ) ) );
 	$terms_by_ids = array();
 
 	if ( is_array( $terms ) ) {
@@ -1279,39 +1402,51 @@ function wte_trip_get_trip_rest_metadata( $trip_id ) {
 			),
 		) as $property_name => $args
 	) {
-		$value = isset( $args[ 'key' ] ) ? wte_array_get( $trip_details, $args[ 'key' ], '' ) : '';
+		$value = isset( $args['key'] ) ? wte_array_get( $trip_details, $args['key'], '' ) : '';
 
-		if ( 'array' === $args[ 'type' ] && isset( $args[ 'items' ] ) ) {
+		if ( 'array' === $args['type'] && isset( $args['items'] ) ) {
 			$value = array();
-			$items = $args[ 'items' ];
+			$items = $args['items'];
 			foreach ( $items as $sub_property_name => $item ) {
-				if ( isset( $trip_details[ $item[ 'key' ] ] ) ) {
-					if ( 'number' === $item[ 'type' ] ) {
-						$decimal                     = isset( $item[ 'decimal' ] ) ? (int) $item[ 'decimal' ] : 0;
-						$value[ $sub_property_name ] = round( (float) $trip_details[ $item[ 'key' ] ], $decimal );
+				if ( isset( $trip_details[ $item['key'] ] ) ) {
+					if ( 'number' === $item['type'] ) {
+						$decimal                     = isset( $item['decimal'] ) ? (int) $item['decimal'] : 0;
+						$value[ $sub_property_name ] = round( (float) $trip_details[ $item['key'] ], $decimal );
 					} else {
-						$value[ $sub_property_name ] = $trip_details[ $item[ 'key' ] ];
+						$value[ $sub_property_name ] = $trip_details[ $item['key'] ];
 					}
 				}
 			}
 			$data->{$property_name} = $value;
 			continue;
 		}
-		$data->{$property_name} = 'number' === $args[ 'type' ] ? round( (float) $value, 2 ) : $value;
+		$data->{$property_name} = 'number' === $args['type'] ? round( (float) $value, 2 ) : $value;
 	}
 
 	// $wte_trip = \wte_get_trip( $trip_id );
 
+	$data->min_pax = '';
+	$data->max_pax = '';
+
 	$trip = wptravelengine_get_trip( $trip_id );
 	if ( $trip ) {
-		$default_package 	= $trip->default_package();
-		$primary_category 	= $default_package->primary_pricing_category->id ?? 0;
+		$default_package  = $trip->default_package();
+		$primary_category = $default_package->primary_pricing_category->id ?? 0;
 
-		$data->discount_value   = $default_package->sale_amount ?? 0;
-		$data->discount_label 	= wptravelengine_get_discount_label( $default_package );
+		$data->discount_value = $default_package->sale_amount ?? 0;
+		$data->discount_label = wptravelengine_get_discount_label( $default_package );
 
+		// @since 6.7.3 Added support for min/max participants.
+		if ( $trip->is_enabled_min_max_participants() ) {
+			if ( ! empty( $trip->get_minimum_participants() ) ) {
+				$data->min_pax = (int) $trip->get_minimum_participants();
+			}
+			if ( ! empty( $trip->get_maximum_participants() ) ) {
+				$data->max_pax = (int) $trip->get_maximum_participants();
+			}
+		}
 	} else {
-		$default_package 	= false;
+		$default_package = false;
 	}
 
 	$primary_category ??= (int) ( get_post_meta( $trip_id, 'primary_category', true ) ?: wptravelengine_settings()->get_primary_pricing_category()->term_id );
@@ -1321,7 +1456,7 @@ function wte_trip_get_trip_rest_metadata( $trip_id ) {
 	$data->sale_price       = $default_package->sale_price ?? '';
 	$data->primary_category = $primary_category;
 
-	$data->available_times  = array(
+	$data->available_times = array(
 		'type'  => 'default',
 		'items' => array_map(
 			function ( $month ) {
@@ -1332,42 +1467,41 @@ function wte_trip_get_trip_rest_metadata( $trip_id ) {
 	);
 
 	$trip_settings = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
-	// Group Size.
-	$data->min_pax = '';
-	$data->max_pax = '';
-	if ( isset( $trip_settings[ 'minmax_pax_enable' ] ) && 'true' === $trip_settings[ 'minmax_pax_enable' ] ) {
-		if ( ! empty( $trip_settings[ 'trip_minimum_pax' ] ) ) {
-			$data->min_pax = (int) $trip_settings[ 'trip_minimum_pax' ];
+
+	if ( ! $trip && isset( $trip_settings['minmax_pax_enable'] ) && 'true' === $trip_settings['minmax_pax_enable'] ) {
+		if ( ! empty( $trip_settings['trip_minimum_pax'] ) ) {
+			$data->min_pax = (int) $trip_settings['trip_minimum_pax'];
 		}
-		if ( ! empty( $trip_settings[ 'trip_maximum_pax' ] ) ) {
-			$data->max_pax = (int) $trip_settings[ 'trip_maximum_pax' ];
+		if ( ! empty( $trip_settings['trip_maximum_pax'] ) ) {
+			$data->max_pax = (int) $trip_settings['trip_maximum_pax'];
 		}
 	}
 
-	$data->description   = $trip_settings[ 'tab_content' ][ '1_wpeditor' ] ?? '';
-	$data->cost_includes = $trip_settings[ 'cost' ][ 'cost_includes' ] ?? '';
-	$data->cost_excludes = $trip_settings[ 'cost' ][ 'cost_excludes' ] ?? '';
+	$data->description   = $trip_settings['tab_content']['1_wpeditor'] ?? '';
+	$data->cost_includes = $trip_settings['cost']['cost_includes'] ?? '';
+	$data->cost_excludes = $trip_settings['cost']['cost_excludes'] ?? '';
 	$data->itineraries   = array();
-	if ( isset( $trip_settings[ 'itinerary' ][ 'itinerary_title' ] ) && is_array( $trip_settings[ 'itinerary' ][ 'itinerary_title' ] ) ) {
-		foreach ( $trip_settings[ 'itinerary' ][ 'itinerary_title' ] as $key => $itinerary ) {
+	if ( isset( $trip_settings['itinerary']['itinerary_title'] ) && is_array( $trip_settings['itinerary']['itinerary_title'] ) ) {
+		foreach ( $trip_settings['itinerary']['itinerary_title'] as $key => $itinerary ) {
 			$data->itineraries[] = array(
-				'title'   => $trip_settings[ 'itinerary' ][ 'itinerary_title' ][ $key ] ?? '',
-				'content' => $trip_settings[ 'itinerary' ][ 'itinerary_content' ][ $key ] ?? '',
-			);
-		}
-	}
-	$data->faqs = array();
-	if ( isset( $trip_settings[ 'faq' ][ 'faq_title' ] ) && is_array( $trip_settings[ 'faq' ][ 'faq_title' ] ) ) {
-		foreach ( $trip_settings[ 'faq' ][ 'faq_title' ] as $key => $faq ) {
-			$data->faqs[] = array(
-				'title'   => $trip_settings[ 'faq' ][ 'faq_title' ][ $key ] ?? '',
-				'content' => $trip_settings[ 'faq' ][ 'faq_content' ][ $key ] ?? '',
+				'title'   => $trip_settings['itinerary']['itinerary_title'][ $key ] ?? '',
+				'content' => $trip_settings['itinerary']['itinerary_content'][ $key ] ?? '',
 			);
 		}
 	}
 
-	if ( isset( $trip_settings[ 'trip_facts' ][ 2 ][ 2 ] ) ) {
-		$data->group_size = $trip_settings[ 'trip_facts' ][ 2 ][ 2 ];
+	$data->faqs = array();
+	if ( isset( $trip_settings['faq']['faq_title'] ) && is_array( $trip_settings['faq']['faq_title'] ) ) {
+		foreach ( $trip_settings['faq']['faq_title'] as $key => $faq ) {
+			$data->faqs[] = array(
+				'title'   => $trip_settings['faq']['faq_title'][ $key ] ?? '',
+				'content' => $trip_settings['faq']['faq_content'][ $key ] ?? '',
+			);
+		}
+	}
+
+	if ( isset( $trip_settings['trip_facts'][2][2] ) ) {
+		$data->group_size = $trip_settings['trip_facts'][2][2];
 	}
 
 	$data->is_featured = \wte_is_trip_featured( $trip_id );
@@ -1441,7 +1575,7 @@ function wte_default_labels( $labelof = null ) {
  * Non-scalar values are ignored.
  *
  * @param string|array $var Data to sanitize.
- * @param string $sanitize_callback Sanitize callback.
+ * @param string       $sanitize_callback Sanitize callback.
  *
  * @return string|array
  * @since 5.3.1
@@ -1449,7 +1583,7 @@ function wte_default_labels( $labelof = null ) {
 function wte_clean( $var ) {
 	if ( is_array( $var ) ) {
 		return array_map( 'wte_clean', $var );
-	} else if ( is_scalar( $var ) ) {
+	} elseif ( is_scalar( $var ) ) {
 		return sanitize_text_field( $var );
 	} else {
 		return $var;
@@ -1483,8 +1617,8 @@ function wte_input_clean( $data, $schema = array() ) {
 	if ( is_array( $data ) ) {
 		$_data = array();
 		foreach ( $data as $index => $value ) {
-			if ( isset( $schema[ 'properties' ][ $index ] ) ) {
-				$_data[ $index ] = call_user_func( 'wte_input_clean', $value, $schema[ 'properties' ][ $index ] );
+			if ( isset( $schema['properties'][ $index ] ) ) {
+				$_data[ $index ] = call_user_func( 'wte_input_clean', $value, $schema['properties'][ $index ] );
 			} else {
 				if ( is_array( $value ) ) {
 					$_data[ $index ] = call_user_func(
@@ -1495,14 +1629,14 @@ function wte_input_clean( $data, $schema = array() ) {
 							'properties' => array(),
 						)
 					);
-				} else if ( is_scalar( $value ) ) {
-					if ( isset( $schema[ 'items' ] ) ) {
+				} elseif ( is_scalar( $value ) ) {
+					if ( isset( $schema['items'] ) ) {
 						$_data[ $index ] = call_user_func(
 							'wte_input_clean',
 							$value,
 							array(
-								'type'              => $schema[ 'items' ][ 'type' ],
-								'sanitize_callback' => $schema[ 'items' ][ 'sanitize_callback' ],
+								'type'              => $schema['items']['type'],
+								'sanitize_callback' => $schema['items']['sanitize_callback'],
 							)
 						);
 					} else {
@@ -1518,8 +1652,8 @@ function wte_input_clean( $data, $schema = array() ) {
 		if ( ! is_scalar( $data ) ) {
 			return $data;
 		}
-		if ( isset( $schema[ 'sanitize_callback' ] ) ) {
-			return call_user_func( $schema[ 'sanitize_callback' ], $data );
+		if ( isset( $schema['sanitize_callback'] ) ) {
+			return call_user_func( $schema['sanitize_callback'], $data );
 		} else {
 			return sanitize_text_field( $data );
 		}
@@ -1538,7 +1672,7 @@ function wte_esc_svg( $value ) {
 	return wp_kses(
 		$value,
 		array(
-			'svg'   => array(
+			'svg'    => array(
 				'id'              => array(),
 				'class'           => array(),
 				'aria-hidden'     => array(),
@@ -1550,36 +1684,76 @@ function wte_esc_svg( $value ) {
 				'viewbox'         => array(), // <= Must be lower case!
 				'fill'            => array(),
 			),
-			'g'     => array(
+			'g'      => array(
 				'fill'      => array(),
 				'id'        => array(),
 				'transform' => array(),
 			),
-			'title' => array( 'title' => array() ),
-			'path'  => array(
-				'id'        => array(),
-				'd'         => array(),
-				'fill'      => array(),
-				'data-name' => array(),
-				'transform' => array(),
-				'stroke'    => array(),
-				'stroke-width' => array(),
-				'stroke-linecap' => array(),
+			'title'  => array( 'title' => array() ),
+			'path'   => array(
+				'id'              => array(),
+				'd'               => array(),
+				'fill'            => array(),
+				'data-name'       => array(),
+				'transform'       => array(),
+				'stroke'          => array(),
+				'stroke-width'    => array(),
+				'stroke-linecap'  => array(),
 				'stroke-linejoin' => array(),
 			),
-			'i'     => array(),
+			'i'      => array(),
 			'circle' => array(
-				'cx' => array(),
-				'cy' => array(),
-				'r' => array(),
-				'fill' => array(),
-				'stroke' => array(),
-				'stroke-width' => array(),
-				'stroke-linecap' => array(),
+				'cx'              => array(),
+				'cy'              => array(),
+				'r'               => array(),
+				'fill'            => array(),
+				'stroke'          => array(),
+				'stroke-width'    => array(),
+				'stroke-linecap'  => array(),
 				'stroke-linejoin' => array(),
 			),
 		)
 	);
+}
+
+/**
+ * Output icon (supports SVG markup, img tags, or image URLs).
+ *
+ * This function handles three types of icon inputs:
+ * - SVG markup (inline SVG content)
+ * - Pre-formatted img tags
+ * - Image URLs (will be wrapped in img tag)
+ *
+ * @param string $icon_url Icon URL, SVG markup, or img tag.
+ * @param string $alt_text Alt text for the icon. Default: 'Payment Method'.
+ * @param bool   $echo     Whether to echo the output. Default: false.
+ *
+ * @return string Escaped HTML markup for the icon.
+ * @since 6.7.0
+ */
+function wptravelengine_display_icon( string $icon_url, string $alt_text = 'Payment Method', bool $echo = false ): string { // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped, WordPress.WP.AlternativeFunctions.esc_html_e
+	if ( empty( $icon_url ) ) {
+		return ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped, WordPress.WP.AlternativeFunctions.esc_html_e
+	}
+
+	$output = '';
+
+	// Check if it's SVG markup
+	if ( strpos( $icon_url, '<svg' ) !== false ) {
+		$output = wte_esc_svg( $icon_url );
+	} elseif ( strpos( $icon_url, '<img' ) !== false ) {
+		// Already an img tag, sanitize it
+		$output = wp_kses_post( $icon_url );
+	} else {
+		// It's a URL, wrap it in an img tag
+		$output = '<img src="' . esc_url( $icon_url ) . '" alt="' . esc_attr( $alt_text ) . '">';
+	}
+
+	if ( $echo ) {
+		echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+
+	return $output;
 }
 
 /**
@@ -1590,20 +1764,20 @@ function wte_esc_svg( $value ) {
  * @return void
  */
 function booking_meta_details( $booking_id ) {
-	$booking_meta                        = array();
-	$booking_metas                       = get_post_meta( $booking_id, 'wp_travel_engine_booking_setting', true );
-	$booking_meta[ 'booked_travellers' ] = isset( $booking_metas[ 'place_order' ][ 'traveler' ] ) ? $booking_metas[ 'place_order' ][ 'traveler' ] : 0;
+	$booking_meta                      = array();
+	$booking_metas                     = get_post_meta( $booking_id, 'wp_travel_engine_booking_setting', true );
+	$booking_meta['booked_travellers'] = isset( $booking_metas['place_order']['traveler'] ) ? $booking_metas['place_order']['traveler'] : 0;
 
-	$booking_meta[ 'total_paid' ]                = isset( $booking_metas[ 'place_order' ][ 'cost' ] ) ? $booking_metas[ 'place_order' ][ 'cost' ] : 0;
-	$booking_meta[ 'remaining_payment' ]         = isset( $booking_metas[ 'place_order' ][ 'due' ] ) ? $booking_metas[ 'place_order' ][ 'due' ] : 0;
-	$booking_meta[ 'total_cost' ]                = isset( $booking_metas[ 'place_order' ][ 'due' ] ) && $booking_metas[ 'place_order' ][ 'due' ] != '' ? floatval( $booking_metas[ 'place_order' ][ 'cost' ] ) + floatval( $booking_metas[ 'place_order' ][ 'due' ] ) : $booking_meta[ 'total_paid' ];
-	$booking_meta[ 'partial_due' ]               = isset( $booking_metas[ 'place_order' ][ 'partial_due' ] ) ? $booking_metas[ 'place_order' ][ 'partial_due' ] : 0;
-	$booking_meta[ 'partial_cost' ]              = isset( $booking_metas[ 'place_order' ][ 'partial_cost' ] ) ? $booking_metas[ 'place_order' ][ 'partial_cost' ] : 0;
-	$booking_meta[ 'trip_id' ]                   = isset( $booking_metas[ 'place_order' ][ 'tid' ] ) ? $booking_metas[ 'place_order' ][ 'tid' ] : 0;
-	$booking_meta[ 'trip_name' ]                 = isset( $booking_metas[ 'place_order' ][ 'tid' ] ) ? esc_html( get_the_title( $booking_metas[ 'place_order' ][ 'tid' ] ) ) : '';
-	$booking_meta[ 'trip_start_date' ]           = isset( $booking_metas[ 'place_order' ][ 'datetime' ] ) ? $booking_metas[ 'place_order' ][ 'datetime' ] : '';
-	$booking_meta[ 'trip_start_date_with_time' ] = isset( $booking_metas[ 'place_order' ][ 'datewithtime' ] ) ? $booking_metas[ 'place_order' ][ 'datewithtime' ] : '';
-	$booking_meta[ 'date_format' ]               = get_option( 'date_format' );
+	$booking_meta['total_paid']                = isset( $booking_metas['place_order']['cost'] ) ? $booking_metas['place_order']['cost'] : 0;
+	$booking_meta['remaining_payment']         = isset( $booking_metas['place_order']['due'] ) ? $booking_metas['place_order']['due'] : 0;
+	$booking_meta['total_cost']                = isset( $booking_metas['place_order']['due'] ) && $booking_metas['place_order']['due'] != '' ? floatval( $booking_metas['place_order']['cost'] ) + floatval( $booking_metas['place_order']['due'] ) : $booking_meta['total_paid'];
+	$booking_meta['partial_due']               = isset( $booking_metas['place_order']['partial_due'] ) ? $booking_metas['place_order']['partial_due'] : 0;
+	$booking_meta['partial_cost']              = isset( $booking_metas['place_order']['partial_cost'] ) ? $booking_metas['place_order']['partial_cost'] : 0;
+	$booking_meta['trip_id']                   = isset( $booking_metas['place_order']['tid'] ) ? $booking_metas['place_order']['tid'] : 0;
+	$booking_meta['trip_name']                 = isset( $booking_metas['place_order']['tid'] ) ? esc_html( get_the_title( $booking_metas['place_order']['tid'] ) ) : '';
+	$booking_meta['trip_start_date']           = isset( $booking_metas['place_order']['datetime'] ) ? $booking_metas['place_order']['datetime'] : '';
+	$booking_meta['trip_start_date_with_time'] = isset( $booking_metas['place_order']['datewithtime'] ) ? $booking_metas['place_order']['datewithtime'] : '';
+	$booking_meta['date_format']               = get_option( 'date_format' );
 
 	return $booking_meta;
 }
@@ -1616,8 +1790,8 @@ function booking_meta_details( $booking_id ) {
 function wte_esc_attr( $value ) {
 	if ( is_string( $value ) ) {
 		preg_match( "/([\w\-]+)=(['\"](.*)['\"])/", $value, $matches );
-		if ( $matches && isset( $matches[ 1 ] ) && $matches[ 3 ] ) {
-			return esc_attr( $matches[ 1 ] ) . '="' . $matches[ 3 ] . '"';
+		if ( $matches && isset( $matches[1] ) && $matches[3] ) {
+			return esc_attr( $matches[1] ) . '="' . $matches[3] . '"';
 		}
 
 		return esc_attr( $value );
@@ -1684,7 +1858,7 @@ function wptravelengine_duplicate_post( $post_id ) {
 		$post_meta_info  = $wpdb->prepare( "SELECT meta_key, meta_value FROM $wpdb->postmeta WHERE post_id = %s", $post->ID ); // phpcs:ignore
 		$post_meta_infos = $wpdb->get_results( $post_meta_info ); // phpcs:ignore
 
-		if ( isset( $post_meta_infos[ 0 ] ) ) {
+		if ( isset( $post_meta_infos[0] ) ) {
 			$sql_query     = $wpdb->prepare( "INSERT INTO {$wpdb->postmeta} (post_id, meta_key, meta_value) VALUES " );
 			$sql_query_sel = array();
 			foreach ( $post_meta_infos as $meta_info ) {
@@ -1801,14 +1975,14 @@ function wptravelengine_get_the_trip_excerpt( $post_id = null, $length = 30 ): s
 		if ( class_exists( '\Elementor\Plugin' ) ) {
 			$elementor_page = Plugin::$instance->documents->get( $post_id );
 			$settings       = $elementor_page->get_properties();
-			if ( $elementor_page->is_built_with_elementor() && isset( $settings[ 'support_wp_page_templates' ] ) ) {
+			if ( $elementor_page->is_built_with_elementor() && isset( $settings['support_wp_page_templates'] ) ) {
 				$content = '';
 			}
 		}
 
 		if ( empty( $content ) ) {
 			$trip_settings = get_post_meta( $post_id, 'wp_travel_engine_setting', true );
-			$content       = $trip_settings[ 'tab_content' ][ '1_wpeditor' ] ?? '';
+			$content       = $trip_settings['tab_content']['1_wpeditor'] ?? '';
 		}
 	}
 
@@ -1851,20 +2025,20 @@ function wptravelengine_svg_by_fa_icon( $icon, $echo = true, $class_names = arra
 	$data = wptravelengine_get_fa_icons();
 
 	if ( is_array( $icon ) ) {
-		$new_icon = $icon[ 'icon' ] ?? '';
-		$path     = ( $icon[ 'path' ] ?? '' ) ?: ( $data[ $new_icon ][ 'path' ] ?? '' );
+		$new_icon = $icon['icon'] ?? '';
+		$path     = ( $icon['path'] ?? '' ) ?: ( $data[ $new_icon ]['path'] ?? '' );
 		if ( empty( $path ) ) {
 			return $path;
 		}
-		$view_box = ( $icon[ 'view_box' ] ?? '' ) ?: ( $data[ $new_icon ][ 'viewBox' ] ?? '' );
+		$view_box = ( $icon['view_box'] ?? '' ) ?: ( $data[ $new_icon ]['viewBox'] ?? '' );
 		$icon     = $new_icon;
 	} else {
 		$path = $data[ $icon ] ?? '';
 		if ( empty( $path ) ) {
 			return $path;
 		}
-		$view_box = $path[ 'viewBox' ] ?? '';
-		$path     = $path[ 'path' ] ?? '';
+		$view_box = $path['viewBox'] ?? '';
+		$path     = $path['path'] ?? '';
 	}
 
 	$attr       = array(
@@ -1882,7 +2056,7 @@ function wptravelengine_svg_by_fa_icon( $icon, $echo = true, $class_names = arra
 		$attributes[] = "{$attr_name}=\"$attr_value\"";
 	}
 
-	$svg = '<svg ';
+	$svg  = '<svg ';
 	$svg .= implode( ' ', $attributes );
 	$svg .= "><path d=\"{$path}\"/></svg>";
 
@@ -1922,37 +2096,37 @@ function wptravelengine_get_sorting_options() {
 	return apply_filters(
 		'wp_travel_engine_archive_header_sorting_options',
 		array(
-			'latest' => esc_html__( 'Recently Added', 'wp-travel-engine' ),
-			'rating' => esc_html__( 'Top Rated', 'wp-travel-engine' ),
-			'price'  => esc_html__( 'Lowest Price First', 'wp-travel-engine' ),
-			'price-desc'  => esc_html__( 'Highest Price First', 'wp-travel-engine' ),
-			'days' => esc_html__( 'Shortest Duration First', 'wp-travel-engine' ),
-			'days-desc' => esc_html__( 'Longest Duration First', 'wp-travel-engine' ),
-			'name' => esc_html__( 'Alphabetical - A to Z', 'wp-travel-engine' ),
-			'name-desc' => esc_html__( 'Alphabetical - Z to A', 'wp-travel-engine' ),
+			'latest'     => esc_html__( 'Recently Added', 'wp-travel-engine' ),
+			'rating'     => esc_html__( 'Top Rated', 'wp-travel-engine' ),
+			'price'      => esc_html__( 'Lowest Price First', 'wp-travel-engine' ),
+			'price-desc' => esc_html__( 'Highest Price First', 'wp-travel-engine' ),
+			'days'       => esc_html__( 'Shortest Duration First', 'wp-travel-engine' ),
+			'days-desc'  => esc_html__( 'Longest Duration First', 'wp-travel-engine' ),
+			'name'       => esc_html__( 'Alphabetical - A to Z', 'wp-travel-engine' ),
+			'name-desc'  => esc_html__( 'Alphabetical - Z to A', 'wp-travel-engine' ),
 			// ''       => esc_html__( 'Default Sorting', 'wp-travel-engine' ),
 			// 'latest' => esc_html__( 'Latest', 'wp-travel-engine' ),
 			// 'rating' => esc_html__( 'Most Reviewed', 'wp-travel-engine' ),
 			// 'price'  => array(
-			// 	'label'   => esc_html__( 'Price', 'wp-travel-engine' ),
-			// 	'options' => array(
-			// 		'price'      => esc_html__( 'Low to High', 'wp-travel-engine' ),
-			// 		'price-desc' => esc_html__( 'High to Low', 'wp-travel-engine' ),
-			// 	),
+			// 'label'   => esc_html__( 'Price', 'wp-travel-engine' ),
+			// 'options' => array(
+			// 'price'      => esc_html__( 'Low to High', 'wp-travel-engine' ),
+			// 'price-desc' => esc_html__( 'High to Low', 'wp-travel-engine' ),
+			// ),
 			// ),
 			// 'days'   => array(
-			// 	'label'   => esc_html__( 'Days', 'wp-travel-engine' ),
-			// 	'options' => array(
-			// 		'days'      => esc_html__( 'Low to High', 'wp-travel-engine' ),
-			// 		'days-desc' => esc_html__( 'High to Low', 'wp-travel-engine' ),
-			// 	),
+			// 'label'   => esc_html__( 'Days', 'wp-travel-engine' ),
+			// 'options' => array(
+			// 'days'      => esc_html__( 'Low to High', 'wp-travel-engine' ),
+			// 'days-desc' => esc_html__( 'High to Low', 'wp-travel-engine' ),
+			// ),
 			// ),
 			// 'name'   => array(
-			// 	'label'   => esc_html__( 'Name', 'wp-travel-engine' ),
-			// 	'options' => array(
-			// 		'name'      => __( 'a - z', 'wp-travel-engine' ),
-			// 		'name-desc' => __( 'z - a', 'wp-travel-engine' ),
-			// 	),
+			// 'label'   => esc_html__( 'Name', 'wp-travel-engine' ),
+			// 'options' => array(
+			// 'name'      => __( 'a - z', 'wp-travel-engine' ),
+			// 'name-desc' => __( 'z - a', 'wp-travel-engine' ),
+			// ),
 			// ),
 		)
 	);
@@ -2023,8 +2197,8 @@ function wptravelengine_system_info() {
 	$wptravelengine_addons = array();
 	if ( is_array( $plugins ) ) {
 		foreach ( $plugins as $plugin ) {
-			if ( preg_match( '/(WP Travel Engine)/', $plugin[ 'Name' ] ) ) {
-				$wptravelengine_addons[ $plugin[ 'Name' ] ] = '<code>' . $plugin[ 'Version' ] . '</code>';
+			if ( preg_match( '/(WP Travel Engine)/', $plugin['Name'] ) ) {
+				$wptravelengine_addons[ $plugin['Name'] ] = '<code>' . $plugin['Version'] . '</code>';
 			}
 		}
 	}
@@ -2069,7 +2243,12 @@ function wptravelengine_payment_status( $status = null ) {
 		'voucher-awaiting' => __( 'Waiting for Voucher', 'wp-travel-engine' ),
 		'voucher-received' => __( 'Voucher Received', 'wp-travel-engine' ),
 	);
-	$options = apply_filters( 'wp_travel_engine_payment_status_options', $options );
+
+	$success_status = wptravelengine_success_payment_status();
+	$pending_status = wptravelengine_pending_payment_status();
+	$failed_status  = wptravelengine_failed_payment_status();
+
+	$options = apply_filters( 'wp_travel_engine_payment_status_options', array_merge( $options, $success_status, $pending_status, $failed_status ) );
 
 	if ( is_null( $status ) ) {
 		return $options;
@@ -2114,7 +2293,7 @@ function wptravelengine_get_page_by_title( $title, $post_type = 'page' ) {
 		)
 	);
 
-	return $pages[ 0 ] ?? null;
+	return $pages[0] ?? null;
 }
 
 /**
@@ -2135,8 +2314,8 @@ function wptravelengine_add_admin_menu_separator( $position ) {
 	$previous_index       = 0;
 	$add_bottom_separator = false;
 	foreach ( $_menu as $index => $item ) {
-		if ( ( $item[ 2 ] === 'edit.php?post_type=booking' ) || $add_bottom_separator ) {
-			if ( substr( $item[ 2 ], 0, 9 ) !== 'separator' ) {
+		if ( ( $item[2] === 'edit.php?post_type=booking' ) || $add_bottom_separator ) {
+			if ( substr( $item[2], 0, 9 ) !== 'separator' ) {
 				$menu[ ( ( $previous_index + $index ) / 2 ) . '' ] = array(
 					'',
 					'read',
@@ -2152,7 +2331,7 @@ function wptravelengine_add_admin_menu_separator( $position ) {
 		}
 		$previous_index = $index;
 
-		if ( $item[ 2 ] === 'wp-travel-engine-analytics' ) {
+		if ( $item[2] === 'wp-travel-engine-analytics' ) {
 			$add_bottom_separator = true;
 		}
 	}
@@ -2161,7 +2340,7 @@ function wptravelengine_add_admin_menu_separator( $position ) {
 /**
  * @param array $fields Form fields.
  *
- * @param bool $use_legacy_template Use legacy template.
+ * @param bool  $use_legacy_template Use legacy template.
  *
  * @return void
  * @since 5.7.4
@@ -2270,25 +2449,25 @@ function wptravelengine_random_hex(): string {
  */
 function wptravelengine_hex_to_rgb( string $hex ) {
 	// Remove the "#" if present
-    $hex = ltrim($hex, '#');
+	$hex = ltrim( $hex, '#' );
 
-    // Handle shorthand format like #f60
-    if (strlen($hex) === 3) {
-        $hex = $hex[0].$hex[0].$hex[1].$hex[1].$hex[2].$hex[2];
-    }
+	// Handle shorthand format like #f60
+	if ( strlen( $hex ) === 3 ) {
+		$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+	}
 
-    // Convert to RGB components
-    if (strlen($hex) === 6) {
-        list($r, $g, $b) = [
-            hexdec(substr($hex, 0, 2)),
-            hexdec(substr($hex, 2, 2)),
-            hexdec(substr($hex, 4, 2)),
-        ];
-        return ''.$r.', '.$g.', '.$b.'';
-    }
+	// Convert to RGB components
+	if ( strlen( $hex ) === 6 ) {
+		list($r, $g, $b) = array(
+			hexdec( substr( $hex, 0, 2 ) ),
+			hexdec( substr( $hex, 2, 2 ) ),
+			hexdec( substr( $hex, 4, 2 ) ),
+		);
+		return '' . $r . ', ' . $g . ', ' . $b . '';
+	}
 
-    // Invalid format
-    return null;
+	// Invalid format
+	return null;
 }
 
 /**
@@ -2305,7 +2484,7 @@ function wptravelengine_unique_id( string $pattern = 'xxxx-xxxxx-xxxxx-xxxx' ) {
 	$result = '';
 
 	// Iterate over each character in the pattern
-	for ( $i = 0; $i < strlen( $pattern ); $i ++ ) {
+	for ( $i = 0; $i < strlen( $pattern ); $i++ ) {
 		if ( $pattern[ $i ] === 'x' ) {
 			$result .= wptravelengine_random_hex();
 		} else {
@@ -2345,7 +2524,7 @@ function wptravelengine_generate_key( string $input ): string {
 function wptravelengine_create_events_table() {
 	global $wpdb;
 
-	$table_name = $wpdb->prefix . 'wptravelengine_events';
+	$table_name      = $wpdb->prefix . 'wptravelengine_events';
 	$charset_collate = $wpdb->get_charset_collate();
 
 	$sql = "CREATE TABLE $table_name (

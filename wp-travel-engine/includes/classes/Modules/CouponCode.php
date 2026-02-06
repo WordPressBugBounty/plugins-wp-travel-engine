@@ -193,7 +193,7 @@ class CouponCode {
 			if ( isset( $coupon_data['restriction'] ) ) {
 				$restriction = $coupon_data['restriction'];
 				array_walk( $restriction, function( &$item ) {
-					if( is_array( $item ) ) {
+					if ( is_array( $item ) ) {
 						$item = array_map( 'wp_filter_nohtml_kses', $item );
 					} else {
 						$item = wp_filter_nohtml_kses( $item );

@@ -81,17 +81,17 @@ class PackageDateParser {
 	 */
 	public function __construct( TripPackage $trip_package, array $args ) {
 
-		$args[ 'is_recurring' ] = empty( $args[ 'is_recurring' ] ) ? false : $args[ 'is_recurring' ];
+		$args['is_recurring'] = empty( $args['is_recurring'] ) ? false : $args['is_recurring'];
 
 		$this->package      = $trip_package;
-		$this->dtstart      = $args[ 'dtstart' ];
-		$this->times        = array_values( $args[ 'times' ] ?? array() );
-		$this->is_recurring = is_bool( $args[ 'is_recurring' ] ) ? $args[ 'is_recurring' ] : '1' === $args[ 'is_recurring' ];
-		$this->seats        = wptravelengine_normalize_numeric_val( $args[ 'seats' ] ?? '' );
-		$this->rrule        = $this->parse_rrule( $args[ 'rrule' ] ?? array() );
+		$this->dtstart      = $args['dtstart'];
+		$this->times        = array_values( $args['times'] ?? array() );
+		$this->is_recurring = is_bool( $args['is_recurring'] ) ? $args['is_recurring'] : '1' === $args['is_recurring'];
+		$this->seats        = wptravelengine_normalize_numeric_val( $args['seats'] ?? '' );
+		$this->rrule        = $this->parse_rrule( $args['rrule'] ?? array() );
 		$this->total_seats  = wptravelengine_normalize_numeric_val( $trip_package->get_trip()->get_maximum_participants() );
 
-		self::$version 		= strtolower( (string) ( $args[ 'version' ] ?? self::$version ?? 'v2' ) );
+		self::$version = strtolower( (string) ( $args['version'] ?? self::$version ?? 'v2' ) );
 
 		do_action( 'wptravelengine_package_date_parser_construct', $this->package, $args );
 	}
@@ -107,22 +107,22 @@ class PackageDateParser {
 		$rrule = array();
 
 		try {
-			$rrule[ 'dtstart' ] = new DateTime( $this->dtstart );
-			$rrule[ 'freq' ]    = $args[ 'r_frequency' ] ?? RRule::DAILY;
-			if ( $args[ 'r_until' ] ?? false ) {
-				$rrule[ 'until' ] = new DateTime( $args[ 'r_until' ] );
-			} else if ( is_numeric( $args[ 'r_count' ] ?? false ) ) {
-				$rrule[ 'count' ] = $args[ 'r_count' ];
+			$rrule['dtstart'] = new DateTime( $this->dtstart );
+			$rrule['freq']    = $args['r_frequency'] ?? RRule::DAILY;
+			if ( $args['r_until'] ?? false ) {
+				$rrule['until'] = new DateTime( $args['r_until'] );
+			} elseif ( is_numeric( $args['r_count'] ?? false ) ) {
+				$rrule['count'] = $args['r_count'];
 			} else {
-				$rrule[ 'count' ] = 10;
+				$rrule['count'] = 10;
 			}
 
-			switch ( $rrule[ 'freq' ] ) {
+			switch ( $rrule['freq'] ) {
 				case 'WEEKLY':
-					$rrule[ 'byday' ] = $args[ 'r_weekdays' ] ?? array();
+					$rrule['byday'] = $args['r_weekdays'] ?? array();
 					break;
 				case 'MONTHLY':
-					$rrule[ 'bymonth' ] = $args[ 'r_months' ] ?? array();
+					$rrule['bymonth'] = $args['r_months'] ?? array();
 					break;
 			}
 
@@ -163,39 +163,40 @@ class PackageDateParser {
 	 * @return array
 	 */
 	protected function prepare_date( $date ): array {
-
 		$times          = array();
 		$formatted_date = $date->format( 'Y-m-d' );
 
-		foreach ( $this->times as $key => $time ) {
-			list( $available_time_seats, $capacity ) = $this->get_seats_details( $formatted_date, $time[ 'from' ] );
+		$i = 0;
+		foreach ( $this->times as $time ) {
+			list( $available_time_seats, $capacity ) = $this->get_seats_details( $formatted_date, $time['from'] );
 
 			if ( is_numeric( $available_time_seats ) && $available_time_seats <= 0 ) {
 				continue;
 			}
 
-			$times[ $key ] = array(
+			$times[ $i ] = array(
 				'key'   => implode(
 					'_',
 					array(
 						$this->package->get_id(),
 						$formatted_date,
-						$time[ 'from' ],
-						$time[ 'to' ],
+						$time['from'],
+						$time['to'],
 					)
 				),
-				'from'  => $formatted_date . 'T' . $time[ 'from' ],
-				'to'    => $formatted_date . 'T' . $time[ 'to' ],
+				'from'  => $formatted_date . 'T' . $time['from'],
+				'to'    => $formatted_date . 'T' . $time['to'],
 				'seats' => $available_time_seats,
 			);
 
 			if ( self::$version === 'v3' ) {
-				$times[ $key ]['capacity']   = $capacity;
-				$times[ $key ]['seats_left'] = $available_time_seats;
+				$times[ $i ]['capacity']   = $capacity;
+				$times[ $i ]['seats_left'] = $available_time_seats;
 			}
+			++$i;
 		}
 
-		list( $seats_left, $capacity ) = $this->get_seats_details(  $formatted_date );
+		list( $seats_left, $capacity ) = $this->get_seats_details( $formatted_date );
 
 		if ( ! empty( $this->times ) && empty( $times ) ) {
 			$available_seats = 0;
@@ -208,29 +209,29 @@ class PackageDateParser {
 				$capacity = $available_seats = 0;
 				foreach ( $times as $time ) {
 					$available_seats += $time['seats'];
-					$capacity += $time['capacity'] ?? 0;
+					$capacity        += $time['capacity'] ?? 0;
 				}
 			}
 		}
 
 		/**
-		 * Here, 'capacity' represents the overall seat capacity for the given date/time, 
+		 * Here, 'capacity' represents the overall seat capacity for the given date/time,
 		 * while 'seats' & 'seats_left' indicates the seats left for that date/time.
-		 * 
+		 *
 		 * @updated 6.6.7
 		 */
 		$date_data = array(
-			'times' 	=> $times,
-			'seats' 	=> is_numeric( $available_seats ) ? (int) $available_seats : '',
-			'pricing' 	=> $this->package->default_pricings,
+			'times'   => $times,
+			'seats'   => is_numeric( $available_seats ) ? (int) $available_seats : '',
+			'pricing' => $this->package->default_pricings,
 		);
 
 		if ( self::$version === 'v3' ) {
-			$date_data['capacity'] 	 = $capacity;
+			$date_data['capacity']   = $capacity;
 			$date_data['seats_left'] = $date_data['seats'];
 		}
 
-		return apply_filters( 'wptravelengine_package_date_parser_prepare_date', $date_data, $this->package );
+		return apply_filters( 'wptravelengine_package_date_parser_prepare_date', $date_data, $this->package, $formatted_date );
 	}
 
 	/**
@@ -245,10 +246,10 @@ class PackageDateParser {
 
 		$recurring_dates = $rrule;
 
-		if ( isset( $args[ 'from' ], $args[ 'to' ] ) ) {
-			$recurring_dates = $rrule->getOccurrencesBetween( $args[ 'from' ], $args[ 'to' ] );
-		} else if ( isset( $args[ 'from' ] ) ) {
-			$recurring_dates = $rrule->getOccurrencesAfter( $args[ 'from' ], true );
+		if ( isset( $args['from'], $args['to'] ) ) {
+			$recurring_dates = $rrule->getOccurrencesBetween( $args['from'], $args['to'] );
+		} elseif ( isset( $args['from'] ) ) {
+			$recurring_dates = $rrule->getOccurrencesAfter( $args['from'], true );
 		}
 
 		$dates = array();
@@ -274,7 +275,7 @@ class PackageDateParser {
 				return array();
 			}
 			try {
-				return [ $this->dtstart => $this->prepare_date( new \DateTime( $this->dtstart ) ) ];
+				return array( $this->dtstart => $this->prepare_date( new \DateTime( $this->dtstart ) ) );
 			} catch ( \Exception $e ) {
 				return array();
 			}
@@ -291,23 +292,28 @@ class PackageDateParser {
 
 	/**
 	 * Get the unique dates.
-	 * 
-	 * @param bool $object Whether to return the dates as an object.
-	 * @param array $args Arguments.
+	 *
+	 * @param bool   $object Whether to return the dates as an object.
+	 * @param array  $args Arguments.
 	 * @param string $format The format of the dates.
 	 *
 	 * @return array
 	 */
 	public function get_unique_dates( bool $object = true, $args = array(), string $format = 'Y-m-d' ): array {
-		return array_unique( array_map( function( $date ) use ( $format ) {
-			return wp_date( $format, strtotime( $date ) );
-		}, array_keys( $this->get_dates( $object, $args ) ) ) );
+		return array_unique(
+			array_map(
+				function ( $date ) use ( $format ) {
+					return wp_date( $format, strtotime( $date ) );
+				},
+				array_keys( $this->get_dates( $object, $args ) )
+			)
+		);
 	}
 
 	/**
 	 * Get data of a single date.
-	 * 
-	 * @param string $date Date.
+	 *
+	 * @param string  $date Date.
 	 * @param ?string $key Key.
 	 *
 	 * @return array
@@ -320,22 +326,22 @@ class PackageDateParser {
 
 	/**
 	 * Retrieves seating information for a specific date and time.
-	 * 
+	 *
 	 * Returns an array containing seating availability data in the following format:
 	 * - Index 0: Number of seats remaining (int)
 	 * - Index 1: Total seating capacity (int)
-	 * 
+	 *
 	 * @param string $date The target date in YYYY-MM-DD format.
 	 * @param string $time The target time in HH:MM format.
-	 * 
+	 *
 	 * @return array{0: int, 1: int} Indexed array with seats left and capacity
-	 * 
+	 *
 	 * @since 6.6.7
 	 */
 	public function get_seats_details( string $date, string $time = '00:00' ) {
 
-		$my_seats 		= $this->seats;
-		$total_seats 	= $this->total_seats;
+		$my_seats    = $this->seats;
+		$total_seats = $this->total_seats;
 
 		$booked_seats_for_this_pac = $this->booked_seats[ $this->package->get_id() ][ $date ][ $time ] ?? 0;
 
@@ -344,20 +350,24 @@ class PackageDateParser {
 				return array( '', '' );
 			}
 			$my_seats = $total_seats;
-		} else if ( ! is_numeric( $total_seats ) ) {
+		} elseif ( ! is_numeric( $total_seats ) ) {
 			return array( max( $my_seats - $booked_seats_for_this_pac, 0 ), $my_seats );
 		}
 
-		$total_booked_seats = array_reduce( $this->booked_seats, function( $acc, $seats ) use ( $date, $time ) {
-			return $acc + ( $seats[ $date ][ $time ] ?? 0 );
-		}, 0 );
+		$total_booked_seats = array_reduce(
+			$this->booked_seats,
+			function ( $acc, $seats ) use ( $date, $time ) {
+				return $acc + ( $seats[ $date ][ $time ] ?? 0 );
+			},
+			0
+		);
 
-		$available_capacity 	= min( $my_seats, $total_seats );
-		$remaining_for_package 	= max( $available_capacity - $booked_seats_for_this_pac, 0 );
-		$remaining_total 		= max( $total_seats - $total_booked_seats, 0 );
+		$available_capacity    = min( $my_seats, $total_seats );
+		$remaining_for_package = max( $available_capacity - $booked_seats_for_this_pac, 0 );
+		$remaining_total       = max( $total_seats - $total_booked_seats, 0 );
 
-		$seats_left	= min( $remaining_for_package, $remaining_total );
-		$capacity	= ( $seats_left === $remaining_for_package ) ? $available_capacity : $total_seats;
+		$seats_left = min( $remaining_for_package, $remaining_total );
+		$capacity   = ( $seats_left === $remaining_for_package ) ? $available_capacity : $total_seats;
 
 		return array( $seats_left, $capacity );
 	}

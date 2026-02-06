@@ -29,9 +29,9 @@ class Heading extends Base {
 		$output = sprintf(
 			'%1$s<%2$s class="%3$s">%4$s</%2$s>%5$s',
 			$this->before_field(),
-			$this->field[ 'tag' ] ?? 'h2',
+			$this->field['tag'] ?? 'h2',
 			$this->field_classnames,
-			$this->field[ 'title' ] ?? '',
+			$this->field['title'] ?? '',
 			$this->after_field()
 		);
 
@@ -40,6 +40,5 @@ class Heading extends Base {
 		}
 
 		return $output;
-
 	}
 }

@@ -162,5 +162,4 @@ abstract class LicenseController {
 	public function is_lifetime(): bool {
 		return $this->expiry_datetime->format( 'Y-m-d H:i:s' ) === '9999-12-31 23:59:59';
 	}
-
 }

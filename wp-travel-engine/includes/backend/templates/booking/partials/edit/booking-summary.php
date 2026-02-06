@@ -1,19 +1,24 @@
 <?php
 /**
- * @var CartInfoParser $cart_info
- * @var Booking $booking
+ * New Booking Summary.
+ *
+ * @var \WPTravelEngine\Core\Models\Post\Booking $booking
+ * @var \WPTravelEngine\Helpers\CartInfoParser $cart_info
+ * @var \WPTravelEngine\Utilities\PaymentCalculator  $calculator
+ * @var array $pricing_arguments
+ * @since 6.7.0
  */
 
-use WPTravelEngine\Helpers\CartInfoParser;
-use WPTravelEngine\Core\Models\Post\Booking;
-
-global $current_screen;
+global $current_screen, $wte_cart;
 
 $_cart_info              = $booking->get_meta( 'cart_info' );
 $is_booking_edit_enabled = isset( $_cart_info['items'] ) || ( $current_screen->id === 'booking' && $current_screen->action === 'add' );
+
+$excl           = $wte_cart->get_exclusion_label( $_cart_info['fees'] ?? array() );
+$payments_total = $booking->get_payments_data( false )['totals'] ?? array();
 ?>
 
-<div class="wpte-booking-summary" data-booking-mode="edit">
+<div class="wpte-booking-summary" data-booking-mode="edit" data-currency-symbol="<?php echo esc_attr( wp_travel_engine_get_currency_symbol( $cart_info->get_currency() ?: wptravelengine_settings()->get( 'currency_code', 'USD' ) ) ); ?>">
 	<h5 class="wpte-booking-summary-title"><?php echo __( 'Booking Summary', 'wp-travel-engine' ); ?></h5>
 	<div class="wpte-booking-summary-table-wrap">
 		<table class="wpte-booking-summary-table">
@@ -22,48 +27,34 @@ $is_booking_edit_enabled = isset( $_cart_info['items'] ) || ( $current_screen->i
 			wptravelengine_get_admin_template(
 				'booking/partials/edit/booking-summary/line-items.php',
 				array(
-					'cart_line_items'         => $cart_info->get_item()->get_line_items(),
-					'is_booking_edit_enabled' => $is_booking_edit_enabled,
-				)
-			);
-			?>
-			<tr class="wpte-booking-subtotal">
-				<td><strong><?php echo esc_html__( 'Subtotal', 'wp-travel-engine' ); ?></strong></td>
-				<td>
-					<input type="number" name="subtotal"
-							value="<?php echo esc_attr( (float) ( $cart_info->get_totals( 'subtotal' ) ?? 0 ) ); ?>" step="any"
-							<?php echo $is_booking_edit_enabled ? '' : 'readonly'; ?>/>
-				</td>
-			</tr>
-			<?php
-			wptravelengine_get_admin_template(
-				'booking/partials/edit/booking-summary/deductible-items.php',
-				array(
-					'deductible_items'        => $cart_info->get_deductible_items(),
 					'is_booking_edit_enabled' => $is_booking_edit_enabled,
 				)
 			);
 
-			wptravelengine_get_admin_template(
-				'booking/partials/edit/booking-summary/fee-items.php',
-				array(
-					'fee_items'               => $cart_info->get_fees(),
-					'is_booking_edit_enabled' => $is_booking_edit_enabled,
-				)
-			);
-
+			$deductible_items = $cart_info->get_deductible_items() ?? array();
+			if ( $deductible_items ) {
+				foreach ( $deductible_items as $line_item ) {
+					printf(
+						'<tr class="wpte-booking-discount"><td>%1$s</td><td class="pricing-total"><b>-%2$s</b</td></tr>',
+						esc_html( $line_item['label'] ?? '' ),
+						wptravelengine_the_price( $line_item['value'] && $line_item['value'] > 0 ? $line_item['value'] : $cart_info->get_totals( 'total_' . $line_item['name'] ) ?? 0, false, $pricing_arguments )
+					);
+				}
+			}
 			?>
 			<tr class="wpte-booking-total">
-				<td><strong><?php echo esc_html__( 'Total', 'wp-travel-engine' ); ?></strong></td>
-				<td>
-					<input type="number" name="total"
-							value="<?php echo esc_attr( (float) ( $cart_info->get_totals( 'total' ) ?? 0 ) ); ?>" step="any"
-							<?php echo $is_booking_edit_enabled ? '' : 'readonly'; ?>/>
+				<td><strong><?php esc_html_e( 'Total', 'wp-travel-engine' ); ?></strong></td>
+				<td class="amount-column">
+					<strong><?php wptravelengine_the_price( $payments_total['total_exclusive'] ?? 0, true, $pricing_arguments ); ?></strong>
+					<input type="hidden" name="total" value="<?php echo esc_attr( $payments_total['total_exclusive'] ?? 0 ); ?>">
 				</td>
 			</tr>
-			<?php
-			wptravelengine_get_admin_template( 'booking/partials/edit/booking-summary/payment-amount-status.php', array( 'is_booking_edit_enabled' => $is_booking_edit_enabled ) );
-			?>
+			<tr class="wpte-booking-due">
+				<td><?php printf( '<strong>%s</strong>%s', __( 'Amount Due', 'wp-travel-engine' ), $excl ? sprintf( ' (excl. %s)', $excl ) : '' ); ?></td>
+				<td class="amount-column">
+					<strong> <?php wptravelengine_the_price( $payments_total['due_exclusive'] ?? 0, true, $pricing_arguments ); ?> </strong>
+				</td>
+			</tr>
 			</tbody>
 		</table>
 	</div>
@@ -94,3 +85,6 @@ $is_booking_edit_enabled = isset( $_cart_info['items'] ) || ( $current_screen->i
 		</td>
 	</tr>
 </script>
+
+<?php wptravelengine_get_admin_template( 'booking/partials/payment-summary-items.php', array( 'payments_data' => $booking->get_payments_data( false ) ) ); ?>
+<?php wptravelengine_get_admin_template( 'booking/partials/payment-summary-total.php' ); ?>

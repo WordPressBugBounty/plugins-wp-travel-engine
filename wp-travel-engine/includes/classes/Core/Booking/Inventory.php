@@ -63,7 +63,7 @@ class Inventory {
 	}
 
 	public function update_pax( $date_key, $pax = 0, $trip_id = 0, $booking_id = 0 ) {
-		if ( ! $booking_id ) {
+		if ( ! $booking_id || ! $date_key ) {
 			return;
 		}
 
@@ -197,9 +197,9 @@ class Inventory {
 
 	/**
 	 * Get the invetory of only given ids.
-	 * 
+	 *
 	 * @param array $ids IDs to filter.
-	 * 
+	 *
 	 * @return array
 	 * @since 6.6.7
 	 */

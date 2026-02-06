@@ -157,5 +157,4 @@ abstract class AdminMenuPage {
 	public function get_icon(): string {
 		return '';
 	}
-
 }

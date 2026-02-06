@@ -71,7 +71,6 @@ class AllowedHTML {
 			'em'     => array(),
 			'strong' => array(),
 		);
-
 	}
 
 	/**
@@ -91,5 +90,4 @@ class AllowedHTML {
 			'b'      => array(),
 		);
 	}
-
 }

@@ -20,6 +20,7 @@ class OnboardSave extends AjaxController {
 	const NONCE_KEY    = '_nonce';
 	const NONCE_ACTION = 'wpte_onboard_save_function';
 	const ACTION       = 'wpte_onboard_save_function';
+	const ALLOW_NOPRIV = false;
 
 	/**
 	 * Process Request.
@@ -37,9 +38,9 @@ class OnboardSave extends AjaxController {
 			
 			if ( isset( $setting_to_save ) && is_array( $setting_to_save ) ) {
 				foreach ( $setting_to_save as $key => $value ) {
-					if( is_array( $value ) ) {
+					if ( is_array( $value ) ) {
 						$wp_travel_engine_settings[$key] = array_diff( $wp_travel_engine_settings[$key], array_values( $value ) ) + $value;
-					}else{
+					} else {
 						$wp_travel_engine_settings[$key] = $value;
 					}
 				}

@@ -9,7 +9,6 @@ namespace WPTravelEngine\Helpers;
 use WPTravelEngine\Core\Cart\Items\ExtraService;
 use WPTravelEngine\Core\Cart\Items\PricingCategory;
 use WPTravelEngine\Core\Models\Post\Trip;
-
 class BookedItem {
 
 	/**
@@ -65,7 +64,7 @@ class BookedItem {
 	/**
 	 * @var int
 	 */
-	protected int $travelers_count = 0;
+	public int $travelers_count = 0;
 
 	protected string $trip_code;
 
@@ -90,59 +89,68 @@ class BookedItem {
 	}
 
 	protected function parse( $data ) {
-		$this->id              = $data[ 'id' ] ?? '';
-		$this->trip_id         = $data[ 'trip_id' ] ?? $data[ 'ID' ] ?? 0;
-		$this->trip_package_id = $data[ 'price_key' ] ?? 0;
-		$this->trip_date       = empty( $data[ 'trip_time' ] ?? '' ) ? ( $data[ 'trip_date' ] ?? $data[ 'datetime' ] ?? wp_date( 'Y-m-d H:i:s' ) ) : $data['trip_time'];
-		$this->package_name    = isset( $data['trip_package'] ) && $data['trip_package'] !== '' ? $data['trip_package'] : ( isset( $data[ 'package_name' ] ) && $data[ 'package_name' ] !== '' ? $data[ 'package_name' ] : '' );
+		$this->id              = $data['id'] ?? '';
+		$this->trip_id         = $data['trip_id'] ?? $data['ID'] ?? 0;
+		$this->trip_package_id = $data['price_key'] ?? 0;
+		$this->trip_date       = empty( $data['trip_time'] ?? '' ) ? ( $data['trip_date'] ?? $data['datetime'] ?? wp_date( 'Y-m-d H:i:s' ) ) : $data['trip_time'];
+		$this->package_name    = isset( $data['trip_package'] ) && $data['trip_package'] !== '' ? $data['trip_package'] : ( isset( $data['package_name'] ) && $data['package_name'] !== '' ? $data['package_name'] : '' );
 		$this->line_items      = $this->parse_line_items( $data );
-		$this->travelers_count = $data[ 'travelers_count' ] ?? array_sum( $data[ 'travelers' ] ?? $data[ 'pax' ] ?? array() );
-		$this->trip_end_time   = isset( $data[ 'trip_time_range' ] ) && is_array( $data[ 'trip_time_range' ] ) && isset( $data[ 'trip_time_range' ][1] ) ? $data[ 'trip_time_range' ][1] : '';
+		$this->travelers_count = $data['travelers_count'] ?? array_sum( $data['travelers'] ?? $data['pax'] ?? array() );
+		$this->trip_end_time   = isset( $data['trip_time_range'] ) && is_array( $data['trip_time_range'] ) && isset( $data['trip_time_range'][1] ) ? $data['trip_time_range'][1] : '';
+		$this->custom_trip     = $data['custom_trip_name'] ?? '';
 
 		try {
 			$trip            = new Trip( (int) $this->trip_id );
 			$this->trip_code = $trip->get_trip_code();
-			$this->end_date = isset( $data[ 'end_date' ] ) && $data[ 'end_date' ] !== '' ? $data[ 'end_date' ] : ( isset( $this->trip_end_time ) && $this->trip_end_time !== '' ? $this->trip_end_time : wptravelengine_format_trip_end_datetime( $this->trip_date, $trip, 'Y-m-d H:i:s' ) ?? wp_date( 'Y-m-d H:i:s' ) );
+			$this->end_date  = isset( $data['end_date'] ) && $data['end_date'] !== '' ? $data['end_date'] : ( isset( $this->trip_end_time ) && $this->trip_end_time !== '' ? $this->trip_end_time : wptravelengine_format_trip_end_datetime( $this->trip_date, $trip, 'Y-m-d H:i:s' ) ?? wp_date( 'Y-m-d H:i:s' ) );
 		} catch ( \Exception $e ) {
 			$this->trip_code = $this->trip_id ? "WTE-{$this->trip_id}" : '';
+			$this->end_date  = isset( $data['end_date'] ) && $data['end_date'] !== '' ? $data['end_date'] : ( isset( $this->trip_end_time ) && $this->trip_end_time !== '' ? $this->trip_end_time : wp_date( 'Y-m-d H:i:s' ) );
 		}
 	}
 
 	protected function parse_line_items( $data ) {
 		$line_items = array( 'pricing_category' => array() );
-		if( defined( 'WTE_EXTRA_SERVICES_FILE_PATH' ) ) {
+		if ( defined( 'WTE_EXTRA_SERVICES_FILE_PATH' ) ) {
 			$line_items = array_merge( $line_items, array( 'extra_service' => array() ) );
 		}
-		if ( $data[ 'line_items' ] ?? false ) {
-			$line_items = ! $data[ 'line_items' ] ? array() : $data[ 'line_items' ];
-		} else if ( isset( $data[ '_cart_item_object' ] ) ) { // Legacy Support.
-			if ( $category_info = ( $data[ '_cart_item_object' ][ 'category_info' ] ?? false ) ) {
-				$line_items[ 'pricing_category' ] = array_map( function ( $item, $index ) use ( $data ) {
-					$pax   = $data[ '_cart_item_object' ][ 'pax' ][ $index ] ?? 0;
-					$price = $item[ 'price' ] ?? 0;
+		if ( $data['line_items'] ?? false ) {
+			$line_items = ! $data['line_items'] ? array() : $data['line_items'];
+		} elseif ( isset( $data['_cart_item_object'] ) ) { // Legacy Support.
+			if ( $category_info = ( $data['_cart_item_object']['category_info'] ?? false ) ) {
+				$line_items['pricing_category'] = array_map(
+					function ( $item, $index ) use ( $data ) {
+						$pax   = $data['_cart_item_object']['pax'][ $index ] ?? 0;
+						$price = $item['price'] ?? 0;
 
-					return array(
-						'label'       => $item[ 'label' ] ?? '',
-						'quantity'    => $pax,
-						'price'       => $price,
-						'total'       => $data[ '_cart_item_object' ][ 'pax_cost' ][ $index ] ?? ( $pax * $price ),
-						'_class_name' => PricingCategory::class,
-					);
-				}, $category_info, array_keys( $category_info ) );
+						return array(
+							'label'       => $item['label'] ?? '',
+							'quantity'    => $pax,
+							'price'       => $price,
+							'total'       => $data['_cart_item_object']['pax_cost'][ $index ] ?? ( $pax * $price ),
+							'_class_name' => PricingCategory::class,
+						);
+					},
+					$category_info,
+					array_keys( $category_info )
+				);
 			}
-			if ( $extra_line_items = ( $data[ '_cart_item_object' ][ 'trip_extras' ] ?? false ) ) {
-				$line_items[ 'extra_service' ] = array_map( function ( $item ) {
-					$qty   = $item[ 'qty' ] ?? 0;
-					$price = $item[ 'price' ] ?? 0;
+			if ( $extra_line_items = ( $data['_cart_item_object']['trip_extras'] ?? false ) ) {
+				$line_items['extra_service'] = array_map(
+					function ( $item ) {
+						$qty   = $item['qty'] ?? 0;
+						$price = $item['price'] ?? 0;
 
-					return array(
-						'label'       => $item[ 'extra_service' ] ?? '',
-						'quantity'    => $qty,
-						'price'       => $price,
-						'total'       => ( $qty * $price ),
-						'_class_name' => '',
-					);
-				}, $extra_line_items );
+						return array(
+							'label'       => $item['extra_service'] ?? '',
+							'quantity'    => $qty,
+							'price'       => $price,
+							'total'       => ( $qty * $price ),
+							'_class_name' => '',
+						);
+					},
+					$extra_line_items
+				);
 			}
 		}
 
@@ -189,4 +197,7 @@ class BookedItem {
 		return $this->package_name;
 	}
 
+	public function get_custom_trip(): string {
+		return ( $this->custom_trip ?? '' ) ?: get_the_title( $this->trip_id );
+	}
 }

@@ -34,46 +34,46 @@ class Wp_Travel_Engine_Form_Handler {
 	 */
 	public static function process_login() {
 
-		if ( isset( $_POST[ '_wpnonce' ] ) ) {
-			$nonce_value = sanitize_text_field( wp_unslash( $_POST[ '_wpnonce' ] ) );
+		if ( isset( $_POST['_wpnonce'] ) ) {
+			$nonce_value = sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) );
 		}
 
-		if ( isset( $_POST[ 'wp-travel-engine-login-nonce' ] ) ) {
-			$nonce_value = sanitize_text_field( wp_unslash( $_POST[ 'wp-travel-engine-login-nonce' ] ) );
+		if ( isset( $_POST['wp-travel-engine-login-nonce'] ) ) {
+			$nonce_value = sanitize_text_field( wp_unslash( $_POST['wp-travel-engine-login-nonce'] ) );
 		}
 
 		if ( ! isset( $nonce_value ) ) {
 			return;
 		}
 
-		if ( ! empty( $_POST[ 'login' ] ) && wp_verify_nonce( $nonce_value, 'wp-travel-engine-login' ) ) {
+		if ( ! empty( $_POST['login'] ) && wp_verify_nonce( $nonce_value, 'wp-travel-engine-login' ) ) {
 
 			try {
 				$creds = array();
-				if ( isset( $_POST[ 'username' ] ) ) {
-					$creds[ 'user_login' ] = trim( sanitize_text_field( wp_unslash( $_POST[ 'username' ] ) ) );
+				if ( isset( $_POST['username'] ) ) {
+					$creds['user_login'] = trim( sanitize_text_field( wp_unslash( $_POST['username'] ) ) );
 				}
-				if ( isset( $_POST[ 'password' ] ) ) {
-					$creds[ 'user_password' ] = trim( sanitize_text_field( wp_unslash( $_POST[ 'password' ] ) ) );
+				if ( isset( $_POST['password'] ) ) {
+					$creds['user_password'] = trim( sanitize_text_field( wp_unslash( $_POST['password'] ) ) );
 				}
-				if ( isset( $_POST[ 'rememberme' ] ) ) {
-					$creds[ 'remember' ] = trim( sanitize_text_field( wp_unslash( $_POST[ 'rememberme' ] ) ) );
+				if ( isset( $_POST['rememberme'] ) ) {
+					$creds['remember'] = trim( sanitize_text_field( wp_unslash( $_POST['rememberme'] ) ) );
 				}
 
 				$validation_error = new WP_Error();
-				$validation_error = apply_filters( 'wp_travel_engine_process_login_errors', $validation_error, $creds[ 'user_login' ], $creds[ 'user_password' ] );
+				$validation_error = apply_filters( 'wp_travel_engine_process_login_errors', $validation_error, $creds['user_login'], $creds['user_password'] );
 
 				if ( $validation_error->get_error_code() ) {
 					throw new Exception( __( 'Error:', 'wp-travel-engine' ) . $validation_error->get_error_message() );
 				}
 
-				if ( empty( $creds[ 'user_login' ] ) ) {
+				if ( empty( $creds['user_login'] ) ) {
 					throw new Exception( __( 'Error:', 'wp-travel-engine' ) . __( 'Username is required.', 'wp-travel-engine' ) );
 				}
 
 				// On multisite, ensure user exists on current site, if not add them before allowing login.
 				if ( is_multisite() ) {
-					$user_data = get_user_by( is_email( $creds[ 'user_login' ] ) ? 'email' : 'login', $creds[ 'user_login' ] );
+					$user_data = get_user_by( is_email( $creds['user_login'] ) ? 'email' : 'login', $creds['user_login'] );
 
 					if ( $user_data && ! is_user_member_of_blog( $user_data->ID, get_current_blog_id() ) ) {
 						add_user_to_blog( get_current_blog_id(), $user_data->ID, 'wp-travel-engine-customer' );
@@ -85,13 +85,13 @@ class Wp_Travel_Engine_Form_Handler {
 
 				if ( is_wp_error( $user ) ) {
 					$message = $user->get_error_message();
-					$message = str_replace( '<strong>' . esc_html( $creds[ 'user_login' ] ) . '</strong>', '<strong>' . esc_html( $creds[ 'user_login' ] ) . '</strong>', $message );
+					$message = str_replace( '<strong>' . esc_html( $creds['user_login'] ) . '</strong>', '<strong>' . esc_html( $creds['user_login'] ) . '</strong>', $message );
 					throw new Exception( $message );
 				} else {
 
-					if ( ! empty( $_POST[ 'redirect' ] ) ) {
-						$redirect = wp_sanitize_redirect( wp_unslash( $_POST[ 'redirect' ] ) );
-					} else if ( wp_travel_engine_get_raw_referer() ) {
+					if ( ! empty( $_POST['redirect'] ) ) {
+						$redirect = wp_sanitize_redirect( wp_unslash( $_POST['redirect'] ) );
+					} elseif ( wp_travel_engine_get_raw_referer() ) {
 						$redirect = wp_travel_engine_get_raw_referer();
 					} else {
 						$redirect = wp_travel_engine_get_page_permalink_by_id( wp_travel_engine_get_dashboard_page_id() );
@@ -105,10 +105,17 @@ class Wp_Travel_Engine_Form_Handler {
 
 				WTE()->notices->add( apply_filters( 'wp_travel_engine_login_errors', __( 'Error :  Invalid Username or Password', 'wp-travel-engine' ) ), 'error' );
 
+				wp_safe_redirect( remove_query_arg( 'password-reset', wp_travel_engine_get_page_permalink_by_id( wp_travel_engine_get_dashboard_page_id() ) ) );
+
+				exit;
 			}
-		} else if ( isset( $_POST[ 'username' ] ) && empty( $_POST[ 'username' ] ) && wp_verify_nonce( $nonce_value, 'wp-travel-engine-login' ) ) {
+		} elseif ( isset( $_POST['username'] ) && empty( $_POST['username'] ) && wp_verify_nonce( $nonce_value, 'wp-travel-engine-login' ) ) {
 
 			WTE()->notices->add( apply_filters( 'wp_travel_engine_login_errors', __( 'Error :  Username can not be empty', 'wp-travel-engine' ) ), 'error' );
+
+			wp_safe_redirect( remove_query_arg( 'password-reset', wp_travel_engine_get_page_permalink_by_id( wp_travel_engine_get_dashboard_page_id() ) ) );
+			
+			exit;
 
 		}
 	}
@@ -118,24 +125,24 @@ class Wp_Travel_Engine_Form_Handler {
 	 */
 	public static function process_registration() {
 
-		if ( isset( $_POST[ '_wpnonce' ] ) ) {
-			$nonce_value = sanitize_text_field( wp_unslash( $_POST[ '_wpnonce' ] ) );
+		if ( isset( $_POST['_wpnonce'] ) ) {
+			$nonce_value = sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) );
 		}
 
-		if ( isset( $_POST[ 'wp-travel-engine-register-nonce' ] ) ) {
-			$nonce_value = sanitize_text_field( wp_unslash( $_POST[ 'wp-travel-engine-register-nonce' ] ) );
+		if ( isset( $_POST['wp-travel-engine-register-nonce'] ) ) {
+			$nonce_value = sanitize_text_field( wp_unslash( $_POST['wp-travel-engine-register-nonce'] ) );
 		}
 
-		if ( ! empty( $_POST[ 'register' ] ) && wp_verify_nonce( $nonce_value, 'wp-travel-engine-register' ) ) {
+		if ( ! empty( $_POST['register'] ) && wp_verify_nonce( $nonce_value, 'wp-travel-engine-register' ) ) {
 
-			if ( isset( $_POST[ 'username' ] ) ) {
-				$username = sanitize_text_field( wp_unslash( $_POST[ 'username' ] ) );
+			if ( isset( $_POST['username'] ) ) {
+				$username = sanitize_text_field( wp_unslash( $_POST['username'] ) );
 			}
-			if ( isset( $_POST[ 'password' ] ) ) {
-				$password = sanitize_text_field( wp_unslash( $_POST[ 'password' ] ) );
+			if ( isset( $_POST['password'] ) ) {
+				$password = sanitize_text_field( wp_unslash( $_POST['password'] ) );
 			}
-			if ( isset( $_POST[ 'email' ] ) ) {
-				$email = sanitize_email( wp_unslash( $_POST[ 'email' ] ) );
+			if ( isset( $_POST['email'] ) ) {
+				$email = sanitize_email( wp_unslash( $_POST['email'] ) );
 			}
 
 			try {
@@ -162,9 +169,9 @@ class Wp_Travel_Engine_Form_Handler {
 					update_user_meta( $new_customer, 'wp_travel_engine_user_bookings', $customer_bookings );
 				}
 
-				if ( ! empty( $_POST[ 'redirect' ] ) ) {
-					$redirect = wp_sanitize_redirect( wp_unslash( $_POST[ 'redirect' ] ) );
-				} else if ( wp_travel_engine_get_raw_referer() ) {
+				if ( ! empty( $_POST['redirect'] ) ) {
+					$redirect = wp_sanitize_redirect( wp_unslash( $_POST['redirect'] ) );
+				} elseif ( wp_travel_engine_get_raw_referer() ) {
 					$redirect = wp_travel_engine_get_raw_referer();
 				} else {
 					$redirect = wp_travel_engine_get_page_permalink_by_id( wp_travel_engine_get_dashboard_page_id() );
@@ -183,8 +190,8 @@ class Wp_Travel_Engine_Form_Handler {
 	 * Handle lost password form.
 	 */
 	public static function process_lost_password() {
-		if ( isset( $_POST[ '_wpnonce' ] ) ) {
-			if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST[ '_wpnonce' ] ) ), 'wp_travel_engine_lost_password' ) && isset( $_POST[ 'wp_travel_engine_reset_password' ] ) && isset( $_POST[ 'user_login' ] ) ) {
+		if ( isset( $_POST['_wpnonce'] ) ) {
+			if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'wp_travel_engine_lost_password' ) && isset( $_POST['wp_travel_engine_reset_password'] ) && isset( $_POST['user_login'] ) ) {
 				$success = UserAccount::retrieve_password();
 
 				// If successful, redirect to my account with query arg set.
@@ -216,18 +223,18 @@ class Wp_Travel_Engine_Form_Handler {
 			$posted_fields[ $field ] = sanitize_text_field( wp_unslash( $_POST[ $field ] ) );
 		}
 
-		if ( ! wp_verify_nonce( $posted_fields[ '_wpnonce' ], 'wp_travel_engine_reset_password_nonce' ) ) {
+		if ( ! wp_verify_nonce( $posted_fields['_wpnonce'], 'wp_travel_engine_reset_password_nonce' ) ) {
 			return;
 		}
 
-		$user = UserAccount::check_password_reset_key( $posted_fields[ 'reset_key' ], $posted_fields[ 'reset_login' ] );
+		$user = UserAccount::check_password_reset_key( $posted_fields['reset_key'], $posted_fields['reset_login'] );
 
 		if ( $user instanceof WP_User ) {
-			if ( empty( $posted_fields[ 'password_1' ] ) ) {
+			if ( empty( $posted_fields['password_1'] ) ) {
 				WTE()->notices->add( __( 'Error :  Please enter your password.', 'wp-travel-engine' ), 'error' );
 			}
 
-			if ( $posted_fields[ 'password_1' ] !== $posted_fields[ 'password_2' ] ) {
+			if ( $posted_fields['password_1'] !== $posted_fields['password_2'] ) {
 				WTE()->notices->add( __( 'Error :  Passwords do not match', 'wp-travel-engine' ), 'error' );
 			}
 
@@ -238,7 +245,7 @@ class Wp_Travel_Engine_Form_Handler {
 			wp_travel_engine_add_wp_error_notices( $errors );
 
 			if ( 0 === wp_travel_engine_get_notice_count( 'error' ) ) {
-				UserAccount::reset_password( $user, $posted_fields[ 'password_1' ] );
+				UserAccount::reset_password( $user, $posted_fields['password_1'] );
 
 				do_action( 'wp_travel_customer_reset_password', $user );
 
@@ -253,9 +260,9 @@ class Wp_Travel_Engine_Form_Handler {
 	 */
 	public static function redirect_reset_password_link() {
 
-		if ( wp_travel_engine_is_account_page() && ! empty( $_GET[ 'key' ] ) && ! empty( $_GET[ 'login' ] ) ) {
+		if ( wp_travel_engine_is_account_page() && ! empty( $_GET['key'] ) && ! empty( $_GET['login'] ) ) {
 
-			$value = sprintf( '%s:%s', sanitize_text_field( wp_unslash( $_GET[ 'login' ] ) ), sanitize_text_field( wp_unslash( $_GET[ 'key' ] ) ) );
+			$value = sprintf( '%s:%s', sanitize_text_field( wp_unslash( $_GET['login'] ) ), sanitize_text_field( wp_unslash( $_GET['key'] ) ) );
 
 			UserAccount::set_reset_password_cookie( $value );
 
@@ -269,11 +276,11 @@ class Wp_Travel_Engine_Form_Handler {
 	 */
 	public static function update_user_billing_data() {
 
-		if ( 'POST' !== strtoupper( $_SERVER[ 'REQUEST_METHOD' ] ) ) {
+		if ( 'POST' !== strtoupper( $_SERVER['REQUEST_METHOD'] ) ) {
 			return;
 		}
 
-		if ( empty( $_POST[ 'action' ] ) || 'wp_travel_engine_save_user_meta_billing_address' !== $_POST[ 'action' ] || empty( $_POST[ 'wp_billing_address_security' ] ) || ! wp_verify_nonce( $_POST[ 'wp_billing_address_security' ], 'wp_travel_engine_save_user_meta_billing_address' ) ) {
+		if ( empty( $_POST['action'] ) || 'wp_travel_engine_save_user_meta_billing_address' !== $_POST['action'] || empty( $_POST['wp_billing_address_security'] ) || ! wp_verify_nonce( $_POST['wp_billing_address_security'], 'wp_travel_engine_save_user_meta_billing_address' ) ) {
 			return;
 		}
 
@@ -288,13 +295,13 @@ class Wp_Travel_Engine_Form_Handler {
 		$current_user = get_user_by( 'id', $user_id );
 
 		// Get Billing Data.
-		$billing_address  = ! empty( $_POST[ 'customer_billing_address' ] ) ? wp_travel_engine_clean_vars( $_POST[ 'customer_billing_address' ] ) : '';
-		$billing_city     = ! empty( $_POST[ 'customer_billing_city' ] ) ? wp_travel_engine_clean_vars( $_POST[ 'customer_billing_city' ] ) : '';
-		$billing_company  = ! empty( $_POST[ 'customer_billing_company' ] ) ? wp_travel_engine_clean_vars( $_POST[ 'customer_billing_company' ] ) : '';
-		$billing_state    = ! empty( $_POST[ 'customer_billing_state' ] ) ? wp_travel_engine_clean_vars( $_POST[ 'customer_billing_state' ] ) : '';
-		$billing_zip_code = ! empty( $_POST[ 'customer_zip_code' ] ) ? wp_travel_engine_clean_vars( $_POST[ 'customer_zip_code' ] ) : '';
-		$billing_country  = ! empty( $_POST[ 'customer_country' ] ) ? wp_travel_engine_clean_vars( $_POST[ 'customer_country' ] ) : '';
-		$billing_phone    = ! empty( $_POST[ 'customer_phone' ] ) ? wp_travel_engine_clean_vars( $_POST[ 'customer_phone' ] ) : '';
+		$billing_address  = ! empty( $_POST['customer_billing_address'] ) ? wp_travel_engine_clean_vars( $_POST['customer_billing_address'] ) : '';
+		$billing_city     = ! empty( $_POST['customer_billing_city'] ) ? wp_travel_engine_clean_vars( $_POST['customer_billing_city'] ) : '';
+		$billing_company  = ! empty( $_POST['customer_billing_company'] ) ? wp_travel_engine_clean_vars( $_POST['customer_billing_company'] ) : '';
+		$billing_state    = ! empty( $_POST['customer_billing_state'] ) ? wp_travel_engine_clean_vars( $_POST['customer_billing_state'] ) : '';
+		$billing_zip_code = ! empty( $_POST['customer_zip_code'] ) ? wp_travel_engine_clean_vars( $_POST['customer_zip_code'] ) : '';
+		$billing_country  = ! empty( $_POST['customer_country'] ) ? wp_travel_engine_clean_vars( $_POST['customer_country'] ) : '';
+		$billing_phone    = ! empty( $_POST['customer_phone'] ) ? wp_travel_engine_clean_vars( $_POST['customer_phone'] ) : '';
 
 		// Handle required fields.
 		$required_fields = apply_filters(
@@ -333,18 +340,17 @@ class Wp_Travel_Engine_Form_Handler {
 			wp_safe_redirect( wp_travel_engine_get_page_permalink_by_id( wp_travel_engine_get_dashboard_page_id() ) );
 			exit;
 		}
-
 	}
 
 	/**
 	 * Save the password/account details and redirect back to the my account page.
 	 */
 	public static function save_account_details() {
-		if ( 'POST' !== strtoupper( $_SERVER[ 'REQUEST_METHOD' ] ) ) {
+		if ( 'POST' !== strtoupper( $_SERVER['REQUEST_METHOD'] ) ) {
 			return;
 		}
 
-		if ( empty( $_POST[ 'action' ] ) || 'wp_travel_engine_save_account_details' !== $_POST[ 'action' ] || empty( $_POST[ 'wp_account_details_security' ] ) || ! wp_verify_nonce( $_POST[ 'wp_account_details_security' ], 'wp_travel_engine_save_account_details' ) ) {
+		if ( empty( $_POST['action'] ) || 'wp_travel_engine_save_account_details' !== $_POST['action'] || empty( $_POST['wp_account_details_security'] ) || ! wp_verify_nonce( $_POST['wp_account_details_security'], 'wp_travel_engine_save_account_details' ) ) {
 			return;
 		}
 
@@ -361,12 +367,12 @@ class Wp_Travel_Engine_Form_Handler {
 		$current_last_name  = $current_user->last_name;
 		$current_email      = $current_user->user_email;
 
-		$account_first_name = ! empty( $_POST[ 'account_first_name' ] ) ? wp_travel_engine_clean_vars( $_POST[ 'account_first_name' ] ) : '';
-		$account_last_name  = ! empty( $_POST[ 'account_last_name' ] ) ? wp_travel_engine_clean_vars( $_POST[ 'account_last_name' ] ) : '';
-		$account_email      = ! empty( $_POST[ 'account_email' ] ) ? wp_travel_engine_clean_vars( $_POST[ 'account_email' ] ) : '';
-		$pass_cur           = ! empty( $_POST[ 'password_current' ] ) ? wte_clean( wp_unslash( $_POST[ 'password_current' ] ) ) : '';
-		$pass1              = ! empty( $_POST[ 'password_1' ] ) ? wte_clean( wp_unslash( $_POST[ 'password_1' ] ) ) : '';
-		$pass2              = ! empty( $_POST[ 'password_2' ] ) ? wte_clean( wp_unslash( $_POST[ 'password_2' ] ) ) : '';
+		$account_first_name = ! empty( $_POST['account_first_name'] ) ? wp_travel_engine_clean_vars( $_POST['account_first_name'] ) : '';
+		$account_last_name  = ! empty( $_POST['account_last_name'] ) ? wp_travel_engine_clean_vars( $_POST['account_last_name'] ) : '';
+		$account_email      = ! empty( $_POST['account_email'] ) ? wp_travel_engine_clean_vars( $_POST['account_email'] ) : '';
+		$pass_cur           = ! empty( $_POST['password_current'] ) ? wte_clean( wp_unslash( $_POST['password_current'] ) ) : '';
+		$pass1              = ! empty( $_POST['password_1'] ) ? wte_clean( wp_unslash( $_POST['password_1'] ) ) : '';
+		$pass2              = ! empty( $_POST['password_2'] ) ? wte_clean( wp_unslash( $_POST['password_2'] ) ) : '';
 		$save_pass          = true;
 
 		$user             = new stdClass();
@@ -397,7 +403,7 @@ class Wp_Travel_Engine_Form_Handler {
 			$account_email = sanitize_email( $account_email );
 			if ( ! is_email( $account_email ) ) {
 				WTE()->notices->add( __( 'Please Provide a valid email address', 'wp-travel-engine' ), 'error' );
-			} else if ( email_exists( $account_email ) && $account_email !== $current_user->user_email ) {
+			} elseif ( email_exists( $account_email ) && $account_email !== $current_user->user_email ) {
 				WTE()->notices->add( __( 'The email address is already registered', 'wp-travel-engine' ), 'error' );
 			}
 			$user->user_email = $account_email;
@@ -406,16 +412,16 @@ class Wp_Travel_Engine_Form_Handler {
 		if ( ! empty( $pass_cur ) && empty( $pass1 ) && empty( $pass2 ) ) {
 			WTE()->notices->add( __( 'Please Fill Out All Password Fields.', 'wp-travel-engine' ), 'error' );
 			$save_pass = false;
-		} else if ( ! empty( $pass1 ) && empty( $pass_cur ) ) {
+		} elseif ( ! empty( $pass1 ) && empty( $pass_cur ) ) {
 			WTE()->notices->add( __( 'Please Enter Your Current Password', 'wp-travel-engine' ), 'error' );
 			$save_pass = false;
-		} else if ( ! empty( $pass1 ) && empty( $pass2 ) ) {
+		} elseif ( ! empty( $pass1 ) && empty( $pass2 ) ) {
 			WTE()->notices->add( __( 'Please re-enter your password', 'wp-travel-engine' ), 'error' );
 			$save_pass = false;
-		} else if ( ( ! empty( $pass1 ) || ! empty( $pass2 ) ) && $pass1 !== $pass2 ) {
+		} elseif ( ( ! empty( $pass1 ) || ! empty( $pass2 ) ) && $pass1 !== $pass2 ) {
 			WTE()->notices->add( __( 'New Passwords do not match', 'wp-travel-engine' ), 'error' );
 			$save_pass = false;
-		} else if ( ! empty( $pass1 ) && ! wp_check_password( $pass_cur, $current_user->user_pass, $current_user->ID ) ) {
+		} elseif ( ! empty( $pass1 ) && ! wp_check_password( $pass_cur, $current_user->user_pass, $current_user->ID ) ) {
 			WTE()->notices->add( __( 'Your current password is incorrect', 'wp-travel-engine' ), 'error' );
 			$save_pass = false;
 		}
@@ -429,12 +435,12 @@ class Wp_Travel_Engine_Form_Handler {
 			$users_meta = array();
 		endif;
 
-		$user_profile_image_file = isset( $_POST[ 'user_profile_image' ] ) && ! empty( $_POST[ 'user_profile_image' ] ) ? sanitize_text_field( wp_normalize_path( $_POST[ 'user_profile_image' ] ) ) : false;
-		$user_profile_image_url  = isset( $_POST[ 'user_profile_image_url' ] ) && ! empty( $_POST[ 'user_profile_image_url' ] ) ? esc_url_raw( $_POST[ 'user_profile_image_url' ] ) : false;
+		$user_profile_image_file = isset( $_POST['user_profile_image'] ) && ! empty( $_POST['user_profile_image'] ) ? sanitize_text_field( wp_normalize_path( $_POST['user_profile_image'] ) ) : false;
+		$user_profile_image_url  = isset( $_POST['user_profile_image_url'] ) && ! empty( $_POST['user_profile_image_url'] ) ? esc_url_raw( $_POST['user_profile_image_url'] ) : false;
 		if ( $user_profile_image_file && $user_profile_image_url && $user_profile_image_file != 'custom-image' ) :
 
-			if ( isset( $users_meta[ 'user_profile_image_id' ] ) && is_numeric( $users_meta[ 'user_profile_image_id' ] ) ) :
-				wp_delete_attachment( $users_meta[ 'user_profile_image_id' ] );
+			if ( isset( $users_meta['user_profile_image_id'] ) && is_numeric( $users_meta['user_profile_image_id'] ) ) :
+				wp_delete_attachment( $users_meta['user_profile_image_id'] );
 			endif;
 
 			$attached_img_id = self::set_user_profile_image( $user_profile_image_file, $user_id );
@@ -442,16 +448,16 @@ class Wp_Travel_Engine_Form_Handler {
 			if ( ! $attached_img_id ) :
 				WTE()->notices->add( __( 'There was an issue updating your profile photo.', 'wp-travel-engine' ), 'error' );
 			else :
-				$users_meta[ 'user_profile_image_id' ] = absint( $attached_img_id );
+				$users_meta['user_profile_image_id'] = absint( $attached_img_id );
 				update_user_meta( $user_id, 'wte_users_meta', $users_meta );
 			endif;
 
 		elseif ( ! $user_profile_image_file ) :
-			if ( isset( $users_meta[ 'user_profile_image_id' ] ) && is_numeric( $users_meta[ 'user_profile_image_id' ] ) ) :
-				wp_delete_attachment( $users_meta[ 'user_profile_image_id' ] );
+			if ( isset( $users_meta['user_profile_image_id'] ) && is_numeric( $users_meta['user_profile_image_id'] ) ) :
+				wp_delete_attachment( $users_meta['user_profile_image_id'] );
 			endif;
 
-			$users_meta[ 'user_profile_image_id' ] = false;
+			$users_meta['user_profile_image_id'] = false;
 			update_user_meta( $user_id, 'wte_users_meta', $users_meta );
 		endif;
 		// Allow plugins to return their own errors.
@@ -479,7 +485,7 @@ class Wp_Travel_Engine_Form_Handler {
 	/**
 	 * Set user dashboard profile image
 	 *
-	 * @param boolean|string $image_url
+	 * @param boolean|string     $image_url
 	 * @param boolean|string|int $user_id
 	 *
 	 * @return mixed
@@ -500,22 +506,22 @@ class Wp_Travel_Engine_Form_Handler {
 			require_once ABSPATH . 'wp-includes/pluggable.php';
 		}
 
-		$uploads  = wp_get_upload_dir();
+		$uploads   = wp_get_upload_dir();
 		$base_real = ( $uploads['basedir'] ?? false ) ? realpath( $uploads['basedir'] ) : false;
 		if ( ! $base_real ) {
 			return false;
 		}
 
-		$wte_image_dir  = trailingslashit( $uploads[ 'basedir' ] ) . 'wp-travel-engine/images/users';
-		$img_filetype   = wp_check_filetype( $image_url, null );
+		$wte_image_dir = trailingslashit( $uploads['basedir'] ) . 'wp-travel-engine/images/users';
+		$img_filetype  = wp_check_filetype( $image_url, null );
 
-		if ( ! ( $img_filetype[ 'ext' ] ?? true ) || ! ( $img_filetype[ 'type' ] ?? true ) ) {
+		if ( ! ( $img_filetype['ext'] ?? true ) || ! ( $img_filetype['type'] ?? true ) ) {
 			return false;
 		}
 
-		$img_file_ext	= $img_filetype[ 'ext' ] ?? '.jpg';
+		$img_file_ext = $img_filetype['ext'] ?? '.jpg';
 
-		$img_file_name 	= $wte_image_dir . '/wte_users_' . $user_id . '.' . $img_file_ext;
+		$img_file_name = $wte_image_dir . '/wte_users_' . $user_id . '.' . $img_file_ext;
 
 		if ( wp_mkdir_p( $wte_image_dir ) ) :
 
@@ -533,7 +539,7 @@ class Wp_Travel_Engine_Form_Handler {
 		endif;
 
 		$attachment = array(
-			'post_mime_type' => $img_filetype[ 'type' ],
+			'post_mime_type' => $img_filetype['type'],
 			'post_title'     => sanitize_file_name( 'wte_users_' . $user_id . '.' . $img_file_ext ),
 			'post_content'   => '',
 			'post_status'    => 'inherit',
@@ -545,16 +551,14 @@ class Wp_Travel_Engine_Form_Handler {
 
 			require_once ABSPATH . 'wp-admin/includes/image.php';
 
-			$attach_data                           = wp_generate_attachment_metadata( $attached_img_id, $img_file_name );
-			$update_attachment                     = wp_update_attachment_metadata( $attached_img_id, $attach_data );
-			$users_meta[ 'user_profile_image_id' ] = $attached_img_id;
+			$attach_data                         = wp_generate_attachment_metadata( $attached_img_id, $img_file_name );
+			$update_attachment                   = wp_update_attachment_metadata( $attached_img_id, $attach_data );
+			$users_meta['user_profile_image_id'] = $attached_img_id;
 
 			return $attached_img_id;
 
 		endif;
-
 	}
-
 }
 
 // Run the show.

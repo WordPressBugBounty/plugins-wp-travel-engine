@@ -40,7 +40,7 @@ class Wp_Travel_Engine_Settings {
 	}
 
 	public static function get_general_fields_schema( $properties ) {
-		$properties[ 'pages' ] = array(
+		$properties['pages'] = array(
 			'type'       => 'object',
 			'properties' => array(
 				'wp_travel_engine_place_order'          => array(
@@ -74,7 +74,7 @@ class Wp_Travel_Engine_Settings {
 	}
 
 	public static function get_emails_fields_schema( $properties ) {
-		$properties[ 'email' ] = array(
+		$properties['email'] = array(
 			'type'       => 'object',
 			'properties' => array(
 				'emails'                              => array(
@@ -108,31 +108,31 @@ class Wp_Travel_Engine_Settings {
 	}
 
 	public static function get_miscellaneous_fields_schema( $properties ) {
-		$properties[ 'currency_code' ]         = array( 'type' => 'string' );
-		$properties[ 'currency_option' ]       = array( 'type' => 'string' );
-		$properties[ 'amount_display_format' ] = array( 'type' => 'string' );
-		$properties[ 'decimal_digits' ]        = array( 'type' => 'number' );
-		$properties[ 'decimal_separator' ]     = array( 'type' => 'string' );
-		$properties[ 'thousands_separator' ]   = array( 'type' => 'string' );
+		$properties['currency_code']         = array( 'type' => 'string' );
+		$properties['currency_option']       = array( 'type' => 'string' );
+		$properties['amount_display_format'] = array( 'type' => 'string' );
+		$properties['decimal_digits']        = array( 'type' => 'number' );
+		$properties['decimal_separator']     = array( 'type' => 'string' );
+		$properties['thousands_separator']   = array( 'type' => 'string' );
 
 		return $properties;
 	}
 
 	public static function get_payment_fields_schema( $properties ) {
-		$properties[ 'payment_debug' ]        = array( 'type' => 'boolean' );
-		$properties[ 'default_gateway' ]      = array( 'type' => 'string' );
-		$properties[ 'default_gateway' ]      = array( 'type' => 'string' );
-		$properties[ 'booking_only' ]         = array( 'type' => 'boolean' );
-		$properties[ 'paypal_payment' ]       = array( 'type' => 'boolean' );
-		$properties[ 'paypal_payment' ]       = array( 'type' => 'boolean' );
-		$properties[ 'direct_bank_transfer' ] = array( 'type' => 'boolean' );
-		$properties[ 'check_payments' ]       = array( 'type' => 'boolean' );
+		$properties['payment_debug']        = array( 'type' => 'boolean' );
+		$properties['default_gateway']      = array( 'type' => 'string' );
+		$properties['default_gateway']      = array( 'type' => 'string' );
+		$properties['booking_only']         = array( 'type' => 'boolean' );
+		$properties['paypal_payment']       = array( 'type' => 'boolean' );
+		$properties['paypal_payment']       = array( 'type' => 'boolean' );
+		$properties['direct_bank_transfer'] = array( 'type' => 'boolean' );
+		$properties['check_payments']       = array( 'type' => 'boolean' );
 
 		return $properties;
 	}
 
 	public static function get_extensions_fields_schema( $properties ) {
-		$properties[ 'trip_search' ] = array(
+		$properties['trip_search'] = array(
 			'type'       => 'object',
 			'properties' => array(
 				'destination'          => array(
@@ -157,10 +157,10 @@ class Wp_Travel_Engine_Settings {
 	}
 
 	public static function get_dashboard_fields_schema( $properties ) {
-		$properties[ 'enable_checkout_customer_registration' ]    = array( 'type' => 'boolean' );
-		$properties[ 'disable_my_account_customer_registration' ] = array( 'type' => 'boolean' );
-		$properties[ 'generate_username_from_email' ]             = array( 'type' => 'boolean' );
-		$properties[ 'generate_user_password' ]                   = array( 'type' => 'boolean' );
+		$properties['enable_checkout_customer_registration']    = array( 'type' => 'boolean' );
+		$properties['disable_my_account_customer_registration'] = array( 'type' => 'boolean' );
+		$properties['generate_username_from_email']             = array( 'type' => 'boolean' );
+		$properties['generate_user_password']                   = array( 'type' => 'boolean' );
 
 		return $properties;
 	}
@@ -196,8 +196,8 @@ class Wp_Travel_Engine_Settings {
 				'options'       => $pages,
 				'class'         => 'wpte-enhanced-select',
 				'name'          => 'wp_travel_engine_settings[pages][wp_travel_engine_place_order]',
-				'selected'      => isset( $options[ 'pages' ][ 'wp_travel_engine_place_order' ] ) ? esc_attr( $options[ 'pages' ][ 'wp_travel_engine_place_order' ] ) : '',
-				'default'       => isset( $options[ 'pages' ][ 'wp_travel_engine_place_order' ] ) ? esc_attr( $options[ 'pages' ][ 'wp_travel_engine_place_order' ] ) : '',
+				'selected'      => isset( $options['pages']['wp_travel_engine_place_order'] ) ? esc_attr( $options['pages']['wp_travel_engine_place_order'] ) : '',
+				'default'       => isset( $options['pages']['wp_travel_engine_place_order'] ) ? esc_attr( $options['pages']['wp_travel_engine_place_order'] ) : '',
 				'tooltip'       => __( 'This is the checkout page where buyers will complete their order. The <b>[WP_TRAVEL_ENGINE_PLACE_ORDER]</b> shortcode must be on this page.', 'wp-travel-engine' ),
 			),
 			'wte-terms-page'        => array(
@@ -209,8 +209,8 @@ class Wp_Travel_Engine_Settings {
 				'options'       => $pages,
 				'class'         => 'wpte-enhanced-select',
 				'name'          => 'wp_travel_engine_settings[pages][wp_travel_engine_terms_and_conditions]',
-				'selected'      => isset( $options[ 'pages' ][ 'wp_travel_engine_terms_and_conditions' ] ) ? esc_attr( $options[ 'pages' ][ 'wp_travel_engine_terms_and_conditions' ] ) : '',
-				'default'       => isset( $options[ 'pages' ][ 'wp_travel_engine_terms_and_conditions' ] ) ? esc_attr( $options[ 'pages' ][ 'wp_travel_engine_terms_and_conditions' ] ) : '',
+				'selected'      => isset( $options['pages']['wp_travel_engine_terms_and_conditions'] ) ? esc_attr( $options['pages']['wp_travel_engine_terms_and_conditions'] ) : '',
+				'default'       => isset( $options['pages']['wp_travel_engine_terms_and_conditions'] ) ? esc_attr( $options['pages']['wp_travel_engine_terms_and_conditions'] ) : '',
 				'tooltip'       => __( 'This is the terms and conditions page where trip bookers will see the terms and conditions for booking.', 'wp-travel-engine' ),
 			),
 			'wte-thankyou-page'     => array(
@@ -222,8 +222,8 @@ class Wp_Travel_Engine_Settings {
 				'options'       => $pages,
 				'class'         => 'wpte-enhanced-select',
 				'name'          => 'wp_travel_engine_settings[pages][wp_travel_engine_thank_you]',
-				'selected'      => isset( $options[ 'pages' ][ 'wp_travel_engine_thank_you' ] ) ? esc_attr( $options[ 'pages' ][ 'wp_travel_engine_thank_you' ] ) : '',
-				'default'       => isset( $options[ 'pages' ][ 'wp_travel_engine_thank_you' ] ) ? esc_attr( $options[ 'pages' ][ 'wp_travel_engine_thank_you' ] ) : '',
+				'selected'      => isset( $options['pages']['wp_travel_engine_thank_you'] ) ? esc_attr( $options['pages']['wp_travel_engine_thank_you'] ) : '',
+				'default'       => isset( $options['pages']['wp_travel_engine_thank_you'] ) ? esc_attr( $options['pages']['wp_travel_engine_thank_you'] ) : '',
 				'tooltip'       => __( 'This is the thank you page where trip bookers will get the payment confirmation message. The <b>[WP_TRAVEL_ENGINE_THANK_YOU]</b> shortcode must be on this page.', 'wp-travel-engine' ),
 			),
 			'wte-confirmation-page' => array(
@@ -235,8 +235,8 @@ class Wp_Travel_Engine_Settings {
 				'options'       => $pages,
 				'class'         => 'wpte-enhanced-select',
 				'name'          => 'wp_travel_engine_settings[pages][wp_travel_engine_confirmation_page]',
-				'selected'      => isset( $options[ 'pages' ][ 'wp_travel_engine_confirmation_page' ] ) ? esc_attr( $options[ 'pages' ][ 'wp_travel_engine_confirmation_page' ] ) : '',
-				'default'       => isset( $options[ 'pages' ][ 'wp_travel_engine_confirmation_page' ] ) ? esc_attr( $options[ 'pages' ][ 'wp_travel_engine_confirmation_page' ] ) : '',
+				'selected'      => isset( $options['pages']['wp_travel_engine_confirmation_page'] ) ? esc_attr( $options['pages']['wp_travel_engine_confirmation_page'] ) : '',
+				'default'       => isset( $options['pages']['wp_travel_engine_confirmation_page'] ) ? esc_attr( $options['pages']['wp_travel_engine_confirmation_page'] ) : '',
 				'tooltip'       => __( 'This is the confirmation page where trip bookers will fill the full form of the travellers. The <b>[WP_TRAVEL_ENGINE_BOOK_CONFIRMATION]</b> shortcode must be on this page.', 'wp-travel-engine' ),
 			),
 			'wte-dashboard-page'    => array(
@@ -248,8 +248,8 @@ class Wp_Travel_Engine_Settings {
 				'options'       => $pages,
 				'class'         => 'wpte-enhanced-select',
 				'name'          => 'wp_travel_engine_settings[pages][wp_travel_engine_dashboard_page]',
-				'selected'      => isset( $options[ 'pages' ][ 'wp_travel_engine_dashboard_page' ] ) ? esc_attr( $options[ 'pages' ][ 'wp_travel_engine_dashboard_page' ] ) : wp_travel_engine_get_page_id( 'my-account' ),
-				'default'       => isset( $options[ 'pages' ][ 'wp_travel_engine_dashboard_page' ] ) ? esc_attr( $options[ 'pages' ][ 'wp_travel_engine_dashboard_page' ] ) : wp_travel_engine_get_page_id( 'my-account' ),
+				'selected'      => isset( $options['pages']['wp_travel_engine_dashboard_page'] ) ? esc_attr( $options['pages']['wp_travel_engine_dashboard_page'] ) : wp_travel_engine_get_page_id( 'my-account' ),
+				'default'       => isset( $options['pages']['wp_travel_engine_dashboard_page'] ) ? esc_attr( $options['pages']['wp_travel_engine_dashboard_page'] ) : wp_travel_engine_get_page_id( 'my-account' ),
 				'tooltip'       => __( 'This is the dasbhboard page that lets your users to login and interact to bookings from frontend. The <b>[wp_travel_engine_dashboard]</b> shortcode must be on this page.', 'wp-travel-engine' ),
 			),
 			'wte-enquiry-thank-you' => array(
@@ -261,8 +261,8 @@ class Wp_Travel_Engine_Settings {
 				'options'       => $pages,
 				'class'         => 'wpte-enhanced-select',
 				'name'          => 'wp_travel_engine_settings[pages][enquiry]',
-				'selected'      => isset( $options[ 'pages' ][ 'enquiry' ] ) ? esc_attr( $options[ 'pages' ][ 'enquiry' ] ) : '',
-				'default'       => isset( $options[ 'pages' ][ 'enquiry' ] ) ? esc_attr( $options[ 'pages' ][ 'enquiry' ] ) : '',
+				'selected'      => isset( $options['pages']['enquiry'] ) ? esc_attr( $options['pages']['enquiry'] ) : '',
+				'default'       => isset( $options['pages']['enquiry'] ) ? esc_attr( $options['pages']['enquiry'] ) : '',
 				'tooltip'       => __( 'This is the thankyou page where user will be redirected after successful enquiry.', 'wp-travel-engine' ),
 			),
 			'wte-wishlist-page'     => array(
@@ -274,8 +274,8 @@ class Wp_Travel_Engine_Settings {
 				'options'       => $pages,
 				'class'         => 'wpte-enhanced-select',
 				'name'          => 'wp_travel_engine_settings[pages][wp_travel_engine_wishlist]',
-				'selected'      => isset( $options[ 'pages' ][ 'wp_travel_engine_wishlist' ] ) ? esc_attr( $options[ 'pages' ][ 'wp_travel_engine_wishlist' ] ) : $wishlist_page_id,
-				'default'       => isset( $options[ 'pages' ][ 'wp_travel_engine_wishlist' ] ) ? esc_attr( $options[ 'pages' ][ 'wp_travel_engine_wishlist' ] ) : $wishlist_page_id,
+				'selected'      => isset( $options['pages']['wp_travel_engine_wishlist'] ) ? esc_attr( $options['pages']['wp_travel_engine_wishlist'] ) : $wishlist_page_id,
+				'default'       => isset( $options['pages']['wp_travel_engine_wishlist'] ) ? esc_attr( $options['pages']['wp_travel_engine_wishlist'] ) : $wishlist_page_id,
 				'tooltip'       => __( 'This is the wishlist page where user can check out the trips they have wishlisted. The <b>[WP_TRAVEL_ENGINE_WISHLIST]</b> shortcode must be on this page.', 'wp-travel-engine' ),
 			),
 		);
@@ -298,25 +298,25 @@ class Wp_Travel_Engine_Settings {
 				'field_label'   => __( 'Disable Admin Notification', 'wp-travel-engine' ),
 				'wrapper_class' => 'wpte-field wpte-checkbox advance-checkbox',
 				'type'          => 'checkbox',
-				'default'       => isset( $wp_travel_engine_settings[ 'email' ][ 'disable_notif' ] ) ? $wp_travel_engine_settings[ 'email' ][ 'disable_notif' ] : '',
+				'default'       => isset( $wp_travel_engine_settings['email']['disable_notif'] ) ? $wp_travel_engine_settings['email']['disable_notif'] : '',
 				'id'            => 'disable-admin-notification',
 				'name'          => 'wp_travel_engine_settings[email][disable_notif]',
 				'tooltip'       => __( 'Turn this on if you do not want to receive sales notification emails.', 'wp-travel-engine' ),
 			),
 			// 'enable_customer_notification'       => array(
-			// 	'field_label'   => __( 'Enable Customer Enquiry Notification', 'wp-travel-engine' ),
-			// 	'wrapper_class' => 'wpte-field wpte-checkbox advance-checkbox',
-			// 	'type'          => 'checkbox',
-			// 	'default'       => isset( $wp_travel_engine_settings['email']['cust_notif'] ) ? $wp_travel_engine_settings['email']['cust_notif'] : '',
-			// 	'id'            => 'enable-customer-enquiry-notification',
-			// 	'name'          => 'wp_travel_engine_settings[email][cust_notif]',
-			// 	'tooltip'       => __( 'Turn this on if you want to send enquiry notification emails to customer as well.', 'wp-travel-engine' ),
+			// 'field_label'   => __( 'Enable Customer Enquiry Notification', 'wp-travel-engine' ),
+			// 'wrapper_class' => 'wpte-field wpte-checkbox advance-checkbox',
+			// 'type'          => 'checkbox',
+			// 'default'       => isset( $wp_travel_engine_settings['email']['cust_notif'] ) ? $wp_travel_engine_settings['email']['cust_notif'] : '',
+			// 'id'            => 'enable-customer-enquiry-notification',
+			// 'name'          => 'wp_travel_engine_settings[email][cust_notif]',
+			// 'tooltip'       => __( 'Turn this on if you want to send enquiry notification emails to customer as well.', 'wp-travel-engine' ),
 			// ),
 			'disable_admin_booking_notification' => array(
 				'field_label'   => __( 'Disable Booking Notification', 'wp-travel-engine' ),
 				'wrapper_class' => 'wpte-field wpte-checkbox advance-checkbox',
 				'type'          => 'checkbox',
-				'default'       => $wp_travel_engine_settings[ 'email' ][ 'disable_booking_notification' ] ?? '',
+				'default'       => $wp_travel_engine_settings['email']['disable_booking_notification'] ?? '',
 				'id'            => 'disable-booking-notification',
 				'name'          => 'wp_travel_engine_settings[email][disable_booking_notification]',
 				'tooltip'       => __( 'Check this box to receive only payment notification emails and not booking notifications.', 'wp-travel-engine' ),
@@ -338,8 +338,8 @@ class Wp_Travel_Engine_Settings {
 		$wp_travel_engine_settings = wptravelengine_settings()->get();
 		$currencies                = Functions::get_currencies();
 		$code                      = 'USD';
-		if ( ! empty( $wp_travel_engine_settings[ 'currency_code' ] ) ) {
-			$code = $wp_travel_engine_settings[ 'currency_code' ];
+		if ( ! empty( $wp_travel_engine_settings['currency_code'] ) ) {
+			$code = $wp_travel_engine_settings['currency_code'];
 		}
 		$options = array( '' => __( 'Choose a currency&hellip;', 'wp-travel-engine' ) );
 		foreach ( $currencies as $key => $name ) {
@@ -350,10 +350,10 @@ class Wp_Travel_Engine_Settings {
 			'symbol' => 'Currency Symbol ( e.g. $ )',
 			'code'   => 'Currency Code ( e.g. USD )',
 		);
-		$currency_option  = isset( $wp_travel_engine_settings[ 'currency_option' ] ) ? esc_attr( $wp_travel_engine_settings[ 'currency_option' ] ) : 'symbol';
+		$currency_option  = isset( $wp_travel_engine_settings['currency_option'] ) ? esc_attr( $wp_travel_engine_settings['currency_option'] ) : 'symbol';
 
 		$amount_display_format = wte_array_get( $wp_travel_engine_settings, 'amount_display_format', '%CURRENCY_SYMBOL%%FORMATED_AMOUNT%' );
-		$thousands_separator   = isset( $wp_travel_engine_settings[ 'thousands_separator' ] ) && $wp_travel_engine_settings[ 'thousands_separator' ] != '' ? ( $wp_travel_engine_settings[ 'thousands_separator' ] ) : '';
+		$thousands_separator   = isset( $wp_travel_engine_settings['thousands_separator'] ) && $wp_travel_engine_settings['thousands_separator'] != '' ? ( $wp_travel_engine_settings['thousands_separator'] ) : '';
 		$decimal_separator     = wte_array_get( $wp_travel_engine_settings, 'decimal_separator', '.' );
 		$decimal_digits        = wte_array_get( $wp_travel_engine_settings, 'decimal_digits', '0' );
 
@@ -427,7 +427,6 @@ class Wp_Travel_Engine_Settings {
 	}
 
 	public static function get_global_settings_schema() {
-
 	}
 
 	public static function get_sanitized_posted_data( $posted_data ) {
@@ -443,7 +442,7 @@ class Wp_Travel_Engine_Settings {
 								'select_options' => array(
 									'type'  => 'array',
 									'items' => array(
-										'type'              => 'string',
+										'type' => 'string',
 										'sanitize_callback' => 'sanitize_textarea_field',
 									),
 								),
@@ -460,11 +459,11 @@ class Wp_Travel_Engine_Settings {
 						'email'            => array(
 							'type'       => 'array',
 							'properties' => array(
-								'booking_notification_template_admin'    => array(
+								'booking_notification_template_admin' => array(
 									'type'              => 'string',
 									'sanitize_callback' => 'wp_kses_post',
 								),
-								'sales_wpeditor'                         => array(
+								'sales_wpeditor'    => array(
 									'type'              => 'string',
 									'sanitize_callback' => 'wp_kses_post',
 								),
@@ -472,7 +471,7 @@ class Wp_Travel_Engine_Settings {
 									'type'              => 'string',
 									'sanitize_callback' => 'wp_kses_post',
 								),
-								'purchase_wpeditor'                      => array(
+								'purchase_wpeditor' => array(
 									'type'              => 'string',
 									'sanitize_callback' => 'wp_kses_post',
 								),
@@ -521,8 +520,8 @@ class Wp_Travel_Engine_Settings {
 	 */
 	public static function save_settings() {
 
-		if ( isset( $_POST[ 'nonce' ] ) ) {
-			if ( ! wp_verify_nonce( wte_clean( wp_unslash( $_POST[ 'nonce' ] ) ), 'wpte_global_tabs_save_data' ) ) {
+		if ( isset( $_POST['nonce'] ) ) {
+			if ( ! wp_verify_nonce( wte_clean( wp_unslash( $_POST['nonce'] ) ), 'wpte_global_tabs_save_data' ) ) {
 				wp_send_json_error( array( 'message' => __( 'Security Error! Nonce verification failed', 'wp-travel-engine' ) ) );
 				die;
 			}
@@ -532,8 +531,8 @@ class Wp_Travel_Engine_Settings {
 
 		$posted_data = self::get_sanitized_posted_data( $_POST );
 
-		if ( isset( $posted_data[ 'wp_travel_engine_settings' ] ) ) {
-			$global_settings_to_save = (array) $posted_data[ 'wp_travel_engine_settings' ];
+		if ( isset( $posted_data['wp_travel_engine_settings'] ) ) {
+			$global_settings_to_save = (array) $posted_data['wp_travel_engine_settings'];
 
 			// Merge data.
 			$global_settings_merged_with_saved = array_merge( $global_settings_saved, $global_settings_to_save );
@@ -547,7 +546,7 @@ class Wp_Travel_Engine_Settings {
 
 			$global_settings_checkboxes = apply_filters( 'wp_travel_engine_global_settings_checkboxes', $global_checkboxes_array );
 
-			$active_tab = $posted_data[ 'tab' ];
+			$active_tab = $posted_data['tab'];
 
 			if ( isset( $global_settings_checkboxes[ $active_tab ] ) ) {
 				foreach ( $global_settings_checkboxes[ $active_tab ] as $key => $checkbox ) {
@@ -605,17 +604,17 @@ class Wp_Travel_Engine_Settings {
 			 *
 			 * @since 5.5.7
 			 */
-			if ( isset( $_REQUEST[ 'wptravelengine_trip_sort_by' ] ) ) {
-				update_option( 'wptravelengine_trip_sort_by', sanitize_text_field( wp_unslash( $_REQUEST[ 'wptravelengine_trip_sort_by' ] ) ) );
+			if ( isset( $_REQUEST['wptravelengine_trip_sort_by'] ) ) {
+				update_option( 'wptravelengine_trip_sort_by', sanitize_text_field( wp_unslash( $_REQUEST['wptravelengine_trip_sort_by'] ) ) );
 			}
-			if ( isset( $_REQUEST[ 'wptravelengine_trip_view_mode' ] ) ) {
-				update_option( 'wptravelengine_trip_view_mode', sanitize_text_field( wp_unslash( $_REQUEST[ 'wptravelengine_trip_view_mode' ] ) ) );
+			if ( isset( $_REQUEST['wptravelengine_trip_view_mode'] ) ) {
+				update_option( 'wptravelengine_trip_view_mode', sanitize_text_field( wp_unslash( $_REQUEST['wptravelengine_trip_view_mode'] ) ) );
 			}
 
 			update_option( 'wp_travel_engine_settings', wp_unslash( $global_settings_merged_with_saved ) );
 
-			if ( isset( $posted_data[ 'wp_travel_engine_settings' ][ 'pages' ][ 'search' ] ) ) {
-				update_option( 'wp_travel_engine_search_page_id', $posted_data[ 'wp_travel_engine_settings' ][ 'pages' ][ 'search' ] );
+			if ( isset( $posted_data['wp_travel_engine_settings']['pages']['search'] ) ) {
+				update_option( 'wp_travel_engine_search_page_id', $posted_data['wp_travel_engine_settings']['pages']['search'] );
 			}
 
 			/**
@@ -626,7 +625,6 @@ class Wp_Travel_Engine_Settings {
 			wp_send_json_success( array( 'message' => 'Settings Saved Successfully.' ) );
 
 		}
-
 	}
 
 	/**
@@ -655,28 +653,28 @@ class Wp_Travel_Engine_Settings {
 							'pages' => array(
 								'type'       => 'object',
 								'properties' => array(
-									'wp_travel_engine_place_order'          => array(
+									'wp_travel_engine_place_order' => array(
 										'type' => 'string',
 									),
 									'wp_travel_engine_terms_and_conditions' => array(
 										'type' => 'string',
 									),
-									'wp_travel_engine_thank_you'            => array(
+									'wp_travel_engine_thank_you' => array(
 										'type' => 'string',
 									),
-									'wp_travel_engine_confirmation_page'    => array(
+									'wp_travel_engine_confirmation_page' => array(
 										'type' => 'string',
 									),
-									'wp_travel_engine_dashboard_page'       => array(
+									'wp_travel_engine_dashboard_page' => array(
 										'type' => 'string',
 									),
-									'enquiry'                               => array(
+									'enquiry' => array(
 										'type' => 'string',
 									),
-									'search'                                => array(
+									'search'  => array(
 										'type' => 'string',
 									),
-									'wp_travel_engine_wishlist'             => array(
+									'wp_travel_engine_wishlist' => array(
 										'type' => 'string',
 									),
 								),

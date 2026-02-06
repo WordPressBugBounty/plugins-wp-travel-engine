@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		}
 		?>
 
-   <?php
+	<?php
 		/**
 		 * wp_travel_engine_after_trip_content hook.
 		 *
@@ -40,7 +40,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		do_action( 'wp_travel_engine_after_trip_content' );
 	?>
 
-   <?php
+	<?php
 		/**
 		 * wp_travel_engine_trip_sidebar hook.
 		 *
@@ -49,7 +49,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		do_action( 'wp_travel_engine_trip_sidebar' );
 	?>
 
-   <?php
+	<?php
 		/**
 		 * wp_travel_engine_primary_wrap_close hook.
 		 *

@@ -19,7 +19,7 @@ class TripSaveAndContinue extends AjaxController {
 	const NONCE_KEY    = 'nonce';
 	const NONCE_ACTION = 'wpte_tab_trip_save_and_continue';
 	const ACTION       = 'wpte_tab_trip_save_and_continue';
-
+	const ALLOW_NOPRIV = false;
 	/**
 	 * Process Request.
 	 */

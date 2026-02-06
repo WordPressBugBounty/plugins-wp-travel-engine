@@ -17,7 +17,7 @@ wp_enqueue_script( 'jquery-ui-datepicker' );
 
 				<div class="wpte-toggle-item-wrap wpte-col2">
 					<?php
-					for ( $i = 1; $i <= $pno; $i ++ ) {
+					for ( $i = 1; $i <= $pno; $i++ ) {
 						?>
 						<div class="wpte-toggle-item">
 							<div class="wpte-toggle-title">
@@ -31,12 +31,12 @@ wp_enqueue_script( 'jquery-ui-datepicker' );
 											<?php esc_html_e( 'Edit', 'wp-travel-engine' ); ?>
 										</a>
 									</div>
-									<?php if ( isset( $personal_options[ 'travelers' ] ) ) : ?>
+									<?php if ( isset( $personal_options['travelers'] ) ) : ?>
 										<h4><?php esc_html_e( 'Traveller information', 'wp-travel-engine' ); ?></h4>
 										<div class="wpte-prsnl-dtl-blk-content">
 											<ul class="wpte-list">
 												<?php
-												foreach ( $personal_options[ 'travelers' ] as $key => $value ) :
+												foreach ( $personal_options['travelers'] as $key => $value ) :
 													if ( ! isset( $value[ $i ] ) ) :
 														continue;
 													endif;
@@ -45,9 +45,9 @@ wp_enqueue_script( 'jquery-ui-datepicker' );
 
 													if ( 'fname' === $key ) {
 														$ti_key = 'traveller_first_name';
-													} else if ( 'lname' === $key ) {
+													} elseif ( 'lname' === $key ) {
 														$ti_key = 'traveller_last_name';
-													} else if ( 'passport' === $key ) {
+													} elseif ( 'passport' === $key ) {
 														$ti_key = 'traveller_passport_number';
 													}
 													$data_label = wp_travel_engine_get_traveler_info_field_label_by_name( $ti_key );
@@ -64,17 +64,17 @@ wp_enqueue_script( 'jquery-ui-datepicker' );
 															?>
 															<span><?php echo esc_html( $data_value ); ?></span>
 														</li>
-													<?php
+														<?php
 													endif;
 												endforeach;
 												?>
 											</ul>
 										</div>
 										<div style="display:none;"
-											 class="wpte-prsnl-dtl-blk-content-edit edit-personal-info">
+											class="wpte-prsnl-dtl-blk-content-edit edit-personal-info">
 											<ul class="wpte-list">
 												<?php
-												foreach ( $personal_options[ 'travelers' ] as $key => $value ) :
+												foreach ( $personal_options['travelers'] as $key => $value ) :
 													if ( ! isset( $value[ $i ] ) ) :
 														continue;
 													endif;
@@ -83,9 +83,9 @@ wp_enqueue_script( 'jquery-ui-datepicker' );
 
 													if ( 'fname' === $key ) {
 														$ti_key = 'traveller_first_name';
-													} else if ( 'lname' === $key ) {
+													} elseif ( 'lname' === $key ) {
 														$ti_key = 'traveller_last_name';
-													} else if ( 'passport' === $key ) {
+													} elseif ( 'passport' === $key ) {
 														$ti_key = 'traveller_passport_number';
 													}
 													$data_label = wp_travel_engine_get_traveler_info_field_label_by_name( $ti_key );
@@ -103,8 +103,8 @@ wp_enqueue_script( 'jquery-ui-datepicker' );
 																	<span>
 											<div class="wpte-field wpte-text">
 												<input class="wp-travel-engine-datetime hasDatepicker" type="text"
-													   name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
-													   value="<?php echo esc_attr( $data_value ); ?>">
+														name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
+														value="<?php echo esc_attr( $data_value ); ?>">
 											</div>
 										</span>
 																	<?php
@@ -115,13 +115,13 @@ wp_enqueue_script( 'jquery-ui-datepicker' );
 											<div class="wpte-field wpte-select">
 												<select class="wpte-enhanced-select"
 														name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]">
-															<?php
-															$country_options = Functions::get_countries();
-															foreach ( $country_options as $key => $country ) {
-																$selected = selected( $data_value, $key, false );
-																echo '<option ' . esc_attr( $selected ) . " value='" . esc_attr( $key ) . "'>" . esc_html( $country ) . '</option>';
-															}
-															?>
+																	<?php
+																	$country_options = Functions::get_countries();
+																	foreach ( $country_options as $key => $country ) {
+																		$selected = selected( $data_value, $key, false );
+																		echo '<option ' . esc_attr( $selected ) . " value='" . esc_attr( $key ) . "'>" . esc_html( $country ) . '</option>';
+																	}
+																	?>
 												</select>
 											</div>
 										</span>
@@ -133,15 +133,15 @@ wp_enqueue_script( 'jquery-ui-datepicker' );
 																	<span>
 											<div class="wpte-field wpte-text">
 												<input type="text"
-													   name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
-													   value="<?php echo esc_attr( $data_value ); ?>">
+														name="wp_travel_engine_booking_setting[place_order][travelers][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
+														value="<?php echo esc_attr( $data_value ); ?>">
 											</div>
 										</span>
-																<?php
+																	<?php
 															}
 															?>
 														</li>
-													<?php
+														<?php
 													endif;
 												endforeach;
 												?>
@@ -156,12 +156,12 @@ wp_enqueue_script( 'jquery-ui-datepicker' );
 											<?php esc_html_e( 'Edit', 'wp-travel-engine' ); ?>
 										</a>
 									</div>
-									<?php if ( isset( $personal_options[ 'relation' ] ) ) : ?>
+									<?php if ( isset( $personal_options['relation'] ) ) : ?>
 										<h4><?php esc_html_e( 'Emergency Contact', 'wp-travel-engine' ); ?></h4>
 										<div class="wpte-prsnl-dtl-blk-content">
 											<ul class="wpte-list">
 												<?php
-												foreach ( $personal_options[ 'relation' ] as $key => $value ) :
+												foreach ( $personal_options['relation'] as $key => $value ) :
 													if ( ! isset( $value[ $i ] ) ) :
 														continue;
 													endif;
@@ -170,9 +170,9 @@ wp_enqueue_script( 'jquery-ui-datepicker' );
 
 													if ( 'fname' === $key ) {
 														$ti_key = 'traveller_emergency_first_name';
-													} else if ( 'lname' === $key ) {
+													} elseif ( 'lname' === $key ) {
 														$ti_key = 'traveller_emergency_last_name';
-													} else if ( 'passport' === $key ) {
+													} elseif ( 'passport' === $key ) {
 														$ti_key = 'traveller_emergency_passport_number';
 													}
 													$data_label = wp_travel_engine_get_relationship_field_label_by_name( $ti_key );
@@ -189,17 +189,17 @@ wp_enqueue_script( 'jquery-ui-datepicker' );
 															?>
 															<span><?php echo esc_html( $data_value ); ?></span>
 														</li>
-													<?php
+														<?php
 													endif;
 												endforeach;
 												?>
 											</ul>
 										</div>
 										<div style="display:none;"
-											 class="wpte-prsnl-dtl-blk-content-edit edit-relation-info">
+											class="wpte-prsnl-dtl-blk-content-edit edit-relation-info">
 											<ul class="wpte-list">
 												<?php
-												foreach ( $personal_options[ 'relation' ] as $key => $value ) :
+												foreach ( $personal_options['relation'] as $key => $value ) :
 													if ( ! isset( $value[ $i ] ) ) :
 														continue;
 													endif;
@@ -208,9 +208,9 @@ wp_enqueue_script( 'jquery-ui-datepicker' );
 
 													if ( 'fname' === $key ) {
 														$ti_key = 'traveller_emergency_first_name';
-													} else if ( 'lname' === $key ) {
+													} elseif ( 'lname' === $key ) {
 														$ti_key = 'traveller_emergency_last_name';
-													} else if ( 'passport' === $key ) {
+													} elseif ( 'passport' === $key ) {
 														$ti_key = 'traveller_emergency_passport_number';
 													}
 													$data_label = wp_travel_engine_get_relationship_field_label_by_name( $ti_key );
@@ -228,8 +228,8 @@ wp_enqueue_script( 'jquery-ui-datepicker' );
 																	<span>
 											<div class="wpte-field wpte-text">
 												<input class="wp-travel-engine-datetime hasDatepicker" type="text"
-													   name="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
-													   value="<?php echo esc_attr( $data_value ); ?>">
+														name="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
+														value="<?php echo esc_attr( $data_value ); ?>">
 											</div>
 										</span>
 																	<?php
@@ -256,15 +256,15 @@ wp_enqueue_script( 'jquery-ui-datepicker' );
 																	<span>
 											<div class="wpte-field wpte-text">
 												<input type="text"
-													   name="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
-													   value="<?php echo esc_attr( $data_value ); ?>">
+														name="wp_travel_engine_booking_setting[place_order][relation][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $i ); ?>]"
+														value="<?php echo esc_attr( $data_value ); ?>">
 											</div>
 										</span>
-																<?php
+																	<?php
 															}
 															?>
 														</li>
-													<?php
+														<?php
 													endif;
 												endforeach;
 												?>

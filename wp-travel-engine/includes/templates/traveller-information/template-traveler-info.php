@@ -18,10 +18,10 @@ if ( wte_array_get( $_REQUEST, '_action', '' ) === 'thankyou' ) {
 		return __( 'Thank you for booking the trip. Please check your email for confirmation.', 'wp-travel-engine' );
 	}
 
-	if ( is_array( $data ) && isset( $data[ 'bid' ] ) ) {
-		$booking_id = $data[ 'bid' ];
-		$payment_id = $data[ 'pid' ];
-		$gateway    = $data[ '_gateway' ];
+	if ( is_array( $data ) && isset( $data['bid'] ) ) {
+		$booking_id = $data['bid'];
+		$payment_id = $data['pid'];
+		$gateway    = $data['_gateway'];
 	}
 	WTE()->session->set( 'temp_tf_direction', "{$booking_id}|{$payment_id}|{$gateway}" );
 } else {
@@ -38,7 +38,7 @@ if ( isset( $booking_id ) ) {
 	if ( empty( $order_trip ) ) {
 		return;
 	}
-	$total_pax = ( isset( $order_trip[ 'pax' ] ) ) ? array_sum( $order_trip[ 'pax' ] ) : 0;
+	$total_pax = ( isset( $order_trip['pax'] ) ) ? array_sum( $order_trip['pax'] ) : 0;
 
 	global $wte_cart;
 
@@ -53,44 +53,44 @@ if ( isset( $booking_id ) ) {
 		}
 	}
 
-	if ( isset( $posted_data[ 'wp_travel_engine_booking_setting' ][ 'place_order' ][ 'booking' ][ 'subscribe' ] ) && $posted_data[ 'wp_travel_engine_booking_setting' ][ 'place_order' ][ 'booking' ][ 'subscribe' ] == '1' ) {
+	if ( isset( $posted_data['wp_travel_engine_booking_setting']['place_order']['booking']['subscribe'] ) && $posted_data['wp_travel_engine_booking_setting']['place_order']['booking']['subscribe'] == '1' ) {
 		$myvar = $posted_data;
 		$obj   = new Wte_Mailchimp_Main();
 		$new   = $obj->wte_mailchimp_action( $myvar );
 	}
-	if ( isset( $posted_data[ 'wp_travel_engine_booking_setting' ][ 'place_order' ][ 'booking' ][ 'mailerlite' ] ) && $posted_data[ 'wp_travel_engine_booking_setting' ][ 'place_order' ][ 'booking' ][ 'mailerlite' ] == '1' ) {
+	if ( isset( $posted_data['wp_travel_engine_booking_setting']['place_order']['booking']['mailerlite'] ) && $posted_data['wp_travel_engine_booking_setting']['place_order']['booking']['mailerlite'] == '1' ) {
 		$myvar = $posted_data;
 		$obj   = new Wte_Mailerlite_Main();
 		$new   = $obj->wte_mailerlite_action( $myvar );
 	}
-	if ( isset( $posted_data[ 'wp_travel_engine_booking_setting' ][ 'place_order' ][ 'booking' ][ 'convertkit' ] ) && $posted_data[ 'wp_travel_engine_booking_setting' ][ 'place_order' ][ 'booking' ][ 'convertkit' ] == '1' ) {
+	if ( isset( $posted_data['wp_travel_engine_booking_setting']['place_order']['booking']['convertkit'] ) && $posted_data['wp_travel_engine_booking_setting']['place_order']['booking']['convertkit'] == '1' ) {
 		$myvar = $posted_data;
 		$obj   = new Wte_Convertkit_Main();
 		$new   = $obj->wte_convertkit_action( $myvar );
 	}
 
 	$options                   = get_option( 'wp_travel_engine_settings', true );
-	$wp_travel_engine_thankyou = isset( $options[ 'pages' ][ 'wp_travel_engine_thank_you' ] ) ? esc_attr( $options[ 'pages' ][ 'wp_travel_engine_thank_you' ] ) : '';
+	$wp_travel_engine_thankyou = isset( $options['pages']['wp_travel_engine_thank_you'] ) ? esc_attr( $options['pages']['wp_travel_engine_thank_you'] ) : '';
 
 	$wp_travel_engine_thankyou = ! empty( $wp_travel_engine_thankyou ) ? get_permalink( $wp_travel_engine_thankyou ) : home_url( '/' );
 
-	$_booking_id = ! empty( $_GET[ 'booking_id' ] ) ? wte_clean( wp_unslash( $_GET[ 'booking_id' ] ) ) : 0;
+	$_booking_id = ! empty( $_GET['booking_id'] ) ? wte_clean( wp_unslash( $_GET['booking_id'] ) ) : 0;
 
 	if ( isset( $_booking_id ) && ! empty( $_booking_id ) ) :
 		$wp_travel_engine_thankyou = add_query_arg( 'booking_id', $_booking_id, $wp_travel_engine_thankyou );
 	endif;
 
-	$_redirect_type = ! empty( $_GET[ 'redirect_type' ] ) ? wte_clean( wp_unslash( $_GET[ 'redirect_type' ] ) ) : 0;
+	$_redirect_type = ! empty( $_GET['redirect_type'] ) ? wte_clean( wp_unslash( $_GET['redirect_type'] ) ) : 0;
 	if ( isset( $_redirect_type ) && ! empty( $_redirect_type ) ) :
 		$wp_travel_engine_thankyou = add_query_arg( 'redirect_type', $_redirect_type, $wp_travel_engine_thankyou );
 	endif;
 
-	$_wte_gateway = ! empty( $_GET[ 'wte_gateway' ] ) ? wte_clean( wp_unslash( $_GET[ 'wte_gateway' ] ) ) : 0;
+	$_wte_gateway = ! empty( $_GET['wte_gateway'] ) ? wte_clean( wp_unslash( $_GET['wte_gateway'] ) ) : 0;
 
 	if ( isset( $_wte_gateway ) && ! empty( $_wte_gateway ) ) :
 		$wp_travel_engine_thankyou = add_query_arg( 'wte_gateway', $_wte_gateway, $wp_travel_engine_thankyou );
 	endif;
-	$_status = ! empty( $_GET[ 'status' ] ) ? wte_clean( wp_unslash( $_GET[ 'status' ] ) ) : 0;
+	$_status = ! empty( $_GET['status'] ) ? wte_clean( wp_unslash( $_GET['status'] ) ) : 0;
 
 	if ( isset( $_status ) && ! empty( $_status ) ) :
 		$wp_travel_engine_thankyou = add_query_arg( 'status', $_status, $wp_travel_engine_thankyou );
@@ -102,7 +102,7 @@ if ( isset( $booking_id ) ) {
 			do_action( 'wp_travel_engine_verify_paypal_ipn' );
 		}
 
-		$hide_traveller_info = isset( $options[ 'travelers_information' ] ) ? $options[ 'travelers_information' ] : 'yes';
+		$hide_traveller_info = isset( $options['travelers_information'] ) ? $options['travelers_information'] : 'yes';
 
 		$hide_traveller_info = apply_filters( 'wptravelengine_hide_traveler_form', $hide_traveller_info );
 
@@ -117,7 +117,7 @@ if ( isset( $booking_id ) ) {
 					wp_redirect( $wp_travel_engine_thankyou );
 				} else {
 					// Some errors were found, so let's output the header since we are staying on this page
-					if ( isset( $_GET[ 'noheader' ] ) ) {
+					if ( isset( $_GET['noheader'] ) ) {
 						require_once ABSPATH . 'wp-admin/admin-header.php';
 					}
 				}
@@ -139,21 +139,21 @@ if ( isset( $booking_id ) ) {
 		// Update the booking meta to indicate that the traveller page is old.
 		update_post_meta( $booking_id, 'traveller_page_type', 'old' );
 
-		for ( $i = 1; $i <= $total_pax; $i ++ ) {
+		for ( $i = 1; $i <= $total_pax; $i++ ) {
 			echo '<div class="relation-options-title">' . sprintf( esc_html__( 'Personal details for Traveller: #%1$s', 'wp-travel-engine' ), (int) $i ) . '</div>';
 
 			$modified_traveller_fields = array_map(
 				function ( $field ) use ( $i ) {
-					if ( strpos( $field[ 'name' ], 'wp_travel_engine_placeorder_setting[place_order][travelers]' ) !== false ) {
-						$field[ 'name' ] = sprintf( '%s[%d]', $field[ 'name' ], $i );
+					if ( strpos( $field['name'], 'wp_travel_engine_placeorder_setting[place_order][travelers]' ) !== false ) {
+						$field['name'] = sprintf( '%s[%d]', $field['name'], $i );
 					} else {
-						$field[ 'name' ] = sprintf( 'wp_travel_engine_placeorder_setting[place_order][travelers][%s][%d]', $field[ 'name' ], $i );
+						$field['name'] = sprintf( 'wp_travel_engine_placeorder_setting[place_order][travelers][%s][%d]', $field['name'], $i );
 					}
-					$field[ 'id' ]            = sprintf( '%s-%d', $field[ 'id' ], $i );
-					$field[ 'wrapper_class' ] = 'wp-travel-engine-personal-details';
+					$field['id']            = sprintf( '%s-%d', $field['id'], $i );
+					$field['wrapper_class'] = 'wp-travel-engine-personal-details';
 
-					if( isset( $field[ 'attributes' ][ 'data-id' ] ) ){
-						$field[ 'attributes' ][ 'data-id' ]	.= '_'.$i;
+					if ( isset( $field['attributes']['data-id'] ) ) {
+						$field['attributes']['data-id'] .= '_' . $i;
 					}
 
 					return $field;
@@ -162,20 +162,20 @@ if ( isset( $booking_id ) ) {
 			);
 
 			$form_fields->init( $modified_traveller_fields )->render();
-			$show_emergency_contact = apply_filters( 'wptravelengine_hide_emergency_form', $wp_travel_engine_settings_options[ 'emergency' ] );
+			$show_emergency_contact = apply_filters( 'wptravelengine_hide_emergency_form', $wp_travel_engine_settings_options['emergency'] );
 
 			if ( ! $show_emergency_contact ) {
 				echo '<div class="relation-options-title">' . sprintf( esc_html__( 'Emergency contact details for Traveller: #%1$s', 'wp-travel-engine' ), esc_html( $i ) ) . '</div>';
 
 				$modified_emergency_contact_fields = array_map(
 					function ( $field ) use ( $i ) {
-						if ( strpos( $field[ 'name' ], 'wp_travel_engine_placeorder_setting[place_order][relation]' ) !== false ) {
-							$field[ 'name' ] = sprintf( '%s[%d]', $field[ 'name' ], $i );
+						if ( strpos( $field['name'], 'wp_travel_engine_placeorder_setting[place_order][relation]' ) !== false ) {
+							$field['name'] = sprintf( '%s[%d]', $field['name'], $i );
 						} else {
-							$field[ 'name' ] = sprintf( 'wp_travel_engine_placeorder_setting[place_order][relation][%s][%d]', $field[ 'name' ], $i );
+							$field['name'] = sprintf( 'wp_travel_engine_placeorder_setting[place_order][relation][%s][%d]', $field['name'], $i );
 						}
-						$field[ 'id' ]            = sprintf( '%s-%d', $field[ 'id' ], $i );
-						$field[ 'wrapper_class' ] = 'wp-travel-engine-personal-details';
+						$field['id']            = sprintf( '%s-%d', $field['id'], $i );
+						$field['wrapper_class'] = 'wp-travel-engine-personal-details';
 
 						return $field;
 					},
@@ -189,7 +189,7 @@ if ( isset( $booking_id ) ) {
 		?>
 		<input type="hidden" name="nonce" value="<?php echo esc_attr( $nonce ); ?>">
 		<input type="submit" name="wp-travel-engine-confirmation-submit"
-			   value="<?php esc_html_e( 'Confirm Booking', 'wp-travel-engine' ); ?>">
+				value="<?php esc_html_e( 'Confirm Booking', 'wp-travel-engine' ); ?>">
 	</form>
 
 	<script>

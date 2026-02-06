@@ -95,18 +95,7 @@ $global_settings = wptravelengine_settings();
 						<?php endif; ?>
 					<?php endif; // Show_multiple_pricing_list_disp. ?>
 					<?php
-					$trip_booking_data = apply_filters(
-						'wptravelengine_trip_booking_modal_data',
-						array(
-							'tripID'      => $trip->get_id(),
-							'nonce'       => wp_create_nonce( 'wte_add_trip_to_cart' ),
-							'wpXHR'       => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
-							'cartVersion' => '2.0',
-							'buttonLabel' => esc_html__( 'Check Availability', 'wp-travel-engine' ),
-							'showModalWarning' 		=> wptravelengine_toggled( $global_settings->get( 'show_booking_modal_warning', true ) ),
-							'modalWarningMessage' 	=> $global_settings->get( 'booking_modal_warning_message', '' ),
-						)
-					);
+					$trip_booking_data = wptravelengine_trip_booking_modal_data( $trip->ID );
 					?>
 					<div class="wpte-bf-btn-wrap">
 						<?php
@@ -153,7 +142,7 @@ $global_settings = wptravelengine_settings();
 								data-trip-booking="<?php echo esc_attr( wp_json_encode( $trip_booking_data ) ); ?>"
 								disabled="disabled"
 								class="wpte-bf-btn wte-book-now btn-loading"><?php esc_html_e( 'Check Availability', 'wp-travel-engine' ); ?></button>
-						<?php else: ?>
+						<?php else : ?>
 							<button type="button" class="wpte-bf-btn wpte-button-disabled" disabled><?php esc_html_e( 'Sold Out', 'wp-travel-engine' ); ?></button>
 						<?php endif; ?>
 					</div>
@@ -161,16 +150,16 @@ $global_settings = wptravelengine_settings();
 				</div>
 				<?php
 				if ( $show_enquiry_info ) :
-					$is_custom_link = 'custom' === $enquiry_link && !empty( $custom_enquiry_link ) && $custom_enquiry_link !== '#';
+					$is_custom_link = 'custom' === $enquiry_link && ! empty( $custom_enquiry_link ) && $custom_enquiry_link !== '#';
 					$link           = $is_custom_link ? $custom_enquiry_link : '#wte_enquiry_form_scroll_wrapper';
 					$target         = $is_custom_link ? '_blank' : '_self';
 					$id             = $is_custom_link ? 'wte-open-enquiry-link' : 'wte-send-enquiry-message';
 
-					$enquiry_message 	= __( 'Need help with booking?', 'wp-travel-engine' );
-					$link_label 		= __( 'Send Us A Message', 'wp-travel-engine' );
+					$enquiry_message = __( 'Need help with booking?', 'wp-travel-engine' );
+					$link_label      = __( 'Send Us A Message', 'wp-travel-engine' );
 					if ( ( $settings['pricing_widget_enquiry_message'] ?? '' ) && preg_match( '/^(.*?)?(?:\s*\[\[(.*?)\]\])?$/', $settings['pricing_widget_enquiry_message'], $matches ) ) {
 						$enquiry_message = trim( $matches[1] ?? '' );
-						$link_label 	 = trim( $matches[2] ?? '' );
+						$link_label      = trim( $matches[2] ?? '' );
 					}
 
 					?>

@@ -4,6 +4,8 @@
  */
 namespace WPTravelEngine\Posttype;
 
+use WP_Post;
+
 /**
  * @deprecated 6.0.0
  */
@@ -13,14 +15,14 @@ class Trip {
 	/**
 	 * Class instance holder.
 	 *
-	 * @var WPTravelEngine\Posttype\Trip
+	 * @var array<int, self>
 	 */
-	protected static $instance = null;
+	protected static $instance = array();
 
 	/**
 	 * WP post Object.
 	 *
-	 * @var WP_Post
+	 * @var ?WP_Post
 	 */
 	public $post = null;
 
@@ -95,11 +97,11 @@ class Trip {
 		} else {
 			$default_package = wptravelengine_get_trip_primary_package( $this->post->ID );
 		}
-		$this->has_sale        	= $default_package->{'has_sale'} ?? false;
-		$this->price           	= $default_package->{'price'} ?? 0;
-		$this->sale_price      	= $default_package->{'sale_price'} ?? 0;
-		$this->sale_percentage 	= $default_package->{'sale_percentage'} ?? 0;
-		$this->default_package 	= $default_package->post ?? false;
+		$this->has_sale        = $default_package->{'has_sale'} ?? false;
+		$this->price           = $default_package->{'price'} ?? 0;
+		$this->sale_price      = $default_package->{'sale_price'} ?? 0;
+		$this->sale_percentage = $default_package->{'sale_percentage'} ?? 0;
+		$this->default_package = $default_package->post ?? false;
 	}
 
 	public function __isset( $key ) {
@@ -156,17 +158,19 @@ class Trip {
 	public static function instance( $trip_id ) {
 
 		$trip_id = (int) $trip_id;
-		if ( ! $trip_id ) {
+
+ 		if ( isset( self::$instance[ $trip_id ] ) ) {
+			return self::$instance[ $trip_id ];
+		}
+
+		$trip = get_post( $trip_id );
+
+		if ( ! ( $trip instanceof WP_Post ) ) {
 			return false;
 		}
 
-		$_trip = wp_cache_get( $trip_id, 'trips' );
+		self::$instance[ $trip_id ] = new self( $trip );
 
-		if ( ! $_trip ) {
-			$_trip = new self( get_post( $trip_id ) );
-			wp_cache_add( $trip_id, $_trip, 'trips' );
-		}
-
-		return $_trip;
+		return self::$instance[ $trip_id ];
 	}
 }

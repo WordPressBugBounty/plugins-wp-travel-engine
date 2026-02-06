@@ -25,7 +25,7 @@ class LoadTripsHtml extends AjaxController {
 	 * Load Trips Html.
 	 */
 	protected function process_request() {
-		$post = $this->request->get_params();
+		$post           = $this->request->get_params();
 		$posts_per_page = ( new Options() )->get( 'posts_per_page', 10 );
 
 		// phpcs:disable
@@ -46,12 +46,12 @@ class LoadTripsHtml extends AjaxController {
 			$details['user_wishlists'] = $user_wishlists;
 			wptravelengine_get_template( $template_name, $details );
 		endwhile;
-		
+
 		wp_reset_postdata();
 
 		wp_send_json_success(
 			array(
-				'data' => ob_get_clean()
+				'data' => ob_get_clean(),
 			)
 		);
 		exit();

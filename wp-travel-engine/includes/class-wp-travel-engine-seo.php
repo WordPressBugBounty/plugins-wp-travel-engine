@@ -3,7 +3,7 @@
  * Blossom Recipe Maker SEO Functions
  *
  * @package    WP Travel Engine
- * 
+ *
  * @since       1.0.2
  * @deprecated  1119-schema-issue
  */

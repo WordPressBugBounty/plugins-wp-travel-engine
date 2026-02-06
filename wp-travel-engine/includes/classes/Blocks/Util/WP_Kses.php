@@ -18,7 +18,7 @@ class WP_Kses {
 	public function wptravelengine_post() {
 		global $allowedposttags;
 
-		$allowedposttags[ 'iframe' ] = array(
+		$allowedposttags['iframe'] = array(
 			'src'             => true,
 			'width'           => true,
 			'height'          => true,

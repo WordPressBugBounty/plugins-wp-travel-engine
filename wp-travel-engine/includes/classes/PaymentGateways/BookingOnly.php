@@ -10,6 +10,7 @@ namespace WPTravelEngine\PaymentGateways;
 
 use WPTravelEngine\Core\Models\Post\Booking;
 use WPTravelEngine\Core\Models\Post\Payment;
+use WPTravelEngine\Core\Booking\BookingProcess;
 
 /**
  * Booking Only Payment Gateway
@@ -17,6 +18,11 @@ use WPTravelEngine\Core\Models\Post\Payment;
  * @since 6.0.0
  */
 class BookingOnly extends BaseGateway {
+
+	/**
+	 * @inheritDoc
+	 */
+	public static string $cart_version = '4.0';
 
 	/**
 	 * Get gateway id.
@@ -76,14 +82,51 @@ class BookingOnly extends BaseGateway {
 
 	/**
 	 * @inheritDoc
+	 * @updated 6.7.0
 	 */
-	public function process_payment( Booking $booking, Payment $payment, $booking_instance ): void {
+	public function process_payment( Booking $booking, Payment $payment, BookingProcess $booking_instance ): void {
+		if ( $booking->is_curr_cart( '<' ) ) {
+			$this->process_payment_before_v4( $booking, $payment, $booking_instance );
+		} else {
+			$this->process_payment_in_v4( $booking, $payment, $booking_instance );
+		}
+	}
+
+	/**
+	 * Process payment before v4.
+	 *
+	 * @param Booking        $booking Booking object.
+	 * @param Payment        $payment Payment object.
+	 * @param BookingProcess $booking_instance Booking process object.
+	 * @return void
+	 */
+	protected function process_payment_before_v4( Booking $booking, Payment $payment, $booking_instance ): void {
 		$cart_info = $booking->get_cart_info();
-		if ( $cart_info[ 'total' ] <= 0 && $cart_info[ 'subtotal' ] > 0 ) { // Maybe 100% discount coupon applied.
+		if ( $cart_info['total'] <= 0 && $cart_info['subtotal'] > 0 ) { // Maybe 100% discount coupon applied.
 			$payment->set_status( 'completed' );
 			$payment->save();
 
 			$booking->update_status( 'booked' );
+		}
+	}
+
+	/**
+	 * Process payment in v4.
+	 *
+	 * @param Booking        $booking Booking object.
+	 * @param Payment        $payment Payment object.
+	 * @param BookingProcess $booking_instance Booking process object.
+	 * @return void
+	 * @since 6.7.0
+	 */
+	protected function process_payment_in_v4( Booking $booking, Payment $payment, $booking_instance ): void {
+		global $wte_cart;
+		$cart_info = $booking->get_cart_info();
+		$amount    = $wte_cart->get_total_payable_amount();
+		if ( $cart_info['total'] == 0 ) {
+			$booking->sync_payment_success_metas( $payment->ID, $amount );
+		} else {
+			$booking->sync_payment_pending_metas( $payment->ID, $amount );
 		}
 	}
 }

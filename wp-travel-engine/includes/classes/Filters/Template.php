@@ -23,8 +23,6 @@ class Template {
 
 		add_filter( 'wptravelengine_hide_emergency_form', array( $this, 'modify_emergency_form' ) );
 
-
-
 		$fse_templates = new FSE_Template();
 		$fse_templates->hooks();
 	}
@@ -43,21 +41,19 @@ class Template {
 
 		$all_taxonomies = get_object_taxonomies( 'trip', 'names' );
 
-		if ( current_theme_supports( 'wptravelengine-templates' ) || ( wp_is_block_theme() && 'yes' == wptravelengine_settings()->get( "enable_fse_template", "no" ) ) ) {
+		if ( current_theme_supports( 'wptravelengine-templates' ) || ( wp_is_block_theme() && 'yes' == wptravelengine_settings()->get( 'enable_fse_template', 'no' ) ) ) {
 			if ( is_single() ) {
-				if ( ! $optimized_loading ) {
-					Assets::instance()->enqueue_script( 'trip-booking-modal' );
-				}
 				Assets::instance()
-				      ->dequeue_script( 'wp-travel-engine' )
-				      ->dequeue_style( 'wp-travel-engine' )
-				      ->enqueue_script( 'wp-api-request' )
-				      ->enqueue_script( 'single-trip' )
-				      ->enqueue_style( 'single-trip' )
-				      ->enqueue_style( 'style-trip-booking-modal' );
+						->enqueue_script( 'trip-booking-modal' )
+						->dequeue_script( 'wp-travel-engine' )
+						->dequeue_style( 'wp-travel-engine' )
+						->enqueue_script( 'wp-api-request' )
+						->enqueue_script( 'single-trip' )
+						->enqueue_style( 'single-trip' )
+						->enqueue_style( 'style-trip-booking-modal' );
 			}
 
-			if ( is_post_type_archive( WP_TRAVEL_ENGINE_POST_TYPE ) || is_tax( $all_taxonomies ) ){
+			if ( is_post_type_archive( WP_TRAVEL_ENGINE_POST_TYPE ) || is_tax( $all_taxonomies ) ) {
 				TripSearch::enqueue_assets();
 			}
 
@@ -66,27 +62,25 @@ class Template {
 
 		if ( is_singular( WP_TRAVEL_ENGINE_POST_TYPE ) ) {
 			if ( ! $optimized_loading ) {
-				Assets::instance()->enqueue_script( 'trip-booking-modal' )
+				Assets::instance()
 					->enqueue_script( 'wte-fpickr-lib' )
 					->enqueue_script( 'wp-api-request' )
 					->enqueue_script( 'wte-redux' )
-					->enqueue_style( 'style-trip-booking-modal' )
 					->enqueue_style( 'wte-fpickr' );
 			}
 			Assets::instance()
-			      ->dequeue_script( 'comment-reply' )
-			      ->dequeue_script( 'wp-travel-engine' )
-			      ->dequeue_script( 'wte-extra-services' )
-			      ->dequeue_script( 'wp-travel-engine-group-discount' )
-			      ->dequeue_style( 'wp-travel-engine' )
-			      ->dequeue_style( 'wte-extra-services' )
-			      ->dequeue_style( 'wp-travel-engine-group-discount' )
-			      ->enqueue_script( 'wp-api-request' )
-			      ->enqueue_script( 'single-trip' )
-			      ->enqueue_style( 'single-trip' )
-			      ->enqueue_style( 'style-trip-booking-modal' );
+					->dequeue_script( 'comment-reply' )
+					->dequeue_script( 'wp-travel-engine' )
+					->dequeue_script( 'wte-extra-services' )
+					->dequeue_script( 'wp-travel-engine-group-discount' )
+					->dequeue_style( 'wp-travel-engine' )
+					->dequeue_style( 'wte-extra-services' )
+					->dequeue_style( 'wp-travel-engine-group-discount' )
+					->enqueue_script( 'wp-api-request' )
+					->enqueue_script( 'single-trip' )
+					->enqueue_style( 'single-trip' );
 			$template_path = wte_locate_template( 'single-trip.php' );
-		} else if ( is_post_type_archive( WP_TRAVEL_ENGINE_POST_TYPE ) ) {
+		} elseif ( is_post_type_archive( WP_TRAVEL_ENGINE_POST_TYPE ) ) {
 			TripSearch::enqueue_assets();
 			$template_path = wte_locate_template( 'archive-trip.php' );
 		} else {
@@ -102,7 +96,7 @@ class Template {
 			}
 		}
 
-		if( wp_travel_engine_is_account_page() ) {
+		if ( wp_travel_engine_is_account_page() ) {
 			Assets::instance()
 				->dequeue_script( 'wp-travel-engine' )
 				->dequeue_style( 'wp-travel-engine' )
@@ -124,7 +118,7 @@ class Template {
 			$elementor_page = \Elementor\Plugin::$instance->documents->get( $post->ID );
 			if ( $elementor_page ) {
 				$settings = $elementor_page->get_properties() ?? false;
-				if ( $settings && $elementor_page->is_built_with_elementor() && isset( $settings[ 'support_wp_page_templates' ] ) ) {
+				if ( $settings && $elementor_page->is_built_with_elementor() && isset( $settings['support_wp_page_templates'] ) ) {
 					Assets::instance()->enqueue_script( 'wp-travel-engine' )->enqueue_style( 'wp-travel-engine' );
 					wp_enqueue_style( 'wte-blocks-index' );
 				}
@@ -147,11 +141,11 @@ class Template {
 			$custom_template = wte_locate_template( $template_slug );
 			if ( file_exists( $custom_template ) ) {
 				Assets::instance()
-				      ->enqueue_script( 'trip-checkout' )
-				      ->enqueue_style( 'trip-checkout' )
-				      ->enqueue_script( 'parsley' )
-				      ->dequeue_script( 'wp-travel-engine' )
-				      ->dequeue_style( 'wp-travel-engine' );
+						->enqueue_script( 'trip-checkout' )
+						->enqueue_style( 'trip-checkout' )
+						->enqueue_script( 'parsley' )
+						->dequeue_script( 'wp-travel-engine' )
+						->dequeue_style( 'wp-travel-engine' );
 
 				$checkout_page   = new \WPTravelEngine\Pages\Checkout( $wte_cart );
 				$tour_details    = $checkout_page->get_tour_details();
@@ -159,11 +153,13 @@ class Template {
 
 				$wptravelengine_template_args = array_merge(
 					$wptravelengine_template_args,
-					wptravelengine_get_checkout_template_args( [
-						'tour_details'    => $tour_details,
-						'cart_line_items' => $cart_line_items,
-						'has_cart_items'  => count( $wte_cart->getItems() ) > 0,
-					] )
+					wptravelengine_get_checkout_template_args(
+						array(
+							'tour_details'    => $tour_details,
+							'cart_line_items' => $cart_line_items,
+							'has_cart_items'  => count( $wte_cart->getItems() ) > 0,
+						)
+					)
 				);
 
 				return $custom_template;
@@ -179,18 +175,18 @@ class Template {
 	 * @return boolean true if traveller emergency information should be hidden, false otherwise.
 	 */
 	public function modify_traveller_emergency_form() {
-		$settings = get_option('wp_travel_engine_settings', []);
-        $checkout_template = $settings['checkout_page_template'] ?? '1.0';
+		$settings          = get_option( 'wp_travel_engine_settings', array() );
+		$checkout_template = $settings['checkout_page_template'] ?? '1.0';
 
-        if ( $checkout_template == '1.0' ) {
+		if ( $checkout_template == '1.0' ) {
 			return wptravelengine_replace( $settings['travelers_information'], 'no', false, true );
-        }
+		}
 
-        if ( $checkout_template == '2.0' ) {
-			return !( wptravelengine_toggled( $settings['display_travellers_info'] ) && wptravelengine_replace( $settings['traveller_emergency_details_form'], 'after_checkout', true, false ) );
-        }
+		if ( $checkout_template == '2.0' ) {
+			return ! ( wptravelengine_toggled( $settings['display_travellers_info'] ) && wptravelengine_replace( $settings['traveller_emergency_details_form'], 'after_checkout', true, false ) );
+		}
 
-        return false;
+		return false;
 	}
 
 	/**
@@ -199,17 +195,16 @@ class Template {
 	 * @return string 'yes' if traveller information should be hidden, false otherwise.
 	 */
 	public function modify_traveller_form() {
-		$wptravelengine_settings          = get_option( 'wp_travel_engine_settings', [] );
-		$checkout_page_template           = $wptravelengine_settings[ 'checkout_page_template' ] ?? '1.0';
-		$is_enabled_travellers_info       = $wptravelengine_settings[ 'display_travellers_info' ] ?? 'no';
-		$traveller_emergency_details_form = $wptravelengine_settings[ 'traveller_emergency_details_form' ] ?? 'after_checkout';
+		$wptravelengine_settings          = get_option( 'wp_travel_engine_settings', array() );
+		$checkout_page_template           = $wptravelengine_settings['checkout_page_template'] ?? '1.0';
+		$is_enabled_travellers_info       = $wptravelengine_settings['display_travellers_info'] ?? 'no';
+		$traveller_emergency_details_form = $wptravelengine_settings['traveller_emergency_details_form'] ?? 'after_checkout';
 
 		if ( $checkout_page_template == '2.0' && $traveller_emergency_details_form == 'on_checkout' && $is_enabled_travellers_info == 'yes' ) {
 			return 'yes';
 		}
 
 		return 'no';
-
 	}
 
 	/**
@@ -218,20 +213,19 @@ class Template {
 	 * @return boolean true if traveller emergency information should be hidden, false otherwise.
 	 */
 	public function modify_emergency_form() {
-        $settings = get_option('wp_travel_engine_settings', []);
-        $checkout_template = $settings['checkout_page_template'] ?? '1.0';
+		$settings          = get_option( 'wp_travel_engine_settings', array() );
+		$checkout_template = $settings['checkout_page_template'] ?? '1.0';
 
-        // Handle legacy checkout template (1.0).
-        if ( $checkout_template == '1.0' ) {
-			return wptravelengine_replace( $settings['emergency'], '1', true , false );
-        }
+		// Handle legacy checkout template (1.0).
+		if ( $checkout_template == '1.0' ) {
+			return wptravelengine_replace( $settings['emergency'], '1', true, false );
+		}
 
-        // Handle new checkout template (2.0).
-        if ($checkout_template == '2.0') {
-			return !( wptravelengine_toggled( $settings['display_emergency_contact'] ) && wptravelengine_toggled( $settings['display_travellers_info'] ) && in_array( $settings['traveller_emergency_details_form'] ?? 'after_checkout', ['on_checkout', 'after_checkout'] ) );
-        }
+		// Handle new checkout template (2.0).
+		if ( $checkout_template == '2.0' ) {
+			return ! ( wptravelengine_toggled( $settings['display_emergency_contact'] ) && wptravelengine_toggled( $settings['display_travellers_info'] ) && in_array( $settings['traveller_emergency_details_form'] ?? 'after_checkout', array( 'on_checkout', 'after_checkout' ) ) );
+		}
 
-        return false;
-    }
-
+		return false;
+	}
 }

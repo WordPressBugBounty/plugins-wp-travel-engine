@@ -7,7 +7,7 @@
 
 namespace WPTravelEngine\Core\Cart\Items;
 
-use WPTravelEngine\Abstracts\CartItem as CartItem;
+use WPTravelEngine\Abstracts\CartItem;
 
 class ExtraService extends CartItem {
 
@@ -15,6 +15,4 @@ class ExtraService extends CartItem {
 	 * @inheritdoc
 	 */
 	public string $item_type = 'extra_service';
-
-
 }

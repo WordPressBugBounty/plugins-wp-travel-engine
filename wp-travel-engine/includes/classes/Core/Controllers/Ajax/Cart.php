@@ -17,9 +17,9 @@ use WPTravelEngine\Core\Controllers\Checkout;
  */
 class Cart extends AjaxController {
 
-	const NONCE_KEY = '_nonce';
+	const NONCE_KEY    = '_nonce';
 	const NONCE_ACTION = 'wp_xhr';
-	const ACTION = 'wptravelengine_cart';
+	const ACTION       = 'wptravelengine_cart';
 
 	/**
 	 * Process Request.
@@ -35,7 +35,6 @@ class Cart extends AjaxController {
 			default:
 				wp_send_json_error( new WP_Error( 'INVALID_CART_ACTION', __( 'Invalid cart action.', 'wp-travel-engine' ) ) );
 		}
-
 	}
 
 	/**
@@ -44,8 +43,8 @@ class Cart extends AjaxController {
 	protected function change_payment_type() {
 		global $wte_cart;
 
-		$payment_type    = $this->request->get_param( 'data' )[ 'payment_type' ] ?? 'full_payment';
-		$payment_gateway = $this->request->get_param( 'data' )[ 'payment_gateway' ] ?? 'booking_only';
+		$payment_type    = $this->request->get_param( 'data' )['payment_type'] ?? 'full_payment';
+		$payment_gateway = $this->request->get_param( 'data' )['payment_gateway'] ?? 'booking_only';
 
 		wptravelengine_update_cart( compact( 'payment_type', 'payment_gateway' ) );
 
@@ -53,13 +52,13 @@ class Cart extends AjaxController {
 		ob_start();
 		$checkout->template_mini_cart();
 		$mini_cart_contents = ob_get_clean();
-		wp_send_json_success( [
-			'message'   => __( 'Payment type updated successfully.', 'wp-travel-engine' ),
-			'fragments' => [
-				'.wpte-bf-book-summary' => $mini_cart_contents,
-			],
-		] );
-
+		wp_send_json_success(
+			array(
+				'message'   => __( 'Payment type updated successfully.', 'wp-travel-engine' ),
+				'fragments' => array(
+					'.wpte-bf-book-summary' => $mini_cart_contents,
+				),
+			)
+		);
 	}
-
 }

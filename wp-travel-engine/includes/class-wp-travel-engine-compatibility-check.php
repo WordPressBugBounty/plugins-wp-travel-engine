@@ -105,7 +105,7 @@ class WP_Travel_Engine_Compatibility_Check {
 
 		$incompatibile_addons = array_filter(
 			$this->addons_list(),
-			function( $addon ) {
+			function ( $addon ) {
 
 				if ( ! function_exists( 'get_plugin_data' ) ) {
 					require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -122,7 +122,6 @@ class WP_Travel_Engine_Compatibility_Check {
 
 			endif;
 				return false;
-
 			}
 		);
 
@@ -137,7 +136,7 @@ class WP_Travel_Engine_Compatibility_Check {
 	public function updated_addons_actives() {
 		$incompatibile_addons = array_filter(
 			$this->updated_addons(),
-			function( $addon ) {
+			function ( $addon ) {
 
 				if ( ! function_exists( 'get_plugin_data' ) ) {
 					require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -154,7 +153,6 @@ class WP_Travel_Engine_Compatibility_Check {
 
 			endif;
 				return false;
-
 			}
 		);
 

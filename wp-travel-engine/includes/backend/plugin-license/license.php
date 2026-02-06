@@ -14,7 +14,7 @@ $licensed_addons  = wptravelengine_get_licensed_addons();
 			<?php settings_fields( 'wp_travel_engine_license' ); ?>
 			<div class="wpte-tab-wrap">
 				<a href="javascript:void(0);"
-				   class="wpte-tab wte-addons current"><?php esc_html_e( 'WP Travel Engine Addons', 'wp-travel-engine' ); ?></a>
+					class="wpte-tab wte-addons current"><?php esc_html_e( 'WP Travel Engine Addons', 'wp-travel-engine' ); ?></a>
 			</div>
 
 			<div class="wpte-tab-content-wrap">
@@ -43,9 +43,9 @@ $licensed_addons  = wptravelengine_get_licensed_addons();
 								if ( $addon->valid() ) {
 									$activation_message = sprintf( __( 'Your license key for %1$s addon is activated on this site.', 'wp-travel-engine' ), $addon->item_name );
 									$msg_color          = 'style=color:#11b411;';
-								} else if ( ! empty( $addon->license() ) ) {
-									$activation_message = isset( $_GET[ 'wte_license_error_msg' ] ) && $_GET[ 'wte_addon_name' ] === $addon->slug
-										? sanitize_text_field( wp_unslash( $_GET[ 'wte_license_error_msg' ] ) )
+								} elseif ( ! empty( $addon->license() ) ) {
+									$activation_message = isset( $_GET['wte_license_error_msg'] ) && $_GET['wte_addon_name'] === $addon->slug
+										? sanitize_text_field( wp_unslash( $_GET['wte_license_error_msg'] ) )
 										: sprintf(
 											__(
 												'Your license key for %1$s addon is not activated on this site yet. Please activate.',
@@ -55,10 +55,13 @@ $licensed_addons  = wptravelengine_get_licensed_addons();
 										); // phpcs:ignore
 									$msg_color          = 'style=color:#f66757;';
 								}
-								wptravelengine_view( __DIR__ . '/license-field.php', array(
-									'license' => $addon,
-									'message' => $activation_message,
-								) );
+								wptravelengine_view(
+									__DIR__ . '/license-field.php',
+									array(
+										'license' => $addon,
+										'message' => $activation_message,
+									)
+								);
 								continue;
 							}
 
@@ -76,7 +79,7 @@ $licensed_addons  = wptravelengine_get_licensed_addons();
 							if ( $license_status->license === 'valid' ) {
 								$activation_message = sprintf( __( 'Your license key for %1$s addon is activated on this site.', 'wp-travel-engine' ), $addon->title );
 								$msg_color          = 'style=color:#11b411;';
-							} else if ( ! empty( $addon->{'license_key'} ) ) {
+							} elseif ( ! empty( $addon->{'license_key'} ) ) {
 								$activation_message = isset( $_GET[ 'wte_license_error_msg' ] ) && $_GET[ 'wte_addon_name' ] === $addon->slug ? sanitize_text_field( wp_unslash( $_GET[ 'wte_license_error_msg' ] ) ) : sprintf( __( 'Your license key for %1$s addon is not activated on this site yet. Please activate.', 'wp-travel-engine' ), $addon->title ); // phpcs:ignore
 								$msg_color          = 'style=color:#f66757;';
 							}
@@ -86,10 +89,10 @@ $licensed_addons  = wptravelengine_get_licensed_addons();
 									for="wp_travel_engine_license[<?php echo esc_attr( $addon->slug ); ?>_license_key]"
 									class="wpte-field-label"><?php echo esc_html( $addon->title ); ?></label>
 								<input id="<?php echo esc_attr( $addon->slug ); ?>"
-									   class="wp_travel_engine_addon_license_key"
-									   name="wp_travel_engine_license[<?php echo esc_attr( $addon->slug ); ?>_license_key]"
-									   type="text" class="regular-text"
-									   value="<?php echo esc_attr( $addon->license_key ); ?>" />
+										class="wp_travel_engine_addon_license_key"
+										name="wp_travel_engine_license[<?php echo esc_attr( $addon->slug ); ?>_license_key]"
+										type="text" class="regular-text"
+										value="<?php echo esc_attr( $addon->license_key ); ?>" />
 								<?php if ( 'valid' == $license_status->license ) : ?>
 									<span class="wte-license-active">
 										<?php wptravelengine_svg_by_fa_icon( 'fas fa-check' ); ?>
@@ -101,13 +104,13 @@ $licensed_addons  = wptravelengine_get_licensed_addons();
 								<div class="wpte-btn-wrap">
 									<?php if ( $license_status->license == 'valid' ) { ?>
 										<input type="submit" class="wpte-btn wpte-btn-deactive deactivate-license"
-											   data-id="<?php echo esc_attr( $addon->slug ); ?>"
-											   name="edd_license_deactivate"
-											   value="<?php echo 'Deactivate License'; ?>" />
-									<?php } else if ( ! empty( $addon->{'license_key'} ) ) { ?>
+												data-id="<?php echo esc_attr( $addon->slug ); ?>"
+												name="edd_license_deactivate"
+												value="<?php echo esc_attr__( 'Deactivate License', 'wp-travel-engine' ); ?>" />
+									<?php } elseif ( ! empty( $addon->{'license_key'} ) ) { ?>
 										<input type="submit" class="wpte-btn wpte-btn-active activate-license"
-											   data-id="<?php echo esc_attr( $addon->slug ); ?>"
-											   name="edd_license_activate" value="<?php echo 'Activate License'; ?>" />
+												data-id="<?php echo esc_attr( $addon->slug ); ?>"
+												name="edd_license_activate" value="<?php echo esc_attr__( 'Activate License', 'wp-travel-engine' ); ?>" />
 									<?php } ?>
 								</div>
 								<span <?php echo esc_html( $msg_color ); ?> class="wpte-tooltip"><?php echo esc_html( $activation_message ); ?></span>
@@ -117,12 +120,12 @@ $licensed_addons  = wptravelengine_get_licensed_addons();
 				</div>
 			</div>
 			<div class="wpte-field wpte-submit"
-				 style="text-align:<?php echo count( $addon_name ) > 0 ? 'right' : 'left'; ?>;">
+				style="text-align:<?php echo count( $addon_name ) > 0 ? 'right' : 'left'; ?>;">
 				<?php
 				if ( count( $licensed_addons ) > 0 ) {
 					?>
 					<input id="submit" type="submit" name="submit"
-						   value="<?php echo esc_attr__( 'Save Changes', 'wp-travel-engine' ); ?>">
+							value="<?php echo esc_attr__( 'Save Changes', 'wp-travel-engine' ); ?>">
 					<?php
 				} else {
 					echo '<a target="_blank" href="https://wptravelengine.com/plugins/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro" class="wpte-link-btn">' . esc_html__( 'Get Now', 'wp-travel-engine' ) . '</a>';

@@ -14,6 +14,7 @@ class UpcomingToursDetails extends AjaxController {
 	const NONCE_KEY    = 'nonce';
 	const NONCE_ACTION = 'wte_upcoming_tours_details';
 	const ACTION       = 'wte_upcoming_tours_details';
+	const ALLOW_NOPRIV = false;
 
 
 	/**

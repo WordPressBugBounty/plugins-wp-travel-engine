@@ -1,13 +1,13 @@
 <?php
-if (isset($_POST['_wpnonce'])) {
-	$nonce_value = sanitize_text_field(wp_unslash($_POST['_wpnonce']));
+if ( isset( $_POST['_wpnonce'] ) ) {
+	$nonce_value = sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) );
 }
 
-if (isset($_POST['wp-travel-engine-register-nonce'])) {
-	$nonce_value = sanitize_text_field(wp_unslash($_POST['wp-travel-engine-register-nonce']));
+if ( isset( $_POST['wp-travel-engine-register-nonce'] ) ) {
+	$nonce_value = sanitize_text_field( wp_unslash( $_POST['wp-travel-engine-register-nonce'] ) );
 }
 
-if (! empty($_POST['register']) && wp_verify_nonce($nonce_value, 'wp-travel-engine-register')) {
+if ( ! empty( $_POST['register'] ) && wp_verify_nonce( $nonce_value, 'wp-travel-engine-register' ) ) {
 	$login_text = 'style=display:block';
 	$reg_text   = 'style=display:none';
 } else {
@@ -15,56 +15,57 @@ if (! empty($_POST['register']) && wp_verify_nonce($nonce_value, 'wp-travel-engi
 	$reg_text   = 'style=display:none';
 }
 
-$wp_travel_engine_settings = get_option('wp_travel_engine_settings', true);
-$enable_social_login       = isset($wp_travel_engine_settings['enable_social_login']) && 'yes' === $wp_travel_engine_settings['enable_social_login'];
-$enable_google_login       = isset($wp_travel_engine_settings['enable_google_login']) && 'yes' === $wp_travel_engine_settings['enable_google_login'];
-$enable_facebook_login     = isset($wp_travel_engine_settings['enable_facebook_login']) && 'yes' === $wp_travel_engine_settings['enable_facebook_login'];
-$enable_linkedin_login     = isset($wp_travel_engine_settings['enable_linkedin_login']) && 'yes' === $wp_travel_engine_settings['enable_linkedin_login'];
+$wp_travel_engine_settings = get_option( 'wp_travel_engine_settings', true );
+$enable_social_login       = isset( $wp_travel_engine_settings['enable_social_login'] ) && 'yes' === $wp_travel_engine_settings['enable_social_login'];
+$enable_google_login       = isset( $wp_travel_engine_settings['enable_google_login'] ) && 'yes' === $wp_travel_engine_settings['enable_google_login'];
+$enable_facebook_login     = isset( $wp_travel_engine_settings['enable_facebook_login'] ) && 'yes' === $wp_travel_engine_settings['enable_facebook_login'];
+$enable_linkedin_login     = isset( $wp_travel_engine_settings['enable_linkedin_login'] ) && 'yes' === $wp_travel_engine_settings['enable_linkedin_login'];
 $settings                  = wptravelengine_settings()->get();
 
 
-if ($enable_social_login) {
-?>
+if ( $enable_social_login ) {
+	?>
 	<div class="wte-social-login-wrapper">
 		<?php
-		if ($enable_facebook_login && (isset($wp_travel_engine_settings['facebook_client_id']) && $wp_travel_engine_settings['facebook_client_id'] != '' && $wp_travel_engine_settings['facebook_client_secret'] != '')) {
-		?>
+		if ( $enable_facebook_login && ( isset( $wp_travel_engine_settings['facebook_client_id'] ) && $wp_travel_engine_settings['facebook_client_id'] != '' && $wp_travel_engine_settings['facebook_client_secret'] != '' ) ) {
+			?>
 			<a href="<?php echo site_url(); ?>/wp-login.php?wte_login=facebook" class="login-with-facebook">
 				<span class="social-icon">
 					<svg>
 						<use xlink:href="#facebook-logo"></use>
 					</svg>
 				</span>
-				<span class="social-label wpte-login" <?php echo esc_html($login_text); ?>><?php esc_html_e('Continue with Facebook', 'wp-travel-engine'); ?></span>
-				<span class="social-label wpte-register" <?php echo esc_html($reg_text); ?>><?php esc_html_e('Signup with Facebook', 'wp-travel-engine'); ?></span>
+				<span class="social-label wpte-login" <?php echo esc_html( $login_text ); ?>><?php esc_html_e( 'Continue with Facebook', 'wp-travel-engine' ); ?></span>
+				<span class="social-label wpte-register" <?php echo esc_html( $reg_text ); ?>><?php esc_html_e( 'Signup with Facebook', 'wp-travel-engine' ); ?></span>
 			</a>
-		<?php
+			<?php
 		}
-		if ($enable_google_login && (isset($wp_travel_engine_settings['google_client_id']) && $wp_travel_engine_settings['google_client_id'] != '' && $wp_travel_engine_settings['google_client_secret'] != '')) {
-		?>
+		if ( $enable_google_login && ( isset( $wp_travel_engine_settings['google_client_id'] ) && $wp_travel_engine_settings['google_client_id'] != '' && $wp_travel_engine_settings['google_client_secret'] != '' ) ) {
+			?>
 			<a href="<?php echo site_url(); ?>/wp-login.php?wte_login=google" class="login-with-google">
 				<span class="social-icon">
 					<svg>
 						<use xlink:href="#google-logo"></use>
 					</svg>
 				</span>
-				<span class="social-label wpte-login" <?php echo esc_html($login_text); ?>><?php esc_html_e('Continue with Google', 'wp-travel-engine'); ?></span>
-				<span class="social-label wpte-register" <?php echo esc_html($reg_text); ?>><?php esc_html_e('Signup with Google', 'wp-travel-engine'); ?></span>
+				<span class="social-label wpte-login" <?php echo esc_html( $login_text ); ?>><?php esc_html_e( 'Continue with Google', 'wp-travel-engine' ); ?></span>
+				<span class="social-label wpte-register" <?php echo esc_html( $reg_text ); ?>><?php esc_html_e( 'Signup with Google', 'wp-travel-engine' ); ?></span>
 			</a>
-		<?php
+			<?php
 		}
-		if ($enable_linkedin_login && (isset($wp_travel_engine_settings['linkedin_client_id']) && $wp_travel_engine_settings['linkedin_client_id'] != '' && $wp_travel_engine_settings['linkedin_client_secret'] != '')) {
-		?>
+		if ( $enable_linkedin_login && ( isset( $wp_travel_engine_settings['linkedin_client_id'] ) && $wp_travel_engine_settings['linkedin_client_id'] != '' && $wp_travel_engine_settings['linkedin_client_secret'] != '' ) ) {
+			?>
 			<a href="<?php echo site_url(); ?>/wp-login.php?wte_login=linkedin" class="login-with-linkedin">
 				<span class="social-icon">
 					<svg>
 						<use xlink:href="#linkedin"></use>
 					</svg>
 				</span>
-				<span class="social-label wpte-login" <?php echo esc_html($login_text); ?>><?php esc_html_e('Continue with LinkedIn', 'wp-travel-engine'); ?></span>
-				<span class="social-label wpte-register" <?php echo esc_html($reg_text); ?>><?php esc_html_e('Signup with LinkedIn', 'wp-travel-engine'); ?></span>
+				<span class="social-label wpte-login" <?php echo esc_html( $login_text ); ?>><?php esc_html_e( 'Continue with LinkedIn', 'wp-travel-engine' ); ?></span>
+				<span class="social-label wpte-register" <?php echo esc_html( $reg_text ); ?>><?php esc_html_e( 'Signup with LinkedIn', 'wp-travel-engine' ); ?></span>
 			</a>
-		<?php }
+			<?php
+		}
 		?>
 	</div>
 	<svg width="0" height="0" class="hidden">
@@ -96,5 +97,5 @@ if ($enable_social_login) {
 			</defs>
 		</symbol>
 	</svg>
-<?php
+	<?php
 }
