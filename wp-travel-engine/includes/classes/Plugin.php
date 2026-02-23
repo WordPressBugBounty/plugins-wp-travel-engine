@@ -15,7 +15,6 @@ use WPTravelEngine\Core\Controllers\RestAPI\V2\Settings;
 use WPTravelEngine\Core\Controllers\RestAPI\V2\Trip;
 use WPTravelEngine\Core\Models\Post\Booking;
 use WPTravelEngine\Core\Models\Review;
-use WPTravelEngine\Core\Models\Settings\Options;
 use WPTravelEngine\Core\Shortcodes\CheckoutV2;
 use WPTravelEngine\Core\Shortcodes\General;
 use WPTravelEngine\Core\Shortcodes\ThankYou;
@@ -164,6 +163,9 @@ final class Plugin {
 
 		// SEO.
 		new SEO();
+
+		// Register shutdown handler for automatic error capture (zero overhead).
+		Logger\ErrorHandlers\ShutdownErrorHandler::register();
 
 		$this->set_class_aliases();
 	}
@@ -381,6 +383,20 @@ final class Plugin {
 		$this->add_init_hooks();
 
 		add_filter( 'is_wptravelengine_active', '__return_true' );
+
+		/**
+		 * Add query vars.
+		 *
+		 * @since 6.7.6
+		 */
+		add_filter(
+			'query_vars',
+			function ( $vars ) {
+				$vars[] = 'wte_id';
+				$vars[] = 'payment_key';
+				return $vars;
+			}
+		);
 
 		add_action( 'wp_footer', array( $this, 'add_booking_modal_container' ) );
 

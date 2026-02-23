@@ -817,6 +817,30 @@ class Functions {
 	}
 
 	/**
+	 * Add "None" as first option to a select field options array (DRY for form fields).
+	 *
+	 * @param array $options       Select field options (key => label).
+	 * @param bool  $skip_sentinel If true, when __skip_none_option__ is present, remove it and return without adding "None".
+	 * @return array Modified options array.
+	 * @since 6.7.6
+	 */
+	public static function add_none_option_to_select( array $options, bool $skip_sentinel = false ): array {
+		$has_skip_sentinel = isset( $options['__skip_none_option__'] );
+		if ( $has_skip_sentinel ) {
+			unset( $options['__skip_none_option__'] );
+			if ( $skip_sentinel ) {
+				return $options;
+			}
+		}
+
+		if ( ! empty( $options ) && ! array_key_exists( '', $options ) ) {
+			return array( '' => __( 'None', 'wp-travel-engine' ) ) + $options;
+		}
+
+		return $options;
+	}
+
+	/**
 	 * @param $code string Country code.
 	 *
 	 * @return false|string

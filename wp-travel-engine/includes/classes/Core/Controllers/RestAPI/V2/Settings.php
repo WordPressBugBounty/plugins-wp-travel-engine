@@ -149,8 +149,8 @@ class Settings {
 				'id'        => (int) $trip_tabs['id'][ $id ],
 				'name'      => (string) $trip_tabs['name'][ $id ],
 				'field'     => (string) $trip_tabs['field'][ $id ],
-				'icon'      => (array) $trip_tabs['icon'][ $id ],
-				'enable'    => wptravelengine_toggled( $trip_tabs['enable'][ $id ] ),
+				'icon'      => (array) ( $trip_tabs['icon'][ $id ] ?? array_fill_keys( array( 'icon', 'view_box', 'path' ), '' ) ),
+				'enable'    => wptravelengine_toggled( $trip_tabs['enable'][ $id ] ?? false ),
 				// @TODO: This is not safe condition check.
 				'trashable' => $id !== 1 && $trip_tabs['field'][ $id ] == 'wp_editor',
 			);

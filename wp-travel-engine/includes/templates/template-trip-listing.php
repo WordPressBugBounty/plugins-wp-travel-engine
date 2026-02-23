@@ -134,6 +134,7 @@ if ( defined( 'WTE_FIXED_DEPARTURE_VERSION' ) && in_array(
 \Wp_Travel_Engine_Archive_Hooks::$query = $wte_trip_tax_post_qry = new WP_Query( $wte_trip_tax_post_args );
 global $post;
 if ( $wte_trip_tax_post_qry->have_posts() ) :
+	$show_sidebar = wptravelengine_toggled( get_option( 'wptravelengine_show_trip_search_sidebar', 'yes' ) );
 	?>
 
 	<div id="wp-travel-trip-wrapper" class="trip-content-area container" itemscope itemtype="https://schema.org/ItemList">
@@ -165,7 +166,9 @@ if ( $wte_trip_tax_post_qry->have_posts() ) :
 				 *
 				 * @hooked wte_advanced_search_archive_sidebar - Trip Search addon
 				 */
-				do_action( 'wp_travel_engine_archive_sidebar' );
+				if ( $show_sidebar ) {
+					do_action( 'wp_travel_engine_archive_sidebar' );
+				}
 				?>
 				<div class="wp-travel-engine-archive-repeater-wrap">
 					<?php

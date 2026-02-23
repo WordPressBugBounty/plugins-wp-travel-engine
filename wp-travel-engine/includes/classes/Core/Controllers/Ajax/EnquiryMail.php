@@ -37,7 +37,19 @@ class EnquiryMail extends AjaxController {
 	protected function sanitize_form_data( array $data ): array {
 		$form_fields    = WTE_Default_Form_Fields::enquiry();
 		$sanitized_data = array();
+
+		// Do not store validation-only fields (e.g. recaptcha) in enquiry data.
+		$validation_only_types = apply_filters(
+			'wptravelengine_enquiry_validation_only_field_types',
+			array( 'recaptcha', 'captcha', 'grecaptcha_v2', 'grecaptcha_v3' )
+		);
+		$validation_only_types = array_map( 'strtolower', (array) $validation_only_types );
+
 		foreach ( $form_fields as $form_field ) {
+			if ( ! empty( $form_field['type'] ) && in_array( strtolower( (string) $form_field['type'] ), $validation_only_types, true ) ) {
+				continue;
+			}
+
 			if ( isset( $form_field['validations']['required'] ) && $form_field['validations']['required'] == 'true' && empty( $data[ $form_field['name'] ] ) ) {
 				throw new Exception( sprintf( __( 'Missing required fields: %s', 'wp-travel-engine' ), $form_field['field_label'] ) );
 			}

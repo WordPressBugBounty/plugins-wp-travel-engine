@@ -50,7 +50,7 @@ class EmergencyEditFormFields extends BookingEditFormFields {
 		if ( $name ) {
 			$field['name']                    = sprintf( 'emergency_contacts[%s][]', $name );
 			$field['id']                      = sprintf( 'emergency_contacts_%s', $name );
-			$field['field_label']             = isset( $field['placeholder'] ) && $field['placeholder'] !== '' ? $field['placeholder'] : $field['field_label'];
+			$field['field_label']             = isset( $field['placeholder'] ) && $field['placeholder'] !== '' ? $field['placeholder'] : ( $field['field_label'] ?? '' );
 			$field['default']                 = $this->defaults[ $name ] ?? $field['default'] ?? '';
 			$field['validations']['required'] = false;
 			// Convert country code to country name to show in the emergency form.
@@ -76,7 +76,7 @@ class EmergencyEditFormFields extends BookingEditFormFields {
 			);
 		}
 
-		if ( static::$mode !== 'edit' ) {
+		if ( static::$mode !== 'edit' && ! ( $field['skip_disabled'] ?? false ) ) {
 			$field['option_attributes'] = array(
 				'disabled' => 'disabled',
 			);

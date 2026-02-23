@@ -67,6 +67,23 @@ class WTE_Ajax {
 		$ajax_registry->register( Ajax\UserWishlist::class );
 		$ajax_registry->register( Ajax\LoadMoreDestination::class );
 
+		/**
+		 * Button Field Actions
+		 *
+		 * @since 6.7.6
+		 */
+		$ajax_registry->register( Ajax\AdminButtonAction::class );
+		$ajax_registry->register( Ajax\PublicButtonAction::class );
+
+		/**
+		 * Logger AJAX Controllers
+		 *
+		 * @since 6.7.6
+		 */
+		$ajax_registry->register( Ajax\ClearLogs::class );
+		$ajax_registry->register( Ajax\DownloadLog::class );
+		$ajax_registry->register( Ajax\SendLogSupport::class );
+
 		add_action(
 			'wp_ajax_nopriv_email_test',
 			function () {

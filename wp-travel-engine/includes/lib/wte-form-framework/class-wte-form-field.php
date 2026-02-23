@@ -153,6 +153,10 @@ class WP_Travel_Engine_Form_Field {
 				'field_label' => __( 'Trips Select', 'wp-travel-engine' ),
 				'field_class' => 'WP_Travel_Engine_Form_Field_Trips_Select',
 			),
+			'button'           => array(
+				'field_label' => __( 'Button', 'wp-travel-engine' ),
+				'field_class' => 'WP_Travel_Engine_Form_Field_Button',
+			),
 		);
 
 		return apply_filters( 'wp_travel_engine_form_field_types', $field_types );

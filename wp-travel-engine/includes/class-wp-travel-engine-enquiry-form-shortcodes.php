@@ -199,7 +199,7 @@ class WP_Travel_Engine_Enquiry_Form_Shortcodes {
 					<?php
 						do_action( 'wte_enquiry_contact_form_before_submit_button' );
 					?>
-					<input type="submit" class="enquiry-submit" name="enquiry_submit_button" id="enquiry_submit_button" value="<?php echo esc_attr__( 'Send Email', 'wp-travel-engine' ); ?>">
+					<button type="submit" class="wpte-button enquiry-submit" name="enquiry_submit_button" id="enquiry_submit_button"><?php echo esc_attr__( 'Send Email', 'wp-travel-engine' ); ?></button>
 					<?php
 					do_action( 'wte_enquiry_contact_form_after_submit_button' );
 					?>

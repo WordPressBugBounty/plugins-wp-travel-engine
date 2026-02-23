@@ -18,9 +18,17 @@
 		</td>
 	</tr>
 	<?php
+	$enquiry_display       = wptravelengine_get_enquiry_form_field_map( isset( $args['package_id'] ) ? absint( $args['package_id'] ) : 0 );
+	$enquiry_field_map     = $enquiry_display['field_map'];
+	$validation_only_types = $enquiry_display['validation_only_types'];
+
 	foreach ( $args as $key => $data ) :
+		if ( wptravelengine_enquiry_should_hide_field( $key, $enquiry_field_map, $validation_only_types ) ) {
+			continue;
+		}
+
 			$data        = is_array( $data ) ? implode( ', ', $data ) : $data;
-			$field_label = wp_travel_engine_get_enquiry_field_label_by_name( $key );
+			$field_label = wptravelengine_enquiry_get_field_display_label( $key, $enquiry_field_map );
 		?>
 		<tr>
 			<td style="color: #566267;"><?php echo esc_html( $field_label ); ?></td>

@@ -1336,6 +1336,8 @@ class Booking extends PostModel {
 			'total_exclusive' => '0',
 			'total_discount'  => '0',
 			'due_exclusive'   => '0',
+			'payable'         => '0',
+			'extra_charges'   => '0',
 		);
 		$payments  = array();
 		$fee_types = $this->get_fee_types();
@@ -1388,8 +1390,10 @@ class Booking extends PostModel {
 				);
 			}
 
-			$payments[ $p_id ]['total']   = (string) $payment->get_amount();
-			$payments[ $p_id ]['deposit'] = (string) ( $cart_totals['deposit'] ?? '0.00' );
+			$payments[ $p_id ]['total']         = (string) $payment->get_amount();
+			$payments[ $p_id ]['deposit']       = (string) ( $cart_totals['deposit'] ?? '0.00' );
+			$payments[ $p_id ]['payable']       = (string) ( $cart_totals['payable_now'] ?? '0.00' );
+			$payments[ $p_id ]['extra_charges'] = (string) ( $cart_totals['total_extra_charges'] ?? '0.00' );
 
 			$totals['total_paid']    = $calculator->add(
 				$totals['total_paid'] ?? '0.00',
@@ -1398,6 +1402,14 @@ class Booking extends PostModel {
 			$totals['total_deposit'] = $calculator->add(
 				$totals['total_deposit'] ?? '0.00',
 				$payments[ $p_id ]['deposit']
+			);
+			$totals['payable']       = $calculator->add(
+				$totals['payable'] ?? '0.00',
+				$payments[ $p_id ]['payable']
+			);
+			$totals['extra_charges'] = $calculator->add(
+				$totals['extra_charges'] ?? '0.00',
+				$payments[ $p_id ]['extra_charges']
 			);
 		}
 

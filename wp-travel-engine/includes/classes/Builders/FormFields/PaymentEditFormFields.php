@@ -91,6 +91,25 @@ class PaymentEditFormFields extends BookingEditFormFields {
 				foreach ( $diff_fields as $slug => $label ) {
 					$fields[ $slug ] = $this->get_default_structure( $slug, $label );
 				}
+
+				foreach ( $defaults['button_details'] ?? array() as $key => $btn ) {
+					$id            = $btn['id'] ?? "btn_{$key}";
+					$fields[ $id ] = wp_parse_args(
+						$btn,
+						array(
+							'id'            => $id,
+							'name'          => '',
+							'type'          => 'button',
+							'button_type'   => 'button',
+							'button_text'   => __( 'Capture', 'wp-travel-engine' ),
+							'class'         => 'wpte-button wpte-outlined wpte-button-full',
+							'wrapper_class' => 'wpte-field',
+							'order'         => $btn['order'] ?? 100,
+							'skip_disabled' => true,
+							'allow_nopriv'  => false,
+						)
+					);
+				}
 			} else {
 				$labels['tax']               = wptravelengine_get_tax_label();
 				$fields['tax']               = $this->get_default_structure( 'tax', $labels['tax'] );
@@ -264,7 +283,7 @@ class PaymentEditFormFields extends BookingEditFormFields {
 
 		$name = str_replace( 'payments_', '', $field['id'] );
 
-		$field['field_label'] = isset( $field['placeholder'] ) && $field['placeholder'] !== '' ? $field['placeholder'] : $field['field_label'];
+		$field['field_label'] = isset( $field['placeholder'] ) && $field['placeholder'] !== '' ? $field['placeholder'] : ( $field['field_label'] ?? '' );
 		$field['default']     = $this->defaults[ $name ] ?? $field['default'] ?? '';
 
 		// Set dynamic prefix if currency is available and field explicitly requests it.
@@ -287,7 +306,7 @@ class PaymentEditFormFields extends BookingEditFormFields {
 			unset( $field['attributes']['show_prefix'] );
 		}
 
-		if ( static::$mode !== 'edit' ) {
+		if ( static::$mode !== 'edit' && ! ( $field['skip_disabled'] ?? false ) ) {
 			$field['option_attributes'] = array(
 				'disabled' => 'disabled',
 			);

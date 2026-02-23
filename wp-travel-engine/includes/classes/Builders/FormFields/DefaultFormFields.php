@@ -286,6 +286,7 @@ class DefaultFormFields extends \WTE_Default_Form_Fields {
 					'options'       => apply_filters(
 						'wptravelengine_payments_form_fields_status_options',
 						array(
+							'__skip_none_option__' => true,
 							'completed' => __( 'Completed', 'wp-travel-engine' ),
 							'pending'   => __( 'Pending', 'wp-travel-engine' ),
 							'failed'    => __( 'Failed', 'wp-travel-engine' ),

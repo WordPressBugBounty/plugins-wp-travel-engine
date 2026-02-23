@@ -22,7 +22,7 @@ if ( is_array( $payments ) && count( $payments ) > 0 ) {
 	}
 }
 $is_customized_reservation = $booking->get_meta( '_user_edited' );
-if ( $payment_amount >= $due_amount && $is_customized_reservation ) {
+if ( $is_customized_reservation ) {
 	return;
 }
 if ( ! $is_booking_edit_enabled || ! $booking->has_due_payment() || ! $booking->get_order_items() ) {

@@ -43,7 +43,7 @@ class TravellerEditFormFields extends BookingEditFormFields {
 		if ( $name ) {
 			$field['name']        = sprintf( 'travellers[%s][%s]', $name, $this->count );
 			$field['id']          = sprintf( 'travellers[%s][%s]', $name, $this->count );
-			$field['field_label'] = isset( $field['placeholder'] ) && $field['placeholder'] !== '' ? $field['placeholder'] : $field['field_label'];
+			$field['field_label'] = isset( $field['placeholder'] ) && $field['placeholder'] !== '' ? $field['placeholder'] : ( $field['field_label'] ?? '' );
 
 			$field['default']                 = $this->defaults[ $name ] ?? $field['default'] ?? '';
 			$field['validations']['required'] = false;
@@ -70,7 +70,7 @@ class TravellerEditFormFields extends BookingEditFormFields {
 			);
 		}
 
-		if ( static::$mode !== 'edit' ) {
+		if ( static::$mode !== 'edit' && ! ( $field['skip_disabled'] ?? false ) ) {
 			$field['option_attributes'] = array(
 				'disabled' => 'disabled',
 			);

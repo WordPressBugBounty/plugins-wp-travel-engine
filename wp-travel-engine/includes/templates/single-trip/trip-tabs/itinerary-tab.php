@@ -44,8 +44,7 @@ do_action( 'wte_itinerary_tab_title' );
 						}
 						?>
 					</div>
-					<span class="accordion-tabs-toggle <?php echo( esc_attr( $active_check ) ); ?>"
-							href="javascript:void(0);">
+					<span class="accordion-tabs-toggle <?php echo( esc_attr( $active_check ) ); ?>">
 					<?php if ( ! empty( $inner_content[ $key ] ) ) : ?>
 						<span
 							class="dashicons dashicons-arrow-down custom-toggle-tabs rotator <?php echo $enabled_expand_all ? 'open' : ''; ?>"></span>

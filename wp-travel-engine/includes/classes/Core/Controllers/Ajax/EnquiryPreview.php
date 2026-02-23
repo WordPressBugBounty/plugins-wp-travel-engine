@@ -32,6 +32,11 @@ class EnquiryPreview extends AjaxController {
 			$enquiry_instance                  = new Enquiry( (int) $enquiry_id );
 			$wp_travel_engine_enquiry_formdata = $enquiry_instance->get_enquiry_data();
 			$wte_old_enquiry_details           = $enquiry_instance->get_old_enquiry_data();
+
+			$enquiry_display       = wptravelengine_get_enquiry_form_field_map( isset( $wp_travel_engine_enquiry_formdata['package_id'] ) ? absint( $wp_travel_engine_enquiry_formdata['package_id'] ) : 0 );
+			$enquiry_field_map     = $enquiry_display['field_map'];
+			$validation_only_types = $enquiry_display['validation_only_types'];
+
 			ob_start();
 			?>
 			<div style="background-color:#ffffff" class="wpte-main-wrap wpte-edit-enquiry">
@@ -42,12 +47,12 @@ class EnquiryPreview extends AjaxController {
 								<?php
 								if ( ! empty( $wp_travel_engine_enquiry_formdata ) ) :
 									foreach ( $wp_travel_engine_enquiry_formdata as $key => $data ) :
-										$data       = is_array( $data ) ? implode( ', ', $data ) : $data;
-										$data_label = wp_travel_engine_get_enquiry_field_label_by_name( $key );
-
-										if ( 'package_name' === $key ) {
-											$data_label = esc_html__( 'Package Name', 'wp-travel-engine' );
+										if ( wptravelengine_enquiry_should_hide_field( $key, $enquiry_field_map, $validation_only_types ) ) {
+											continue;
 										}
+
+										$data       = is_array( $data ) ? implode( ', ', $data ) : $data;
+										$data_label = wptravelengine_enquiry_get_field_display_label( $key, $enquiry_field_map );
 										?>
 										<li>
 											<b><?php echo esc_html( $data_label ); ?></b>

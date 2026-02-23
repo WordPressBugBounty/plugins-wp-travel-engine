@@ -85,6 +85,7 @@ $all_email_tags = apply_filters(
 			'{additional_note}'           => __( 'The additional note filled in new checkout template.', 'wp-travel-engine' ),
 			'{bank_details}'              => __( 'Banks Accounts Details. This tag will be replaced with the bank details and sent to the customer receipt email when Bank Transfer method has been chosen by the customer.', 'wp-travel-engine' ),
 			'{check_payment_instruction}' => __( 'Instructions to make check payment.', 'wp-travel-engine' ),
+			'{trip_extra_fee}'            => __( 'The extra fee for the trip.', 'wp-travel-engine' ),
 		)
 	)
 );

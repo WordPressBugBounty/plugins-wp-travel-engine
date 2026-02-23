@@ -148,8 +148,8 @@ class Wp_Travel_Engine_Admin {
 	 * Exclude custom trips (from manual booking) from trip count on Trips list.
 	 *
 	 * @param \stdClass $counts An object containing the post counts by status.
-	 * @param string   $type   Post type.
-	 * @param string   $perm   Permission level.
+	 * @param string    $type   Post type.
+	 * @param string    $perm   Permission level.
 	 * @return \stdClass Modified counts.
 	 * @since 6.7.3
 	 */
@@ -253,6 +253,7 @@ class Wp_Travel_Engine_Admin {
 				'position'    => 19,
 				'condition'   => file_exists( WPTRAVELENGINE_UPDATES_DATA_PATH . '/data.json' ),
 			),
+			'wptravelengine-logs'                => new \WPTravelEngine\Logger\Admin\LogsPage(),
 		);
 
 		$menus = apply_filters( 'wptravelengine-admin:boooking:submenus', $menus );
@@ -2520,6 +2521,11 @@ class Wp_Travel_Engine_Admin {
 			$wp_travel_engine_setting          = get_post_meta( $enquiry_id, 'wp_travel_engine_setting', true );
 			$wp_travel_engine_enquiry_formdata = get_post_meta( $enquiry_id, 'wp_travel_engine_enquiry_formdata', true );
 			$wte_old_enquiry_details           = isset( $wp_travel_engine_setting['enquiry'] ) ? $wp_travel_engine_setting['enquiry'] : array();
+
+			$enquiry_display       = wptravelengine_get_enquiry_form_field_map( isset( $wp_travel_engine_enquiry_formdata['package_id'] ) ? absint( $wp_travel_engine_enquiry_formdata['package_id'] ) : 0 );
+			$enquiry_field_map     = $enquiry_display['field_map'];
+			$validation_only_types = $enquiry_display['validation_only_types'];
+
 			ob_start();
 			?>
 			<div style="background-color:#ffffff" class="wpte-main-wrap wpte-edit-enquiry">
@@ -2530,12 +2536,12 @@ class Wp_Travel_Engine_Admin {
 								<?php
 								if ( ! empty( $wp_travel_engine_enquiry_formdata ) ) :
 									foreach ( $wp_travel_engine_enquiry_formdata as $key => $data ) :
-										$data       = is_array( $data ) ? implode( ', ', $data ) : $data;
-										$data_label = wp_travel_engine_get_enquiry_field_label_by_name( $key );
-
-										if ( 'package_name' === $key ) {
-											$data_label = esc_html__( 'Package Name', 'wp-travel-engine' );
+										if ( wptravelengine_enquiry_should_hide_field( $key, $enquiry_field_map, $validation_only_types ) ) {
+											continue;
 										}
+
+										$data       = is_array( $data ) ? implode( ', ', $data ) : $data;
+										$data_label = wptravelengine_enquiry_get_field_display_label( $key, $enquiry_field_map );
 										?>
 										<li>
 											<b><?php echo esc_html( $data_label ); ?></b>

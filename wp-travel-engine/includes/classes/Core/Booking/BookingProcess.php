@@ -167,7 +167,8 @@ class BookingProcess {
 				$this->booking->set_meta( 'wptravelengine_billing_details', $sanitized_billing['billing'] ?? array() );
 			}
 
-			// Add new travelers info to booking meta.
+			// Gather sanitized lead traveller from request (so process_customer can set it in one place).
+			$lead_traveller = array();
 			if ( $this->request->get_param( 'travellers' ) ) {
 				// Set travelers form data to session.
 				WTE()->session->set( 'travellers_form_data', $this->request->get_param( 'travellers' ) );
@@ -181,7 +182,12 @@ class BookingProcess {
 
 				// Set travelers details to booking meta.
 				$this->booking->set_meta( 'wptravelengine_travelers_details', $sanitized_travellers['travelers'] ?? array() );
+
+				$lead_traveller = $sanitized_travellers['travelers'][0] ?? array();
 			}
+
+			// Create/fetch customer and set lead traveller details in one place. Lead traveller is already sanitized via TravelersValidator::sanitized().
+			$this->customer = $this->process_customer( $lead_traveller );
 
 			// Add new emergency contacts info to booking meta.
 			if ( $this->request->get_param( 'emergency' ) ) {
@@ -208,7 +214,6 @@ class BookingProcess {
 
 			$this->update_coupon_usage();
 
-			$this->customer = $this->process_customer();
 			$this->customer->update_customer_bookings( $this->booking->get_id() );
 
 			$this->payment = $this->create_payment();
@@ -449,11 +454,13 @@ class BookingProcess {
 	/**
 	 * Process customer insert and update customer meta.
 	 *
+	 * @param array $lead_traveller Optional. Sanitized lead traveller data (index 0) to store on customer for future checkouts.
 	 * @return Customer
 	 */
-	protected function process_customer(): Customer {
+	protected function process_customer( array $lead_traveller = array() ): Customer {
+		$email = sanitize_email( $this->billing_info['email'] ?? '' );
 
-		if ( $customer_id = Customer::is_exists( $this->billing_info['email'] ?? '' ) ) {
+		if ( $customer_id = Customer::is_exists( $email ) ) {
 			try {
 				$customer_model = new Customer( $customer_id );
 			} catch ( \Exception $e ) {
@@ -462,7 +469,7 @@ class BookingProcess {
 					array(
 						'post_status' => 'publish',
 						'post_type'   => 'customer',
-						'post_title'  => $this->billing_info['email'],
+						'post_title'  => $email,
 					)
 				);
 			}
@@ -473,9 +480,13 @@ class BookingProcess {
 				array(
 					'post_status' => 'publish',
 					'post_type'   => 'customer',
-					'post_title'  => $this->billing_info['email'],
+					'post_title'  => $email,
 				)
 			);
+		}
+
+		if ( ! empty( $lead_traveller ) ) {
+			$customer_model->set_my_meta( 'wptravelengine_traveller_details.0', $lead_traveller );
 		}
 
 		$customer_model->maybe_register_as_user();

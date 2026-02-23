@@ -72,14 +72,20 @@ class Template_Tags extends TemplateTags {
 		parent::__construct();
 	}
 
+	/**
+	 * Get the trip URL.
+	 *
+	 * @return string
+	 * @since 6.7.6 Updated: only get url from this function.
+	 */
 	public function get_trip_url() {
 		$order_trip = $this->cart_info_parser->get_item();
 
 		if ( ! empty( $order_trip ) ) {
-			return '<a href=' . esc_url( get_permalink( $order_trip->get_trip_id() ) ) . '>' . esc_html( $order_trip->get_trip_title() ) . '</a>';
+			return esc_url( get_permalink( $order_trip->get_trip_id() ) );
 		}
 
-		return '<a href=' . esc_url( get_permalink( $this->trip->ID ) ) . '>' . esc_html( $this->trip->title ) . '</a>';
+		return esc_url( get_permalink( $this->trip->ID ) );
 	}
 
 	public function get_billing_first_name() {
@@ -492,7 +498,7 @@ class Template_Tags extends TemplateTags {
 		$is_triggered_manually = 'wte_resend_purchase_receipt' === ( sanitize_text_field( $_REQUEST['action'] ?? '' ) );
 
 		ob_start();
-
+		echo '<table border="0" width="100%" cellspacing="0" cellpadding="0">';
 		foreach ( $this->order_trips as $trip ) :
 			$trip       = (object) $trip;
 			$trip_modal = new Trip( $trip->ID );
@@ -597,6 +603,7 @@ class Template_Tags extends TemplateTags {
 				}
 			}
 		endforeach;
+		echo '</table>';
 
 		return ob_get_clean();
 	}
@@ -865,9 +872,9 @@ class Template_Tags extends TemplateTags {
 		?>
 		<tr style="font-size: 16px;">
 			<td colspan="2">
-				<span style="display: block;padding: 8px 16px;background-color: rgba(15, 29, 35, 0.04);border-radius: 4px;margin: 0 -16px;">
+				<span style="display: flex;padding: 8px 16px;background-color: rgba(15, 29, 35, 0.04);border-radius: 4px;margin: 0 -16px;">
 					<strong style="width: 50%;display: inline-block;"><?php esc_html_e( 'Total', 'wp-travel-engine' ); ?></strong>
-					<strong style="width: 49%;text-align: right;display: inline-block;">
+					<strong style="width: 50%;text-align: right;display: inline-block;">
 					<?php
 					echo wptravelengine_the_price( $amounts['total'], false );
 					if ( $tax_enable == 'yes' && isset( $global_settings['tax_type_option'] ) && 'inclusive' === $global_settings['tax_type_option'] ) {
@@ -949,9 +956,9 @@ class Template_Tags extends TemplateTags {
 		<?php if ( 'booking_only' === $payment_gateway || 'check_payments' === $payment_gateway ) { ?>
 		<tr>
 			<td colspan="2">
-				<span style="display: block;padding: 8px 16px;background-color: #147dfe1a;border-radius: 4px;margin: 0 -16px;">
+				<span style="display: flex;padding: 8px 16px;background-color: #147dfe1a;border-radius: 4px;margin: 0 -16px;">
 					<strong style="width: 50%;display: inline-block;"><?php esc_html_e( 'Payable Amount', 'wp-travel-engine' ); ?></strong>
-					<strong style="width: 49%;text-align: right;display: inline-block;">
+					<strong style="width: 50%;text-align: right;display: inline-block;">
 					<?php
 					echo wptravelengine_the_price( $payment_model->get_payable_amount(), false );
 					?>
@@ -962,9 +969,9 @@ class Template_Tags extends TemplateTags {
 		<?php } else { ?>
 			<tr>
 			<td colspan="2">
-				<span style="display: block;padding: 8px 16px;background-color: #147dfe1a;border-radius: 4px;margin: 0 -16px;">
+				<span style="display: flex;padding: 8px 16px;background-color: #147dfe1a;border-radius: 4px;margin: 0 -16px;">
 					<strong style="width: 50%;display: inline-block;"><?php esc_html_e( 'Amount Paid', 'wp-travel-engine' ); ?></strong>
-					<strong style="width: 49%;text-align: right;display: inline-block;">
+					<strong style="width: 50%;text-align: right;display: inline-block;">
 					<?php
 					echo wptravelengine_the_price( $amounts['deposit'], false );
 					?>
@@ -1033,82 +1040,84 @@ class Template_Tags extends TemplateTags {
 			// Trip Booking Summary.
 			echo $this->get_trip_booking_summary();
 			?>
-			<tr>
-				<td colspan="2"><hr style="border: none;border-top: 1px solid #DCDFEA;"></td>
-			</tr>
-			<?php
-			// Set called from booking details to true.
-			$this->called_from_booking_details = true;
-			// Trip Booking Payment Details.
-			echo $this->get_trip_booking_payment();
-
-			// Bank Details.
-			if ( $this->payment && 'direct_bank_transfer' === $this->payment->payment_gateway ) :
-				$bank_details_labels = array(
-					'account_name'   => __( 'Account Name', 'wp-travel-engine' ),
-					'account_number' => __( 'Account Number', 'wp-travel-engine' ),
-					'bank_name'      => __( 'Bank Name', 'wp-travel-engine' ),
-					'sort_code'      => __( 'Sort Code', 'wp-travel-engine' ),
-					'iban'           => __( 'IBAN', 'wp-travel-engine' ),
-					'swift'          => __( 'BIC/Swift', 'wp-travel-engine' ),
-				);
-
-				$settings = get_option( 'wp_travel_engine_settings', array() );
-
-				$bank_accounts = wte_array_get( $settings, 'bank_transfer.accounts', array() );
-				?>
+			<table border="0" width="100%" cellspacing="0" cellpadding="0">
 				<tr>
 					<td colspan="2"><hr style="border: none;border-top: 1px solid #DCDFEA;"></td>
 				</tr>
-				<tr>
-					<td colspan="2" style="font-size: 16px;line-height: 1.75;font-weight: bold;padding: 8px 0 4px;"><?php esc_html_e( 'Bank Details:', 'wp-travel-engine' ); ?></td>
-				</tr>
 				<?php
-				foreach ( $bank_accounts as $account ) :
-					foreach ( $bank_details_labels as $key => $label ) :
+				// Set called from booking details to true.
+				$this->called_from_booking_details = true;
+				// Trip Booking Payment Details.
+				echo $this->get_trip_booking_payment();
+
+				// Bank Details.
+				if ( $this->payment && 'direct_bank_transfer' === $this->payment->payment_gateway ) :
+					$bank_details_labels = array(
+						'account_name'   => __( 'Account Name', 'wp-travel-engine' ),
+						'account_number' => __( 'Account Number', 'wp-travel-engine' ),
+						'bank_name'      => __( 'Bank Name', 'wp-travel-engine' ),
+						'sort_code'      => __( 'Sort Code', 'wp-travel-engine' ),
+						'iban'           => __( 'IBAN', 'wp-travel-engine' ),
+						'swift'          => __( 'BIC/Swift', 'wp-travel-engine' ),
+					);
+
+					$settings = get_option( 'wp_travel_engine_settings', array() );
+
+					$bank_accounts = wte_array_get( $settings, 'bank_transfer.accounts', array() );
+					?>
+					<tr>
+						<td colspan="2"><hr style="border: none;border-top: 1px solid #DCDFEA;"></td>
+					</tr>
+					<tr>
+						<td colspan="2" style="font-size: 16px;line-height: 1.75;font-weight: bold;padding: 8px 0 4px;"><?php esc_html_e( 'Bank Details:', 'wp-travel-engine' ); ?></td>
+					</tr>
+					<?php
+					foreach ( $bank_accounts as $account ) :
+						foreach ( $bank_details_labels as $key => $label ) :
+							?>
+							<tr>
+								<td style="color: #566267;"><?php esc_html_e( $label, 'wp-travel-engine' ); ?></td>
+								<td style="width: 50%;text-align: right;"><strong><?php echo isset( $account[ $key ] ) ? esc_html( $account[ $key ] ) : ''; ?></strong></td>
+							</tr>
+							<?php
+						endforeach;
 						?>
-						<tr>
-							<td style="color: #566267;"><?php esc_html_e( $label, 'wp-travel-engine' ); ?></td>
-							<td style="width: 50%;text-align: right;"><strong><?php isset( $account[ $key ] ) ? esc_html_e( $account[ $key ], 'wp-travel-engine' ) : ''; ?></strong></td>
-						</tr>
 						<?php
 					endforeach;
+				endif;
+
+				// Check Payment Details.
+				if ( $this->payment && 'check_payments' === $this->payment->payment_gateway ) :
 					?>
+					<tr>
+						<td colspan="2"><hr style="border: none;border-top: 1px solid #DCDFEA;"></td>
+					</tr>
+					<tr>
+						<td colspan="2" style="font-size: 16px;line-height: 1.75;font-weight: bold;padding: 8px 0 4px;"><?php esc_html_e( 'Check Payment Instructions:', 'wp-travel-engine' ); ?></td>
+					</tr>
+					<tr>
+						<td colspan="2" style="color: #566267;"><?php echo esc_html( wptravelengine_settings()->get( 'check_payment.instruction', '' ) ); ?></td>
+					</tr>
 					<?php
-				endforeach;
-			endif;
+				endif;
 
-			// Check Payment Details.
-			if ( $this->payment && 'check_payments' === $this->payment->payment_gateway ) :
-				?>
-				<tr>
-					<td colspan="2"><hr style="border: none;border-top: 1px solid #DCDFEA;"></td>
-				</tr>
-				<tr>
-					<td colspan="2" style="font-size: 16px;line-height: 1.75;font-weight: bold;padding: 8px 0 4px;"><?php esc_html_e( 'Check Payment Instructions:', 'wp-travel-engine' ); ?></td>
-				</tr>
-				<tr>
-					<td colspan="2" style="color: #566267;"><?php esc_html_e( wptravelengine_settings()->get( 'check_payment.instruction', '' ), 'wp-travel-engine' ); ?></td>
-				</tr>
-				<?php
+				// Additional Notes.
+				if ( ! empty( $this->additional_notes ) ) :
+					?>
+					<tr>
+						<td colspan="2"><hr style="border: none;border-top: 1px solid #DCDFEA;"></td>
+					</tr>
+					<tr>
+						<td colspan="2" style="font-size: 16px;line-height: 1.75;font-weight: bold;padding: 8px 0 4px;"><?php esc_html_e( 'Additional Notes:', 'wp-travel-engine' ); ?></td>
+					</tr>
+					<tr>
+						<td colspan="2" style="color: #566267;"><?php echo esc_html( $this->additional_notes ); ?></td>
+					</tr>
+					<?php
+				endif;
+				do_action( 'wptravelengine_email_template_after_additional_notes', $this );
 			endif;
-
-			// Additional Notes.
-			if ( ! empty( $this->additional_notes ) ) :
-				?>
-				<tr>
-					<td colspan="2"><hr style="border: none;border-top: 1px solid #DCDFEA;"></td>
-				</tr>
-				<tr>
-					<td colspan="2" style="font-size: 16px;line-height: 1.75;font-weight: bold;padding: 8px 0 4px;"><?php esc_html_e( 'Additional Notes:', 'wp-travel-engine' ); ?></td>
-				</tr>
-				<tr>
-					<td colspan="2" style="color: #566267;"><?php echo esc_html( $this->additional_notes ); ?></td>
-				</tr>
-				<?php
-			endif;
-			do_action( 'wptravelengine_email_template_after_additional_notes', $this );
-		endif;
+		echo '</table>';
 		return ob_get_clean();
 	}
 
@@ -1179,20 +1188,20 @@ class Template_Tags extends TemplateTags {
 
 		$trip = $this->trip;
 
-		$traveler_data    = get_post_meta( $this->booking->ID, 'wp_travel_engine_placeorder_setting', true );
-		$personal_options = isset( $traveler_data['place_order'] ) ? $traveler_data['place_order'] : array();
+		$booking_id        = $this->booking->ID;
+		$_booking          = new Booking( $booking_id );
+		$edit_booking_link = admin_url() . 'post.php?post=' . $booking_id . '&action=edit';
 
-		$item = $this->trip;
-		$pno  = ( isset( $item->pax ) ) ? array_sum( $item->pax ) : 0;
-		if ( isset( $personal_options['travelers'] ) ) :
-			$traveller_email_template_content = $this->get_traveller_template( 'traveller-data', $pno, $personal_options );
+		$traveller_data = $_booking->get_travelers();
+
+		$pno = ( isset( $trip->pax ) ) ? array_sum( $trip->pax ) : 0;
+		if ( ! empty( $traveller_data ) ) :
+			$traveller_email_template_content = $this->get_traveller_template( 'traveller-data', $pno, $traveller_data );
 		else :
 			$traveller_email_template_content = '';
 		endif;
 
-		$booking_id        = $this->booking->ID;
-		$_booking          = new Booking( $booking_id );
-		$edit_booking_link = admin_url() . 'post.php?post=' . $booking_id . '&action=edit';
+		$order_trip = reset( $this->order_trips );
 
 		parent::set_tags(
 			apply_filters(
@@ -1205,13 +1214,13 @@ class Template_Tags extends TemplateTags {
 					'{billing_address}'           => $this->get_billing_address(),
 					'{city}'                      => $this->get_billing_city(),
 					'{country}'                   => $this->get_billing_country(),
-					'{tdate}'                     => ( isset( $trip->has_time ) && $trip->has_time && isset( $trip->datetime ) ) ? wp_date( 'Y-m-d H:i', strtotime( $trip->datetime ) ) : wp_date( get_option( 'date-format', 'Y-m-d' ), strtotime( isset( $trip->datetime ) ? $trip->datetime : '' ) ),
+					'{tdate}'                     => wptravelengine_format_trip_datetime( $trip->datetime ),
 					'{traveler}'                  => isset( $trip->pax ) ? array_sum( $trip->pax ) : 0,
 					// '{child-traveler}'            => $trip->pax['child'],
 					'{tprice}'                    => isset( $trip->cost ) ? wte_get_formated_price( $trip->cost, $this->currency ) : 0,
 					'{price}'                     => $_booking->get_total_paid_amount() == 0 ? 0 : wte_get_formated_price( $_booking->get_total_paid_amount(), $this->currency ),
 					'{total_cost}'                => wte_get_formated_price( $this->cart_info->total ?? $this->cart_info['total'] ?? 0, $this->currency ),
-					'{due}'                       => $this->get_due_amount(),
+					'{due}'                       => wte_get_formated_price( max( 0, $_booking->get_total_due_amount() ), $this->currency ),
 					'{booking_url}'               => $edit_booking_link,
 					'{date}'                      => $this->get_current_date(),
 					'{booking_id}'                => sprintf( __( 'Booking #%1$s', 'wp-travel-engine' ), $this->booking->ID ),
@@ -1240,13 +1249,14 @@ class Template_Tags extends TemplateTags {
 					'{customer_email}'            => $this->get_billing_email(),
 					'{trip_booked_date}'          => $this->get_current_date(),
 					'{trip_start_date}'           => wptravelengine_format_trip_datetime( $trip->datetime ),
-					'{trip_end_date}'             => wptravelengine_format_trip_end_datetime( $trip->datetime, new Trip( $trip->ID ) ),
-					'{no_of_travellers}'          => isset( $trip->pax ) ? array_sum( $trip->pax ) : 0,
+					'{trip_end_date}'             => wptravelengine_format_trip_datetime( isset( $order_trip['end_datetime'] ) ? $order_trip['end_datetime'] : '' ),
+					'{no_of_travellers}'          => $this->get_no_of_travellers(),
 					'{trip_total_price}'          => $this->get_total_amount(),
-					'{trip_paid_amount}'          => $this->get_paid_amount(),
-					'{trip_due_amount}'           => $this->get_due_amount(),
+					'{trip_paid_amount}'          => wte_get_formated_price( $_booking->get_total_paid_amount(), $this->currency ),
+					'{trip_due_amount}'           => wte_get_formated_price( max( 0, $_booking->get_total_due_amount() ), $this->currency ),
 					'{payment_link}'              => $_booking->get_due_payment_link(),
 					'{trip_code}'                 => $this->get_trip_code(),
+					'{trip_extra_fee}'            => wte_get_formated_price( $this->get_trip_extra_fee( $_booking ), $this->currency ),
 				),
 				$this->payment->ID,
 				$this->booking->ID
@@ -1254,6 +1264,44 @@ class Template_Tags extends TemplateTags {
 		);
 
 		return $this->tags;
+	}
+
+	/**
+	 * Get the trip extra fee.
+	 * This function consists the extra fee..
+	 *
+	 * @param Booking $booking
+	 * @return mixed
+	 * @since 6.7.6
+	 */
+	public function get_trip_extra_fee( Booking $booking ) {
+		$payment_data      = $booking->get_payments_data( false );
+		$total_paid_amount = $booking->get_total_paid_amount();
+		if ( $total_paid_amount === 0.0 ) {
+			return isset( $payment_data['totals']['extra_charges'] ) ? $payment_data['totals']['extra_charges'] : 0;
+		}
+		// Addition of extra fee for the trip addition of ( Tax, Booking Fee, Payment Gateway Fee ).
+		$payment_calculator = PaymentCalculator::for( $booking->get_currency() );
+		$payable            = $payment_calculator->subtract( $payment_data['totals']['payable'] ?? 0, $total_paid_amount );
+		// Make sure payable is positive number because payment transaction fee can be added to paid amount directly which can be negative after sub.
+		$payable   = (string) abs( floatval( $payable ) );
+		$extra_fee = $payment_calculator->add( $payable, $payment_data['totals']['extra_charges'] ?? 0 );
+		return $extra_fee;
+	}
+
+	/**
+	 * Get the number of travellers.
+	 *
+	 * @return int
+	 * @since 6.7.6
+	 */
+	public function get_no_of_travellers(): int {
+		if ( ! empty( $this->trip->pax ) ) {
+			return array_sum( $this->trip->pax );
+		} elseif ( ! empty( $this->cart_info['items'][0]['travelers_count'] ) ) {
+			return (int) $this->cart_info['items'][0]['travelers_count'];
+		}
+		return 0;
 	}
 
 	/**

@@ -17,6 +17,13 @@ use WPTravelEngine\Core\Shortcodes\UserAccount;
 class Wp_Travel_Engine_Form_Handler {
 
 	/**
+	 * Customer meta key for lead traveller (index 0).
+	 *
+	 * @var string
+	 */
+	const LEAD_TRAVELLER_META_KEY = 'wptravelengine_traveller_details.0';
+
+	/**
 	 * Hook in methods.
 	 */
 	public static function init() {
@@ -114,7 +121,7 @@ class Wp_Travel_Engine_Form_Handler {
 			WTE()->notices->add( apply_filters( 'wp_travel_engine_login_errors', __( 'Error :  Username can not be empty', 'wp-travel-engine' ) ), 'error' );
 
 			wp_safe_redirect( remove_query_arg( 'password-reset', wp_travel_engine_get_page_permalink_by_id( wp_travel_engine_get_dashboard_page_id() ) ) );
-			
+
 			exit;
 
 		}
@@ -163,10 +170,37 @@ class Wp_Travel_Engine_Form_Handler {
 					wp_travel_engine_set_customer_auth_cookie( $new_customer );
 				}
 
+				// Create customer post if it doesn't exist and set lead traveller from user.
+				$customer_id = Customer::is_exists( $email );
+				if ( ! $customer_id ) {
+					$user = get_user_by( 'id', $new_customer );
+					if ( $user instanceof \WP_User ) {
+						try {
+							$customer_model   = self::get_or_create_customer( $email );
+							$customer_details = array(
+								'email' => $email,
+								'fname' => $user->first_name,
+								'lname' => $user->last_name,
+							);
+							$customer_model->set_customer_details( $customer_details );
+							self::sync_lead_traveller( $customer_model, $customer_details );
+							$customer_id = $customer_model->get_id();
+						} catch ( \Exception $e ) {
+							if ( function_exists( 'error_log' ) ) {
+								error_log( sprintf( 'WP Travel Engine: Customer creation/sync failed during registration for user %d: %s', (int) $new_customer, $e->getMessage() ) );
+							}
+						}
+					} elseif ( function_exists( 'error_log' ) ) {
+							error_log( sprintf( 'WP Travel Engine: Failed to retrieve user %d during registration; customer record not created.', (int) $new_customer ) );
+					}
+				}
+
 				// Update user meta if bookings have been made before registration.
-				if ( $customer_id = Customer::is_exists( $email ) ) {
+				if ( $customer_id ) {
 					$customer_bookings = get_post_meta( $customer_id, 'wp_travel_engine_bookings', true );
-					update_user_meta( $new_customer, 'wp_travel_engine_user_bookings', $customer_bookings );
+					if ( $customer_bookings ) {
+						update_user_meta( $new_customer, 'wp_travel_engine_user_bookings', $customer_bookings );
+					}
 				}
 
 				if ( ! empty( $_POST['redirect'] ) ) {
@@ -333,6 +367,21 @@ class Wp_Travel_Engine_Form_Handler {
 
 			update_user_meta( $user_id, 'wp_travel_engine_customer_billing_details', $data_array );
 
+			// Sync billing data to customer post lead traveller.
+			$customer_model = self::get_or_create_customer( $current_user->user_email );
+			self::sync_lead_traveller(
+				$customer_model,
+				array(
+					'address'  => $billing_address,
+					'city'     => $billing_city,
+					'state'    => $billing_state,
+					'postcode' => $billing_zip_code,
+					'country'  => $billing_country,
+					'phone'    => $billing_phone,
+					'company'  => $billing_company,
+				)
+			);
+
 			WTE()->notices->add( __( 'Billing Details Updated Successfully', 'wp-travel-engine' ), 'success' );
 
 			do_action( 'wp_travel_engine_save_billing_details', $user_id );
@@ -473,6 +522,18 @@ class Wp_Travel_Engine_Form_Handler {
 		if ( wp_travel_engine_get_notice_count( 'error' ) === 0 ) {
 			wp_update_user( $user );
 
+			// Sync account name/email to customer post and lead traveller.
+			$customer_email   = ! empty( $account_email ) ? $account_email : $current_user->user_email;
+			$customer_model   = self::get_or_create_customer( $customer_email );
+			$customer_details = array(
+				'fname' => $account_first_name,
+				'lname' => $account_last_name,
+				'email' => $customer_email,
+			);
+			$customer_model->set_customer_details( $customer_details );
+			$customer_model->save();
+			self::sync_lead_traveller( $customer_model, $customer_details );
+
 			WTE()->notices->add( __( 'Account Details Updated Successfully', 'wp-travel-engine' ), 'success' );
 
 			do_action( 'wp_travel_engine_save_account_details', $user->ID );
@@ -558,6 +619,67 @@ class Wp_Travel_Engine_Form_Handler {
 			return $attached_img_id;
 
 		endif;
+	}
+
+	/**
+	 * Returns customer by email, or creates a new customer post.
+	 *
+	 * @param string $email Customer email (post_title).
+	 * @return Customer
+	 * @since 6.7.6
+	 */
+	private static function get_or_create_customer( string $email ) {
+		$customer_id = Customer::is_exists( $email );
+		if ( $customer_id ) {
+			return new Customer( $customer_id );
+		}
+		try {
+			return Customer::create_post(
+				array(
+					'post_status' => 'publish',
+					'post_type'   => 'customer',
+					'post_title'  => $email,
+				)
+			);
+		} catch ( \Exception $e ) {
+			// Another process may have created the customer (race); return existing if so.
+			$customer_id = Customer::is_exists( $email );
+			if ( $customer_id ) {
+				return new Customer( $customer_id );
+			}
+			throw $e;
+		}
+	}
+
+	/**
+	 * Merges new lead traveller data with existing and saves to customer meta.
+	 *
+	 * @param Customer $customer Customer model.
+	 * @param array    $lead_data Lead traveller fields (e.g. fname, lname, email, address, ...).
+	 * @return void
+	 * @since 6.7.6
+	 */
+	private static function sync_lead_traveller( Customer $customer, array $lead_data ) {
+		$existing   = $customer->get_customer_meta();
+		$lead_index = isset( $existing['wptravelengine_traveller_details'][0] ) && is_array( $existing['wptravelengine_traveller_details'][0] )
+			? $existing['wptravelengine_traveller_details'][0]
+			: array();
+
+		// Sanitize and filter: skip empty values, sanitize by field type before saving to customer meta.
+		$sanitized_lead_data = array();
+		foreach ( $lead_data as $key => $value ) {
+			if ( '' === $value || null === $value ) {
+				continue;
+			}
+			if ( 'email' === $key ) {
+				$sanitized_lead_data[ $key ] = sanitize_email( $value );
+			} else {
+				$sanitized_lead_data[ $key ] = sanitize_text_field( $value );
+			}
+		}
+
+		$customer->set_my_meta( self::LEAD_TRAVELLER_META_KEY, array_merge( $lead_index, $sanitized_lead_data ) );
+		$customer->save();
 	}
 }
 

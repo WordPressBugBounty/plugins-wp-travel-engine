@@ -369,14 +369,19 @@ class WP_Travel_Engine_Custom_Shortcodes {
 			'wte_trip'
 		);
 
-		if ( ! in_array( $attr['layout'], array( 'grid', 'list' ) ) ) {
-			return '<h1>' . sprintf( __( 'Layout not found: %s', 'wp-travel-engine' ), $attr['layout'] ) . '</h1>';
+		$allowed_layouts = array( 'grid', 'list' );
+		if ( ! in_array( $attr['layout'], $allowed_layouts, true ) ) {
+			return '<h1>' . esc_html__( 'Invalid layout parameter. Allowed values: grid, list', 'wp-travel-engine' ) . '</h1>';
+		}
+
+		$attr['postsnumber'] = absint( $attr['postsnumber'] );
+		if ( $attr['postsnumber'] < 1 ) {
+			$attr['postsnumber'] = get_option( 'posts_per_page', 10 );
 		}
 
 		if ( ! empty( $attr['ids'] ) ) {
-			$ids         = array();
-			$ids         = explode( ',', $attr['ids'] );
-			$attr['ids'] = $ids;
+			$ids         = array_map( 'absint', explode( ',', $attr['ids'] ) );
+			$attr['ids'] = array_filter( $ids );
 		}
 
 		ob_start();
@@ -405,26 +410,29 @@ class WP_Travel_Engine_Custom_Shortcodes {
 			'wte_trip_tax'
 		);
 
-		if ( ! in_array( $attr['layout'], array( 'grid', 'list' ) ) ) {
-			return '<h1>' . sprintf( __( 'Layout not found: %s', 'wp-travel-engine' ), $attr['layout'] ) . '</h1>';
+		$allowed_layouts = array( 'grid', 'list' );
+		if ( ! in_array( $attr['layout'], $allowed_layouts, true ) ) {
+			return '<h1>' . esc_html__( 'Invalid layout parameter. Allowed values: grid, list', 'wp-travel-engine' ) . '</h1>';
+		}
+
+		$attr['postsnumber'] = absint( $attr['postsnumber'] );
+		if ( $attr['postsnumber'] < 1 ) {
+			$attr['postsnumber'] = get_option( 'posts_per_page', 10 );
 		}
 
 		if ( ! empty( $attr['activities'] ) ) {
-			$activities         = array();
-			$activities         = explode( ',', $attr['activities'] );
-			$attr['activities'] = $activities;
+			$activities         = array_map( 'absint', explode( ',', $attr['activities'] ) );
+			$attr['activities'] = array_filter( $activities );
 		}
 
 		if ( ! empty( $attr['destination'] ) ) {
-			$destination         = array();
-			$destination         = explode( ',', $attr['destination'] );
-			$attr['destination'] = $destination;
+			$destination         = array_map( 'absint', explode( ',', $attr['destination'] ) );
+			$attr['destination'] = array_filter( $destination );
 		}
 
 		if ( ! empty( $attr['trip_types'] ) ) {
-			$trip_types         = array();
-			$trip_types         = explode( ',', $attr['trip_types'] );
-			$attr['trip_types'] = $trip_types;
+			$trip_types         = array_map( 'absint', explode( ',', $attr['trip_types'] ) );
+			$attr['trip_types'] = array_filter( $trip_types );
 		}
 
 		ob_start();

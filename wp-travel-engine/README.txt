@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 6.7.5
+Stable tag: 6.7.6
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -349,9 +349,13 @@ Please send us an email via [support ticket](https://wptravelengine.com/support-
 
 == Changelog ==
 
-= 6.7.5 - 4th February 2026 =
+= 6.7.6 - 23rd February 2026 =
 
-* Fixed: Ensured non-logged-in users can access public features as expected after changes introduced in version 6.7.4.
+* New Feature: Added a comprehensive logging system with automated log management to efficiently track and maintain system activity.
+* Fixed: Resolved minor issues on the single trip page to improve stability.
+* Fixed: Removed reCAPTCHA field values from enquiry emails and dashboard details to prevent long unreadable code from appearing.
+* Fixed: Resolved an issue where billing and traveller details were not automatically populated at checkout after account creation from My Account.
+* Security: Patched a Stored Cross-Site Scripting (XSS) vulnerability to prevent unauthorized script injection.
 
 [See changelog for all versions](https://plugins.svn.wordpress.org/wp-travel-engine/trunk/changelog.txt).
 

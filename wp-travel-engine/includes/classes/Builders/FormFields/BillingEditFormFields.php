@@ -37,7 +37,7 @@ class BillingEditFormFields extends BookingEditFormFields {
 		if ( $name ) {
 			$field['name']        = sprintf( 'billing[%s]', $name );
 			$field['id']          = sprintf( 'billing_%s', $name );
-			$field['field_label'] = isset( $field['placeholder'] ) && $field['placeholder'] !== '' ? $field['placeholder'] : $field['field_label'];
+			$field['field_label'] = isset( $field['placeholder'] ) && $field['placeholder'] !== '' ? $field['placeholder'] : ( $field['field_label'] ?? '' );
 			$field['default']     = $this->defaults[ $name ] ?? $field['default'] ?? '';
 
 			$field['validations']['required'] = false;
@@ -89,7 +89,7 @@ class BillingEditFormFields extends BookingEditFormFields {
 			}
 		}
 
-		if ( static::$mode !== 'edit' ) {
+		if ( static::$mode !== 'edit' && ! ( $field['skip_disabled'] ?? false ) ) {
 			$field['option_attributes'] = array(
 				'disabled' => 'disabled',
 			);

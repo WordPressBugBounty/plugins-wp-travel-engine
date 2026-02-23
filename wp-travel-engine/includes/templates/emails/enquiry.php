@@ -8,6 +8,9 @@ $formdata = $args['formdata'];
 if ( wptravelengine_toggled( Options::get( 'wte_update_mail_template', false ) ) ) {
 	wte_get_template( 'template-emails/enquiry-admin.php', $formdata );
 } else {
+	$enquiry_display       = wptravelengine_get_enquiry_form_field_map( isset( $formdata['package_id'] ) ? absint( $formdata['package_id'] ) : 0 );
+	$enquiry_field_map     = $enquiry_display['field_map'];
+	$validation_only_types = $enquiry_display['validation_only_types'];
 	?>
 <table class="main" width="100%" cellpadding="0" cellspacing="0">
 	<tr>
@@ -31,8 +34,12 @@ if ( wptravelengine_toggled( Options::get( 'wte_update_mail_template', false ) )
 									<table class="invoice-items" cellpadding="0" cellspacing="0">
 										<?php
 										foreach ( $formdata as $key => $data ) :
+											if ( wptravelengine_enquiry_should_hide_field( $key, $enquiry_field_map, $validation_only_types ) ) {
+												continue;
+											}
+
 											$data        = is_array( $data ) ? implode( ', ', $data ) : $data;
-											$field_label = wp_travel_engine_get_enquiry_field_label_by_name( $key );
+											$field_label = wptravelengine_enquiry_get_field_display_label( $key, $enquiry_field_map );
 											?>
 										<tr>
 											<td><?php echo esc_html( $field_label ); ?></td>

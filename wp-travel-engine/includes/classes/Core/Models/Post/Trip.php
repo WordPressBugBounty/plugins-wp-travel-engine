@@ -206,12 +206,11 @@ class Trip extends PostModel {
 		$trip_services = $this->get_setting( 'trip_extra_services' );
 
 		foreach ( $services as $service ) {
-			$service_data = get_post_meta( $service->ID, 'wte_services', true );
-
 			$service_options = array();
+			$service_data    = get_post_meta( $service->ID, 'wte_services', true ) ?: array();
 			$trip_service    = current( array_filter( $trip_services ?? array(), fn( $trip_service ) => $trip_service['id'] == $service->ID ) );
 
-			$is_default_service  = $service_data['service_type'] === 'default';
+			$is_default_service  = ( $service_data['service_type'] ?? 'default' ) === 'default';
 			$service_unit        = $service_data['service_unit'] ?? 'unit';
 			$default_description = $service_data['default_descriptions'] ?? apply_filters( 'the_content', get_the_content( '', false, $service->ID ) );
 

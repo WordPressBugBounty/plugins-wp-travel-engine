@@ -1802,11 +1802,11 @@ function wte_get_discount_percent( $trip_id ) {
  * Send new account notification to users.
  */
 function wp_travel_engine_user_new_account_created( $customer_id, $new_customer_data, $password_generated, $template ) {
-	$plugin_settings  = new PluginSettings();
-	$account_settings = $plugin_settings->get( 'customer_email_notify_tabs.account_registration' );
+	$plugin_settings       = new PluginSettings();
+	$account_settings      = $plugin_settings->get( 'customer_email_notify_tabs.account_registration' );
 	$is_admin_booking_edit = false;
 	if ( is_admin() && isset( $_POST['wptravelengine_new_booking_nonce'] ) ) {
-		$nonce_verified = wp_verify_nonce( $_POST['wptravelengine_new_booking_nonce'], 'wptravelengine_new_booking' );
+		$nonce_verified        = wp_verify_nonce( $_POST['wptravelengine_new_booking_nonce'], 'wptravelengine_new_booking' );
 		$is_admin_booking_edit = ( false !== $nonce_verified );
 	}
 	if ( $is_admin_booking_edit ) {
@@ -2389,28 +2389,31 @@ function wp_travel_engine_get_booking_status() {
 function wptravelengine_get_booking_ids( $trip_id ) {
 	global $wpdb;
 
-	// Get bookings with matching trip_id.
+	// Get all bookings with cart_info.
 	$booking_list = $wpdb->get_col(
 		$wpdb->prepare(
 			"
         SELECT DISTINCT p.ID
         FROM {$wpdb->posts} p
         JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
-        WHERE p.post_type = 'booking'
-        AND pm.meta_key = 'cart_info'
-    "
+        WHERE p.post_type = %s
+        AND pm.meta_key = %s
+    ",
+			'booking',
+			'cart_info'
 		)
 	);
 
+	$filtered_bookings = array();
+
 	if ( ! empty( $booking_list ) ) {
-		$filtered_bookings = array();
 		foreach ( $booking_list as $booking_id ) {
 			$cart_info = get_post_meta( $booking_id, 'cart_info', true );
 			if ( ! empty( $cart_info ) ) {
 				$cart_data = maybe_unserialize( $cart_info );
-				if ( isset( $cart_data['items'] ) && is_array( $cart_data['items'] ) ) {
+				if ( is_array( $cart_data ) && isset( $cart_data['items'] ) && is_array( $cart_data['items'] ) ) {
 					foreach ( $cart_data['items'] as $item ) {
-						if ( isset( $item['trip_id'] ) && $item['trip_id'] == $trip_id ) {
+						if ( is_array( $item ) && isset( $item['trip_id'] ) && intval( $item['trip_id'] ) === intval( $trip_id ) ) {
 							$filtered_bookings[] = $booking_id;
 							break;
 						}
@@ -2418,8 +2421,10 @@ function wptravelengine_get_booking_ids( $trip_id ) {
 				}
 			}
 		}
-		$booking_list = $filtered_bookings;
-	} else {
+	}
+
+	// Fallback: Try using order_trips if cart_info doesn't have the data
+	if ( empty( $filtered_bookings ) ) {
 		$bookings = array_reduce(
 			get_posts(
 				array(
@@ -2427,14 +2432,14 @@ function wptravelengine_get_booking_ids( $trip_id ) {
 					'posts_per_page' => -1,
 				)
 			),
-			function ( $result, $item ) {
+			function ( $result, $item ) use ( $trip_id ) {
 				$order_trips = $item->order_trips ?? array();
 				if ( ! empty( $order_trips ) ) {
 					$order_trip    = (object) array_shift( $order_trips );
 					$order_trip_id = $order_trip->ID ?? null;
 
-					if ( $order_trip_id !== null ) {
-						$result[ $item->ID ] = $order_trip_id;  // Only store if valid
+					if ( $order_trip_id !== null && intval( $order_trip_id ) === intval( $trip_id ) ) {
+						$result[] = $item->ID;
 					}
 				}
 				return $result;
@@ -2442,15 +2447,10 @@ function wptravelengine_get_booking_ids( $trip_id ) {
 			array()
 		);
 
-		$booking_list = array();
-		foreach ( $bookings as $key => $value ) {
-			if ( $value === $trip_id ) {
-				$booking_list[] = $key;
-			}
-		}
+		$filtered_bookings = $bookings;
 	}
 
-	return apply_filters( 'wp_travel_engine_booking_ids_list', $booking_list );
+	return apply_filters( 'wp_travel_engine_booking_ids_list', $filtered_bookings );
 }
 
 /**
@@ -2988,3 +2988,102 @@ function wptravelengine_get_pricing_type( $all = false, $key = 'per-person' ) {
 
 	return $all ? $pricing_types : ( $pricing_types[ $key ] ?? $pricing_types['per-person'] );
 }
+
+/**
+ * Get enquiry form field map (name => type, field_label) and validation-only types.
+ *
+ * Used when displaying enquiry data so validation-only fields (e.g. recaptcha) can be
+ * hidden. Validation-only types are filterable via wptravelengine_enquiry_validation_only_field_types.
+ *
+ * Results are cached per request and per package_id to avoid repeated work when the
+ * same map is needed multiple times (e.g. enquiry meta, emails, previews).
+ *
+ * @param int $package_id Trip/package ID; use 0 for default form fields.
+ * @return array{field_map: array, validation_only_types: array}
+ * @since 6.7.6
+ */
+function wptravelengine_get_enquiry_form_field_map( $package_id = 0 ) {
+	static $cache = array();
+	$cache_key    = (int) $package_id;
+	if ( isset( $cache[ $cache_key ] ) ) {
+		return $cache[ $cache_key ];
+	}
+
+	if ( ! class_exists( 'WP_Travel_Engine_Enquiry_Form_Shortcodes' ) ) {
+		$result              = array(
+			'field_map'             => array(),
+			'validation_only_types' => array_map( 'strtolower', (array) apply_filters( 'wptravelengine_enquiry_validation_only_field_types', array( 'recaptcha', 'captcha', 'grecaptcha_v2', 'grecaptcha_v3' ) ) ),
+		);
+		$cache[ $cache_key ] = $result;
+		return $result;
+	}
+
+	$form_fields = WP_Travel_Engine_Enquiry_Form_Shortcodes::get_enquiry_form_fields( $package_id, array( 'shortcode' => true ) );
+	if ( ! is_array( $form_fields ) ) {
+		$form_fields = array();
+	}
+	$field_map = array();
+
+	$validation_only_types = apply_filters(
+		'wptravelengine_enquiry_validation_only_field_types',
+		array( 'recaptcha', 'captcha', 'grecaptcha_v2', 'grecaptcha_v3' )
+	);
+	$validation_only_types = array_map( 'strtolower', (array) $validation_only_types );
+
+	foreach ( $form_fields as $field ) {
+		if ( ! empty( $field['name'] ) ) {
+			$field_map[ $field['name'] ] = array(
+				'type'        => isset( $field['type'] ) ? strtolower( (string) $field['type'] ) : '',
+				'field_label' => isset( $field['field_label'] ) ? $field['field_label'] : '',
+			);
+		}
+	}
+
+	$result              = array(
+		'field_map'             => $field_map,
+		'validation_only_types' => $validation_only_types,
+	);
+	$cache[ $cache_key ] = $result;
+	return $result;
+}
+
+/**
+ * Whether an enquiry form field should be hidden from display.
+ *
+ * Returns true when the field type is validation-only (e.g. recaptcha, captcha).
+ * Used so these values are not shown in enquiry meta, emails, or previews.
+ *
+ * @param string $key                   Field name (key in enquiry formdata).
+ * @param array  $field_map             From wptravelengine_get_enquiry_form_field_map()['field_map'].
+ * @param array  $validation_only_types From wptravelengine_get_enquiry_form_field_map()['validation_only_types'].
+ * @return bool True if the field should be hidden from display.
+ * @since 6.7.6
+ */
+function wptravelengine_enquiry_should_hide_field( $key, array $field_map, array $validation_only_types ) {
+	if ( isset( $field_map[ $key ]['type'] ) && in_array( $field_map[ $key ]['type'], $validation_only_types, true ) ) {
+		return true;
+	}
+	return false;
+}
+
+/**
+ * Get display label for an enquiry form field key.
+ *
+ * Uses, in order: special case for package_name, then field_label from the field map,
+ * then fallback to wp_travel_engine_get_enquiry_field_label_by_name() for legacy/custom keys.
+ *
+ * @param string $key       Field name (key in enquiry formdata).
+ * @param array  $field_map From wptravelengine_get_enquiry_form_field_map()['field_map'].
+ * @return string Label for display.
+ * @since 6.7.6
+ */
+function wptravelengine_enquiry_get_field_display_label( $key, array $field_map ) {
+	if ( 'package_name' === $key ) {
+		return esc_html__( 'Package Name', 'wp-travel-engine' );
+	}
+	if ( isset( $field_map[ $key ]['field_label'] ) && $field_map[ $key ]['field_label'] !== '' ) {
+		return $field_map[ $key ]['field_label'];
+	}
+	return wp_travel_engine_get_enquiry_field_label_by_name( $key );
+}
+

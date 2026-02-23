@@ -2,8 +2,7 @@
 
 namespace WPTravelEngine\Builders\FormFields;
 
-use WPTravelEngine\Utilities\FormBuilder\Fields\CurrencyPicker;
-
+use WPTravelEngine\Helpers\Functions;
 if ( ! class_exists( '\WP_Travel_Engine_Form_Field' ) ) {
 	require_once WP_TRAVEL_ENGINE_ABSPATH . 'includes/lib/wte-form-framework/class-wte-form-field.php';
 }
@@ -71,11 +70,11 @@ class FormField extends \WP_Travel_Engine_Form_Field {
 	 * @return array The modified options array.
 	 */
 	public function modify_form_field_options( $options ): array {
-		if ( ! empty( $options ) && ! array_key_exists( '', $options ) ) {
-			$options = array_merge( array( '' => __( 'None', 'wp-travel-engine' ) ), $options );
+		if ( ! is_array( $options ) ) {
+			return $options;
 		}
 
-		return $options;
+		return Functions::add_none_option_to_select( $options, false );
 	}
 
 	/**

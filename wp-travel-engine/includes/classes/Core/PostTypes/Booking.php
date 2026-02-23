@@ -108,6 +108,26 @@ class Booking extends PostType {
 		add_filter( 'wptravelengine_booking_line_items', array( $this, 'add_booking_line_items' ), 10, 2 );
 		add_filter( 'wp_travel_engine_traveller_info_fields_display', array( $this, 'add_pricing_category_field_to_traveller' ), 10, 1 );
 		add_filter( 'wp_travel_engine_lead_traveller_info_fields_display', array( $this, 'add_pricing_category_field_to_lead_traveller' ), 10, 1 );
+		add_filter( 'wptravelengine_form_field_options', array( $this, 'add_none_option_to_select_options' ), 10, 1 );
+	}
+
+	/**
+	 * Add "None" as first option for select fields on backend (same as frontend FormField filter).
+	 *
+	 * @param array $options Select field options.
+	 * @return array Modified options.
+	 * @since 6.7.6
+	 */
+	public function add_none_option_to_select_options( $options ): array {
+		if ( ! is_array( $options ) ) {
+			return $options;
+		}
+
+		if ( ! is_admin() || get_post_type() !== 'booking' ) {
+			return $options;
+		}
+
+		return Functions::add_none_option_to_select( $options, true );
 	}
 
 	/**
@@ -182,9 +202,10 @@ class Booking extends PostType {
 			$pricing_categories = array();
 		}
 
-		// Add default option.
-		// $pricing_categories = array( 'selectoption' => __( 'Select Price Category', 'wp-travel-engine' ) ) + $pricing_categories;
-
+		/**
+		 * Sentinel to skip adding None option to the pricing category field.
+		 */
+		$pricing_categories['__skip_none_option__'] = true;
 		// Create the pricing category field.
 		$pricing_category_field = array(
 			'type'          => 'select',
@@ -2171,6 +2192,7 @@ class Booking extends PostType {
 	 * @param BookingModel $booking Booking model.
 	 * @param array        $cart_info Cart info.
 	 * @since 6.7.0
+	 * @since 6.7.6 - removed partial total from cart info.
 	 */
 	private function update_cart_totals( BookingModel $booking, array $cart_info ): array {
 		if ( is_numeric( $total = $this->request->get_param( 'total' ) ) ) {
@@ -2186,11 +2208,6 @@ class Booking extends PostType {
 		if ( is_numeric( $due_amount = $this->request->get_param( 'due_amount' ) ) ) {
 			$booking->set_total_due_amount( (float) $due_amount );
 			$cart_info['totals']['due_total'] = (float) $due_amount;
-		}
-
-		if ( is_numeric( $paid_amount = $this->request->get_param( 'paid_amount' ) ) ) {
-			$cart_info['totals']['partial_total'] = (float) $paid_amount;
-			$booking->set_total_paid_amount( (float) $paid_amount );
 		}
 
 		return $cart_info;
@@ -2349,6 +2366,11 @@ class Booking extends PostType {
 		$booking->set_meta( 'wp_travel_engine_booking_payment_status', $last_status );
 
 		$booking->set_meta( 'payments', $_payments );
+		/*
+		Moved from update_cart_totals to process_payments.
+		*  @since 6.7.6
+		*/
+		$booking->set_total_paid_amount( (float) $paid_amount );
 	}
 
 	/**

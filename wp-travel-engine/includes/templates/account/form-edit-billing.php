@@ -68,9 +68,7 @@ $billing_phone   = isset( $biling_data['billing_phone'] ) ? $biling_data['billin
 		<div class="wpte__form-col">
 			<div class="wpte-form-field lrf-text">
 				<label class="lrf-field-label" for="customer_billing_city"><?php esc_html_e( 'City:', 'wp-travel-engine' ); ?></label>
-				<input type="text" name="customer_billing_city" id="customer_billing_city" required="1"
-					data-msg="Please enter your city" data-parsley-required-message="Please enter your city"
-					value="<?php echo esc_attr( $billing_city ); ?>" />
+				<input type="text" name="customer_billing_city" id="customer_billing_city" value="<?php echo esc_attr( $billing_city ); ?>" />
 			</div>
 		</div>
 		<div class="wpte__form-col">

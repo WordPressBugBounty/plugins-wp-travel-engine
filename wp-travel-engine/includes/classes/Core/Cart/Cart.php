@@ -60,8 +60,8 @@ class Cart extends LegacyCart {
 	public function calculate_totals(): void {
 
 		if ( ! $this->booking_ref ) {
-			$payment_gateway_obj 	= PaymentGateways::instance()->get_payment_gateway( $this->payment_gateway );
-			$this->version       	= ( $payment_gateway_obj instanceof BaseGateway ) ? $payment_gateway_obj::$cart_version : $this->version;
+			$payment_gateway_obj = PaymentGateways::instance()->get_payment_gateway( $this->payment_gateway );
+			$this->version       = ( $payment_gateway_obj instanceof BaseGateway ) ? $payment_gateway_obj::$cart_version : $this->version;
 		}
 
 		$this->reset_totals();

@@ -255,7 +255,7 @@ class Customer extends PostModel {
 	 */
 	public function maybe_register_as_user( bool $force = false ) {
 		$register_user = $force || wptravelengine_settings()->is( 'generate_user_account', 'yes' );
-		
+
 		if ( $register_user ) {
 			$email_address = trim( $this->get_title() );
 			$email_address = sanitize_email( $email_address );
@@ -274,16 +274,18 @@ class Customer extends PostModel {
 				);
 
 				$user_id = wp_insert_user( $userdata );
-				
+
 				if ( is_wp_error( $user_id ) ) {
-					error_log( sprintf( 
-						'Failed to create user for customer %d: %s', 
-						$this->get_id(), 
-						$user_id->get_error_message() 
-					) );
+					error_log(
+						sprintf(
+							'Failed to create user for customer %d: %s',
+							$this->get_id(),
+							$user_id->get_error_message()
+						)
+					);
 					return;
 				}
-				
+
 				update_user_meta( $user_id, 'customer_id', $this->get_id() );
 				$data_array = array(
 					'billing_address'  => $this->get_customer_address(),
@@ -338,14 +340,14 @@ class Customer extends PostModel {
 			'wp_travel_engine_bookings' => 'wp_travel_engine_user_bookings',
 		);
 
-		$billing_info = get_post_meta( $booking_id, 'wptravelengine_billing_details', true );
+		$billing_info  = get_post_meta( $booking_id, 'wptravelengine_billing_details', true );
 		$billing_email = $billing_info['email'] ?? $this->get_customer_email();
 
 		if ( empty( $billing_email ) || ! is_email( $billing_email ) ) {
 			return;
 		}
 
-		$user = get_user_by( 'email', $billing_email );
+		$user           = get_user_by( 'email', $billing_email );
 		$logged_in_user = null;
 
 		if ( is_user_logged_in() ) {
@@ -367,15 +369,15 @@ class Customer extends PostModel {
 				if ( isset( $meta_mappings[ $meta_key ] ) && 'wp_travel_engine_bookings' === $meta_key ) {
 					// Get the new bookings array from the customer meta changes
 					$new_bookings = is_array( $meta_value ) ? $meta_value : array();
-					
+
 					foreach ( $users_to_update as $user_to_update ) {
 						// Get existing user bookings
 						$existing_bookings = get_user_meta( $user_to_update->ID, 'wp_travel_engine_user_bookings', true );
 						$existing_bookings = is_array( $existing_bookings ) ? $existing_bookings : array();
-						
+
 						// Merge and deduplicate bookings
 						$merged_bookings = array_unique( array_merge( $existing_bookings, $new_bookings ) );
-						
+
 						update_user_meta( $user_to_update->ID, 'wp_travel_engine_user_bookings', $merged_bookings );
 					}
 				}

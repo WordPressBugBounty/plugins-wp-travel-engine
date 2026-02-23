@@ -64,14 +64,16 @@ class Events {
 
 			$__data['trigger_time'] ??= gmdate( 'Y-m-d H:i:s', time() + 60 );
 
+			// Use %i placeholder for table name (WP 6.2+)
 			$sql = $wpdb->prepare(
-				"INSERT INTO {$table} (`object_id`, `event_name`, `object_type`, `event_data`, `trigger_time`, `event_created_at`)
+				'INSERT INTO %i (`object_id`, `event_name`, `object_type`, `event_data`, `trigger_time`, `event_created_at`)
 				VALUES (%d, %s, %s, %s, %s, %s)
 				ON DUPLICATE KEY UPDATE
 					`event_data` = VALUES(`event_data`),
 					`trigger_time` = VALUES(`trigger_time`),
 					`event_created_at` = VALUES(`event_created_at`)
-				",
+				',
+				$table,
 				$__data['object_id'],
 				$__data['event_name'],
 				$__data['object_type'],
@@ -117,7 +119,8 @@ class Events {
 		$table = $wpdb->prefix . 'wptravelengine_events';
 		$now   = current_time( 'mysql', true );
 
-		$prepare = $wpdb->prepare( "SELECT * FROM $table WHERE `trigger_time` <= %s", $now );
+		// Use %i placeholder for table name (WP 6.2+)
+		$prepare = $wpdb->prepare( 'SELECT * FROM %i WHERE `trigger_time` <= %s', $table, $now );
 		$events  = $wpdb->get_results( $prepare, ARRAY_A );
 
 		foreach ( $events as $event ) :
@@ -144,6 +147,11 @@ class Events {
 							continue 2;
 						}
 						$object = new Review( $comment );
+						break;
+					case 'log_file':
+						// Handle log file cleanup via Logger class
+						\WPTravelEngine\Logger\Logger::handle_log_file_cleanup( json_decode( $event_data, true ) );
+						$object = $object_id;
 						break;
 					default:
 						$object = $object_id;
@@ -262,6 +270,8 @@ class Events {
 	/**
 	 * Event Exists.
 	 *
+	 * Checks both database and pending in-memory events to prevent race conditions.
+	 *
 	 * @param string $event_name Event name.
 	 * @param int    $object_id Object ID.
 	 * @param string $object_type Object type.
@@ -269,12 +279,24 @@ class Events {
 	 * @return bool
 	 */
 	public static function exists( string $event_name, int $object_id, string $object_type ): bool {
+		// Check pending in-memory events first (race condition prevention)
+		foreach ( self::$events_data as $event ) {
+			if ( $event['event_name'] === $event_name &&
+				$event['object_id'] === $object_id &&
+				$event['object_type'] === $object_type ) {
+				return true;
+			}
+		}
+
+		// Check database
 		global $wpdb;
 
 		$table = static::$table_name;
 
+		// Use %i placeholder for table name (WP 6.2+)
 		$sql_check = $wpdb->prepare(
-			"SELECT 1 FROM {$table} WHERE object_id = %d AND event_name = %s AND object_type = %s LIMIT 1",
+			'SELECT 1 FROM %i WHERE object_id = %d AND event_name = %s AND object_type = %s LIMIT 1',
+			$table,
 			$object_id,
 			$event_name,
 			$object_type
