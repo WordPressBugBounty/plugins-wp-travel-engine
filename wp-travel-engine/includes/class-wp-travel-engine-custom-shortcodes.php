@@ -69,11 +69,22 @@ class WP_Travel_Engine_Custom_Shortcodes {
 
 		ob_start();
 		$current_user_wishlist = wptravelengine_user_wishlists();
+		$current_user_wishlist = is_array( $current_user_wishlist ) ? $current_user_wishlist : array( 0 );
+
+		$query = new WP_Query(
+			array(
+				'post_type'   => WP_TRAVEL_ENGINE_POST_TYPE,
+				'post_status' => 'publish',
+				'post__in'    => $current_user_wishlist,
+				'orderby'     => 'post__in',
+				'paged'       => get_query_var( 'paged' ),
+			)
+		);
 		?>
 		<div>
 			<div class="wte-category-outer-wrap wte-user-wishlists">
 				<?php
-				if ( empty( $current_user_wishlist ) || ! is_array( $current_user_wishlist ) ) {
+				if ( 0 === $query->post_count ) {
 					$button_txt    = __( 'Explore Trips', 'wp-travel-engine' );
 					$site_url      = get_site_url();
 					$trip_page_url = $site_url . '/trip';
@@ -93,7 +104,7 @@ class WP_Travel_Engine_Custom_Shortcodes {
 					<div class="wte-category-outer-wrap" data-wptravelengine-wishlist-list>
 						<div class="wte-user-wishlist-toolbar">
 							<span class="wte-user-wishlist-count" data-wptravelengine-wishlist-count>
-								<?php printf( wp_kses_post( _n( '<strong>%d</strong> item in wishlist', '<strong>%d</strong> items in wishlist', count( $current_user_wishlist ), 'wp-travel-engine' ) ), count( $current_user_wishlist ) ); ?>
+								<?php printf( wp_kses_post( _n( '<strong>%d</strong> item in wishlist', '<strong>%d</strong> items in wishlist', $query->post_count, 'wp-travel-engine' ) ), $query->post_count ); ?>
 							</span>
 							<button aria-label="Remove All Items from Wishlist"
 									class="wishlist-toggle wte-wishlist-remove-all" data-wptravelengine-wishlist-remove data-product="all">
@@ -101,15 +112,6 @@ class WP_Travel_Engine_Custom_Shortcodes {
 							</button>
 						</div>
 						<?php
-						$query = new WP_Query(
-							array(
-								'post_type'   => WP_TRAVEL_ENGINE_POST_TYPE,
-								'post_status' => 'publish',
-								'post__in'    => $current_user_wishlist,
-								'orderby'     => 'post__in',
-								'paged'       => get_query_var( 'paged' ),
-							)
-						);
 						if ( $query->have_posts() ) :
 							?>
 							<div class="category-main-wrap wte-col-3 category-grid" data-wptravelengine-wishlists>

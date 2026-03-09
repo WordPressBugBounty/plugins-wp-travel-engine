@@ -100,15 +100,8 @@ class TripMetaTabs {
 	 * @return array
 	 */
 	public function fixed_starting_dates_fields( array $fields, string $extension ): array {
-		if ( 'fixed-starting-dates' === $extension ) {
+		if ( 'fixed-starting-dates' === $extension && wptravelengine_is_addon_active( 'fixed-starting-dates' ) ) {
 			$fields = array(
-				array(
-					'field'      => array(
-						'type'  => 'TITLE',
-						'title' => __( 'Date Settings', 'wp-travel-engine' ),
-					),
-					'visibility' => wptravelengine_is_addon_active( 'fixed-starting-dates' ),
-				),
 				array(
 					'label'       => __( 'Section Title', 'wp-travel-engine' ),
 					'description' => __( 'Enter title for the Availability section.', 'wp-travel-engine' ),
@@ -118,7 +111,6 @@ class TripMetaTabs {
 						'type'        => 'TEXT',
 						'placeholder' => __( 'Enter here', 'wp-travel-engine' ),
 					),
-					'visibility'  => wptravelengine_is_addon_active( 'fixed-starting-dates' ),
 				),
 				array(
 					'divider'     => true,
@@ -128,7 +120,6 @@ class TripMetaTabs {
 						'name' => 'fsd.hide',
 						'type' => 'SWITCH',
 					),
-					'visibility'  => wptravelengine_is_addon_active( 'fixed-starting-dates' ),
 				),
 			);
 		}

@@ -44,7 +44,7 @@ class LoggerSettings {
 		'retention_days' => 7,
 		'auto_cleanup'   => 'yes',
 		'max_file_size'  => 10,
-		'cache_duration' => 5, // Minutes
+		'cache_duration' => 1440, // Minutes
 	);
 
 	/**
@@ -115,7 +115,7 @@ class LoggerSettings {
 
 		// Update transient cache on successful save
 		if ( $result ) {
-			$cache_duration = (int) $this->get( 'cache_duration', 5 );
+			$cache_duration = (int) $this->get( 'cache_duration', 1440 );
 			set_transient( self::TRANSIENT_KEY, $this->settings, $cache_duration * MINUTE_IN_SECONDS );
 		}
 
@@ -150,7 +150,7 @@ class LoggerSettings {
 		}
 
 		// Cache for future requests
-		$cache_duration = isset( $this->settings['cache_duration'] ) ? (int) $this->settings['cache_duration'] : 5;
+		$cache_duration = isset( $this->settings['cache_duration'] ) ? (int) $this->settings['cache_duration'] : 1440;
 		set_transient( self::TRANSIENT_KEY, $this->settings, $cache_duration * MINUTE_IN_SECONDS );
 	}
 
@@ -162,30 +162,5 @@ class LoggerSettings {
 	 */
 	public function is_enabled(): bool {
 		return 'yes' === $this->get( 'enabled', 'yes' );
-	}
-
-	/**
-	 * Reset settings to defaults.
-	 *
-	 * @return bool True on success, false on failure.
-	 * @since 6.7.6
-	 */
-	public function reset(): bool {
-		$this->settings = array();
-		$this->clear_cache();
-		return delete_option( self::OPTION_NAME );
-	}
-
-	/**
-	 * Clear the transient cache.
-	 *
-	 * Call this when settings are updated externally or need to be refreshed.
-	 *
-	 * @return bool True on success, false on failure.
-	 * @since 6.7.6
-	 */
-	public function clear_cache(): bool {
-		$this->settings = null; // Force reload on next access
-		return delete_transient( self::TRANSIENT_KEY );
 	}
 }

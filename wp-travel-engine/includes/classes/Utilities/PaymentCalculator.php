@@ -189,4 +189,140 @@ final class PaymentCalculator {
 		}
 		return number_format( floatval( $value ), $this->scale, '.', '' );
 	}
+
+	/**
+	 * Converts the value to positive.
+	 *
+	 * @param string $value Value to convert.
+	 * @return string Positive value.
+	 * @since 6.7.7
+	 */
+	public function abs( string $value ): string {
+		$value = (string) abs( floatval( $value ) );
+		return $this->normalize( $value );
+	}
+
+	/**
+	 * Check if the value is equals to the given value.
+	 *
+	 * @param string $a Value to check.
+	 * @param string $operator Operator to compare. e.g. '==', '!=', '>', '<', '>=', '<='.
+	 * @param string $b Value to check against.
+	 * @return bool True if the value is equals to the given value, false otherwise.
+	 * @throws InvalidArgumentException If the operator is invalid.
+	 * @since 6.7.7
+	 */
+	public function is( string $a, string $operator, string $b ) {
+		$result = $this->compare( $a, $b );
+		switch ( $operator ) {
+			case '==':
+			case '===':
+				return $result === 0;
+			case '!=':
+				return $result !== 0;
+			case '>':
+				return $result > 0;
+			case '<':
+				return $result < 0;
+			case '>=':
+				return $result >= 0;
+			case '<=':
+				return $result <= 0;
+			default:
+				throw new InvalidArgumentException( 'Invalid operator' );
+		}
+	}
+
+	/**
+	 * Check if the value is negative.
+	 *
+	 * @param string $value Value to check.
+	 * @return bool True if the value is negative, false otherwise.
+	 * @since 6.7.7
+	 */
+	public function is_negative( string $value ): bool {
+		return $this->is( $value, '<', '0.00' );
+	}
+
+	/**
+	 * Check if the value is positive.
+	 *
+	 * @param string $value Value to check.
+	 * @return bool True if the value is positive, false otherwise.
+	 * @since 6.7.7
+	 */
+	public function is_positive( string $value ): bool {
+		return $this->is( $value, '>', '0.00' );
+	}
+
+	/**
+	 * Find the highest value among the provided arguments.
+	 *
+	 * @param string|int|float ...$args The values to compare.
+	 * @return string The highest value as a string.
+	 * @throws InvalidArgumentException If no arguments are provided.
+	 * @since 6.7.7
+	 */
+	public function max( ...$args ): string {
+		// Handle array passed as first argument
+		if ( count( $args ) === 1 && is_array( $args[0] ) ) {
+			$args = $args[0];
+		}
+
+		if ( empty( $args ) ) {
+			throw new InvalidArgumentException( 'max(): Array must contain at least one element' );
+		}
+
+		if ( ! $this->has_bcmath ) {
+			return strval( max( array_map( 'floatval', $args ) ) );
+		}
+
+		$max = strval( $args[0] );
+		foreach ( $args as $val ) {
+			$curr = strval( $val );
+			// BCMath doesn't support 'e', so we ignore or convert.
+			// Check is_numeric and exclude scientific notation for BCMath safety.
+			if ( is_numeric( $curr ) && stripos( $curr, 'e' ) === false ) {
+				if ( bccomp( $curr, $max ) === 1 ) {
+					$max = $curr;
+				}
+			}
+		}
+
+		return $max;
+	}
+
+	/**
+	 * Find the lowest value among the provided arguments.
+	 *
+	 * @param string|int|float ...$args The values to compare.
+	 * @return string The lowest value as a string.
+	 * @throws InvalidArgumentException If no arguments are provided.
+	 * @since 6.7.7
+	 */
+	public function min( ...$args ): string {
+		if ( count( $args ) === 1 && is_array( $args[0] ) ) {
+			$args = $args[0];
+		}
+
+		if ( empty( $args ) ) {
+			throw new InvalidArgumentException( 'min(): Array must contain at least one element' );
+		}
+
+		if ( ! $this->has_bcmath ) {
+			return strval( min( array_map( 'floatval', $args ) ) );
+		}
+
+		$min = strval( $args[0] );
+		foreach ( $args as $val ) {
+			$curr = strval( $val );
+			if ( is_numeric( $curr ) && stripos( $curr, 'e' ) === false ) {
+				if ( bccomp( $curr, $min ) === -1 ) {
+					$min = $curr;
+				}
+			}
+		}
+
+		return $min;
+	}
 }

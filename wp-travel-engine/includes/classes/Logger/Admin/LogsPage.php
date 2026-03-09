@@ -486,8 +486,8 @@ class LogsPage implements AdminPage {
 		// Cache Duration - numeric validation
 		if ( isset( $_POST['logger_cache_duration'] ) ) {
 			$cache_duration = absint( wp_unslash( $_POST['logger_cache_duration'] ) );
-			// Clamp to 1-1440 minutes (1 day)
-			$settings->set( 'cache_duration', max( 1, min( 1440, $cache_duration ) ) );
+			// Clamp to 1-2880 minutes (2 days)
+			$settings->set( 'cache_duration', max( 1, min( 2880, $cache_duration ) ) );
 		}
 
 		// Persist to database
@@ -510,7 +510,7 @@ class LogsPage implements AdminPage {
 		$retention_days = $settings->get( 'retention_days', 7 );
 		$auto_cleanup   = $settings->get( 'auto_cleanup', 'yes' );
 		$max_file_size  = $settings->get( 'max_file_size', 10 );
-		$cache_duration = $settings->get( 'cache_duration', 5 ); // Already in minutes
+		$cache_duration = $settings->get( 'cache_duration', 1440 ); // Already in minutes
 
 		// Simplified log levels - just 2 options
 		$log_levels = array(
@@ -610,9 +610,9 @@ class LogsPage implements AdminPage {
 						</th>
 						<td>
 							<input type="number" name="logger_cache_duration" id="logger_cache_duration"
-									value="<?php echo esc_attr( $cache_duration ); ?>" min="1" max="1440" class="small-text">
+									value="<?php echo esc_attr( $cache_duration ); ?>" min="1" max="2880" class="small-text">
 							<p class="description">
-								<?php esc_html_e( 'How long to cache log file lists in minutes (1-1440 minutes).', 'wp-travel-engine' ); ?>
+								<?php esc_html_e( 'How long to cache log file lists in minutes (1-2880 minutes).', 'wp-travel-engine' ); ?>
 							</p>
 						</td>
 					</tr>

@@ -619,40 +619,6 @@ final class Plugin {
 		add_filter( 'wte_show_changelog_for_550', '__return_true' );
 
 		add_filter(
-			'display_post_states',
-			function ( $states, $post ) {
-				if ( ! in_array( $post->post_type, array( 'page', WP_TRAVEL_ENGINE_POST_TYPE ) ) ) {
-					return $states;
-				}
-				$pages  = wte_array_get( get_option( 'wp_travel_engine_settings', array() ), 'pages', array() );
-				$pages  = is_array( $pages ) ? array_flip( array_filter( $pages, fn( $v ) => is_numeric( $v ) ) ) : array();
-				$labels = array(
-					'wp_travel_engine_place_order'       => __( 'WTE Checkout', 'wp-travel-engine' ),
-					'wp_travel_engine_terms_and_conditions' => __( 'WTE Terms and Conditions', 'wp-travel-engine' ),
-					'wp_travel_engine_thank_you'         => __( 'WTE Thank You', 'wp-travel-engine' ),
-					'wp_travel_engine_confirmation_page' => __( 'WTE Travellers Information', 'wp-travel-engine' ),
-					'wp_travel_engine_dashboard_page'    => __( 'My Account', 'wp-travel-engine' ),
-					'enquiry'                            => __( 'WTE Enquiry Thank You', 'wp-travel-engine' ),
-					'search'                             => __( 'WTE Search Results', 'wp-travel-engine' ),
-					'wp_travel_engine_wishlist'          => __( 'WTE WishList', 'wp-travel-engine' ),
-				);
-
-				if ( ! empty( $post->trip_version ) ) {
-					$version_parts       = explode( '.', $post->trip_version );
-					$states[ $post->ID ] = $version_parts[0] . '.' . $version_parts[1];
-				}
-
-				if ( isset( $pages[ $post->ID ] ) ) {
-					$states[ $pages[ $post->ID ] ] = $labels[ $pages[ $post->ID ] ];
-				}
-
-				return $states;
-			},
-			11,
-			2
-		);
-
-		add_filter(
 			'wp_kses_allowed_html',
 			function ( $allowedtags, $context ) {
 				if ( is_array( $context ) ) {

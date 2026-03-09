@@ -69,7 +69,7 @@ class PluginSettings extends BaseSetting {
 	 */
 	public function get( string $key = null, $default_value = null ) {
 
-		if ( isset( $this->callbacks[ $key ] ) ) {
+		if ( isset( $this->callbacks[ $key ?? '' ] ) ) {
 			$value = call_user_func( $this->callbacks[ $key ] );
 		} elseif ( is_null( $key ) || wptravelengine_key_exists( parent::get(), explode( '.', $key ) ) ) {
 				$value = parent::get( $key );

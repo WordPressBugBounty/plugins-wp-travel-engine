@@ -1181,7 +1181,7 @@ class Trip extends WP_REST_Posts_Controller {
 			'dates'             => array(),
 		);
 		if ( class_exists( 'WTE_Fixed_Starting_Dates' ) ) {
-			foreach ( $trip_package->get_meta( 'package-dates' ) ?? array() as $date_data ) {
+			foreach ( $trip_package->get_meta( 'package-dates' ) ?: array() as $date_data ) {
 				$times = array();
 				foreach ( $date_data['times'] ?? array() as $time ) {
 					$times[] = array(

@@ -100,24 +100,6 @@ class TourPackages {
 		add_action( 'rest_api_init', array( $this, 'register_rest_fields' ) );
 
 		add_filter(
-			'wp_travel_engine_admin_trip_meta_tabs',
-			function ( $trip_edit_tabs ) {
-				global $post;
-
-				if ( ! defined( 'USE_WTE_LEGACY_VERSION' ) && ( get_post_meta( $post->ID, 'trip_version', true ) === '2.0.0' ) || 'draft' === $post->post_status ) {
-					wp_enqueue_script( 'wte-rxjs' );
-					wp_enqueue_script( 'wte-redux' );
-					unset( $trip_edit_tabs['wpte-availability'] );
-					$trip_edit_tabs['wpte-pricing']['tab_label']    = __( 'Date and Price', 'wp-travel-engine' );
-					$trip_edit_tabs['wpte-pricing']['content_path'] = WTE_PRICING_TAB_PARTIALS_DIR . 'tab-pricing.php';
-				}
-
-				return $trip_edit_tabs;
-			},
-			11
-		);
-
-		add_filter(
 			'wte_admin_localize_data',
 			function ( $data ) {
 				$screen = get_current_screen();

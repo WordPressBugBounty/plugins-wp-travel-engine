@@ -1,5 +1,10 @@
 == Changelog ==
 
+= 6.7.7 - 9th March 2026 =
+* Improved: Reorganized trip edit settings by structuring tabs and sub-tabs for easier navigation.
+* Improved: Simplified multi-day trip time selection by using only a start time, which is automatically applied as the end time for clear display.
+* Fixed: Corrected an intermittent issue with the pre-selected payment option on the checkout page.
+
 = 6.7.6 - 23rd February 2026 =
 * New Feature: Added a comprehensive logging system with automated log management to efficiently track and maintain system activity.
 * Fixed: Resolved minor issues on the single trip page to improve stability.

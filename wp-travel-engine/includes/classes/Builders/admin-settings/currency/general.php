@@ -35,7 +35,7 @@ return apply_filters(
 	array(
 		'title'  => __( 'General', 'wp-travel-engine' ),
 		'order'  => 5,
-		'id'     => 'currency-genral',
+		'id'     => 'currency-general',
 		'fields' => array(
 			array(
 				'label'       => __( 'Payment Currency', 'wp-travel-engine' ),

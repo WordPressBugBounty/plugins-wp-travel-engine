@@ -29,13 +29,15 @@ abstract class Handler {
 	abstract public function handle( string $level, string $message, array $context ): void;
 
 	/**
-	 * Format timestamp in ISO 8601 format.
+	 * Format timestamp in UTC ISO 8601 format for log files.
+	 *
+	 * Converts Unix timestamp to UTC string (not localized).
 	 *
 	 * @param int $timestamp Unix timestamp.
-	 * @return string Formatted timestamp.
+	 * @return string Formatted UTC timestamp (YYYY-MM-DD HH:MM:SS).
 	 * @since 6.7.6
 	 */
-	protected function format_timestamp( int $timestamp ): string {
+	protected function format_utc_timestamp( int $timestamp ): string {
 		return gmdate( 'Y-m-d H:i:s', $timestamp );
 	}
 
@@ -49,7 +51,7 @@ abstract class Handler {
 	 * @since 6.7.6
 	 */
 	protected function format_entry( string $level, string $message, array $context ): string {
-		$timestamp = $this->format_timestamp( time() );
+		$timestamp = $this->format_utc_timestamp( time() );
 		$level     = strtoupper( $level );
 
 		$entry = sprintf(

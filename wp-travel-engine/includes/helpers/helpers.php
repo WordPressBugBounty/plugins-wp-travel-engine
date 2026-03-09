@@ -2259,17 +2259,17 @@ function wpte_get_booking_cutoff( int $post_id ): array {
 	return $cutoff_array;
 }
 
-// Tabs filter to support custom tabs.
-add_filter( 'wp_travel_engine_admin_trip_meta_tabs', 'wpte_add_custom_tabs_to_trip_meta' );
-
 /**
  * Get custom tabs array.
  *
+ * @param array $trip_meta_tabs
+ *
  * @return array
+ * @since 6.7.7 Updated the response to new version array
  */
-function wpte_add_custom_tabs_to_trip_meta( $trip_meta_tabs ) {
-	$default_tabs = wte_get_default_settings_tab();
-	$settings     = get_option( 'wp_travel_engine_settings', array() );
+function wpte_add_custom_tabs_to_trip_meta( array $trip_meta_tabs ): array {
+	// $default_tabs = wte_get_default_settings_tab();
+	$settings = get_option( 'wp_travel_engine_settings', array() );
 
 	$def_tabs = array(
 		'2' => 'itinerary',
@@ -2283,36 +2283,21 @@ function wpte_add_custom_tabs_to_trip_meta( $trip_meta_tabs ) {
 		return $trip_meta_tabs;
 	}
 
-	$last_tab[ array_key_last( $trip_meta_tabs ) ] = array_pop( $trip_meta_tabs );
-	$priority                                      = reset( $last_tab )['priority'] ?? 120;
+	$custom_tabs = array();
 	foreach ( $settings['trip_tabs']['id'] as $key => $value ) {
 
 		$field = $settings['trip_tabs']['field'][ $value ];
 
-		if ( '1' == $value || in_array( $field, $def_tabs ) ) {
+		if ( '1' == $value || in_array( $field, $def_tabs ) || 'review' === $field ) {
 			continue;
 		}
 
-		if ( 'review' === $field ) {
-			continue;
-		}
+		$tab_label = ! empty( $settings['trip_tabs']['name'][ $value ] ?? '' ) ? $settings['trip_tabs']['name'][ $value ] : __( 'Custom Tab', 'wp-travel-engine' );
 
-		$tab_label = isset( $settings['trip_tabs']['name'][ $value ] ) && ! empty( $settings['trip_tabs']['name'][ $value ] ) ? $settings['trip_tabs']['name'][ $value ] : __( 'Custom Tab', 'wp-travel-engine' );
-		// $tab_content = isset( $wp_travel_engine_setting[ 'tab_content' ][ $value . '_wpeditor' ] ) ? $wp_travel_engine_setting[ 'tab_content' ][ $value . '_wpeditor' ] : '';
-
-		$trip_meta_tabs[ 'wp_editor_tab_' . $value ] = array(
-			'tab_label'         => $tab_label,
-			'tab_heading'       => $tab_label,
-			'content_path'      => plugin_dir_path( WP_TRAVEL_ENGINE_FILE_PATH ) . '/admin/meta-parts/trip-tabs/custom-tabs.php',
-			'callback_function' => 'wpte_tab_' . $key,
-			'content_key'       => 'wp_editor_tab_' . $value,
-			'tab_key'           => $value,
-			'current'           => false,
-			'content_loaded'    => true,
-			'priority'          => $priority,
-			'is_custom'         => true,
-			'icon'              => 'tool',
-			'fields'            => array(
+		$custom_tabs[] = array(
+			'id'     => 'wp_editor_tab_' . $value,
+			'title'  => $tab_label,
+			'fields' => array(
 				array(
 					'label'   => __( 'Section Title', 'wp-travel-engine' ),
 					'divider' => true,
@@ -2322,7 +2307,6 @@ function wpte_add_custom_tabs_to_trip_meta( $trip_meta_tabs ) {
 						'placeholder' => __( 'Title', 'wp-travel-engine' ),
 					),
 				),
-
 				array(
 					'label'   => __( 'Tab Content', 'wp-travel-engine' ),
 					'divider' => true,
@@ -2332,14 +2316,29 @@ function wpte_add_custom_tabs_to_trip_meta( $trip_meta_tabs ) {
 					),
 				),
 			),
-
 		);
-		++$priority;
 	}
 
-	$last_tab[ key( $last_tab ) ]['priority'] = $priority;
+	if ( ! empty( $custom_tabs ) ) {
+		$trip_meta_tabs['wpte-custom-tabs'] = array(
+			'tab_label'   => __( 'Custom Tabs', 'wp-travel-engine' ),
+			'tab_heading' => __( 'Custom Tabs', 'wp-travel-engine' ),
+			'content_key' => 'wpte-custom-tabs',
+			'is_custom'   => true,
+			'priority'    => 80,
+			'icon'        => 'tool',
+			'fields'      => array(
+				array(
+					'field' => array(
+						'type' => 'TAB',
+						'tabs' => $custom_tabs,
+					),
+				),
+			),
+		);
+	}
 
-	return $trip_meta_tabs + $last_tab;
+	return $trip_meta_tabs;
 }
 
 /**

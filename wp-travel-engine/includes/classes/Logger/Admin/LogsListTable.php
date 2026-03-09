@@ -229,7 +229,7 @@ class LogsListTable extends WP_List_Table {
 	protected function column_default( $item, $column_name ): string {
 		switch ( $column_name ) {
 			case 'timestamp':
-				return esc_html( LogUtils::format_timestamp( $item['timestamp'] ) );
+				return esc_html( LogUtils::format_display_timestamp( $item['timestamp'] ) );
 
 			case 'level':
 				return LogUtils::format_level( $item['level'] );
@@ -367,12 +367,20 @@ class LogsListTable extends WP_List_Table {
 				<pre style="background: #fff; padding: 10px; overflow-x: auto;"><?php echo esc_html( LogUtils::format_context( $item['context'] ) ); ?></pre>
 			<?php endif; ?>
 
-			<?php if ( ! empty( $item['context']['trace'] ) || ! empty( $item['context']['backtrace'] ) ) : ?>
+			<?php if ( ! empty( $item['context']['stack_trace'] ) || ! empty( $item['context']['trace'] ) || ! empty( $item['context']['backtrace'] ) ) : ?>
 				<p><strong><?php esc_html_e( 'Stack Trace:', 'wp-travel-engine' ); ?></strong></p>
 				<pre style="background: #fff; padding: 10px; overflow-x: auto;">
 				<?php
-				$trace = $item['context']['trace'] ?? $item['context']['backtrace'];
-				echo esc_html( LogUtils::format_backtrace( $trace ) );
+				// Prefer stack_trace (from exception) over backtrace (from debug_backtrace)
+				// stack_trace is a formatted string, backtrace is an array
+				if ( ! empty( $item['context']['stack_trace'] ) ) {
+					// Stack trace is already formatted as string - just display it
+					echo esc_html( $item['context']['stack_trace'] );
+				} else {
+					// Backtrace is array - needs formatting
+					$trace = $item['context']['trace'] ?? $item['context']['backtrace'];
+					echo esc_html( LogUtils::format_backtrace( $trace ) );
+				}
 				?>
 				</pre>
 			<?php endif; ?>

@@ -17,51 +17,10 @@ namespace WPTravelEngine\Logger\Utilities;
  */
 class LogUtils {
 
-	/**
-	 * Lines per chunk for reading.
-	 *
-	 * @var int
-	 */
-	protected int $chunk_size = 1000;
-
 	// ============================================================================
 	// FILE MANAGEMENT METHODS
 	// ============================================================================
 
-	/**
-	 * Delete all log files.
-	 *
-	 * @return int Number of files deleted.
-	 */
-	public static function delete_all_logs(): int {
-		$log_dir = self::get_log_directory();
-		if ( ! is_dir( $log_dir ) ) {
-			return 0;
-		}
-
-		// Use specific pattern *.log to match only log files (not .log.bak, .log.txt, etc.)
-		$files         = glob( $log_dir . '/*.log' );
-		$deleted_count = 0;
-
-		if ( is_array( $files ) ) {
-			foreach ( $files as $file ) {
-				if ( basename( $file ) === 'index.html' ) {
-					continue;
-				}
-
-				// phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink
-				if ( unlink( $file ) ) {
-					++$deleted_count;
-				}
-			}
-		}
-
-		// Clear all log cleanup events
-		self::clear_log_events();
-
-		self::clear_cache();
-		return $deleted_count;
-	}
 
 	/**
 	 * Get log directory path.
@@ -100,6 +59,100 @@ class LogUtils {
 		}
 
 		return $size;
+	}
+
+	/**
+	 * Detect source name from error file path.
+	 *
+	 * Determines which plugin/addon the error came from:
+	 * - wp-travel-engine → 'wptravelengine'
+	 * - wp-travel-engine-* → 'wp-travel-engine-addon-name'
+	 * - wptravelengine-* → 'wptravelengine-addon-name'
+	 * - wte-* → 'wte-addon-name'
+	 * - wpte-* → 'wpte-addon-name'
+	 *
+	 * If error file is from WordPress core, checks backtrace to find
+	 * the actual plugin that triggered the error.
+	 *
+	 * @param string $file Error file path.
+	 * @return string Source name for log file.
+	 * @since 6.7.6
+	 */
+	public static function detect_source_from_file( string $file ): string {
+		if ( ! defined( 'WP_PLUGIN_DIR' ) ) {
+			return 'wptravelengine';
+		}
+
+		$plugins_dir = wp_normalize_path( WP_PLUGIN_DIR );
+
+		// Try to detect source from error file first
+		$source = self::get_source_from_file( $file, $plugins_dir );
+		if ( 'wptravelengine' !== $source ) {
+			return $source; // Found specific addon
+		}
+
+		// Normalize path to check if it's in plugins directory
+		$file_normalized = wp_normalize_path( $file );
+
+		// check backtrace to find the actual plugin source
+		if ( strpos( $file_normalized, $plugins_dir ) !== 0 ) {
+			$backtrace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 15 );
+			foreach ( $backtrace as $frame ) {
+				if ( ! isset( $frame['file'] ) ) {
+					continue;
+				}
+
+				$frame_source = self::get_source_from_file( $frame['file'], $plugins_dir );
+				if ( 'wptravelengine' !== $frame_source ) {
+					return $frame_source; // Found specific addon in backtrace
+				}
+
+				// Check if it's from main plugin
+				$frame_file = wp_normalize_path( $frame['file'] );
+				if ( strpos( $frame_file, $plugins_dir . '/wp-travel-engine/' ) === 0 ) {
+					return 'wptravelengine';
+				}
+			}
+		}
+
+		// Fallback to main plugin
+		return 'wptravelengine';
+	}
+
+	/**
+	 * Extract source plugin name from file path.
+	 *
+	 * Helper method to identify which plugin/addon a file belongs to.
+	 *
+	 * @param string $file        File path to check.
+	 * @param string $plugins_dir WordPress plugins directory path.
+	 * @return string Source name, or 'wptravelengine' if not from addon.
+	 * @since 6.7.6
+	 */
+	protected static function get_source_from_file( string $file, string $plugins_dir ): string {
+		// Normalize path
+		$file = wp_normalize_path( $file );
+
+		// Check if from main wp-travel-engine plugin
+		if ( strpos( $file, $plugins_dir . '/wp-travel-engine/' ) === 0 ) {
+			return 'wptravelengine';
+		}
+
+		// Extract plugin folder name if file is in plugins directory
+		$prefix = $plugins_dir . '/';
+		if ( strpos( $file, $prefix ) === 0 ) {
+			$relative = substr( $file, strlen( $prefix ) );
+			$parts    = explode( '/', $relative );
+			$folder   = $parts[0] ?? '';
+
+			// Check if folder matches addon patterns
+			if ( ! empty( $folder ) && preg_match( '/^(wp-travel-engine-.+|wptravelengine-.+|wte-.+|wpte-.+)$/', $folder ) ) {
+				return $folder;
+			}
+		}
+
+		// Not from our plugin/addons
+		return 'wptravelengine';
 	}
 
 	/**
@@ -193,12 +246,10 @@ class LogUtils {
 		);
 	}
 
-	// ============================================================================
-	// PARSING METHODS
-	// ============================================================================
-
 	/**
 	 * Parse log file.
+	 *
+	 * Parses multi-line log entries written by FileHandler.
 	 *
 	 * @param string $file_path File path.
 	 * @param array  $filters   Filters to apply (level, source, date, search).
@@ -234,6 +285,7 @@ class LogUtils {
 		}
 
 		// Read and parse file (with memory protection via max_entries limit and hard line limit)
+		// Now supports multi-line entries with stack traces
 		$entries        = array();
 		$lines_read     = 0;
 		$max_lines_read = 50000; // Hard limit: prevent DoS from massive files
@@ -241,6 +293,11 @@ class LogUtils {
 		$handle = fopen( $file_path, 'r' );
 
 		if ( $handle ) {
+			// State machine for multi-line log entries
+			$main_line   = null;   // Current entry's main log line
+			$in_stack    = false;  // Currently reading stack trace section
+			$stack_trace = null;   // Accumulated stack trace lines
+
 			while ( ( $line = fgets( $handle ) ) !== false ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fgets
 				++$lines_read;
 
@@ -249,15 +306,68 @@ class LogUtils {
 					break;
 				}
 
-				$entry = $this->parse_line( $line );
+				$trimmed = trim( $line );
+
+				// Separator line marks end of entry (written by FileHandler)
+				if ( preg_match( '/^-{10,}$/', $trimmed ) ) {
+					// Process buffered entry
+					if ( null !== $main_line ) {
+						$entry = $this->parse_line( $main_line );
+
+						// Add stack trace if collected
+						if ( $entry && ! empty( $stack_trace ) ) {
+							$entry['context']['stack_trace'] = trim( $stack_trace );
+						}
+
+						if ( $entry && $this->matches_filters( $entry, $filters ) ) {
+							$entries[] = $entry;
+
+							// Memory protection: stop if max entries reached (0 = unlimited)
+							if ( $max_entries > 0 && count( $entries ) >= $max_entries ) {
+								// Clear state before breaking to prevent duplicate in flush block
+								$main_line = null;
+								break;
+							}
+						}
+					}
+
+					// Reset state
+					$main_line   = null;
+					$stack_trace = null;
+					$in_stack    = false;
+					continue;
+				}
+
+				// Check if this is a stack trace section
+				if ( $trimmed === 'STACK TRACE:' ) {
+					$in_stack    = true;
+					$stack_trace = '';
+					continue;
+				}
+
+				// Collect stack trace lines (including empty lines - PHP stack traces can have blank lines)
+				if ( $in_stack ) {
+					$stack_trace .= $line; // Keep original newlines and blank lines
+					continue;
+				}
+
+				// Main log line (timestamp prefix)
+				if ( preg_match( '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/', $trimmed ) ) {
+					$main_line = $line;
+				}
+			}
+
+			// Flush last buffered entry (if file doesn't end with separator)
+			if ( null !== $main_line ) {
+				$entry = $this->parse_line( $main_line );
+
+				// Add stack trace if collected
+				if ( $entry && ! empty( $stack_trace ) ) {
+					$entry['context']['stack_trace'] = trim( $stack_trace );
+				}
 
 				if ( $entry && $this->matches_filters( $entry, $filters ) ) {
 					$entries[] = $entry;
-
-					// Memory protection: stop if max entries reached (0 = unlimited)
-					if ( $max_entries > 0 && count( $entries ) >= $max_entries ) {
-						break;
-					}
 				}
 			}
 
@@ -510,12 +620,15 @@ class LogUtils {
 	// ============================================================================
 
 	/**
-	 * Format timestamp for display.
+	 * Format timestamp for display in admin UI.
 	 *
-	 * @param string $timestamp ISO 8601 timestamp.
-	 * @return string Formatted timestamp.
+	 * Converts ISO 8601 timestamp string to localized display format.
+	 * Uses wp_date() for WordPress timezone support.
+	 *
+	 * @param string $timestamp ISO 8601 timestamp string.
+	 * @return string Formatted localized timestamp.
 	 */
-	public static function format_timestamp( string $timestamp ): string {
+	public static function format_display_timestamp( string $timestamp ): string {
 		$datetime = strtotime( $timestamp );
 		if ( ! $datetime ) {
 			return $timestamp;
@@ -577,11 +690,11 @@ class LogUtils {
 	 * @return string Formatted JSON.
 	 */
 	public static function format_context( array $context ): string {
-		// Remove sensitive or large data
+		// Remove sensitive or large data (stack traces are shown separately)
 		$filtered = array_filter(
 			$context,
 			function ( $key ) {
-				return ! in_array( $key, array( 'backtrace', 'trace' ), true );
+				return ! in_array( $key, array( 'backtrace', 'trace', 'stack_trace' ), true );
 			},
 			ARRAY_FILTER_USE_KEY
 		);
@@ -628,24 +741,5 @@ class LogUtils {
 		}
 
 		return '';
-	}
-
-	/**
-	 * Get human-readable time difference.
-	 *
-	 * @param string $timestamp ISO 8601 timestamp.
-	 * @return string Human-readable time difference.
-	 */
-	public static function human_time_diff( string $timestamp ): string {
-		$datetime = strtotime( $timestamp );
-		if ( ! $datetime ) {
-			return $timestamp;
-		}
-
-		return sprintf(
-			/* translators: %s: Time difference */
-			__( '%s ago', 'wp-travel-engine' ),
-			human_time_diff( $datetime, current_time( 'timestamp' ) )
-		);
 	}
 }

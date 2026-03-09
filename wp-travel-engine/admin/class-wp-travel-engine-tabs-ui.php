@@ -35,8 +35,8 @@ class WP_Travel_Engine_Tabs_UI {
 	 * @return $this
 	 */
 	public function init( $tab_attributes = array() ): WP_Travel_Engine_Tabs_UI {
-		$this->tab_attributes[ 'id' ]    = $tab_attributes[ 'id' ] ?? '';
-		$this->tab_attributes[ 'class' ] = $tab_attributes[ 'class' ] ?? '';
+		$this->tab_attributes['id']    = $tab_attributes['id'] ?? '';
+		$this->tab_attributes['class'] = $tab_attributes['class'] ?? '';
 
 		return $this;
 	}
@@ -52,14 +52,27 @@ class WP_Travel_Engine_Tabs_UI {
 	public function formated_tabs( $admin_tabs ): array {
 		$tabs = array();
 		foreach ( $admin_tabs as $key => $tab ) {
-			$tabs[] = array(
-				'id'          => $tab[ 'content_key' ],
-				'label'       => $tab[ 'tab_label' ],
-				'heading'     => $tab[ 'tab_heading' ],
-				'description' => $tab[ 'tab_description' ] ?? '',
-				'icon'        => $tab[ 'icon' ] ?? 'info',
-				'fields'      => $tab[ 'fields' ] ?? array(),
+			$formatted_tab = array(
+				'id'          => $tab['content_key'],
+				'label'       => $tab['tab_label'] ?? '',
+				'heading'     => $tab['tab_heading'] ?? '',
+				'description' => $tab['tab_description'] ?? '',
+				'icon'        => $tab['icon'] ?? 'info',
+				'fields'      => $tab['fields'] ?? array(),
+				'separated'   => $tab['separated'] ?? false,
+				'as'          => $tab['as'] ?? '',
 			);
+
+			// Handle sub_tabs if present
+			if ( isset( $tab['sub_tabs'] ) && is_array( $tab['sub_tabs'] ) ) {
+				$formatted_tab['sub_tabs'] = $tab['sub_tabs'];
+			}
+
+			if ( isset( $tab['sub_menus'] ) && is_array( $tab['sub_menus'] ) ) {
+				$formatted_tab['sub_menus'] = $tab['sub_menus'];
+			}
+
+			$tabs[] = $formatted_tab;
 		}
 
 		return $tabs;
@@ -75,9 +88,9 @@ class WP_Travel_Engine_Tabs_UI {
 		if ( is_array( $admin_tabs ) && ! empty( $admin_tabs ) ) :
 			$tabs = $this->formated_tabs( $admin_tabs );
 			?>
-			<div id="<?php echo esc_attr( $this->tab_attributes[ 'id' ] ); ?>"
-				 data-app="<?php echo esc_attr( wp_json_encode( compact( 'tabs' ) ) ); ?>"></div>
-		<?php
+			<div id="<?php echo esc_attr( $this->tab_attributes['id'] ); ?>"
+				data-app="<?php echo esc_attr( wp_json_encode( compact( 'tabs' ) ) ); ?>"></div>
+			<?php
 		endif;
 	}
 
@@ -90,37 +103,37 @@ class WP_Travel_Engine_Tabs_UI {
 		global $post;
 		if ( is_array( $admin_tabs ) && ! empty( $admin_tabs ) ) :
 			?>
-			<div id="<?php echo esc_attr( $this->tab_attributes[ 'id' ] ); ?>"
-				 class="wpte-main-wrap <?php echo esc_attr( $this->tab_attributes[ 'class' ] ); ?>">
+			<div id="<?php echo esc_attr( $this->tab_attributes['id'] ); ?>"
+				class="wpte-main-wrap <?php echo esc_attr( $this->tab_attributes['class'] ); ?>">
 				<div class="wpte-tab-main wpte-vertical-tab">
 					<!-- Tabs Navigator -->
 					<div class="wpte-tab-wrap">
 						<?php
 						foreach ( $admin_tabs as $key => $tab ) :
-							$next_tab = next( $admin_tabs );
-							$tab_key = $tab[ 'tab_key' ] ?? '';
+							$next_tab    = next( $admin_tabs );
+							$tab_key     = $tab['tab_key'] ?? '';
 							$tab_details = array(
-								'content_path' => base64_encode( $tab[ 'content_path' ] ),
+								'content_path' => base64_encode( $tab['content_path'] ),
 								// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-								'content_key'  => $tab[ 'content_key' ],
-								'tab_heading'  => $tab[ 'tab_heading' ],
+								'content_key'  => $tab['content_key'],
+								'tab_heading'  => $tab['tab_heading'],
 								'tab_key'      => $tab_key,
 							);
 
-							$class = 'wpte-tab';
+							$class  = 'wpte-tab';
 							$class .= " {$key}";
 							$class .= ' wpte-tab-nav';
-							$class .= ( $tab[ 'current' ] ) ? ' current' : '';
-							$class .= ( $tab[ 'content_loaded' ] ) ? ' content_loaded' : '';
+							$class .= ( $tab['current'] ) ? ' current' : '';
+							$class .= ( $tab['content_loaded'] ) ? ' content_loaded' : '';
 							?>
 							<a data-next-tab="<?php echo esc_attr( wp_json_encode( $next_tab ) ); ?>"
-							   data-post-id="<?php echo is_object( $post ) ? esc_attr( $post->ID ) : ''; ?>"
-							   data-callback="<?php echo esc_attr( $tab[ 'callback_function' ] ); ?>"
-							   href="javascript:void(0);"
-							   data-tab-details="<?php echo esc_attr( wp_json_encode( $tab_details ) ); ?>"
-							   data-nonce="<?php echo esc_attr( wp_create_nonce( 'wpte_admin_load_tab_content' ) ); ?>"
-							   class="<?php echo esc_attr( $class ); ?>">
-								<?php echo esc_html( $tab[ 'tab_label' ] ); ?>
+								data-post-id="<?php echo is_object( $post ) ? esc_attr( $post->ID ) : ''; ?>"
+								data-callback="<?php echo esc_attr( $tab['callback_function'] ); ?>"
+								href="javascript:void(0);"
+								data-tab-details="<?php echo esc_attr( wp_json_encode( $tab_details ) ); ?>"
+								data-nonce="<?php echo esc_attr( wp_create_nonce( 'wpte_admin_load_tab_content' ) ); ?>"
+								class="<?php echo esc_attr( $class ); ?>">
+								<?php echo esc_html( $tab['tab_label'] ); ?>
 							</a>
 						<?php endforeach; ?>
 					</div>
@@ -128,23 +141,23 @@ class WP_Travel_Engine_Tabs_UI {
 						<?php
 						foreach ( $admin_tabs as $key => $tab ) :
 							$next_tab = next( $admin_tabs );
-							if ( isset( $tab[ 'content_loaded' ] ) && $tab[ 'content_loaded' ] ) {
-								if ( file_exists( $tab[ 'content_path' ] ) ) {
+							if ( isset( $tab['content_loaded'] ) && $tab['content_loaded'] ) {
+								if ( file_exists( $tab['content_path'] ) ) {
 									?>
-									<div data-trigger="<?php echo esc_attr( $tab[ 'content_key' ] ); ?>"
-										 class="wpte-tab-content <?php echo esc_attr( $key ); ?>-content <?php echo $tab[ 'current' ] ? 'current' : ''; ?> <?php echo $tab[ 'content_loaded' ] ? 'content_loaded' : ''; ?>">
+									<div data-trigger="<?php echo esc_attr( $tab['content_key'] ); ?>"
+										class="wpte-tab-content <?php echo esc_attr( $key ); ?>-content <?php echo $tab['current'] ? 'current' : ''; ?> <?php echo $tab['content_loaded'] ? 'content_loaded' : ''; ?>">
 										<div class="wpte-title-wrap">
-											<h2 class="wpte-title"><?php echo esc_html( $tab[ 'tab_heading' ] ); ?></h2>
+											<h2 class="wpte-title"><?php echo esc_html( $tab['tab_heading'] ); ?></h2>
 										</div> <!-- .wpte-title-wrap -->
 										<div class="wpte-block-content">
 											<?php
 											global $post;
 											if ( isset( $post->ID ) ) {
-												$args[ 'post_id' ] = $post->ID;
+												$args['post_id'] = $post->ID;
 											}
-											$args[ 'next_tab' ] = $next_tab;
+											$args['next_tab'] = $next_tab;
 											// load template.
-											include $tab[ 'content_path' ];
+											include $tab['content_path'];
 											?>
 										</div>
 									</div>
@@ -157,7 +170,7 @@ class WP_Travel_Engine_Tabs_UI {
 					<div style="display:none;" class="wpte-loading-anim"></div>
 				</div> <!-- .wpte-tab-main -->
 			</div><!-- .wpte-main-wrap -->
-		<?php
+			<?php
 		endif;
 	}
 }

@@ -129,8 +129,9 @@ class ClearLogs extends AjaxController {
 			}
 		}
 
-		// Clear cache
+		// Clear cache and cleanup events
 		LogUtils::clear_cache();
+		LogUtils::clear_log_events();
 
 		wp_send_json_success(
 			array(

@@ -231,10 +231,11 @@ class Wp_Travel_Engine_Archive_Hooks {
 		$args = array_merge(
 			self::$query_args,
 			array(
-				'post__in'         => $trips_array,
-				'paged'            => 1,
-				'posts_per_page'   => $feat_trip_num,
-				'wpte_trip_search' => false,
+				'post__in'            => $trips_array,
+				'paged'               => 1,
+				'posts_per_page'      => $feat_trip_num,
+				'wpte_trip_search'    => false,
+				'wpte_featured_query' => true,
 			)
 		);
 
@@ -586,10 +587,10 @@ class Wp_Travel_Engine_Archive_Hooks {
 				?>
 				<div class="wte-category-outer-wrap is-loading" data-filter-nonce="<?php echo esc_attr( wp_create_nonce( 'wte_show_ajax_result' ) ); ?>">
 					<?php
-					$j              = 1;
-					$view_mode      = wp_travel_engine_get_archive_view_mode();
-					$classes        = apply_filters( 'wte_advanced_search_trip_results_grid_classes', class_exists( 'Wte_Advanced_Search' ) ? ( $show_sidebar ? 'wte-col-2 category-grid' : 'wte-col-3 category-grid' ) : 'wte-col-3 category-grid' );
-					$view_class     = 'grid' === $view_mode ? $classes : 'category-list';
+					$j          = 1;
+					$view_mode  = wp_travel_engine_get_archive_view_mode();
+					$classes    = apply_filters( 'wte_advanced_search_trip_results_grid_classes', class_exists( 'Wte_Advanced_Search' ) ? ( $show_sidebar ? 'wte-col-2 category-grid' : 'wte-col-3 category-grid' ) : 'wte-col-3 category-grid' );
+					$view_class = 'grid' === $view_mode ? $classes : 'category-list';
 
 					echo '<div class="category-main-wrap ' . esc_attr( $view_class ) . '">';
 

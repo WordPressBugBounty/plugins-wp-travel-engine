@@ -120,7 +120,7 @@ class Cart {
 	/**
 	 * @var string $payment_type Payment type. full|due|partial.
 	 */
-	protected string $payment_type = 'partial';
+	protected string $payment_type = 'full';
 
 	/**
 	 * @var mixed|null
@@ -368,7 +368,7 @@ class Cart {
 		$this->cart_key = wptravelengine_generate_key( time() );
 
 		$this->set_booking_ref();
-		$this->set_payment_type( 'partial' );
+		$this->set_payment_type( 'full' );
 
 		if ( ! is_null( $request->get_param( 'booking_id' ) ) ) {
 			$booking = wptravelengine_get_booking( $request->get_param( 'booking_id' ) );

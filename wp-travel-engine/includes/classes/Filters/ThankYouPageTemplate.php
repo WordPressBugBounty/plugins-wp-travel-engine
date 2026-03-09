@@ -114,7 +114,7 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 	 */
 	public function print_payment_details() {
 
-		$payment_amount = $this->payment->get_cart_totals( 'payable_now' ) ?: $this->payment->get_payable_amount();
+		$payment_amount = $this->cart->get_total_payable_amount() ?: $this->payment->get_payable_amount();
 		$payment_status = $this->payment->get_payment_status_label();
 		$remarks        = __( 'Your booking order has been placed. Your booking will be confirmed after payment confirmation/settlement.', 'wp-travel-engine' );
 		wptravelengine_get_template(
@@ -270,6 +270,7 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 			array(
 				'show_coupon_form' => $show_coupon_form === 'show',
 				'_wte_cart'        => $this->cart,
+				'template_instance' => $template_instance,
 			),
 			$args
 		);

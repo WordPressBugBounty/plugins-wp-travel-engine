@@ -118,6 +118,50 @@ class FileHandler extends Handler {
 	}
 
 	/**
+	 * Format a log entry with human-readable stack traces.
+	 *
+	 * Overrides parent to extract stack_trace from context and format it on separate lines
+	 * for readability, while keeping the main log line single-line for grep/parsing.
+	 *
+	 * @param string $level   Log level.
+	 * @param string $message Log message.
+	 * @param array  $context Additional context.
+	 * @return string Formatted log entry.
+	 * @since 6.7.7
+	 */
+	protected function format_entry( string $level, string $message, array $context ): string {
+		$timestamp = $this->format_utc_timestamp( time() );
+		$level     = strtoupper( $level );
+
+		// Extract stack_trace for separate formatting (more readable)
+		$stack_trace = null;
+		if ( isset( $context['stack_trace'] ) ) {
+			$stack_trace = $context['stack_trace'];
+			unset( $context['stack_trace'] ); // Remove from JSON context
+		}
+
+		// Format main log line (single-line for grep)
+		$entry = sprintf(
+			'%s %s %s',
+			$timestamp,
+			$level,
+			$message
+		);
+
+		// Add context as JSON (if any remains after removing stack_trace)
+		if ( ! empty( $context ) ) {
+			$entry .= ' CONTEXT: ' . wp_json_encode( $context, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+		}
+
+		// Add stack trace on separate lines for readability (if exists)
+		if ( ! empty( $stack_trace ) ) {
+			$entry .= PHP_EOL . 'STACK TRACE:' . PHP_EOL . $stack_trace;
+		}
+
+		return $entry;
+	}
+
+	/**
 	 * Get log file path for a log entry.
 	 *
 	 * Day-based file naming - one file per day for all sources.
@@ -231,21 +275,6 @@ class FileHandler extends Handler {
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
 			file_put_contents( $index_file, '<!-- Silence is golden. -->' );
 		}
-	}
-
-	/**
-	 * Get source from context.
-	 *
-	 * @param array $context Log context.
-	 * @return string Source identifier.
-	 * @since 6.7.6
-	 */
-	protected function get_source_from_context( array $context ): string {
-		if ( isset( $context['source'] ) ) {
-			return sanitize_key( $context['source'] );
-		}
-
-		return 'wptravelengine';
 	}
 
 	/**

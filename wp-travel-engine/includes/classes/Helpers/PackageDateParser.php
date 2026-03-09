@@ -165,6 +165,7 @@ class PackageDateParser {
 	protected function prepare_date( $date ): array {
 		$times          = array();
 		$formatted_date = $date->format( 'Y-m-d' );
+		$end_date 		= wptravelengine_format_trip_end_datetime( $formatted_date, $this->package->get_trip(), 'Y-m-d' );
 
 		$i = 0;
 		foreach ( $this->times as $time ) {
@@ -181,11 +182,11 @@ class PackageDateParser {
 						$this->package->get_id(),
 						$formatted_date,
 						$time['from'],
-						$time['to'],
+						$time['from'],
 					)
 				),
 				'from'  => $formatted_date . 'T' . $time['from'],
-				'to'    => $formatted_date . 'T' . $time['to'],
+				'to'    => $end_date . 'T' . $time['from'],
 				'seats' => $available_time_seats,
 			);
 

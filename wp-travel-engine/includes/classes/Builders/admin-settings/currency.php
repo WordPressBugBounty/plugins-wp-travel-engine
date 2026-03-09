@@ -11,5 +11,5 @@ return array(
 	'order'    => 20,
 	'sub_tabs' => __DIR__ . '/currency',
 	'icon'     => 'grid',
-	'id'       => 'currency-genral',
+	'id'       => 'currency-general',
 );

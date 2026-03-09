@@ -14,6 +14,8 @@
 
 namespace WPTravelEngine\Logger\ErrorHandlers;
 
+use WPTravelEngine\Logger\Utilities\LogUtils;
+
 /**
  * Error handler class.
  *
@@ -100,6 +102,9 @@ class ShutdownErrorHandler {
 	 * @since 6.7.6
 	 */
 	public static function register(): void {
+		if ( ! \WPTravelEngine\Logger\LoggerSettings::instance()->is_enabled() ) {
+			return;
+		}
 		// Capture previous error handler to properly chain with other plugins
 		$mask                   = E_WARNING | E_CORE_WARNING | E_COMPILE_WARNING
 		| E_USER_WARNING | E_USER_ERROR | E_RECOVERABLE_ERROR;
@@ -136,17 +141,8 @@ class ShutdownErrorHandler {
 		}
 
 		// Only capture errors from WP Travel Engine plugin files
-		if ( ! self::is_plugin_error( $errfile ) ) {
-			return false;
-		}
-
-		// Check if logging is enabled (warnings respect this setting)
-		// Fatal errors are always logged regardless of this setting
-		// Cache settings to avoid DB calls on every error (performance optimization)
-		if ( null === self::$enabled_cache ) {
-			self::$enabled_cache = \WPTravelEngine\Logger\LoggerSettings::instance()->is_enabled();
-		}
-		if ( ! self::$enabled_cache && ! WP_DEBUG ) {
+		// Pass backtrace to verify if WordPress core errors were caused by our plugin
+		if ( ! self::is_plugin_error( $errfile, debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 20 ) ) ) {
 			return false;
 		}
 
@@ -223,13 +219,10 @@ class ShutdownErrorHandler {
 		}
 
 		// Only capture errors from WP Travel Engine plugin files
-		if ( ! self::is_plugin_error( $error['file'] ) ) {
+		// Pass error message so we can extract stack trace from it
+		if ( ! self::is_plugin_error( $error['file'], null, $error['message'] ) ) {
 			return;
 		}
-
-		// FATAL ERRORS ARE ALWAYS LOGGED - they break the site
-		// Settings check is skipped for fatal errors (E_ERROR, E_PARSE, etc.)
-		// Only warnings respect the enabled/disabled setting
 
 		// Rate limiting
 		if ( ! self::check_rate_limit() ) {
@@ -269,8 +262,17 @@ class ShutdownErrorHandler {
 		// Map error type to log level
 		$level = self::get_log_level_for_error_type( $errno );
 
+		// Extract original stack trace from error message before stripping it
+		// For uncaught exceptions, PHP includes the full stack trace in the error message
+		// This is MORE valuable than debug_backtrace() at shutdown (which only shows hook chain)
+		// Pattern handles all line ending styles (LF, CRLF, CR) for cross-platform compatibility
+		$original_stack_trace = null;
+		if ( preg_match( '/(?:\r\n|\r|\n)Stack trace:(?:\r\n|\r|\n)(.+)/s', $errstr, $stack_matches ) ) {
+			$original_stack_trace = trim( $stack_matches[1] );
+		}
+
 		// Strip stack trace from error message for cleaner single-line logging
-		$clean_errstr = preg_replace( '/\r?\n?Stack trace:.*/s', '', $errstr );
+		$clean_errstr = preg_replace( '/(?:\r\n|\r|\n)Stack trace:.*/s', '', $errstr );
 
 		// Build error message
 		$message = sprintf(
@@ -281,20 +283,31 @@ class ShutdownErrorHandler {
 			$errline
 		);
 
-		// Detect source from file path
-		$source = self::detect_source_from_file( $errfile );
+		// Build context (source will be detected later from stack trace if available)
+		$context = array(
+			'error_type' => $errno,
+			'file'       => $errfile,
+			'line'       => $errline,
+		);
+
+		// Add original stack trace if available (from uncaught exception)
+		// This is the REAL stack trace showing the call chain, not the shutdown hook chain
+		if ( null !== $original_stack_trace ) {
+			$context['stack_trace'] = $original_stack_trace;
+		}
+
+		// Detect source from stack trace first (more accurate - shows actual caller)
+		// Fall back to error file if no stack trace available
+		if ( null !== $original_stack_trace ) {
+			$source = self::detect_source_from_stack_trace( $original_stack_trace );
+		} else {
+			$source = LogUtils::detect_source_from_file( $errfile );
+		}
+
+		$context['source'] = $source;
 
 		// Log the error
-		$logger->log(
-			$level,
-			$message,
-			array(
-				'error_type' => $errno,
-				'file'       => $errfile,
-				'line'       => $errline,
-				'source'     => $source,
-			)
-		);
+		$logger->log( $level, $message, $context );
 	}
 
 	/**
@@ -355,11 +368,13 @@ class ShutdownErrorHandler {
 	/**
 	 * Check if error is from WP Travel Engine plugin or addons.
 	 *
-	 * @param string $file Error file path.
+	 * @param string      $file          Error file path.
+	 * @param array|null  $backtrace     Optional backtrace from handle_error().
+	 * @param string|null $error_message Optional error message from handle_shutdown().
 	 * @return bool True if error is from plugin or addons.
 	 * @since 6.7.6
 	 */
-	protected static function is_plugin_error( string $file ): bool {
+	protected static function is_plugin_error( string $file, ?array $backtrace = null, ?string $error_message = null ): bool {
 		// Check if file is in plugins directory
 		if ( ! defined( 'WP_PLUGIN_DIR' ) ) {
 			return false;
@@ -379,8 +394,31 @@ class ShutdownErrorHandler {
 			return false;
 		}
 
+		// If error message provided (from fatal error), extract and parse stack trace
+		if ( null !== $error_message ) {
+			return self::is_plugin_error_from_message( $error_message, $plugins_dir );
+		}
+
+		// If backtrace provided (from warning/error), use it
+		if ( null !== $backtrace ) {
+			return self::is_plugin_error_from_backtrace( $backtrace, $plugins_dir );
+		}
+
+		// No backtrace or message available - for WordPress core errors, accept them
+		// (might be caused by our plugin)
+		return true;
+	}
+
+	/**
+	 * Check if error is from our plugin using backtrace array.
+	 *
+	 * @param array  $backtrace   Backtrace from debug_backtrace().
+	 * @param string $plugins_dir Normalized plugins directory path.
+	 * @return bool True if our plugin is in the call stack.
+	 * @since 6.7.6
+	 */
+	protected static function is_plugin_error_from_backtrace( array $backtrace, string $plugins_dir ): bool {
 		// Check backtrace - skip error handler frames, find first plugin
-		$backtrace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 20 );
 		foreach ( $backtrace as $frame ) {
 			if ( ! isset( $frame['file'] ) ) {
 				continue;
@@ -406,6 +444,63 @@ class ShutdownErrorHandler {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Check if error is from our plugin using error message stack trace.
+	 *
+	 * @param string $error_message Error message (may contain stack trace).
+	 * @param string $plugins_dir   Normalized plugins directory path.
+	 * @return bool True if our plugin is in the stack trace.
+	 * @since 6.7.7
+	 */
+	protected static function is_plugin_error_from_message( string $error_message, string $plugins_dir ): bool {
+		// Extract stack trace from error message
+		// Pattern: matches "Stack trace:" followed by stack trace lines
+		if ( ! preg_match( '/(?:\r\n|\r|\n)Stack trace:(?:\r\n|\r|\n)(.+)/s', $error_message, $matches ) ) {
+			// No stack trace in message - for WordPress core errors, accept them
+			return true;
+		}
+
+		$stack_trace = $matches[1];
+		$lines       = explode( "\n", $stack_trace );
+
+		// Parse stack trace lines to extract file paths
+		// Format: #0 /path/to/file.php(123): function()
+		foreach ( $lines as $line ) {
+			// Extract file path from stack trace line
+			// Pattern: #N /path/to/file.php(line): or #N [internal function]:
+			if ( ! preg_match( '~^#\d+\s+([^(]+)\(\d+\):~', $line, $match ) ) {
+				continue;
+			}
+
+			$frame_file = trim( $match[1] );
+			$frame_file = wp_normalize_path( $frame_file );
+
+			// Skip internal functions
+			if ( '[internal function]' === $frame_file || '[internal' === $frame_file ) {
+				continue;
+			}
+
+			// Skip error handler frames
+			if ( strpos( $frame_file, 'Logger/ErrorHandlers/' ) !== false ||
+				strpos( $frame_file, 'Logger/Handlers/' ) !== false ) {
+				continue;
+			}
+
+			// First non-error-handler frame: check if it's our plugin
+			if ( self::is_our_plugin_file( $frame_file, $plugins_dir ) ) {
+				return true; // Our plugin is first - we caused the error
+			}
+
+			// If it's a different plugin, reject immediately
+			if ( strpos( $frame_file, $plugins_dir . '/' ) === 0 ) {
+				return false; // Other plugin caused the error
+			}
+		}
+
+		// No plugin found in stack trace - for WordPress core errors, accept them
+		return true;
 	}
 
 	/**
@@ -443,60 +538,44 @@ class ShutdownErrorHandler {
 	}
 
 	/**
-	 * Detect source name from error file path.
+	 * Detect source from stack trace string.
 	 *
-	 * Determines which plugin/addon the error came from:
-	 * - wp-travel-engine → 'wptravelengine'
-	 * - wp-travel-engine-* → 'wp-travel-engine-addon-name'
-	 * - wptravelengine-* → 'wptravelengine-addon-name'
-	 * - wte-* → 'wte-addon-name'
-	 * - wpte-* → 'wpte-addon-name'
+	 * Parses the stack trace to find the first frame from WP Travel Engine plugins/addons.
+	 * This is more accurate than using the error file location, as it shows the actual caller.
 	 *
-	 * If error file is from WordPress core, checks backtrace to find
-	 * the actual plugin that triggered the error.
+	 * Example: If PostModel.php throws an error but was called by Partial Payment addon,
+	 * the source should be 'wp-travel-engine-partial-payment', not 'wptravelengine'.
 	 *
-	 * @param string $file Error file path.
-	 * @return string Source name for log file.
-	 * @since 6.7.6
+	 * @param string $stack_trace Stack trace string from exception.
+	 * @return string Source name.
+	 * @since 6.7.7
 	 */
-	protected static function detect_source_from_file( string $file ): string {
+	protected static function detect_source_from_stack_trace( string $stack_trace ): string {
 		if ( ! defined( 'WP_PLUGIN_DIR' ) ) {
 			return 'wptravelengine';
 		}
 
 		$plugins_dir = wp_normalize_path( WP_PLUGIN_DIR );
 
-		// Try to detect source from error file first
-		$source = self::get_source_from_file( $file, $plugins_dir );
-		if ( 'wptravelengine' !== $source ) {
-			return $source; // Found specific addon
-		}
+		// Parse stack trace lines to extract file paths
+		$lines = explode( "\n", $stack_trace );
 
-		// Normalize path to check if it's in plugins directory
-		$file_normalized = wp_normalize_path( $file );
+		foreach ( $lines as $line ) {
+			// Extract file path from stack trace line
+			// Use ~ as delimiter to avoid conflict with # in the pattern
+			if ( preg_match( '~^#\d+\s+([^(]+)\(\d+\):~', trim( $line ), $matches ) ) {
+				$file   = trim( $matches[1] );
+				$source = self::get_source_from_file( $file, $plugins_dir );
 
-		// check backtrace to find the actual plugin source
-		if ( strpos( $file_normalized, $plugins_dir ) !== 0 ) {
-			$backtrace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 15 );
-			foreach ( $backtrace as $frame ) {
-				if ( ! isset( $frame['file'] ) ) {
-					continue;
-				}
-
-				$frame_source = self::get_source_from_file( $frame['file'], $plugins_dir );
-				if ( 'wptravelengine' !== $frame_source ) {
-					return $frame_source; // Found specific addon in backtrace
-				}
-
-				// Check if it's from main plugin
-				$frame_file = wp_normalize_path( $frame['file'] );
-				if ( strpos( $frame_file, $plugins_dir . '/wp-travel-engine/' ) === 0 ) {
-					return 'wptravelengine';
+				// If we found a specific addon (not just 'wptravelengine'), return it
+				// This means we found the actual caller addon
+				if ( 'wptravelengine' !== $source ) {
+					return $source;
 				}
 			}
 		}
 
-		// Fallback to main plugin
+		// Fallback: return 'wptravelengine' if no addon found in stack
 		return 'wptravelengine';
 	}
 
@@ -579,7 +658,7 @@ class ShutdownErrorHandler {
 	/**
 	 * Check if this specific error should be logged.
 	 *
-	 * Prevents duplicate logging of the same error within 5 minutes.
+	 * Prevents duplicate logging of the same error within the configured cache duration.
 	 * Uses MD5 hash of file:line:message to identify unique errors.
 	 *
 	 * @param array $error Error array from error_get_last().
@@ -596,11 +675,15 @@ class ShutdownErrorHandler {
 
 		// Check if we've logged this exact error recently
 		if ( get_transient( $cache_key ) ) {
-			return false; // Already logged in last 5 minutes
+			return false;
 		}
 
-		// Mark as logged for 5 minutes (300 seconds)
-		set_transient( $cache_key, true, 300 );
+		// Get cache duration from settings (in minutes)
+		$cache_duration_minutes = (int) \WPTravelEngine\Logger\LoggerSettings::instance()->get( 'cache_duration', 1440 );
+		$cache_duration_seconds = $cache_duration_minutes * 60;
+
+		// Mark as logged for the configured duration
+		set_transient( $cache_key, true, $cache_duration_seconds );
 
 		return true;
 	}

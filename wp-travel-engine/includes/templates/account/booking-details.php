@@ -47,11 +47,11 @@ $start_datetime  = $order_trip['datetime'];
 $trip_start_date = wptravelengine_format_trip_datetime( $start_datetime );
 $trip_end_date   = wptravelengine_format_trip_end_datetime( $start_datetime, $trip );
 
-if ( isset( $cart['items'][0] ) && is_array( $cart['items'][0] ) ) {
-	/** @var array $cart_item */
-	$trip_start_date = wptravelengine_format_trip_datetime( $cart['items'][0]['trip_date'] ) ?? $trip_start_date;
-	$trip_end_date   = isset( $cart['items'][0]['end_date'] ) ? wptravelengine_format_trip_datetime( $cart['items'][0]['end_date'] ) : $trip_end_date;
-}
+// if ( isset( $cart['items'][0] ) && is_array( $cart['items'][0] ) ) {
+// ** @var array $cart_item */
+// $trip_start_date = wptravelengine_format_trip_datetime( $cart['items'][0]['trip_date'] ) ?? $trip_start_date;
+// $trip_end_date   = isset( $cart['items'][0]['end_date'] ) ? wptravelengine_format_trip_datetime( $cart['items'][0]['end_date'] ) : $trip_end_date;
+// }
 
 $traveller_details = array();
 if ( is_array( $_traveller_details ) ) {
@@ -178,9 +178,10 @@ if ( $booking_instance->is_curr_cart() ) {
 					foreach ( $cart['items'] ?? array() as $cart_item ) {
 						/** @var array $cart_item */
 
+						$_start_date     = ( $cart_item['trip_time'] ?? '' ) ?: ( ( $cart_item['trip_date'] ?? '' ) ?: null );
 						$trip            = new Trip( $cart_item['trip_id'] );
 						$end_date        = isset( $cart_item['end_date'] ) ? wptravelengine_format_trip_datetime( $cart_item['end_date'] ) : $trip_end_date;
-						$start_date      = isset( $cart_item['trip_date'] ) ? wptravelengine_format_trip_datetime( $cart_item['trip_date'] ) : $trip_start_date;
+						$start_date      = isset( $_start_date ) ? wptravelengine_format_trip_datetime( $_start_date ) : $trip_start_date;
 						$trip_package    = $cart_item['trip_package'] ?? get_the_title( $cart_item['price_key'] );
 						$travelers_count = $cart_item['travelers_count'] ?? array_sum( $cart_item['pax'] ?? array() );
 						$link            = wptravelengine_toggled( $trip->get_meta( 'is_created_from_booking' ) ) ? '' : $trip->get_permalink();

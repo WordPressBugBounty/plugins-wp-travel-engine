@@ -11,6 +11,7 @@
 namespace WPTravelEngine\Logger;
 
 use WPTravelEngine\Logger\Handlers\Handler;
+use WPTravelEngine\Logger\Utilities\LogUtils;
 use WPTravelEngine\Traits\Singleton;
 
 /**
@@ -48,6 +49,8 @@ class Logger {
 	 *
 	 * Fatal errors: E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR.
 	 *
+	 * @api Public API method for logging fatal errors.
+	 *
 	 * @param string $message Log message.
 	 * @param array  $context Additional context.
 	 * @return void
@@ -61,6 +64,8 @@ class Logger {
 	 * Log a warning.
 	 *
 	 * Warnings: E_WARNING, E_CORE_WARNING, E_COMPILE_WARNING, E_USER_WARNING.
+	 *
+	 * @api Public API method for logging warnings.
 	 *
 	 * @param string $message Log message.
 	 * @param array  $context Additional context.
@@ -114,7 +119,8 @@ class Logger {
 
 		// Performance: Only capture backtrace for FATAL errors (not for WARNING)
 		// Backtrace generation has overhead, and warnings are more common
-		if ( 'FATAL' === $level && ! isset( $context['backtrace'] ) ) {
+		// Skip if stack_trace already exists (original exception stack is more valuable than debug_backtrace at shutdown)
+		if ( 'FATAL' === $level && ! isset( $context['backtrace'] ) && ! isset( $context['stack_trace'] ) ) {
 			$backtrace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 5 );
 			// Remove logger calls from backtrace
 			$backtrace            = array_filter(
@@ -146,43 +152,7 @@ class Logger {
 	protected function detect_source_from_backtrace( array $backtrace ): string {
 		foreach ( $backtrace as $trace ) {
 			if ( isset( $trace['file'] ) ) {
-				return $this->detect_source_from_file( $trace['file'] );
-			}
-		}
-
-		return 'wptravelengine';
-	}
-
-	/**
-	 * Detect source from file path.
-	 *
-	 * @param string $file File path.
-	 * @return string Source identifier.
-	 * @since 6.7.6
-	 */
-	protected function detect_source_from_file( string $file ): string {
-		// Normalize path
-		$file = wp_normalize_path( $file );
-
-		if ( ! defined( 'WP_PLUGIN_DIR' ) ) {
-			return 'wptravelengine';
-		}
-
-		$plugins_dir = wp_normalize_path( WP_PLUGIN_DIR );
-
-		// Check if from main plugin
-		if ( strpos( $file, $plugins_dir . '/wp-travel-engine/' ) === 0 ) {
-			return 'wptravelengine';
-		}
-
-		// Extract plugin folder name if file is in plugins directory
-		if ( strpos( $file, $plugins_dir . '/' ) === 0 ) {
-			$relative = substr( $file, strlen( $plugins_dir ) + 1 );
-			$folder   = explode( '/', $relative )[0];
-
-			// Check if folder matches addon patterns
-			if ( ! empty( $folder ) && preg_match( '/^(wp-travel-engine-.+|wptravelengine-.+|wte-.+|wpte-.+)$/', $folder ) ) {
-				return $folder;
+				return LogUtils::detect_source_from_file( $trace['file'] );
 			}
 		}
 

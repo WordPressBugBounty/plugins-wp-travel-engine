@@ -9,15 +9,16 @@
  * @var bool $show_title
  * @var bool $show_coupon_form
  * @var Checkout $checkout
- * @var \WPTravelEngine\Core\Cart\Cart $cart
+ * @var \WPTravelEngine\Core\Cart\Cart $_wte_cart
+ * @var \WPTravelEngine\Core\Cart\Cart $wte_cart
  * @since 6.3.0
  */
 use WPTravelEngine\Pages\Checkout;
 
 global $wte_cart;
 
-$cart     = $_wte_cart ?? $wte_cart;
-$checkout = new Checkout( $cart );
+$checkout = $template_instance ?? new Checkout( $_wte_cart ?? $wte_cart );
+
 ?>
 	<div class="wpte-checkout__booking-summary">
 		<?php
