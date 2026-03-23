@@ -133,6 +133,8 @@ class TripSearch {
 
 	/**
 	 * Enqueue trip search widgets dropdown scripts.
+	 *
+	 * @since 6.7.8 dequeue is done to remove unused scripts and styles.
 	 */
 	public static function enqueue_trip_search_scripts() {
 		Assets::instance()->enqueue_script( 'wptravelengine-trip-search-widgets-dropdown' )->enqueue_script( 'wptravelengine-trip-search-widgets-slider' );
@@ -181,7 +183,6 @@ class TripSearch {
 		// wp_enqueue_script( 'jquery-ui-slider' );
 		// wp_enqueue_script( 'wte-nouislider' );
 		// wp_enqueue_style( 'wte-nouislider' );
-		wp_enqueue_script( 'wptravelengine-trip-search-widgets-slider' );
 		$range = (array) self::get_price_range( true );
 		$id    = wte_uniqid();
 		?>
@@ -1122,10 +1123,6 @@ class TripSearch {
 			$atts,
 			'Wte_Advanced_Search_Form'
 		);
-
-		if ( ! wp_script_is( 'wptravelengine-trip-search-widgets-slider', 'enqueued' ) ) {
-			self::enqueue_trip_search_scripts();
-		}
 
 		ob_start();
 		wptravelengine_get_template( 'template-trip-search-form.php', array( 'direction' => $atts['direction'] ) );

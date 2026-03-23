@@ -585,7 +585,7 @@ class Wp_Travel_Engine_Archive_Hooks {
 				 */
 				do_action( 'wp_travel_engine_header_filters' );
 				?>
-				<div class="wte-category-outer-wrap is-loading" data-filter-nonce="<?php echo esc_attr( wp_create_nonce( 'wte_show_ajax_result' ) ); ?>">
+				<div class="wte-category-outer-wrap" data-filter-nonce="<?php echo esc_attr( wp_create_nonce( 'wte_show_ajax_result' ) ); ?>">
 					<?php
 					$j          = 1;
 					$view_mode  = wp_travel_engine_get_archive_view_mode();

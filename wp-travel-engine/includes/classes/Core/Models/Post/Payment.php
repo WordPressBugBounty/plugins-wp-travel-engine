@@ -322,4 +322,14 @@ class Payment extends PostModel {
 		$all_payment_details = wptravelengine_payment_status();
 		return $all_payment_details[ $this->get_payment_status() ] ?? $this->get_payment_status();
 	}
+
+	/**
+	 * Get Payment Gateways extra charges.
+	 *
+	 * @return float
+	 * @since 6.7.8
+	 */
+	public function get_gateway_fee(): float {
+		return (float) ( $this->get_meta( 'gateway_fee' ) ?: 0 );
+	}
 }

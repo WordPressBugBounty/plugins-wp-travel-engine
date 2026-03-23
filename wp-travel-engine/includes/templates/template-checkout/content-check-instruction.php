@@ -15,7 +15,7 @@
 	</div>
 	<div class="wpte-thankyou__block-content">
 		<div class="wte-bank-transfer-instructions">
-			<?php echo wp_kses_post( $instruction ); ?>
+			<?php echo wp_kses_post( nl2br( $instruction ) ); ?>
 		</div>
 	</div>
 </div>

@@ -29,6 +29,8 @@ if ( isset( $tabs['id'] ) ) : ?>
 			do_action( "wte_single_before_trip_tab_{$field}" );
 			?>
 			<div id="nb-<?php echo esc_attr( $id ); ?>-configurations" class="nb-<?php echo esc_attr( $id ); ?>-configurations nb-configurations"
+					role="tabpanel"
+					aria-labelledby="tab-<?php echo esc_attr( $id ); ?>"
 					style="order: <?php echo esc_attr( $order ); ?>;<?php echo ( 0 !== $index && ! $show_all_tabs ) ? 'display:none;' : ''; ?>" >
 					<?php do_action( "wte_single_trip_tab_content_{$field}", $id, $field, $tabs['name'][ $id ], $icon ); ?>
 			</div>

@@ -164,8 +164,9 @@ class Checkout {
 
 	public function full_payment_label( $full_payment, $settings ) {
 		// translators: %s: Full payment Amount/Percentage.
-		$label = apply_filters( 'wte_checkout_full_pay_label', __( 'Full payment(%s)', 'wp-travel-engine' ) );
-		$value = ( $settings['type'] ?? '' ) === 'amount' ? wptravelengine_the_price( $full_payment, false, false ) : '100%';
+		$label        = apply_filters( 'wte_checkout_full_pay_label', __( 'Full payment(%s)', 'wp-travel-engine' ) );
+		$payment_type = $settings['type'] ?? '';
+		$value        = in_array( $payment_type, array( 'amount', 'amount_per_booking' ), true ) ? wptravelengine_the_price( $full_payment, false, false ) : '100%';
 
 		/**
 		 * Filters the full payment label.
@@ -189,7 +190,7 @@ class Checkout {
 	 * @return string
 	 */
 	public function down_payment_label( $settings ): string {
-		$is_amount = ( $settings['type'] ?? '' ) === 'amount';
+		$is_amount = in_array( $settings['type'] ?? '', array( 'amount', 'amount_per_booking' ), true );
 		$value     = $settings['value'] ?? 0;
 		$label     = $is_amount ? wptravelengine_the_price( $value, false, false ) : "{$value}%";
 

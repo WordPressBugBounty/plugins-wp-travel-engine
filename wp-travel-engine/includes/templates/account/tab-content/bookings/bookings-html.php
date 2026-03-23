@@ -43,17 +43,17 @@ $map = array(
 					<li>
 						<span class="lrf-td-title"><?php printf( __( 'Total Amount:%s', 'wp-travel-engine' ), $booking_instance->is_curr_cart() ? __( '<br>(excl. extra fees)', 'wp-travel-engine' ) : '' ); ?></span>
 						<span
-							class="lrf-td-desc"><?php wptravelengine_the_price( $booking_instance->get_total() ?? 0, true, compact( 'currency_code' ) ); ?></span>
+							class="lrf-td-desc"><?php wptravelengine_the_price_with_decimal( $booking_instance->get_total() ?? 0, true, compact( 'currency_code' ) ); ?></span>
 					</li>
 					<li>
 						<span class="lrf-td-title"><?php esc_html_e( 'Amount Paid:', 'wp-travel-engine' ); ?></span>
 						<span
-							class="lrf-td-desc"><?php wptravelengine_the_price( $total_paid, true, compact( 'currency_code' ) ); ?></span>
+							class="lrf-td-desc"><?php wptravelengine_the_price_with_decimal( $total_paid, true, compact( 'currency_code' ) ); ?></span>
 					</li>
 					<li>
 						<span class="lrf-td-title"><?php esc_html_e( 'Amount Due:', 'wp-travel-engine' ); ?></span>
 						<span
-							class="lrf-td-desc"><?php wptravelengine_the_price( $due, true, compact( 'currency_code' ) ); ?></span>
+							class="lrf-td-desc"><?php wptravelengine_the_price_with_decimal( $due, true, compact( 'currency_code' ) ); ?></span>
 					</li>
 				</ul>
 			</div>
@@ -68,7 +68,7 @@ $map = array(
 		?>
 		<div class="wpte-ud-message wpte-warning">
 		<?php if ( $due > 0 && $total_paid > 0 ) { ?>
-				<p><?php printf( esc_html__( 'Due %1$s needs to be paid.', 'wp-travel-engine' ), '<strong>' . wptravelengine_the_price( $due, false, compact( 'currency_code' ) ) . '</strong>' ); ?></p>
+				<p><?php printf( esc_html__( 'Due %1$s needs to be paid.', 'wp-travel-engine' ), '<strong>' . wptravelengine_the_price_with_decimal( $due, false, compact( 'currency_code' ) ) . '</strong>' ); ?></p>
 			<?php } ?>
 			<a href="<?php echo esc_url( $payment_link ); ?>"><?php esc_html_e( 'Pay Now', 'wp-travel-engine' ); ?></a>
 		<?php if ( $total_paid == 0 ) { ?>

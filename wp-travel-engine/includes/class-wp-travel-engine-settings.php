@@ -823,7 +823,7 @@ class Wp_Travel_Engine_Settings {
 		);
 
 		$settings_directory = plugin_dir_path( WP_TRAVEL_ENGINE_FILE_PATH ) . 'includes/backend/settings';
-		$settings_dirs      = scandir( $settings_directory );
+		$settings_dirs      = is_dir( $settings_directory ) && is_readable( $settings_directory ) ? scandir( $settings_directory ) : array();
 
 		if ( is_array( $settings_dirs ) ) {
 			foreach ( $settings_dirs as $dir ) {

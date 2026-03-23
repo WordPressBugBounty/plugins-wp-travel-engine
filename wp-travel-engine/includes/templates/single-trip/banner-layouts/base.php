@@ -11,7 +11,9 @@
  */
 $specific_layout && print( '<div class="trip-content-area">' );
 
-if ( $is_mobile_view ) {
+$show_image_gallery = wptravelengine_get_template_arg( 'show_image_gallery', true );
+
+if ( $is_mobile_view || ! $show_image_gallery ) {
 	wptravelengine_get_template( 'single-trip/banner-layouts/mobile-banner.php' );
 } else {
 	wptravelengine_get_template( 'single-trip/banner-layouts/list.php' );

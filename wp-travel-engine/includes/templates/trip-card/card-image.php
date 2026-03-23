@@ -50,11 +50,31 @@ if ( $show_carousel && $trip_instance->is_enabled_image_gallery() && count( $tri
 	wptravelengine_get_template( 'single-trip/main-gallery.php' );
 } else {
 	?>
-	<a href="<?php the_permalink(); ?>">
+	<a href="<?php the_permalink(); ?>" aria-label="<?php echo esc_attr( get_the_title() ); ?>">
 		<?php
 		$size = apply_filters( 'wp_travel_engine_archive_trip_feat_img_size', 'trip-single-size' );
 		if ( has_post_thumbnail() ) :
-			the_post_thumbnail( $size, array( 'loading' => 'lazy' ) );
+			/**
+			 * Filter to enable/disable image optimization (lazy loading, fetchpriority, dimensions).
+			 * To disable: add_filter( 'wptravelengine_enable_image_optimization', '__return_false' );
+			 *
+			 * @since 6.7.8
+			 * @param bool $enabled Whether image optimization is enabled. Default true.
+			 */
+			$enable_image_optimization = apply_filters( 'wptravelengine_enable_image_optimization', true );
+
+			if ( $enable_image_optimization ) {
+				// Use fixed dimensions for archive cards (300x300) for better performance and consistency
+				$img_attrs = array(
+					'loading' => 'lazy',
+					'width'   => 300,
+					'height'  => 300,
+				);
+
+				the_post_thumbnail( $size, $img_attrs );
+			} else {
+				the_post_thumbnail( $size, array( 'loading' => 'lazy' ) );
+			}
 		endif;
 		?>
 	</a>
@@ -112,29 +132,58 @@ if ( $show_map ) {
 				)
 			),
 			array(
-				'div'    => array(
-					'class' => array(),
-					'style' => array(),
+				'div'      => array(
+					'class'           => array(),
+					'style'           => array(),
+					'data-iframe'     => array(),
+					'data-map-loaded' => array(),
 				),
-				'img'    => array(
+				'img'      => array(
 					'class'   => array(),
 					'src'     => array(),
 					'style'   => array(),
 					'loading' => array(),
+					'alt'     => array(),
 				),
-				'iframe' => array(
+				'iframe'   => array(
 					'src'             => array(),
 					'allowfullscreen' => array(),
 					'loading'         => array(),
 					'style'           => array(),
 					'width'           => array(),
 					'height'          => array(),
+					'referrerpolicy'  => array(),
 				),
+				'svg'      => array(
+					'class'           => array(),
+					'xmlns'           => array(),
+					'width'           => array(),
+					'height'          => array(),
+					'viewBox'         => array(),
+					'fill'            => array(),
+					'stroke'          => array(),
+					'stroke-width'    => array(),
+					'stroke-linecap'  => array(),
+					'stroke-linejoin' => array(),
+				),
+				'polygon'  => array(
+					'points' => array(),
+				),
+				'line'     => array(
+					'x1' => array(),
+					'y1' => array(),
+					'x2' => array(),
+					'y2' => array(),
+				),
+				'span'     => array(
+					'class' => array(),
+				),
+				'noscript' => array(),
 			)
 		);
 		?>
 	</div>
-	<button data-thumbnail-toggler class="toggle-map">
+	<button data-thumbnail-toggler class="toggle-map" aria-label="<?php esc_attr_e( 'Toggle map', 'wp-travel-engine' ); ?>">
 		<svg width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
 			<path d="M7.99996 8.83337C9.10453 8.83337 9.99996 7.93794 9.99996 6.83337C9.99996 5.7288 9.10453 4.83337 7.99996 4.83337C6.89539 4.83337 5.99996 5.7288 5.99996 6.83337C5.99996 7.93794 6.89539 8.83337 7.99996 8.83337Z" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round" />
 			<path d="M7.99996 15.1667C9.33329 12.5 13.3333 10.7789 13.3333 7.16671C13.3333 4.22119 10.9455 1.83337 7.99996 1.83337C5.05444 1.83337 2.66663 4.22119 2.66663 7.16671C2.66663 10.7789 6.66663 12.5 7.99996 15.1667Z" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round" />

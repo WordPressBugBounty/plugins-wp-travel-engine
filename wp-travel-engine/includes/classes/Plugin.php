@@ -216,51 +216,12 @@ final class Plugin {
 		add_action( 'init', array( $this, 'wte_login_integration' ) ); // check for the social logins
 		add_action( 'init', array( $this, 'process_booking' ), 12 );
 		add_action( 'init', array( BookingProcess::class, 'initialize_legacy_booking_hooks' ) );
-		add_action(
-			'init',
-			function () {
-				// Deactivate core integrated Plugin.
-				foreach (
-				array(
-					'WTE_TRIP_CODE_FILE_PATH'              => __( 'Trip Code', 'wp-travel-engine' ),
-					'WP_TRAVEL_ENGINE_COUPONS_PLUGIN_FILE' => __( 'Coupon Code', 'wp-travel-engine' ),
-					'WTE_ADVANCED_SEARCH_FILE_PATH'        => __( 'Advanced Search', 'wp-travel-engine' ),
-				) as $constant_name => $plugin_name
-				) {
-					if ( defined( $constant_name ) ) {
-						$plugin = constant( $constant_name );
-						deactivate_plugins( $plugin );
-
-						add_action(
-							'admin_notices',
-							function () use ( $plugin_name ) {
-								printf(
-									'<div id="message" class="notice notice-info is-dismissible"><p>%1$s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%2$s</span></button></div>',
-									esc_html( sprintf( __( '%1$s has been automatically deactivated, the feature providing by the plugin is now available in the WP Travel Engine Core.', 'wp-travel-engine' ), $plugin_name ) ),
-									esc_html__( 'Dismiss this notice.', 'wp-travel-engine' )
-								);
-							}
-						);
-					}
-				}
-
-				/**
-				 * Set default value for display_new_trip_listing as yes.
-				 *
-				 * @since 6.6.0
-				 */
-				$settings         = wptravelengine_settings();
-				$new_trip_listing = $settings->get( 'display_new_trip_listing' );
-				if ( 'yes' !== $new_trip_listing ) {
-					$settings->set( 'display_new_trip_listing', 'yes' );
-					$settings->save();
-				}
-			}
-		);
+		add_action( 'init', array( $this, 'handle_plugin_deactivation_notices' ) );
 
 		add_action( 'admin_init', array( \WTE_Ajax::class, 'ajax_request_middleware' ) );
 		add_action( 'admin_init', array( $this, 'plugin_inline_update_notices' ) );
 		add_action( 'admin_notices', array( $this, 'booking_dashboard_notice' ), 99 );
+		add_action( 'admin_notices', array( $this, 'legacy_checkout_template_notice' ) );
 		add_action( 'comment_post', array( $this, 'on_insert_comment' ) );
 	}
 
@@ -316,6 +277,44 @@ final class Plugin {
 					'p'      => array(),
 					'strong' => array(),
 					'br'     => array(),
+				)
+			)
+		);
+	}
+
+	/**
+	 * Display admin notice for sites still using the legacy (1.0) checkout template.
+	 *
+	 * @return void
+	 * @since 6.7.8
+	 */
+	public function legacy_checkout_template_notice() {
+		if ( wptravelengine_is_new_user() ) {
+			return;
+		}
+
+		$settings          = get_option( 'wp_travel_engine_settings', array() );
+		$checkout_template = wptravelengine_get_checkout_template_version( $settings );
+
+		// Show notice only when the legacy (1.0) template is in use.
+		if ( '1.0' !== $checkout_template ) {
+			return;
+		}
+
+		$settings_url = admin_url( 'admin.php?page=class-wp-travel-engine-admin.php#checkout_settings' );
+		$message      = sprintf(
+			/* translators: 1: opening anchor tag, 2: closing anchor tag */
+			__( 'WP Travel Engine: You are using the legacy checkout page. Please change it to the new version. From version 6.8.0, the legacy checkout page will be discontinued. %1$sClick here to set up your checkout page.%2$s', 'wp-travel-engine' ),
+			'<a href="' . esc_url( $settings_url ) . '">',
+			'</a>'
+		);
+
+		printf(
+			'<div class="notice notice-warning"><p>%s</p></div>',
+			wp_kses(
+				$message,
+				array(
+					'a' => array( 'href' => array() ),
 				)
 			)
 		);
@@ -428,16 +427,7 @@ final class Plugin {
 		 *
 		 * @since 6.5.2
 		 */
-		add_filter(
-			'cron_schedules',
-			function ( $schedules ) {
-				$schedules['every_minute'] = array(
-					'interval' => 60,
-					'display'  => 'Every Minute',
-				);
-				return $schedules;
-			}
-		);
+		add_filter( 'cron_schedules', array( $this, 'add_custom_cron_schedule' ) );
 
 		add_action( 'plugins_loaded', array( $this, 'add_event_table' ) );
 
@@ -525,91 +515,7 @@ final class Plugin {
 			2
 		);
 
-		add_action(
-			'init',
-			function () {
-
-				// Email Template preview.
-				// phpcs:disable
-				if ( wte_array_get( $_REQUEST, '_action', '' ) == 'email-template-preview' ) {
-					if ( ! isset( $_REQUEST[ 'pid' ] ) ) {
-						return;
-					}
-
-					// Mail class.
-					require_once plugin_dir_path( WP_TRAVEL_ENGINE_FILE_PATH ) . 'includes/class-wp-travel-engine-emails.php';
-
-					( new Email() )->template_preview( wte_clean( wp_unslash( $_REQUEST[ 'pid' ] ) ), wte_clean( wp_unslash( wte_array_get( $_REQUEST, 'template_type', 'order' ) ) ), wte_clean( wp_unslash( wte_array_get( $_REQUEST, 'to', 'customer' ) ) ) );
-				}
-
-				if ( wte_array_get( $_REQUEST, '_action', '' ) == 'wte-email-template-update' ) {
-					if ( ! isset( $_REQUEST[ 'field' ] ) ) {
-						return;
-					}
-					switch ( $_REQUEST[ 'field' ] ) {
-						case 'email.sales_wpeditor':
-							$settings                                = get_option( 'wp_travel_engine_settings', array() );
-							$settings[ 'email' ][ 'sales_wpeditor' ] = '';
-							update_option( 'wp_travel_engine_settings', $settings );
-							update_option( 'payment_notification_admin_version', '2.0.0' );
-							break;
-						case 'email.purchase_wpeditor':
-							$settings                                   = get_option( 'wp_travel_engine_settings', array() );
-							$settings[ 'email' ][ 'purchase_wpeditor' ] = '';
-							update_option( 'wp_travel_engine_settings', $settings );
-							update_option( 'payment_notification_customer_version', '2.0.0' );
-							break;
-					}
-				}
-				// phpcs:enable
-			}
-		);
-
-		// @TODO: Move to form Editor
-		add_filter(
-			'wte_booking_mail_tags',
-			function ( $mail_tags, $payment_id ) {
-				$booking_id = get_post_meta( $payment_id, 'booking_id', ! 0 );
-				$booking    = get_post( $booking_id );
-				if ( is_null( $booking ) || 'booking' !== $booking->post_type ) {
-					return $mail_tags;
-				}
-
-				$additional_fields = wte_array_get( get_post_meta( $booking->ID, 'wptravelengine_billing_details', ! 0 ), null, array() );
-
-				foreach ( $additional_fields as $field_name => $field_value ) {
-					if ( is_array( $field_value ) ) {
-						$field_value = implode( ',', $field_value );
-					}
-					$mail_tags[ '{' . $field_name . '}' ] = is_array( $field_value ) ? implode( ',', $field_value ) : $field_value;
-				}
-
-				// Move to Discount Coupon.
-				// Discount Tags.
-				$mail_tags['{discount_name}']   = '';
-				$mail_tags['{discount_amount}'] = '';
-				$mail_tags['{discount_sign}']   = '';
-				$mail_tags['{discount_value}']  = '';
-
-				if ( isset( $booking->cart_info['discounts'] ) ) {
-					$discounts = $booking->cart_info['discounts'];
-					if ( ! is_array( $discounts ) || empty( $discounts ) ) {
-						return $mail_tags;
-					}
-					$discount  = (object) array_shift( $discounts );
-					$cart_info = $booking->cart_info;
-
-					$mail_tags['{discount_name}']   = $discount->name;
-					$mail_tags['{discount_amount}'] = 'percentage' === $discount->type ? wte_get_formated_price( ( + $cart_info['subtotal'] * ( + $discount->value ) / 100 ), $cart_info['currency'] ) : wte_get_formated_price( $discount->value, $cart_info['currency'] );
-					$mail_tags['{discount_sign}']   = 'percentage' === $discount->type ? '%' : $cart_info['currency'];
-					$mail_tags['{discount_value}']  = 'percentage' === $discount->type ? $discount->value : wte_get_formated_price( $discount->value, $cart_info['currency'] );
-				}
-
-				return $mail_tags;
-			},
-			11,
-			2
-		);
+		add_action( 'init', array( $this, 'handle_email_template_actions' ) );
 
 		add_filter( 'extra_theme_headers', array( $this, 'plugin_headers' ) );
 		add_filter( 'extra_plugin_headers', array( $this, 'plugin_headers' ) );
@@ -1421,7 +1327,7 @@ final class Plugin {
 
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'wp_travel_engine_register_settings' );
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'wte_update_actual_prices_for_filter' );
-		$this->loader->add_action( 'admin_head', $plugin_admin, 'wp_travel_engine_tabs_template', 0 );
+		// $this->loader->add_action( 'admin_head', $plugin_admin, 'wp_travel_engine_tabs_template', 0 );
 		$this->loader->add_filter( 'manage_enquiry_posts_columns', $plugin_admin, 'wp_travel_engine_enquiry_cpt_columns' );
 		$this->loader->add_filter( 'post_row_actions', $plugin_admin, 'enquiry_remove_row_actions', 10, 1 );
 		$this->loader->add_action( 'manage_posts_custom_column', $plugin_admin, 'wp_travel_engine_enquiry_custom_columns', 10, 2 );
@@ -1882,5 +1788,93 @@ final class Plugin {
 		// Output the schema using the display_wte_rich_snippet action.
 		// This ensures schema is available even when Elementor Full Width template bypasses single-trip.php.
 		do_action( 'display_wte_rich_snippet' );
+	}
+
+	/**
+	 * Add custom cron schedule intervals.
+	 *
+	 * Adds 'every_minute' schedule for time-sensitive operations.
+	 *
+	 * @param array $schedules Existing cron schedules.
+	 * @return array Modified schedules.
+	 * @since 6.7.8 organize code into moving to this method from hooks.
+	 */
+	public function add_custom_cron_schedule( $schedules ) {
+		$schedules['every_minute'] = array(
+			'interval' => 60,
+			'display'  => __( 'Every Minute', 'wp-travel-engine' ),
+		);
+		return $schedules;
+	}
+
+	/**
+	 * Handle email template preview and update actions.
+	 *
+	 * Processes email template preview requests and template update actions.
+	 *
+	 * @return void
+	 * @since 6.7.8
+	 */
+	public function handle_email_template_actions() {
+
+		// Email Template preview.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified via wp_verify_nonce.
+		if ( wte_array_get( $_REQUEST, '_action', '' ) == 'email-template-preview' && wp_verify_nonce( wte_array_get( $_REQUEST, 'nonce', '' ), 'wptravelengine_email_template_preview' ) && current_user_can( 'manage_options' ) ) {
+			if ( ! isset( $_REQUEST['pid'] ) ) {
+				return;
+			}
+
+			// Mail class.
+			require_once plugin_dir_path( WP_TRAVEL_ENGINE_FILE_PATH ) . 'includes/class-wp-travel-engine-emails.php';
+
+			( new Email() )->template_preview( wte_clean( wp_unslash( $_REQUEST['pid'] ) ), wte_clean( wp_unslash( wte_array_get( $_REQUEST, 'template_type', 'order' ) ) ), wte_clean( wp_unslash( wte_array_get( $_REQUEST, 'to', 'customer' ) ) ) );
+		}
+	}
+
+	/**
+	 * Handle deactivation notices for core-integrated plugins.
+	 *
+	 * Deactivates plugins whose features have been integrated into core
+	 * and displays admin notices. Also sets default trip listing display.
+	 *
+	 * @return void
+	 * @since 6.7.8 organize code into moving to this method from add_init_hooks.
+	 */
+	public function handle_plugin_deactivation_notices() {
+		foreach (
+		array(
+			'WTE_TRIP_CODE_FILE_PATH'              => __( 'Trip Code', 'wp-travel-engine' ),
+			'WP_TRAVEL_ENGINE_COUPONS_PLUGIN_FILE' => __( 'Coupon Code', 'wp-travel-engine' ),
+			'WTE_ADVANCED_SEARCH_FILE_PATH'        => __( 'Advanced Search', 'wp-travel-engine' ),
+		) as $constant_name => $plugin_name
+		) {
+			if ( defined( $constant_name ) ) {
+				$plugin = constant( $constant_name );
+				deactivate_plugins( $plugin );
+
+				add_action(
+					'admin_notices',
+					function () use ( $plugin_name ) {
+						printf(
+							'<div id="message" class="notice notice-info is-dismissible"><p>%1$s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%2$s</span></button></div>',
+							esc_html( sprintf( __( '%1$s has been automatically deactivated, the feature providing by the plugin is now available in the WP Travel Engine Core.', 'wp-travel-engine' ), $plugin_name ) ),
+							esc_html__( 'Dismiss this notice.', 'wp-travel-engine' )
+						);
+					}
+				);
+			}
+		}
+
+		/**
+		 * Set default value for display_new_trip_listing as yes.
+		 *
+		 * @since 6.6.0
+		 */
+		$settings         = wptravelengine_settings();
+		$new_trip_listing = $settings->get( 'display_new_trip_listing' );
+		if ( 'yes' !== $new_trip_listing ) {
+			$settings->set( 'display_new_trip_listing', 'yes' );
+			$settings->save();
+		}
 	}
 }

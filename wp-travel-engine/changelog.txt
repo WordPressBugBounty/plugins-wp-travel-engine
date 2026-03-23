@@ -1,5 +1,13 @@
 == Changelog ==
 
+= 6.7.8 - 23rd March 2026 =
+* Improved: Enhanced site performance by enabling lazy loading for images and maps, and caching database requests.
+* Improved: Added a popup gallery to display all images when a banner image is clicked.
+* Improved: Standardized amount formatting across bookings, emails, and payments to always show two decimal places.
+* Fixed: Resolved formatting issues with bank instructions and descriptions on the checkout page and in emails.
+* Fixed: Corrected duplicate traveler columns and inconsistent field key prefixes in the booking CSV export.
+* Changed: Removed the email footer image to create a cleaner email layout.
+
 = 6.7.7 - 9th March 2026 =
 * Improved: Reorganized trip edit settings by structuring tabs and sub-tabs for easier navigation.
 * Improved: Simplified multi-day trip time selection by using only a start time, which is automatically applied as the end time for clear display.

@@ -12,6 +12,7 @@ use WPTravelEngine\Core\Models\Post\Payment;
 use WPTravelEngine\Traits\Singleton;
 use WPTravelEngine\Helpers\Functions;
 use WPTravelEngine\Utilities\ArrayUtility;
+use WPTravelEngine\Core\Cart\Adjustments\GatewayFee;
 
 /**
  * Form field class to render billing form fields.
@@ -175,6 +176,32 @@ class PaymentEditFormFields extends BookingEditFormFields {
 			}
 		} else {
 			$fields = array_diff_key( $fields, $labels );
+		}
+
+		if ( isset( $defaults['gateway_fee'] ) && $defaults['gateway_fee'] > 0.00 ) {
+			$fields['gateway_fee'] = array(
+				'type'          => 'number',
+				'wrapper_class' => 'row-repeater',
+				'field_label'   => __( 'Gateway Fee', 'wp-travel-engine' ),
+				'name'          => 'payments[gateway_fee][]',
+				'id'            => 'payments_gateway_fee',
+				'class'         => 'input',
+				'attributes'    => array(
+					'data-key'      => 'gateway_fee',
+					'show_prefix'   => true,
+					'wrapper_class' => 'wpte-amount-wrap',
+					'prefix_class'  => 'wpte-amount-currency',
+					'readOnly'      => true,
+					'disabled'      => true,
+				),
+				'behaviours'    => array(
+					'type'          => 'fee',
+					'apply_tax'     => false,
+					'class_name'    => GatewayFee::class,
+					'_gateway_fee_' => $defaults['gateway_fee'] ?? 0,
+				),
+				'order'         => 5,
+			);
 		}
 
 		$sorted_fields = $this->sort_fields_by_order( $fields );

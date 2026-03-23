@@ -9,8 +9,6 @@
  * @subpackage Wp_Travel_Engine/includes/templates
  * @since @release-version //TODO: change after travel muni is live
  */
-wp_enqueue_script( 'wte-popper' );
-wp_enqueue_script( 'wte-tippyjs' );
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly

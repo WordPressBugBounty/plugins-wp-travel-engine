@@ -404,6 +404,23 @@ class Wp_Travel_Engine_Admin {
 			Events::schedule();
 			TripSearch::update_metas_for_trip_search();
 			update_option( "wte_search_params_updated_{$version}", 'done', true );
+			self::disable_autoload();
+		}
+	}
+
+	/**
+	 * Disable autoload for wp_travel_engine_settings option.
+	 *
+	 * @return void
+	 * @since 6.7.8
+	 */
+	public static function disable_autoload() {
+		global $wpdb;
+
+		$option = $wpdb->get_var( $wpdb->prepare( "SELECT autoload FROM $wpdb->options WHERE option_name = %s", 'wp_travel_engine_settings' ) );
+
+		if ( 'off' !== $option ) {
+			$wpdb->update( $wpdb->options, array( 'autoload' => 'off' ), array( 'option_name' => 'wp_travel_engine_settings' ) );
 		}
 	}
 
@@ -827,7 +844,7 @@ class Wp_Travel_Engine_Admin {
 		$column_actions = array(
 			'remaining'      => function ( $booking ) use ( $wp_travel_engine_setting_option_setting, $pricing_arguments, $_due_amount ) {
 				if ( isset( $_due_amount ) && is_numeric( $_due_amount ) ) {
-					wptravelengine_the_price( $_due_amount, true, $pricing_arguments );
+					wptravelengine_the_price_with_decimal( $_due_amount, true, $pricing_arguments );
 
 					return;
 				} else {
@@ -855,7 +872,7 @@ class Wp_Travel_Engine_Admin {
 			},
 			'paid'           => function ( $booking ) use ( $wp_travel_engine_setting_option_setting, $pricing_arguments, $_paid_amount ) {
 				if ( isset( $_paid_amount ) && is_numeric( $_paid_amount ) ) {
-					wptravelengine_the_price( $_paid_amount, true, $pricing_arguments );
+					wptravelengine_the_price_with_decimal( $_paid_amount, true, $pricing_arguments );
 
 					return;
 				} else {
@@ -1623,6 +1640,8 @@ class Wp_Travel_Engine_Admin {
 	 * HTML template for tabs
 	 *
 	 * @since 1.0.0
+	 * @deprecated 6.7.8
+	 * TODO: Remove this function in next release
 	 */
 	function wp_travel_engine_tabs_template() {
 		?>
@@ -3016,14 +3035,16 @@ class Wp_Travel_Engine_Admin {
 	 * Callback for global tabs data save action.
 	 *
 	 * @return void
+	 * @deprecated 6.7.8
+	 * TODO: Remove this function after stable release
 	 */
 	function wpte_global_tabs_save_data_callback() {
 
-		if ( ! class_exists( '\Wp_Travel_Engine_Settings' ) ) {
-			require_once plugin_dir_path( \WP_TRAVEL_ENGINE_FILE_PATH ) . 'includes/class-wp-travel-engine-settings.php';
-		}
+		// if ( ! class_exists( '\Wp_Travel_Engine_Settings' ) ) {
+		// require_once plugin_dir_path( \WP_TRAVEL_ENGINE_FILE_PATH ) . 'includes/class-wp-travel-engine-settings.php';
+		// }
 
-		\Wp_Travel_Engine_Settings::save_settings();
+		// \Wp_Travel_Engine_Settings::save_settings();
 
 		exit;
 	}

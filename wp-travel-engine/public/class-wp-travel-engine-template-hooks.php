@@ -142,7 +142,6 @@ class WP_Travel_Engine_Template_Hooks {
 						<a data-galtarget="#wte-image-gallary-popup-<?php echo esc_attr( $trip_id . $random ); ?>"
 						data-variable="<?php echo esc_attr( 'wteimageGallery' . $random ); ?>"
 						href="#wte-image-gallary-popup-<?php echo esc_attr( $trip_id . $random ); ?>"
-						data-items="<?php echo esc_attr( wp_json_encode( array_values( $carousel_slides ) ) ); ?>"
 						class="wte-trip-image-gal-popup-trigger"><?php esc_html_e( 'Gallery', 'wp-travel-engine' ); ?>
 						</a>
 					</span>
@@ -160,7 +159,16 @@ class WP_Travel_Engine_Template_Hooks {
 			const galleryTriggers = document.querySelectorAll(".wte-trip-image-gal-popup-trigger");
 			galleryTriggers.forEach(trigger => {
 					trigger.addEventListener("click", () => {
-						jQuery.fancybox.open(JSON.parse(trigger.getAttribute("data-items") || "[]"), {
+						const wrapper = trigger.closest("[data-images]")
+						let items = []
+						if (wrapper) {
+							try {
+								items = JSON.parse(wrapper.getAttribute("data-images") || "[]")
+							} catch (err) {
+								items = []
+							}
+						}
+						jQuery.fancybox?.open(items, {
 							buttons: ["zoom", "slideShow", "fullScreen", "close"],
 						})
 					})
@@ -211,21 +219,38 @@ class WP_Travel_Engine_Template_Hooks {
 
 		$_list_images = array();
 		foreach ( array_values( $list_images ) as $index => $image ) {
-			$attachment_url = wp_get_attachment_image_url( $image, $image_sizes_by_layout[ $index ] ?? 'full' );
-			if ( ! $attachment_url || ! array_key_exists( $index, $image_sizes_by_layout ) ) {
+			$image_size     = $image_sizes_by_layout[ $index ] ?? 'full';
+			$attachment_src = wp_get_attachment_image_src( $image, $image_size );
+			if ( ! $attachment_src || ! array_key_exists( $index, $image_sizes_by_layout ) ) {
 				continue;
 			}
+
+			$attachment_url = $attachment_src[0];
+			$img_width      = ! empty( $attachment_src[1] ) ? $attachment_src[1] : '';
+			$img_height     = ! empty( $attachment_src[2] ) ? $attachment_src[2] : '';
+			$loading        = ( 0 === $index ) ? 'eager' : 'lazy';
+			$fetchpriority  = ( 0 === $index ) ? 'high' : '';
+
 			$open_lightbox = $show_image_gallery || $show_video_gallery;
 			$lightbox_url  = wp_get_attachment_image_url( $image, 'full' );
+			$image_alt     = get_post_meta( $image, '_wp_attachment_image_alt', true );
 			ob_start();
 			?>
 			<div class="wpte-multi-banner-image">
-				<?php if ( $open_lightbox ) { ?>
-					<a href="<?php echo esc_url( $lightbox_url ); ?>" data-fancybox="gallery">
+				<?php
+				$image_alt  = get_post_meta( $image, '_wp_attachment_image_alt', true );
+				$aria_label = ! empty( $image_alt ) ? $image_alt : __( 'View image in gallery', 'wp-travel-engine' );
+				if ( $open_lightbox ) {
+					?>
+					<a href="<?php echo esc_url( $lightbox_url ); ?>" data-fancybox="gallery" aria-label="<?php echo esc_attr( $aria_label ); ?>">
 				<?php } ?>
 					<img
 						src="<?php echo esc_url( $attachment_url ); ?>"
-						alt="<?php echo esc_attr( get_post_meta( $image, '_wp_attachment_image_alt', true ) ); ?>"
+						alt="<?php echo esc_attr( $image_alt ); ?>"
+						<?php echo $loading ? 'loading="' . esc_attr( $loading ) . '"' : ''; ?>
+						<?php echo $fetchpriority ? 'fetchpriority="' . esc_attr( $fetchpriority ) . '"' : ''; ?>
+						<?php echo $img_width ? 'width="' . esc_attr( $img_width ) . '"' : ''; ?>
+						<?php echo $img_height ? 'height="' . esc_attr( $img_height ) . '"' : ''; ?>
 					/>
 				<?php if ( $open_lightbox ) { ?>
 					</a>
@@ -383,7 +408,7 @@ class WP_Travel_Engine_Template_Hooks {
 			// $category_term_meta = get_term_meta( $c_id, 'pll_category_name', true );
 			// $locale             = get_locale();
 			// if ( ! empty( $category_term_meta[ substr( $locale, 0, 2 ) ] ) ) {
-			// 	$per_label = $category_term_meta[ substr( $locale, 0, 2 ) ];
+			// $per_label = $category_term_meta[ substr( $locale, 0, 2 ) ];
 			// }
 
 			// NOTE to Dev: Disabled this as per support request. Maybe add filter later ?
@@ -408,7 +433,7 @@ class WP_Travel_Engine_Template_Hooks {
 
 			$price_per_label = apply_filters( 'wptravelengine_price_per_label', __( '/ %s', 'wp-travel-engine' ) );
 
-			if ( 0.00 === floatval( $sale_price ) ) : 
+			if ( 0.00 === floatval( $sale_price ) ) :
 				?>
 				<div class="wpte-bf-price">
 					<span class="wpte-bf-reg-price">

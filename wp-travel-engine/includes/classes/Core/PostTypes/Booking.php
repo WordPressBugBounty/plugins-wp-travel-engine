@@ -36,6 +36,7 @@ use WPTravelEngine\Abstracts\CartItem;
 use WPTravelEngine\Core\Cart\Cart;
 use WPTravelEngine\Utilities\PaymentCalculator;
 use WPTravelEngine\Core\Tax;
+use WPTravelEngine\Filters\Events;
 
 /**
  * Class Booking
@@ -746,9 +747,9 @@ class Booking extends PostType {
 		$booking->save();
 
 		if ( ! $update ) {
-			do_action( 'wptravelengine.booking.created', $booking->get_data(), $booking );
+			Events::booking_created( $booking );
 		} else {
-			do_action( 'wptravelengine.booking.updated', $booking->get_data(), $booking );
+			Events::booking_updated( $booking );
 		}
 	}
 
@@ -1122,6 +1123,7 @@ class Booking extends PostType {
 						'transaction_id'   => $payment->get_transaction_id(),
 						'gateway_response' => $response,
 						'payment_source'   => $payment_source,
+						'gateway_fee'      => $payment->get_gateway_fee(),
 					);
 
 					$defaults['payable'] = $payment->get_payable_amount();
@@ -2350,6 +2352,8 @@ class Booking extends PostType {
 			if ( empty( $payment_model->get_meta( 'payment_source' ) ) ) {
 				$payment_model->set_meta( 'payment_source', $payment_model->get_payment_source() );
 			}
+
+			Events::payment_created( $payment_model );
 
 			$payment_model->save();
 			$_payments[] = $payment_model->get_id();

@@ -71,24 +71,12 @@ class TripCheckout extends Shortcode {
 				if ( $wte_cart->is_curr_cart( '<' ) ) {
 					// Check for customized reservation with full payment.
 					$is_customized_reservation = $booking->get_meta( '_user_edited' );
-					if ( $is_customized_reservation ) {
-						$payments       = $booking->get_payment_detail();
-						$payment_amount = 0;
-
-						foreach ( $payments as $payment ) {
-							$payment_id      = Payment::make( $payment );
-							$payment_amount += $payment_id->get_amount();
-						}
-
-						$cart_version = $wte_cart->version;
-
-						if ( $payment_amount > $due_amount && $cart_version < '4.0' ) {
-							echo __(
-								'Thank you! Your payment has been received in full. No further action is required.',
-								'wp-travel-engine'
-							);
-							return ob_get_clean();
-						}
+					if ( $is_customized_reservation && round( $due_amount, 2 ) <= 0 ) {
+						echo __(
+							'Thank you! Your payment has been received in full. No further action is required.',
+							'wp-travel-engine'
+						);
+						return ob_get_clean();
 					}
 				} elseif ( round( $due_amount, 2 ) <= 0 ) {
 					echo __(

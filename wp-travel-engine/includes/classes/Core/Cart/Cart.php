@@ -136,7 +136,7 @@ class Cart extends LegacyCart {
 				$due_amount = get_post_meta( $this->booking_ref, 'total_due_amount', true );
 				$amount     = ! empty( $due_amount ) ? (string) $due_amount : '0.00';
 
-				if ( $calculator->compare( $amount, '0.00' ) === 0 ) {
+				if ( $calculator->is( $amount, '==', '0.00' ) ) {
 					$amount = $totals['total'];
 				}
 
@@ -249,9 +249,16 @@ class Cart extends LegacyCart {
 	 * @since 6.7.0
 	 */
 	public function get_fees_by_type( $key = null ) {
-		$fees_arr = array();
+		$fees = $this->fees;
+		usort(
+			$fees,
+			function ( $a, $b ) {
+				return $a->order - $b->order;
+			}
+		);
 
-		foreach ( $this->fees as $fee ) {
+		$fees_arr = array();
+		foreach ( $fees as $fee ) {
 			if ( 'tax' === $fee->name ) {
 				$fees_arr['tax'] = $fee;
 			} elseif ( $fee->apply_tax ) {

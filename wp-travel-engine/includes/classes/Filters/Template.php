@@ -54,6 +54,10 @@ class Template {
 			}
 
 			if ( is_post_type_archive( WP_TRAVEL_ENGINE_POST_TYPE ) || is_tax( $all_taxonomies ) ) {
+				Assets::instance()->dequeue_script( 'wp-travel-engine' )
+									->dequeue_style( 'wp-travel-engine' )
+									->dequeue_script( 'wte-fpickr' )
+									->dequeue_script( 'wte-fpickr-lib' );
 				TripSearch::enqueue_assets();
 			}
 
@@ -81,6 +85,10 @@ class Template {
 					->enqueue_style( 'single-trip' );
 			$template_path = wte_locate_template( 'single-trip.php' );
 		} elseif ( is_post_type_archive( WP_TRAVEL_ENGINE_POST_TYPE ) ) {
+			Assets::instance()->dequeue_script( 'wp-travel-engine' )
+								->dequeue_style( 'wp-travel-engine' )
+								->dequeue_script( 'wte-fpickr' )
+								->dequeue_script( 'wte-fpickr-lib' );
 			TripSearch::enqueue_assets();
 			$template_path = wte_locate_template( 'archive-trip.php' );
 		} else {
@@ -176,7 +184,7 @@ class Template {
 	 */
 	public function modify_traveller_emergency_form() {
 		$settings          = get_option( 'wp_travel_engine_settings', array() );
-		$checkout_template = $settings['checkout_page_template'] ?? '1.0';
+		$checkout_template = wptravelengine_get_checkout_template_version( $settings );
 
 		if ( $checkout_template == '1.0' ) {
 			return wptravelengine_replace( $settings['travelers_information'], 'no', false, true );
@@ -196,7 +204,7 @@ class Template {
 	 */
 	public function modify_traveller_form() {
 		$wptravelengine_settings          = get_option( 'wp_travel_engine_settings', array() );
-		$checkout_page_template           = $wptravelengine_settings['checkout_page_template'] ?? '1.0';
+		$checkout_page_template           = wptravelengine_get_checkout_template_version( $wptravelengine_settings );
 		$is_enabled_travellers_info       = $wptravelengine_settings['display_travellers_info'] ?? 'no';
 		$traveller_emergency_details_form = $wptravelengine_settings['traveller_emergency_details_form'] ?? 'after_checkout';
 
@@ -214,7 +222,7 @@ class Template {
 	 */
 	public function modify_emergency_form() {
 		$settings          = get_option( 'wp_travel_engine_settings', array() );
-		$checkout_template = $settings['checkout_page_template'] ?? '1.0';
+		$checkout_template = wptravelengine_get_checkout_template_version( $settings );
 
 		// Handle legacy checkout template (1.0).
 		if ( $checkout_template == '1.0' ) {

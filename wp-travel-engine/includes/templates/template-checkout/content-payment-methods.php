@@ -26,7 +26,7 @@
 			<?php endif; ?>
 			<?php if ( ! empty( $payment_method['description'] ) ) : ?>
 				<div class="wpte-checkout__payment-method-info">
-					<?php echo wp_kses_post( $payment_method['description'] ); ?>
+					<?php echo wp_kses_post( nl2br( $payment_method['description'] ) ); ?>
 				</div>
 			<?php endif; ?>
 			<?php do_action( "wptravelengine_{$key}_payment_cc" ); ?>

@@ -431,7 +431,7 @@
 															>
 															<div class="post-data faq">
 																<a href="#" class="expand-all-faq">
-																	<i class="fa fa-toggle-off" aria-hidden="true"></i>
+																	<?php wptravelengine_svg_by_fa_icon( 'fas fa-toggle-off' ); ?>
 																	<?php _e( 'Expand/Close', 'wp-travel-engine' ); ?>
 																</a>
 																<?php

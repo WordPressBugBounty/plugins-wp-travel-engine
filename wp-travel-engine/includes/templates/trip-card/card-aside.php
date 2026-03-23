@@ -33,14 +33,14 @@ $duration_label      = wptravelengine_get_trip_duration_arr( $trip_instance ?? $
 </div>
 <?php $fsds = apply_filters( 'trip_card_fixed_departure_dates', $trip_id ); ?>
 <div class="wpte-button-group">
-	<a href="<?php echo esc_url( get_the_permalink() ); ?>" class="wpte-button">
+	<a href="<?php echo esc_url( get_the_permalink() ); ?>" class="wpte-button" aria-label="<?php printf( esc_attr__( 'View details for %s', 'wp-travel-engine' ), get_the_title() ); ?>">
 		<?php echo esc_html__( 'View Details', 'wp-travel-engine' ); ?>
 	</a>
 	<?php do_action( 'wp_travel_engine_download_pdf_button' ); ?>
 	<?php if ( ! $has_date ) : ?>
-		<a href="#" class="wpte-button wpte-button-disabled" disabled>
+		<span class="wpte-button wpte-button-disabled" aria-label="<?php printf( esc_attr__( '%s is sold out', 'wp-travel-engine' ), get_the_title() ); ?>">
 			<?php echo esc_html__( 'Sold Out', 'wp-travel-engine' ); ?>
-		</a>
+		</span>
 	<?php endif; ?>
 </div>
 <?php

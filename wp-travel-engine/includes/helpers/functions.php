@@ -25,23 +25,28 @@ require_once __DIR__ . '/cart.php';
  *
  * @return array
  * @since 6.7.0
+ * @since 6.7.8 Added additional succes payment status and filter for modification.
  */
 function wptravelengine_success_payment_status() {
-	$options = array(
-		'completed'        => __( 'Completed', 'wp-travel-engine' ),
-		'complete'         => __( 'Completed', 'wp-travel-engine' ),
-		'captured'         => __( 'Captured', 'wp-travel-engine' ),
-		'capture'          => __( 'Captured', 'wp-travel-engine' ),
-		'check-received'   => __( 'Check Received', 'wp-travel-engine' ),
-		'partially-paid'   => __( 'Partially Paid', 'wp-travel-engine' ),
-		'settlement'       => __( 'Settlement', 'wp-travel-engine' ),
-		'success'          => __( 'Success', 'wp-travel-engine' ),
-		'voucher-received' => __( 'Voucher Received', 'wp-travel-engine' ),
-	);
+	static $cache = null;
 
-	$options = apply_filters( 'wptravelengine_success_payment_status_options', $options );
+	if ( null === $cache ) {
+		$cache = array(
+			'completed'        => __( 'Completed', 'wp-travel-engine' ),
+			'complete'         => __( 'Completed', 'wp-travel-engine' ),
+			'captured'         => __( 'Captured', 'wp-travel-engine' ),
+			'capture'          => __( 'Captured', 'wp-travel-engine' ),
+			'check-received'   => __( 'Check Received', 'wp-travel-engine' ),
+			'partially-paid'   => __( 'Partially Paid', 'wp-travel-engine' ),
+			'settlement'       => __( 'Settlement', 'wp-travel-engine' ),
+			'success'          => __( 'Success', 'wp-travel-engine' ),
+			'voucher-received' => __( 'Voucher Received', 'wp-travel-engine' ),
+		);
 
-	return $options;
+		$cache = apply_filters( 'wptravelengine_success_payment_status_options', $cache );
+	}
+
+	return $cache;
 }
 
 /**
@@ -49,18 +54,23 @@ function wptravelengine_success_payment_status() {
  *
  * @return array
  * @since 6.7.0
+ * @since 6.7.8 Added additional pending payment status and filter for modification.
  */
 function wptravelengine_pending_payment_status() {
-	$options = array(
-		'check-waiting'    => __( 'Waiting for Check', 'wp-travel-engine' ),
-		'pending'          => __( 'Pending', 'wp-travel-engine' ),
-		'voucher-waiting'  => __( 'Waiting for Voucher', 'wp-travel-engine' ),
-		'voucher-awaiting' => __( 'Waiting for Voucher', 'wp-travel-engine' ),
-	);
+	static $cache = null;
 
-	$options = apply_filters( 'wptravelengine_pending_payment_status_options', $options );
+	if ( null === $cache ) {
+		$cache = array(
+			'check-waiting'    => __( 'Waiting for Check', 'wp-travel-engine' ),
+			'pending'          => __( 'Pending', 'wp-travel-engine' ),
+			'voucher-waiting'  => __( 'Waiting for Voucher', 'wp-travel-engine' ),
+			'voucher-awaiting' => __( 'Waiting for Voucher', 'wp-travel-engine' ),
+		);
 
-	return $options;
+		$cache = apply_filters( 'wptravelengine_pending_payment_status_options', $cache );
+	}
+
+	return $cache;
 }
 
 /**
@@ -68,21 +78,26 @@ function wptravelengine_pending_payment_status() {
  *
  * @return array
  * @since 6.7.0
+ * @since 6.7.8 Added additional failed payment status and filter for modification.
  */
 function wptravelengine_failed_payment_status() {
-	$options = array(
-		'abandoned' => __( 'Abandoned', 'wp-travel-engine' ),
-		'cancelled' => __( 'Cancelled', 'wp-travel-engine' ),
-		'cancel'    => __( 'Cancelled', 'wp-travel-engine' ),
-		'failed'    => __( 'Failed', 'wp-travel-engine' ),
-		'deny'      => __( 'Denied', 'wp-travel-engine' ),
-		'expire'    => __( 'Expired', 'wp-travel-engine' ),
-		'revoked'   => __( 'Revoked', 'wp-travel-engine' ),
-	);
+	static $cache = null;
 
-	$options = apply_filters( 'wptravelengine_failed_payment_status_options', $options );
+	if ( null === $cache ) {
+		$cache = array(
+			'abandoned' => __( 'Abandoned', 'wp-travel-engine' ),
+			'cancelled' => __( 'Cancelled', 'wp-travel-engine' ),
+			'cancel'    => __( 'Cancelled', 'wp-travel-engine' ),
+			'failed'    => __( 'Failed', 'wp-travel-engine' ),
+			'deny'      => __( 'Denied', 'wp-travel-engine' ),
+			'expire'    => __( 'Expired', 'wp-travel-engine' ),
+			'revoked'   => __( 'Revoked', 'wp-travel-engine' ),
+		);
 
-	return $options;
+		$cache = apply_filters( 'wptravelengine_failed_payment_status_options', $cache );
+	}
+
+	return $cache;
 }
 
 /**
@@ -117,7 +132,25 @@ function wptravelengine_trip_booking_modal_data( $trip_id ) {
  * @since 6.6.7
  */
 function wptravelengine_is_new_user(): bool {
-	return WP_TRAVEL_ENGINE_VERSION === ( get_option( 'wptravelengine_since' ) ?: '0.0.0' );
+	static $result = null;
+	if ( null === $result ) {
+		$result = WP_TRAVEL_ENGINE_VERSION === ( get_option( 'wptravelengine_since' ) ?: '0.0.0' );
+	}
+	return $result;
+}
+
+/**
+ * Get the default checkout page template version based on whether the user is new or existing.
+ *
+ * @param array $settings The settings array. Defaults to an empty array.
+ * @return string The checkout page template version.
+ * @since 6.7.8
+ */
+function wptravelengine_get_checkout_template_version( array $settings = array() ): string {
+	if ( wptravelengine_is_new_user() ) {
+		return '2.0';
+	}
+	return $settings['checkout_page_template'] ?? '1.0';
 }
 
 /**
@@ -193,34 +226,38 @@ function wptravelengine_get_trip_duration_arr( $trip, string $set_duration_type 
  * @since 6.4.1
  * @updated 6.5.2
  * @since 6.7.3 Added support for (person) plural labels.
+ * @since 6.7.8 Added filter for modification & performance improvement from property cache.
  */
 function wptravelengine_get_label_by_slug( string $slug, $count = 1 ): string {
+	static $slug_array = null;
 
-	$slug_array = apply_filters(
-		'wptravelengine_get_label_by_slug',
-		array(
-			'day'    => array(
-				'single' => __( 'Day', 'wp-travel-engine' ),
-				'plural' => __( 'Days', 'wp-travel-engine' ),
-			),
-			'night'  => array(
-				'single' => __( 'Night', 'wp-travel-engine' ),
-				'plural' => __( 'Nights', 'wp-travel-engine' ),
-			),
-			'hour'   => array(
-				'single' => __( 'Hour', 'wp-travel-engine' ),
-				'plural' => __( 'Hours', 'wp-travel-engine' ),
-			),
-			'minute' => array(
-				'single' => __( 'Minute', 'wp-travel-engine' ),
-				'plural' => __( 'Minutes', 'wp-travel-engine' ),
-			),
-			'person' => array(
-				'single' => __( 'Person', 'wp-travel-engine' ),
-				'plural' => __( 'People', 'wp-travel-engine' ),
-			),
-		)
-	);
+	if ( null === $slug_array ) {
+		$slug_array = apply_filters(
+			'wptravelengine_get_label_by_slug',
+			array(
+				'day'    => array(
+					'single' => __( 'Day', 'wp-travel-engine' ),
+					'plural' => __( 'Days', 'wp-travel-engine' ),
+				),
+				'night'  => array(
+					'single' => __( 'Night', 'wp-travel-engine' ),
+					'plural' => __( 'Nights', 'wp-travel-engine' ),
+				),
+				'hour'   => array(
+					'single' => __( 'Hour', 'wp-travel-engine' ),
+					'plural' => __( 'Hours', 'wp-travel-engine' ),
+				),
+				'minute' => array(
+					'single' => __( 'Minute', 'wp-travel-engine' ),
+					'plural' => __( 'Minutes', 'wp-travel-engine' ),
+				),
+				'person' => array(
+					'single' => __( 'Person', 'wp-travel-engine' ),
+					'plural' => __( 'People', 'wp-travel-engine' ),
+				),
+			)
+		);
+	}
 
 	$singular_map = array(
 		'days'    => 'day',
@@ -273,9 +310,11 @@ function wptravelengine_get_label_by_slug( string $slug, $count = 1 ): string {
  *                     - accommodation
  *                     - travel-insurance
  *                     - waitlist
+ *                     - installment-payments
  *
  * @return ?bool Returns true if addon is active, false if inactive, null if invalid addon
  * @since 6.2.2
+ * @since 6.7.8 Added filter for modification & performance improvement from property cache.
  */
 function wptravelengine_is_addon_active( string $addon ) {
 
@@ -283,37 +322,41 @@ function wptravelengine_is_addon_active( string $addon ) {
 		return null;
 	}
 
-	$addon_files = array(
-		'wptravelengine'       => 'WP_TRAVEL_ENGINE_FILE_PATH',
-		'fixed-starting-dates' => 'WTE_FIXED_DEPARTURE_FILE_PATH',
-		'partial-payment'      => 'WP_TRAVEL_ENGINE_PARTIAL_PAYMENT_FILE_PATH',
-		'extra-services'       => 'WTE_EXTRA_SERVICES_FILE_PATH',
-		'file-downloads'       => 'WTEFD_FILE_PATH',
-		'group-discount'       => 'WP_TRAVEL_ENGINE_GROUP_DISCOUNT_FILE_PATH',
-		'advanced-itinerary'   => 'WTEAD_FILE_PATH',
-		'currency-converter'   => 'WTE_CURRENCY_CONVERTER_ABSPATH',
-		'form-editor'          => 'WTE_FORM_EDITOR_PLUGIN_FILE',
-		'itinerary-downloader' => 'WTE_ITINERARY_DOWNLOADER_ABSPATH',
-		'trip-reviews'         => 'WTE_TRIP_REVIEW_FILE_PATH',
-		'user-history'         => 'WTE_USER_HISTORY_FILE_PATH',
-		'we-travel'            => 'WTE_AFFILIATE_BOOKING_FILE_PATH',
-		'weather-forecast'     => 'WTE_WEATHER_FORECAST_BASE_PATH',
-		'zapier'               => 'WTE_ZAPIER_PLUGIN_FILE',
-		'custom-booking-link'  => 'WTE_CBL_FILE_PATH',
-		'booking-fee'          => 'WPTRAVELENGINE_BOOKING_FEE_FILE',
-		'activity-tour'        => 'WPTRAVELENGINE_ACTIVITY_TOUR_BOOKING_PATH',
-		'email-automator'      => 'WPTRAVELENGINE_EMAIL_AUTOMATOR_PATH',
-		'conditional-price'    => 'WPTRAVELENGINE_CONDITIONAL_PRICE_PLUGIN_PATH',
-		'stripe'               => 'WTE_STRIPE_GATEWAY_FILE_PATH',
-		'paypal_express'       => 'WP_TRAVEL_ENGINE_PAYPAL_EXPRESS_FILE_PATH',
-		'authorize_net'        => 'WP_TRAVEL_ENGINE_AUTHORIZE_NET_FILE_PATH',
-		'midtrans'             => 'WTE_MIDTRANS_ABSPATH',
-		'payu_money_bolt'      => 'WTE_PAYU_MONEY_BOLT_FILE_PATH',
-		'waitlist'             => 'WPTRAVELENGINE_WAITLIST_DIR_PATH',
-		'accommodation'        => 'WPTRAVELENGINE_ACCOMMODATION_DIR_PATH',
-		'travel-insurance'     => 'WPTRAVELENGINE_TRAVEL_INSURANCE_DIR_PATH',
-		'installment-payments' => 'WPTRAVELENGINE_INSTALLMENT_PAYMENTS_PATH',
-	);
+	static $addon_files = null;
+
+	if ( null === $addon_files ) {
+		$addon_files = array(
+			'wptravelengine'       => 'WP_TRAVEL_ENGINE_FILE_PATH',
+			'fixed-starting-dates' => 'WTE_FIXED_DEPARTURE_FILE_PATH',
+			'partial-payment'      => 'WP_TRAVEL_ENGINE_PARTIAL_PAYMENT_FILE_PATH',
+			'extra-services'       => 'WTE_EXTRA_SERVICES_FILE_PATH',
+			'file-downloads'       => 'WTEFD_FILE_PATH',
+			'group-discount'       => 'WP_TRAVEL_ENGINE_GROUP_DISCOUNT_FILE_PATH',
+			'advanced-itinerary'   => 'WTEAD_FILE_PATH',
+			'currency-converter'   => 'WTE_CURRENCY_CONVERTER_ABSPATH',
+			'form-editor'          => 'WTE_FORM_EDITOR_PLUGIN_FILE',
+			'itinerary-downloader' => 'WTE_ITINERARY_DOWNLOADER_ABSPATH',
+			'trip-reviews'         => 'WTE_TRIP_REVIEW_FILE_PATH',
+			'user-history'         => 'WTE_USER_HISTORY_FILE_PATH',
+			'we-travel'            => 'WTE_AFFILIATE_BOOKING_FILE_PATH',
+			'weather-forecast'     => 'WTE_WEATHER_FORECAST_BASE_PATH',
+			'zapier'               => 'WTE_ZAPIER_PLUGIN_FILE',
+			'custom-booking-link'  => 'WTE_CBL_FILE_PATH',
+			'booking-fee'          => 'WPTRAVELENGINE_BOOKING_FEE_FILE',
+			'activity-tour'        => 'WPTRAVELENGINE_ACTIVITY_TOUR_BOOKING_PATH',
+			'email-automator'      => 'WPTRAVELENGINE_EMAIL_AUTOMATOR_PATH',
+			'conditional-price'    => 'WPTRAVELENGINE_CONDITIONAL_PRICE_PLUGIN_PATH',
+			'stripe'               => 'WTE_STRIPE_GATEWAY_FILE_PATH',
+			'paypal_express'       => 'WP_TRAVEL_ENGINE_PAYPAL_EXPRESS_FILE_PATH',
+			'authorize_net'        => 'WP_TRAVEL_ENGINE_AUTHORIZE_NET_FILE_PATH',
+			'midtrans'             => 'WTE_MIDTRANS_ABSPATH',
+			'payu_money_bolt'      => 'WTE_PAYU_MONEY_BOLT_FILE_PATH',
+			'waitlist'             => 'WPTRAVELENGINE_WAITLIST_DIR_PATH',
+			'accommodation'        => 'WPTRAVELENGINE_ACCOMMODATION_DIR_PATH',
+			'travel-insurance'     => 'WPTRAVELENGINE_TRAVEL_INSURANCE_DIR_PATH',
+			'installment-payments' => 'WPTRAVELENGINE_INSTALLMENT_PAYMENTS_PATH',
+		);
+	}
 
 	if ( ! isset( $addon_files[ $addon ] ) ) {
 		return null;
@@ -2091,6 +2134,7 @@ function wptravelengine_settings(): PluginSettings {
  * Returns Sorting options.
  *
  * @since 5.5.7
+ * @since 6.7.8 Removed unecessary commented codes.
  */
 function wptravelengine_get_sorting_options() {
 	return apply_filters(
@@ -2104,30 +2148,6 @@ function wptravelengine_get_sorting_options() {
 			'days-desc'  => esc_html__( 'Longest Duration First', 'wp-travel-engine' ),
 			'name'       => esc_html__( 'Alphabetical - A to Z', 'wp-travel-engine' ),
 			'name-desc'  => esc_html__( 'Alphabetical - Z to A', 'wp-travel-engine' ),
-			// ''       => esc_html__( 'Default Sorting', 'wp-travel-engine' ),
-			// 'latest' => esc_html__( 'Latest', 'wp-travel-engine' ),
-			// 'rating' => esc_html__( 'Most Reviewed', 'wp-travel-engine' ),
-			// 'price'  => array(
-			// 'label'   => esc_html__( 'Price', 'wp-travel-engine' ),
-			// 'options' => array(
-			// 'price'      => esc_html__( 'Low to High', 'wp-travel-engine' ),
-			// 'price-desc' => esc_html__( 'High to Low', 'wp-travel-engine' ),
-			// ),
-			// ),
-			// 'days'   => array(
-			// 'label'   => esc_html__( 'Days', 'wp-travel-engine' ),
-			// 'options' => array(
-			// 'days'      => esc_html__( 'Low to High', 'wp-travel-engine' ),
-			// 'days-desc' => esc_html__( 'High to Low', 'wp-travel-engine' ),
-			// ),
-			// ),
-			// 'name'   => array(
-			// 'label'   => esc_html__( 'Name', 'wp-travel-engine' ),
-			// 'options' => array(
-			// 'name'      => __( 'a - z', 'wp-travel-engine' ),
-			// 'name-desc' => __( 'z - a', 'wp-travel-engine' ),
-			// ),
-			// ),
 		)
 	);
 }
@@ -2218,64 +2238,74 @@ function wptravelengine_system_info() {
  * Defined payment status.
  *
  * @since 5.6.3
+ * @since 6.7.8 performance improvement from property cache.
  */
 function wptravelengine_payment_status( $status = null ) {
-	$options = array(
-		'abandoned'        => __( 'Abandoned', 'wp-travel-engine' ),
-		'completed'        => __( 'Completed', 'wp-travel-engine' ),
-		'complete'         => __( 'Completed', 'wp-travel-engine' ),
-		'cancelled'        => __( 'Cancelled', 'wp-travel-engine' ),
-		'cancel'           => __( 'Cancelled', 'wp-travel-engine' ),
-		'captured'         => __( 'Captured', 'wp-travel-engine' ),
-		'capture'          => __( 'Captured', 'wp-travel-engine' ),
-		'check-received'   => __( 'Check Received', 'wp-travel-engine' ),
-		'check-waiting'    => __( 'Waiting for Check', 'wp-travel-engine' ),
-		'failed'           => __( 'Failed', 'wp-travel-engine' ),
-		'partially-paid'   => __( 'Partially Paid', 'wp-travel-engine' ),
-		'settlement'       => __( 'Settlement', 'wp-travel-engine' ),
-		'pending'          => __( 'Pending', 'wp-travel-engine' ),
-		'deny'             => __( 'Denied', 'wp-travel-engine' ),
-		'expire'           => __( 'Expired', 'wp-travel-engine' ),
-		'refunded'         => __( 'Refunded', 'wp-travel-engine' ),
-		'revoked'          => __( 'Revoked', 'wp-travel-engine' ),
-		'success'          => __( 'Success', 'wp-travel-engine' ),
-		'voucher-waiting'  => __( 'Waiting for Voucher', 'wp-travel-engine' ),
-		'voucher-awaiting' => __( 'Waiting for Voucher', 'wp-travel-engine' ),
-		'voucher-received' => __( 'Voucher Received', 'wp-travel-engine' ),
-	);
+	static $cache = null;
 
-	$success_status = wptravelengine_success_payment_status();
-	$pending_status = wptravelengine_pending_payment_status();
-	$failed_status  = wptravelengine_failed_payment_status();
+	if ( null === $cache ) {
+		$options = array(
+			'abandoned'        => __( 'Abandoned', 'wp-travel-engine' ),
+			'completed'        => __( 'Completed', 'wp-travel-engine' ),
+			'complete'         => __( 'Completed', 'wp-travel-engine' ),
+			'cancelled'        => __( 'Cancelled', 'wp-travel-engine' ),
+			'cancel'           => __( 'Cancelled', 'wp-travel-engine' ),
+			'captured'         => __( 'Captured', 'wp-travel-engine' ),
+			'capture'          => __( 'Captured', 'wp-travel-engine' ),
+			'check-received'   => __( 'Check Received', 'wp-travel-engine' ),
+			'check-waiting'    => __( 'Waiting for Check', 'wp-travel-engine' ),
+			'failed'           => __( 'Failed', 'wp-travel-engine' ),
+			'partially-paid'   => __( 'Partially Paid', 'wp-travel-engine' ),
+			'settlement'       => __( 'Settlement', 'wp-travel-engine' ),
+			'pending'          => __( 'Pending', 'wp-travel-engine' ),
+			'deny'             => __( 'Denied', 'wp-travel-engine' ),
+			'expire'           => __( 'Expired', 'wp-travel-engine' ),
+			'refunded'         => __( 'Refunded', 'wp-travel-engine' ),
+			'revoked'          => __( 'Revoked', 'wp-travel-engine' ),
+			'success'          => __( 'Success', 'wp-travel-engine' ),
+			'voucher-waiting'  => __( 'Waiting for Voucher', 'wp-travel-engine' ),
+			'voucher-awaiting' => __( 'Waiting for Voucher', 'wp-travel-engine' ),
+			'voucher-received' => __( 'Voucher Received', 'wp-travel-engine' ),
+		);
 
-	$options = apply_filters( 'wp_travel_engine_payment_status_options', array_merge( $options, $success_status, $pending_status, $failed_status ) );
+		$success_status = wptravelengine_success_payment_status();
+		$pending_status = wptravelengine_pending_payment_status();
+		$failed_status  = wptravelengine_failed_payment_status();
 
-	if ( is_null( $status ) ) {
-		return $options;
+		$cache = apply_filters( 'wp_travel_engine_payment_status_options', array_merge( $options, $success_status, $pending_status, $failed_status ) );
 	}
 
-	return $options[ $status ] ?? __( 'N/A', 'wp-travel-engine' );
+	if ( is_null( $status ) ) {
+		return $cache;
+	}
+
+	return $cache[ $status ] ?? __( 'N/A', 'wp-travel-engine' );
 }
 
 /**
  * Defined booking status.
  *
  * @since 5.6.3
+ * @since 6.7.8 performance improvement from property cache.
  */
 function wptravelengine_booking_status( $status = null ) {
-	$options = array(
-		'booked'    => __( 'Booked', 'wp-travel-engine' ),
-		'completed' => __( 'Completed', 'wp-travel-engine' ),
-		'pending'   => __( 'Pending', 'wp-travel-engine' ),
-		'canceled'  => __( 'Cancelled', 'wp-travel-engine' ),
-	);
-	$options = apply_filters( 'wp_travel_engine_booking_status_options', $options );
+	static $cache = null;
 
-	if ( is_null( $status ) ) {
-		return $options;
+	if ( null === $cache ) {
+		$cache = array(
+			'booked'    => __( 'Booked', 'wp-travel-engine' ),
+			'completed' => __( 'Completed', 'wp-travel-engine' ),
+			'pending'   => __( 'Pending', 'wp-travel-engine' ),
+			'canceled'  => __( 'Cancelled', 'wp-travel-engine' ),
+		);
+		$cache = apply_filters( 'wp_travel_engine_booking_status_options', $cache );
 	}
 
-	return $options[ $status ] ?? __( 'N/A', 'wp-travel-engine' );
+	if ( is_null( $status ) ) {
+		return $cache;
+	}
+
+	return $cache[ $status ] ?? __( 'N/A', 'wp-travel-engine' );
 }
 
 /**

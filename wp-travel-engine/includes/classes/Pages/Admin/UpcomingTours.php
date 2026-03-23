@@ -401,17 +401,17 @@ class UpcomingTours implements AdminPage {
 		$today             = wp_date( 'Y-m-d' );
 
 		foreach ( $bookings as $booking ) {
-			try {
-				$booking_model = new Booking( $booking->ID );
-				$trip_datetime = $booking_model->get_trip_datetime();
+			$booking_model = wptravelengine_get_booking( $booking );
 
-				// Only include bookings with future trip dates
-				if ( $trip_datetime && $trip_datetime >= $today ) {
-					$filtered_bookings[] = $booking;
-				}
-			} catch ( \Exception $e ) {
-				// Skip invalid bookings
+			if ( ! $booking_model ) {
 				continue;
+			}
+
+			$trip_datetime = $booking_model->get_trip_datetime();
+
+			// Only include bookings with future trip dates
+			if ( $trip_datetime && $trip_datetime >= $today ) {
+				$filtered_bookings[] = $booking;
 			}
 		}
 

@@ -245,7 +245,7 @@ if ( ! empty( $cart_items ) ) :
 					$instructions = isset( $settings['bank_transfer']['instruction'] ) ? $settings['bank_transfer']['instruction'] : '';
 					?>
 					<div class="wte-bank-transfer-instructions">
-						<?php echo wp_kses_post( $instructions ); ?>
+						<?php echo wp_kses_post( nl2br( $instructions ) ); ?>
 					</div>
 					<h3 class="bank-details"><?php echo esc_html__( 'Bank Details:', 'wp-travel-engine' ); ?></h3>
 					<?php
@@ -298,7 +298,7 @@ if ( ! empty( $cart_items ) ) :
 					$instructions = isset( $settings['check_payment']['instruction'] ) ? $settings['check_payment']['instruction'] : '';
 					?>
 					<div class="wte-bank-transfer-instructions">
-						<?php echo wp_kses_post( $instructions ); ?>
+						<?php echo wp_kses_post( nl2br( $instructions ) ); ?>
 					</div>
 					<?php
 				},

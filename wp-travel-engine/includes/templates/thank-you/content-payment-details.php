@@ -21,7 +21,7 @@
 			<tr>
 				<td><strong><?php echo __( 'Payment Amount', 'wp-travel-engine' ); ?></strong></td>
 				<td>
-					<?php wptravelengine_the_price( $payment_amount ); ?>
+					<?php wptravelengine_the_price_with_decimal( $payment_amount ); ?>
 					<code><?php echo esc_html( " [$payment_status]" ); ?></code>
 				</td>
 			</tr>

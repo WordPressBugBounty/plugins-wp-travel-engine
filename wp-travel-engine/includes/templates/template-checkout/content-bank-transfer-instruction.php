@@ -14,7 +14,7 @@
 	<div class="wpte-thankyou__block-title"><?php echo esc_html__( 'Bank Details:', 'wp-travel-engine' ); ?></div>
 	<div class="wpte-thankyou__block-content">
 		<div class="wte-bank-transfer-instructions">
-			<?php echo wp_kses_post( $instruction ); ?>
+			<?php echo wp_kses_post( nl2br( $instruction ) ); ?>
 		</div>
 		<?php if ( isset( $bank_details[0] ) ) : ?>
 			<?php foreach ( $bank_details as $bank ) : ?>

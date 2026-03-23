@@ -156,7 +156,7 @@ if ( isset( $wp_travel_engine_setting['trip_prev_price'] ) && $wp_travel_engine_
 			<?php
 			do_action( 'wp_travel_engine_after_price_form' );
 			?>
-		<div id="price-loading"><div id="price-loading-wrap"><div id="price-loading-outer"><div id="price-loading-inner"><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></div></div></div></div>
+		<div id="price-loading"><div id="price-loading-wrap"><div id="price-loading-outer"><div id="price-loading-inner"><?php wptravelengine_svg_by_fa_icon( 'fas fa-spinner', true, array( 'fa-spin' ) ); ?></div></div></div></div>
 		</div>
 	</div>
 	<?php

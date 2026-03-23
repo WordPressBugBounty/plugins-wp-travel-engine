@@ -62,7 +62,13 @@ class WP_Travel_Engine_Form_Field_Select {
 
 		endif;
 
-		$output = sprintf( '<select id="%s" name="%s" class="%s" %s %s>', $this->field['id'], $this->field['name'], $this->field['class'], $validations, $attributes );
+		// Add aria-label for accessibility if field_label is set.
+		$aria_label = '';
+		if ( ! empty( $this->field['field_label'] ) ) {
+			$aria_label = sprintf( 'aria-label="%s"', esc_attr( wp_strip_all_tags( $this->field['field_label'] ) ) );
+		}
+
+		$output = sprintf( '<select id="%s" name="%s" class="%s" %s %s %s>', $this->field['id'], $this->field['name'], $this->field['class'], $validations, $attributes, $aria_label );
 
 		if ( ! empty( $this->field['attributes']['placeholder'] ) ) :
 

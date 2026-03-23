@@ -176,6 +176,7 @@ class Events {
 	 * @param mixed  $meta_value Meta value.
 	 *
 	 * @return void
+	 * @since 6.7.8 Made compatible with `payment_created` and `due_payment_completed` methods
 	 */
 	public function trigger_payment_status_update( int $meta_id, int $post_id, string $meta_key, $meta_value ) {
 
@@ -190,11 +191,31 @@ class Events {
 		if ( 'wte-payments' === $post->post_type && in_array( $meta_value, $success_values, true ) ) {
 			$payment = new Payment( $post );
 			if ( wptravelengine_toggled( $payment->get_meta( 'is_due_payment' ) ) ) {
-				static::add_event( 'wptravelengine.booking.due.payment.completed', $payment->get_id(), $payment->get_post_type() );
+				static::due_payment_completed( $payment );
 			} else {
-				static::add_event( 'wptravelengine.booking.payment.completed', $payment->get_id(), $payment->get_post_type() );
+				static::payment_created( $payment );
 			}
 		}
+	}
+
+	/**
+	 * Payment created event.
+	 *
+	 * @param Payment $payment Payment instance.
+	 * @since 6.7.8
+	 */
+	public static function payment_created( Payment $payment ) {
+		static::add_event( 'wptravelengine.booking.payment.completed', $payment->get_id(), $payment->get_post_type() );
+	}
+
+	/**
+	 * Due payment completed event.
+	 *
+	 * @param Payment $payment Payment instance.
+	 * @since 6.7.8
+	 */
+	public static function due_payment_completed( Payment $payment ) {
+		static::add_event( 'wptravelengine.booking.due.payment.completed', $payment->get_id(), $payment->get_post_type() );
 	}
 
 	/**

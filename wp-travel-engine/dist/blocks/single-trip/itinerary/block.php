@@ -32,7 +32,7 @@ if ( $render->is_editor() ) {
 		$itineraries = array();
 	}
 	if ( ! defined( 'WTEAI_VERSION' ) ) {
-		if ( isset( $itinerary ) && isset( $itinerary['itinerary_title'] ) ){
+		if ( isset( $itinerary ) && isset( $itinerary['itinerary_title'] ) ) {
 			foreach ( $itinerary['itinerary_title'] as $key => $itinerary_title ) {
 				if ( isset( $itinerary['itinerary_content'][ $key ] ) ) {
 					$itineraries[] = array(
@@ -42,37 +42,40 @@ if ( $render->is_editor() ) {
 				}
 			}
 		}
-	} else {
-		if ( isset( $advanced_itinerary ) && !is_array( $advanced_itinerary ) ) {
+	} elseif ( isset( $advanced_itinerary ) && ! is_array( $advanced_itinerary ) ) {
 			$itineraries = array();
-		} else {
-			$merged_itinerary = array();
-			if ( is_array( $itinerary ) && is_array( $advanced_itinerary ) ) {
-				$merged_itinerary = array_merge( $itinerary, $advanced_itinerary );
-			}
-			if ( ! isset( $merged_itinerary['itinerary_title'] ) ) {
-				return;
-			}
-			foreach ( $merged_itinerary['itinerary_title'] as $key => $itinerary_title ) {
-				$itineraries[] = array(
-					'title'                  => $itinerary_title,
-					'days_label'             => $merged_itinerary['itinerary_days_label'][ $key ] ?? '',
-					'content'                => $merged_itinerary['itinerary_content'][ $key ] ?? '',
-					'duration'               => $merged_itinerary['itinerary_duration'][ $key ] ?? '',
-					'duration_type'          => $merged_itinerary['itinerary_duration_type'][ $key ] ?? '',
-					'sleep_modes'            => $merged_itinerary['sleep_modes'][ $key ] ?? '',
-					'sleep_mode_description' => $merged_itinerary['itinerary_sleep_mode_description'][ $key ] ?? '',
-					'itinerary_image'        => $merged_itinerary['itinerary_image'][ $key ] ?? '',
-					'meals_included'         => $merged_itinerary['meals_included'][ $key ] ?? '',
-				);
-			}
+	} else {
+		$merged_itinerary = array();
+		if ( is_array( $itinerary ) && is_array( $advanced_itinerary ) ) {
+			$merged_itinerary = array_merge( $itinerary, $advanced_itinerary );
+		}
+		if ( ! isset( $merged_itinerary['itinerary_title'] ) ) {
+			return;
+		}
+		foreach ( $merged_itinerary['itinerary_title'] as $key => $itinerary_title ) {
+			$itineraries[] = array(
+				'title'                  => $itinerary_title,
+				'days_label'             => $merged_itinerary['itinerary_days_label'][ $key ] ?? '',
+				'content'                => $merged_itinerary['itinerary_content'][ $key ] ?? '',
+				'duration'               => $merged_itinerary['itinerary_duration'][ $key ] ?? '',
+				'duration_type'          => $merged_itinerary['itinerary_duration_type'][ $key ] ?? '',
+				'sleep_modes'            => $merged_itinerary['sleep_modes'][ $key ] ?? '',
+				'sleep_mode_description' => $merged_itinerary['itinerary_sleep_mode_description'][ $key ] ?? '',
+				'itinerary_image'        => $merged_itinerary['itinerary_image'][ $key ] ?? '',
+				'meals_included'         => $merged_itinerary['meals_included'][ $key ] ?? '',
+			);
 		}
 	}
 }
 
-	?>
+?>
 	<div <?php echo esc_attr( $attributes_parser->wrapper_attributes() ); ?> >
-		<div class="post-data itinerary wte-trip-itinerary-v2<?php echo $attributes_parser->get('showDivider') ? ' has-divider' : '';echo $attributes_parser->get('showBullets') ? ' has-bullets' : ''; ?>">
+		<div class="post-data itinerary wte-trip-itinerary-v2
+		<?php
+		echo $attributes_parser->get( 'showDivider' ) ? ' has-divider' : '';
+		echo $attributes_parser->get( 'showBullets' ) ? ' has-bullets' : '';
+		?>
+		">
 			<?php
 			if ( $attributes_parser->get( 'expandAll' ) && ( $itinerary || $render->is_editor() ) ) {
 				?>
@@ -86,7 +89,8 @@ if ( $render->is_editor() ) {
 				</div>
 				<?php
 			}
-			foreach ( $itineraries as $index => $itinerary ) : ?>
+			foreach ( $itineraries as $index => $itinerary ) :
+				?>
 				<div class="itinerary-row <?php echo ( $enabled_expand_all || 0 === $index ) ? 'active' : ''; ?>">
 					<div class="wte-itinerary-head-wrap">
 						<div class="title">
@@ -96,11 +100,9 @@ if ( $render->is_editor() ) {
 								?>
 									<?php echo esc_attr( $itinerary['days_label'] ); ?>
 									<?php
-							} else {
-								if ( true === $attributes_parser->get( 'dayLabel' ) ) {
+							} elseif ( true === $attributes_parser->get( 'dayLabel' ) ) {
 									// Translators: %s => day number.
-									echo sprintf( esc_html__( 'Day %s : ', 'wp-travel-engine' ), esc_attr( $index + 1 ) );
-								}
+									printf( esc_html__( 'Day %s : ', 'wp-travel-engine' ), esc_attr( $index + 1 ) );
 							}
 							?>
 							</span>
@@ -148,7 +150,7 @@ if ( $render->is_editor() ) {
 							}
 							if ( isset( $itinerary['duration'] ) && ! empty( $itinerary['duration'] ) || ( isset( $itinerary['meals_included'] ) ) || ( isset( $itinerary['sleep_modes'] ) && ! empty( $itinerary['sleep_modes'] ) ) || ( isset( $itinerary['itinerary_image'] ) && ! empty( $itinerary['itinerary_image'] ) ) ) {
 								?>
-								<div class="itinerary-detail-additional-info<?php echo $attributes_parser->get('itineraryInfoDivider') ? ' has-divider' : ''; ?>">
+								<div class="itinerary-detail-additional-info<?php echo $attributes_parser->get( 'itineraryInfoDivider' ) ? ' has-divider' : ''; ?>">
 									<?php
 									if ( isset( $itinerary['duration'] ) && ! empty( $itinerary['duration'] ) ) {
 										if ( isset( $itinerary['duration'] ) ) {
@@ -196,7 +198,7 @@ if ( $render->is_editor() ) {
 														echo ', ';
 													}
 												}
-												$i ++;
+												++$i;
 											}
 											?>
 										</span>
@@ -211,7 +213,7 @@ if ( $render->is_editor() ) {
 											<?php
 											if ( isset( $itinerary['sleep_mode_description'] ) && '' !== $itinerary['sleep_mode_description'] ) {
 												echo '<a href="javascript:void(0);">' . esc_attr( $itinerary['sleep_modes'] ) . '<span>';
-												echo function_exists( 'wptravelengine_svg_by_fa_icon' ) ? wptravelengine_svg_by_fa_icon( 'fas fa-info' ) : '<i class="fas fa-info-circle'; // phpcs:ignore Escaping done in function wptravelengine_svg_by_fa_icon.
+												wptravelengine_svg_by_fa_icon( 'fas fa-info' );
 												echo '</span></a>';
 											} else {
 												echo esc_attr( $itinerary['sleep_modes'] );
@@ -240,7 +242,7 @@ if ( $render->is_editor() ) {
 												} else {
 													$content_sleep_mode = '';
 												}
-												echo apply_filters( 'the_content',  wp_kses_post( $content_sleep_mode ) );
+												echo apply_filters( 'the_content', wp_kses_post( $content_sleep_mode ) );
 												?>
 											</p>
 										</div>

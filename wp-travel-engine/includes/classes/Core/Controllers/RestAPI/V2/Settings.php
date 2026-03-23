@@ -1078,18 +1078,13 @@ class Settings {
 	 *
 	 * @return array
 	 * @since 6.2.0
+	 * @since 6.7.8 Remove Lazy Loading settings.
 	 */
 	protected function prepare_performace_settings( WP_REST_Request $request ): array {
 
 		$settings = array();
 
 		$settings['enable_optimized_loading'] = wptravelengine_toggled( $this->plugin_settings->get( 'enable_optimize_loading', 'no' ) );
-
-		$settings['lazy_loading'] = array(
-			'enable'       => wptravelengine_toggled( $this->plugin_settings->get( 'enable_lazy_loading', 'no' ) ),
-			'enable_map'   => wptravelengine_toggled( $this->plugin_settings->get( 'enable_map_lazy_loading', 'no' ) ),
-			'enable_image' => wptravelengine_toggled( $this->plugin_settings->get( 'enable_img_lazy_loading', 'no' ) ),
-		);
 
 		return $settings;
 	}
@@ -2397,6 +2392,7 @@ class Settings {
 	 *
 	 * @return void
 	 * @since 6.2.0
+	 * @since 6.7.8 Remove Lazy Loading settings.
 	 */
 	protected function set_performance_settings( WP_REST_Request $request ) {
 
@@ -2404,22 +2400,6 @@ class Settings {
 
 		if ( isset( $request['enable_optimized_loading'] ) ) {
 			$plugin_settings->set( 'enable_optimize_loading', wptravelengine_replace( $request['enable_optimized_loading'], true, 'yes', 'no' ) );
-		}
-
-		if ( ! isset( $request['lazy_loading'] ) ) {
-			return;
-		}
-
-		if ( isset( $request['lazy_loading']['enable'] ) ) {
-			$plugin_settings->set( 'enable_lazy_loading', wptravelengine_replace( $request['lazy_loading']['enable'], true, 'yes', 'no' ) );
-		}
-
-		if ( isset( $request['lazy_loading']['enable_map'] ) ) {
-			$plugin_settings->set( 'enable_map_lazy_loading', wptravelengine_replace( $request['lazy_loading']['enable_map'], true, 'yes', 'no' ) );
-		}
-
-		if ( isset( $request['lazy_loading']['enable_image'] ) ) {
-			$plugin_settings->set( 'enable_img_lazy_loading', wptravelengine_replace( $request['lazy_loading']['enable_image'], true, 'yes', 'no' ) );
 		}
 	}
 
@@ -3857,24 +3837,6 @@ class Settings {
 			'enable_optimized_loading'         => array(
 				'description' => __( 'Optimized Loading Enabled or Not', 'wp-travel-engine' ),
 				'type'        => 'boolean',
-			),
-			'lazy_loading'                     => array(
-				'description' => __( 'Lazy Loading', 'wp-travel-engine' ),
-				'type'        => 'object',
-				'properties'  => array(
-					'enable'       => array(
-						'description' => __( 'Lazy Loading Enabled or Not', 'wp-travel-engine' ),
-						'type'        => 'boolean',
-					),
-					'enable_map'   => array(
-						'description' => __( 'Map Lazy Loading Enabled or Not', 'wp-travel-engine' ),
-						'type'        => 'boolean',
-					),
-					'enable_image' => array(
-						'description' => __( 'Image Lazy Loading Enabled or Not', 'wp-travel-engine' ),
-						'type'        => 'boolean',
-					),
-				),
 			),
 		);
 

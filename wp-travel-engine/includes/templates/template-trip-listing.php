@@ -211,7 +211,7 @@ if ( $wte_trip_tax_post_qry->have_posts() ) :
 						<div class="table">
 							<div class="table-grid">
 								<div class="table-cell">
-									<i class="fa fa-spinner fa-spin" aria-hidden="true"></i>
+									<?php wptravelengine_svg_by_fa_icon( 'fas fa-spinner', true, array( 'fa-spin' ) ); ?>
 								</div>
 							</div>
 						</div>

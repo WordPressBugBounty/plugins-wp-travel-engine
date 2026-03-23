@@ -88,8 +88,7 @@ foreach ( $_edit_form_field->get_my_fields() as $id => $field ) {
 	if ( str_ends_with( $id, '_hidden' ) || isset( $def_arr[ $id ] ) ) {
 		continue;
 	}
-	$defaults = $_edit_form_field->get_defaults() ?: array();
-	$behav_   = $field['behaviours'] ?? array();
+	$behav_ = $field['behaviours'] ?? array();
 	if ( 'fee' === ( $behav_['type'] ?? '' ) ) {
 		$fee_hidden_markups .= '<input type="hidden" name="fees[slug][]" value="' . esc_attr( $id ) . '">';
 		$fee_hidden_markups .= '<input type="hidden" name="fees[label][]" value="' . esc_attr( $field['field_label'] ?? '' ) . '">';

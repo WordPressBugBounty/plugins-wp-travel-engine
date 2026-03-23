@@ -107,7 +107,7 @@ $global_settings = wptravelengine_settings();
 							?>
 							<!-- Whatsapp Call to Action -->
 							<div class="wpte-bf-whatsapp-cta">
-								<a href="https://wa.me/<?php echo esc_attr( $normalized_number ); ?>" class="wpte-bf-whatsapp-cta-link" target="_blank">
+								<a href="https://wa.me/<?php echo esc_attr( $normalized_number ); ?>" class="wpte-bf-whatsapp-cta-link" target="_blank" aria-label="<?php esc_html_e( 'Whatsapp', 'wp-travel-engine' ); ?>">
 									<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
 										<g clip-path="url(#clip0_330_17)">
 										<g filter="url(#filter0_f_330_17)">

@@ -41,6 +41,67 @@ class WP_Travel_Engine_Booking_Export {
 	}
 
 	/**
+	 * Get a traveller field value by its exact stored key or variations.
+	 * Field keys are collected dynamically from the stored data, but we provide resolution
+	 * logic to handle various prefixes for consistency across different plugin versions.
+	 *
+	 * @param array  $traveler  Single traveller data array.
+	 * @param string $field_key Field key as stored in meta or requested.
+	 * @return mixed Value (string or array; arrays are joined by the caller).
+	 * @since 6.7.8
+	 */
+	private static function get_traveler_field_value( array $traveler, $field_key ) {
+		$u         = str_replace( '-', '_', $field_key );
+		$prefixes  = array( 'lead_traveller_', 'traveller_', 'lead_' );
+		$base_name = $u;
+
+		// Extract base name by stripping known prefixes.
+		foreach ( $prefixes as $prefix ) {
+			if ( strpos( $u, $prefix ) === 0 ) {
+				$base_name = substr( $u, strlen( $prefix ) );
+				break;
+			}
+		}
+
+		// Generate all possible candidate keys.
+		$candidates = array(
+			$field_key,
+			$u,
+			$base_name,
+			'traveller_' . $base_name,
+			'lead_' . $base_name,
+			'lead_traveller_' . $base_name,
+		);
+
+		foreach ( array_unique( array_filter( $candidates ) ) as $key ) {
+			if ( array_key_exists( $key, $traveler ) && ( '' !== (string) $traveler[ $key ] || is_array( $traveler[ $key ] ) ) ) {
+				return $traveler[ $key ];
+			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * Normalize a traveller field key to a clean display label.
+	 * Strips lead_traveller_, lead_, traveller_ prefixes and normalizes separators.
+	 *
+	 * @param string $field Field key.
+	 * @return string Normalized display label.
+	 * @since 6.7.8
+	 */
+	private static function normalize_traveller_field_label( $field ) {
+		$label = $field;
+		// Strip known prefixes (longer patterns first to avoid partial matches).
+		$label = preg_replace( '/^lead[-_]traveller[-_]/i', '', $label );
+		$label = preg_replace( '/^lead[-_]/i', '', $label );
+		$label = preg_replace( '/^traveller[-_]/i', '', $label );
+		// Replace hyphens and underscores with spaces.
+		$label = str_replace( array( '_', '-' ), ' ', $label );
+		return ucwords( $label );
+	}
+
+	/**
 	 * Initialize export procedure.
 	 *
 	 * @return void
@@ -333,6 +394,37 @@ class WP_Travel_Engine_Booking_Export {
 	}
 
 	/**
+	 * Get allowed payment field keys (only those visible in the payment form).
+	 * Used to filter verified fields so we only export form-visible fields.
+	 *
+	 * @param array $queries_data Export query data (list of bookings).
+	 * @return array Ordered list: form value keys (deposit, payable, gateway_response) then fee slugs from get_fees() across all bookings.
+	 * @since 6.7.8
+	 */
+	private static function get_allowed_payment_form_field_keys( $queries_data ) {
+		$allowed   = array( 'deposit', 'payable', 'gateway_response' );
+		$fee_slugs = array();
+		foreach ( $queries_data as $data ) {
+			try {
+				$booking = BookingModel::make( $data->BookingID );
+				if ( $booking ) {
+					$fees = $booking->get_fees();
+					foreach ( $fees as $fee ) {
+						$slug = $fee['name'];
+						if ( ! in_array( $slug, $fee_slugs, true ) ) {
+							$fee_slugs[] = $slug;
+						}
+					}
+				}
+			} catch ( \Exception $e ) {
+				// Skip failed bookings.
+				continue;
+			}
+		}
+		return array_merge( $allowed, $fee_slugs );
+	}
+
+	/**
 	 * Collect payment field names, check cart version, and payment-related flags from a booking.
 	 *
 	 * @param int $booking_id Booking ID.
@@ -360,12 +452,15 @@ class WP_Travel_Engine_Booking_Export {
 				if ( is_array( $payments ) && ! empty( $payments ) ) {
 					$max_payments = count( $payments );
 
-					// Collect deposit (same pattern as payment edit form - separate from fees)
-					if ( ! in_array( 'deposit', $payment_fields ) ) {
-						$payment_fields[] = 'deposit';
+					// Collect payment fields from payment edit form (deposit, payable, gateway_response) so export matches form.
+					$form_value_keys = array( 'deposit', 'payable', 'gateway_response' );
+					foreach ( $form_value_keys as $key ) {
+						if ( ! in_array( $key, $payment_fields ) ) {
+							$payment_fields[] = $key;
+						}
 					}
 
-					// Collect fee fields using same pattern as payment edit form (get_fees())
+					// Collect fee fields using same pattern as payment edit form (get_fees()) – only fields visible in payment form
 					$fees = $booking->get_fees();
 					foreach ( $fees as $fee ) {
 						$slug = $fee['name'];
@@ -606,7 +701,7 @@ class WP_Travel_Engine_Booking_Export {
 						$cart_info    = new CartInfoParser( $booking->get_cart_info() ?? array() );
 						$payment_data = $cart_info->is_curr_cart_ver( '>=' ) ? $booking->get_payments_data( false )['payments'] ?? array() : array();
 
-						// Verify deposit (same pattern as payment edit form - separate from fees)
+						// Verify deposit, payable, gateway_response (same order as payment edit form)
 						foreach ( $payments as $payment ) {
 							$payment_id    = isset( $payment->ID ) ? $payment->ID : ( method_exists( $payment, 'get_id' ) ? $payment->get_id() : 0 );
 							$_payment_data = $payment_data[ $payment_id ] ?? array();
@@ -623,6 +718,26 @@ class WP_Travel_Engine_Booking_Export {
 										if ( ! in_array( 'deposit', $payment_fields_with_actual_values ) ) {
 											$payment_fields_with_actual_values[] = 'deposit';
 										}
+									}
+								}
+							}
+
+							// Verify payable (from Payment model)
+							if ( method_exists( $payment, 'get_payable_amount' ) ) {
+								$payable_val = $payment->get_payable_amount();
+								if ( is_numeric( $payable_val ) && (float) $payable_val != 0 && ! in_array( 'payable', $payment_fields_with_actual_values ) ) {
+									$payment_fields_with_actual_values[] = 'payable';
+								}
+							}
+
+							// Verify gateway_response (from Payment model)
+							if ( method_exists( $payment, 'get_gateway_response' ) ) {
+								$gw = $payment->get_gateway_response();
+								if ( $gw !== null && $gw !== '' && $gw !== false && ! in_array( 'gateway_response', $payment_fields_with_actual_values ) ) {
+									if ( is_string( $gw ) && trim( $gw ) !== '' ) {
+										$payment_fields_with_actual_values[] = 'gateway_response';
+									} elseif ( is_array( $gw ) && ! empty( $gw ) ) {
+										$payment_fields_with_actual_values[] = 'gateway_response';
 									}
 								}
 							}
@@ -675,7 +790,10 @@ class WP_Travel_Engine_Booking_Export {
 			}
 		}
 
-		// Remove duplicates and re-index
+		// Only export fields that are visible in the payment form (form value keys + get_fees() slugs)
+		$allowed_payment_field_keys        = self::get_allowed_payment_form_field_keys( $queries_data );
+		$payment_fields_with_actual_values = array_values( array_intersect( $allowed_payment_field_keys, $payment_fields_with_actual_values ) );
+
 		return array_values( array_unique( $payment_fields_with_actual_values ) );
 	}
 
@@ -737,8 +855,8 @@ class WP_Travel_Engine_Booking_Export {
 	 * @since 6.7.4
 	 */
 	private static function verify_traveler_fields( $queries_data ) {
-		$lead_traveler_fields_with_values    = array();
-		$regular_traveler_fields_with_values = array();
+		$primary_traveler_fields    = array();
+		$additional_traveler_fields = array();
 
 		foreach ( $queries_data as $data ) {
 			$traveler_details = get_post_meta( $data->BookingID, 'wptravelengine_travelers_details', true );
@@ -748,38 +866,24 @@ class WP_Travel_Engine_Booking_Export {
 					foreach ( $travelers as $index => $traveler ) {
 						if ( is_array( $traveler ) ) {
 							foreach ( $traveler as $field => $value ) {
-								// Check if value is non-empty
 								if ( $value === null || $value === '' || $value === false ) {
 									continue;
 								}
-
-								// Skip empty arrays
 								if ( is_array( $value ) && empty( $value ) ) {
 									continue;
 								}
-
-								// Skip whitespace-only strings and null strings
 								if ( is_string( $value ) ) {
 									$trimmed_value = trim( $value );
 									if ( empty( $trimmed_value ) || $trimmed_value === 'null' || $trimmed_value === 'NULL' ) {
 										continue;
 									}
 								}
-
-								// Determine if this is a lead field
-								$is_lead_field = (
-									preg_match( '/^lead[-_\s]/i', $field ) ||
-									preg_match( '/lead[-_\s]traveller/i', $field )
-								);
-
-								if ( $index === 0 && $is_lead_field ) {
-									if ( ! in_array( $field, $lead_traveler_fields_with_values ) ) {
-										$lead_traveler_fields_with_values[] = $field;
+								if ( $index === 0 ) {
+									if ( ! in_array( $field, $primary_traveler_fields, true ) ) {
+										$primary_traveler_fields[] = $field;
 									}
-								} elseif ( ! $is_lead_field ) {
-									if ( ! in_array( $field, $regular_traveler_fields_with_values ) ) {
-										$regular_traveler_fields_with_values[] = $field;
-									}
+								} elseif ( ! in_array( $field, $additional_traveler_fields, true ) ) {
+										$additional_traveler_fields[] = $field;
 								}
 							}
 						}
@@ -788,17 +892,17 @@ class WP_Travel_Engine_Booking_Export {
 			}
 		}
 
-		// Always include Pricing Category from traveller details (lead: pricing_category, others: traveller_pricing_category).
-		if ( ! in_array( 'pricing_category', $lead_traveler_fields_with_values, true ) ) {
-			$lead_traveler_fields_with_values[] = 'pricing_category';
+		// Always include pricing category as first field.
+		if ( ! in_array( 'pricing_category', $primary_traveler_fields, true ) ) {
+			array_unshift( $primary_traveler_fields, 'pricing_category' );
 		}
-		if ( ! in_array( 'traveller_pricing_category', $regular_traveler_fields_with_values, true ) ) {
-			$regular_traveler_fields_with_values[] = 'traveller_pricing_category';
+		if ( ! in_array( 'traveller_pricing_category', $additional_traveler_fields, true ) ) {
+			array_unshift( $additional_traveler_fields, 'traveller_pricing_category' );
 		}
 
 		return array(
-			'lead_traveler_fields'    => array_values( array_unique( $lead_traveler_fields_with_values ) ),
-			'regular_traveler_fields' => array_values( array_unique( $regular_traveler_fields_with_values ) ),
+			'primary_traveler_fields'    => array_values( $primary_traveler_fields ),
+			'additional_traveler_fields' => array_values( $additional_traveler_fields ),
 		);
 	}
 
@@ -924,10 +1028,13 @@ class WP_Travel_Engine_Booking_Export {
 			$header[] = sprintf( __( 'Payment %d - Transaction ID', 'wp-travel-engine' ), $i );
 			$header[] = sprintf( __( 'Payment %d - Currency', 'wp-travel-engine' ), $i );
 
-			// Add dynamic payment fields (tax, deposit, booking_fee, etc.)
+			// Add dynamic payment fields (tax, deposit, booking_fee, gateway_response, etc.)
 			foreach ( $payment_fields_with_actual_values as $field_key ) {
 				$field_label = ucwords( str_replace( array( '_', 'total_' ), array( ' ', '' ), $field_key ) );
-				$header[]    = sprintf( __( 'Payment %1$d - %2$s', 'wp-travel-engine' ), $i, $field_label );
+				if ( $field_key === 'gateway_response' ) {
+					$field_label = __( 'Gateway response (base64)', 'wp-travel-engine' );
+				}
+				$header[] = sprintf( __( 'Payment %1$d - %2$s', 'wp-travel-engine' ), $i, $field_label );
 			}
 		}
 
@@ -946,58 +1053,22 @@ class WP_Travel_Engine_Booking_Export {
 			$header[] = __( 'Discount Amount', 'wp-travel-engine' );
 		}
 
-		// Helper function for traveler field matching (using verified fields)
-		$has_corresponding_lead_field = function ( $regular_field ) use ( $traveler_fields_with_values ) {
-			$regular_base = preg_replace( '/^(traveller[-_\s]*)/i', '', strtolower( $regular_field ) );
-			$regular_base = preg_replace( '/[-_\s]+/', ' ', trim( $regular_base ) );
-
-			foreach ( $traveler_fields_with_values['lead_traveler_fields'] as $lead_field ) {
-				$lead_base = preg_replace( '/^(lead[-_\s]*)?(traveller[-_\s]*)?/i', '', strtolower( $lead_field ) );
-				$lead_base = preg_replace( '/[-_\s]+/', ' ', trim( $lead_base ) );
-
-				if ( $regular_base === $lead_base ) {
-					return true;
-				}
-			}
-			return false;
-		};
-
 		// Add headers for each traveler (only fields with actual values).
 		// Use at least 1 traveler slot when Pricing Category is in the fields (display from cart until saved in meta).
-		$has_pricing_category    = in_array( 'pricing_category', $traveler_fields_with_values['lead_traveler_fields'], true )
-			|| in_array( 'traveller_pricing_category', $traveler_fields_with_values['regular_traveler_fields'], true );
+		$has_pricing_category    = in_array( 'pricing_category', $traveler_fields_with_values['primary_traveler_fields'], true )
+			|| in_array( 'traveller_pricing_category', $traveler_fields_with_values['additional_traveler_fields'], true );
 		$effective_max_travelers = $has_pricing_category ? max( 1, (int) $field_definitions['max_travelers'] ) : (int) $field_definitions['max_travelers'];
-		$pricing_category_label  = __( 'Pricing Category', 'wp-travel-engine' );
 		for ( $i = 1; $i <= $effective_max_travelers; $i++ ) {
-			if ( $i === 1 ) {
-				foreach ( $traveler_fields_with_values['lead_traveler_fields'] as $field ) {
-					$field_label = ( $field === 'pricing_category' ) ? $pricing_category_label : ucwords( str_replace( '_', ' ', $field ) );
-					$header[]    = sprintf( __( 'Traveler %1$d - %2$s', 'wp-travel-engine' ), $i, $field_label );
+			$fields         = ( $i === 1 ) ? $traveler_fields_with_values['primary_traveler_fields'] : $traveler_fields_with_values['additional_traveler_fields'];
+			$emitted_labels = array();
+			foreach ( $fields as $field ) {
+				$field_label    = self::normalize_traveller_field_label( $field );
+				$normalized_key = strtolower( $field_label );
+				if ( in_array( $normalized_key, $emitted_labels, true ) ) {
+					continue;
 				}
-				foreach ( $traveler_fields_with_values['regular_traveler_fields'] as $field ) {
-					if ( ! $has_corresponding_lead_field( $field ) ) {
-						$field_label = ( $field === 'traveller_pricing_category' ) ? $pricing_category_label : ucwords( str_replace( '_', ' ', $field ) );
-						$header[]    = sprintf( __( 'Traveler %1$d - %2$s', 'wp-travel-engine' ), $i, $field_label );
-					}
-				}
-			} else {
-				$pricing_category_field = null;
-				$other_fields           = array();
-				foreach ( $traveler_fields_with_values['regular_traveler_fields'] as $field ) {
-					if ( $field === 'traveller_pricing_category' ) {
-						$pricing_category_field = $field;
-					} else {
-						$other_fields[] = $field;
-					}
-				}
-				// Add pricing category first if it exists
-				if ( $pricing_category_field !== null ) {
-					$header[] = sprintf( __( 'Traveler %1$d - %2$s', 'wp-travel-engine' ), $i, $pricing_category_label );
-				}
-				foreach ( $other_fields as $field ) {
-					$field_label = ucwords( str_replace( '_', ' ', $field ) );
-					$header[]    = sprintf( __( 'Traveler %1$d - %2$s', 'wp-travel-engine' ), $i, $field_label );
-				}
+				$emitted_labels[] = $normalized_key;
+				$header[]         = sprintf( __( 'Traveler %1$d - %2$s', 'wp-travel-engine' ), $i, $field_label );
 			}
 		}
 
@@ -1153,134 +1224,51 @@ class WP_Travel_Engine_Booking_Export {
 		// Derive pricing category from cart line items when not in meta (same as booking details page display).
 		$pricing_from_cart = self::get_pricing_categories_from_cart( $booking_id );
 
-		$lead_traveler_fields    = $traveler_fields_with_values['lead_traveler_fields'];
-		$regular_traveler_fields = $traveler_fields_with_values['regular_traveler_fields'];
-
-		$has_corresponding_lead_field = function ( $regular_field ) use ( $lead_traveler_fields ) {
-			$regular_base = preg_replace( '/^(traveller[-_\s]*)/i', '', strtolower( $regular_field ) );
-			$regular_base = preg_replace( '/[-_\s]+/', ' ', trim( $regular_base ) );
-
-			foreach ( $lead_traveler_fields as $lead_field ) {
-				$lead_base = preg_replace( '/^(lead[-_\s]*)?(traveller[-_\s]*)?/i', '', strtolower( $lead_field ) );
-				$lead_base = preg_replace( '/[-_\s]+/', ' ', trim( $lead_base ) );
-
-				if ( $regular_base === $lead_base ) {
-					return true;
-				}
-			}
-			return false;
-		};
+		$primary_traveler_fields    = $traveler_fields_with_values['primary_traveler_fields'] ?? array();
+		$additional_traveler_fields = $traveler_fields_with_values['additional_traveler_fields'] ?? array();
 
 		for ( $i = 0; $i < $max_travelers; $i++ ) {
+			$fields = ( $i === 0 ) ? $primary_traveler_fields : $additional_traveler_fields;
 			if ( isset( $travelers[ $i ] ) && is_array( $travelers[ $i ] ) ) {
-				$traveler = $travelers[ $i ];
-
-				if ( $i === 0 ) {
-					// Lead traveler fields
-					foreach ( $lead_traveler_fields as $field ) {
-						$value = isset( $traveler[ $field ] ) ? $traveler[ $field ] : '';
-						// For pricing_category: prioritize cart_info (source of truth) over meta, since cart reflects actual booking
-						if ( $field === 'pricing_category' && isset( $pricing_from_cart[ $i ] ) && $pricing_from_cart[ $i ] !== '' ) {
-							$value = $pricing_from_cart[ $i ];
-						} elseif ( $field === 'pricing_category' ) {
-							// Fallback: use meta if cart doesn't have it
-							$meta_value = trim( (string) $value );
-							if ( $meta_value === '' || $meta_value === '0' || $meta_value === 'null' || $meta_value === 'NULL' ) {
-								$value = '';
+				$traveler       = $travelers[ $i ];
+				$emitted_labels = array();
+				foreach ( $fields as $field ) {
+					$field_label    = self::normalize_traveller_field_label( $field );
+					$normalized_key = strtolower( $field_label );
+					if ( in_array( $normalized_key, $emitted_labels, true ) ) {
+						continue;
+					}
+					$emitted_labels[] = $normalized_key;
+					if ( $field === 'pricing_category' || $field === 'traveller_pricing_category' ) {
+						$value = ( isset( $pricing_from_cart[ $i ] ) && $pricing_from_cart[ $i ] !== '' ) ? $pricing_from_cart[ $i ] : '';
+						if ( $value === '' && $field === 'pricing_category' ) {
+							$pc_raw = self::get_traveler_field_value( $traveler, 'pricing_category' );
+							$pc_str = trim( (string) $pc_raw );
+							if ( $pc_str !== '' && $pc_str !== '0' && strtolower( $pc_str ) !== 'null' ) {
+								$value = $pc_raw;
 							}
 						}
-						$value               = self::convert_country_codes( $value, $field, $countries_list );
-						$value               = self::resolve_pricing_category_value( $value, $field );
-						$traveler_row_data[] = is_array( $value ) ? implode( ', ', $value ) : $value;
-					}
-					// Regular traveler fields that don't have corresponding lead fields
-					foreach ( $regular_traveler_fields as $field ) {
-						if ( ! $has_corresponding_lead_field( $field ) ) {
-							$value = isset( $traveler[ $field ] ) ? $traveler[ $field ] : '';
-							// For traveller_pricing_category: prioritize cart_info (source of truth) over meta
-							if ( $field === 'traveller_pricing_category' && isset( $pricing_from_cart[ $i ] ) && $pricing_from_cart[ $i ] !== '' ) {
-								$value = $pricing_from_cart[ $i ];
-							} elseif ( $field === 'traveller_pricing_category' ) {
-								// Fallback: use meta if cart doesn't have it
-								$meta_value = trim( (string) $value );
-								if ( $meta_value === '' || $meta_value === '0' || $meta_value === 'null' || $meta_value === 'NULL' ) {
-									$value = '';
-								}
-							}
-							$value               = self::convert_country_codes( $value, $field, $countries_list );
-							$value               = self::resolve_pricing_category_value( $value, $field );
-							$traveler_row_data[] = is_array( $value ) ? implode( ', ', $value ) : $value;
-						}
-					}
-				} else {
-					// Regular traveler fields - put pricing category first (like traveller 1)
-					$pricing_category_field = null;
-					$other_fields           = array();
-					foreach ( $regular_traveler_fields as $field ) {
-						if ( $field === 'traveller_pricing_category' ) {
-							$pricing_category_field = $field;
-						} else {
-							$other_fields[] = $field;
-						}
-					}
-					// Process pricing category first if it exists
-					if ( $pricing_category_field !== null ) {
-						$value = isset( $traveler[ $pricing_category_field ] ) ? $traveler[ $pricing_category_field ] : '';
-						// For traveller_pricing_category: prioritize cart_info (source of truth) over meta
-						if ( isset( $pricing_from_cart[ $i ] ) && $pricing_from_cart[ $i ] !== '' ) {
-							$value = $pricing_from_cart[ $i ];
-						} else {
-							// Fallback: use meta if cart doesn't have it
-							$meta_value = trim( (string) $value );
-							if ( $meta_value === '' || $meta_value === '0' || $meta_value === 'null' || $meta_value === 'NULL' ) {
-								$value = '';
-							}
-						}
-						$value               = self::convert_country_codes( $value, $pricing_category_field, $countries_list );
-						$value               = self::resolve_pricing_category_value( $value, $pricing_category_field );
-						$traveler_row_data[] = is_array( $value ) ? implode( ', ', $value ) : $value;
-					}
-					// Then process other fields
-					foreach ( $other_fields as $field ) {
-						$value               = isset( $traveler[ $field ] ) ? $traveler[ $field ] : '';
+						$traveler_row_data[] = self::resolve_pricing_category_value( $value, $field );
+					} else {
+						$value               = self::get_traveler_field_value( $traveler, $field );
 						$value               = self::convert_country_codes( $value, $field, $countries_list );
 						$value               = self::resolve_pricing_category_value( $value, $field );
 						$traveler_row_data[] = is_array( $value ) ? implode( ', ', $value ) : $value;
 					}
 				}
 			} else {
-				// No traveler meta at this index: output empty values, but use pricing_from_cart when available (same as booking page display)
-				if ( $i === 0 ) {
-					foreach ( $lead_traveler_fields as $field ) {
-						$value               = ( $field === 'pricing_category' && isset( $pricing_from_cart[ $i ] ) ) ? $pricing_from_cart[ $i ] : '';
-						$traveler_row_data[] = $value;
+				// No traveler meta at this index: emit empty values, use pricing_from_cart when available.
+				$emitted_labels = array();
+				foreach ( $fields as $field ) {
+					$field_label    = self::normalize_traveller_field_label( $field );
+					$normalized_key = strtolower( $field_label );
+					if ( in_array( $normalized_key, $emitted_labels, true ) ) {
+						continue;
 					}
-					foreach ( $regular_traveler_fields as $field ) {
-						if ( ! $has_corresponding_lead_field( $field ) ) {
-							$value               = ( $field === 'traveller_pricing_category' && isset( $pricing_from_cart[ $i ] ) ) ? $pricing_from_cart[ $i ] : '';
-							$traveler_row_data[] = $value;
-						}
-					}
-				} else {
-					// For traveller 2+, put pricing category first (like traveller 1)
-					$pricing_category_field = null;
-					$other_fields           = array();
-					foreach ( $regular_traveler_fields as $field ) {
-						if ( $field === 'traveller_pricing_category' ) {
-							$pricing_category_field = $field;
-						} else {
-							$other_fields[] = $field;
-						}
-					}
-					// Add pricing category first if it exists
-					if ( $pricing_category_field !== null ) {
-						$value               = ( isset( $pricing_from_cart[ $i ] ) ) ? $pricing_from_cart[ $i ] : '';
-						$traveler_row_data[] = $value;
-					}
-					// Then add other fields
-					foreach ( $other_fields as $field ) {
-						$traveler_row_data[] = '';
-					}
+					$emitted_labels[]    = $normalized_key;
+					$traveler_row_data[] = ( ( $field === 'pricing_category' || $field === 'traveller_pricing_category' ) && isset( $pricing_from_cart[ $i ] ) )
+						? $pricing_from_cart[ $i ]
+						: '';
 				}
 			}
 		}
@@ -1390,7 +1378,7 @@ class WP_Travel_Engine_Booking_Export {
 		$payment_row[] = isset( $payment['transaction_id'] ) ? ( is_object( $payment['transaction_id'] ) ? wp_json_encode( $payment['transaction_id'] ) : (string) $payment['transaction_id'] ) : '';
 		$payment_row[] = isset( $payment['currency'] ) ? ( is_object( $payment['currency'] ) ? wp_json_encode( $payment['currency'] ) : (string) $payment['currency'] ) : '';
 
-		// Add dynamic payment fields in the same order as headers
+		// Add dynamic payment fields (e.g. gateway_response JSON)
 		foreach ( $payment_fields_with_actual_values as $field_key ) {
 			$value = '';
 			if ( isset( $payment[ $field_key ] ) ) {
@@ -1402,13 +1390,20 @@ class WP_Travel_Engine_Booking_Export {
 					$value = $payment[ $base_key ];
 				}
 			}
-			// Convert objects to strings
+			// Convert objects/arrays to strings
 			if ( is_object( $value ) ) {
 				$value = wp_json_encode( $value );
 			} elseif ( is_array( $value ) ) {
 				$value = wp_json_encode( $value );
 			}
-			$payment_row[] = is_numeric( $value ) ? $value : (string) $value;
+			if ( is_numeric( $value ) ) {
+				$payment_row[] = $value;
+			} elseif ( $field_key === 'gateway_response' && $value !== '' && $value !== null ) {
+				// Encode as base64 so commas, quotes and newlines in JSON cannot break CSV row.
+				$payment_row[] = base64_encode( (string) $value );
+			} else {
+				$payment_row[] = (string) $value;
+			}
 		}
 
 		return $payment_row;
@@ -1979,7 +1974,7 @@ class WP_Travel_Engine_Booking_Export {
 						// Get payment data using same pattern as payment edit form fields
 						$_payment_data = $payment_data[ $payment_id ] ?? array();
 
-						// Build payment row with basic fields (same pattern as payment edit form)
+						// Build payment row with basic fields (same as payment edit form: id, status, gateway, date, amount, transaction_id, currency)
 						$payment_row = array(
 							'id'             => $payment_id,
 							'status'         => ! empty( $payment_status ) ? ucfirst( $payment_status ) : '',
@@ -1990,23 +1985,29 @@ class WP_Travel_Engine_Booking_Export {
 							'currency'       => ! empty( $currency ) ? $currency : '',
 						);
 
-						// Add deposit (same pattern as payment edit form - separate from fees)
-						if ( isset( $_payment_data['deposit'] ) ) {
+						// Add dynamic fields from payment edit form (deposit, payable, gateway_response, then fees).
+						if ( in_array( 'deposit', $payment_fields_with_actual_values, true ) && isset( $_payment_data['deposit'] ) ) {
 							$deposit_value = $_payment_data['deposit'];
 							if ( $deposit_value !== null && $deposit_value !== '' && $deposit_value !== false ) {
 								$payment_row['deposit'] = is_numeric( $deposit_value ) ? (float) $deposit_value : $deposit_value;
 							}
 						}
+						if ( in_array( 'payable', $payment_fields_with_actual_values, true ) && method_exists( $payment, 'get_payable_amount' ) ) {
+							$payable_val            = $payment->get_payable_amount();
+							$payment_row['payable'] = is_numeric( $payable_val ) ? (float) $payable_val : 0;
+						}
+						if ( in_array( 'gateway_response', $payment_fields_with_actual_values, true ) && method_exists( $payment, 'get_gateway_response' ) ) {
+							$gw                              = $payment->get_gateway_response();
+							$payment_row['gateway_response'] = is_array( $gw ) ? wp_json_encode( $gw ) : (string) $gw;
+						}
 
-						// Add fee fields using same pattern as payment edit form (get_fees())
+						// Add fee fields using same pattern as payment edit form (get_fees()); only fields visible in payment form.
 						$fees = $booking->get_fees();
 						foreach ( $fees as $fee ) {
 							$slug = $fee['name'];
-							// Only include fields that are in the verified fields list
-							if ( ! in_array( $slug, $payment_fields_with_actual_values ) ) {
+							if ( ! in_array( $slug, $payment_fields_with_actual_values, true ) ) {
 								continue;
 							}
-							// Get value from payment_data (same pattern as payment edit form)
 							$value = $_payment_data[ $slug ] ?? 0;
 							if ( $value !== null && $value !== '' && $value !== false ) {
 								$payment_row[ $slug ] = is_numeric( $value ) ? (float) $value : $value;
@@ -2050,8 +2051,8 @@ class WP_Travel_Engine_Booking_Export {
 			$row_data[] = $summary_data['discount_percentage'];
 			$row_data[] = $summary_data['discount_amount'];
 		}
-		$has_pricing_category    = in_array( 'pricing_category', $traveler_fields_with_values['lead_traveler_fields'], true )
-			|| in_array( 'traveller_pricing_category', $traveler_fields_with_values['regular_traveler_fields'], true );
+		$has_pricing_category    = in_array( 'pricing_category', $traveler_fields_with_values['primary_traveler_fields'], true )
+			|| in_array( 'traveller_pricing_category', $traveler_fields_with_values['additional_traveler_fields'], true );
 		$effective_max_travelers = $has_pricing_category ? max( 1, (int) $field_definitions['max_travelers'] ) : (int) $field_definitions['max_travelers'];
 		$traveler_row_data       = self::get_traveler_row_data( $data->BookingID, $traveler_fields_with_values, $effective_max_travelers, $countries_list );
 		$row_data                = array_merge( $row_data, $traveler_row_data );

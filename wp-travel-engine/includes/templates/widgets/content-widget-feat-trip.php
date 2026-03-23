@@ -19,7 +19,7 @@ $is_featured_widget = true;
 	<div class="category-trips-widget-inner-wrap">
 
 		<figure class="category-trip-fig">
-			<a href="<?php the_permalink(); ?>">
+			<a href="<?php the_permalink(); ?>" aria-label="<?php the_title_attribute(); ?>">
 				<?php
 				$size = apply_filters( 'wp_travel_engine_archive_trip_feat_img_size', 'destination-thumb-trip-size' );
 				if ( has_post_thumbnail() ) :

@@ -205,7 +205,7 @@ class Checkout extends BasePage {
 	 * @return string
 	 */
 	public function get_full_payment_amount() {
-		$value = ( $this->get_down_payment_type() ?? '' ) === 'amount' ? wptravelengine_the_price( $this->cart->get_totals()['total'], false, false ) : '100%';
+		$value = in_array( $this->get_down_payment_type() ?? '', array( 'amount', 'amount_per_booking' ), true ) ? wptravelengine_the_price( $this->cart->get_totals()['total'], false, false ) : '100%';
 
 		return $value;
 	}
@@ -216,7 +216,7 @@ class Checkout extends BasePage {
 	 * @return string
 	 */
 	public function get_down_payment_amount() {
-		$is_amount = ( $this->get_down_payment_type() ?? '' ) === 'amount';
+		$is_amount = in_array( $this->get_down_payment_type() ?? '', array( 'amount', 'amount_per_booking' ), true );
 		$value     = $this->get_down_payment_value() ?? 0;
 
 		return $is_amount ? wptravelengine_the_price( $value, false, false ) : "{$value}%";
@@ -505,7 +505,7 @@ class Checkout extends BasePage {
 			'total'        => sprintf(
 				'<tr class="wpte-checkout__booking-summary-total"><td><strong>%s</strong></td><td><strong>%s</strong>%s</td></tr>',
 				__( 'Total:', 'wp-travel-engine' ),
-				wptravelengine_the_price( $this->cart->get_totals()['total'], false ),
+				wptravelengine_the_price_with_decimal( $this->cart->get_totals()['total'], false ),
 				( $tax->is_taxable() && $tax->is_inclusive() ) ? sprintf( __( ' (Incl. %s%% tax)', 'wp-travel-engine' ), $tax->get_tax_percentage() ) : ''
 			),
 			'after_total'  => '<tr class="wpte-checkout__table-spacer"><td colspan="2"></td></tr>',
@@ -623,7 +623,7 @@ class Checkout extends BasePage {
 				)
 				: '',
 			$this->cart->is_curr_cart() ? '' : ( 'coupon' === $key ? '-' : '+' ),
-			wptravelengine_the_price( $amount, false )
+			wptravelengine_the_price_with_decimal( $amount, false )
 		);
 
 		return array( $key => $row );

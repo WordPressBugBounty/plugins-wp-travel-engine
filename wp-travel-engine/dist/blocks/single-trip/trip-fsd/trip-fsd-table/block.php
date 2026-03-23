@@ -97,7 +97,7 @@ if ( $render->is_editor() ) {
 												>
 														<?php
 														if ( $attributes_parser->get( 'startDate' ) || $attributes_parser->get( 'endDate' ) ) :
-															function_exists( 'wptravelengine_svg_by_fa_icon' ) ? wptravelengine_svg_by_fa_icon( 'far fa-calendar' ) : print( '<i class="fa fa-calendar"></i>' );
+															wptravelengine_svg_by_fa_icon( 'far fa-calendar' );
 														endif;
 														?>
 														<?php if ( $attributes_parser->get( 'startDate' ) ) : ?>
@@ -132,7 +132,7 @@ if ( $render->is_editor() ) {
 													class="accordion-cost"
 												>
 													<span class="currency-code">
-													<?php function_exists( 'wptravelengine_svg_by_fa_icon' ) ? wptravelengine_svg_by_fa_icon( 'fas fa-tag' ) : print( '<i class="fa fa-tag"></i>' ); ?>
+														<?php wptravelengine_svg_by_fa_icon( 'fas fa-tag' ); ?>
 													</span>
 													<strong
 														class="trip-cost-holder"><?php echo esc_html( wte_get_formated_price( $fsd['price'] ) ); ?></strong>
@@ -149,8 +149,8 @@ if ( $render->is_editor() ) {
 													<div class="seats-available">
 														<?php
 														if ( ( $fsd['space'] === '' ) || ( (int) $fsd['space'] > 0 ) ) :
+															wptravelengine_svg_by_fa_icon( 'fas fa-user' );
 															?>
-															<?php function_exists( 'wptravelengine_svg_by_fa_icon' ) ? wptravelengine_svg_by_fa_icon( 'fas fa-user' ) : print( '<i class="fa fa-user"></i>' ); ?>
 															<span class="seats"><?php echo esc_html( sprintf( __( '%1$s Available', 'wp-travel-engine' ), $fsd['space'] ) ); ?></span>
 															<?php
 															else :

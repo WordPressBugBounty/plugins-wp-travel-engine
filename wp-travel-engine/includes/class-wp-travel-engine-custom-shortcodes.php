@@ -286,8 +286,9 @@ class WP_Travel_Engine_Custom_Shortcodes {
 	public static function wte_show_trip_map_shortcodes_callback( $attr ) {
 		$attr = shortcode_atts(
 			array(
-				'id'   => '',
-				'show' => 'both',
+				'id'            => '',
+				'show'          => 'both',
+				'click_to_load' => null, // null means auto-detect based on settings.
 			),
 			$attr,
 			'wte_trip_map'
@@ -306,9 +307,11 @@ class WP_Travel_Engine_Custom_Shortcodes {
 
 		$wp_travel_engine_setting = get_post_meta( $attr['id'], 'wp_travel_engine_setting', true );
 
-		$global_settings  = wptravelengine_settings();
-		$do_lazy_loading  = wptravelengine_toggled( $global_settings->get( 'enable_lazy_loading', 'no' ) );
-		$map_lazy_loading = wptravelengine_toggled( $global_settings->get( 'enable_map_lazy_loading', 'no' ) );
+		// Determine if click-to-load should be used.
+		$click_to_load = $attr['click_to_load'];
+		if ( null === $click_to_load ) {
+			$click_to_load = apply_filters( 'wptravelengine_map_click_to_load', true, $attr['id'] );
+		}
 
 		ob_start();
 
@@ -320,15 +323,36 @@ class WP_Travel_Engine_Custom_Shortcodes {
 				'iframe|image',
 			)
 		) && ! empty( $wp_travel_engine_setting['map']['iframe'] ) ) {
-			?>
+			$iframe_html = $wp_travel_engine_setting['map']['iframe'];
+
+			if ( $click_to_load ) {
+				?>
+				<div class="trip-map iframe wte-map-placeholder" data-iframe="<?php echo esc_attr( wp_json_encode( $iframe_html ) ); ?>" data-map-loaded="false">
+					<div class="wte-map-placeholder-inner">
+						<svg class="wte-map-icon wte-map-loading-spinner" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+							<polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+							<line x1="8" y1="2" x2="8" y2="18"></line>
+							<line x1="16" y1="6" x2="16" y2="22"></line>
+						</svg>
+						<span class="wte-map-placeholder-text"><?php esc_html_e( 'Map', 'wp-travel-engine' ); ?></span>
+					</div>
+					<noscript>
+						<?php echo wptravelengine_esc_iframe( $iframe_html ); ?>
+					</noscript>
+				</div>
+				<?php
+			} else {
+				// Original behavior: output iframe directly.
+				?>
 				<div class="trip-map iframe">
 					<?php
-					if ( ! is_singular( WP_TRAVEL_ENGINE_POST_TYPE ) || ! $do_lazy_loading || ! $map_lazy_loading ) :
-						echo wptravelengine_esc_iframe( $wp_travel_engine_setting['map']['iframe'] );
+					if ( ! is_singular( WP_TRAVEL_ENGINE_POST_TYPE ) ) :
+						echo wptravelengine_esc_iframe( $iframe_html );
 					endif;
 					?>
 				</div>
-			<?php
+				<?php
+			}
 			if ( 'iframe|image' === $attr['show'] ) {
 				$attr['show'] = 'none';
 			}

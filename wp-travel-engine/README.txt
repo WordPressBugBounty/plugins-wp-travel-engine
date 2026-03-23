@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 6.7.7
+Stable tag: 6.7.8
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -349,11 +349,14 @@ Please send us an email via [support ticket](https://wptravelengine.com/support-
 
 == Changelog ==
 
-= 6.7.7 - 9th March 2026 =
+= 6.7.8 - 23rd March 2026 =
 
-* Improved: Reorganized trip edit settings by structuring tabs and sub-tabs for easier navigation.
-* Improved: Simplified multi-day trip time selection by using only a start time, which is automatically applied as the end time for clear display.
-* Fixed: Corrected an intermittent issue with the pre-selected payment option on the checkout page.
+* Improved: Enhanced site performance by enabling lazy loading for images and maps, and caching database requests.
+* Improved: Added a popup gallery to display all images when a banner image is clicked.
+* Improved: Standardized amount formatting across bookings, emails, and payments to always show two decimal places.
+* Fixed: Resolved formatting issues with bank instructions and descriptions on the checkout page and in emails.
+* Fixed: Corrected duplicate traveler columns and inconsistent field key prefixes in the booking CSV export.
+* Changed: Removed the email footer image to create a cleaner email layout.
 
 [See changelog for all versions](https://plugins.svn.wordpress.org/wp-travel-engine/trunk/changelog.txt).
 

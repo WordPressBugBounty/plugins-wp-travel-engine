@@ -22,18 +22,20 @@ $make_tabs_sticky = wte_array_get( get_option( 'wp_travel_engine_settings' ), 'w
 if ( ! empty( $tabs['id'] ) ) : ?>
 	<div id="tabs-container"
 		class="wpte-tabs-container <?php echo esc_attr( $make_tabs_sticky ? 'wpte-tabs-sticky wpte-tabs-scrollable' : '' ); ?> clearfix">
-		<div class="nav-tab-wrapper">
+		<div class="nav-tab-wrapper" role="tablist">
 			<?php if ( $make_tabs_sticky ) : ?>
-				<div class="wpte-sticky-tab-mobile">
+				<div class="wpte-sticky-tab-mobile" role="presentation">
 					<?php
 					$order = 1;
 					foreach ( array_values( $tabs['id'] ) as $index => $values ) :
 						?>
-						<div class="tab-anchor-wrapper" style="order: <?php echo esc_attr( $order ); ?>;">
+						<div class="tab-anchor-wrapper" role="presentation" style="order: <?php echo esc_attr( $order ); ?>;">
 							<a href="#"
 								class="nav-tab nb-tab-trigger <?php echo esc_attr( $index === 0 ? 'nav-tab-active' : '' ); ?>"
-								data-configuration="<?php echo esc_attr( $values ); ?>" 
-								role="tab" 
+								data-configuration="<?php echo esc_attr( $values ); ?>"
+								role="tab"
+								id="tab-<?php echo esc_attr( $values ); ?>-mobile"
+								aria-controls="nb-<?php echo esc_attr( $values ); ?>-configurations"
 								aria-selected="<?php echo esc_attr( $index === 0 ? 'true' : 'false' ); ?>">
 								<?php
 								if ( isset( $tabs['icon'][ $values ] ) && $tabs['icon'][ $values ] !== '' ) {
@@ -50,17 +52,19 @@ if ( ! empty( $tabs['id'] ) ) : ?>
 					?>
 				</div>
 			<?php endif; ?>
-			<div class="tab-inner-wrapper">
+			<div class="tab-inner-wrapper" role="presentation" style="order: <?php echo esc_attr( $order ); ?>;">
 				<?php
 				$order = 1;
 				foreach ( array_values( $tabs['id'] ) as $index => $values ) :
 					?>
-					<div class="tab-anchor-wrapper" style="order: <?php echo esc_attr( $order ); ?>;">
-						<h2 class="wte-tab-title">
+					<div class="tab-anchor-wrapper" role="presentation" style="order: <?php echo esc_attr( $order ); ?>;">
+						<h2 class="wte-tab-title" role="presentation">
 							<a href="#"
 								class="nav-tab nb-tab-trigger <?php echo esc_attr( $index === 0 ? 'nav-tab-active' : '' ); ?>"
-								data-configuration="<?php echo esc_attr( $values ); ?>" 
-								role="tab" 
+								data-configuration="<?php echo esc_attr( $values ); ?>"
+								role="tab"
+								id="tab-<?php echo esc_attr( $values ); ?>"
+								aria-controls="nb-<?php echo esc_attr( $values ); ?>-configurations"
 								aria-selected="<?php echo esc_attr( $index === 0 ? 'true' : 'false' ); ?>">
 								<?php
 								if ( isset( $tabs['icon'][ $values ] ) && $tabs['icon'][ $values ] !== '' ) {

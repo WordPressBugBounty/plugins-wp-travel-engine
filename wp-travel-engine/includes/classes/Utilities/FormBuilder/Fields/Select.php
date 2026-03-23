@@ -70,6 +70,22 @@ class Select extends Base {
 	}
 
 	/**
+	 * Get field attributes with aria-label for accessibility.
+	 *
+	 * @return array
+	 */
+	protected function field_attributes(): array {
+		$attributes = parent::field_attributes();
+
+		// Add aria-label for accessibility if field_label is set.
+		if ( ! empty( $this->field['field_label'] ) ) {
+			$attributes['aria-label'] = wp_strip_all_tags( $this->field['field_label'] );
+		}
+
+		return $attributes;
+	}
+
+	/**
 	 * Render field.
 	 *
 	 * @return void
@@ -78,7 +94,7 @@ class Select extends Base {
 
 		$output = sprintf(
 			'<select %s>%s</select>',
-			$this->concat_attributes( $this->field_attributes(), array( 'placeholder', 'value' ) ),
+			$this->concat_attributes( $this->field_attributes(), array( 'placeholder', 'value', 'type' ) ),
 			$this->select_options(),
 		);
 

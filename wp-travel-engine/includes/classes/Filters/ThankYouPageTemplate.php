@@ -19,6 +19,8 @@ use WPTravelEngine\Helpers\CartInfoParser;
 use WPTravelEngine\Pages\Checkout;
 use WPTravelEngine\PaymentGateways\CheckPayment;
 use WPTravelEngine\PaymentGateways\DirectBankTransfer;
+use WPTravelEngine\Core\Cart\Adjustments\GatewayFee;
+
 /**
  * Thank You Page Template Filters.
  *
@@ -140,13 +142,24 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 	protected function set_cart() {
 		if ( ! $this->cart ) {
 			global $wte_cart;
-			$this->cart = clone $wte_cart;
+
+			$this->cart  = clone $wte_cart;
+			$cart_info   = $this->booking->get_cart_info();
+			$gateway_fee = $this->payment->get_gateway_fee();
+
+			if ( $gateway_fee > 0.00 ) {
+				$cart_info['totals']['payable_now']       = $this->payment->get_amount();
+				$cart_info['totals']['total_gateway_fee'] = $gateway_fee;
+
+				$gateway_fee_obj = new GatewayFee( $this->cart );
+				$this->cart->add_fee( $gateway_fee_obj );
+			}
 
 			$this->cart->set_cart_key( wptravelengine_generate_key( time() ) );
 
 			$this->cart->version = $this->booking->get_cart_version();
 
-			$this->cart->load( $this->booking->get_cart_info() );
+			$this->cart->load( $cart_info );
 		}
 
 		return $this->cart;
@@ -268,8 +281,8 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 		$args = array_merge(
 			compact( 'cart_line_items', 'deposit_amount', 'due_amount', 'is_partial_payment', 'coupons' ),
 			array(
-				'show_coupon_form' => $show_coupon_form === 'show',
-				'_wte_cart'        => $this->cart,
+				'show_coupon_form'  => $show_coupon_form === 'show',
+				'_wte_cart'         => $this->cart,
 				'template_instance' => $template_instance,
 			),
 			$args

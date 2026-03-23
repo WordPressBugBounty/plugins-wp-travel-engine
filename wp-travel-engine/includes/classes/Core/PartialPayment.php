@@ -26,7 +26,7 @@ class PartialPayment {
 	/**
 	 * Payment type.
 	 *
-	 * @var string $type percentage|amount
+	 * @var string $type percentage|amount|amount_per_booking
 	 */
 	public string $type;
 
@@ -92,6 +92,7 @@ class PartialPayment {
 				$partial_amount = ( $cart_total ?? $cart_item->get_totals( 'total' ) ) * $percentage * 0.01;
 				break;
 			case 'amount':
+				// Fixed amount per person (partial_payment_amount).
 				$amount_per_person = $trip->get_setting( 'partial_payment_amount' );
 				if ( 'global' === $partial_payment_use || ! $amount_per_person ) {
 					$amount_per_person = $this->amount;
@@ -102,6 +103,15 @@ class PartialPayment {
 				);
 
 				$partial_amount = $amount_per_person * array_sum( $total_person );
+				break;
+			case 'amount_per_booking':
+				// Fixed amount per booking (flat), same partial_payment_amount key as amount.
+				$amount_per_booking = $trip->get_setting( 'partial_payment_amount' );
+				if ( 'global' === $partial_payment_use || ! $amount_per_booking ) {
+					$amount_per_booking = $this->amount;
+				}
+
+				$partial_amount = (float) $amount_per_booking;
 				break;
 		}
 

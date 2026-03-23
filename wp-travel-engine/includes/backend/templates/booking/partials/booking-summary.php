@@ -72,7 +72,7 @@ $cart_line_items ??= $cart_info->get_item()->get_line_items();
 					printf(
 						'<tr class="wpte-booking-discount"><td colspan="2">%1$s</td><td class="pricing-total"><b>-%2$s</b</td></tr>',
 						esc_html( $line_item['label'] ?? '' ),
-						wptravelengine_the_price( $line_item['value'] && $line_item['value'] > 0 ? $line_item['value'] : $cart_info->get_totals( 'total_' . $line_item['name'] ) ?? 0, false, $pricing_arguments )
+						wptravelengine_the_price_with_decimal( $line_item['value'] && $line_item['value'] > 0 ? $line_item['value'] : $cart_info->get_totals( 'total_' . $line_item['name'] ) ?? 0, false, $pricing_arguments )
 					);
 				}
 			}
@@ -83,7 +83,7 @@ $cart_line_items ??= $cart_info->get_item()->get_line_items();
 				<tr class="wpte-booking-total">
 					<td colspan="2"><strong><?php esc_html_e( 'Total', 'wp-travel-engine' ); ?></strong></td>
 					<td class="amount-column">
-						<strong><?php wptravelengine_the_price( $payments_total['total_exclusive'] ?? 0, true, $pricing_arguments ); ?></strong>
+						<strong><?php wptravelengine_the_price_with_decimal( $payments_total['total_exclusive'] ?? 0, true, $pricing_arguments ); ?></strong>
 					</td>
 				</tr>
 				<?php if ( ( $payments_total['due_exclusive'] ?? 0 ) > 0 ) : ?>
@@ -93,7 +93,7 @@ $cart_line_items ??= $cart_info->get_item()->get_line_items();
 						</td>
 						<td class="amount-column">
 							<strong>
-								<?php wptravelengine_the_price( $payments_total['due_exclusive'], true, $pricing_arguments ); ?>
+								<?php wptravelengine_the_price_with_decimal( $payments_total['due_exclusive'], true, $pricing_arguments ); ?>
 							</strong>
 						</td>
 					</tr>

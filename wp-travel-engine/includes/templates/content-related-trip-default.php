@@ -38,7 +38,7 @@ $duration_label = wptravelengine_get_trip_duration_arr( $trip_data ?? $post, 'da
 				</div>
 			<?php } ?>
 			<!-- Trip Image -->
-			<a href="<?php the_permalink(); ?>">
+			<a href="<?php the_permalink(); ?>" aria-label="<?php echo esc_attr( get_the_title() ); ?>">
 				<?php
 				$size = apply_filters( 'wp_travel_engine_archive_trip_feat_img_size', 'trip-single-size' );
 				if ( has_post_thumbnail() ) :

@@ -208,7 +208,7 @@ abstract class CartAdjustment implements CartAdjustmentInterface {
 				)
 				: '',
 			'coupon' === $this->name ? '-' : '+',
-			wptravelengine_the_price( $this->cart->get_totals()[ "total_{$this->name}" ], false )
+			wptravelengine_the_price_with_decimal( $this->cart->get_totals()[ "total_{$this->name}" ], false )
 		);
 	}
 }

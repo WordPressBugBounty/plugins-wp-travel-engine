@@ -605,7 +605,7 @@ class Item {
 		$global_settings = get_option( 'wp_travel_engine_settings', true );
 		$trip_settings   = get_post_meta( $trip_id, 'wp_travel_engine_setting', true );
 
-		$valid_partial_types = apply_filters( 'wptravelengine_partial_value_types', array( 'amount', 'percent' ) );
+		$valid_partial_types = apply_filters( 'wptravelengine_partial_value_types', array( 'amount', 'amount_per_booking', 'percent' ) );
 
 		$type = $global_settings['partial_payment_option'] ?? 'invalid';
 
@@ -616,9 +616,11 @@ class Item {
 		$trip_full_payment   = ( $trip_settings['trip_full_payment_enabled'] ?? 'yes' ) === 'yes';
 		$global_full_payment = ( $global_settings['full_payment_enable'] ?? 'yes' ) === 'yes';
 
-		$value = (float) $global_settings[ "partial_payment_{$type}" ] ?? 0;
-		if ( ! empty( $trip_settings[ "partial_payment_{$type}" ] ) ) {
-			$value = (float) $trip_settings[ "partial_payment_{$type}" ];
+		// amount = fixed per person; amount_per_booking = fixed per booking (flat). Both use partial_payment_amount.
+		$settings_key = ( 'amount_per_booking' === $type ) ? 'amount' : $type;
+		$value        = (float) ( $global_settings[ "partial_payment_{$settings_key}" ] ?? 0 );
+		if ( ! empty( $trip_settings[ "partial_payment_{$settings_key}" ] ) ) {
+			$value = (float) $trip_settings[ "partial_payment_{$settings_key}" ];
 		}
 
 		$trip_full_payment = $global_full_payment;

@@ -268,7 +268,7 @@ function wptravelengine_get_checkout_template_args( array $args = array() ): arr
 	global $wte_cart;
 
 	$wptravelengine_settings = get_option( 'wp_travel_engine_settings', array() );
-	$checkout_page_template  = $wptravelengine_settings['checkout_page_template'] ?? '1.0';
+	$checkout_page_template  = wptravelengine_get_checkout_template_version( $wptravelengine_settings );
 	$display_header_footer   = $wptravelengine_settings['display_header_footer'] ?? 'no';
 	$show_travellers_info    = $wptravelengine_settings['display_travellers_info'] ?? 'yes';
 	$show_emergency_contact  = $wptravelengine_settings['display_emergency_contact'] ?? 'yes';
@@ -433,24 +433,35 @@ function wte_doing_it_wrong( $function, $message, $version ) {
 /**
  * Return array list of all trips.
  *
- * @return Array
+ * @return array
+ * @since 6.7.8 Added compatibility with private post status.
  */
 function wp_travel_engine_get_trips_array( $use_titles = false ) {
+	$post_statuses = array( 'publish' );
+
+	if ( is_admin() && current_user_can( 'read_private_posts' ) ) {
+		$post_statuses[] = 'private';
+	}
+
 	$args = array(
 		'post_type'   => 'trip',
-		'numberposts' => - 1,
+		'numberposts' => -1,
 		'orderby'     => 'title',
 		'order'       => 'ASC',
+		'post_status' => $post_statuses,
 	);
 
 	$trips = get_posts( $args );
 
-	$trips_array = array();
+	$trips_array   = array();
+	$private_label = __( 'Private', 'wp-travel-engine' );
 	foreach ( $trips as $trip ) {
+		$label = $trip->post_title . ( ( 'private' === $trip->post_status ) ? ' [' . $private_label . ']' : '' );
+
 		if ( $use_titles ) {
-			$trips_array[ $trip->post_title ] = $trip->post_title;
+			$trips_array[ $label ] = $label;
 		} else {
-			$trips_array[ $trip->ID ] = $trip->post_title;
+			$trips_array[ $trip->ID ] = $label;
 		}
 	}
 
@@ -1930,7 +1941,27 @@ function wte_get_the_tax_term_list( $id, $taxonomy, $before = '', $sep = '', $af
 	return $before . join( $sep, $term_links ) . $after;
 }
 
+/**
+ * Get trip details.
+ *
+ * @param int $trip_id Trip ID.
+ *
+ * @return array
+ * @since 6.7.8 performance improvement from property cache.
+ */
 function wte_get_trip_details( $trip_id ) {
+	// Static cache to prevent duplicate processing within same request
+	static $cache = array();
+
+	// Allow cache to be cleared via filter
+	if ( apply_filters( 'wptravelengine_clear_trip_details_cache', false ) ) {
+		$cache = array();
+	}
+
+	if ( isset( $cache[ $trip_id ] ) ) {
+		return $cache[ $trip_id ];
+	}
+
 	if ( ! $trip_id || get_post_type( $trip_id ) !== 'trip' ) {
 		return false;
 	}
@@ -2007,14 +2038,14 @@ function wte_get_trip_details( $trip_id ) {
 
 	if ( $details['show_trip_carousel'] ) {
 		if ( ! has_action( 'wp_travel_engine_feat_img_trip_galleries' ) ) {
-			$wpte_trip_images              = get_post_meta( get_the_ID(), 'wpte_gallery_id', true );
+			$wpte_trip_images              = get_post_meta( $trip_id, 'wpte_gallery_id', true );
 			$details['show_trip_carousel'] = ! has_action( 'wp_travel_engine_feat_img_trip_galleries' ) && ! empty( $wpte_trip_images );
 		}
 	}
 
 	if ( wptravelengine_toggled( $wte_global['related_display_new_trip_listing'] ?? false ) ) {
 		if ( $details['show_related_trip_carousel'] && ! has_action( 'wp_travel_engine_feat_img_trip_galleries' ) ) {
-			$wpte_trip_images                      = get_post_meta( get_the_ID(), 'wpte_gallery_id', true );
+			$wpte_trip_images                      = get_post_meta( $trip_id, 'wpte_gallery_id', true );
 			$details['show_related_trip_carousel'] = ! has_action( 'wp_travel_engine_feat_img_trip_galleries' ) && ! empty( $wpte_trip_images );
 		}
 	} else {
@@ -2029,6 +2060,9 @@ function wte_get_trip_details( $trip_id ) {
 		$details['show_related_available_dates']  = false;
 		$details['show_related_featured_tag']     = false;
 	}
+
+	// Cache the result before returning
+	$cache[ $trip_id ] = $details;
 
 	return $details;
 }

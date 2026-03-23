@@ -13,9 +13,18 @@ defined( 'ABSPATH' ) || exit;
  * @var bool $show_video_gallery
  * @var bool $full_width_banner Is full width banner enabled?
  */
+
 $fullwidth_class = $full_width_banner && 'banner-layout-1' === $banner_layout ? ' banner-layout-full' : '';
+
+$fancybox_images = array();
+foreach ( array_values( $list_images ) as $image ) {
+	$url = wp_get_attachment_image_url( $image, 'full' );
+	if ( $url ) {
+		$fancybox_images[] = array( 'src' => $url );
+	}
+}
 ?>
-<div class="wpte-gallery-wrapper <?php echo esc_attr( $banner_layout ); ?>">
+<div class="wpte-gallery-wrapper <?php echo esc_attr( $banner_layout ); ?>" data-images="<?php echo esc_attr( wp_json_encode( $fancybox_images ) ); ?>">
 	<div class="wpte-multi-banner-layout<?php echo esc_attr( $fullwidth_class ); ?>">
 		<?php
 		/**

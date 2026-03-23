@@ -37,38 +37,56 @@ foreach ( $all_payments as $key => $payment ) {
 			<table class="wpte-payment-card-table">
 				<tr class="wpte-payment-deposit">
 					<td><?php esc_html_e( 'Deposit Amount', 'wp-travel-engine' ); ?></td>
-					<td><?php wptravelengine_the_price( $payment['deposit'], true, $pricing_arguments ); ?></td>
+					<td><?php wptravelengine_the_price_with_decimal( $payment['deposit'], true, $pricing_arguments ); ?></td>
 				</tr>
 				<?php
 				foreach ( $payments_total['tax_inclusive'] ?? array() as $fee_name => $fee ) {
-					printf(
-						'<tr class="wpte-payment-%1$s"><td>%2$s</td><td>%3$s</td></tr>',
-						esc_attr( $fee_name ),
-						esc_html( $fee['label'] ),
-						wptravelengine_the_price( $payment[ $fee_name ] ?? 0, false, $pricing_arguments )
-					);
+					$price = floatval( $payment[ $fee_name ] ?? 0 );
+					if ( $price > 0.00 ) {
+						printf(
+							'<tr class="wpte-payment-%1$s"><td>%2$s</td><td>%3$s</td></tr>',
+							esc_attr( $fee_name ),
+							esc_html( $fee['label'] ),
+							wptravelengine_the_price_with_decimal( $price, false, $pricing_arguments )
+						);
+					}
 				}
 
 				if ( isset( $payments_total['tax'] ) ) {
-					printf(
-						'<tr class="wpte-payment-tax"><td>%1$s</td><td>%2$s</td></tr>',
-						esc_html( $payments_total['tax']['label'] ),
-						wptravelengine_the_price( $payment['tax'] ?? 0, false, $pricing_arguments )
-					);
+					$price = floatval( $payment['tax'] ?? 0 );
+					if ( $price > 0.00 ) {
+						printf(
+							'<tr class="wpte-payment-tax"><td>%1$s</td><td>%2$s</td></tr>',
+							esc_html( $payments_total['tax']['label'] ),
+							wptravelengine_the_price_with_decimal( $price, false, $pricing_arguments )
+						);
+					}
 				}
 
 				foreach ( $payments_total['tax_exclusive'] ?? array() as $fee_name => $fee ) {
+					$price = floatval( $payment[ $fee_name ] ?? 0 );
+					if ( $price > 0.00 && 'gateway_fee' !== $fee_name ) {
+						printf(
+							'<tr class="wpte-payment-%1$s"><td>%2$s</td><td>%3$s</td></tr>',
+							esc_attr( $fee_name ),
+							esc_html( $fee['label'] ),
+							wptravelengine_the_price_with_decimal( $price, false, $pricing_arguments )
+						);
+					}
+				}
+
+				if ( ( $payment['gateway_fee'] ?? 0 ) > 0.00 ) {
 					printf(
-						'<tr class="wpte-payment-%1$s"><td>%2$s</td><td>%3$s</td></tr>',
-						esc_attr( $fee_name ),
-						esc_html( $fee['label'] ),
-						wptravelengine_the_price( $payment[ $fee_name ] ?? 0, false, $pricing_arguments )
+						'<tr class="wpte-payment-gateway-fee"><td>%1$s</td><td><strong>%2$s</strong></td></tr>',
+						esc_html( __( 'Gateway Fee', 'wp-travel-engine' ) ),
+						wptravelengine_the_price_with_decimal( $payment['gateway_fee'] ?? 0, false, $pricing_arguments )
 					);
 				}
+
 				?>
 				<tr class="wpte-payment-total wpte-payment-amount">
 					<td><?php esc_html_e( 'Amount Paid', 'wp-travel-engine' ); ?></td>
-					<td><?php wptravelengine_the_price( $payment['total'], true, $pricing_arguments ); ?></td>
+					<td><?php wptravelengine_the_price_with_decimal( $payment['total'], true, $pricing_arguments ); ?></td>
 				</tr>
 			</table>
 		</div>

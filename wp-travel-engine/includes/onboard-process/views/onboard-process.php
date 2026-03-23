@@ -434,7 +434,7 @@ if ( ! empty( $addons_data ) ) {
 							value="<?php esc_attr_e( 'Continue', 'wp-travel-engine' ); ?>">
 					<?php wp_nonce_field( 'obp_btn_submit_continue_action', 'obp_btn_submit_onboard_nonce_field' ); ?>
 					<div id="onboard-loader" style="display: none">
-						<i class="fa fa-spinner fa-spin" aria-hidden="true"></i>
+						<?php wptravelengine_svg_by_fa_icon( 'fas fa-spinner', true, array( 'fa-spin' ) ); ?>
 					</div>
 				</div>
 				<div class="obp-message-block toast">

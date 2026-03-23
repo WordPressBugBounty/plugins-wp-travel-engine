@@ -929,19 +929,24 @@ class Booking extends PostModel {
 	 *
 	 * @return float
 	 * @since 6.4.0
+	 * @since 6.7.8 Support for old cart version where total paid amount is not stored.
 	 */
 	public function get_total_paid_amount(): float {
-		$paid_amount = $this->get_meta( 'total_paid_amount' );
-		// Check if the value exists and is numeric, even if it's 0
-		if ( $paid_amount !== null && $paid_amount !== false && is_numeric( $paid_amount ) ) {
-			return (float) $paid_amount;
+		if ( $this->is_curr_cart() ) {
+			$paid_amount = $this->get_meta( 'total_paid_amount' );
+			// Check if the value exists and is numeric, even if it's 0
+			if ( $paid_amount !== null && $paid_amount !== false && is_numeric( $paid_amount ) ) {
+				return (float) $paid_amount;
+			}
 		}
 		$payments    = get_post_meta( $this->ID, 'payments', true );
 		$paid_amount = 0;
 		if ( is_array( $payments ) && count( $payments ) > 0 ) {
-			foreach ( $payments as $payment ) {
-				$payment      = Payment::make( $payment );
-				$paid_amount += $payment->get_amount();
+			foreach ( $payments as $p_id ) {
+				$payment = wptravelengine_get_payment( $p_id );
+				if ( $payment ) {
+					$paid_amount += $payment->get_amount();
+				}
 			}
 		}
 
@@ -1338,6 +1343,7 @@ class Booking extends PostModel {
 			'due_exclusive'   => '0',
 			'payable'         => '0',
 			'extra_charges'   => '0',
+			'gateway_fee'     => '0',
 		);
 		$payments  = array();
 		$fee_types = $this->get_fee_types();
@@ -1371,6 +1377,9 @@ class Booking extends PostModel {
 			}
 
 			foreach ( $fee_types['tax_exclusive'] ?? array() as $fee ) {
+				if ( 'gateway_fee' === $fee['name'] ) {
+					continue;
+				}
 				$payments[ $p_id ][ $fee['name'] ]                = (string) ( $cart_totals[ 'total_' . $fee['name'] ] ?? '0.00' );
 				$totals['tax_exclusive'][ $fee['name'] ]['label'] = $fee['label'];
 				$totals['tax_exclusive'][ $fee['name'] ]['value'] = $calculator->add(
@@ -1394,6 +1403,7 @@ class Booking extends PostModel {
 			$payments[ $p_id ]['deposit']       = (string) ( $cart_totals['deposit'] ?? '0.00' );
 			$payments[ $p_id ]['payable']       = (string) ( $cart_totals['payable_now'] ?? '0.00' );
 			$payments[ $p_id ]['extra_charges'] = (string) ( $cart_totals['total_extra_charges'] ?? '0.00' );
+			$payments[ $p_id ]['gateway_fee']   = (string) ( $payment->get_gateway_fee() );
 
 			$totals['total_paid']    = $calculator->add(
 				$totals['total_paid'] ?? '0.00',
@@ -1410,6 +1420,10 @@ class Booking extends PostModel {
 			$totals['extra_charges'] = $calculator->add(
 				$totals['extra_charges'] ?? '0.00',
 				$payments[ $p_id ]['extra_charges']
+			);
+			$totals['gateway_fee']   = $calculator->add(
+				$totals['gateway_fee'] ?? '0.00',
+				$payments[ $p_id ]['gateway_fee']
 			);
 		}
 
@@ -1455,9 +1469,12 @@ class Booking extends PostModel {
 		/** @var PaymentCalculator $calculator */
 		$calculator = PaymentCalculator::for( $this->get_currency() );
 
+		$gateway_fee = (string) ( $args['payment_metadata']['gateway_fee'] ?? '0.00' );
+
 		$_payment            = null;
-		$total_paid_amount   = (string) $paid_amount;
 		$total_extra_charges = '0.00';
+		$total_paid_amount   = (string) $paid_amount;
+		$total_gateway_fee   = $gateway_fee;
 
 		$payments = $this->get_payments();
 
@@ -1470,6 +1487,7 @@ class Booking extends PostModel {
 				$total_paid_amount = $calculator->add( $total_paid_amount, (string) $payment->get_amount() );
 			}
 			$total_extra_charges = $calculator->add( $total_extra_charges, (string) $payment->get_cart_totals( 'total_extra_charges' ) );
+			$total_gateway_fee   = $calculator->add( $total_gateway_fee, (string) $payment->get_gateway_fee() );
 		}
 
 		if ( ! ( $_payment instanceof Payment ) ) {
@@ -1479,12 +1497,9 @@ class Booking extends PostModel {
 		$args['payment_metadata'] = is_array( $args['payment_metadata'] ) ? $args['payment_metadata'] : array();
 		$args['booking_metadata'] = is_array( $args['booking_metadata'] ) ? $args['booking_metadata'] : array();
 
-		$payable_amount = $calculator->subtract(
-			(string) $_payment->get_payable_amount(),
-			(string) $paid_amount
-		);
-
+		$payable_amount          = $calculator->subtract( (string) $_payment->get_payable_amount(), (string) $paid_amount );
 		$previous_payment_status = $_payment->get_payment_status();
+		$paid_amount             = $calculator->add( (string) $paid_amount, $gateway_fee );
 
 		$_payment_metas = array(
 			'payable'              => array(
@@ -1497,13 +1512,16 @@ class Booking extends PostModel {
 			),
 			'_prev_payment_status' => $previous_payment_status,
 			'payment_status'       => 'completed',
+			'gateway_fee'          => $gateway_fee,
 		);
 
 		$_payment->sync_metas( array_merge( $args['payment_metadata'], $_payment_metas ) );
 
+		$total_paid_amount = $calculator->add( $total_paid_amount, $gateway_fee );
+
 		$total_due_amount = $calculator->subtract(
-			$calculator->add( (string) $this->get_total(), (string) $total_extra_charges ),
-			(string) $total_paid_amount
+			$calculator->add( (string) $this->get_total(), $total_extra_charges ),
+			$calculator->subtract( $total_paid_amount, $total_gateway_fee )
 		);
 
 		$_booking_metas = array(
@@ -1533,7 +1551,7 @@ class Booking extends PostModel {
 	 * Syncs metas to the Payment and Booking posts.
 	 *
 	 * @param int   $payment_id The payment ID.
-	 * @param float $paid_amount The paid amount received from the payment gateway response.
+	 * @param float $amount The amount received from the payment gateway response.
 	 * @param array $args The arguments with payment and booking IDs and its respective metadata to sync.
 	 * {
 	 *  'payment_metadata' => array<mixed>,
@@ -1567,6 +1585,7 @@ class Booking extends PostModel {
 			),
 			'payment_status'       => 'pending',
 			'_prev_payment_status' => $previous_payment_status,
+			'gateway_fee'          => '0.00',
 		);
 
 		$_payment->sync_metas( array_merge( $args['payment_metadata'], $_payment_metas ) );
@@ -1588,7 +1607,7 @@ class Booking extends PostModel {
 	 * Syncs metas to the Payment and Booking posts.
 	 *
 	 * @param int   $payment_id The payment ID.
-	 * @param float $paid_amount The paid amount received from the payment gateway response.
+	 * @param float $amount The amount received from the payment gateway response.
 	 * @param array $args The arguments with payment and booking IDs and its respective metadata to sync.
 	 * {
 	 *  'payment_metadata' => array<mixed>,
@@ -1623,6 +1642,7 @@ class Booking extends PostModel {
 			),
 			'payment_status'       => 'failed',
 			'_prev_payment_status' => $previous_payment_status,
+			'gateway_fee'          => '0.00',
 		);
 
 		$_payment->sync_metas( array_merge( $args['payment_metadata'], $_payment_metas ) );

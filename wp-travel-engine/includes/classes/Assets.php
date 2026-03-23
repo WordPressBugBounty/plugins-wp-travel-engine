@@ -77,8 +77,6 @@ class Assets extends AssetsAbstract {
 		$post_meta = is_object( $post ) ? get_post_meta( $post->ID, 'wp_travel_engine_setting', true ) : [];
 
 		$currency_code_js = apply_filters( 'wpte_cc_allow_payment_with_switcher', true ) ? wp_travel_engine_get_currency_code() : wte_currency_code_in_db();
-		$lazy_loading     = wptravelengine_toggled( wptravelengine_settings()->get( "enable_lazy_loading", "no" ) );
-		$map_lazy_loading = wptravelengine_toggled( wptravelengine_settings()->get( "enable_map_lazy_loading", "no" ) );
 
 		$data = [
 			'wtePreFetch'      => array(
@@ -88,7 +86,6 @@ class Assets extends AssetsAbstract {
 					'nonce'         => wp_create_nonce( 'wp_rest' ),
 					'versionString' => 'wp/v2/',
 				),
-				'map_lazy_load' => ( $lazy_loading && $map_lazy_loading ) ? "enable" : "disable",
 				'iframe_url'    => isset( $post_meta[ 'map' ][ 'iframe' ] ) ? wptravelengine_esc_iframe( $post_meta[ 'map' ][ 'iframe' ] ) : '',
 			),
 			'wte_account_page' => array(
@@ -262,7 +259,7 @@ class Assets extends AssetsAbstract {
 			}
 
 			$wptravelengine_settings = get_option( 'wp_travel_engine_settings', array() );
-			$checkout_page_template  = $wptravelengine_settings[ 'checkout_page_template' ] ?? '1.0';
+			$checkout_page_template  = wptravelengine_get_checkout_template_version( $wptravelengine_settings );
 
 			if ( $version === '2.0' || $checkout_page_template === '2.0' || has_shortcode( $post->post_content, 'WPTRAVELENGINE_CHECKOUT' ) ) {
 				$this->enqueue_script( 'wte-popper' );

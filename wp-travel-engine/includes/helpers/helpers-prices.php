@@ -825,3 +825,57 @@ function wptravelengine_the_price( $price, bool $echo = true, $html = array() ):
 
 	return $formated_price;
 }
+
+/**
+ * Get the price with decimal places.
+ *
+ * @param float $price The price to format.
+ * @param bool  $echo Whether to echo the result.
+ * @param array $html The HTML arguments.
+ * @param int   $decimals The number of decimal places.
+ * @return string The formatted price.
+ * @since 6.7.8
+ */
+function wptravelengine_the_price_with_decimal( $price, bool $echo = true, $html = array(), int $decimals = 2 ) {
+	if ( is_bool( $html ) ) {
+		$html = array( 'use_html' => $html );
+	}
+	$use_html = ! isset( $html['use_html'] ) || $html['use_html'];
+
+	$settings      = wptravelengine_settings()->get();
+	$currency_code = isset( $settings['currency_code'] ) ? $settings['currency_code'] : 'USD';
+	$decimal_sep   = isset( $settings['decimal_separator'] ) ? $settings['decimal_separator'] : '.';
+	$thousands_sep = isset( $settings['thousands_separator'] ) ? $settings['thousands_separator'] : ',';
+	$format        = ! empty( $settings['amount_display_format'] ) ? $settings['amount_display_format'] : '%CURRENCY_SYMBOL% %FORMATED_AMOUNT%';
+
+	$formatted_num = number_format( (float) $price, $decimals, $decimal_sep, $thousands_sep );
+
+	$args = array_merge(
+		array(
+			'currency_code'             => $currency_code,
+			'format'                    => $format,
+			'use_html'                  => $use_html,
+			'use_default_currency_code' => false,
+		),
+		$html
+	);
+
+	if ( ! isset( $args['use_currency_symbol'] ) ) {
+		$args['use_currency_symbol'] = wp_travel_engine_get_currency_symbol( $args['currency_code'] );
+	}
+
+	$replacer = array(
+		'%CURRENCY_CODE%'   => $args['use_html'] ? '<span class="wpte-currency-code">' . $args['currency_code'] . '</span>' : $args['currency_code'],
+		'%CURRENCY_SYMBOL%' => $args['use_html'] ? '<span class="wpte-currency-code">' . $args['use_currency_symbol'] . '</span>' : $args['use_currency_symbol'],
+		'%AMOUNT%'          => $args['use_html'] ? '<span class="wpte-price" data-value="' . esc_attr( $price ) . '">' . $price . '</span>' : $price,
+		'%FORMATED_AMOUNT%' => $args['use_html'] ? '<span class="wpte-price" data-value="' . esc_attr( $price ) . '">' . $formatted_num . '</span>' : $formatted_num,
+	);
+
+	$output = str_replace( array_keys( $replacer ), array_values( $replacer ), $args['format'] );
+
+	if ( $echo ) {
+		echo wp_kses( $output, 'allowed_price_html' );
+	}
+
+	return $output;
+}

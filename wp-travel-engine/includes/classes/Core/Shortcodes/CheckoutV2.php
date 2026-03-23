@@ -24,7 +24,7 @@ class CheckoutV2 extends Checkout {
 		global $wte_cart;
 
 		$wptravelengine_settings = get_option( 'wp_travel_engine_settings', array() );
-		$checkout_page_template  = $wptravelengine_settings['checkout_page_template'] ?? '1.0';
+		$checkout_page_template  = wptravelengine_get_checkout_template_version( $wptravelengine_settings );
 		$display_header_footer   = $wptravelengine_settings['display_header_footer'] ?? 'no';
 		$show_travellers_info    = $wptravelengine_settings['display_travellers_info'] ?? 'yes';
 		$show_emergency_contact  = $wptravelengine_settings['display_emergency_contact'] ?? '';
@@ -86,7 +86,7 @@ class CheckoutV2 extends Checkout {
 			return ob_get_clean();
 		}
 
-		$checkout_page_template = $wptravelengine_settings['checkout_page_template'] ?? '1.0';
+		$checkout_page_template = wptravelengine_get_checkout_template_version( $wptravelengine_settings );
 		// Simplified conditional check for outputting based on version
 		if ( $atts['version'] === '1.0' || ( $atts['version'] !== '2.0' && $checkout_page_template == '1.0' ) ) {
 			return parent::output( $atts );
@@ -119,24 +119,12 @@ class CheckoutV2 extends Checkout {
 				if ( $wte_cart->is_curr_cart( '<' ) ) {
 					// Check for customized reservation with full payment.
 					$is_customized_reservation = $booking->get_meta( '_user_edited' );
-					if ( $is_customized_reservation ) {
-						$payments       = $booking->get_payment_detail();
-						$payment_amount = 0;
-
-						foreach ( $payments as $payment ) {
-							$payment_id      = Payment::make( $payment );
-							$payment_amount += $payment_id->get_amount();
-						}
-
-						$cart_version = $wte_cart->version;
-
-						if ( $payment_amount > $due_amount && $cart_version < '4.0' ) {
-							echo __(
-								'Thank you! Your payment has been received in full. No further action is required.',
-								'wp-travel-engine'
-							);
-							return ob_get_clean();
-						}
+					if ( $is_customized_reservation && round( $due_amount, 2 ) <= 0 ) {
+						echo __(
+							'Thank you! Your payment has been received in full. No further action is required.',
+							'wp-travel-engine'
+						);
+						return ob_get_clean();
 					}
 				} elseif ( round( $due_amount, 2 ) <= 0 ) {
 					echo __(

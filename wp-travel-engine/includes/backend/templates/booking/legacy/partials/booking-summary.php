@@ -48,7 +48,7 @@
 					<td>
 						<strong>
 							<?php
-							wptravelengine_the_price( $cart_info->get_totals( 'subtotal' ) ?? 0, true, $pricing_arguments );
+							wptravelengine_the_price_with_decimal( $cart_info->get_totals( 'subtotal' ) ?? 0, true, $pricing_arguments );
 							?>
 						</strong>
 					</td>
@@ -59,7 +59,7 @@
 						printf(
 							'<tr class="wpte-booking-discount"><td>%1$s</td><td class="pricing-total"><b>-%2$s</b</td></tr>',
 							esc_html( $line_item['label'] ?? '' ),
-							wptravelengine_the_price( $line_item['value'] && $line_item['value'] > 0 ? $line_item['value'] : $cart_info->get_totals( 'total_' . $line_item['name'] ) ?? 0, false, $pricing_arguments )
+							wptravelengine_the_price_with_decimal( $line_item['value'] && $line_item['value'] > 0 ? $line_item['value'] : $cart_info->get_totals( 'total_' . $line_item['name'] ) ?? 0, false, $pricing_arguments )
 						);
 					}
 				}
@@ -69,7 +69,7 @@
 						printf(
 							'<tr class="wpte-booking-tax"><td>%1$s</td><td class="pricing-total"><b>+%2$s</b</td></tr>',
 							esc_html( $line_item['label'] ?? '' ),
-							wptravelengine_the_price( $line_item['value'] && $line_item['value'] > 0 ? $line_item['value'] : $cart_info->get_totals( 'total_' . $line_item['name'] ) ?? 0, false, $pricing_arguments ),
+							wptravelengine_the_price_with_decimal( $line_item['value'] && $line_item['value'] > 0 ? $line_item['value'] : $cart_info->get_totals( 'total_' . $line_item['name'] ) ?? 0, false, $pricing_arguments ),
 							$line_item['name']
 						);
 					}
@@ -78,7 +78,7 @@
 				<tr class="wpte-booking-total">
 					<td><strong><?php esc_html_e( 'Total', 'wp-travel-engine' ); ?></strong></td>
 					<td class="amount-column">
-						<strong><?php wptravelengine_the_price( $cart_info->get_totals( 'total' ) ?? 0, true, $pricing_arguments ); ?></strong>
+						<strong><?php wptravelengine_the_price_with_decimal( $cart_info->get_totals( 'total' ) ?? 0, true, $pricing_arguments ); ?></strong>
 					</td>
 				</tr>
 				<tr class="wpte-booking-paid">
@@ -87,7 +87,7 @@
 						<strong>
 							<span class="amount-paid">-
 								<?php
-								wptravelengine_the_price( $booking->get_total_paid_amount(), true, $pricing_arguments );
+								wptravelengine_the_price_with_decimal( $booking->get_total_paid_amount(), true, $pricing_arguments );
 								// wptravelengine_the_price( $booking->get_meta('paid_amount'), true, $pricing_arguments );
 								?>
 							</span>
@@ -99,7 +99,7 @@
 					<td class="amount-column">
 						<strong>
 							<?php
-							wptravelengine_the_price( $booking->get_total_due_amount(), true, $pricing_arguments );
+							wptravelengine_the_price_with_decimal( $booking->get_total_due_amount(), true, $pricing_arguments );
 							// TODO: remove this after well testing
 							// wptravelengine_the_price( $cart_info->get_totals( 'due_total' ), true, $pricing_arguments );
 							// wptravelengine_the_price( $booking->get_meta('due_amount'), true, $pricing_arguments );

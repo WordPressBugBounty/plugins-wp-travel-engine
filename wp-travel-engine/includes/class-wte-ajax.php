@@ -119,16 +119,16 @@ class WTE_Ajax {
 		add_action( 'wp_ajax_nopriv_wptravelengine_send_test_email', array( $this, 'send_test_email' ) );
 
 		// Save global Settings.
-		add_action(
-			'wp_ajax_wpte_global_tabs_save_data',
-			function () {
-				if ( ! class_exists( '\Wp_Travel_Engine_Settings' ) ) {
-					require_once plugin_dir_path( \WP_TRAVEL_ENGINE_FILE_PATH ) . 'includes/class-wp-travel-engine-settings.php';
-				}
+		// add_action(
+		// 'wp_ajax_wpte_global_tabs_save_data',
+		// function () {
+		// if ( ! class_exists( '\Wp_Travel_Engine_Settings' ) ) {
+		// require_once plugin_dir_path( \WP_TRAVEL_ENGINE_FILE_PATH ) . 'includes/class-wp-travel-engine-settings.php';
+		// }
 
-				call_user_func( array( '\Wp_Travel_Engine_Settings', 'save_settings' ) );
-			}
-		);
+		// call_user_func( array( '\Wp_Travel_Engine_Settings', 'save_settings' ) );
+		// }
+		// );
 
 		// Onboard Dynamic Recommendation
 		add_action(

@@ -187,11 +187,15 @@ class Customer extends PostModel {
 	public function get_customer_bookings() {
 		$bookings_ids = $this->get_meta( 'wp_travel_engine_bookings' );
 		$bookings     = array();
+
+		if ( is_array( $bookings_ids ) && ! empty( $bookings_ids ) ) {
+			update_meta_cache( 'post', $bookings_ids );
+		}
+
 		foreach ( is_array( $bookings_ids ) ? $bookings_ids : array() as $booking_id ) {
-			try {
-				$bookings[] = new Booking( $booking_id );
-			} catch ( \Exception $e ) {
-				// Do nothing.
+			$booking = wptravelengine_get_booking( $booking_id );
+			if ( $booking instanceof Booking ) {
+				$bookings[] = $booking;
 			}
 		}
 

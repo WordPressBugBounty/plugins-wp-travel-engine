@@ -106,7 +106,7 @@ class AddToCart extends AjaxController {
 		$partial_payment_data = wp_travel_engine_get_trip_partial_payment_data( $trip_id );
 		if ( ! empty( $partial_payment_data ) ) :
 
-			if ( 'amount' === $partial_payment_data['type'] ) :
+			if ( in_array( $partial_payment_data['type'], array( 'amount', 'amount_per_booking' ), true ) ) :
 
 				$trip_price_partial = $partial_payment_data['value'];
 
