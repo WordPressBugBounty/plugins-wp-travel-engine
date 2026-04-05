@@ -9,10 +9,7 @@
 namespace WPTravelEngine\Core\Models\Post;
 
 use DateInterval;
-use DateTime;
 use WPTravelEngine\Abstracts\PostModel;
-use WPTravelEngine\Helpers\PackageDateParser;
-use WPTravelEngine\Core\Models\Settings\Options;
 
 /**
  * Class TripPackage.
@@ -144,6 +141,7 @@ class TripPackage extends PostModel {
 	 * @param array $args
 	 *
 	 * @return array
+	 * @since 6.7.9 Use wptravelengine_get_date_parser() helper for instantiation and propagate version arg to package date parsers.
 	 */
 	public function get_package_dates( array $args = array() ): array {
 
@@ -197,7 +195,11 @@ class TripPackage extends PostModel {
 			);
 
 			foreach ( $package_dates as $package_date ) {
-				$package_date_parser = new PackageDateParser( $this, $package_date );
+				if ( isset( $args['version'] ) ) {
+					$package_date['version'] = $args['version'];
+				}
+
+				$package_date_parser = wptravelengine_get_date_parser( $this, $package_date );
 
 				$package_dates = $package_date_parser->get_dates( false, compact( 'from', 'to' ) );
 				foreach ( $package_dates as $date => $date_data ) {
@@ -252,7 +254,7 @@ class TripPackage extends PostModel {
 				$enable_week_days  = empty( $enable_week_days ) ? array_combine( array_values( $week_days_mapping ), array_fill( 0, 7, true ) ) : $enable_week_days;
 				$week_days         = array_keys( $weekly_time_slots );
 
-				$package_date_parser = new PackageDateParser(
+				$package_date_parser = wptravelengine_get_date_parser(
 					$this,
 					array(
 						'dtstart'      => $valid_date_time,
@@ -274,7 +276,7 @@ class TripPackage extends PostModel {
 							'r_until'     => wp_date( 'Y-m-d', strtotime( "{$valid_date_time} +3 years" ) ),
 						),
 						'seats'        => '',
-						'version'      => $args['version'] ?? PackageDateParser::$version ?? 'v2',
+						'version'      => $args['version'] ?? 'v2',
 					)
 				);
 
@@ -284,6 +286,7 @@ class TripPackage extends PostModel {
 					$date          = $package_date->format( 'Y-m-d' );
 					$times         = array();
 					$times_by_days = $weekly_time_slots[ $package_date->format( 'w' ) ?: 7 ] ?? array();
+					$i             = 0;
 					foreach ( $times_by_days as $key => $time ) {
 						if ( empty( $time ) ) {
 							continue;
@@ -306,7 +309,7 @@ class TripPackage extends PostModel {
 
 						list( $seats, $capacity ) = $package_date_parser->get_seats_details( $date, $time );
 
-						$times[ $key ] = array(
+						$times[ $i ] = array(
 							'key'   => "{$this->ID}_{$package_date->format( 'Y-m-d_H:i' )}_{$to->format('H:i')}",
 							'from'  => $from_time,
 							'to'    => $to->format( 'Y-m-d\TH:i' ),
@@ -314,9 +317,10 @@ class TripPackage extends PostModel {
 						);
 
 						if ( 'v3' === $package_date_parser->version ) {
-							$times[ $key ]['capacity']   = $capacity;
-							$times[ $key ]['seats_left'] = $seats;
+							$times[ $i ]['capacity']   = $capacity;
+							$times[ $i ]['seats_left'] = $seats;
 						}
+						++$i;
 					}
 
 					$capacity       = $seats = '';
@@ -334,7 +338,7 @@ class TripPackage extends PostModel {
 					$dates[ $date ]['pricing'] = $this->get_default_pricings();
 				}
 			} else {
-				$package_date_parser = new PackageDateParser(
+				$package_date_parser = wptravelengine_get_date_parser(
 					$this,
 					array(
 						'dtstart'      => wp_date( 'Y-m-d' ),
@@ -344,7 +348,7 @@ class TripPackage extends PostModel {
 							'r_until'     => $to,
 						),
 						'seats'        => $available_seats,
-						'version'      => $args['version'] ?? PackageDateParser::$version ?? 'v2',
+						'version'      => $args['version'] ?? 'v2',
 					)
 				);
 
@@ -484,7 +488,7 @@ class TripPackage extends PostModel {
 		}
 
 		if ( $package_date ) {
-			$parser                    = new PackageDateParser( $this, $package_date );
+			$parser                    = wptravelengine_get_date_parser( $this, $package_date );
 			$this->categories_pricings = $parser->get_data_of( $package_date['dtstart'], 'pricing' );
 		} else {
 			$this->categories_pricings = $this->get_default_pricings();

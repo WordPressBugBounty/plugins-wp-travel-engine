@@ -10,9 +10,7 @@ namespace WPTravelEngine\Helpers;
 
 use DateTime;
 use RRule\RRule;
-use WPTravelEngine\Core\Booking\Inventory;
 use WPTravelEngine\Core\Models\Post\TripPackage;
-use WPTravelEngine\Core\Models\Post\TravelerCategory;
 
 #[\AllowDynamicProperties]
 /**
@@ -75,6 +73,12 @@ class PackageDateParser {
 	public static $version = null;
 
 	/**
+	 * @var null|string
+	 * @since 6.7.9
+	 */
+	protected $ver = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param TripPackage $trip_package Trip package object.
@@ -91,7 +95,7 @@ class PackageDateParser {
 		$this->rrule        = $this->parse_rrule( $args['rrule'] ?? array() );
 		$this->total_seats  = wptravelengine_normalize_numeric_val( $trip_package->get_trip()->get_maximum_participants() );
 
-		self::$version = strtolower( (string) ( $args['version'] ?? self::$version ?? 'v2' ) );
+		$this->ver = strtolower( (string) ( $args['version'] ?? self::$version ?? 'v2' ) );
 
 		do_action( 'wptravelengine_package_date_parser_construct', $this->package, $args );
 	}
@@ -171,11 +175,12 @@ class PackageDateParser {
 	 * @param $date
 	 *
 	 * @return array
+	 * @since 6.7.9 Use instance property $ver for version checking instead of static $version.
 	 */
 	protected function prepare_date( $date ): array {
 		$times          = array();
 		$formatted_date = $date->format( 'Y-m-d' );
-		$end_date       = wptravelengine_format_trip_end_datetime( $formatted_date, $this->package->get_trip(), 'Y-m-d' );
+		$trip           = $this->package->get_trip();
 
 		$i = 0;
 		foreach ( $this->times as $time ) {
@@ -196,11 +201,11 @@ class PackageDateParser {
 					)
 				),
 				'from'  => $formatted_date . 'T' . $time['from'],
-				'to'    => $end_date . 'T' . $time['from'],
+				'to'    => wptravelengine_format_trip_end_datetime( $formatted_date . 'T' . $time['from'], $trip, 'Y-m-d\TH:i' ),
 				'seats' => $available_time_seats,
 			);
 
-			if ( self::$version === 'v3' ) {
+			if ( $this->ver === 'v3' ) {
 				$times[ $i ]['capacity']   = $capacity;
 				$times[ $i ]['seats_left'] = $available_time_seats;
 			}
@@ -237,7 +242,7 @@ class PackageDateParser {
 			'pricing' => $this->package->default_pricings,
 		);
 
-		if ( self::$version === 'v3' ) {
+		if ( $this->ver === 'v3' ) {
 			$date_data['capacity']   = $capacity;
 			$date_data['seats_left'] = $date_data['seats'];
 		}
@@ -276,13 +281,14 @@ class PackageDateParser {
 	 * Get the recurring Dates.
 	 *
 	 * @return RRule|array
+	 * @since 6.7.9 Use wp_date() instead of date() for WordPress timezone-aware date comparison.
 	 */
 	public function get_dates( bool $object = true, $args = array() ) {
 
 		$this->booked_seats = $this->package->get_trip()->get_my_booked_seats();
 
 		if ( ! $this->is_recurring || empty( $this->rrule ) ) {
-			if ( $this->dtstart < date( 'Y-m-d' ) ) {
+			if ( $this->dtstart < wp_date( 'Y-m-d' ) ) {
 				return array();
 			}
 			try {
@@ -329,8 +335,12 @@ class PackageDateParser {
 	 *
 	 * @return array
 	 * @since 6.5.5
+	 * @since 6.7.9 Lazily hydrate booked_seats before calling prepare_date() to ensure accurate seat availability.
 	 */
 	public function get_data_of( string $date, $key = null ): array {
+		if ( empty( $this->booked_seats ) ) {
+			$this->booked_seats = $this->package->get_trip()->get_my_booked_seats();
+		}
 		$data = $this->prepare_date( new \DateTime( $date ) );
 		return $key ? ( $data[ $key ] ?? array() ) : $data;
 	}

@@ -1,5 +1,13 @@
 == Changelog ==
 
+= 6.7.9 - 5th March 2026 =
+* New Feature: Added support for translating email content using TranslatePress, making it easy to localize emails into multiple languages.
+* Improved: Email previews and test emails now update instantly without saving, allowing admins to quickly review layouts using sample data.
+* Fixed: Fixed an issue where Yoast SEO analysis failed if the Maps tab was left empty.
+* Fixed: Resolved an issue where the Thank You page showed incorrect content due to Yoast SEO removing required URL parameters.
+* Fixed: Corrected formatting issues with bank instructions on the checkout page and in email templates.
+* Deprecated: Certain email tags are now deprecated and will be removed in a future release.
+
 = 6.7.8 - 23rd March 2026 =
 * Improved: Enhanced site performance by enabling lazy loading for images and maps, and caching database requests.
 * Improved: Added a popup gallery to display all images when a banner image is clicked.

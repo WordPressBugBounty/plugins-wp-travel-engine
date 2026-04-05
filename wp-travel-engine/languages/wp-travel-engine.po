@@ -1,13 +1,13 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WP Travel Engine - Travel and Tour Booking Plugin 6.7.8\n"
+"Project-Id-Version: WP Travel Engine - Travel and Tour Booking Plugin 6.7.9\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wptravelengine\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-03-23T04:16:03+00:00\n"
+"POT-Creation-Date: 2026-04-05T06:55:35+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language: \n"
 "X-Generator: WP-CLI 2.12.0\n"
@@ -81,8 +81,8 @@ msgstr ""
 #: includes/backend/submenu/extensions.php:10
 #: includes/class-wp-travel-engine-settings.php:807
 #: includes/classes/Builders/admin-settings/extensions.php:10
-#: includes/helpers/functions.php:2211
-#: includes/helpers/functions.php:2228
+#: includes/helpers/functions.php:2219
+#: includes/helpers/functions.php:2236
 msgid "Extensions"
 msgstr ""
 
@@ -396,16 +396,17 @@ msgid "Date"
 msgstr ""
 
 #: admin/class-wp-travel-engine-admin.php:723
-#: admin/class-wp-travel-engine-booking-export.php:995
+#: admin/class-wp-travel-engine-booking-export.php:1002
 #: includes/class-wp-travel-engine-emails.php:681
-#: includes/classes/Booking/Email/Template_Tags.php:322
-#: includes/classes/Booking/Email/Template_Tags.php:515
-#: includes/classes/Plugin.php:723
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:300
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:410
+#: includes/classes/Booking/Email/Template_Tags.php:333
+#: includes/classes/Plugin.php:711
 msgid "Trip Date"
 msgstr ""
 
 #: admin/class-wp-travel-engine-admin.php:724
-#: admin/class-wp-travel-engine-booking-export.php:983
+#: admin/class-wp-travel-engine-booking-export.php:990
 #: includes/backend/booking/booking-parts/booking-details_trip-info.php:51
 #: includes/backend/booking/legacy/booking-parts/trip-info.php:20
 #: includes/backend/booking/legacy/booking-parts/trip-info.php:60
@@ -416,7 +417,7 @@ msgstr ""
 #: includes/classes/Core/PostTypes/Booking.php:553
 #: includes/dashboard/class-wp-travel-engine-enquiry-form-shortcodes.php:45
 #: includes/dashboard/class-wp-travel-engine-enquiry-form-shortcodes.php:112
-#: includes/helpers/helpers.php:1163
+#: includes/helpers/helpers.php:1188
 msgid "Trip Name"
 msgstr ""
 
@@ -429,8 +430,9 @@ msgstr ""
 #: includes/backend/templates/booking/partials/tab-title.php:19
 #: includes/backend/templates/upcoming-tours/partials/details.php:58
 #: includes/class-wp-travel-engine-emails.php:689
-#: includes/classes/Booking/Email/Template_Tags.php:333
-#: includes/classes/Booking/Email/Template_Tags.php:532
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:308
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:418
+#: includes/classes/Booking/Email/Template_Tags.php:344
 #: includes/classes/Core/Controllers/Ajax/ResendPurchaseReceipt.php:209
 #: includes/frontend/trip-meta/class-wp-travel-engine-meta-tags.php:130
 #: includes/frontend/trip-meta/trip-meta-parts/trip-price.php:104
@@ -447,7 +449,7 @@ msgstr ""
 #: admin/class-wp-travel-engine-admin.php:726
 #: admin/class-wp-travel-engine-admin.php:1751
 #: admin/class-wp-travel-engine-admin.php:1760
-#: admin/class-wp-travel-engine-booking-export.php:982
+#: admin/class-wp-travel-engine-booking-export.php:989
 #: includes/backend/booking/booking-parts/booking-details.php:377
 #: includes/backend/templates/booking/legacy/partials/edit/booking-status.php:11
 #: includes/backend/templates/booking/partials/edit/booking-status.php:9
@@ -458,7 +460,7 @@ msgid "Booking Status"
 msgstr ""
 
 #: admin/class-wp-travel-engine-admin.php:727
-#: admin/class-wp-travel-engine-booking-export.php:987
+#: admin/class-wp-travel-engine-booking-export.php:994
 #: includes/backend/booking/legacy/booking-parts/trip-info.php:40
 #: includes/backend/booking/legacy/booking-parts/trip-info.php:100
 msgid "Total Paid"
@@ -479,6 +481,7 @@ msgstr ""
 #: includes/backend/booking/booking.php:89
 #: includes/backend/booking/customer.php:13
 #: includes/class-wte-default-form-fields.php:276
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:526
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:58
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:502
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:606
@@ -550,6 +553,7 @@ msgstr ""
 #: includes/backend/booking/customer.php:24
 #: includes/class-wte-default-form-fields.php:62
 #: includes/class-wte-default-form-fields.php:321
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:530
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:111
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:529
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:635
@@ -589,12 +593,12 @@ msgstr ""
 #: includes/backend/booking/booking-parts/booking-details_payments.php:34
 #: includes/backend/booking/legacy/booking-parts/payment-details.php:41
 #: includes/bookings/class-wte-process-booking-core.php:1363
-#: includes/classes/Booking/Email/Template_Tags.php:1172
+#: includes/classes/Booking/Email/Template_Tags.php:1203
 #: includes/classes/Core/Booking/BookingProcess.php:673
 #: includes/deprecated/class-booking.php:39
-#: includes/helpers/functions.php:2282
-#: includes/helpers/functions.php:2308
-#: includes/helpers/helpers.php:2407
+#: includes/helpers/functions.php:2290
+#: includes/helpers/functions.php:2316
+#: includes/helpers/helpers.php:2432
 msgid "N/A"
 msgstr ""
 
@@ -703,7 +707,7 @@ msgstr ""
 
 #: admin/class-wp-travel-engine-admin.php:1243
 #: includes/classes/Core/PostTypes/Trip.php:169
-#: includes/classes/Modules/TripSearch.php:751
+#: includes/classes/Modules/TripSearch.php:750
 #: includes/templates/template-trip-search-form.php:14
 #: dist/blocks/editor/editor.js:2
 msgid "Activities"
@@ -893,7 +897,7 @@ msgstr ""
 #: includes/backend/settings/general/trip-info.php:159
 #: includes/classes/Core/Controllers/Ajax/AddTripInfo.php:44
 #: includes/classes/Core/Controllers/Ajax/PaymentGateway.php:58
-#: public/class-wp-travel-engine-public.php:648
+#: public/class-wp-travel-engine-public.php:644
 msgid "Choose a field type&hellip;"
 msgstr ""
 
@@ -994,7 +998,7 @@ msgstr ""
 
 #: admin/class-wp-travel-engine-admin.php:2225
 #: includes/helpers/functions.php:239
-#: dist/admin/trip-edit.js:4315
+#: dist/admin/trip-edit.js:4459
 msgid "Day"
 msgstr ""
 
@@ -1006,13 +1010,13 @@ msgstr ""
 #: includes/backend/settings/display/single-trip.php:518
 #: includes/classes/Builders/admin-settings/display/single-trip.php:129
 #: includes/classes/Builders/admin-settings/display/trip-archive.php:302
-#: includes/classes/Modules/TripSearch.php:158
-#: includes/classes/Modules/TripSearch.php:263
-#: includes/classes/Modules/TripSearch.php:946
+#: includes/classes/Modules/TripSearch.php:156
+#: includes/classes/Modules/TripSearch.php:262
+#: includes/classes/Modules/TripSearch.php:945
 #: includes/helpers/functions.php:240
-#: dist/admin/exports.js:3892
-#: dist/admin/global-settings.js:3772
-#: dist/admin/trip-edit.js:3906
+#: dist/admin/exports.js:3963
+#: dist/admin/global-settings.js:3870
+#: dist/admin/trip-edit.js:3977
 msgid "Days"
 msgstr ""
 
@@ -1071,7 +1075,7 @@ msgid "Note: By clicking yes, you will get an additional messages menu inside Tr
 msgstr ""
 
 #: admin/class-wp-travel-engine-admin.php:2343
-#: includes/classes/Plugin.php:1861
+#: includes/classes/Plugin.php:1823
 msgid "Dismiss this notice."
 msgstr ""
 
@@ -1092,19 +1096,20 @@ msgid "Selected users migrated."
 msgstr ""
 
 #: admin/class-wp-travel-engine-admin.php:2577
-#: admin/class-wp-travel-engine-booking-export.php:997
+#: admin/class-wp-travel-engine-booking-export.php:1004
 #: admin/meta-parts/enquiry.php:48
 #: admin/partials/trip/edit/tab-pricing/tab-pricing__packages.php:15
 #: includes/class-wp-travel-engine-emails.php:673
-#: includes/classes/Booking/Email/Template_Tags.php:318
-#: includes/classes/Booking/Email/Template_Tags.php:511
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:296
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:406
+#: includes/classes/Booking/Email/Template_Tags.php:329
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:899
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:972
 #: includes/classes/Builders/FormFields/OrderTripEditFormFields.php:192
 #: includes/classes/Builders/FormFields/OrderTripEditFormFields.php:308
 #: includes/classes/Core/Controllers/Ajax/EnquiryPreview.php:69
 #: includes/classes/Core/Controllers/Ajax/ResendPurchaseReceipt.php:189
-#: includes/helpers/helpers.php:3115
+#: includes/helpers/helpers.php:3140
 #: includes/templates/script-templates/tmpl-wte-packages.php:7
 msgid "Package Name"
 msgstr ""
@@ -1117,9 +1122,12 @@ msgstr ""
 #: includes/helpers/privacy-functions.php:121
 #: includes/templates/content--template-taxonomy.php:98
 #: includes/templates/emails/booking/notification.php:14
-#: dist/admin/exports.js:3667
-#: dist/admin/global-settings.js:3547
-#: dist/admin/trip-edit.js:3681
+#: dist/admin/exports.js:3641
+#: dist/admin/exports.js:3680
+#: dist/admin/global-settings.js:3548
+#: dist/admin/global-settings.js:3587
+#: dist/admin/trip-edit.js:3655
+#: dist/admin/trip-edit.js:3694
 msgid "Name"
 msgstr ""
 
@@ -1353,11 +1361,11 @@ msgstr ""
 msgid "You do not have sufficient permissions to perform this action."
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:981
+#: admin/class-wp-travel-engine-booking-export.php:988
 msgid "Booking ID"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:986
+#: admin/class-wp-travel-engine-booking-export.php:993
 #: includes/backend/booking/booking-parts/booking-details_payments.php:154
 #: includes/backend/booking/legacy/booking-parts/trip-info.php:48
 #: includes/backend/booking/legacy/booking-parts/trip-info.php:120
@@ -1366,7 +1374,7 @@ msgstr ""
 msgid "Total Cost"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:992
+#: admin/class-wp-travel-engine-booking-export.php:999
 #: includes/backend/booking/booking-parts/booking-details_payments.php:79
 #: includes/backend/booking/legacy/booking-parts/payment-details.php:44
 #: includes/backend/booking/legacy/booking-parts/payment-details.php:87
@@ -1375,32 +1383,33 @@ msgstr ""
 msgid "Payment Gateway"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:993
+#: admin/class-wp-travel-engine-booking-export.php:1000
 #: includes/backend/booking/booking-parts/booking-details.php:121
 msgid "No. of Travellers"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:994
+#: admin/class-wp-travel-engine-booking-export.php:1001
 msgid "Booking Date"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:996
+#: admin/class-wp-travel-engine-booking-export.php:1003
 #: includes/backend/booking/booking-parts/booking-details_trip-info.php:97
-#: includes/classes/Booking/Email/Template_Tags.php:327
-#: includes/classes/Booking/Email/Template_Tags.php:519
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:304
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:414
+#: includes/classes/Booking/Email/Template_Tags.php:338
 #: includes/classes/Core/Controllers/Ajax/ResendPurchaseReceipt.php:204
-#: includes/classes/Plugin.php:730
+#: includes/classes/Plugin.php:718
 msgid "Trip End Date"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:1003
+#: admin/class-wp-travel-engine-booking-export.php:1010
 #: includes/backend/booking/booking-parts/booking-details.php:67
 #: includes/backend/templates/booking/partials/tabs/accommodation.php:14
 #: includes/classes/Core/PostTypes/Booking.php:252
 msgid "Accommodation"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:1006
+#: admin/class-wp-travel-engine-booking-export.php:1013
 #: admin/meta-parts/trip-metas.php:668
 #: admin/meta-parts/trip-metas.php:669
 #: includes/backend/booking/booking-parts/booking-details_trip-info.php:178
@@ -1413,7 +1422,7 @@ msgstr ""
 #: includes/classes/Core/PostTypes/Booking.php:405
 #: includes/classes/Filters/CheckoutPageTemplate.php:586
 #: includes/classes/Filters/SettingsAPISchema.php:185
-#: includes/classes/Plugin.php:1730
+#: includes/classes/Plugin.php:1692
 #: includes/templates/checkout/header-steps.php:35
 #: includes/templates/checkout/mini-cart-before-coupon.php:13
 #: dist/bundle/trip-booking-modal.bundle.js:2
@@ -1422,98 +1431,98 @@ msgstr ""
 msgid "Extra Services"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:1009
+#: admin/class-wp-travel-engine-booking-export.php:1016
 msgid "Pickup Points"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:1012
+#: admin/class-wp-travel-engine-booking-export.php:1019
 #: includes/backend/templates/booking/partials/tabs/travel-insurance.php:14
 #: includes/classes/Core/PostTypes/Booking.php:261
 msgid "Travel Insurance"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:1018
+#: admin/class-wp-travel-engine-booking-export.php:1025
 #, php-format
 msgid "Billing - %s"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:1023
+#: admin/class-wp-travel-engine-booking-export.php:1030
 #, php-format
 msgid "Payment %d - ID"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:1024
+#: admin/class-wp-travel-engine-booking-export.php:1031
 #, php-format
 msgid "Payment %d - Status"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:1025
+#: admin/class-wp-travel-engine-booking-export.php:1032
 #, php-format
 msgid "Payment %d - Gateway"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:1026
+#: admin/class-wp-travel-engine-booking-export.php:1033
 #, php-format
 msgid "Payment %d - Date"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:1027
+#: admin/class-wp-travel-engine-booking-export.php:1034
 #, php-format
 msgid "Payment %d - Paid Amount"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:1028
+#: admin/class-wp-travel-engine-booking-export.php:1035
 #, php-format
 msgid "Payment %d - Transaction ID"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:1029
+#: admin/class-wp-travel-engine-booking-export.php:1036
 #, php-format
 msgid "Payment %d - Currency"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:1035
+#: admin/class-wp-travel-engine-booking-export.php:1042
 msgid "Gateway response (base64)"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:1037
+#: admin/class-wp-travel-engine-booking-export.php:1044
 #, php-format
 msgid "Payment %1$d - %2$s"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:1043
+#: admin/class-wp-travel-engine-booking-export.php:1050
 #: includes/backend/templates/booking/partials/payment-details.php:240
 #: includes/backend/templates/booking/partials/payment-summary-total.php:18
 msgid "Total Deposit Amount"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:1046
+#: admin/class-wp-travel-engine-booking-export.php:1053
 msgid "Total Tax"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:1051
+#: admin/class-wp-travel-engine-booking-export.php:1058
 msgid "Discount Code"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:1052
+#: admin/class-wp-travel-engine-booking-export.php:1059
 msgid "Discount Percentage"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:1053
+#: admin/class-wp-travel-engine-booking-export.php:1060
 msgid "Discount Amount"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:1071
+#: admin/class-wp-travel-engine-booking-export.php:1078
 #, php-format
 msgid "Traveler %1$d - %2$s"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:1079
+#: admin/class-wp-travel-engine-booking-export.php:1086
 #, php-format
 msgid "Emergency Contact %1$d - %2$s"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:1084
+#: admin/class-wp-travel-engine-booking-export.php:1091
 #: includes/backend/booking/booking-parts/booking-details.php:79
 #: includes/backend/templates/booking/legacy/partials/additional-field.php:22
 #: includes/backend/templates/booking/legacy/partials/tab-title.php:40
@@ -1522,24 +1531,24 @@ msgstr ""
 msgid "Additional Notes"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:1087
+#: admin/class-wp-travel-engine-booking-export.php:1094
 msgid "Admin Notes"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:1849
+#: admin/class-wp-travel-engine-booking-export.php:1856
 msgid "Declined"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:1855
-#: admin/class-wp-travel-engine-booking-export.php:1863
+#: admin/class-wp-travel-engine-booking-export.php:1862
+#: admin/class-wp-travel-engine-booking-export.php:1870
 msgid "External Insurance"
 msgstr ""
 
-#: admin/class-wp-travel-engine-booking-export.php:1859
+#: admin/class-wp-travel-engine-booking-export.php:1866
 #: includes/backend/templates/booking/partials/edit/travel-insurance.php:129
 #: includes/classes/Logger/Admin/LogsPage.php:534
 #: includes/classes/Modules/custom-filters/views/admin-custom-filters-page.php:123
-#: includes/helpers/functions.php:2196
+#: includes/helpers/functions.php:2204
 msgid "Yes"
 msgstr ""
 
@@ -1548,9 +1557,9 @@ msgid "No messages available"
 msgstr ""
 
 #: admin/class-wp-travel-engine-messages-list.php:114
-#: dist/admin/exports.js:3667
-#: dist/admin/global-settings.js:3547
-#: dist/admin/trip-edit.js:3681
+#: dist/admin/exports.js:3680
+#: dist/admin/global-settings.js:3587
+#: dist/admin/trip-edit.js:3694
 msgid "Subject"
 msgstr ""
 
@@ -1632,7 +1641,7 @@ msgstr ""
 
 #: admin/meta-parts/tabs-inner/itinerary-setting.php:44
 #: admin/meta-parts/trip-tabs/itinerary.php:82
-#: dist/admin/trip-edit.js:4315
+#: dist/admin/trip-edit.js:4459
 msgid "Add Itinerary"
 msgstr ""
 
@@ -1655,7 +1664,7 @@ msgstr ""
 #: includes/classes/Builders/admin-settings/payments/payment-general.php:19
 #: includes/classes/Builders/admin-settings/performance/general.php:12
 #: includes/templates/script-templates/tmpl-wte-package-single.php:22
-#: dist/admin/trip-edit.js:4625
+#: dist/admin/trip-edit.js:4769
 msgid "General"
 msgstr ""
 
@@ -1671,7 +1680,7 @@ msgstr ""
 #: includes/classes/Modules/TripCode.php:194
 #: includes/classes/Modules/TripCode.php:209
 #: includes/classes/Modules/TripCode.php:228
-#: includes/classes/Plugin.php:1846
+#: includes/classes/Plugin.php:1808
 msgid "Trip Code"
 msgstr ""
 
@@ -1689,14 +1698,14 @@ msgstr ""
 #: admin/meta-parts/trip-tabs/general.php:53
 #: includes/classes/Blocks/Blocks.php:116
 #: includes/classes/Blocks/Blocks.php:117
-#: includes/classes/Modules/TripSearch.php:746
+#: includes/classes/Modules/TripSearch.php:745
 #: includes/templates/content-related-trip-default.php:136
 #: includes/templates/template-trip-search-form.php:15
 #: includes/templates/trip-card/card-aside.php:16
-#: dist/admin/exports.js:3667
-#: dist/admin/global-settings.js:3547
-#: dist/admin/trip-edit.js:3681
-#: dist/admin/trip-edit.js:4315
+#: dist/admin/exports.js:3641
+#: dist/admin/global-settings.js:3548
+#: dist/admin/trip-edit.js:3655
+#: dist/admin/trip-edit.js:4459
 #: dist/blocks/editor/editor.js:2
 msgid "Duration"
 msgstr ""
@@ -1771,7 +1780,7 @@ msgstr ""
 #: admin/meta-parts/trip-metas.php:350
 #: admin/meta-parts/trip-metas.php:729
 #: admin/meta-parts/trip-tabs/overview.php:17
-#: includes/helpers/helpers.php:1228
+#: includes/helpers/helpers.php:1253
 msgid "Overview"
 msgstr ""
 
@@ -1793,7 +1802,7 @@ msgstr ""
 #: admin/meta-parts/trip-tabs/trip-facts.php:26
 #: admin/partials/trip/edit/tab-pricing/tab-pricing__settings.php:16
 #: includes/classes/Filters/TripMetaTabs.php:106
-#: includes/helpers/helpers.php:2336
+#: includes/helpers/helpers.php:2361
 msgid "Section Title"
 msgstr ""
 
@@ -1811,7 +1820,7 @@ msgstr ""
 
 #: admin/meta-parts/trip-metas.php:365
 #: includes/classes/Builders/admin-settings/general/trip-settings.php:39
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2895
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2901
 #: public/class-wp-travel-engine-template-hooks.php:1092
 msgid "Highlights"
 msgstr ""
@@ -1820,7 +1829,7 @@ msgstr ""
 #: admin/meta-parts/trip-metas.php:378
 #: admin/meta-parts/trip-metas.php:394
 #: admin/meta-parts/trip-tabs/itinerary.php:18
-#: includes/helpers/helpers.php:1229
+#: includes/helpers/helpers.php:1254
 msgid "Itinerary"
 msgstr ""
 
@@ -1932,7 +1941,7 @@ msgstr ""
 #: admin/meta-parts/trip-metas.php:572
 #: includes/class-wp-travel-engine-taxonomy-thumb.php:105
 #: includes/class-wp-travel-engine-taxonomy-thumb.php:260
-#: dist/admin/trip-edit.js:4315
+#: dist/admin/trip-edit.js:4459
 msgid "Add Image"
 msgstr ""
 
@@ -1945,7 +1954,7 @@ msgstr ""
 #: admin/meta-parts/trip-metas.php:599
 #: admin/meta-parts/trip-metas.php:780
 #: includes/class-wp-travel-engine-custom-shortcodes.php:337
-#: includes/helpers/helpers.php:1233
+#: includes/helpers/helpers.php:1258
 msgid "Map"
 msgstr ""
 
@@ -1960,9 +1969,9 @@ msgstr ""
 
 #: admin/meta-parts/trip-metas.php:625
 #: admin/meta-parts/trip-tabs/map.php:27
-#: dist/admin/exports.js:3892
-#: dist/admin/global-settings.js:3772
-#: dist/admin/trip-edit.js:3906
+#: dist/admin/exports.js:3963
+#: dist/admin/global-settings.js:3870
+#: dist/admin/trip-edit.js:3977
 msgid "Upload Image"
 msgstr ""
 
@@ -1972,7 +1981,7 @@ msgstr ""
 
 #: admin/meta-parts/trip-metas.php:640
 #: admin/meta-parts/trip-metas.php:641
-#: includes/helpers/helpers.php:1232
+#: includes/helpers/helpers.php:1257
 msgid "FAQs"
 msgstr ""
 
@@ -2034,7 +2043,7 @@ msgstr ""
 #: admin/meta-parts/trip-tabs/custom-tabs.php:41
 #: admin/meta-parts/trip-tabs/editor.php:30
 #: admin/meta-parts/trip-tabs/editor.php:42
-#: includes/helpers/helpers.php:2345
+#: includes/helpers/helpers.php:2370
 msgid "Tab Content"
 msgstr ""
 
@@ -2125,7 +2134,7 @@ msgstr ""
 
 #: admin/meta-parts/trip-tabs/faqs.php:62
 #: admin/meta-parts/trip-tabs/faqs.php:68
-#: dist/admin/trip-edit.js:4157
+#: dist/admin/trip-edit.js:4301
 msgid "FAQ Question"
 msgstr ""
 
@@ -2134,7 +2143,7 @@ msgid "FAQ Answer"
 msgstr ""
 
 #: admin/meta-parts/trip-tabs/faqs.php:80
-#: dist/admin/trip-edit.js:4157
+#: dist/admin/trip-edit.js:4301
 msgid "Add FAQs"
 msgstr ""
 
@@ -2187,8 +2196,8 @@ msgid "Enter youtube/vimeo video URL"
 msgstr ""
 
 #: admin/meta-parts/trip-tabs/gallery.php:73
-#: dist/admin/exports.js:2184
-#: dist/admin/trip-edit.js:2184
+#: dist/admin/exports.js:2185
+#: dist/admin/trip-edit.js:2185
 msgid "Add Video"
 msgstr ""
 
@@ -2248,7 +2257,7 @@ msgid "Enable minimum and maximum age required restriction for booking this trip
 msgstr ""
 
 #: admin/meta-parts/trip-tabs/general.php:155
-#: includes/helpers/helpers.php:2554
+#: includes/helpers/helpers.php:2579
 msgid "Minimum Age"
 msgstr ""
 
@@ -2257,7 +2266,7 @@ msgid "Enter minimum age"
 msgstr ""
 
 #: admin/meta-parts/trip-tabs/general.php:159
-#: includes/helpers/helpers.php:2562
+#: includes/helpers/helpers.php:2587
 msgid "Maximum Age"
 msgstr ""
 
@@ -2326,7 +2335,7 @@ msgstr ""
 #: admin/meta-parts/trip-tabs/itinerary.php:46
 #: admin/meta-parts/trip-tabs/itinerary.php:68
 #: admin/meta-parts/trip-tabs/itinerary.php:86
-#: dist/admin/trip-edit.js:4315
+#: dist/admin/trip-edit.js:4459
 msgid "Day "
 msgstr ""
 
@@ -2411,7 +2420,7 @@ msgid "Infant"
 msgstr ""
 
 #: admin/meta-parts/trip-tabs/pricing.php:29
-#: includes/helpers/helpers.php:3013
+#: includes/helpers/helpers.php:3038
 msgid "Group"
 msgstr ""
 
@@ -2457,13 +2466,13 @@ msgstr ""
 
 #: admin/meta-parts/trip-tabs/pricing.php:168
 #: includes/classes/Builders/admin-settings/general/trip-settings.php:49
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2912
 #: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2918
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2924
 #: includes/templates/script-templates/tmpl-wte-package-category-single.php:42
-#: dist/admin/exports.js:3524
-#: dist/admin/global-settings.js:3404
-#: dist/admin/trip-edit.js:3538
-#: dist/admin/trip-edit.js:4625
+#: dist/admin/exports.js:3498
+#: dist/admin/global-settings.js:3405
+#: dist/admin/trip-edit.js:3512
+#: dist/admin/trip-edit.js:4769
 msgid "Pricing Type"
 msgstr ""
 
@@ -2510,7 +2519,7 @@ msgid "Global Trip Info not found. Please add trip info in the global settings p
 msgstr ""
 
 #: admin/partials/partial-multiple-pricing.php:17
-#: dist/admin/trip-edit.js:4114
+#: dist/admin/trip-edit.js:4258
 msgid "Service Name"
 msgstr ""
 
@@ -2528,7 +2537,7 @@ msgstr ""
 
 #: admin/partials/partial-multiple-pricing.php:46
 #: admin/partials/partial-multiple-pricing.php:54
-#: dist/admin/trip-edit.js:4114
+#: dist/admin/trip-edit.js:4258
 msgid "Service Description"
 msgstr ""
 
@@ -2573,9 +2582,9 @@ msgid "Need further assistance?"
 msgstr ""
 
 #: admin/partials/plugin-updates/getting-started/getting-started.php:128
-#: dist/admin/exports.js:3376
-#: dist/admin/global-settings.js:3906
-#: dist/admin/trip-edit.js:3390
+#: dist/admin/exports.js:3350
+#: dist/admin/global-settings.js:4050
+#: dist/admin/trip-edit.js:3364
 msgid "Contact Support"
 msgstr ""
 
@@ -2739,7 +2748,7 @@ msgstr ""
 #: dist/blocks/core/trips/layouts/layout-2.php:14
 #: dist/blocks/core/trips/layouts/layout-3.php:12
 #: dist/blocks/core/trips/layouts/layout-4.php:15
-#: includes/helpers/helpers.php:97
+#: includes/helpers/helpers.php:116
 #, php-format
 msgid "%1$s%% Off"
 msgstr ""
@@ -2791,16 +2800,16 @@ msgid "Please activate WP Travel Engine - Advanced Itinerary addon for this bloc
 msgstr ""
 
 #: dist/blocks/single-trip/itinerary-chart/block.php:72
-#: dist/admin/exports.js:3892
-#: dist/admin/global-settings.js:3772
-#: dist/admin/trip-edit.js:3906
+#: dist/admin/exports.js:3963
+#: dist/admin/global-settings.js:3870
+#: dist/admin/trip-edit.js:3977
 msgid "M."
 msgstr ""
 
 #: dist/blocks/single-trip/itinerary-chart/block.php:73
-#: dist/admin/exports.js:3892
-#: dist/admin/global-settings.js:3772
-#: dist/admin/trip-edit.js:3906
+#: dist/admin/exports.js:3963
+#: dist/admin/global-settings.js:3870
+#: dist/admin/trip-edit.js:3977
 msgid "FT."
 msgstr ""
 
@@ -2821,12 +2830,12 @@ msgid "Breakfast"
 msgstr ""
 
 #: dist/blocks/single-trip/itinerary/block.php:186
-#: dist/admin/trip-edit.js:4315
+#: dist/admin/trip-edit.js:4459
 msgid "Lunch"
 msgstr ""
 
 #: dist/blocks/single-trip/itinerary/block.php:187
-#: dist/admin/trip-edit.js:4315
+#: dist/admin/trip-edit.js:4459
 msgid "Dinner"
 msgstr ""
 
@@ -2864,7 +2873,7 @@ msgstr ""
 #: dist/blocks/single-trip/trip-booking-button/block.php:52
 #: includes/frontend/trip-meta/trip-meta-parts/trip-prices-sidebar-widget.php:144
 #: includes/helpers/functions.php:122
-#: includes/helpers/helpers.php:799
+#: includes/helpers/helpers.php:824
 msgid "Check Availability"
 msgstr ""
 
@@ -2982,9 +2991,9 @@ msgstr ""
 #: includes/backend/booking/legacy/booking-parts/payment-details.php:17
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:291
 #: includes/helpers/functions.php:65
-#: includes/helpers/functions.php:2260
-#: includes/helpers/functions.php:2298
-#: includes/helpers/helpers.php:2387
+#: includes/helpers/functions.php:2268
+#: includes/helpers/functions.php:2306
+#: includes/helpers/helpers.php:2412
 #: includes/templates/account/tab-content/bookings/bookings-html.php:11
 #: includes/templates/account/tab-content/bookings/bookings-manager.php:44
 #: includes/templates/account/tab-content/bookings/bookings-manager.php:47
@@ -3001,8 +3010,8 @@ msgstr ""
 #: includes/backend/booking/booking-parts/booking-details.php:33
 #: includes/backend/booking/legacy/booking-parts/payment-details.php:19
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:293
-#: includes/helpers/functions.php:2263
-#: includes/helpers/helpers.php:2395
+#: includes/helpers/functions.php:2271
+#: includes/helpers/helpers.php:2420
 msgid "Refunded"
 msgstr ""
 
@@ -3010,9 +3019,9 @@ msgstr ""
 #: includes/backend/booking/legacy/booking-parts/payment-details.php:16
 #: includes/helpers/functions.php:89
 #: includes/helpers/functions.php:90
-#: includes/helpers/functions.php:2251
-#: includes/helpers/functions.php:2252
-#: includes/helpers/functions.php:2299
+#: includes/helpers/functions.php:2259
+#: includes/helpers/functions.php:2260
+#: includes/helpers/functions.php:2307
 msgid "Cancelled"
 msgstr ""
 
@@ -3123,6 +3132,7 @@ msgstr ""
 #: includes/backend/booking/customer.php:10
 #: includes/class-wte-default-form-fields.php:243
 #: includes/class-wte-default-form-fields.php:443
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:525
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:38
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:486
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:589
@@ -3170,7 +3180,7 @@ msgid "Qty"
 msgstr ""
 
 #: includes/backend/booking/booking-parts/booking-details.php:250
-#: includes/helpers/helpers.php:1230
+#: includes/helpers/helpers.php:1255
 msgid "Cost"
 msgstr ""
 
@@ -3191,7 +3201,8 @@ msgid "Booking Summary"
 msgstr ""
 
 #: includes/backend/booking/booking-parts/booking-details.php:285
-#: includes/classes/Booking/Email/Template_Tags.php:536
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:422
+#: includes/classes/Booking/Email/Template_Tags.php:547
 #: includes/classes/Filters/CheckoutPageTemplate.php:573
 msgid "Traveller(s):"
 msgstr ""
@@ -3201,8 +3212,9 @@ msgid "Accommodation:"
 msgstr ""
 
 #: includes/backend/booking/booking-parts/booking-details.php:309
-#: includes/classes/Booking/Email/Template_Tags.php:371
-#: includes/classes/Booking/Email/Template_Tags.php:561
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:341
+#: includes/classes/Booking/Email/Template_Tags.php:382
+#: includes/classes/Booking/Email/Template_Tags.php:572
 #: includes/templates/template-booking-thank-you.php:13
 #: includes/templates/thank-you/thank-you-legacy.php:18
 #: includes/templates/thank-you/thank-you.php:18
@@ -3215,12 +3227,16 @@ msgstr ""
 #: includes/class-wp-travel-engine-emails.php:729
 #: includes/class-wp-travel-engine-emails.php:767
 #: includes/class-wp-travel-engine-emails.php:790
-#: includes/classes/Booking/Email/Template_Tags.php:362
-#: includes/classes/Booking/Email/Template_Tags.php:391
-#: includes/classes/Booking/Email/Template_Tags.php:410
-#: includes/classes/Booking/Email/Template_Tags.php:688
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:332
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:360
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:375
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:684
+#: includes/classes/Booking/Email/Template_Tags.php:373
+#: includes/classes/Booking/Email/Template_Tags.php:402
+#: includes/classes/Booking/Email/Template_Tags.php:421
+#: includes/classes/Booking/Email/Template_Tags.php:699
 #: includes/classes/Core/Controllers/Ajax/ResendPurchaseReceipt.php:242
-#: includes/classes/Plugin.php:804
+#: includes/classes/Plugin.php:792
 #: includes/templates/content-cart.php:70
 #: includes/templates/emails/booking/confirmation.php:21
 msgid "Subtotal"
@@ -3242,11 +3258,13 @@ msgstr ""
 #: includes/backend/templates/customer/partials/orders.php:19
 #: includes/backend/templates/upcoming-tours/partials/details.php:65
 #: includes/class-wp-travel-engine-emails.php:831
-#: includes/classes/Booking/Email/Template_Tags.php:445
-#: includes/classes/Booking/Email/Template_Tags.php:675
-#: includes/classes/Booking/Email/Template_Tags.php:866
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:379
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:696
+#: includes/classes/Booking/Email/Template_Tags.php:456
+#: includes/classes/Booking/Email/Template_Tags.php:686
+#: includes/classes/Booking/Email/Template_Tags.php:880
 #: includes/classes/Core/Controllers/Ajax/ResendPurchaseReceipt.php:294
-#: includes/classes/Plugin.php:843
+#: includes/classes/Plugin.php:831
 #: includes/frontend/trip-meta/trip-meta-parts/trip-price-bak.php:123
 #: includes/frontend/trip-meta/trip-meta-parts/trip-price-bak.php:130
 #: includes/frontend/trip-meta/trip-meta-parts/trip-price.php:94
@@ -3260,7 +3278,7 @@ msgid "Total"
 msgstr ""
 
 #: includes/backend/booking/booking-parts/booking-details.php:349
-#: includes/classes/Plugin.php:853
+#: includes/classes/Plugin.php:841
 msgid "Deposit Today"
 msgstr ""
 
@@ -3268,10 +3286,10 @@ msgstr ""
 #: includes/backend/templates/booking/legacy/partials/booking-summary.php:98
 #: includes/backend/templates/booking/partials/booking-summary.php:92
 #: includes/backend/templates/booking/partials/edit/booking-summary.php:53
-#: includes/classes/Booking/Email/Template_Tags.php:754
-#: includes/classes/Booking/Email/Template_Tags.php:984
+#: includes/classes/Booking/Email/Template_Tags.php:768
+#: includes/classes/Booking/Email/Template_Tags.php:1001
 #: includes/classes/Pages/Checkout.php:570
-#: includes/classes/Plugin.php:863
+#: includes/classes/Plugin.php:851
 msgid "Amount Due"
 msgstr ""
 
@@ -3290,7 +3308,8 @@ msgstr ""
 #: includes/backend/booking/booking-parts/booking-details_customer.php:22
 #: includes/backend/templates/booking/legacy/partials/billing-details.php:16
 #: includes/backend/templates/booking/partials/billing-details.php:16
-#: includes/classes/Booking/Email/Template_Tags.php:1414
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:537
+#: includes/classes/Booking/Email/Template_Tags.php:1447
 #: includes/templates/checkout/header-steps.php:45
 #: includes/templates/emails/booking.php:77
 #: includes/templates/emails/booking/confirmation.php:57
@@ -3302,7 +3321,8 @@ msgid "Billing Details"
 msgstr ""
 
 #: includes/backend/booking/booking-parts/booking-details_customer.php:121
-#: includes/classes/Booking/Email/Template_Tags.php:1394
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:511
+#: includes/classes/Booking/Email/Template_Tags.php:1427
 msgid "Additional Note"
 msgstr ""
 
@@ -3390,7 +3410,8 @@ msgstr ""
 #: includes/backend/booking/booking-parts/booking-details_personal.php:25
 #: includes/backend/booking/booking-parts/booking-details_travellers.php:15
 #: includes/backend/booking/legacy/booking-parts/personal-details.php:14
-#: includes/classes/Booking/Email/Template_Tags.php:1536
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:558
+#: includes/classes/Booking/Email/Template_Tags.php:1569
 #: includes/templates/emails/booking.php:64
 #: includes/templates/emails/traveller-data.php:11
 msgid "Traveller Details"
@@ -3486,12 +3507,12 @@ msgstr ""
 #: includes/classes/Builders/admin-settings/payments/check-payments.php:17
 #: includes/classes/Helpers/Functions.php:559
 #: includes/classes/Helpers/Functions.php:679
-#: includes/helpers/helpers.php:2341
+#: includes/helpers/helpers.php:2366
 #: includes/helpers/wp-travel-engine-form-fields.php:432
 #: includes/helpers/wp-travel-engine-form-fields.php:621
-#: dist/admin/exports.js:3524
-#: dist/admin/global-settings.js:3404
-#: dist/admin/trip-edit.js:3538
+#: dist/admin/exports.js:3498
+#: dist/admin/global-settings.js:3405
+#: dist/admin/trip-edit.js:3512
 #: dist/blocks/editor/editor.js:2
 msgid "Title"
 msgstr ""
@@ -3507,6 +3528,7 @@ msgstr ""
 #: includes/backend/booking/customer.php:7
 #: includes/class-wte-default-form-fields.php:227
 #: includes/class-wte-default-form-fields.php:427
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:524
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:18
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:470
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:574
@@ -3528,6 +3550,7 @@ msgstr ""
 #: includes/backend/booking/customer.php:18
 #: includes/backend/templates/customer/partials/profile.php:55
 #: includes/class-wte-default-form-fields.php:290
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:528
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:76
 #: includes/classes/Filters/SettingsAPISchema.php:286
 #: includes/classes/Helpers/Functions.php:534
@@ -3542,6 +3565,7 @@ msgstr ""
 #: includes/backend/booking/booking.php:111
 #: includes/backend/booking/customer.php:21
 #: includes/class-wte-default-form-fields.php:306
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:529
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:95
 #: includes/classes/Helpers/Functions.php:540
 #: includes/classes/Helpers/Functions.php:601
@@ -3557,7 +3581,7 @@ msgstr ""
 
 #: includes/backend/booking/booking.php:129
 #: includes/classes/Core/Controllers/Ajax/PaymentGateway.php:61
-#: public/class-wp-travel-engine-public.php:651
+#: public/class-wp-travel-engine-public.php:647
 msgid "Choose country&hellip;"
 msgstr ""
 
@@ -3573,6 +3597,7 @@ msgstr ""
 #: includes/backend/booking/booking.php:310
 #: includes/class-wte-default-form-fields.php:353
 #: includes/class-wte-default-form-fields.php:459
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:527
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:514
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:620
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:705
@@ -3642,15 +3667,15 @@ msgstr ""
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:290
 #: includes/helpers/functions.php:35
 #: includes/helpers/functions.php:36
-#: includes/helpers/functions.php:2249
-#: includes/helpers/functions.php:2250
-#: includes/helpers/functions.php:2297
+#: includes/helpers/functions.php:2257
+#: includes/helpers/functions.php:2258
+#: includes/helpers/functions.php:2305
 msgid "Completed"
 msgstr ""
 
 #: includes/backend/booking/legacy/booking-parts/payment-details.php:18
 #: includes/helpers/functions.php:40
-#: includes/helpers/functions.php:2258
+#: includes/helpers/functions.php:2266
 #: includes/templates/account/tab-content/bookings/bookings-html.php:10
 #: includes/templates/account/tab-content/bookings/bookings-manager.php:44
 msgid "Partially Paid"
@@ -3658,33 +3683,33 @@ msgstr ""
 
 #: includes/backend/booking/legacy/booking-parts/payment-details.php:20
 #: includes/helpers/functions.php:88
-#: includes/helpers/functions.php:2248
+#: includes/helpers/functions.php:2256
 msgid "Abandoned"
 msgstr ""
 
 #: includes/backend/booking/legacy/booking-parts/payment-details.php:21
 #: includes/helpers/functions.php:66
 #: includes/helpers/functions.php:67
-#: includes/helpers/functions.php:2266
-#: includes/helpers/functions.php:2267
+#: includes/helpers/functions.php:2274
+#: includes/helpers/functions.php:2275
 msgid "Waiting for Voucher"
 msgstr ""
 
 #: includes/backend/booking/legacy/booking-parts/payment-details.php:22
 #: includes/helpers/functions.php:43
-#: includes/helpers/functions.php:2268
+#: includes/helpers/functions.php:2276
 msgid "Voucher Received"
 msgstr ""
 
 #: includes/backend/booking/legacy/booking-parts/payment-details.php:23
 #: includes/helpers/functions.php:64
-#: includes/helpers/functions.php:2256
+#: includes/helpers/functions.php:2264
 msgid "Waiting for Check"
 msgstr ""
 
 #: includes/backend/booking/legacy/booking-parts/payment-details.php:24
 #: includes/helpers/functions.php:39
-#: includes/helpers/functions.php:2255
+#: includes/helpers/functions.php:2263
 msgid "Check Received"
 msgstr ""
 
@@ -3696,8 +3721,8 @@ msgstr ""
 #: includes/backend/templates/booking/legacy/partials/booking-summary.php:85
 #: includes/backend/templates/booking/partials/payment-details.php:226
 #: includes/backend/templates/booking/partials/payment-summary-items.php:88
-#: includes/classes/Booking/Email/Template_Tags.php:749
-#: includes/classes/Booking/Email/Template_Tags.php:973
+#: includes/classes/Booking/Email/Template_Tags.php:763
+#: includes/classes/Booking/Email/Template_Tags.php:990
 #: includes/classes/Pages/Checkout.php:559
 msgid "Amount Paid"
 msgstr ""
@@ -3902,12 +3927,12 @@ msgid ""
 msgstr ""
 
 #: includes/backend/settings/display/labels.php:28
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3478
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3488
 msgid "Initial Label"
 msgstr ""
 
 #: includes/backend/settings/display/labels.php:31
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3482
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3492
 msgid "Modified Label"
 msgstr ""
 
@@ -3997,7 +4022,7 @@ msgid "Enable to display related trips in the trip pages."
 msgstr ""
 
 #: includes/backend/settings/display/single-trip.php:235
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3319
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3329
 msgid "Show Related Trips By"
 msgstr ""
 
@@ -4147,7 +4172,7 @@ msgstr ""
 
 #: includes/backend/settings/display/trip-archive.php:26
 #: includes/classes/Builders/admin-settings/display/trip-archive.php:100
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3413
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3423
 msgid "Sort Trips By"
 msgstr ""
 
@@ -4158,7 +4183,7 @@ msgstr ""
 
 #: includes/backend/settings/display/trip-archive.php:51
 #: includes/classes/Builders/admin-settings/display/trip-archive.php:108
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3417
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3427
 msgid "Trip View Mode"
 msgstr ""
 
@@ -4185,7 +4210,7 @@ msgstr ""
 
 #: includes/backend/settings/display/trip-archive.php:86
 #: includes/classes/Builders/admin-settings/display/trip-archive.php:135
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3430
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3440
 msgid "Number of Featured Trips"
 msgstr ""
 
@@ -4265,6 +4290,9 @@ msgstr ""
 #: includes/backend/settings/emails/booking-notifications.php:72
 #: includes/backend/settings/emails/purchase-receipt.php:142
 #: includes/backend/settings/emails/purchase-receipt.php:179
+#: dist/admin/exports.js:3680
+#: dist/admin/global-settings.js:3587
+#: dist/admin/trip-edit.js:3694
 msgid "Preview Template"
 msgstr ""
 
@@ -4301,129 +4329,116 @@ msgstr ""
 
 #: includes/backend/settings/emails/booking-notifications.php:115
 #: includes/backend/settings/emails/purchase-receipt.php:212
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:51
+#: includes/helpers/helpers.php:3206
 msgid "The trip URL for each booked trip"
 msgstr ""
 
 #: includes/backend/settings/emails/booking-notifications.php:119
 #: includes/backend/settings/emails/purchase-receipt.php:216
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:53
 msgid "The buyer's first name"
 msgstr ""
 
 #: includes/backend/settings/emails/booking-notifications.php:123
 #: includes/backend/settings/emails/purchase-receipt.php:220
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:54
 msgid "The buyer's full name, first and last"
 msgstr ""
 
 #: includes/backend/settings/emails/booking-notifications.php:127
 #: includes/backend/settings/emails/purchase-receipt.php:224
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:55
 msgid "The buyer's email address"
 msgstr ""
 
 #: includes/backend/settings/emails/booking-notifications.php:131
 #: includes/backend/settings/emails/purchase-receipt.php:228
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:56
+#: includes/helpers/helpers.php:3208
 msgid "The buyer's billing address"
 msgstr ""
 
 #: includes/backend/settings/emails/booking-notifications.php:135
 #: includes/backend/settings/emails/purchase-receipt.php:232
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:57
+#: includes/helpers/helpers.php:3209
 msgid "The buyer's city"
 msgstr ""
 
 #: includes/backend/settings/emails/booking-notifications.php:139
 #: includes/backend/settings/emails/purchase-receipt.php:236
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:58
+#: includes/helpers/helpers.php:3210
 msgid "The buyer's country"
 msgstr ""
 
 #: includes/backend/settings/emails/booking-notifications.php:143
 #: includes/backend/settings/emails/purchase-receipt.php:240
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:59
 msgid "The starting date of the trip"
 msgstr ""
 
 #: includes/backend/settings/emails/booking-notifications.php:147
 #: includes/backend/settings/emails/purchase-receipt.php:244
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:60
 msgid "The trip booking date"
 msgstr ""
 
 #: includes/backend/settings/emails/booking-notifications.php:151
 #: includes/backend/settings/emails/purchase-receipt.php:248
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:61
 msgid "The total number of traveller(s)"
 msgstr ""
 
 #: includes/backend/settings/emails/booking-notifications.php:155
 #: includes/backend/settings/emails/purchase-receipt.php:252
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:62
+#: includes/helpers/helpers.php:3211
 msgid "The trip price"
 msgstr ""
 
 #: includes/backend/settings/emails/booking-notifications.php:159
 #: includes/backend/settings/emails/purchase-receipt.php:256
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:63
 msgid "The total payment made of the booking"
 msgstr ""
 
 #: includes/backend/settings/emails/booking-notifications.php:163
 #: includes/backend/settings/emails/purchase-receipt.php:260
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:64
 msgid "The total price of the booking"
 msgstr ""
 
 #: includes/backend/settings/emails/booking-notifications.php:167
 #: includes/backend/settings/emails/purchase-receipt.php:264
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:65
 msgid "The due balance"
 msgstr ""
 
 #: includes/backend/settings/emails/booking-notifications.php:171
 #: includes/backend/settings/emails/purchase-receipt.php:268
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:13
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:25
+#: includes/helpers/helpers.php:3194
 msgid "Your site name"
 msgstr ""
 
 #: includes/backend/settings/emails/booking-notifications.php:175
 #: includes/backend/settings/emails/purchase-receipt.php:272
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:66
+#: includes/helpers/helpers.php:3212
 msgid "The trip booking link"
 msgstr ""
 
 #: includes/backend/settings/emails/booking-notifications.php:179
 #: includes/backend/settings/emails/purchase-receipt.php:276
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:30
+#: includes/helpers/helpers.php:3199
 msgid "The buyer's IP Address"
 msgstr ""
 
 #: includes/backend/settings/emails/booking-notifications.php:183
 #: includes/backend/settings/emails/purchase-receipt.php:280
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:17
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:81
+#: includes/helpers/helpers.php:3225
 msgid "The booking order ID"
 msgstr ""
 
 #: includes/backend/settings/emails/booking-notifications.php:187
 #: includes/backend/settings/emails/purchase-receipt.php:292
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:67
 msgid "The booking details: Booked trips, Extra Services, Traveller details etc"
 msgstr ""
 
 #: includes/backend/settings/emails/booking-notifications.php:191
 #: includes/backend/settings/emails/purchase-receipt.php:296
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:68
 msgid "The traveller details: Traveller details and Emergency Contact Details"
 msgstr ""
 
 #: includes/backend/settings/emails/booking-notifications.php:195
 #: includes/backend/settings/emails/purchase-receipt.php:300
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:69
+#: includes/helpers/helpers.php:3213
 msgid "Payment Method used to checkout."
 msgstr ""
 
@@ -4484,7 +4499,7 @@ msgstr ""
 
 #: includes/backend/settings/emails/purchase-receipt.php:92
 #: includes/classes/Builders/admin-settings/emails/emails-settings.php:38
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2961
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2971
 msgid "From Name"
 msgstr ""
 
@@ -4495,7 +4510,7 @@ msgstr ""
 
 #: includes/backend/settings/emails/purchase-receipt.php:101
 #: includes/classes/Builders/admin-settings/emails/emails-settings.php:44
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2965
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2975
 #: includes/onboard-process/views/onboard-process.php:207
 msgid "From Email"
 msgstr ""
@@ -4542,7 +4557,7 @@ msgid "Banks Accounts Details. This tag will be replaced with the bank details a
 msgstr ""
 
 #: includes/backend/settings/emails/purchase-receipt.php:288
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:87
+#: includes/helpers/helpers.php:3231
 msgid "Instructions to make check payment."
 msgstr ""
 
@@ -4556,9 +4571,9 @@ msgstr ""
 
 #: includes/backend/settings/emails/test-email.php:35
 #: includes/classes/Builders/admin-settings/emails/emails-settings.php:88
-#: dist/admin/exports.js:3667
-#: dist/admin/global-settings.js:3547
-#: dist/admin/trip-edit.js:3681
+#: dist/admin/exports.js:3680
+#: dist/admin/global-settings.js:3587
+#: dist/admin/trip-edit.js:3694
 msgid "Send Test Email"
 msgstr ""
 
@@ -4611,22 +4626,22 @@ msgid "Trip highlight"
 msgstr ""
 
 #: includes/backend/settings/general/trip-info.php:202
-#: dist/admin/exports.js:3524
-#: dist/admin/global-settings.js:3404
-#: dist/admin/trip-edit.js:3538
+#: dist/admin/exports.js:3498
+#: dist/admin/global-settings.js:3405
+#: dist/admin/trip-edit.js:3512
 msgid "Help Text"
 msgstr ""
 
 #: includes/backend/settings/general/trip-tabs.php:15
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2798
-#: dist/admin/exports.js:3667
-#: dist/admin/global-settings.js:3547
-#: dist/admin/trip-edit.js:3681
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2804
+#: dist/admin/exports.js:3641
+#: dist/admin/global-settings.js:3548
+#: dist/admin/trip-edit.js:3655
 msgid "Tab Name"
 msgstr ""
 
 #: includes/backend/settings/general/trip-tabs.php:16
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2806
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2812
 msgid "Tab Icon"
 msgstr ""
 
@@ -4644,9 +4659,9 @@ msgid "Add tab icon"
 msgstr ""
 
 #: includes/backend/settings/general/trip-tabs.php:80
-#: dist/admin/exports.js:3667
-#: dist/admin/global-settings.js:3547
-#: dist/admin/trip-edit.js:3681
+#: dist/admin/exports.js:3641
+#: dist/admin/global-settings.js:3548
+#: dist/admin/trip-edit.js:3655
 msgid "Add Tab"
 msgstr ""
 
@@ -4672,7 +4687,7 @@ msgid "Book Now button text"
 msgstr ""
 
 #: includes/backend/settings/misc/miscellaneous.php:18
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3147
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3157
 msgid "Email Subject For Enquiry"
 msgstr ""
 
@@ -4703,7 +4718,7 @@ msgstr ""
 
 #: includes/backend/settings/misc/miscellaneous.php:30
 #: includes/classes/Builders/admin-settings/display/checkout.php:12
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3555
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3565
 msgid "Booking Confirmation Message"
 msgstr ""
 
@@ -4713,7 +4728,7 @@ msgstr ""
 
 #: includes/backend/settings/misc/miscellaneous.php:35
 #: includes/classes/Builders/admin-settings/display/single-trip.php:378
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3559
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3569
 msgid "GDPR Message"
 msgstr ""
 
@@ -4853,9 +4868,9 @@ msgstr ""
 #: includes/class-wp-travel-engine-taxonomy-thumb.php:124
 #: includes/classes/Builders/admin-settings/payments/bank-transfer.php:25
 #: includes/classes/Builders/admin-settings/payments/check-payments.php:25
-#: dist/admin/exports.js:3524
-#: dist/admin/global-settings.js:3404
-#: dist/admin/trip-edit.js:3538
+#: dist/admin/exports.js:3498
+#: dist/admin/global-settings.js:3405
+#: dist/admin/trip-edit.js:3512
 msgid "Description"
 msgstr ""
 
@@ -4881,72 +4896,77 @@ msgstr ""
 
 #: includes/backend/settings/payments/bacs-payment.php:48
 #: includes/classes/Builders/admin-settings/payments/bank-transfer.php:41
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3665
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3675
 #: includes/classes/Core/Shortcodes/UserAccount.php:50
 #: includes/dashboard/class-wp-travel-engine-user-account.php:48
 msgid "Account Details"
 msgstr ""
 
 #: includes/backend/settings/payments/bacs-payment.php:53
-#: includes/classes/Booking/Email/Template_Tags.php:1056
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3671
-#: dist/admin/exports.js:3469
-#: dist/admin/global-settings.js:3349
-#: dist/admin/trip-edit.js:3483
+#: includes/classes/Booking/Email/Template_Tags.php:226
+#: includes/classes/Booking/Email/Template_Tags.php:1073
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3681
+#: dist/admin/exports.js:3443
+#: dist/admin/global-settings.js:3350
+#: dist/admin/trip-edit.js:3457
 msgid "Account Name"
 msgstr ""
 
 #: includes/backend/settings/payments/bacs-payment.php:54
 #: includes/class-wp-travel-engine-emails.php:197
 #: includes/class-wp-travel-engine-emails.php:544
-#: includes/classes/Booking/Email/Template_Tags.php:226
-#: includes/classes/Booking/Email/Template_Tags.php:1057
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3675
-#: dist/admin/exports.js:3469
-#: dist/admin/global-settings.js:3349
-#: dist/admin/trip-edit.js:3483
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:633
+#: includes/classes/Booking/Email/Template_Tags.php:227
+#: includes/classes/Booking/Email/Template_Tags.php:1074
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3685
+#: dist/admin/exports.js:3443
+#: dist/admin/global-settings.js:3350
+#: dist/admin/trip-edit.js:3457
 msgid "Account Number"
 msgstr ""
 
 #: includes/backend/settings/payments/bacs-payment.php:55
 #: includes/class-wp-travel-engine-emails.php:198
 #: includes/class-wp-travel-engine-emails.php:545
-#: includes/classes/Booking/Email/Template_Tags.php:227
-#: includes/classes/Booking/Email/Template_Tags.php:1058
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3679
-#: dist/admin/exports.js:3469
-#: dist/admin/global-settings.js:3349
-#: dist/admin/trip-edit.js:3483
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:634
+#: includes/classes/Booking/Email/Template_Tags.php:228
+#: includes/classes/Booking/Email/Template_Tags.php:1075
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3689
+#: dist/admin/exports.js:3443
+#: dist/admin/global-settings.js:3350
+#: dist/admin/trip-edit.js:3457
 msgid "Bank Name"
 msgstr ""
 
 #: includes/backend/settings/payments/bacs-payment.php:56
-#: dist/admin/exports.js:3469
-#: dist/admin/global-settings.js:3349
-#: dist/admin/trip-edit.js:3483
+#: dist/admin/exports.js:3443
+#: dist/admin/global-settings.js:3350
+#: dist/admin/trip-edit.js:3457
 msgid "Sort code"
 msgstr ""
 
 #: includes/backend/settings/payments/bacs-payment.php:57
 #: includes/class-wp-travel-engine-emails.php:200
 #: includes/class-wp-travel-engine-emails.php:547
-#: includes/classes/Booking/Email/Template_Tags.php:229
-#: includes/classes/Booking/Email/Template_Tags.php:1060
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3687
-#: dist/admin/exports.js:3469
-#: dist/admin/global-settings.js:3349
-#: dist/admin/trip-edit.js:3483
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:636
+#: includes/classes/Booking/Email/Template_Tags.php:230
+#: includes/classes/Booking/Email/Template_Tags.php:1077
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3697
+#: dist/admin/exports.js:3443
+#: dist/admin/global-settings.js:3350
+#: dist/admin/trip-edit.js:3457
 msgid "IBAN"
 msgstr ""
 
 #: includes/backend/settings/payments/bacs-payment.php:58
 #: includes/class-wp-travel-engine-emails.php:201
 #: includes/class-wp-travel-engine-emails.php:548
-#: includes/classes/Booking/Email/Template_Tags.php:230
-#: includes/classes/Booking/Email/Template_Tags.php:1061
-#: dist/admin/exports.js:3469
-#: dist/admin/global-settings.js:3349
-#: dist/admin/trip-edit.js:3483
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:637
+#: includes/classes/Booking/Email/Template_Tags.php:231
+#: includes/classes/Booking/Email/Template_Tags.php:1078
+#: dist/admin/exports.js:3443
+#: dist/admin/global-settings.js:3350
+#: dist/admin/trip-edit.js:3457
 msgid "BIC/Swift"
 msgstr ""
 
@@ -4963,7 +4983,7 @@ msgstr ""
 
 #: includes/backend/settings/payments/general.php:9
 #: includes/classes/Builders/admin-settings/payments/payment-general.php:29
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3610
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3620
 msgid "Debug Mode"
 msgstr ""
 
@@ -4984,7 +5004,7 @@ msgstr ""
 
 #: includes/backend/settings/payments/general.php:39
 #: includes/classes/Builders/admin-settings/payments/payment-general.php:44
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3618
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3628
 msgid "Payment Gateways"
 msgstr ""
 
@@ -5017,8 +5037,9 @@ msgid "Enter a valid Merchant account ID (strongly recommend) or PayPal account 
 msgstr ""
 
 #: includes/backend/settings/payments/tax-settings.php:7
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:707
 #: includes/classes/Core/Tax.php:33
-#: includes/classes/Plugin.php:825
+#: includes/classes/Plugin.php:813
 #: includes/helpers/tax.php:16
 #, php-format
 msgid "Tax (%s%%)"
@@ -5065,7 +5086,7 @@ msgid "This option will affect how you enter trip prices."
 msgstr ""
 
 #: includes/backend/settings/payments/tax-settings.php:49
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3735
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3745
 msgid "Tax Percentage"
 msgstr ""
 
@@ -5210,14 +5231,14 @@ msgid "New Payment"
 msgstr ""
 
 #: includes/backend/templates/booking/legacy/partials/traveller-info.php:31
-#: includes/classes/Booking/Email/Template_Tags.php:1546
+#: includes/classes/Booking/Email/Template_Tags.php:1579
 #: includes/templates/thank-you/content-booking-details.php:39
 #, php-format
 msgid "Traveller %1$d%2$s"
 msgstr ""
 
 #: includes/backend/templates/booking/legacy/partials/traveller-info.php:31
-#: includes/classes/Booking/Email/Template_Tags.php:1546
+#: includes/classes/Booking/Email/Template_Tags.php:1579
 #: includes/templates/thank-you/content-booking-details.php:39
 msgid " (Lead Traveller)"
 msgstr ""
@@ -5261,7 +5282,8 @@ msgid "COST"
 msgstr ""
 
 #: includes/backend/templates/booking/partials/additional-field.php:17
-#: includes/classes/Booking/Email/Template_Tags.php:1111
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:491
+#: includes/classes/Booking/Email/Template_Tags.php:1142
 #: includes/templates/thank-you/content-booking-details.php:125
 msgid "Additional Notes:"
 msgstr ""
@@ -5352,7 +5374,7 @@ msgstr ""
 #: includes/backend/templates/booking/partials/edit/travel-insurance.php:130
 #: includes/classes/Logger/Admin/LogsPage.php:535
 #: includes/classes/Modules/custom-filters/views/admin-custom-filters-page.php:123
-#: includes/helpers/functions.php:2196
+#: includes/helpers/functions.php:2204
 msgid "No"
 msgstr ""
 
@@ -5390,18 +5412,18 @@ msgid "Price Type"
 msgstr ""
 
 #: includes/backend/templates/booking/partials/edit/travel-insurance.php:192
-#: dist/admin/exports.js:3469
-#: dist/admin/exports.js:3524
-#: dist/admin/exports.js:3667
-#: dist/admin/exports.js:3892
-#: dist/admin/global-settings.js:3349
-#: dist/admin/global-settings.js:3404
-#: dist/admin/global-settings.js:3547
-#: dist/admin/global-settings.js:3772
-#: dist/admin/trip-edit.js:3483
-#: dist/admin/trip-edit.js:3538
-#: dist/admin/trip-edit.js:3681
-#: dist/admin/trip-edit.js:3906
+#: dist/admin/exports.js:3443
+#: dist/admin/exports.js:3498
+#: dist/admin/exports.js:3641
+#: dist/admin/exports.js:3963
+#: dist/admin/global-settings.js:3350
+#: dist/admin/global-settings.js:3405
+#: dist/admin/global-settings.js:3548
+#: dist/admin/global-settings.js:3870
+#: dist/admin/trip-edit.js:3457
+#: dist/admin/trip-edit.js:3512
+#: dist/admin/trip-edit.js:3655
+#: dist/admin/trip-edit.js:3977
 msgid "Action"
 msgstr ""
 
@@ -5414,13 +5436,15 @@ msgid "Plan"
 msgstr ""
 
 #: includes/backend/templates/booking/partials/emergency-contact.php:13
-#: includes/classes/Booking/Email/Template_Tags.php:1471
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:597
+#: includes/classes/Booking/Email/Template_Tags.php:1504
 #: includes/templates/template-checkout/content-emergency-details.php:23
 msgid "Emergency Details"
 msgstr ""
 
 #: includes/backend/templates/booking/partials/payment-details.php:11
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3718
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:707
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3728
 #: includes/classes/Helpers/CartInfoParser.php:130
 msgid "Tax"
 msgstr ""
@@ -5446,7 +5470,7 @@ msgid "Total Amount Paid"
 msgstr ""
 
 #: includes/backend/templates/booking/partials/payment-summary-items.php:81
-#: includes/classes/Booking/Email/Template_Tags.php:964
+#: includes/classes/Booking/Email/Template_Tags.php:981
 #: includes/classes/Builders/FormFields/PaymentEditFormFields.php:185
 #: includes/classes/Core/Cart/Adjustments/GatewayFee.php:20
 msgid "Gateway Fee"
@@ -5479,7 +5503,7 @@ msgid "Not Set"
 msgstr ""
 
 #: includes/backend/templates/customer/partials/header.php:18
-#: dist/admin/trip-edit.js:4625
+#: dist/admin/trip-edit.js:4769
 msgid "Are you sure you want to delete?"
 msgstr ""
 
@@ -5493,11 +5517,11 @@ msgstr ""
 #: includes/classes/Modules/custom-filters/views/admin-custom-filters-page.php:119
 #: includes/templates/account/form-edit-account.php:65
 #: dist/admin/exports.js:1533
-#: dist/admin/exports.js:3667
+#: dist/admin/exports.js:3680
 #: dist/admin/global-settings.js:1974
-#: dist/admin/global-settings.js:3547
+#: dist/admin/global-settings.js:3587
 #: dist/admin/trip-edit.js:1533
-#: dist/admin/trip-edit.js:3681
+#: dist/admin/trip-edit.js:3694
 msgid "Delete"
 msgstr ""
 
@@ -5538,12 +5562,12 @@ msgstr[1] ""
 #: includes/class-wp-travel-engine-archive-hooks.php:621
 #: includes/classes/Builders/admin-settings/display/trip-archive.php:166
 #: includes/classes/Core/Controllers/Ajax/FilterTripsHtml.php:86
-#: includes/classes/Modules/TripSearch.php:455
+#: includes/classes/Modules/TripSearch.php:454
 msgid "Load More"
 msgstr ""
 
 #: includes/backend/templates/upcoming-tours/partials/content.php:95
-#: includes/classes/Modules/TripSearch.php:853
+#: includes/classes/Modules/TripSearch.php:852
 #: dist/bundle/trip-booking-modal.bundle.js:2
 #: dist/public/components/trip-booking-modal.js:2
 #: dist/public/exports.js:2
@@ -5630,7 +5654,7 @@ msgid "Booking Only"
 msgstr ""
 
 #: includes/bookings/class-wte-process-booking-core.php:869
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:828
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:834
 #: includes/classes/PaymentGateways/DirectBankTransfer.php:51
 msgid "Direct Bank Transfer"
 msgstr ""
@@ -5665,9 +5689,9 @@ msgid "My account"
 msgstr ""
 
 #: includes/class-wp-travel-engine-activator.php:92
-#: dist/admin/exports.js:3667
-#: dist/admin/global-settings.js:3547
-#: dist/admin/trip-edit.js:3681
+#: dist/admin/exports.js:3680
+#: dist/admin/global-settings.js:3587
+#: dist/admin/trip-edit.js:3694
 msgid "Customer"
 msgstr ""
 
@@ -5723,9 +5747,9 @@ msgstr ""
 #: includes/class-wp-travel-engine-archive-hooks.php:385
 #: includes/classes/Blocks/Blocks.php:89
 #: includes/templates/template-trip-search-form.php:161
-#: dist/admin/exports.js:3469
-#: dist/admin/global-settings.js:3349
-#: dist/admin/trip-edit.js:2922
+#: dist/admin/exports.js:3443
+#: dist/admin/global-settings.js:3350
+#: dist/admin/trip-edit.js:2923
 #: dist/blocks/editor/editor.js:2
 msgid "Search"
 msgstr ""
@@ -5755,7 +5779,7 @@ msgstr[1] ""
 #: includes/class-wp-travel-engine-archive-hooks.php:598
 #: includes/classes/Core/Controllers/Ajax/FilterTripsHtml.php:63
 #: includes/classes/Modules/trip-search/class-wte-show-trip-results.php:62
-#: includes/classes/Modules/TripSearch.php:426
+#: includes/classes/Modules/TripSearch.php:425
 msgid "No results found!"
 msgstr ""
 
@@ -5869,8 +5893,8 @@ msgstr ""
 #: includes/class-wp-travel-engine-emails.php:860
 #: includes/class-wp-travel-engine-emails.php:872
 #: includes/class-wp-travel-engine-mail.php:306
-#: includes/classes/Email/BookingEmail.php:312
-#: includes/classes/Email/BookingEmail.php:326
+#: includes/classes/Email/BookingEmail.php:314
+#: includes/classes/Email/BookingEmail.php:328
 msgid "Dear Admin,"
 msgstr ""
 
@@ -5883,8 +5907,8 @@ msgstr ""
 #: includes/class-wp-travel-engine-emails.php:343
 #: includes/class-wp-travel-engine-emails.php:864
 #: includes/class-wp-travel-engine-mail.php:42
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:246
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:278
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:247
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:279
 msgid "Booking Confirmation"
 msgstr ""
 
@@ -5907,15 +5931,17 @@ msgstr ""
 
 #: includes/class-wp-travel-engine-emails.php:199
 #: includes/class-wp-travel-engine-emails.php:546
-#: includes/classes/Booking/Email/Template_Tags.php:228
-#: includes/classes/Booking/Email/Template_Tags.php:1059
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:635
+#: includes/classes/Booking/Email/Template_Tags.php:229
+#: includes/classes/Booking/Email/Template_Tags.php:1076
 msgid "Sort Code"
 msgstr ""
 
 #: includes/class-wp-travel-engine-emails.php:209
 #: includes/class-wp-travel-engine-emails.php:558
-#: includes/classes/Booking/Email/Template_Tags.php:240
-#: includes/classes/Booking/Email/Template_Tags.php:1072
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:642
+#: includes/classes/Booking/Email/Template_Tags.php:245
+#: includes/classes/Booking/Email/Template_Tags.php:1090
 #: includes/classes/Core/Booking/BookingProcess.php:895
 #: includes/templates/template-booking-thank-you.php:250
 #: includes/templates/template-checkout/content-bank-transfer-instruction.php:14
@@ -5924,8 +5950,9 @@ msgstr ""
 
 #: includes/class-wp-travel-engine-emails.php:248
 #: includes/class-wp-travel-engine-emails.php:601
-#: includes/classes/Booking/Email/Template_Tags.php:278
-#: includes/classes/Booking/Email/Template_Tags.php:1096
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:617
+#: includes/classes/Booking/Email/Template_Tags.php:289
+#: includes/classes/Booking/Email/Template_Tags.php:1127
 msgid "Check Payment Instructions:"
 msgstr ""
 
@@ -5938,13 +5965,15 @@ msgid "Invalid Booking ID."
 msgstr ""
 
 #: includes/class-wp-travel-engine-emails.php:697
-#: includes/classes/Booking/Email/Template_Tags.php:337
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:312
+#: includes/classes/Booking/Email/Template_Tags.php:348
 msgid "Trip Cost"
 msgstr ""
 
 #: includes/class-wp-travel-engine-emails.php:798
-#: includes/classes/Booking/Email/Template_Tags.php:414
-#: includes/classes/Booking/Email/Template_Tags.php:701
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:689
+#: includes/classes/Booking/Email/Template_Tags.php:425
+#: includes/classes/Booking/Email/Template_Tags.php:712
 #: includes/templates/content-cart.php:66
 #: includes/templates/emails/booking/confirmation.php:23
 #: dist/blocks/editor/editor.js:2
@@ -5960,7 +5989,7 @@ msgid "A payment has been received for {booking_id}. The payment details are lis
 msgstr ""
 
 #: includes/class-wp-travel-engine-emails.php:876
-#: includes/classes/Email/BookingEmail.php:331
+#: includes/classes/Email/BookingEmail.php:333
 msgid "Your booking has been confirmed."
 msgstr ""
 
@@ -5984,19 +6013,19 @@ msgid "Your payment has been confirmed for %1$s"
 msgstr ""
 
 #: includes/class-wp-travel-engine-emails.php:992
-#: includes/classes/Email/BookingEmail.php:200
+#: includes/classes/Email/BookingEmail.php:201
 #, php-format
 msgid "Payment has been received for %1$s"
 msgstr ""
 
 #: includes/class-wp-travel-engine-emails.php:995
-#: includes/classes/Email/BookingEmail.php:203
+#: includes/classes/Email/BookingEmail.php:204
 #, php-format
 msgid "Your due payment of booking %1$s has been confirmed"
 msgstr ""
 
 #: includes/class-wp-travel-engine-emails.php:996
-#: includes/classes/Email/BookingEmail.php:204
+#: includes/classes/Email/BookingEmail.php:205
 #, php-format
 msgid "Due payment has been received for booking %1$s"
 msgstr ""
@@ -6161,7 +6190,7 @@ msgstr ""
 #: includes/class-wp-travel-engine-settings.php:191
 #: includes/class-wp-travel-engine-settings.php:194
 #: includes/classes/Builders/admin-settings/general/page.php:25
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2756
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2762
 #: includes/onboard-process/views/onboard-process.php:234
 msgid "Checkout Page"
 msgstr ""
@@ -6173,7 +6202,7 @@ msgstr ""
 #: includes/class-wp-travel-engine-settings.php:204
 #: includes/class-wp-travel-engine-settings.php:207
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:785
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2760
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2766
 #: includes/onboard-process/views/onboard-process.php:240
 msgid "Terms and Conditions"
 msgstr ""
@@ -6187,7 +6216,7 @@ msgstr ""
 #: includes/class-wp-travel-engine-settings.php:217
 #: includes/class-wp-travel-engine-settings.php:220
 #: includes/classes/Builders/admin-settings/general/page.php:41
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2764
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2770
 #: includes/onboard-process/views/onboard-process.php:246
 msgid "Thank You Page"
 msgstr ""
@@ -6199,7 +6228,7 @@ msgstr ""
 #: includes/class-wp-travel-engine-settings.php:230
 #: includes/class-wp-travel-engine-settings.php:233
 #: includes/classes/Builders/admin-settings/general/page.php:49
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2768
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2774
 #: includes/onboard-process/views/onboard-process.php:252
 msgid "Confirmation Page"
 msgstr ""
@@ -6222,7 +6251,7 @@ msgstr ""
 #: includes/class-wp-travel-engine-settings.php:256
 #: includes/class-wp-travel-engine-settings.php:259
 #: includes/classes/Builders/admin-settings/general/page.php:65
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2776
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2782
 msgid "Enquiry Thank You Page"
 msgstr ""
 
@@ -6233,7 +6262,7 @@ msgstr ""
 #: includes/class-wp-travel-engine-settings.php:269
 #: includes/class-wp-travel-engine-settings.php:272
 #: includes/classes/Builders/admin-settings/general/page.php:73
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2780
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2786
 #: includes/onboard-process/views/onboard-process.php:264
 msgid "Wishlist Page"
 msgstr ""
@@ -6347,7 +6376,7 @@ msgid "Symbol to use for thousands separator in Trip Price."
 msgstr ""
 
 #: includes/class-wp-travel-engine-settings.php:525
-#: includes/class-wte-ajax.php:353
+#: includes/class-wte-ajax.php:371
 msgid "Security Error! Nonce verification failed"
 msgstr ""
 
@@ -6373,14 +6402,14 @@ msgid "Customer Email Templates"
 msgstr ""
 
 #: includes/class-wp-travel-engine-settings.php:715
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2947
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2957
 msgid "Enquiry Emails"
 msgstr ""
 
 #: includes/class-wp-travel-engine-settings.php:720
-#: dist/admin/exports.js:3667
-#: dist/admin/global-settings.js:3547
-#: dist/admin/trip-edit.js:3681
+#: dist/admin/exports.js:3641
+#: dist/admin/global-settings.js:3548
+#: dist/admin/trip-edit.js:3655
 msgid "Test Email"
 msgstr ""
 
@@ -6406,7 +6435,7 @@ msgstr ""
 
 #: includes/class-wp-travel-engine-settings.php:763
 #: includes/classes/Builders/admin-settings/payments/paypal-standard.php:11
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:818
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:824
 msgid "PayPal Standard"
 msgstr ""
 
@@ -6417,7 +6446,7 @@ msgstr ""
 
 #: includes/class-wp-travel-engine-settings.php:773
 #: includes/classes/Builders/admin-settings/payments/check-payments.php:11
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:841
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:847
 #: includes/classes/PaymentGateways/CheckPayment.php:42
 #: includes/classes/PaymentGateways/CheckPayment.php:51
 msgid "Check Payments"
@@ -6448,9 +6477,9 @@ msgstr ""
 
 #: includes/class-wp-travel-engine-taxonomy-thumb.php:91
 #: includes/class-wp-travel-engine-taxonomy-thumb.php:238
-#: dist/admin/exports.js:3667
-#: dist/admin/global-settings.js:3547
-#: dist/admin/trip-edit.js:3681
+#: dist/admin/exports.js:3641
+#: dist/admin/global-settings.js:3548
+#: dist/admin/trip-edit.js:3655
 msgid "Icon"
 msgstr ""
 
@@ -6486,7 +6515,7 @@ msgstr ""
 #: includes/class-wp-travel-engine-taxonomy-thumb.php:155
 #: includes/class-wp-travel-engine-taxonomy-thumb.php:190
 #: includes/templates/script-templates/trip-edit/tab-pricing/tmpl-wte-package-general.php:37
-#: dist/admin/trip-edit.js:4590
+#: dist/admin/trip-edit.js:4734
 msgid "Short Description"
 msgstr ""
 
@@ -6582,70 +6611,70 @@ msgstr ""
 msgid "Begin Tour"
 msgstr ""
 
-#: includes/class-wte-ajax.php:293
-#: includes/class-wte-ajax.php:326
+#: includes/class-wte-ajax.php:309
+#: includes/class-wte-ajax.php:342
 msgid "Invalid nonce or nonce expired."
 msgstr ""
 
-#: includes/class-wte-ajax.php:302
-#: includes/class-wte-ajax.php:335
+#: includes/class-wte-ajax.php:318
+#: includes/class-wte-ajax.php:351
 msgid "Nonce Missing."
 msgstr ""
 
-#: includes/class-wte-ajax.php:349
+#: includes/class-wte-ajax.php:367
 msgid "Missing required parameters."
 msgstr ""
 
-#: includes/class-wte-ajax.php:455
+#: includes/class-wte-ajax.php:473
 #: includes/classes/Core/Controllers/Ajax/CloneTrip.php:46
 msgid "Cloning post must be of trip posttype."
 msgstr ""
 
-#: includes/class-wte-ajax.php:523
+#: includes/class-wte-ajax.php:541
 #: includes/classes/Core/Controllers/Ajax/AddToCart.php:34
 #: includes/classes/Core/Controllers/Ajax/AddToCart.php:201
 msgid "Invalid data structure."
 msgstr ""
 
-#: includes/class-wte-ajax.php:532
+#: includes/class-wte-ajax.php:550
 #: includes/classes/Core/Controllers/Ajax/AddToCart.php:209
 msgid "Invalid Trip ID."
 msgstr ""
 
-#: includes/class-wte-ajax.php:630
-#: includes/class-wte-ajax.php:851
-#: includes/class-wte-ajax.php:881
+#: includes/class-wte-ajax.php:648
+#: includes/class-wte-ajax.php:869
+#: includes/class-wte-ajax.php:899
 #: includes/classes/Core/Controllers/Ajax/AddToCart.php:143
 #: includes/classes/Core/Controllers/Ajax/AddToCart.php:175
 msgid "deprecated because of more params."
 msgstr ""
 
-#: includes/class-wte-ajax.php:651
+#: includes/class-wte-ajax.php:669
 #: includes/classes/Core/Controllers/Ajax/AddToCart.php:222
 msgid "Trip added to cart successfully."
 msgstr ""
 
-#: includes/class-wte-ajax.php:683
+#: includes/class-wte-ajax.php:701
 #: includes/classes/Core/Controllers/Ajax/UserWishlist.php:32
 msgid "Wishlist fetched successfully."
 msgstr ""
 
-#: includes/class-wte-ajax.php:693
+#: includes/class-wte-ajax.php:711
 #: includes/classes/Core/Controllers/Ajax/UserWishlist.php:50
 msgid "Trip is added to wishlists."
 msgstr ""
 
-#: includes/class-wte-ajax.php:703
+#: includes/class-wte-ajax.php:721
 #: includes/classes/Core/Controllers/Ajax/UserWishlist.php:57
 msgid "Trip is removed from wishlists."
 msgstr ""
 
-#: includes/class-wte-ajax.php:714
+#: includes/class-wte-ajax.php:732
 msgid "<strong>0</strong> item in wishlist"
 msgstr ""
 
 #. Translators: %d is the number of items in the wishlist.
-#: includes/class-wte-ajax.php:722
+#: includes/class-wte-ajax.php:740
 #: includes/classes/Core/Controllers/Ajax/UserWishlist.php:80
 #, php-format
 msgid "<strong>%d</strong> item in the wishlist"
@@ -6653,16 +6682,16 @@ msgid_plural "<strong>%d</strong> items in the wishlist"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-wte-ajax.php:737
+#: includes/class-wte-ajax.php:755
 msgid "Nonce verification failed."
 msgstr ""
 
-#: includes/class-wte-ajax.php:749
+#: includes/class-wte-ajax.php:767
 #: includes/classes/Core/Controllers/Ajax/AddToCart.php:43
 msgid "Invalid trip ID."
 msgstr ""
 
-#: includes/class-wte-ajax.php:889
+#: includes/class-wte-ajax.php:907
 #: includes/classes/Core/Controllers/Ajax/AddToCart.php:183
 msgid "Trip added to cart successfully"
 msgstr ""
@@ -6908,7 +6937,7 @@ msgstr ""
 
 #: includes/classes/Blocks/Blocks.php:95
 #: includes/classes/Blocks/Blocks.php:96
-#: includes/classes/Modules/TripSearch.php:736
+#: includes/classes/Modules/TripSearch.php:735
 #: includes/templates/template-trip-search-form.php:13
 #: dist/blocks/editor/editor.js:2
 msgid "Destination"
@@ -6916,7 +6945,7 @@ msgstr ""
 
 #: includes/classes/Blocks/Blocks.php:102
 #: includes/classes/Blocks/Blocks.php:103
-#: includes/classes/Modules/TripSearch.php:756
+#: includes/classes/Modules/TripSearch.php:755
 #: dist/blocks/editor/editor.js:2
 msgid "Trip Types"
 msgstr ""
@@ -6929,9 +6958,9 @@ msgstr ""
 
 #: includes/classes/Blocks/Blocks.php:123
 #: includes/classes/Blocks/Blocks.php:124
-#: includes/classes/Modules/TripSearch.php:741
+#: includes/classes/Modules/TripSearch.php:740
 #: includes/templates/script-templates/tmpl-wte-package-category-single.php:31
-#: dist/admin/trip-edit.js:4114
+#: dist/admin/trip-edit.js:4258
 #: dist/blocks/editor/editor.js:2
 #: dist/bundle/trip-booking-modal.bundle.js:2
 #: dist/public/components/trip-booking-modal.js:2
@@ -6998,9 +7027,9 @@ msgstr ""
 #: includes/classes/Blocks/Metadata.php:70
 #: includes/classes/Utilities/FormBuilder/FieldTypes.php:13
 #: includes/lib/wte-form-framework/class-wte-form-field.php:81
-#: dist/admin/exports.js:3667
-#: dist/admin/global-settings.js:3547
-#: dist/admin/trip-edit.js:3681
+#: dist/admin/exports.js:3641
+#: dist/admin/global-settings.js:3548
+#: dist/admin/trip-edit.js:3655
 msgid "Text"
 msgstr ""
 
@@ -7038,10 +7067,110 @@ msgstr ""
 msgid "Editor"
 msgstr ""
 
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:198
+#: includes/classes/Booking/Email/Template_Tags.php:1256
+#, php-format
+msgid "Booking #%1$s"
+msgstr ""
+
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:403
+#: includes/classes/Booking/Email/Template_Tags.php:519
+#: includes/templates/thank-you/thank-you-legacy.php:33
+#: includes/templates/thank-you/thank-you.php:33
+msgid "Booking Details:"
+msgstr ""
+
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:437
+#: includes/classes/Booking/Email/Template_Tags.php:1633
+msgid "Accommodation(s):"
+msgstr ""
+
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:438
+msgid "Pickup Point(s):"
+msgstr ""
+
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:439
+#: includes/classes/Booking/Email/Template_Tags.php:1630
+msgid "Extra Service(s):"
+msgstr ""
+
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:440
+#: includes/classes/Booking/Email/Template_Tags.php:1639
+msgid "Travel Insurance:"
+msgstr ""
+
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:562
+msgid "Traveller 1 (Lead Traveller)"
+msgstr ""
+
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:622
+msgid "Please make your check payable to <strong>Demo Travel Agency</strong> and mail it to 123 Adventure Lane, Kathmandu, Nepal. Include your booking reference <strong>#12345</strong> on the memo line. Payment must be received within 7 business days to confirm your booking."
+msgstr ""
+
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:680
+#: includes/classes/Booking/Email/Template_Tags.php:696
+#: includes/classes/Booking/Email/Template_Tags.php:859
+msgid "Payment Details:"
+msgstr ""
+
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:702
+#: includes/classes/Booking/Email/Template_Tags.php:902
+#: includes/classes/Core/PartialPayment.php:145
+msgid "Initial Deposit"
+msgstr ""
+
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:712
+msgid "Amount Due (excl. Tax) "
+msgstr ""
+
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:716
+#: includes/classes/Booking/Email/Template_Tags.php:773
+#: includes/classes/Booking/Email/Template_Tags.php:1021
+msgid "Billing Details:"
+msgstr ""
+
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:719
+#: includes/classes/Booking/Email/Template_Tags.php:776
+#: includes/classes/Booking/Email/Template_Tags.php:1024
+msgid "Booking Name:"
+msgstr ""
+
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:723
+#: includes/classes/Booking/Email/Template_Tags.php:780
+#: includes/classes/Booking/Email/Template_Tags.php:1028
+msgid "Booking Email:"
+msgstr ""
+
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:727
+#: includes/classes/Booking/Email/Template_Tags.php:784
+#: includes/classes/Booking/Email/Template_Tags.php:1032
+msgid "Booking Address:"
+msgstr ""
+
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:731
+#: includes/classes/Booking/Email/Template_Tags.php:788
+#: includes/classes/Booking/Email/Template_Tags.php:1036
+#: includes/templates/account/form-edit-billing.php:70
+msgid "City:"
+msgstr ""
+
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:735
+#: includes/classes/Booking/Email/Template_Tags.php:792
+#: includes/classes/Booking/Email/Template_Tags.php:1040
+#: includes/classes/Core/PostTypes/Customer.php:280
+#: includes/templates/account/form-edit-billing.php:85
+msgid "Country:"
+msgstr ""
+
+#: includes/classes/Booking/Email/Dummy/DummyTags.php:736
+#: includes/classes/Helpers/Countries.php:178
+msgid "Nepal"
+msgstr ""
+
 #. translators: %s: Tax percentage.
-#: includes/classes/Booking/Email/Template_Tags.php:453
-#: includes/classes/Booking/Email/Template_Tags.php:671
-#: includes/classes/Booking/Email/Template_Tags.php:872
+#: includes/classes/Booking/Email/Template_Tags.php:464
+#: includes/classes/Booking/Email/Template_Tags.php:682
+#: includes/classes/Booking/Email/Template_Tags.php:886
 #: includes/classes/Core/Controllers/MiniCart.php:233
 #: includes/templates/thank-you/thank-you-legacy.php:221
 #: includes/templates/thank-you/thank-you.php:221
@@ -7049,69 +7178,35 @@ msgstr ""
 msgid "(%s%% Incl. tax)"
 msgstr ""
 
-#: includes/classes/Booking/Email/Template_Tags.php:508
-#: includes/templates/thank-you/thank-you-legacy.php:33
-#: includes/templates/thank-you/thank-you.php:33
-msgid "Booking Details:"
+#: includes/classes/Booking/Email/Template_Tags.php:522
+msgid "Package Name:"
 msgstr ""
 
-#: includes/classes/Booking/Email/Template_Tags.php:685
-#: includes/classes/Booking/Email/Template_Tags.php:845
-msgid "Payment Details:"
+#: includes/classes/Booking/Email/Template_Tags.php:526
+msgid "Trip Date:"
 msgstr ""
 
-#: includes/classes/Booking/Email/Template_Tags.php:759
-#: includes/classes/Booking/Email/Template_Tags.php:1004
-msgid "Billing Details:"
+#: includes/classes/Booking/Email/Template_Tags.php:530
+msgid "Trip End Date:"
 msgstr ""
 
-#: includes/classes/Booking/Email/Template_Tags.php:762
-#: includes/classes/Booking/Email/Template_Tags.php:1007
-msgid "Booking Name:"
+#: includes/classes/Booking/Email/Template_Tags.php:543
+msgid "Travellers:"
 msgstr ""
 
-#: includes/classes/Booking/Email/Template_Tags.php:766
-#: includes/classes/Booking/Email/Template_Tags.php:1011
-msgid "Booking Email:"
-msgstr ""
-
-#: includes/classes/Booking/Email/Template_Tags.php:770
-#: includes/classes/Booking/Email/Template_Tags.php:1015
-msgid "Booking Address:"
-msgstr ""
-
-#: includes/classes/Booking/Email/Template_Tags.php:774
-#: includes/classes/Booking/Email/Template_Tags.php:1019
-#: includes/templates/account/form-edit-billing.php:70
-msgid "City:"
-msgstr ""
-
-#: includes/classes/Booking/Email/Template_Tags.php:778
-#: includes/classes/Booking/Email/Template_Tags.php:1023
-#: includes/classes/Core/PostTypes/Customer.php:280
-#: includes/templates/account/form-edit-billing.php:85
-msgid "Country:"
-msgstr ""
-
-#: includes/classes/Booking/Email/Template_Tags.php:885
-#: includes/classes/Core/PartialPayment.php:145
-msgid "Initial Deposit"
-msgstr ""
-
-#: includes/classes/Booking/Email/Template_Tags.php:894
+#: includes/classes/Booking/Email/Template_Tags.php:911
 #: includes/classes/Pages/Checkout.php:548
 #: includes/templates/checkout/mini-cart.php:134
 msgid "Remaining Amount"
 msgstr ""
 
-#: includes/classes/Booking/Email/Template_Tags.php:950
+#: includes/classes/Booking/Email/Template_Tags.php:967
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:344
 msgid "Payable Amount"
 msgstr ""
 
-#: includes/classes/Booking/Email/Template_Tags.php:1225
-#, php-format
-msgid "Booking #%1$s"
+#: includes/classes/Booking/Email/Template_Tags.php:1636
+msgid "Pickup Points:"
 msgstr ""
 
 #: includes/classes/Builders/admin-settings/currency/general.php:24
@@ -7128,7 +7223,7 @@ msgid "Amount Display format. Available tags: <code>%CURRENCY_CODE%</code>, <cod
 msgstr ""
 
 #: includes/classes/Builders/admin-settings/dashboard/social-login.php:12
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3783
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3793
 msgid "Social Login"
 msgstr ""
 
@@ -7227,7 +7322,7 @@ msgid "Enable to let customers create new accounts on my account page."
 msgstr ""
 
 #: includes/classes/Builders/admin-settings/dashboard/user-dashboard.php:52
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3753
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3763
 msgid "Login Page Label"
 msgstr ""
 
@@ -7237,7 +7332,7 @@ msgid "Log into Your Account"
 msgstr ""
 
 #: includes/classes/Builders/admin-settings/dashboard/user-dashboard.php:59
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3757
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3767
 msgid "Forgot Page Label"
 msgstr ""
 
@@ -7247,7 +7342,7 @@ msgid "Reset Your Password"
 msgstr ""
 
 #: includes/classes/Builders/admin-settings/dashboard/user-dashboard.php:66
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3761
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3771
 msgid "Forgot Page Description"
 msgstr ""
 
@@ -7256,7 +7351,7 @@ msgid "If an account with that email exist, we’ll send you a link to reset you
 msgstr ""
 
 #: includes/classes/Builders/admin-settings/dashboard/user-dashboard.php:73
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3765
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3775
 msgid "Set Password Page Label"
 msgstr ""
 
@@ -7274,7 +7369,7 @@ msgid "Color Settings"
 msgstr ""
 
 #: includes/classes/Builders/admin-settings/display/appearance.php:23
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3001
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3011
 msgid "Primary Color"
 msgstr ""
 
@@ -7287,7 +7382,7 @@ msgid "Featured Ribbon Color"
 msgstr ""
 
 #: includes/classes/Builders/admin-settings/display/appearance.php:41
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3017
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3027
 msgid "Icon Color"
 msgstr ""
 
@@ -7306,9 +7401,9 @@ msgid "To use the New template, create a new page and assign the \"WP Travel Eng
 msgstr ""
 
 #: includes/classes/Builders/admin-settings/display/checkout.php:38
-#: dist/admin/exports.js:2074
-#: dist/admin/global-settings.js:2515
-#: dist/admin/trip-edit.js:2074
+#: dist/admin/exports.js:2075
+#: dist/admin/global-settings.js:2516
+#: dist/admin/trip-edit.js:2075
 msgid "New"
 msgstr ""
 
@@ -7321,7 +7416,7 @@ msgid "If checked, information of all the travellers will be compulsory. After c
 msgstr ""
 
 #: includes/classes/Builders/admin-settings/display/checkout.php:60
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3576
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3586
 msgid "Show Emergency Contact Details"
 msgstr ""
 
@@ -7386,7 +7481,7 @@ msgstr ""
 
 #: includes/classes/Builders/admin-settings/display/checkout.php:124
 #: includes/classes/Builders/admin-settings/display/checkout.php:215
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3594
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3604
 msgid "Show Additional Note"
 msgstr ""
 
@@ -7417,7 +7512,7 @@ msgstr ""
 
 #: includes/classes/Builders/admin-settings/display/checkout.php:148
 #: includes/classes/Builders/admin-settings/display/checkout.php:241
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3606
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3616
 msgid "Footer Copyright"
 msgstr ""
 
@@ -7476,7 +7571,7 @@ msgid "Automatically slide images in the gallery to enhance visual engagement."
 msgstr ""
 
 #: includes/classes/Builders/admin-settings/display/single-trip.php:121
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3395
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3405
 msgid "Trip Duration Format"
 msgstr ""
 
@@ -7559,7 +7654,7 @@ msgid "Keep the pricing widget visible while users scroll the page."
 msgstr ""
 
 #: includes/classes/Builders/admin-settings/display/single-trip.php:273
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3289
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3299
 msgid "WhatsApp Number"
 msgstr ""
 
@@ -7614,7 +7709,7 @@ msgid "Enter the GDPR message for the trip enquiry form."
 msgstr ""
 
 #: includes/classes/Builders/admin-settings/display/single-trip.php:386
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3303
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3313
 msgid "Related Trips"
 msgstr ""
 
@@ -7743,111 +7838,7 @@ msgstr ""
 msgid "Show Taxonomy Children Terms"
 msgstr ""
 
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:14
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:26
-msgid "The customer's first name."
-msgstr ""
-
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:15
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:27
-msgid "The customer's full name."
-msgstr ""
-
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:16
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:50
-msgid "The name of the trip booked."
-msgstr ""
-
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:18
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:80
-msgid "The payment ID of trip."
-msgstr ""
-
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:28
-msgid "The customer's last name."
-msgstr ""
-
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:29
-msgid "The customer's email address."
-msgstr ""
-
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:31
-msgid "The site admin email address."
-msgstr ""
-
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:40
-msgid "The link to reset the password."
-msgstr ""
-
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:52
-msgid "The trip code for each booked trip"
-msgstr ""
-
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:70
-msgid "The trip booking & Payment details."
-msgstr ""
-
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:71
-msgid "The trip booking summary."
-msgstr ""
-
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:72
-msgid "The trip payment details."
-msgstr ""
-
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:73
-msgid "The date and time when the trip was booked."
-msgstr ""
-
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:74
-msgid "The start date of the trip."
-msgstr ""
-
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:75
-msgid "The end date of the trip."
-msgstr ""
-
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:76
-msgid "The total number of travellers."
-msgstr ""
-
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:77
-msgid "The total price of the trip."
-msgstr ""
-
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:78
-msgid "The amount paid by the customer."
-msgstr ""
-
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:79
-msgid "The due amount for the trip."
-msgstr ""
-
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:82
-msgid "The billing details filled in new checkout template."
-msgstr ""
-
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:83
-msgid "The traveler's details filled in new checkout template."
-msgstr ""
-
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:84
-msgid "The emergency contact details filled in new checkout template."
-msgstr ""
-
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:85
-msgid "The additional note filled in new checkout template."
-msgstr ""
-
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:86
-msgid "Banks Accounts Details. This tag will be replaced with the bank details and sent to the customer receipt email when Bank Transfer method has been chosen by the customer."
-msgstr ""
-
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:88
-msgid "The extra fee for the trip."
-msgstr ""
-
-#: includes/classes/Builders/admin-settings/emails/emails-notification.php:96
+#: includes/classes/Builders/admin-settings/emails/emails-notification.php:17
 msgid "Notifications"
 msgstr ""
 
@@ -8024,9 +8015,9 @@ msgid "Check this option to enable auto rate update"
 msgstr ""
 
 #: includes/classes/Builders/admin-settings/extensions/currency-converter.php:118
-#: dist/admin/exports.js:3469
-#: dist/admin/global-settings.js:3349
-#: dist/admin/trip-edit.js:3483
+#: dist/admin/exports.js:3443
+#: dist/admin/global-settings.js:3350
+#: dist/admin/trip-edit.js:3457
 msgid "Add Currency"
 msgstr ""
 
@@ -8370,12 +8361,12 @@ msgid "Check this, if you want to make User Consent checkbox required in order t
 msgstr ""
 
 #: includes/classes/Builders/admin-settings/extensions/itinerary-downloader.php:130
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2943
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2953
 msgid "Email Settings"
 msgstr ""
 
 #: includes/classes/Builders/admin-settings/extensions/itinerary-downloader.php:134
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2969
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2979
 #: includes/classes/Filters/schemas/itinerary-downloader.php:65
 msgid "Reply To Email"
 msgstr ""
@@ -8760,8 +8751,8 @@ msgid "Default: Shown. If unchecked, Client Location field will be hidden from f
 msgstr ""
 
 #: includes/classes/Builders/admin-settings/extensions/trip-search.php:11
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3796
-#: includes/classes/Modules/TripSearch.php:1176
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3806
+#: includes/classes/Modules/TripSearch.php:1177
 msgid "Trip Search"
 msgstr ""
 
@@ -9013,13 +9004,13 @@ msgid "This is the wishlist page where users can check out the trips they have w
 msgstr ""
 
 #: includes/classes/Builders/admin-settings/general/page.php:81
-#: includes/classes/Modules/TripSearch.php:1200
-#: includes/classes/Modules/TripSearch.php:1203
+#: includes/classes/Modules/TripSearch.php:1201
+#: includes/classes/Modules/TripSearch.php:1204
 msgid "Trip Search Results Page"
 msgstr ""
 
 #: includes/classes/Builders/admin-settings/general/page.php:82
-#: includes/classes/Modules/TripSearch.php:1210
+#: includes/classes/Modules/TripSearch.php:1211
 msgid "This is the trip search results page with search filters."
 msgstr ""
 
@@ -9028,7 +9019,7 @@ msgid "Trip Settings"
 msgstr ""
 
 #: includes/classes/Builders/admin-settings/general/trip-settings.php:19
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2788
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2794
 msgid "Trip Tabs"
 msgstr ""
 
@@ -9316,7 +9307,7 @@ msgid "Sofort"
 msgstr ""
 
 #: includes/classes/Builders/admin-settings/payments/paypal-express.php:57
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:911
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:917
 msgid "PayPal Express"
 msgstr ""
 
@@ -9494,8 +9485,8 @@ msgstr ""
 
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:292
 #: includes/helpers/functions.php:91
-#: includes/helpers/functions.php:2257
-#: includes/helpers/helpers.php:2403
+#: includes/helpers/functions.php:2265
+#: includes/helpers/helpers.php:2428
 msgid "Failed"
 msgstr ""
 
@@ -9736,6 +9727,19 @@ msgstr ""
 msgid "Select Trip*"
 msgstr ""
 
+#: includes/classes/Core/Controllers/Ajax/PreviewEmail.php:31
+#: includes/classes/Core/Controllers/Ajax/SendTestEmail.php:30
+msgid "Permission denied."
+msgstr ""
+
+#: includes/classes/Core/Controllers/Ajax/PreviewEmail.php:34
+msgid "No content provided."
+msgstr ""
+
+#: includes/classes/Core/Controllers/Ajax/PreviewEmail.php:59
+msgid "Test Mode"
+msgstr ""
+
 #: includes/classes/Core/Controllers/Ajax/ResendPurchaseReceipt.php:122
 msgid "Invalid booking ID."
 msgstr ""
@@ -9809,6 +9813,14 @@ msgstr ""
 msgid "Email error: %s"
 msgstr ""
 
+#: includes/classes/Core/Controllers/Ajax/SendTestEmail.php:53
+msgid "Test Email Sent Successfully. Please check your inbox."
+msgstr ""
+
+#: includes/classes/Core/Controllers/Ajax/SendTestEmail.php:55
+msgid "Failed to send the test email. Something went wrong."
+msgstr ""
+
 #: includes/classes/Core/Controllers/Ajax/UploadProfilePicture.php:54
 #: includes/classes/Helpers/Functions.php:140
 msgid "File size too large."
@@ -9860,1299 +9872,1303 @@ msgstr ""
 msgid "Sorry, you are not allowed to view this resource."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:251
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:252
 msgid "This email is sent to the admin when a booking is confirmed."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:255
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:286
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:256
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:287
 msgid "Payment Confirmation"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:294
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:295
 msgid "Account Registration"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:302
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:303
 msgid "Forgot Password"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:310
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:311
 msgid "Enquiry"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:332
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:333
 msgid "This email is to notify the admin that a new booking has been placed as soon as a customer completes the checkout process."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:335
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:336
 msgid "This email is to notify the admin that a payment has been successfully received and confirmed for a booking."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:347
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:348
 msgid "This email is sent to customers after they complete checkout, confirming that their trip has been successfully booked."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:350
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:351
 msgid "This email is sent to customers after they complete payment for the booking."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:353
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:354
 msgid "This email is sent to customers when their account is successfully created on your website."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:356
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:357
 msgid "This email is sent to customers when they request a password reset."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:359
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:360
 msgid "This email is sent to customers after they submit an enquiry form on your website confirming that their enquiry has been received."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:705
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:711
 msgid "Check the box to confirm you've read and agree to our"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:810
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:816
 #: includes/classes/PaymentGateways/BookingOnly.php:42
 #: includes/classes/PaymentGateways/BookingOnly.php:51
 #: includes/onboard-process/views/onboard-process.php:323
 msgid "Book Now Pay Later"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:854
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:860
 msgid "HBL Payments"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:925
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:931
 msgid "Authorize.Net"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:1541
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:1550
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:1547
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:1556
 msgid "Invalid email address"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2772
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2778
 msgid "Dashboard Page"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2784
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2790
 msgid "Search Page"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2794
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2800
 msgid "Tab ID"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2802
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2808
 msgid "Tab Field"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2810
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2861
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2816
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2867
 msgid "Icon Name"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2814
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2865
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2820
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2871
 msgid "Icon View Box"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2818
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2869
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2824
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2875
 msgid "Icon Path"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2824
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2830
 msgid "Tab Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2828
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2834
 msgid "Tab Trashable or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2835
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2841
 msgid "Trip Infos"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2841
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2847
 msgid "Fact ID"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2845
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2851
 msgid "Fact Name"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2849
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2855
 msgid "Fact Placeholder"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2853
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2859
 msgid "Fact Type"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2857
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2863
 msgid "Fact Icon"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2875
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2881
 msgid "Fact Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2881
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2887
 msgid "Fact Options"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2888
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2894
 msgid "Fact Trashable or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2901
-#: dist/admin/exports.js:3524
-#: dist/admin/global-settings.js:3404
-#: dist/admin/trip-edit.js:3538
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2907
+#: dist/admin/exports.js:3498
+#: dist/admin/global-settings.js:3405
+#: dist/admin/trip-edit.js:3512
 msgid "Highlight Title"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2905
-#: dist/admin/exports.js:3524
-#: dist/admin/global-settings.js:3404
-#: dist/admin/trip-edit.js:3538
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2911
+#: dist/admin/exports.js:3498
+#: dist/admin/global-settings.js:3405
+#: dist/admin/trip-edit.js:3512
 msgid "Highlight Description"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2922
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2928
 msgid "Pricing Type Description"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2929
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2935
 msgid "Email Notification"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2933
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2939
 msgid "Admin Email Notification"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2937
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2943
 msgid "Customer Email Notification"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2954
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2947
+msgid "Current editing language for email templates"
+msgstr ""
+
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2964
 msgid "Sale Emails"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2973
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2983
 msgid "Header Logo"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2977
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2987
 msgid "Attachment ID"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2981
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2991
 msgid "Logo URL"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2985
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2995
 msgid "Logo Alt Text"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2991
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3001
 msgid "Footer Text"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2997
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3007
 msgid "Appearance Settings"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3005
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3015
 msgid "Primary Color RGB"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3009
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3019
 msgid "Discount Color"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3013
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3023
 msgid "Featured Color"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3118
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3130
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3128
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3140
 msgid "Enquiry Form Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3122
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3132
 msgid "Custom Enquiry Form Enabled"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3126
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3136
 msgid "Custom Enquiry Form Shortcode"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3136
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3146
 msgid "Enquiry Email"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3140
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3150
 msgid "Enquiry Email Addresses"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3151
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3161
 msgid "Customer Enquiry Notification Enabled"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3173
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3183
 msgid "Powered By Link Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3179
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3329
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3189
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3339
 msgid "New Trip Layout"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3183
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3333
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3193
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3343
 msgid "New Trip Layout Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3187
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3337
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3197
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3347
 msgid "Display Slider or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3191
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3341
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3201
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3351
 msgid "Display Featured or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3195
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3345
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3205
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3355
 msgid "Display Wishlist or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3199
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3349
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3209
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3359
 msgid "Display Map or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3203
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3213
 msgid "Display Trip Archive Excerpt or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3207
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3357
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3217
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3367
 msgid "Display Difficulty or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3211
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3361
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3221
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3371
 msgid "Display Tags or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3215
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3365
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3225
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3375
 msgid "Display Next Departure Dates or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3219
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3369
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3229
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3379
 msgid "Display Available Months or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3223
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3373
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3233
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3383
 msgid "Display Available Dates or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3229
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3239
 msgid "Trip Duration Label"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3234
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3244
 msgid "Show Booking Modal Warning"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3238
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3248
 msgid "Booking Modal Warning Message"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3242
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3252
 msgid "Trip Banner Layout"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3246
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3256
 msgid "Display Banner in Full Width"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3250
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3260
 msgid "Booking Form Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3254
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3264
 msgid "Pricing Section Layout"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3258
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3268
 msgid "Compact Layout Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3262
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3272
 msgid "Inquiry Info Form"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3266
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3276
 msgid "Inquiry Info Form Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3270
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3280
 msgid "Inquiry Info Form Link Type"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3275
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3285
 msgid "Inquiry Info Form Link"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3281
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3291
 msgid "WhatsApp"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3285
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3295
 msgid "WhatsApp Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3295
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3305
 msgid "Tabs Sticky and Scrollable Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3299
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3309
 msgid "Booking Widget Sticky and Scrollable Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3307
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3317
 msgid "Related Trips Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3311
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3321
 msgid "Related Trips Title"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3315
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3325
 msgid "Number of Related Trips"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3325
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3335
 msgid "Pricing Widget Enquiry Message"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3353
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3363
 msgid "Display Related Trip Excerpt or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3379
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3389
 msgid "Trip Info Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3383
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3393
 msgid "Trip Info on Sidebar Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3387
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3397
 msgid "Trip Info on Main Content Area Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3391
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3401
 msgid "Image Gallery Autoplay Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3400
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3410
 msgid "Show Discounts Type"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3405
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3415
 msgid "Featured Image in Gallery Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3409
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3419
 msgid "Archive Title Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3422
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3432
 #: includes/widgets/widget-featured-trip.php:83
 msgid "Featured Trips"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3426
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3436
 msgid "Featured Trips Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3436
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3446
 msgid "Show Sidebar"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3440
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3450
 msgid "Display Mode"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3445
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3455
 msgid "Customize Archives"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3449
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3459
 msgid "Archive Title"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3453
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3463
 msgid "Archive title Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3457
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3467
 msgid "Archive Title Type"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3472
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3482
 msgid "Custom Strings"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3489
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3499
 msgid "Currency Code"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3493
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3503
 msgid "Currency Symbol"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3497
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3507
 msgid "Amount Format"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3501
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3511
 msgid "Decimal Digits"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3505
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3515
 msgid "Decimal Seperator"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3509
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3519
 msgid "Thousands Seperator"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3513
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3523
 msgid "Emergency Contact Details Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3517
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3527
 msgid "Trip Featured Image Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3521
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3531
 msgid "Travellers Information Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3525
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3535
 msgid "Multiple Price List Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3529
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3539
 msgid "Taxonomy"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3533
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3543
 msgid "Taxonomy Image Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3537
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3547
 msgid "Taxonomy Children Terms Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3543
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3553
 msgid "FSE Template Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3547
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3557
 msgid "Booking Button Label"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3563
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3573
 msgid "Checkout Page Layout"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3568
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3578
 msgid "Show Theme Header and Footer"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3572
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3582
 msgid "Show Travellers Information"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3580
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3590
 msgid "Traveller and Emergency Details Form"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3585
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3595
 msgid "Travellers Details Type"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3590
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3600
 msgid "Display Billing Details"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3598
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3608
 msgid "Show Discount"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3602
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3612
 msgid "Privacy Policy Message"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3614
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3624
 msgid "Default Payment Gateway"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3624
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3634
 msgid "Gateway ID"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3628
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3638
 msgid "Gateway Title"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3632
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3642
 msgid "Gateway Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3639
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3649
 msgid "Paypal Standard Payment Gateway"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3643
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3653
 msgid "Paypal Id"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3649
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3659
 msgid "Direct Bank Transfer Payment Gateway"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3653
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3663
 msgid "Direct Bank Transfer Title"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3657
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3667
 msgid "Direct Bank Transfer Description"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3661
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3671
 msgid "Direct Bank Transfer Instructions"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3683
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3693
 msgid "Short Code"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3691
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3701
 msgid "SWIFT"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3700
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3710
 msgid "Check Payments Payment Gateway"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3704
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3714
 msgid "Check Payments Title"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3708
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3718
 msgid "Check Payments Description"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3712
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3722
 msgid "Check Payments Instructions"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3722
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3732
 msgid "Tax Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3726
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3736
 msgid "Tax Custom Label"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3730
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3740
 msgid "Type of Tax Inclusion"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3741
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3751
 msgid "Generate User Account Automatically or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3745
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3755
 msgid "Whether to prevent customers from creating new accounts on the account page."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3749
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3759
 msgid "Enable Registration for Booking"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3769
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3779
 msgid "User Account"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3773
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3783
 msgid "Generate Username from Customer Email or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3777
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3787
 msgid "Generate Secure Password or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3787
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3797
 msgid "Social Login Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3800
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3810
 msgid "Destination Search Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3804
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3814
 msgid "Activities Search Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3808
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3818
 msgid "Trip Types Search Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3812
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3822
 msgid "Trip Tags Search Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3816
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3826
 msgid "Difficulties Search Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3820
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3830
 msgid "Duration Search Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3824
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3834
 msgid "Budget Search Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3828
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3838
 msgid "Fixed Starting Date Search Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3832
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3842
 msgid "Filter By Section Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3838
+#: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3848
 msgid "Optimized Loading Enabled or Not"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:245
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:244
 msgid "Sorry, you are not allowed to delete packages for this trip."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:253
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:252
 msgid "Trip not found."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:298
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:297
 #, php-format
 msgid "Failed to delete the package. %s"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:363
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:362
 #, php-format
 msgid "%1$sTrip Code%2$s is required."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:379
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:378
 #, php-format
 msgid "%1$sDuration%2$s must be a number."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:387
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:386
 #, php-format
 msgid "%1$sTrip Duration Night%2$s must be greater than or equal to 0."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:398
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:397
 #, php-format
 msgid "%1$sCut-off Time Period%2$s must fall within the range of 0 to 24 hours."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:400
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:399
 #, php-format
 msgid "%1$sCut-off Time Period%2$s must be greater than or equal to 0."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:412
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:411
 #, php-format
 msgid "%1$sCut-off Time Unit%2$s must be either 'days' or 'hours'."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:424
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:423
 #, php-format
 msgid "%1$sMinimum Age Limit%2$s must be greater than or equal to 0."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:432
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:431
 #, php-format
 msgid "%1$sMaximum Age Limit%2$s must be greater than 0."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:445
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:444
 #, php-format
 msgid "%1$sMinimum Participants%2$s must be greater than or equal to 0."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:454
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:453
 #, php-format
 msgid "%1$sMaximum Participants%2$s must be greater than 0."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:750
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:749
 #, php-format
 msgid "must be greater than or equal to 0 in '%s Package'."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:753
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:752
 #, php-format
 msgid "The %1$s%3$s%2$s category in the %1$s%4$s%2$s Package requires a valid price."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:759
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:758
 #, php-format
 msgid "The %1$s%3$s%2$s category in the %1$s%4$s%2$s Package requires a valid sale price."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:765
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:764
 #, php-format
 msgid "%1$sSale price%2$s must be less than %1$sRegular price%2$s in '%3$s Package'."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:775
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:774
 #, php-format
 msgid "%1$sTotal Seats%2$s %3$s"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:780
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:779
 #, php-format
 msgid "%1$sPrice%2$s %3$s"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:785
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:784
 #, php-format
 msgid "%1$sSale Price%2$s %3$s"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:790
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:789
 #, php-format
 msgid "%1$sMinimum Pax%2$s %3$s"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1124
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1122
 #: public/class-wp-travel-engine-template-hooks.php:932
 msgid "Per"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1318
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1317
 #, php-format
 msgid "Per %s"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1373
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1372
 msgid "Trip code."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1377
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1376
 msgid "Trip duration."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1381
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1380
 msgid "Duration period."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1385
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1384
 msgid "Duration unit."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1390
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1389
 msgid "Duration nights."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1396
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1395
 msgid "Trip cut off time."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1401
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1400
 msgid "Cut off enabled."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1407
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1406
 msgid "Cut off period."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1411
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1410
 msgid "Cut off unit."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1418
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1417
 msgid "Trip age."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1422
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1421
 msgid "Age enabled."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1428
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1427
 msgid "Minimum age."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1432
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1431
 msgid "Maximum age."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1438
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1437
 msgid "Minimum and maximum participants for booking this trip."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1448
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1447
 msgid "Minimum pax."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1452
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1451
 msgid "Maximum pax."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1458
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1457
 msgid "Trip overview title."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1463
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1462
 msgid "Trip overview."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1467
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1466
 msgid "Trip highlights title."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1472
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1471
 msgid "Trip highlights."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1479
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1478
 msgid "Trip itinerary title."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1484
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1483
 msgid "Trip itineraries."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1490
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1489
 msgid "Itinerary title."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1494
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1493
 msgid "Itinerary label."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1499
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1498
 msgid "Itinerary content."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1503
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1502
 msgid "Itinerary period."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1507
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1506
 msgid "Itinerary period unit."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1512
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1511
 msgid "Itinerary sleep mode."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1516
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1515
 msgid "Sleep mode field."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1520
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1519
 msgid "Sleep mode description."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1526
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1525
 msgid "Itinerary meals included."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1533
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1532
 msgid "Itinerary images."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1539
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1538
 msgid "Image ID."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1543
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1542
 msgid "Image alt."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1547
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1659
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1713
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1546
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1658
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1712
 msgid "Image URL."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1554
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1553
 msgid "Itinerary overnights."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1558
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1557
 msgid "Overnight location."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1562
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1561
 msgid "Overnight altitude."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1571
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1570
 msgid "Trip cost title."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1576
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1575
 msgid "Trip cost includes title."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1581
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1580
 msgid "Trip cost includes."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1588
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1587
 msgid "Trip cost excludes title."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1593
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1592
 msgid "Trip cost excludes."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1600
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1599
 msgid "Trip info title."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1605
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1604
 msgid "Trip facts."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1611
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1610
 msgid "Facts ID."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1615
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1614
 msgid "Facts label."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1619
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1618
 msgid "Facts content."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1623
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1622
 msgid "Facts type."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1628
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1627
 msgid "Facts options."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1639
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1638
 msgid "Trip gallery enabled."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1645
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1644
 msgid "Trip image gallery."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1651
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1705
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1650
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1704
 msgid "Attachment ID."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1655
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1709
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1654
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1708
 msgid "Image alt text."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1667
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1666
 msgid "Trip video gallery enabled."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1673
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1672
 msgid "Trip video gallery."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1679
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1678
 msgid "Video URL."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1683
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1682
 msgid "Video thumbnail."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1690
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1689
 msgid "Trip map title."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1695
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1694
 msgid "Trip map."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1699
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1698
 msgid "Map images."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1720
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1719
 msgid "Map iframe."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1726
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1725
 msgid "Trip FAQs title."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1731
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1730
 msgid "Trip FAQs."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1737
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1736
 msgid "Question."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1741
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1740
 msgid "Answer."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1748
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1747
 msgid "Trip packages."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1755
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1754
 msgid "Package ID."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1759
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1758
 msgid "Package name."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1763
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1762
 msgid "Package description."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1767
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1766
 msgid "Is package primary."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1772
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1771
 msgid "Package changed."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1777
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1776
 msgid "Package traveler categories."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1783
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1782
 msgid "Traveler category ID."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1787
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1786
 msgid "Traveler category label."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1791
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1790
 msgid "Traveler category price."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1795
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1794
 msgid "Traveler category pricing type."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1799
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1798
 msgid "Pricing type value."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1803
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1802
 msgid "Pricing type label."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1809
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1808
 msgid "Traveler category sale price."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1813
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1812
 msgid "Traveler category has sale."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1818
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1817
 msgid "Traveler category has group pricing."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1823
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1822
 msgid "Traveler category group pricing."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1829
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1828
 msgid "Group pricing from."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1833
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1832
 msgid "Group pricing to."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1837
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1836
 msgid "Group pricing price."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1844
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1843
 msgid "Traveler category minimum pax."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1848
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1847
 msgid "Traveler category maximum pax."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1855
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1854
 msgid "Package time slots enabled."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1860
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1859
 msgid "Package time slots."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1864
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1863
 msgid "Monday time slots."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1868
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1867
 msgid "Tuesday time slots."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1872
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1871
 msgid "Wednesday time slots."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1876
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1875
 msgid "Thursday time slots."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1880
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1879
 msgid "Friday time slots."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1884
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1883
 msgid "Saturday time slots."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1888
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1887
 msgid "Sunday time slots."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1894
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1893
 msgid "Package weekly time enabled."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1899
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1898
 msgid "Monday time enabled."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1904
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1903
 msgid "Tuesday time enabled."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1909
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1908
 msgid "Wednesday time enabled."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1914
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1913
 msgid "Thursday time enabled."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1919
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1918
 msgid "Friday time enabled."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1924
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1923
 msgid "Saturday time enabled."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1929
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1928
 msgid "Sunday time enabled."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1936
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1935
 msgid "Package dates."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1942
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1941
 msgid "Package start date."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1946
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1945
 msgid "Package times."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1952
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1951
 msgid "Package time from."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1956
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1955
 msgid "Package time to."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1963
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1962
 msgid "Package enable repeat."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1968
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1967
 msgid "Package repeat."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1972
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1971
 msgid "Package repeated frequency."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1976
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1975
 msgid "Package repeated weekdays."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1983
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1982
 msgid "Package repeated months."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1990
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1989
 msgid "Package repeated until."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1994
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1993
 msgid "Package repeated limit."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:2000
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:1999
 msgid "Package total seats."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:2004
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:2003
 msgid "Package availability label."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:2014
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:2013
 msgid "Trip custom tabs."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:2020
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:2019
 msgid "Custom tab title."
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:2024
+#: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:2023
 msgid "Custom tab content."
 msgstr ""
 
@@ -11170,7 +11186,7 @@ msgid "Traveler"
 msgstr ""
 
 #: includes/classes/Core/Models/Post/Trip.php:444
-#: includes/helpers/helpers.php:773
+#: includes/helpers/helpers.php:798
 #, php-format
 msgctxt "trip duration nights"
 msgid "%s Night"
@@ -11179,7 +11195,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: includes/classes/Core/Models/Post/Trip.php:793
-#: includes/helpers/helpers.php:2824
+#: includes/helpers/helpers.php:2849
 #: dist/blocks/editor/editor.js:2
 #, php-format,js-format
 msgid "%d Hour"
@@ -11188,7 +11204,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: includes/classes/Core/Models/Post/Trip.php:799
-#: includes/helpers/helpers.php:2829
+#: includes/helpers/helpers.php:2854
 #: dist/blocks/editor/editor.js:2
 #, php-format,js-format
 msgid "%d Day"
@@ -11408,7 +11424,7 @@ msgid "Sorry, you may not have selected the number of travellers for this trip. 
 msgstr ""
 
 #: includes/classes/Core/Shortcodes/TripsList.php:45
-#: includes/classes/Modules/TripSearch.php:416
+#: includes/classes/Modules/TripSearch.php:415
 #, php-format
 msgid "Layout not found: %s"
 msgstr ""
@@ -11470,67 +11486,67 @@ msgstr ""
 msgid "<strong>Heads up!</strong> The versions of the following plugins you're running haven't been tested with WP Travel Engine %s."
 msgstr ""
 
-#: includes/classes/Email/BookingEmail.php:195
+#: includes/classes/Email/BookingEmail.php:196
 #, php-format
 msgid "Your booking for %1$s is confirmed – %2$s"
 msgstr ""
 
-#: includes/classes/Email/BookingEmail.php:196
+#: includes/classes/Email/BookingEmail.php:197
 #, php-format
 msgid "New Trip is Booked - %1$s - %2$s"
 msgstr ""
 
-#: includes/classes/Email/BookingEmail.php:199
+#: includes/classes/Email/BookingEmail.php:200
 #, php-format
 msgid "Payment Received for %1$s – %2$s"
 msgstr ""
 
-#: includes/classes/Email/BookingEmail.php:311
-#: includes/classes/Email/BookingEmail.php:317
+#: includes/classes/Email/BookingEmail.php:313
+#: includes/classes/Email/BookingEmail.php:319
 msgid "Your Trip is Booked."
 msgstr ""
 
-#: includes/classes/Email/BookingEmail.php:313
+#: includes/classes/Email/BookingEmail.php:315
 #, php-format
 msgid "Your trip <strong>%1$s</strong> is booked by <strong>%2$s</strong> on <strong>%3$s</strong>.<br>Here's the booked trip details:"
 msgstr ""
 
-#: includes/classes/Email/BookingEmail.php:314
-#: includes/classes/Email/BookingEmail.php:328
+#: includes/classes/Email/BookingEmail.php:316
+#: includes/classes/Email/BookingEmail.php:330
 #, php-format
 msgid "Regards, <br>%1$s"
 msgstr ""
 
-#: includes/classes/Email/BookingEmail.php:318
-#: includes/classes/Email/BookingEmail.php:332
+#: includes/classes/Email/BookingEmail.php:320
+#: includes/classes/Email/BookingEmail.php:334
 msgid "Dear {customer_first_name},"
 msgstr ""
 
-#: includes/classes/Email/BookingEmail.php:319
+#: includes/classes/Email/BookingEmail.php:321
 #, php-format
 msgid "Thank you for booking <strong>%1$s</strong> with us! <br> Your trip has been successfully booked on <strong>%2$s</strong> which starts on <strong>%3$s</strong>.<br> We're excited to have you on board.<br>Here's a quick summary of your booking:"
 msgstr ""
 
-#: includes/classes/Email/BookingEmail.php:320
+#: includes/classes/Email/BookingEmail.php:322
 #, php-format
 msgid "If you have any questions, feel free to reach out. <br>Safe travels, <br>%1$s Team"
 msgstr ""
 
-#: includes/classes/Email/BookingEmail.php:325
+#: includes/classes/Email/BookingEmail.php:327
 msgid "New Payment Received."
 msgstr ""
 
-#: includes/classes/Email/BookingEmail.php:327
+#: includes/classes/Email/BookingEmail.php:329
 #, php-format
 msgid "The payment for the trip <strong>%1$s</strong>, booked by <strong>%2$s</strong> on <strong>%3$s</strong>, has been successfully received.<br>Here are the booked trip details:"
 msgstr ""
 
-#: includes/classes/Email/BookingEmail.php:333
+#: includes/classes/Email/BookingEmail.php:335
 #, php-format
 msgid "We've received your payment for the trip <strong>%1$s</strong>. Thank you!<br>Here's a summary of your payment:"
 msgstr ""
 
-#: includes/classes/Email/BookingEmail.php:334
+#: includes/classes/Email/BookingEmail.php:336
 #, php-format
 msgid "We look forward to making your journey unforgettable!<br>Warm regards,<br>%1$s Team"
 msgstr ""
@@ -11595,9 +11611,9 @@ msgid "Enable Line Graph"
 msgstr ""
 
 #: includes/classes/Filters/schemas/advanced-itinerary.php:57
-#: dist/admin/exports.js:3892
-#: dist/admin/global-settings.js:3772
-#: dist/admin/trip-edit.js:3906
+#: dist/admin/exports.js:3963
+#: dist/admin/global-settings.js:3870
+#: dist/admin/trip-edit.js:3977
 msgid "Background Image"
 msgstr ""
 
@@ -11848,9 +11864,9 @@ msgid "User Consent Required or Not"
 msgstr ""
 
 #: includes/classes/Filters/schemas/itinerary-downloader.php:73
-#: dist/admin/exports.js:3667
-#: dist/admin/global-settings.js:3547
-#: dist/admin/trip-edit.js:3681
+#: dist/admin/exports.js:3680
+#: dist/admin/global-settings.js:3587
+#: dist/admin/trip-edit.js:3694
 msgid "Email Content"
 msgstr ""
 
@@ -12997,10 +13013,6 @@ msgstr ""
 
 #: includes/classes/Helpers/Countries.php:177
 msgid "Nauru"
-msgstr ""
-
-#: includes/classes/Helpers/Countries.php:178
-msgid "Nepal"
 msgstr ""
 
 #: includes/classes/Helpers/Countries.php:179
@@ -14385,16 +14397,16 @@ msgid "Automatic Cleanup"
 msgstr ""
 
 #: includes/classes/Logger/Admin/LogsPage.php:583
-#: dist/admin/exports.js:2074
-#: dist/admin/global-settings.js:2515
-#: dist/admin/trip-edit.js:2074
+#: dist/admin/exports.js:2075
+#: dist/admin/global-settings.js:2516
+#: dist/admin/trip-edit.js:2075
 msgid "Enabled"
 msgstr ""
 
 #: includes/classes/Logger/Admin/LogsPage.php:584
-#: dist/admin/exports.js:2074
-#: dist/admin/global-settings.js:2515
-#: dist/admin/trip-edit.js:2074
+#: dist/admin/exports.js:2075
+#: dist/admin/global-settings.js:2516
+#: dist/admin/trip-edit.js:2075
 msgid "Disabled"
 msgstr ""
 
@@ -14419,8 +14431,8 @@ msgid "How long to cache log file lists in minutes (1-2880 minutes)."
 msgstr ""
 
 #: includes/classes/Logger/Admin/LogsPage.php:624
-#: dist/admin/exports.js:3892
-#: dist/admin/global-settings.js:3772
+#: dist/admin/exports.js:3963
+#: dist/admin/global-settings.js:3870
 msgid "Save Settings"
 msgstr ""
 
@@ -14534,7 +14546,7 @@ msgstr ""
 
 #: includes/classes/Modules/CouponCode/views/checkout-coupon-form.php:32
 #: includes/classes/Modules/CouponCode/views/coupon-metabox-content.php:82
-#: includes/classes/Plugin.php:1847
+#: includes/classes/Plugin.php:1809
 msgid "Coupon Code"
 msgstr ""
 
@@ -14847,7 +14859,7 @@ msgstr ""
 msgid "{trip_code} - Trip Code"
 msgstr ""
 
-#: includes/classes/Modules/TripSearch.php:458
+#: includes/classes/Modules/TripSearch.php:457
 #, php-format
 msgctxt "number of trips"
 msgid "%s Trip Found"
@@ -14855,23 +14867,23 @@ msgid_plural "%s Trips found"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/classes/Modules/TripSearch.php:761
+#: includes/classes/Modules/TripSearch.php:760
 msgid "Tags"
 msgstr ""
 
-#: includes/classes/Modules/TripSearch.php:766
+#: includes/classes/Modules/TripSearch.php:765
 msgid "Difficulties"
 msgstr ""
 
-#: includes/classes/Modules/TripSearch.php:852
+#: includes/classes/Modules/TripSearch.php:851
 #: dist/bundle/trip-booking-modal.bundle.js:2
 #: dist/public/components/trip-booking-modal.js:2
 #: dist/public/exports.js:2
 msgid "Show More"
 msgstr ""
 
-#: includes/classes/Modules/TripSearch.php:956
-#: includes/classes/Modules/TripSearch.php:959
+#: includes/classes/Modules/TripSearch.php:955
+#: includes/classes/Modules/TripSearch.php:958
 #, php-format
 msgid "%1$s Days"
 msgstr ""
@@ -14916,46 +14928,46 @@ msgstr ""
 msgid "Invalid IPN"
 msgstr ""
 
-#: includes/classes/Plugin.php:268
+#: includes/classes/Plugin.php:270
 msgid "Notice: Please be aware that you are responsible for any mistakes, payment issues, or customer concerns that may arise when editing the booking summary. Double-check your changes, update payment settings, and contact support if you need assistance."
 msgstr ""
 
 #. translators: 1: opening anchor tag, 2: closing anchor tag
-#: includes/classes/Plugin.php:307
+#: includes/classes/Plugin.php:309
 #, php-format
 msgid "WP Travel Engine: You are using the legacy checkout page. Please change it to the new version. From version 6.8.0, the legacy checkout page will be discontinued. %1$sClick here to set up your checkout page.%2$s"
 msgstr ""
 
-#: includes/classes/Plugin.php:678
+#: includes/classes/Plugin.php:666
 msgid "WTE-Customer"
 msgstr ""
 
-#: includes/classes/Plugin.php:814
+#: includes/classes/Plugin.php:802
 #, php-format
 msgid "Discount (%s)"
 msgstr ""
 
-#: includes/classes/Plugin.php:1735
+#: includes/classes/Plugin.php:1697
 msgid "Extra services"
 msgstr ""
 
-#: includes/classes/Plugin.php:1744
+#: includes/classes/Plugin.php:1706
 msgid "User History Addon E-mail Tags"
 msgstr ""
 
-#: includes/classes/Plugin.php:1749
+#: includes/classes/Plugin.php:1711
 msgid "Show buyer's browsing history before making the booking"
 msgstr ""
 
-#: includes/classes/Plugin.php:1805
+#: includes/classes/Plugin.php:1767
 msgid "Every Minute"
 msgstr ""
 
-#: includes/classes/Plugin.php:1848
+#: includes/classes/Plugin.php:1810
 msgid "Advanced Search"
 msgstr ""
 
-#: includes/classes/Plugin.php:1860
+#: includes/classes/Plugin.php:1822
 #, php-format
 msgid "%1$s has been automatically deactivated, the feature providing by the plugin is now available in the WP Travel Engine Core."
 msgstr ""
@@ -14973,9 +14985,9 @@ msgstr ""
 
 #: includes/classes/Utilities/FormBuilder/FieldTypes.php:21
 #: includes/lib/wte-form-framework/class-wte-form-field.php:89
-#: dist/admin/exports.js:3667
-#: dist/admin/global-settings.js:3547
-#: dist/admin/trip-edit.js:3681
+#: dist/admin/exports.js:3641
+#: dist/admin/global-settings.js:3548
+#: dist/admin/trip-edit.js:3655
 msgid "Number"
 msgstr ""
 
@@ -14986,17 +14998,17 @@ msgstr ""
 
 #: includes/classes/Utilities/FormBuilder/FieldTypes.php:29
 #: includes/lib/wte-form-framework/class-wte-form-field.php:97
-#: dist/admin/exports.js:3667
-#: dist/admin/global-settings.js:3547
-#: dist/admin/trip-edit.js:3681
+#: dist/admin/exports.js:3641
+#: dist/admin/global-settings.js:3548
+#: dist/admin/trip-edit.js:3655
 msgid "Select"
 msgstr ""
 
 #: includes/classes/Utilities/FormBuilder/FieldTypes.php:33
 #: includes/lib/wte-form-framework/class-wte-form-field.php:101
-#: dist/admin/exports.js:3667
-#: dist/admin/global-settings.js:3547
-#: dist/admin/trip-edit.js:3681
+#: dist/admin/exports.js:3641
+#: dist/admin/global-settings.js:3548
+#: dist/admin/trip-edit.js:3655
 msgid "Textarea"
 msgstr ""
 
@@ -15172,7 +15184,7 @@ msgid "Price From"
 msgstr ""
 
 #: includes/frontend/trip-meta/trip-meta-parts/trip-price-bak.php:84
-#: public/class-wp-travel-engine-public.php:423
+#: public/class-wp-travel-engine-public.php:415
 msgid "Pick a date"
 msgstr ""
 
@@ -15199,7 +15211,7 @@ msgstr ""
 #: includes/frontend/trip-meta/trip-meta-parts/trip-price.php:108
 #: includes/frontend/trip-meta/trip-meta-parts/trip-price.php:113
 #: includes/helpers/functions.php:255
-#: includes/helpers/helpers.php:3009
+#: includes/helpers/helpers.php:3034
 #: public/class-wp-travel-engine-template-hooks.php:954
 #: public/class-wp-travel-engine-template-hooks.php:969
 msgid "Person"
@@ -15240,7 +15252,7 @@ msgid "Need help with booking?"
 msgstr ""
 
 #: includes/frontend/trip-meta/trip-meta-parts/trip-tabs.php:23
-#: public/class-wp-travel-engine-public.php:445
+#: public/class-wp-travel-engine-public.php:437
 msgid " Day"
 msgid_plural " Days"
 msgstr[0] ""
@@ -15266,33 +15278,33 @@ msgstr ""
 
 #: includes/helpers/functions.php:37
 #: includes/helpers/functions.php:38
-#: includes/helpers/functions.php:2253
-#: includes/helpers/functions.php:2254
+#: includes/helpers/functions.php:2261
+#: includes/helpers/functions.php:2262
 msgid "Captured"
 msgstr ""
 
 #: includes/helpers/functions.php:41
-#: includes/helpers/functions.php:2259
+#: includes/helpers/functions.php:2267
 msgid "Settlement"
 msgstr ""
 
 #: includes/helpers/functions.php:42
-#: includes/helpers/functions.php:2265
+#: includes/helpers/functions.php:2273
 msgid "Success"
 msgstr ""
 
 #: includes/helpers/functions.php:92
-#: includes/helpers/functions.php:2261
+#: includes/helpers/functions.php:2269
 msgid "Denied"
 msgstr ""
 
 #: includes/helpers/functions.php:93
-#: includes/helpers/functions.php:2262
+#: includes/helpers/functions.php:2270
 msgid "Expired"
 msgstr ""
 
 #: includes/helpers/functions.php:94
-#: includes/helpers/functions.php:2264
+#: includes/helpers/functions.php:2272
 msgid "Revoked"
 msgstr ""
 
@@ -15349,48 +15361,48 @@ msgstr ""
 msgid "Total Payable Now"
 msgstr ""
 
-#: includes/helpers/functions.php:2143
+#: includes/helpers/functions.php:2151
 msgid "Recently Added"
 msgstr ""
 
-#: includes/helpers/functions.php:2144
+#: includes/helpers/functions.php:2152
 msgid "Top Rated"
 msgstr ""
 
-#: includes/helpers/functions.php:2145
+#: includes/helpers/functions.php:2153
 msgid "Lowest Price First"
 msgstr ""
 
-#: includes/helpers/functions.php:2146
+#: includes/helpers/functions.php:2154
 msgid "Highest Price First"
 msgstr ""
 
-#: includes/helpers/functions.php:2147
+#: includes/helpers/functions.php:2155
 msgid "Shortest Duration First"
 msgstr ""
 
-#: includes/helpers/functions.php:2148
+#: includes/helpers/functions.php:2156
 msgid "Longest Duration First"
 msgstr ""
 
-#: includes/helpers/functions.php:2149
+#: includes/helpers/functions.php:2157
 msgid "Alphabetical - A to Z"
 msgstr ""
 
-#: includes/helpers/functions.php:2150
+#: includes/helpers/functions.php:2158
 msgid "Alphabetical - Z to A"
 msgstr ""
 
-#: includes/helpers/functions.php:2192
+#: includes/helpers/functions.php:2200
 msgid "Site Info"
 msgstr ""
 
-#: includes/helpers/functions.php:2200
+#: includes/helpers/functions.php:2208
 msgid "WordPress Configuration"
 msgstr ""
 
-#: includes/helpers/functions.php:2296
-#: includes/helpers/helpers.php:2391
+#: includes/helpers/functions.php:2304
+#: includes/helpers/helpers.php:2416
 msgid "Booked"
 msgstr ""
 
@@ -15415,18 +15427,18 @@ msgid_plural "Number of pax in %1$s"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/helpers/helpers.php:95
-#: includes/helpers/helpers.php:107
+#: includes/helpers/helpers.php:114
+#: includes/helpers/helpers.php:126
 #: dist/blocks/editor/editor.js:2
 #, php-format,js-format
 msgid "%s Off"
 msgstr ""
 
-#: includes/helpers/helpers.php:457
+#: includes/helpers/helpers.php:482
 msgid "Private"
 msgstr ""
 
-#: includes/helpers/helpers.php:773
+#: includes/helpers/helpers.php:798
 #, php-format
 msgctxt "trip duration days"
 msgid "%s Day"
@@ -15435,61 +15447,161 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s template
-#: includes/helpers/helpers.php:902
+#: includes/helpers/helpers.php:927
 #, php-format
 msgid "%s does not exist."
 msgstr ""
 
-#: includes/helpers/helpers.php:920
+#: includes/helpers/helpers.php:945
 msgid "action_args should not be overwritten when calling wte_get_template."
 msgstr ""
 
-#: includes/helpers/helpers.php:1231
+#: includes/helpers/helpers.php:1256
 #: includes/templates/script-templates/tmpl-wte-package-single.php:21
-#: dist/admin/trip-edit.js:4625
+#: dist/admin/trip-edit.js:4769
 #: dist/blocks/editor/editor.js:2
 msgid "Dates"
 msgstr ""
 
 #. translators: %s: human-readable time difference
-#: includes/helpers/helpers.php:2221
+#: includes/helpers/helpers.php:2246
 #, php-format
 msgctxt "%s = human-readable time difference"
 msgid "%s ago"
 msgstr ""
 
-#: includes/helpers/helpers.php:2329
+#: includes/helpers/helpers.php:2354
 msgid "Custom Tab"
 msgstr ""
 
-#: includes/helpers/helpers.php:2358
-#: includes/helpers/helpers.php:2359
+#: includes/helpers/helpers.php:2383
+#: includes/helpers/helpers.php:2384
 msgid "Custom Tabs"
 msgstr ""
 
-#: includes/helpers/helpers.php:2399
+#: includes/helpers/helpers.php:2424
 msgid "Canceled"
 msgstr ""
 
-#: includes/helpers/helpers.php:2558
+#: includes/helpers/helpers.php:2583
 msgid "Minimum Age from Trip Settings"
 msgstr ""
 
-#: includes/helpers/helpers.php:2566
+#: includes/helpers/helpers.php:2591
 msgid "Maximum Age from Trip Settings"
 msgstr ""
 
-#: includes/helpers/helpers.php:2574
+#: includes/helpers/helpers.php:2599
 msgid "Minimum and Maximum praticipants from Trip Settings"
 msgstr ""
 
-#: includes/helpers/helpers.php:2582
+#: includes/helpers/helpers.php:2607
 msgid "Trip Difficulty"
 msgstr ""
 
-#: includes/helpers/helpers.php:2596
+#: includes/helpers/helpers.php:2621
 #, php-format
 msgid "List of %s"
+msgstr ""
+
+#: includes/helpers/helpers.php:3195
+msgid "The customer's first name."
+msgstr ""
+
+#: includes/helpers/helpers.php:3196
+msgid "The customer's full name."
+msgstr ""
+
+#: includes/helpers/helpers.php:3197
+msgid "The customer's last name."
+msgstr ""
+
+#: includes/helpers/helpers.php:3198
+msgid "The customer's email address."
+msgstr ""
+
+#: includes/helpers/helpers.php:3200
+msgid "The site admin email address."
+msgstr ""
+
+#: includes/helpers/helpers.php:3205
+msgid "The name of the trip booked."
+msgstr ""
+
+#: includes/helpers/helpers.php:3207
+msgid "The trip code for each booked trip"
+msgstr ""
+
+#: includes/helpers/helpers.php:3214
+msgid "The trip booking & Payment details."
+msgstr ""
+
+#: includes/helpers/helpers.php:3215
+msgid "The trip booking summary."
+msgstr ""
+
+#: includes/helpers/helpers.php:3216
+msgid "The trip payment details."
+msgstr ""
+
+#: includes/helpers/helpers.php:3217
+msgid "The date and time when the trip was booked."
+msgstr ""
+
+#: includes/helpers/helpers.php:3218
+msgid "The start date of the trip."
+msgstr ""
+
+#: includes/helpers/helpers.php:3219
+msgid "The end date of the trip."
+msgstr ""
+
+#: includes/helpers/helpers.php:3220
+msgid "The total number of travelers."
+msgstr ""
+
+#: includes/helpers/helpers.php:3221
+msgid "The total price of the trip."
+msgstr ""
+
+#: includes/helpers/helpers.php:3222
+msgid "The amount paid by the customer."
+msgstr ""
+
+#: includes/helpers/helpers.php:3223
+msgid "The due amount for the trip."
+msgstr ""
+
+#: includes/helpers/helpers.php:3224
+msgid "The payment ID of trip."
+msgstr ""
+
+#: includes/helpers/helpers.php:3226
+msgid "The billing details filled in new checkout template."
+msgstr ""
+
+#: includes/helpers/helpers.php:3227
+msgid "The traveler's details filled in new checkout template."
+msgstr ""
+
+#: includes/helpers/helpers.php:3228
+msgid "The emergency contact details filled in new checkout template."
+msgstr ""
+
+#: includes/helpers/helpers.php:3229
+msgid "The additional note filled in new checkout template."
+msgstr ""
+
+#: includes/helpers/helpers.php:3230
+msgid "Banks Accounts Details. This tag will be replaced with the bank details and sent to the customer receipt email when Bank Transfer method has been chosen by the customer."
+msgstr ""
+
+#: includes/helpers/helpers.php:3232
+msgid "The extra fee for the trip."
+msgstr ""
+
+#: includes/helpers/helpers.php:3246
+msgid "The link to reset the password."
 msgstr ""
 
 #: includes/helpers/privacy-functions.php:41
@@ -16548,12 +16660,12 @@ msgid "Save and Close"
 msgstr ""
 
 #: includes/templates/script-templates/trip-edit/tab-pricing/dates/tmpl-wte-package-dates.php:33
-#: dist/admin/trip-edit.js:4551
+#: dist/admin/trip-edit.js:4695
 msgid "Enable Hours"
 msgstr ""
 
 #: includes/templates/script-templates/trip-edit/tab-pricing/tmpl-wte-package-general.php:31
-#: dist/admin/trip-edit.js:4625
+#: dist/admin/trip-edit.js:4769
 msgid "General Package Settings"
 msgstr ""
 
@@ -16987,76 +17099,76 @@ msgstr ""
 msgid "Number of Posts:"
 msgstr ""
 
-#: public/class-wp-travel-engine-public.php:95
+#: public/class-wp-travel-engine-public.php:93
 msgid "Already added to cart!"
 msgstr ""
 
-#: public/class-wp-travel-engine-public.php:99
+#: public/class-wp-travel-engine-public.php:97
 msgid "Added to cart successfully!"
 msgstr ""
 
-#: public/class-wp-travel-engine-public.php:102
+#: public/class-wp-travel-engine-public.php:100
 msgid "Unable to add to cart!"
 msgstr ""
 
-#: public/class-wp-travel-engine-public.php:126
+#: public/class-wp-travel-engine-public.php:124
 msgid "Select Payment Method"
 msgstr ""
 
-#: public/class-wp-travel-engine-public.php:137
+#: public/class-wp-travel-engine-public.php:135
 msgid "Please choose a gateway"
 msgstr ""
 
-#: public/class-wp-travel-engine-public.php:189
+#: public/class-wp-travel-engine-public.php:187
 msgid "Wishlist"
 msgstr ""
 
-#: public/class-wp-travel-engine-public.php:397
+#: public/class-wp-travel-engine-public.php:389
 msgid "Trips:"
 msgstr ""
 
-#: public/class-wp-travel-engine-public.php:419
+#: public/class-wp-travel-engine-public.php:411
 msgid "Start Date: "
 msgstr ""
 
-#: public/class-wp-travel-engine-public.php:425
+#: public/class-wp-travel-engine-public.php:417
 msgid "Trip Price: "
 msgstr ""
 
-#: public/class-wp-travel-engine-public.php:438
+#: public/class-wp-travel-engine-public.php:430
 msgid "Duration: "
 msgstr ""
 
-#: public/class-wp-travel-engine-public.php:443
+#: public/class-wp-travel-engine-public.php:435
 msgid " Days"
 msgstr ""
 
-#: public/class-wp-travel-engine-public.php:452
+#: public/class-wp-travel-engine-public.php:444
 msgid "Number of Travellers: "
 msgstr ""
 
-#: public/class-wp-travel-engine-public.php:458
+#: public/class-wp-travel-engine-public.php:450
 msgid "Total: "
 msgstr ""
 
-#: public/class-wp-travel-engine-public.php:479
+#: public/class-wp-travel-engine-public.php:471
 msgid "Update cart"
 msgstr ""
 
-#: public/class-wp-travel-engine-public.php:689
+#: public/class-wp-travel-engine-public.php:685
 msgid "Invalid Package."
 msgstr ""
 
-#: public/class-wp-travel-engine-public.php:702
+#: public/class-wp-travel-engine-public.php:698
 msgid "Number of pax is not eligible for booking. Number of pax should be at least 1 for the package."
 msgstr ""
 
-#: public/class-wp-travel-engine-public.php:710
+#: public/class-wp-travel-engine-public.php:706
 #, php-format
 msgid "Number of pax (%1$s) is not eligible for booking. Number of %2$s should be at least %3$s for the package."
 msgstr ""
 
-#: public/class-wp-travel-engine-public.php:717
+#: public/class-wp-travel-engine-public.php:713
 #, php-format
 msgid "Number of pax (%1$s) is not eligible for booking. Number of %2$s should be at most %3$s for the package."
 msgstr ""

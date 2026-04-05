@@ -438,7 +438,7 @@ class PluginSettings extends BaseSetting {
 	 */
 	protected function get_admin_booking_notify_template() {
 
-		$template = parent::get( 'email.booking_notification_template_admin' ) ?? \WTE_Booking_Emails::get_template_content( 'order', 'template-emails/booking/notification.php', 'admin' );
+		$template = parent::get( 'email.booking_notification_template_admin' ) ?? wte_get_template_html( 'template-emails/booking/notification.php', array( 'sent_to' => 'admin' ) );
 
 		if ( is_null( parent::get( 'email.booking_notification_template_admin' ) ) ) {
 			$this->set( 'email.booking_notification_template_admin', $template );
@@ -472,7 +472,7 @@ class PluginSettings extends BaseSetting {
 	 */
 	protected function get_admin_payment_notify_template() {
 
-		$template = parent::get( 'email.sales_wpeditor' ) ?? \WTE_Booking_Emails::get_template_content( 'order_confirmation', 'template-emails/booking/confirmation.php', 'admin' );
+		$template = parent::get( 'email.sales_wpeditor' ) ?? wte_get_template_html( 'template-emails/booking/confirmation.php', array( 'sent_to' => 'admin' ) );
 
 		if ( is_null( parent::get( 'email.sales_wpeditor' ) ) ) {
 			$this->set( 'email.sales_wpeditor', $template );
@@ -499,20 +499,20 @@ class PluginSettings extends BaseSetting {
 	}
 
 	/**
-	 * Get the customer booking notification subject.
+	 * Get the customer booking notification template.
 	 *
 	 * @return string
 	 * @since 6.2.0
 	 */
 	protected function get_customer_booking_notify_template() {
 
-		$subject = parent::get( 'email.booking_notification_template_customer' ) ?? \WTE_Booking_Emails::get_template_content( 'order', 'template-emails/booking/notification.php', 'customer' );
+		$template = parent::get( 'email.booking_notification_template_customer' ) ?? wte_get_template_html( 'template-emails/booking/notification.php', array( 'sent_to' => 'customer' ) );
 
 		if ( is_null( parent::get( 'email.booking_notification_template_customer' ) ) ) {
-			$this->set( 'email.booking_notification_template_customer', $subject );
+			$this->set( 'email.booking_notification_template_customer', $template );
 		}
 
-		return $subject;
+		return $template;
 	}
 
 	/**
@@ -540,7 +540,7 @@ class PluginSettings extends BaseSetting {
 	 */
 	protected function get_customer_purchase_notify_template() {
 
-		$template = parent::get( 'email.purchase_wpeditor' ) ?? \WTE_Booking_Emails::get_template_content( 'order_confirmation', 'template-emails/booking/confirmation.php', 'customer' );
+		$template = parent::get( 'email.purchase_wpeditor' ) ?? wte_get_template_html( 'template-emails/booking/confirmation.php', array( 'sent_to' => 'customer' ) );
 
 		if ( is_null( parent::get( 'email.purchase_wpeditor' ) ) ) {
 			$this->set( 'email.purchase_wpeditor', $template );
@@ -616,7 +616,7 @@ class PluginSettings extends BaseSetting {
 	 * @return void
 	 */
 	private function set_defaults() {
-		if ( is_null( Options::get( 'wte_update_mail_template' ) ) ) {
+		if ( is_null( Options::get( 'wte_update_mail_template' ) ) && ! is_null( Options::get( 'wptravelengine_since' ) ) ) {
 			Options::update(
 				'wte_update_mail_template',
 				wptravelengine_replace(

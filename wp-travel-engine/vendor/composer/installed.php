@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'wp-travel-engine/core',
-        'pretty_version' => 'v6.7.8',
-        'version' => '6.7.8.0',
-        'reference' => 'dcf6fcf4bf40cf271b9d2d704e48b4a05261388a',
+        'pretty_version' => 'v6.7.9',
+        'version' => '6.7.9.0',
+        'reference' => '50b526a2fa4801e4d4f2d4b54d79962384d4e808',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -11,9 +11,9 @@
     ),
     'versions' => array(
         'hybridauth/hybridauth' => array(
-            'pretty_version' => 'v3.12.2',
-            'version' => '3.12.2.0',
-            'reference' => 'c6184bf92404394e918353a0ea0d35a97ac3b0fe',
+            'pretty_version' => 'v3.13.0',
+            'version' => '3.13.0.0',
+            'reference' => '5f799ed5fd35e21f06cf42310f9f6ed3f7bbe7df',
             'type' => 'library',
             'install_path' => __DIR__ . '/../hybridauth/hybridauth',
             'aliases' => array(),
@@ -29,9 +29,9 @@
             'dev_requirement' => false,
         ),
         'wp-travel-engine/core' => array(
-            'pretty_version' => 'v6.7.8',
-            'version' => '6.7.8.0',
-            'reference' => 'dcf6fcf4bf40cf271b9d2d704e48b4a05261388a',
+            'pretty_version' => 'v6.7.9',
+            'version' => '6.7.9.0',
+            'reference' => '50b526a2fa4801e4d4f2d4b54d79962384d4e808',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

@@ -185,9 +185,9 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 			}
 			$travelers_count = isset( $cart_item['travelers_count'] ) && $cart_item['travelers_count'] > 0 ? $cart_item['travelers_count'] : array_sum( $cart_item['pax'] ?? array() );
 
-			if ( ! empty( $cart_item['trip_time_range'] ) ) {
-				$trip_end_date = wptravelengine_format_trip_datetime( $cart_item['trip_time_range'][1] ?? '' );
-			}
+			// if ( ! empty( $cart_item['trip_time_range'] ) ) {
+			// $trip_end_date = wptravelengine_format_trip_datetime( $cart_item['trip_time_range'][1] ?? '' );
+			// }
 
 			$link = wptravelengine_toggled( $trip->get_meta( 'is_created_from_booking' ) ) ? '' : $trip->get_permalink();
 

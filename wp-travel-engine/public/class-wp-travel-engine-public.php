@@ -51,7 +51,6 @@ class Wp_Travel_Engine_Public {
 		self::$version     = $version;
 
 		$this->init_hooks();
-
 	}
 
 	/**
@@ -69,8 +68,7 @@ class Wp_Travel_Engine_Public {
 	 * @since    1.0.0
 	 */
 	function wpte_start_session() {
-		if ( ( defined( 'WTE_USE_OLD_BOOKING_PROCESS' ) && ! WTE_USE_OLD_BOOKING_PROCESS )
-			 || ( ! defined( 'WTE_USE_OLD_BOOKING_PROCESS' ) ) ) {
+		if ( ( defined( 'WTE_USE_OLD_BOOKING_PROCESS' ) && ! WTE_USE_OLD_BOOKING_PROCESS ) || ( ! defined( 'WTE_USE_OLD_BOOKING_PROCESS' ) ) ) {
 			return;
 		}
 
@@ -87,7 +85,7 @@ class Wp_Travel_Engine_Public {
 	public static function wp_add_trip_cart() {
 		if ( wte_nonce_verify( 'nonce', 'wp-travel-engine-nonce' ) ) {
 			die();
-		};
+		}
 
 		// phpcs:disable
 		if ( array_key_exists( $_SESSION[ 'cart_item' ][ wte_clean( wp_unslash( $_REQUEST[ 'trip_id' ] ) ) ], $_SESSION[ 'cart_item' ] ) ) {
@@ -161,10 +159,10 @@ class Wp_Travel_Engine_Public {
 				<div class="table-row">
 					<div class="table-cell">
 						<svg class="svg-inline--fa fa-spinner fa-w-16 fa-spin" aria-hidden="true" data-prefix="fa"
-							 data-icon="spinner" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
-							 data-fa-i2svg="">
+							data-icon="spinner" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
+							data-fa-i2svg="">
 							<path fill="currentColor"
-								  d="M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z"></path>
+									d="M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z"></path>
 						</svg><!-- <i class="fa fa-spinner fa-spin" aria-hidden="true"></i> -->
 					</div>
 				</div>
@@ -189,8 +187,8 @@ class Wp_Travel_Engine_Public {
 				<th><?php echo esc_html__( 'Wishlist', 'wp-travel-engine' ); ?></th>
 				<td>
 					<input type="text" name="wishlist" id="wishlist"
-						   value="<?php echo esc_attr( get_the_author_meta( 'wishlist', $user->ID ) ); ?>"
-						   class="regular-text" />
+							value="<?php echo esc_attr( get_the_author_meta( 'wishlist', $user->ID ) ); ?>"
+							class="regular-text" />
 				</td>
 			</tr>
 		</table>
@@ -204,7 +202,7 @@ class Wp_Travel_Engine_Public {
 		if ( ! current_user_can( 'edit_user', $user_id ) ) {
 			return false;
 		}
-		update_user_meta( $user_id, 'wishlist', $_POST[ 'wishlist' ] );
+		update_user_meta( $user_id, 'wishlist', $_POST['wishlist'] );
 	}
 
 	/**
@@ -249,10 +247,9 @@ class Wp_Travel_Engine_Public {
 
 		$id = $product->get_id();
 
-		if ( $id == $object[ 'id' ] ) {
+		if ( $id == $object['id'] ) {
 			return $product->get_price();
 		}
-
 	}
 
 	function rest_stock( $object, $field_name, $request ) {
@@ -261,10 +258,9 @@ class Wp_Travel_Engine_Public {
 
 		$id = $product->get_id();
 
-		if ( $id == $object[ 'id' ] ) {
+		if ( $id == $object['id'] ) {
 			return $product->get_stock_status();
 		}
-
 	}
 
 	function rest_img( $object, $field_name, $request ) {
@@ -273,14 +269,13 @@ class Wp_Travel_Engine_Public {
 
 		$id = $product->get_id();
 
-		if ( $id == $object[ 'id' ] ) {
+		if ( $id == $object['id'] ) {
 			return $product->get_image();
 		}
-
 	}
 
 	function maximum_api_filter( $query_params ) {
-		$query_params[ 'per_page' ][ 'maximum' ] = 100;
+		$query_params['per_page']['maximum'] = 100;
 
 		return $query_params;
 	}
@@ -304,7 +299,6 @@ class Wp_Travel_Engine_Public {
 		<!-- Placeholder for payment fields. -->
 		<div id="wte-checkout-payment-fields"></div>
 		<?php
-
 	}
 
 	/**
@@ -317,7 +311,6 @@ class Wp_Travel_Engine_Public {
 		<div class="error"></div>
 		<div class="successful"></div>
 		<?php
-
 	}
 
 	/**
@@ -332,17 +325,16 @@ class Wp_Travel_Engine_Public {
 				<div class="table-row">
 					<div class="table-cell">
 						<svg class="svg-inline--fa fa-spinner fa-w-16 fa-spin" aria-hidden="true" data-prefix="fa"
-							 data-icon="spinner" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
-							 data-fa-i2svg="">
+							data-icon="spinner" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
+							data-fa-i2svg="">
 							<path fill="currentColor"
-								  d="M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z"></path>
+									d="M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z"></path>
 						</svg><!-- <i class="fa fa-spinner fa-spin" aria-hidden="true"></i> -->
 					</div>
 				</div>
 			</div>
 		</div>
 		<?php
-
 	}
 
 	/**
@@ -364,7 +356,7 @@ class Wp_Travel_Engine_Public {
 	 * @return void
 	 */
 	public function register_tinymce_plugin( $plugin_array ) {
-		$plugin_array[ 'table' ] = plugin_dir_url( WP_TRAVEL_ENGINE_FILE_PATH ) . '/includes/lib/tinymce/table/plugin.min.js';
+		$plugin_array['table'] = plugin_dir_url( WP_TRAVEL_ENGINE_FILE_PATH ) . '/includes/lib/tinymce/table/plugin.min.js';
 
 		return $plugin_array;
 	}
@@ -390,23 +382,23 @@ class Wp_Travel_Engine_Public {
 	 * @since    1.0.2
 	 */
 	function wte_cart_trips() {
-		if ( isset( $_SESSION[ 'cart_item' ] ) && '' !== $_SESSION[ 'cart_item' ] && isset( $_POST[ 'trip-id' ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$cart_item = wte_clean( wp_unslash( $_SESSION[ 'cart_item' ] ) );
-			unset( $cart_item[ $_POST[ 'trip-id' ] ] ); //phpcs:ignore WordPress.Security.NonceVerification.Missing
+		if ( isset( $_SESSION['cart_item'] ) && '' !== $_SESSION['cart_item'] && isset( $_POST['trip-id'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$cart_item = wte_clean( wp_unslash( $_SESSION['cart_item'] ) );
+			unset( $cart_item[ $_POST['trip-id'] ] ); //phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$matches = array_unique( $cart_item );
 			echo '<h2>' . esc_html__( 'Trips:', 'wp-travel-engine' ) . '</h2>';
 
 			foreach ( $matches as $key => $value ) {
 				$wp_travel_engine_trip_setting           = get_post_meta( $value, 'wp_travel_engine_setting', true );
 				$wp_travel_engine_setting_option_setting = get_option( 'wp_travel_engine_settings', true );
-				$cost                                    = $wp_travel_engine_trip_setting[ 'trip_price' ];
+				$cost                                    = $wp_travel_engine_trip_setting['trip_price'];
 				$nonce                                   = wp_create_nonce( 'wte-remove-nonce' );
 				?>
 				<div class="wp-travel-engine-order-form-wrapper"
-					 id="wp-travel-engine-order-form-wrapper-<?php echo esc_attr( $value ); ?>"><a href="#"
-																								   class="remove-from-cart"
-																								   data-id="<?php echo esc_attr( $value ); ?>"
-																								   data-nonce="<?php echo esc_attr( $nonce ); ?>"></a>
+					id="wp-travel-engine-order-form-wrapper-<?php echo esc_attr( $value ); ?>"><a href="#"
+																									class="remove-from-cart"
+																									data-id="<?php echo esc_attr( $value ); ?>"
+																									data-nonce="<?php echo esc_attr( $nonce ); ?>"></a>
 					<div class="wp-travel-engine-order-left-column">
 						<?php echo get_the_post_thumbnail( $value, 'medium', '' ); ?>
 					</div>
@@ -425,8 +417,8 @@ class Wp_Travel_Engine_Public {
 								<span><?php esc_html_e( 'Trip Price: ', 'wp-travel-engine' ); ?></span>
 								<?php
 								$code = 'USD';
-								if ( isset( $wp_travel_engine_setting_option_setting[ 'currency_code' ] ) && $wp_travel_engine_setting_option_setting[ 'currency_code' ] != '' ) {
-									$code = $wp_travel_engine_setting_option_setting[ 'currency_code' ];
+								if ( isset( $wp_travel_engine_setting_option_setting['currency_code'] ) && $wp_travel_engine_setting_option_setting['currency_code'] != '' ) {
+									$code = $wp_travel_engine_setting_option_setting['currency_code'];
 								}
 								$obj      = \wte_functions();
 								$currency = $obj->wp_travel_engine_currencies_symbol( $code );
@@ -437,9 +429,9 @@ class Wp_Travel_Engine_Public {
 							</li>
 							<li><span><?php esc_html_e( 'Duration: ', 'wp-travel-engine' ); ?></span>
 								<?php
-								if ( isset( $wp_travel_engine_trip_setting[ 'trip_duration' ] ) && $wp_travel_engine_trip_setting[ 'trip_duration' ] != '' ) {
-									echo (float) $wp_travel_engine_trip_setting[ 'trip_duration' ];
-									if ( $wp_travel_engine_trip_setting[ 'trip_duration' ] > 1 ) {
+								if ( isset( $wp_travel_engine_trip_setting['trip_duration'] ) && $wp_travel_engine_trip_setting['trip_duration'] != '' ) {
+									echo (float) $wp_travel_engine_trip_setting['trip_duration'];
+									if ( $wp_travel_engine_trip_setting['trip_duration'] > 1 ) {
 										esc_html_e( ' Days', 'wp-travel-engine' );
 									} else {
 										esc_html_e( ' Day', 'wp-travel-engine' );
@@ -453,7 +445,7 @@ class Wp_Travel_Engine_Public {
 							echo esc_html( apply_filters( 'wp_travel_engine_no_of_travelers_text', $no_of_travelers ) );
 							?>
 								<input type="number" min="1" name="travelers[]" class="travelers-number" value=""
-									   placeholder="0" required></span></li>
+										placeholder="0" required></span></li>
 							<li class="cart-trip-total-price">
 								<span><?php esc_html_e( 'Total: ', 'wp-travel-engine' ); ?></span><?php echo esc_attr( $currency ) . '<span class="cart-trip-total-price-holder">0</span>' . esc_attr( ' ' . $code ); ?>
 							</li>
@@ -476,7 +468,7 @@ class Wp_Travel_Engine_Public {
 		<div class="wte-update-cart-button-wrapper">
 			<div class="wte-update-cart-button">
 				<input type="submit" name="submit"
-					   value="<?php echo esc_html__( 'Update cart', 'wp-travel-engine' ); ?>" class="wte-update-cart" />
+						value="<?php echo esc_html__( 'Update cart', 'wp-travel-engine' ); ?>" class="wte-update-cart" />
 			</div>
 			<div class="wte-update-cart-msg"></div>
 		</div>
@@ -533,7 +525,7 @@ class Wp_Travel_Engine_Public {
 			'url'          => admin_url( 'admin-ajax.php' ),
 			'query'        => $cats,
 			'slug'         => $wte_trip_cat_slug,
-			'current_page' => isset( $_POST[ 'page' ] ) ? wte_clean( wp_unslash( $_POST[ 'page' ] ) ) : 1,
+			'current_page' => isset( $_POST['page'] ) ? wte_clean( wp_unslash( $_POST['page'] ) ) : 1,
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 			'max_page'     => $wp_query->max_num_pages,
 		);
@@ -548,10 +540,10 @@ class Wp_Travel_Engine_Public {
 		check_ajax_referer( 'wpte-be-load-more-nonce', 'nonce' );
 
 		// Prepare our arguments for the query.
-		$args                  = wte_clean( json_decode( wp_unslash( $_POST[ 'query' ] ), true ) );
-		$args                  = wte_clean( $args );
-		$args[ 'paged' ]       = wte_clean( wp_unslash( $_POST[ 'page' ] ) ) + 1; // We need next page to be loaded.
-		$args[ 'post_status' ] = 'publish';
+		$args                = wte_clean( json_decode( wp_unslash( $_POST['query'] ), true ) );
+		$args                = wte_clean( $args );
+		$args['paged']       = wte_clean( wp_unslash( $_POST['page'] ) ) + 1; // We need next page to be loaded.
+		$args['post_status'] = 'publish';
 
 		$query = new WP_Query( $args );
 		ob_start();
@@ -578,10 +570,10 @@ class Wp_Travel_Engine_Public {
 
 		// prepare our arguments for the query
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-		$args = json_decode( wte_clean( wp_unslash( $_POST[ 'query' ] ) ), true );
+		$args = json_decode( wte_clean( wp_unslash( $_POST['query'] ) ), true );
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-		$args[ 'paged' ]       = wte_clean( wp_unslash( $_POST[ 'page' ] ) ) + 1; // we need next page to be loaded
-		$args[ 'post_status' ] = 'publish';
+		$args['paged']       = wte_clean( wp_unslash( $_POST['page'] ) ) + 1; // we need next page to be loaded
+		$args['post_status'] = 'publish';
 
 		$query = new WP_Query( $args );
 		ob_start();
@@ -622,7 +614,7 @@ class Wp_Travel_Engine_Public {
 
 		$post_data = wp_clean( wp_unslash( $_POST ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
-		if ( in_array( $post_data[ 'val' ], array( 'Test Payment', 'PayPal' ), true ) ) {
+		if ( in_array( $post_data['val'], array( 'Test Payment', 'PayPal' ), true ) ) {
 			ob_start();
 			$obj             = \wte_functions();
 			$billing_options = $obj->order_form_billing_options();
@@ -630,18 +622,22 @@ class Wp_Travel_Engine_Public {
 				?>
 				<div class='wp-travel-engine-billing-details-field-wrap'>
 					<?php
-					if ( in_array( $key, array(
-						'fname',
-						'lname',
-						'email',
-						'passport',
-						'password',
-						'address',
-						'country',
-					), true ) ) {
+					if ( in_array(
+						$key,
+						array(
+							'fname',
+							'lname',
+							'email',
+							'passport',
+							'password',
+							'address',
+							'country',
+						),
+						true
+					) ) {
 						if ( 'country' === $key ) {
 							?>
-							<label for="<?php echo esc_attr( $key ); ?>"><?php esc_html( $value[ 'label' ] ); ?><span
+							<label for="<?php echo esc_attr( $key ); ?>"><?php esc_html( $value['label'] ); ?><span
 									class="required">*</span></label>
 							<select required id="<?php echo esc_attr( $key ); ?>"
 									name="wp_travel_engine_booking_setting[place_order][booking][<?php echo esc_attr( $key ); ?>]"
@@ -660,12 +656,12 @@ class Wp_Travel_Engine_Public {
 						}
 						?>
 						<label
-							for="wp_travel_engine_booking_setting[place_order][booking][<?php echo esc_attr( $key ); ?>]"><?php echo esc_html( $value[ 'label' ] ); ?>
+							for="wp_travel_engine_booking_setting[place_order][booking][<?php echo esc_attr( $key ); ?>]"><?php echo esc_html( $value['label'] ); ?>
 							<span class="required">*</span></label>
-						<input type="<?php echo esc_attr( $value[ 'type' ] ); ?>"
-							   name="wp_travel_engine_booking_setting[place_order][booking][<?php echo esc_attr( $key ); ?>]"
-							   id="wp_travel_engine_booking_setting[place_order][booking][<?php echo esc_attr( $key ); ?>]"
-							<?php ( + $value[ 'required' ] === 1 ) && print 'required'; ?>/>
+						<input type="<?php echo esc_attr( $value['type'] ); ?>"
+								name="wp_travel_engine_booking_setting[place_order][booking][<?php echo esc_attr( $key ); ?>]"
+								id="wp_travel_engine_booking_setting[place_order][booking][<?php echo esc_attr( $key ); ?>]"
+							<?php ( + $value['required'] === 1 ) && print 'required'; ?>/>
 						<?php
 					}
 					?>
@@ -685,36 +681,36 @@ class Wp_Travel_Engine_Public {
 	 */
 	function check_min_max_pax( $trip_id, $attrs ) {
 
-		if ( empty( $attrs[ 'price_key' ] ) ) {
+		if ( empty( $attrs['price_key'] ) ) {
 			WTE()->notices->add( __( 'Invalid Package.', 'wp-travel-engine' ) );
 
 			return;
 		}
-		$package_key = $attrs[ 'price_key' ];
+		$package_key = $attrs['price_key'];
 
 		$package = get_post( $package_key );
 
 		$package_pricings = isset( $package->{'package-categories'} ) ? $package->{'package-categories'} : array();
 
-		$pax = isset( $attrs[ 'pax' ] ) ? $attrs[ 'pax' ] : array();
+		$pax = isset( $attrs['pax'] ) ? $attrs['pax'] : array();
 
-		if ( empty( $attrs[ 'pax' ] ) ) {
+		if ( empty( $attrs['pax'] ) ) {
 			WTE()->notices->add( __( 'Number of pax is not eligible for booking. Number of pax should be at least 1 for the package.', 'wp-travel-engine' ) );
 
 			return;
 		}
 
 		foreach ( $pax as $pricing_category_id => $pax_count ) {
-			if ( isset( $package_pricings[ 'min_paxes' ][ $pricing_category_id ] ) ) {
-				if ( $pax_count < (int) $package_pricings[ 'min_paxes' ][ $pricing_category_id ] ) {
-					WTE()->notices->add( sprintf( __( 'Number of pax (%1$s) is not eligible for booking. Number of %2$s should be at least %3$s for the package.', 'wp-travel-engine' ), $pax_count, $attrs[ 'category_info' ][ $pricing_category_id ][ 'label' ], $package_pricings[ 'min_paxes' ][ $pricing_category_id ] ), 'error' );
+			if ( isset( $package_pricings['min_paxes'][ $pricing_category_id ] ) ) {
+				if ( $pax_count < (int) $package_pricings['min_paxes'][ $pricing_category_id ] ) {
+					WTE()->notices->add( sprintf( __( 'Number of pax (%1$s) is not eligible for booking. Number of %2$s should be at least %3$s for the package.', 'wp-travel-engine' ), $pax_count, $attrs['category_info'][ $pricing_category_id ]['label'], $package_pricings['min_paxes'][ $pricing_category_id ] ), 'error' );
 
 					return;
 				}
 			}
-			if ( isset( $package_pricings[ 'max_paxes' ][ $pricing_category_id ] ) && '' !== $package_pricings[ 'max_paxes' ][ $pricing_category_id ] ) {
-				if ( $pax_count > (int) $package_pricings[ 'max_paxes' ][ $pricing_category_id ] ) {
-					WTE()->notices->add( sprintf( __( 'Number of pax (%1$s) is not eligible for booking. Number of %2$s should be at most %3$s for the package.', 'wp-travel-engine' ), $pax_count, $attrs[ 'category_info' ][ $pricing_category_id ][ 'label' ], $package_pricings[ 'max_paxes' ][ $pricing_category_id ] ), 'error' );
+			if ( isset( $package_pricings['max_paxes'][ $pricing_category_id ] ) && '' !== $package_pricings['max_paxes'][ $pricing_category_id ] ) {
+				if ( $pax_count > (int) $package_pricings['max_paxes'][ $pricing_category_id ] ) {
+					WTE()->notices->add( sprintf( __( 'Number of pax (%1$s) is not eligible for booking. Number of %2$s should be at most %3$s for the package.', 'wp-travel-engine' ), $pax_count, $attrs['category_info'][ $pricing_category_id ]['label'], $package_pricings['max_paxes'][ $pricing_category_id ] ), 'error' );
 
 					return;
 				}
@@ -750,27 +746,42 @@ class Wp_Travel_Engine_Public {
 		foreach ( get_intermediate_image_sizes() as $s ) {
 			$sizes[ $s ] = array( 0, 0 );
 			if ( in_array( $s, array( 'thumbnail', 'medium', 'medium_large', 'large' ) ) ) {
-				$sizes[ $s ][ 0 ] = get_option( $s . '_size_w' );
-				$sizes[ $s ][ 1 ] = get_option( $s . '_size_h' );
-			} else {
-				if ( isset( $_wp_additional_image_sizes ) && isset( $_wp_additional_image_sizes[ $s ] ) ) {
+				$sizes[ $s ][0] = get_option( $s . '_size_w' );
+				$sizes[ $s ][1] = get_option( $s . '_size_h' );
+			} elseif ( isset( $_wp_additional_image_sizes ) && isset( $_wp_additional_image_sizes[ $s ] ) ) {
 					$sizes[ $s ] = array(
-						$_wp_additional_image_sizes[ $s ][ 'width' ],
-						$_wp_additional_image_sizes[ $s ][ 'height' ],
+						$_wp_additional_image_sizes[ $s ]['width'],
+						$_wp_additional_image_sizes[ $s ]['height'],
 					);
-				}
 			}
 		}
 
 		foreach ( $sizes as $size => $atts ) {
-			$image_size    = str_replace( [ '-', '_' ], ' ', $size );
+			$image_size    = str_replace( array( '-', '_' ), ' ', $size );
 			$image_size    = ucwords( $image_size );
-			$image_sizes[] = array( 'value' => $size, 'label' => $image_size . ' ' . implode( 'x', $atts ) );
+			$image_sizes[] = array(
+				'value' => $size,
+				'label' => $image_size . ' ' . implode( 'x', $atts ),
+			);
 		}
-		//Image Size to take image's original size.
-		$image_sizes[] = array( 'value' => 'full', 'label' => 'Full' );
+		// Image Size to take image's original size.
+		$image_sizes[] = array(
+			'value' => 'full',
+			'label' => 'Full',
+		);
 
 		return $image_sizes;
 	}
 
+
+	/**
+	 * Allowlist WTE query params (payment_key, wte_id) in Yoast SEO permalink cleanup.
+	 *
+	 * @param array $allowed Allowed permalink vars.
+	 * @return array
+	 * @since 6.7.9
+	 */
+	public function yoast_allowlist_permalink_vars( $allowed ) {
+		return array_merge( $allowed, array( 'payment_key', 'wte_id' ) );
+	}
 }

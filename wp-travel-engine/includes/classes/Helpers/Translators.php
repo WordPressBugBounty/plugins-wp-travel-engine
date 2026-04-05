@@ -31,6 +31,23 @@ class Translators {
 		 * @since 6.6.9
 		 */
 		add_filter( 'wpml_tm_adjust_translation_job', array( __CLASS__, 'wpml_ate_translation_adjust' ) );
+
+		// Set the language after booking created if TranslatePress is active.
+		add_action( 'wptravelengine_after_booking_created', array( __CLASS__, 'set_language_after_booking_created' ) );
+	}
+
+	/**
+	 * Set the language after booking created.
+	 *
+	 * @param int $booking_id The booking ID.
+	 * @return void
+	 * @since 6.7.9
+	 */
+	public static function set_language_after_booking_created( int $booking_id ) {
+		$language = static::get_translatepress_language();
+		if ( $language ) {
+			update_post_meta( $booking_id, 'wp_travel_engine_booking_language', $language );
+		}
 	}
 
 	public static function wpml_pre_save_pro_translation( $postarr, $job ) {
@@ -149,5 +166,94 @@ class Translators {
 			$translation_units[ $key ]['extradata']['unit']     = '';
 		}
 		return $translation_units;
+	}
+
+	/**
+	 * Checks if TranslatePress is active.
+	 *
+	 * @return bool True if TranslatePress is active, false otherwise.
+	 * @since 6.7.9
+	 */
+	public static function is_translatepress_active(): bool {
+		return function_exists( 'trp_translate' ) && class_exists( 'TRP_Translate_Press' );
+	}
+
+	/**
+	 * Get available languages for translation with their display labels.
+	 * Currently supports TranslatePress. Can be extended for other plugins via filter.
+	 *
+	 * @return array List of ['code' => string, 'label' => string] pairs.
+	 * @since 6.7.9
+	 */
+	public static function get_available_languages( $plugin = 'translatepress' ): array {
+		$languages = array();
+		if ( 'translatepress' === $plugin && static::is_translatepress_active() ) {
+			$trp = \TRP_Translate_Press::get_trp_instance();
+			if ( $trp ) {
+				$settings  = $trp->get_component( 'settings' )->get_settings();
+				$codes     = $settings['translation-languages'] ?? array();
+				$trp_langs = $trp->get_component( 'languages' );
+
+				$trp_languages = $trp_langs->get_language_names( $codes );
+				foreach ( $trp_languages as $code => $name ) {
+					$languages[] = array(
+						'code'  => $code,
+						'label' => $name,
+					);
+				}
+			}
+		}
+
+		return apply_filters( 'wptravelengine_available_languages', $languages );
+	}
+
+	/**
+	 * Get default language code.
+	 * Currently supports TranslatePress. Can be extended for other plugins via filter.
+	 *
+	 * @return string Default language code (e.g., 'en_US').
+	 * @since 6.7.9
+	 */
+	public static function get_default_language( $plugin = 'translatepress' ): string {
+		$language = get_locale();
+
+		if ( 'translatepress' === $plugin && static::is_translatepress_active() ) {
+			$trp = \TRP_Translate_Press::get_trp_instance();
+			if ( $trp ) {
+				$settings = $trp->get_component( 'settings' )->get_settings();
+				$language = $settings['default-language'] ?? get_locale();
+			}
+		}
+
+		return apply_filters( 'wptravelengine_default_language', $language );
+	}
+
+	/**
+	 * Get the current TranslatePress language.
+	 *
+	 * @return string|null Current language code or null if TranslatePress is not active.
+	 * @since 6.7.9
+	 */
+	public static function get_translatepress_language(): ?string {
+		if ( ! static::is_translatepress_active() || ! function_exists( 'trp_get_locale' ) ) {
+			return null;
+		}
+
+		return trp_get_locale() ?? null;
+	}
+
+	/**
+	 * Set the TranslatePress language.
+	 *
+	 * @param string $language_code Language code.
+	 * @return void
+	 * @since 6.7.9
+	 */
+	public static function set_translatepress_language( $language_code = null ): void {
+		if ( ! static::is_translatepress_active() || ! $language_code || ! function_exists( 'trp_switch_language' ) ) {
+			return;
+		}
+
+		trp_switch_language( $language_code );
 	}
 }

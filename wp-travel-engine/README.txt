@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 6.7.8
+Stable tag: 6.7.9
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -349,14 +349,14 @@ Please send us an email via [support ticket](https://wptravelengine.com/support-
 
 == Changelog ==
 
-= 6.7.8 - 23rd March 2026 =
+= 6.7.9 - 5th March 2026 =
 
-* Improved: Enhanced site performance by enabling lazy loading for images and maps, and caching database requests.
-* Improved: Added a popup gallery to display all images when a banner image is clicked.
-* Improved: Standardized amount formatting across bookings, emails, and payments to always show two decimal places.
-* Fixed: Resolved formatting issues with bank instructions and descriptions on the checkout page and in emails.
-* Fixed: Corrected duplicate traveler columns and inconsistent field key prefixes in the booking CSV export.
-* Changed: Removed the email footer image to create a cleaner email layout.
+* New Feature: Added support for translating email content using TranslatePress, making it easy to localize emails into multiple languages.
+* Improved: Email previews and test emails now update instantly without saving, allowing admins to quickly review layouts using sample data.
+* Fixed: Fixed an issue where Yoast SEO analysis failed if the Maps tab was left empty.
+* Fixed: Resolved an issue where the Thank You page showed incorrect content due to Yoast SEO removing required URL parameters.
+* Fixed: Corrected formatting issues with bank instructions on the checkout page and in email templates.
+* Deprecated: Certain email tags are now deprecated and will be removed in a future release.
 
 [See changelog for all versions](https://plugins.svn.wordpress.org/wp-travel-engine/trunk/changelog.txt).
 

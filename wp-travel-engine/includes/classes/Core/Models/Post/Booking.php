@@ -944,7 +944,7 @@ class Booking extends PostModel {
 		if ( is_array( $payments ) && count( $payments ) > 0 ) {
 			foreach ( $payments as $p_id ) {
 				$payment = wptravelengine_get_payment( $p_id );
-				if ( $payment ) {
+				if ( $payment && $payment->is_completed() ) {
 					$paid_amount += $payment->get_amount();
 				}
 			}

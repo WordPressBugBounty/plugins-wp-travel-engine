@@ -19,6 +19,7 @@ use WPTravelEngine\Core\Models\Settings\StaticStrings;
 use WPTravelEngine\Helpers\Translators;
 use WPTravelEngine\PaymentGateways\PaymentGateways;
 use WPTravelEngine\Utilities\ArrayUtility;
+use WPTravelEngine\Email\TranslationManager\TranslatePress;
 
 /**
  * Settings API class.
@@ -364,11 +365,16 @@ class Settings {
 			$customer_email_notifi_tabs
 		);
 
-		return array(
-			'email_notification' => array(
+		$email_notification = TranslatePress::prepare_email_notification_settings(
+			array(
 				'admin'    => $admin_email_notifi_tabs,
 				'customer' => $customer_email_notifi_tabs,
 			),
+			$request
+		);
+
+		return array(
+			'email_notification' => $email_notification,
 		);
 	}
 
@@ -1435,7 +1441,7 @@ class Settings {
 
 		$plugin_settings = $this->plugin_settings;
 
-		if ( ! isset( $request['email_notification'] ) ) {
+		if ( ! isset( $request['email_notification'] ) || TranslatePress::skip_email_notification_save( $request ) ) {
 			return;
 		}
 
@@ -2929,13 +2935,17 @@ class Settings {
 				'description' => __( 'Email Notification', 'wp-travel-engine' ),
 				'type'        => 'object',
 				'properties'  => array(
-					'admin'    => array(
+					'admin'     => array(
 						'description' => __( 'Admin Email Notification', 'wp-travel-engine' ),
 						'type'        => 'object',
 					),
-					'customer' => array(
+					'customer'  => array(
 						'description' => __( 'Customer Email Notification', 'wp-travel-engine' ),
 						'type'        => 'object',
+					),
+					'_language' => array(
+						'description' => __( 'Current editing language for email templates', 'wp-travel-engine' ),
+						'type'        => 'string',
 					),
 				),
 			),

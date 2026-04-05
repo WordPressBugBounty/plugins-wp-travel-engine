@@ -66,7 +66,7 @@ class Email extends TemplateTags {
 	 * @var ?string Template Name.
 	 * @since 6.5.0
 	 */
-	protected ?string $template = null;
+	public ?string $template = null;
 
 	/**
 	 * Email settings.
@@ -160,7 +160,8 @@ class Email extends TemplateTags {
 	 * Send email.
 	 *
 	 * @return mixed
-	 * @updated 6.5.0
+	 * @since 6.5.0
+	 * @since 6.7.9 Updated to use EmailTranslationManager for translation.
 	 */
 	public function send() {
 
@@ -168,12 +169,24 @@ class Email extends TemplateTags {
 			return false;
 		}
 
+		// Prepare email data.
 		$to          = array_map( 'trim', explode( ',', $this->get( 'to' ) ) );
-		$subject     = $this->apply_tags( $this->get( 'my_subject' ) );
-		$body        = $this->apply_tags( $this->get( 'body' ) );
 		$headers     = $this->get( 'headers' );
 		$attachments = $this->get( 'attachments' );
 
+		/**
+		 * Filters email subject & body before applying template tags.
+		 *
+		 * @since 6.7.9
+		 */
+		$subject = apply_filters( 'wptravelengine_email_subject', $this->get( 'my_subject' ), $this );
+		$body    = apply_filters( 'wptravelengine_email_content', $this->get( 'body' ), $this );
+
+		// Apply template tags to the translated content.
+		$subject = $this->apply_tags( $subject );
+		$body    = $this->apply_tags( $body );
+
+		// Send email to each recipient.
 		foreach ( $to as $email ) {
 			$result = wp_mail( $email, $subject, $body, $headers, $attachments );
 		}
@@ -204,6 +217,7 @@ class Email extends TemplateTags {
 	 *
 	 * @return void
 	 * @since 6.5.0
+	 * @deprecated 6.7.9 this function logic is move to PreviewEmail Ajax Controller.
 	 */
 	public function template_preview( $payment_id, $email_template_type = 'order', $to = 'customer' ) {
 

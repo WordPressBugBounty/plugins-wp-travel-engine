@@ -84,6 +84,20 @@ class WTE_Ajax {
 		$ajax_registry->register( Ajax\DownloadLog::class );
 		$ajax_registry->register( Ajax\SendLogSupport::class );
 
+		/**
+		 * Preview Email AJAX Controllers
+		 *
+		 * @since 6.7.9
+		 */
+		$ajax_registry->register( Ajax\PreviewEmail::class );
+
+		/**
+		 * Send Test Email AJAX Controllers
+		 *
+		 * @since 6.7.9
+		 */
+		$ajax_registry->register( Ajax\SendTestEmail::class );
+
 		add_action(
 			'wp_ajax_nopriv_email_test',
 			function () {
@@ -114,9 +128,11 @@ class WTE_Ajax {
 
 		/**
 		 * Send Test Email.
+		 *
+		 * @deprecated this ajax is handle above with new controller structure way.
 		 */
-		add_action( 'wp_ajax_wptravelengine_send_test_email', array( $this, 'send_test_email' ) );
-		add_action( 'wp_ajax_nopriv_wptravelengine_send_test_email', array( $this, 'send_test_email' ) );
+		// add_action( 'wp_ajax_wptravelengine_send_test_email', array( $this, 'send_test_email' ) );
+		// add_action( 'wp_ajax_nopriv_wptravelengine_send_test_email', array( $this, 'send_test_email' ) );
 
 		// Save global Settings.
 		// add_action(
@@ -343,6 +359,8 @@ class WTE_Ajax {
 
 	/**
 	 * Sends test email.
+	 *
+	 * @deprecated This function is no longer used it is handle from SendTestEmail Controller.
 	 */
 	public function send_test_email() {
 		if ( ! isset( $_POST['nonce'] ) ) {

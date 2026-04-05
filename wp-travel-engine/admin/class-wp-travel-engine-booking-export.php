@@ -254,10 +254,17 @@ class WP_Travel_Engine_Booking_Export {
 	 * @since 6.7.4
 	 */
 	private static function sanitize_csv_value( $value ) {
-		if ( is_numeric( $value ) || $value === null || $value === '' ) {
+		if ( $value === null || $value === '' ) {
 			return $value;
 		}
 		$string_value = (string) $value;
+		// Wrap long digit-only strings in an Excel text formula to prevent Excel from converting them to scientific notation (E+11).
+		if ( is_numeric( $value ) && ctype_digit( $string_value ) && strlen( $string_value ) > 10 ) {
+			return '="' . $string_value . '"';
+		}
+		if ( is_numeric( $value ) ) {
+			return $value;
+		}
 		if ( ! empty( $string_value ) && in_array( substr( $string_value, 0, 1 ), array( '=', '+', '-', '@', "\t" ), true ) ) {
 			return "\t" . $string_value;
 		}

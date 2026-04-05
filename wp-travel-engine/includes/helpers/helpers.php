@@ -21,6 +21,25 @@ use WPTravelEngine\Pages\Checkout;
 use WPTravelEngine\PaymentGateways\PaymentGateways;
 use WPTravelEngine\Utilities\Price;
 use WPTravelEngine\Utilities\RequestParser;
+use WPTravelEngine\Helpers\PackageDateParser;
+
+/**
+ * Get PackageDateParser instance.
+ *
+ * @param TripPackage $trip_package
+ * @param array       $args
+ * @return PackageDateParser
+ * @since 6.7.9
+ */
+function wptravelengine_get_date_parser( TripPackage $trip_package, array $args = array() ): PackageDateParser {
+	$date_parser = apply_filters( 'wptravelengine_date_parser_instance', false, $trip_package, $args );
+
+	if ( $date_parser instanceof PackageDateParser ) {
+		return $date_parser;
+	}
+
+	return new PackageDateParser( $trip_package, $args );
+}
 
 /**
  * Sanitize Request Params.
@@ -183,6 +202,7 @@ function wptravelengine_format_trip_datetime( string $date, string $format = '' 
  *
  * @return string
  * @since 6.3.0
+ * @since {next} Builds strtotime offset from raw trip model data; supports minutes sub-unit (e.g. "+7 hours 15 minutes") via `trip_duration_minutes` meta.
  */
 function wptravelengine_format_trip_end_datetime( string $start_date, Trip $trip, string $format = '' ): string {
 	$date_format = $format;
@@ -191,10 +211,15 @@ function wptravelengine_format_trip_end_datetime( string $start_date, Trip $trip
 		$date_format .= strpos( $start_date, 'T' ) !== false ? ' \a\t ' . get_option( 'time_format', 'g:i a' ) : '';
 	}
 
-	$trip_duration_type = $trip->get_trip_duration_unit() ?? 'days';
-	$trip_duration      = 'days' === $trip_duration_type ? ( intval( $trip->get_trip_duration() ) - 1 ) : intval( $trip->get_trip_duration() );
+	$duration_str = '0 day';
+	if ( 'days' === $trip->get_trip_duration_unit() ) {
+		$duration_str = ( (int) ( $trip->get_trip_duration() ?: 1 ) - 1 ) . ' days';
+	} else {
+		$duration_arr = array_map( 'strtolower', wptravelengine_get_trip_duration_arr( $trip ) );
+		$duration_str = implode( ' ', $duration_arr );
+	}
 
-	return wp_date( $date_format, strtotime( "+$trip_duration {$trip_duration_type}", strtotime( $start_date ) ), new DateTimeZone( 'UTC' ) );
+	return wp_date( $date_format, strtotime( "+{$duration_str}", strtotime( $start_date ) ), new DateTimeZone( 'UTC' ) );
 }
 
 /**
@@ -1814,7 +1839,7 @@ function wte_get_discount_percent( $trip_id ) {
  */
 function wp_travel_engine_user_new_account_created( $customer_id, $new_customer_data, $password_generated, $template ) {
 	$plugin_settings       = new PluginSettings();
-	$account_settings      = $plugin_settings->get( 'customer_email_notify_tabs.account_registration' );
+	$account_settings      = $plugin_settings->get( 'customer_email_notify_tabs.account_registration' ) ?? array();
 	$is_admin_booking_edit = false;
 	if ( is_admin() && isset( $_POST['wptravelengine_new_booking_nonce'] ) ) {
 		$nonce_verified        = wp_verify_nonce( $_POST['wptravelengine_new_booking_nonce'], 'wptravelengine_new_booking' );
@@ -1828,8 +1853,8 @@ function wp_travel_engine_user_new_account_created( $customer_id, $new_customer_
 	if ( $send_notification && $new_customer_data ) {
 		$email = new UserEmail( $customer_id );
 		$email->set( 'to', $new_customer_data['user_email'] );
-		$email->set( 'my_subject', $account_settings['subject'] );
-		$email->set( 'content', $account_settings['content'] );
+		$email->set( 'my_subject', $account_settings['subject'] ?? '' );
+		$email->set( 'content', $account_settings['content'] ?? '' );
 		if ( $email->send() ) {
 			return true;
 		}
@@ -3120,3 +3145,106 @@ function wptravelengine_enquiry_get_field_display_label( $key, array $field_map 
 	return wp_travel_engine_get_enquiry_field_label_by_name( $key );
 }
 
+
+
+/**
+ * This function contains array of deprecated email tags.
+ *
+ * @return array array key as deprecated and its value as an new replacement tags.
+ * @since 6.7.9
+ */
+function wptravelengine_deprecated_email_tags(): array {
+	return apply_filters(
+		'wptravelengine_deprecated_email_tags',
+		array(
+			'{booking_details}'   => '{trip_booking_details}',
+			'{name}'              => '{customer_first_name}',
+			'{fullname}'          => '{customer_full_name}',
+			'{user_email}'        => '{customer_email}',
+			'{tdate}'             => '{trip_start_date}',
+			'{date}'              => '{trip_booked_date}',
+			'{traveler}'          => '{no_of_travelers}',
+			'{no_of_travellers}'  => '{no_of_travelers}',
+			'{price}'             => '{trip_paid_amount}',
+			'{total_cost}'        => '{trip_total_price}',
+			'{due}'               => '{trip_due_amount}',
+			'{traveler_data}'     => '{traveler_details}',
+			'{traveller_details}' => '{traveler_details}',
+		)
+	);
+}
+
+/**
+ * Returns all email tag descriptions grouped by context.
+ *
+ * Keys in the returned array:
+ *   'all'      – common + all booking tags (use for booking email content)
+ *   'subject'  – subset allowed in email subjects
+ *   'customer' – common + customer account tags (password reset, etc.)
+ *
+ * Add-on filters still work on each group via their original filter hooks.
+ *
+ * @return array All Email Tags
+ * @since 6.7.9
+ */
+function wptravelengine_all_email_tags(): array {
+	$common = apply_filters(
+		'wptravelengine_common_email_tags',
+		array(
+			'{sitename}'            => __( 'Your site name', 'wp-travel-engine' ),
+			'{customer_first_name}' => __( 'The customer\'s first name.', 'wp-travel-engine' ),
+			'{customer_full_name}'  => __( 'The customer\'s full name.', 'wp-travel-engine' ),
+			'{customer_last_name}'  => __( 'The customer\'s last name.', 'wp-travel-engine' ),
+			'{customer_email}'      => __( 'The customer\'s email address.', 'wp-travel-engine' ),
+			'{ip_address}'          => __( 'The buyer\'s IP Address', 'wp-travel-engine' ),
+			'{site_admin_email}'    => __( 'The site admin email address.', 'wp-travel-engine' ),
+		)
+	);
+
+	$booking = array(
+		'{booked_trip_name}'          => __( 'The name of the trip booked.', 'wp-travel-engine' ),
+		'{trip_url}'                  => __( 'The trip URL for each booked trip', 'wp-travel-engine' ),
+		'{trip_code}'                 => __( 'The trip code for each booked trip', 'wp-travel-engine' ),
+		'{billing_address}'           => __( 'The buyer\'s billing address', 'wp-travel-engine' ),
+		'{city}'                      => __( 'The buyer\'s city', 'wp-travel-engine' ),
+		'{country}'                   => __( 'The buyer\'s country', 'wp-travel-engine' ),
+		'{tprice}'                    => __( 'The trip price', 'wp-travel-engine' ),
+		'{booking_url}'               => __( 'The trip booking link', 'wp-travel-engine' ),
+		'{payment_method}'            => __( 'Payment Method used to checkout.', 'wp-travel-engine' ),
+		'{trip_booking_details}'      => __( 'The trip booking & Payment details.', 'wp-travel-engine' ),
+		'{trip_booking_summary}'      => __( 'The trip booking summary.', 'wp-travel-engine' ),
+		'{trip_payment_details}'      => __( 'The trip payment details.', 'wp-travel-engine' ),
+		'{trip_booked_date}'          => __( 'The date and time when the trip was booked.', 'wp-travel-engine' ),
+		'{trip_start_date}'           => __( 'The start date of the trip.', 'wp-travel-engine' ),
+		'{trip_end_date}'             => __( 'The end date of the trip.', 'wp-travel-engine' ),
+		'{no_of_travelers}'           => __( 'The total number of travelers.', 'wp-travel-engine' ),
+		'{trip_total_price}'          => __( 'The total price of the trip.', 'wp-travel-engine' ),
+		'{trip_paid_amount}'          => __( 'The amount paid by the customer.', 'wp-travel-engine' ),
+		'{trip_due_amount}'           => __( 'The due amount for the trip.', 'wp-travel-engine' ),
+		'{payment_id}'                => __( 'The payment ID of trip.', 'wp-travel-engine' ),
+		'{booking_id}'                => __( 'The booking order ID', 'wp-travel-engine' ),
+		'{billing_details}'           => __( 'The billing details filled in new checkout template.', 'wp-travel-engine' ),
+		'{traveler_details}'          => __( 'The traveler\'s details filled in new checkout template.', 'wp-travel-engine' ),
+		'{emergency_details}'         => __( 'The emergency contact details filled in new checkout template.', 'wp-travel-engine' ),
+		'{additional_note}'           => __( 'The additional note filled in new checkout template.', 'wp-travel-engine' ),
+		'{bank_details}'              => __( 'Banks Accounts Details. This tag will be replaced with the bank details and sent to the customer receipt email when Bank Transfer method has been chosen by the customer.', 'wp-travel-engine' ),
+		'{check_payment_instruction}' => __( 'Instructions to make check payment.', 'wp-travel-engine' ),
+		'{trip_extra_fee}'            => __( 'The extra fee for the trip.', 'wp-travel-engine' ),
+	);
+
+	$subject_keys = array( '{sitename}', '{customer_first_name}', '{customer_full_name}', '{booked_trip_name}', '{booking_id}', '{payment_id}' );
+
+	$all = apply_filters( 'wptravelengine_booking_email_tags', array_merge( $common, $booking ) );
+
+	return array(
+		'all'      => $all,
+		'subject'  => apply_filters( 'wptravelengine_email_subject_tags', array_intersect_key( $all, array_flip( $subject_keys ) ) ),
+		'customer' => apply_filters(
+			'wptravelengine_customer_email_template_tags',
+			array_merge(
+				$common,
+				array( '{password_reset_link}' => __( 'The link to reset the password.', 'wp-travel-engine' ) )
+			)
+		),
+	);
+}

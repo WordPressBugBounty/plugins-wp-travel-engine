@@ -15,6 +15,7 @@ use WPTravelEngine\Helpers\Countries;
 use WPTravelEngine\Helpers\CartInfoParser;
 use WPTravelEngine\Core\Models\Post\Booking;
 use WPTravelEngine\Core\Models\Post\Payment;
+use WPTravelEngine\Helpers\Translators;
 use WPTravelEngine\Utilities\PaymentCalculator;
 
 #[AllowDynamicProperties]
@@ -222,7 +223,7 @@ class Template_Tags extends TemplateTags {
 	public function get_bank_details() {
 		if ( $this->payment && 'direct_bank_transfer' === $this->payment->payment_gateway ) {
 			$bank_details_labels = array(
-				// 'account_name',
+				'account_name'   => __( 'Account Name', 'wp-travel-engine' ),
 				'account_number' => __( 'Account Number', 'wp-travel-engine' ),
 				'bank_name'      => __( 'Bank Name', 'wp-travel-engine' ),
 				'sort_code'      => __( 'Sort Code', 'wp-travel-engine' ),
@@ -232,36 +233,46 @@ class Template_Tags extends TemplateTags {
 
 			$settings = get_option( 'wp_travel_engine_settings', array() );
 
-			$bank_accounts = wte_array_get( $settings, 'bank_transfer.accounts', array() );
+			$bank_accounts     = wte_array_get( $settings, 'bank_transfer.accounts', array() );
+			$bank_instructions = wte_array_get( $settings, 'bank_transfer.instruction', '' );
 			ob_start();
-			echo '<table class="invoice-items">';
-			echo '<tr>';
-			echo '<td colspan="2">';
-			echo '<h3>' . esc_html__( 'Bank Details:', 'wp-travel-engine' ) . '</h3>';
-			echo '</td>';
-			echo '</tr>';
-			echo '<tr>';
-			echo '<td colspan="2">';
-			echo wp_kses_post( wte_array_get( $settings, 'bank_transfer.instruction', '' ) );
-			echo '</td>';
-			echo '</tr>';
-			foreach ( $bank_accounts as $account ) {
-				echo '<tr>';
-				echo '<td colspan="2">';
-				echo '<h5>' . esc_html( $account['account_name'] ) . '</h5>';
-				echo '</td>';
-				echo '</tr>';
-				foreach ( $bank_details_labels as $key => $label ) {
-					?>
-					<tr>
-						<td><?php echo esc_html( $label ); ?></td>
-						<td class="alignright"><?php echo isset( $account[ $key ] ) ? esc_html( $account[ $key ] ) : ''; ?></td>
-					</tr>
+			?>
+			<table cellspacing="0" cellpadding="0" style="width: 100%;">
+				<tr>
+					<td colspan="2"><hr style="border: none;border-top: 1px solid #DCDFEA;"></td>
+				</tr>
+				<tr>
+					<td colspan="2" style="font-size: 16px;line-height: 1.75;font-weight: bold;padding: 8px 0 4px;"><?php esc_html_e( 'Bank Details:', 'wp-travel-engine' ); ?></td>
+				</tr>
+				<?php if ( ! empty( $bank_instructions ) ) : ?>
+				<tr>
+					<td colspan="2" style="color: #566267;"><?php echo wp_kses( nl2br( $bank_instructions ), array( 'br' => array() ) ); ?></td>
+				</tr>
+				<tr>
+					<td colspan="2" style="padding: 4px 0;"></td>
+				</tr>
 					<?php
-				}
-			}
-			echo '</table>';
-
+				endif;
+				$is_first = true;
+				foreach ( $bank_accounts as $account ) :
+					if ( ! $is_first ) {
+						?>
+						<tr><td colspan="2"><hr style="border: none;border-top: 1px solid #DCDFEA;"></td></tr>
+						<?php
+					}
+					$is_first = false;
+					foreach ( $bank_details_labels as $key => $label ) :
+						?>
+						<tr>
+							<td style="color: #566267;"><?php echo esc_html( $label ); ?></td>
+							<td style="width: 50%;text-align: right;"><strong><?php echo isset( $account[ $key ] ) ? esc_html( $account[ $key ] ) : ''; ?></strong></td>
+						</tr>
+						<?php
+					endforeach;
+				endforeach;
+				?>
+			</table>
+			<?php
 			return ob_get_clean();
 		}
 
@@ -508,15 +519,15 @@ class Template_Tags extends TemplateTags {
 				<td colspan="2" style="font-size: 16px;line-height: 1.75;font-weight: bold;padding: 8px 0 4px;"><?php esc_html_e( 'Booking Details:', 'wp-travel-engine' ); ?></td>
 			</tr>
 			<tr>
-				<td style="color: #566267;"><?php esc_html_e( 'Package Name', 'wp-travel-engine' ); ?>:</td>
+				<td style="color: #566267;"><?php esc_html_e( 'Package Name:', 'wp-travel-engine' ); ?></td>
 				<td style="width: 50%;text-align: right;"><strong><?php echo esc_html( $trip->package_name ); ?></strong></td>
 			</tr>
 			<tr>
-				<td style="color: #566267;"><?php esc_html_e( 'Trip Date', 'wp-travel-engine' ); ?>:</td>
+				<td style="color: #566267;"><?php esc_html_e( 'Trip Date:', 'wp-travel-engine' ); ?></td>
 				<td style="width: 50%;text-align: right;"><strong><?php echo wptravelengine_format_trip_datetime( $trip->datetime ); ?></strong></td>
 			</tr>
 			<tr>
-				<td style="color: #566267;"><?php esc_html_e( 'Trip End Date', 'wp-travel-engine' ); ?>:</td>
+				<td style="color: #566267;"><?php esc_html_e( 'Trip End Date:', 'wp-travel-engine' ); ?></td>
 				<td style="width: 50%;text-align: right;"><strong>
 				<?php
 					echo esc_html(
@@ -529,7 +540,7 @@ class Template_Tags extends TemplateTags {
 				</td>
 			</tr>
 			<tr>
-				<td style="color: #566267;"><?php esc_html_e( 'Travellers', 'wp-travel-engine' ); ?>:</td>
+				<td style="color: #566267;"><?php esc_html_e( 'Travellers:', 'wp-travel-engine' ); ?></td>
 				<td style="width: 50%;text-align: right;"><strong><?php echo esc_html( $travelers_count ); ?></strong></td>
 			</tr>
 			<tr>
@@ -587,10 +598,10 @@ class Template_Tags extends TemplateTags {
 
 			} else {
 				foreach ( $line_items as $line_item => $_items ) {
-					$label = str_replace( '_', ' ', ucwords( $line_item ) );
+					$label = $this->get_line_item_label( $line_item );
 					?>
 					<tr>
-						<td colspan="2"><strong><?php esc_html_e( $label, 'wp-travel-engine' ); ?></strong></td>
+						<td colspan="2"><strong><?php echo esc_html( $label ); ?></strong></td>
 					</tr>
 					<?php
 					foreach ( $_items as $item ) {
@@ -746,6 +757,9 @@ class Template_Tags extends TemplateTags {
 		}
 		?>
 			<tr>
+				<td colspan="2" style="padding: 4px 0;"></td>
+			</tr>
+			<tr>
 				<td><strong><?php esc_html_e( 'Amount Paid', 'wp-travel-engine' ); ?></strong></td>
 				<td style="text-align: right;font-size: 16px;"><strong><?php echo wptravelengine_the_price_with_decimal( $amount_paid, false ); ?></strong></td>
 			</tr>
@@ -860,11 +874,11 @@ class Template_Tags extends TemplateTags {
 			// Add new row before total amount calculation on email template.
 			do_action( 'wptravelengine_email_template_trip_cost_rows', $cart_info );
 		?>
-		<tr style="font-size: 16px;">
+		<tr>
 			<td colspan="2">
-				<span style="display: flex;padding: 8px 16px;background-color: rgba(15, 29, 35, 0.04);border-radius: 4px;margin: 0 -16px;">
-					<strong style="width: 50%;display: inline-block;"><?php esc_html_e( 'Total', 'wp-travel-engine' ); ?></strong>
-					<strong style="width: 50%;text-align: right;display: inline-block;">
+				<span style="display: flex;padding: 8px 16px;background-color: rgba(15, 29, 35, 0.04);border-radius: 4px;margin: 0 -16px; font-size: 0px;">
+					<strong style="width: 50%;display: inline-block; font-size: 16px;"><?php esc_html_e( 'Total', 'wp-travel-engine' ); ?></strong>
+					<strong style="width: 50%;text-align: right;display: inline-block; font-size: 16px;">
 					<?php
 					echo wptravelengine_the_price_with_decimal( $amounts['total'], false );
 					if ( $tax_enable == 'yes' && isset( $global_settings['tax_type_option'] ) && 'inclusive' === $global_settings['tax_type_option'] ) {
@@ -875,6 +889,9 @@ class Template_Tags extends TemplateTags {
 					</strong>
 				</span>
 			</td>
+		</tr>
+		<tr>
+			<td colspan="2" style="padding: 4px 0;"></td>
 		</tr>
 
 		<?php
@@ -1063,7 +1080,8 @@ class Template_Tags extends TemplateTags {
 
 					$settings = get_option( 'wp_travel_engine_settings', array() );
 
-					$bank_accounts = wte_array_get( $settings, 'bank_transfer.accounts', array() );
+					$bank_accounts     = wte_array_get( $settings, 'bank_transfer.accounts', array() );
+					$bank_instructions = wte_array_get( $settings, 'bank_transfer.instruction', '' );
 					?>
 					<tr>
 						<td colspan="2"><hr style="border: none;border-top: 1px solid #DCDFEA;"></td>
@@ -1071,18 +1089,31 @@ class Template_Tags extends TemplateTags {
 					<tr>
 						<td colspan="2" style="font-size: 16px;line-height: 1.75;font-weight: bold;padding: 8px 0 4px;"><?php esc_html_e( 'Bank Details:', 'wp-travel-engine' ); ?></td>
 					</tr>
-					<?php
+					<?php if ( ! empty( $bank_instructions ) ) : ?>
+					<tr>
+						<td colspan="2" style="color: #566267;"><?php echo wp_kses( nl2br( $bank_instructions ), array( 'br' => array() ) ); ?></td>
+					</tr>
+					<tr>
+						<td colspan="2" style="padding: 4px 0;"></td>
+					</tr>
+						<?php
+					endif;
+					$is_first = true;
 					foreach ( $bank_accounts as $account ) :
+						if ( ! $is_first ) {
+							?>
+							<tr><td colspan="2"><hr style="border: none;border-top: 1px solid #DCDFEA;"></td></tr>
+							<?php
+						}
+						$is_first = false;
 						foreach ( $bank_details_labels as $key => $label ) :
 							?>
 							<tr>
-								<td style="color: #566267;"><?php esc_html_e( $label, 'wp-travel-engine' ); ?></td>
+								<td style="color: #566267;"><?php echo esc_html( $label ); ?></td>
 								<td style="width: 50%;text-align: right;"><strong><?php echo isset( $account[ $key ] ) ? esc_html( $account[ $key ] ) : ''; ?></strong></td>
 							</tr>
 							<?php
 						endforeach;
-						?>
-						<?php
 					endforeach;
 				endif;
 
@@ -1235,7 +1266,8 @@ class Template_Tags extends TemplateTags {
 			'{payment_method}'            => $this->get_payment_method( $this->payment->ID ),
 			'{billing_details}'           => $this->get_billing_details(),
 			'{additional_note}'           => $this->get_additional_note(),
-			'{traveller_details}'         => $this->get_traveller_details(),
+			'{traveller_details}'         => $this->get_traveller_details(), // @deprecated 6.7.9 This is deprecated tags that need to remove after addon fixed typos.
+			'{traveler_details}'          => $this->get_traveller_details(),
 			'{emergency_details}'         => $this->get_emergency_details(),
 			'{trip_booking_summary}'      => $this->get_trip_booking_summary(),
 			'{trip_payment_details}'      => $this->get_trip_booking_payment(),
@@ -1248,7 +1280,8 @@ class Template_Tags extends TemplateTags {
 			'{trip_booked_date}'          => $this->get_current_date(),
 			'{trip_start_date}'           => wptravelengine_format_trip_datetime( $trip->datetime ),
 			'{trip_end_date}'             => wptravelengine_format_trip_datetime( isset( $order_trip['end_datetime'] ) ? $order_trip['end_datetime'] : '' ),
-			'{no_of_travellers}'          => $this->get_no_of_travellers(),
+			'{no_of_travellers}'          => $this->get_no_of_travellers(), // @depreacted next This is deprecated tags that need to remove after addon like ( automator, waitlist ) fixed typos.
+			'{no_of_travelers}'           => $this->get_no_of_travellers(),
 			'{trip_total_price}'          => $this->get_total_amount(),
 			'{trip_paid_amount}'          => wptravelengine_the_price_with_decimal( $_booking->get_total_paid_amount(), false ),
 			'{trip_due_amount}'           => wptravelengine_the_price_with_decimal( max( 0, $_booking->get_total_due_amount() ), false ),
@@ -1577,8 +1610,38 @@ class Template_Tags extends TemplateTags {
 					endforeach;
 			endforeach;
 			?>
-		</table>
+					</table>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * This function returns label for line items of cart.
+	 *
+	 * @since 6.7.9
+	 */
+	public function get_line_item_label( $line_item ) {
+
+		switch ( $line_item ) :
+			case 'pricing_category':
+				$label = '';
+				break;
+			case 'extra_service':
+				$label = __( 'Extra Service(s):', 'wp-travel-engine' );
+				break;
+			case 'accommodation':
+				$label = __( 'Accommodation(s):', 'wp-travel-engine' );
+				break;
+			case 'pickup_point':
+				$label = __( 'Pickup Points:', 'wp-travel-engine' );
+				break;
+			case 'travel_insurance':
+				$label = __( 'Travel Insurance:', 'wp-travel-engine' );
+				break;
+			default:
+				$label = ucwords( str_replace( '_', ' ', $line_item ) ) . ':';
+				break;
+		endswitch;
+		return apply_filters( 'wptravelengine_mail_line_item_label', $label, $line_item );
 	}
 }

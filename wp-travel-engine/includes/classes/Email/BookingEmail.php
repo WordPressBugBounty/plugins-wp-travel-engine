@@ -127,7 +127,7 @@ class BookingEmail extends Email {
 	 *
 	 * @return string
 	 */
-	protected function get_body( $content = null, $template = null ): string {
+	public function get_body( $content = null, $template = null ): string {
 		return apply_filters( 'wptravelengine_generate_email_template', parent::get_body( $content, $template ), $this );
 	}
 
@@ -138,6 +138,7 @@ class BookingEmail extends Email {
 		$plugin_settings = new PluginSettings();
 		$subject         = $plugin_settings->get( "{$this->sendto}_email_notify_tabs." . $this->template . '.subject', '' );
 		$subject         = apply_filters( "wptravelengine_{$this->email_template_type}_email_template_subject_{$this->sendto}", $subject, $this );
+
 		return $subject;
 	}
 
@@ -219,6 +220,7 @@ class BookingEmail extends Email {
 		$plugin_settings = new PluginSettings();
 		$content         = $plugin_settings->get( $this->sendto . '_email_notify_tabs.' . $this->template . '.content', '' );
 		$content         = apply_filters( "wptravelengine_{$this->email_template_type}_email_template_content_{$this->sendto}", $content, $this );
+
 		$this->set( 'content', $content );
 		return $this;
 	}

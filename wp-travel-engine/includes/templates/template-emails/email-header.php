@@ -15,7 +15,7 @@ $logo_url = $settings['email']['logo']['url'];
 		<tr>
 			<th style="text-align: center;padding: 32px 0 24px;">
 				<?php if ( ! empty( $logo_url ) ) : ?>
-					<a href="<?php echo esc_url( home_url( '/' ) ); ?>">
+					<a href="<?php echo esc_url( home_url( '/' ) ); ?>" style="box-shadow: none; outline: none;">
 						<img style="max-width: 100px;margin: 0 auto;height: auto;" src="<?php echo esc_url( $logo_url ); ?>" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
 					</a>
 				<?php else : ?>

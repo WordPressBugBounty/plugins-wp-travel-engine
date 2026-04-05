@@ -427,9 +427,9 @@ class Checkout extends BasePage {
 		$trip_start_date = ! empty( $cart_item['trip_time'] ) ? $cart_item['trip_time'] : $cart_item['trip_date'];
 		$trip_end_date   = wptravelengine_format_trip_end_datetime( $trip_start_date, $trip );
 
-		if ( ! empty( $cart_item['trip_time_range'] ) ) {
-			$trip_end_date = wptravelengine_format_trip_datetime( $cart_item['trip_time_range'][1] ?? '' );
-		}
+		// if ( ! empty( $cart_item['trip_time_range'] ) ) {
+		// $trip_end_date = wptravelengine_format_trip_datetime( $cart_item['trip_time_range'][1] ?? '' );
+		// }
 
 		return array(
 			'trip'         => $trip,

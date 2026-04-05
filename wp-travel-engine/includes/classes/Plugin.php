@@ -30,6 +30,7 @@ use WPTravelEngine\Filters\Template;
 use WPTravelEngine\Filters\TripAPISchema;
 use WPTravelEngine\Filters\TripMetaTabs;
 use WPTravelEngine\Helpers\Functions;
+use WPTravelEngine\Email\TranslationManager\TranslatePress;
 use WPTravelEngine\Helpers\Translators;
 use WPTravelEngine\Modules\CouponCode;
 use WPTravelEngine\Modules\Filters as CustomFilters;
@@ -151,6 +152,7 @@ final class Plugin {
 		new TripSearch();
 
 		new Translators();
+		new TranslatePress();
 
 		$this->set_cart();
 		$this->run();
@@ -383,20 +385,6 @@ final class Plugin {
 
 		add_filter( 'is_wptravelengine_active', '__return_true' );
 
-		/**
-		 * Add query vars.
-		 *
-		 * @since 6.7.6
-		 */
-		add_filter(
-			'query_vars',
-			function ( $vars ) {
-				$vars[] = 'wte_id';
-				$vars[] = 'payment_key';
-				return $vars;
-			}
-		);
-
 		add_action( 'wp_footer', array( $this, 'add_booking_modal_container' ) );
 
 		add_filter( 'widget_text', 'do_shortcode' );
@@ -515,7 +503,7 @@ final class Plugin {
 			2
 		);
 
-		add_action( 'init', array( $this, 'handle_email_template_actions' ) );
+		// add_action( 'init', array( $this, 'handle_email_template_actions' ) );
 
 		add_filter( 'extra_theme_headers', array( $this, 'plugin_headers' ) );
 		add_filter( 'extra_plugin_headers', array( $this, 'plugin_headers' ) );
@@ -1526,34 +1514,6 @@ final class Plugin {
 		// $this->loader->add_action( 'wp_travel_engine_before_trip_add_to_cart', $plugin_public, 'check_min_max_pax', 9, 6 );
 		$this->loader->add_action( 'wte_before_add_to_cart', $plugin_public, 'check_min_max_pax', 9, 2 );
 
-		// add_filter(
-		// 'wp_travel_engine_available_payment_gateways',
-		// function ($gateways_list) {
-		// if ( array_key_exists( 'direct_bank_transfer', $gateways_list ) ) {
-		// $settings = get_option( 'wp_travel_engine_settings', array() );
-		// $method = $settings['bank_transfer'] ?? array();
-		// if ( ! empty( $method['title'] ) ) {
-		// $gateways_list['direct_bank_transfer']['label'] = $method['title'];
-		// }
-		// if ( ! empty( $method['description'] ) ) {
-		// $gateways_list['direct_bank_transfer']['info_text'] = $method['description'];
-		// }
-		// }
-		// if ( array_key_exists( 'check_payments', $gateways_list ) ) {
-		// $settings = get_option( 'wp_travel_engine_settings', array() );
-		// $method = $settings['check_payment'] ?? array();
-		// if ( ! empty( $method['title'] ) ) {
-		// $gateways_list['check_payments']['label'] = $method['title'];
-		// }
-		// if ( ! empty( $method['description'] ) ) {
-		// $gateways_list['check_payments']['info_text'] = $method['description'];
-		// }
-		// }
-		//
-		// return $gateways_list;
-		// }
-		// );
-
 		/**
 		 * Custom Enquiry Form
 		 *
@@ -1566,6 +1526,8 @@ final class Plugin {
 
 		// Add action to output WTE rich snippet for Elementor templates on trip single pages.
 		$this->loader->add_action( 'elementor/page_templates/header-footer/after_content', $this, 'output_wte_rich_snippet_for_elementor' );
+
+		$this->loader->add_filter( 'Yoast\WP\SEO\allowlist_permalink_vars', $plugin_public, 'yoast_allowlist_permalink_vars' );
 	}
 
 	/**
@@ -1813,7 +1775,7 @@ final class Plugin {
 	 * Processes email template preview requests and template update actions.
 	 *
 	 * @return void
-	 * @since 6.7.8
+	 * @deprecated 6.7.9 Handling this function logic is move to PreviewEmail Ajax Controller.
 	 */
 	public function handle_email_template_actions() {
 

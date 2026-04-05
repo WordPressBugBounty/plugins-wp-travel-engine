@@ -21,10 +21,10 @@ if ( is_array( $payments ) && count( $payments ) > 0 ) {
 		$payment_amount += $payment_id->get_amount();
 	}
 }
-// $is_customized_reservation = $booking->get_meta( '_user_edited' );
-// if ( $is_customized_reservation ) {
-// return;
-// }
+$is_customized_reservation = $booking->get_meta( '_user_edited' );
+if ( $is_customized_reservation ) {
+	return;
+}
 if ( ! $is_booking_edit_enabled || ! $booking->has_due_payment() || ! $booking->get_order_items() ) {
 	return;
 }

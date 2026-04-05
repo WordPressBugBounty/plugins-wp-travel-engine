@@ -19,7 +19,6 @@ use WPTravelEngine\Core\Models\Post;
 use WPTravelEngine\Core\Models\Settings\Options;
 use WPTravelEngine\Utilities\ArrayUtility;
 use WPTravelEngine\Core\Models\Post\TripPackage;
-use WPTravelEngine\Helpers\PackageDateParser;
 
 /**
  * REST API: Trip Post Controller class
@@ -153,7 +152,7 @@ class Trip extends WP_REST_Posts_Controller {
 					array(
 						'methods'             => WP_REST_Server::READABLE,
 						'callback'            => function ( $req ) use ( $ver ) {
-							PackageDateParser::$version = $ver;
+							$req->set_param( 'version', $ver );
 							return $this->get_dates( $req );
 						},
 						'permission_callback' => array( $this, 'get_items_permissions_check' ),
@@ -829,10 +828,9 @@ class Trip extends WP_REST_Posts_Controller {
 									'array_merge',
 									array_map(
 										function ( $string ) use ( $package_id, $trip, $package_dates ) {
-											return ( new PackageDateParser(
-												new TripPackage( $package_id, $trip ),
-												$package_dates[ $string ]
-											) )->get_unique_dates( false, array(), 'ym' );
+											$trip_package = new TripPackage( $package_id, $trip );
+											$date_parser  = wptravelengine_get_date_parser( $trip_package, $package_dates[ $string ] );
+											return $date_parser->get_unique_dates( false, array(), 'ym' );
 										},
 										array_keys( $package_dates )
 									)
@@ -1255,15 +1253,16 @@ class Trip extends WP_REST_Posts_Controller {
 		$trip          = Post\Trip::make( $id );
 		$trip_packages = new Post\TripPackages( $trip );
 
-		$from = $request->get_param( 'from' ) ?? wp_date( 'Y-m-d' );
-		$to   = $request->get_param( 'to' ) ?? wp_date( 'Y-m-d', strtotime( "{$from} +3 years" ) );
+		$from    = $request->get_param( 'from' ) ?? wp_date( 'Y-m-d' );
+		$to      = $request->get_param( 'to' ) ?? wp_date( 'Y-m-d', strtotime( "{$from} +3 years" ) );
+		$version = $request->get_param( 'version' );
 
 		$dates = array();
 		foreach ( $trip_packages as $trip_package ) {
 			/** @var Post\TripPackage $trip_package */
 			$data = array(
 				'package' => $this->prepare_package_data( $trip_package ),
-				'dates'   => $trip_package->get_package_dates( compact( 'from', 'to' ) ),
+				'dates'   => $trip_package->get_package_dates( compact( 'from', 'to', 'version' ) ),
 			);
 
 			$dates[] = $data;

@@ -36,8 +36,8 @@ foreach ( $args['bookings'] ?? array() as $booking ) {
 		$total_paid = $p_data['total_paid'] ?? 0;
 		$due        = $p_data['due_exclusive'] ?? 0;
 	} else {
-		$total_paid = $booking_instance->get_paid_amount() ?? 0;
-		$due        = $booking_instance->get_due_amount() ?? 0;
+		$total_paid = $booking_instance->get_total_paid_amount() ?? 0;
+		$due        = $booking_instance->get_total_due_amount() ?? 0;
 	}
 
 	$show_pay_now_btn = $due > 0;

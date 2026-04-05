@@ -45,6 +45,7 @@ class Events {
 	 * Process events.
 	 *
 	 * @since 6.7.1
+	 * @since 6.7.9 Added support for TranslatePress language.
 	 */
 	public function process_events() {
 
@@ -60,6 +61,9 @@ class Events {
 
 			if ( Translators::is_wpml_multilingual_active() ) {
 				$__data['event_data']['wpml_lang'] = apply_filters( 'wpml_current_language', null );
+			} elseif ( Translators::is_translatepress_active() ) {
+				// @since 6.7.9 Added support for TranslatePress language.
+				$__data['event_data']['trp_lang'] = Translators::get_translatepress_language();
 			}
 
 			$__data['trigger_time'] ??= gmdate( 'Y-m-d H:i:s', time() + 60 );

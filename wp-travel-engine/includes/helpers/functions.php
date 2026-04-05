@@ -1727,6 +1727,14 @@ function wte_esc_svg( $value ) {
 				'viewbox'         => array(), // <= Must be lower case!
 				'fill'            => array(),
 			),
+			'image'  => array(
+				'href'                => array( 'url' => true ),
+				'width'               => array(),
+				'height'              => array(),
+				'x'                   => array(),
+				'y'                   => array(),
+				'preserveAspectRatio' => array(),
+			),
 			'g'      => array(
 				'fill'      => array(),
 				'id'        => array(),
