@@ -11,13 +11,13 @@ $tab_contents = apply_filters(
 	array(
 		10 => array(
 			'content_id'       => 'packages',
-			'content_callback' => function() {
+			'content_callback' => function () {
 				require_once WTE_PRICING_TAB_PARTIALS_DIR . 'tab-pricing__packages.php';
 			},
 		),
 		20 => array(
 			'content_id'       => 'partial-payment-upsell',
-			'content_callback' => function() {
+			'content_callback' => function () {
 					require_once WTE_PRICING_TAB_PARTIALS_DIR . 'tab-pricing__partial-payment-upsell.php';
 			},
 		),

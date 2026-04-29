@@ -5,9 +5,10 @@
 namespace WPTravelEngine\Posttype;
 
 use WP_Post;
+use WPTravelEngine\Core\Models\Post\Trip as PostTrip;
 
 /**
- * @deprecated 6.0.0
+ * @since 6.7.10 - Reverted deprecated label ( deprecated 6.0.0 ); identified as a crucial element for native themes.
  */
 #[\AllowDynamicProperties]
 class Trip {
@@ -33,6 +34,14 @@ class Trip {
 	 */
 	public $packages = array();
 
+	/**
+	 * PostTrip model instance.
+	 *
+	 * @var ?PostTrip
+	 * @since 6.7.10
+	 */
+	private ?PostTrip $trip_model = null;
+
 	public function __construct( $post ) {
 		// wptravelengine_deprecated_class( __CLASS__, '6.0.0', \WPTravelEngine\Core\Models\Post\Trip::class );
 		// add_action( 'wp', array( $this, 'initialize' ) );
@@ -42,15 +51,9 @@ class Trip {
 	}
 
 	public function initialize() {
-		$_post = $this->post;
 
-		$trip_version = get_post_meta( $_post->ID, 'trip_version', true );
-		if ( empty( $trip_version ) ) {
-			$trip_version = '1.0.0';
-		}
-
-		$this->trip_version = $trip_version;
-
+		$this->trip_model      = wptravelengine_get_trip( $this->post );
+		$this->trip_version    = $this->trip_model ? $this->trip_model->version() : '1.0.0';
 		$this->use_legacy_trip = defined( 'USE_WTE_LEGACY_VERSION' ) && USE_WTE_LEGACY_VERSION;
 
 		$this->set_packages();
@@ -59,43 +62,24 @@ class Trip {
 
 	public function set_packages() {
 
-		if ( ! $this->post ) {
-			return array();
+		if ( ! $this->trip_model instanceof PostTrip ) {
+			return;
 		}
 
-		// Get Trip package Ids.
-		$package_ids = $this->{'packages_ids'};
+		$pkgs = $this->trip_model->packages()->array();
 
-		if ( ! is_array( $package_ids ) ) {
-			$package_ids = array();
+		if ( empty( $pkgs ) ) {
+			return;
 		}
 
-		if ( ! empty( $package_ids ) ) {
-			$packages = \get_posts(
-				array(
-					'post_type'        => 'trip-packages',
-					'include'          => $package_ids,
-					'suppress_filters' => true,
-				)
-			);
-		} else {
-			$packages = array();
-		}
-
-		$_packages = array();
-
-		foreach ( $packages as $package ) {
-			$_packages[ $package->ID ] = $package;
-		}
-
-		$this->packages = $_packages;
+		$this->packages = array_column( $pkgs, 'post', 'ID' );
 	}
 
 	public function set_default_package() {
-		if ( $this->post->post_type !== 'trip' ) {
-			$default_package = null;
+		if ( $this->trip_model instanceof PostTrip ) {
+			$default_package = $this->trip_model->default_package();
 		} else {
-			$default_package = wptravelengine_get_trip_primary_package( $this->post->ID );
+			$default_package = null;
 		}
 		$this->has_sale        = $default_package->{'has_sale'} ?? false;
 		$this->price           = $default_package->{'price'} ?? 0;
@@ -159,7 +143,7 @@ class Trip {
 
 		$trip_id = (int) $trip_id;
 
- 		if ( isset( self::$instance[ $trip_id ] ) ) {
+		if ( isset( self::$instance[ $trip_id ] ) ) {
 			return self::$instance[ $trip_id ];
 		}
 

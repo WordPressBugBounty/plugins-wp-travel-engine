@@ -14,9 +14,9 @@ if ( empty( $tag_terms ) || is_wp_error( $tag_terms ) ) {
 	<?php
 	foreach ( $tag_terms as $tg ) :
 		$tags_description = term_description( $tg->term_id );
-		$tag_link       = get_term_link( $tg );
-		$tag_name       = $tg->name;
-		$tag_span_class = $tags_description ? 'tippy-exist' : '';
+		$tag_link         = get_term_link( $tg );
+		$tag_name         = $tg->name;
+		$tag_span_class   = $tags_description ? 'tippy-exist' : '';
 
 		printf(
 			'<span class="%s"%s><a rel="tag" target="_self" href="%s">%s</a></span>',

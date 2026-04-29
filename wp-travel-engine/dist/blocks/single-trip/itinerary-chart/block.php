@@ -39,7 +39,7 @@ if ( ! defined( 'WTEAI_VERSION' ) ) {
 	if ( $chart_data_unit !== $altitude_unit ) {
 		$conversion_factor  = 'm' === $chart_data_unit ? 3.28084 : 0.3048;
 		$altitude_unit_data = array_map(
-			function( $altitude ) use ( $conversion_factor ) {
+			function ( $altitude ) use ( $conversion_factor ) {
 				return round( $altitude * $conversion_factor );
 			},
 			$altitude_unit_data

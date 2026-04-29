@@ -45,6 +45,7 @@ use const WP_TRAVEL_ENGINE_FILE_PATH;
 use WPTravelEngine\Core\Models\Post\TripPackages;
 use WPTravelEngine\Core\Controllers\RestAPI\V2\Booking as BookingController;
 use WPTravelEngine\Core\Models\Post\Payment;
+use WPTravelEngine\Pages\Admin\UpcomingTours;
 
 /**
  * The file that defines the core plugin class
@@ -219,6 +220,7 @@ final class Plugin {
 		add_action( 'init', array( $this, 'process_booking' ), 12 );
 		add_action( 'init', array( BookingProcess::class, 'initialize_legacy_booking_hooks' ) );
 		add_action( 'init', array( $this, 'handle_plugin_deactivation_notices' ) );
+		add_action( 'init', array( UpcomingTours::class, 'register_cache_hooks' ) ); // Clear cache on relevant events.
 
 		add_action( 'admin_init', array( \WTE_Ajax::class, 'ajax_request_middleware' ) );
 		add_action( 'admin_init', array( $this, 'plugin_inline_update_notices' ) );

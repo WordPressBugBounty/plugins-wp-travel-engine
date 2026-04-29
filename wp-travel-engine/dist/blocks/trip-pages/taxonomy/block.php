@@ -1,11 +1,12 @@
 <?php
 /**
  * Trip Taxonomy Template.
+ *
  * @package Wp_Travel_Engine
  * @since 5.9
  */
 global $wtetrip;
-$taxonomy =  $attributes_parser->get( 'taxonomyType' );
+$taxonomy = $attributes_parser->get( 'taxonomyType' );
 wp_enqueue_script( 'wp-travel-engine' );
 wp_enqueue_style( 'wp-travel-engine' );
 ?>
@@ -61,7 +62,8 @@ wp_enqueue_style( 'wp-travel-engine' );
 								<h1 class="page-title" data-id="<?php echo esc_attr( $taxonomy ); ?>"><?php the_title(); ?></h1>
 								<?php
 								endif;
-							if ( isset( $post->ID ) ):?>
+							if ( isset( $post->ID ) ) :
+								?>
 							<div class="page-feat-image">
 								<?php
 								$image_id    = get_post_thumbnail_id( $post->ID );
@@ -69,7 +71,7 @@ wp_enqueue_style( 'wp-travel-engine' );
 								echo wp_get_attachment_image( $image_id, $banner_size );
 								?>
 							</div>
-							<?php endif;?>
+							<?php endif; ?>
 					</div>
 					<div class="<?php echo esc_attr( $taxonomy ); ?>-holder wpte-trip-list-wrapper">
 							<?php
@@ -88,12 +90,12 @@ wp_enqueue_style( 'wp-travel-engine' );
 										<figure class="thumbnail">
 											<a href="<?php echo esc_url( $term_object->link ); ?>">
 											<?php
-                                                $term_object->thumbnail && print( \wp_get_attachment_image(
-                                                    $term_object->thumbnail,
-                                                    apply_filters( 'wp_travel_engine_activities_img_size', 'activities-thumb-size' ),
-                                                    false,
-                                                    array( 'itemprop' => 'image' )
-                                                ) );
+												$term_object->thumbnail && print( \wp_get_attachment_image(
+													$term_object->thumbnail,
+													apply_filters( 'wp_travel_engine_activities_img_size', 'activities-thumb-size' ),
+													false,
+													array( 'itemprop' => 'image' )
+												) );
 											?>
 											</a>
 										</figure>

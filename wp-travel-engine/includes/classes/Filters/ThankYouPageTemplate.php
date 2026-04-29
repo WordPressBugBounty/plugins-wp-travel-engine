@@ -239,8 +239,9 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 	 * @since 6.4.0
 	 */
 	public function print_cart_summary( $args ) {
-		$template_instance                   = new Checkout( $this->cart );
-		$template_instance->is_checkout_page = false;
+		$template_instance                    = new Checkout( $this->cart );
+		$template_instance->is_checkout_page  = false;
+		$template_instance->payment_completed = $this->payment->is_completed();
 
 		$cart_info = new CartInfoParser( $this->booking->get_cart_info() );
 

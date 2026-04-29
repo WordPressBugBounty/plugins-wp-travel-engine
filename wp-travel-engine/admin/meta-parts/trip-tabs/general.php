@@ -69,7 +69,7 @@ $duration_array = apply_filters(
 	<span class="wpte-tooltip"><?php esc_html_e( 'Enter the duration ( number ) for the trip and choose desired unit.', 'wp-travel-engine' ); ?></span>
 </div>
 
-<div class="wpte-field wpte-floated<?php echo $trip_duration_unit == 'hours' ? ' hidden' : '' ?>" id="wte-edit__general_duration-night">
+<div class="wpte-field wpte-floated<?php echo $trip_duration_unit == 'hours' ? ' hidden' : ''; ?>" id="wte-edit__general_duration-night">
 	<label class="wpte-field-label"><?php esc_html_e( 'Nights', 'wp-travel-engine' ); ?> </label>
 	<div class="wpte-multi-fields wpte-floated">
 		<input type="number" min="1" step="1" name="wp_travel_engine_setting[trip_duration_nights]" value="<?php echo $trip_duration_nights ? esc_attr( $trip_duration_nights ) : ''; ?>" placeholder="<?php esc_attr_e( 'Enter Duration', 'wp-travel-engine' ); ?>">
@@ -80,8 +80,8 @@ $duration_array = apply_filters(
 	<span class="wpte-tooltip"><?php esc_html_e( 'Enter the trip duration in nights.', 'wp-travel-engine' ); ?></span>
 </div>
 
-<?php 
-if ( ! defined( 'WTE_FIXED_DEPARTURE_VERSION' )  ) {
+<?php
+if ( ! defined( 'WTE_FIXED_DEPARTURE_VERSION' ) ) {
 	?>
 	<div class="wpte-form-block-wrap">
 		<div class="wpte-form-block">

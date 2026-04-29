@@ -22,6 +22,7 @@ $settings                 = wptravelengine_settings()->get();
 $set_duration_type        = isset( $settings['set_duration_type'] ) && ! empty( $settings['set_duration_type'] ) ? $settings['set_duration_type'] : 'days';
 $wp_travel_engine_setting = get_post_meta( get_the_ID(), 'wp_travel_engine_setting', true );
 $wpte_trip_images         = get_post_meta( get_the_ID(), 'wpte_gallery_id', true );
+$is_main_slider           = false; // for disable "single-trip-main-carousel" class in gallery when related trips in single trip page.
 
 $view_mode = 'grid';
 wptravelengine_set_template_args( array( 'related_query' => true ) );
@@ -38,7 +39,7 @@ if ( $is_featured ) {
 		<?php
 			do_action( 'wptravelengine_before_trip_archive_card' );
 
-			wptravelengine_get_template( 'trip-card/index.php', compact( 'view_mode' ) );
+			wptravelengine_get_template( 'trip-card/index.php', compact( 'view_mode', 'is_main_slider' ) );
 
 			do_action( 'wptravelengine_after_trip_archive_card' );
 		?>

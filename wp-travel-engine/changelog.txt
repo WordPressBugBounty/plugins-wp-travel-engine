@@ -1,6 +1,11 @@
 == Changelog ==
 
-= 6.7.9 - 5th March 2026 =
+= 6.7.10 - 29th April 2026 =
+* Improved: Enhanced the Upcoming Tours interface with filters, a seat availability bar, and a search option for easier navigation.
+* Fixed: Corrected the amount displayed on the Thank You page to match the actual payment status.
+* Fixed: Resolved issue where trip end time displayed incorrectly when using translated hour and minute formats.
+
+= 6.7.9 - 5th April 2026 =
 * New Feature: Added support for translating email content using TranslatePress, making it easy to localize emails into multiple languages.
 * Improved: Email previews and test emails now update instantly without saving, allowing admins to quickly review layouts using sample data.
 * Fixed: Fixed an issue where Yoast SEO analysis failed if the Maps tab was left empty.

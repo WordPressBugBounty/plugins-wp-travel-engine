@@ -183,7 +183,7 @@ class Email extends TemplateTags {
 		$body    = apply_filters( 'wptravelengine_email_content', $this->get( 'body' ), $this );
 
 		// Apply template tags to the translated content.
-		$subject = $this->apply_tags( $subject );
+		$subject = wp_specialchars_decode( $this->apply_tags( $subject ), ENT_QUOTES );
 		$body    = $this->apply_tags( $body );
 
 		// Send email to each recipient.

@@ -18,7 +18,7 @@ if ( $render->is_editor() ) {
 } else {
 	$trip_settings = get_post_meta( $wtetrip->post->ID, 'wp_travel_engine_setting', true );
 	$key           = '1_wpeditor';
-	$overview      = isset( $trip_settings[ 'tab_content' ][ $key ] ) ? $trip_settings[ 'tab_content' ][ $key ] : '';
+	$overview      = isset( $trip_settings['tab_content'][ $key ] ) ? $trip_settings['tab_content'][ $key ] : '';
 }
 ?>
 <div <?php $attributes_parser->wrapper_attributes(); ?>>

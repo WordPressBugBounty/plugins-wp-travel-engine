@@ -29,7 +29,8 @@ class UpcomingToursDetails extends AjaxController {
 	 */
 	protected function process_request() {
 		$get  = $this->request->get_query_params();
-		$html = UpcomingTours::get_details_html( $get['id'] );
+		$id   = isset( $get['id'] ) ? sanitize_text_field( wp_unslash( $get['id'] ) ) : '';
+		$html = UpcomingTours::get_details_html( $id );
 		wp_send_json_success(
 			array(
 				'html' => $html,

@@ -202,7 +202,7 @@ function wptravelengine_format_trip_datetime( string $date, string $format = '' 
  *
  * @return string
  * @since 6.3.0
- * @since {next} Builds strtotime offset from raw trip model data; supports minutes sub-unit (e.g. "+7 hours 15 minutes") via `trip_duration_minutes` meta.
+ * @since 6.7.10 remove translation strings for strtotime calculation.
  */
 function wptravelengine_format_trip_end_datetime( string $start_date, Trip $trip, string $format = '' ): string {
 	$date_format = $format;
@@ -215,7 +215,7 @@ function wptravelengine_format_trip_end_datetime( string $start_date, Trip $trip
 	if ( 'days' === $trip->get_trip_duration_unit() ) {
 		$duration_str = ( (int) ( $trip->get_trip_duration() ?: 1 ) - 1 ) . ' days';
 	} else {
-		$duration_arr = array_map( 'strtolower', wptravelengine_get_trip_duration_arr( $trip ) );
+		$duration_arr = array_map( 'strtolower', wptravelengine_get_trip_duration_arr( $trip, 'both', false ) );
 		$duration_str = implode( ' ', $duration_arr );
 	}
 
@@ -417,7 +417,7 @@ function wptravelengine_get_checkout_template_args( array $args = array() ): arr
 /**
  * Trip primary package.
  *
- * @param Trip|int $trip The trip-object or ID.
+ * @param WP_Post|Trip|int $trip The WP_Post object or trip-object or ID.
  *
  * @return ?TripPackage
  * @since 6.1.0

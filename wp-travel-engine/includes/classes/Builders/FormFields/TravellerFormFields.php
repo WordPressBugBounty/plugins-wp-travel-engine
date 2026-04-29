@@ -18,6 +18,13 @@ use WTE_Default_Form_Fields;
  */
 class TravellerFormFields extends FormField {
 
+	/**
+	 * Summary of traveller_count
+	 *
+	 * @var int
+	 */
+	public int $traveller_count = 0;
+
 	public function __construct() {
 		parent::__construct( false );
 	}
@@ -40,10 +47,9 @@ class TravellerFormFields extends FormField {
 	 * @since 6.3.3
 	 */
 	public function with_values( array $form_data, $booking = null ): array {
-		static $traveller_count = 0;
-		++$traveller_count;
+		++$this->traveller_count;
 
-		if ( $traveller_count == 1 && $booking ) {
+		if ( $this->traveller_count == 1 && $booking ) {
 			$this->fields = 'old' === $booking->get_meta( 'traveller_page_type' )
 				? WTE_Default_Form_Fields::traveller_information()
 				: DefaultFormFields::lead_traveller();

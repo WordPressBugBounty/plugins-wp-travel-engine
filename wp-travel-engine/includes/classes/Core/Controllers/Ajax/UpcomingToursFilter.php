@@ -28,19 +28,22 @@ class UpcomingToursFilter extends AjaxController {
 	 * Process request
 	 */
 	protected function process_request() {
-		$post   = $this->request->get_body_params();
-		$status = isset( $post['status'] ) ? sanitize_text_field( $post['status'] ) : 'all';
-		// Get valid statuses (allow plugins to add custom statuses)
-		$valid_statuses = apply_filters( 'wptravelengine_upcoming_tours_valid_statuses', array( 'all', 'booked' ) );
-		// Ensure status is one of the valid values
+		$post = $this->request->get_body_params();
+
+		$valid_statuses = array_keys( UpcomingTours::get_filtered_statuses() );
+		$status         = isset( $post['status'] ) ? sanitize_text_field( $post['status'] ) : 'all';
 		if ( ! in_array( $status, $valid_statuses, true ) ) {
 			$status = 'all';
 		}
+
 		$html = UpcomingTours::get_upcoming_tours_html(
 			array(
-				'date'   => isset( $post['date'] ) ? $post['date'] : 'all',
-				'count'  => isset( $post['count'] ) ? absint( $post['count'] ) : 10,
-				'status' => $status,
+				'date'        => isset( $post['date'] ) ? sanitize_text_field( $post['date'] ) : 'all',
+				'count'       => isset( $post['count'] ) ? absint( $post['count'] ) : 10,
+				'status'      => $status,
+				'keywords'    => isset( $post['keywords'] ) ? sanitize_text_field( $post['keywords'] ) : '',
+				'destination' => isset( $post['destination'] ) ? sanitize_text_field( $post['destination'] ) : '',
+				'activity'    => isset( $post['activity'] ) ? sanitize_text_field( $post['activity'] ) : '',
 			)
 		);
 		wp_send_json_success( array( 'html' => $html ) );

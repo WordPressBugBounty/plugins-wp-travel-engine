@@ -15,7 +15,6 @@ use WPTravelEngine\Helpers\Countries;
 use WPTravelEngine\Helpers\CartInfoParser;
 use WPTravelEngine\Core\Models\Post\Booking;
 use WPTravelEngine\Core\Models\Post\Payment;
-use WPTravelEngine\Helpers\Translators;
 use WPTravelEngine\Utilities\PaymentCalculator;
 
 #[AllowDynamicProperties]
@@ -170,9 +169,16 @@ class Template_Tags extends TemplateTags {
 	 *
 	 * @since 6.5.0
 	 * @return string
+	 * @since 6.7.10 Updated booked date calculation.
 	 */
 	public function get_current_date() {
-		return wp_date( get_option( 'date_format', 'Y-m-d' ) . ' ' . get_option( 'time_format', 'H:i:s' ) );
+		$date_to_format = $this->booking->post_date_gmt ?: $this->booking->post_date;
+		$timestamp      = strtotime( $date_to_format );
+
+		return wp_date(
+			get_option( 'date_format', 'Y-m-d' ) . ' ' . get_option( 'time_format', 'H:i:s' ),
+			$timestamp
+		);
 	}
 
 	/**
@@ -531,9 +537,7 @@ class Template_Tags extends TemplateTags {
 				<td style="width: 50%;text-align: right;"><strong>
 				<?php
 					echo esc_html(
-						( isset( $trip->end_datetime ) && ! empty( $trip->end_datetime ) )
-							? wptravelengine_format_trip_datetime( $trip->end_datetime )
-							: wptravelengine_format_trip_end_datetime( $trip->datetime, $trip_modal )
+						wptravelengine_format_trip_end_datetime( $trip->datetime, $trip_modal )
 					);
 				?>
 					</strong>
@@ -715,7 +719,7 @@ class Template_Tags extends TemplateTags {
 				<?php
 			}
 			?>
-			
+
 			<?php
 			echo $total_row;
 			echo $spacer_row;
@@ -772,26 +776,26 @@ class Template_Tags extends TemplateTags {
 		<tr>
 			<td colspan="2" style="font-size: 16px;line-height: 1.75;font-weight: bold;padding: 8px 0 4px;"><?php esc_html_e( 'Billing Details:', 'wp-travel-engine' ); ?></td>
 		</tr>
-		<tr>
-			<td style="color: #566267;"><?php esc_html_e( 'Booking Name:', 'wp-travel-engine' ); ?></td>
-			<td style="width: 50%;text-align: right;"><strong><?php esc_html_e( $this->get_billing_fullname(), 'wp-travel-engine' ); ?></strong></td>
-		</tr>
-		<tr>
-			<td style="color: #566267;"><?php esc_html_e( 'Booking Email:', 'wp-travel-engine' ); ?></td>
-			<td style="width: 50%;text-align: right;"><strong><?php esc_html_e( $this->get_billing_email(), 'wp-travel-engine' ); ?></strong></td>
-		</tr>
-		<tr>
-			<td style="color: #566267;"><?php esc_html_e( 'Booking Address:', 'wp-travel-engine' ); ?></td>
-			<td style="width: 50%;text-align: right;"><strong><?php esc_html_e( $this->get_billing_address(), 'wp-travel-engine' ); ?></strong></td>
-		</tr>
-		<tr>
-			<td style="color: #566267;"><?php esc_html_e( 'City:', 'wp-travel-engine' ); ?></td>
-			<td style="width: 50%;text-align: right;"><strong><?php esc_html_e( $this->get_billing_city(), 'wp-travel-engine' ); ?></strong></td>
-		</tr>
-		<tr>
-			<td style="color: #566267;"><?php esc_html_e( 'Country:', 'wp-travel-engine' ); ?></td>
-			<td style="width: 50%;text-align: right;"><strong><?php esc_html_e( $this->get_billing_country(), 'wp-travel-engine' ); ?></strong></td>
-		</tr>
+		<?php
+		$billing_fields = array(
+			__( 'Booking Name:', 'wp-travel-engine' )    => $this->get_billing_fullname(),
+			__( 'Booking Email:', 'wp-travel-engine' )   => $this->get_billing_email(),
+			__( 'Booking Address:', 'wp-travel-engine' ) => $this->get_billing_address(),
+			__( 'City:', 'wp-travel-engine' )            => $this->get_billing_city(),
+			__( 'Country:', 'wp-travel-engine' )         => $this->get_billing_country(),
+		);
+		foreach ( $billing_fields as $label => $value ) {
+			if ( empty( trim( $value ) ) ) {
+				continue;
+			}
+			?>
+			<tr>
+				<td style="color: #566267;"><?php echo esc_html( $label ); ?></td>
+				<td style="width: 50%;text-align: right;"><strong><?php echo esc_html( $value ); ?></strong></td>
+			</tr>
+			<?php
+		}
+		?>
 		<?php
 		return ob_get_clean();
 	}
@@ -960,7 +964,7 @@ class Template_Tags extends TemplateTags {
 		endif;
 		ob_start();
 		?>
-		<?php if ( 'booking_only' === $payment_gateway || 'check_payments' === $payment_gateway ) { ?>
+		<?php if ( 'booking_only' === $payment_gateway || 'check_payments' === $payment_gateway || 'direct_bank_transfer' === $payment_gateway ) { ?>
 		<tr>
 			<td colspan="2">
 				<span style="display: flex;padding: 8px 16px;background-color: #147dfe1a;border-radius: 4px;margin: 0 -16px;">
@@ -1020,26 +1024,26 @@ class Template_Tags extends TemplateTags {
 		<tr>
 			<td colspan="2" style="font-size: 16px;line-height: 1.75;font-weight: bold;padding: 8px 0 4px;"><?php esc_html_e( 'Billing Details:', 'wp-travel-engine' ); ?></td>
 		</tr>
-		<tr>
-			<td style="color: #566267;"><?php esc_html_e( 'Booking Name:', 'wp-travel-engine' ); ?></td>
-			<td style="width: 50%;text-align: right;"><strong><?php esc_html_e( $this->get_billing_fullname(), 'wp-travel-engine' ); ?></strong></td>
-		</tr>
-		<tr>
-			<td style="color: #566267;"><?php esc_html_e( 'Booking Email:', 'wp-travel-engine' ); ?></td>
-			<td style="width: 50%;text-align: right;"><strong><?php esc_html_e( $this->get_billing_email(), 'wp-travel-engine' ); ?></strong></td>
-		</tr>
-		<tr>
-			<td style="color: #566267;"><?php esc_html_e( 'Booking Address:', 'wp-travel-engine' ); ?></td>
-			<td style="width: 50%;text-align: right;"><strong><?php esc_html_e( $this->get_billing_address(), 'wp-travel-engine' ); ?></strong></td>
-		</tr>
-		<tr>
-			<td style="color: #566267;"><?php esc_html_e( 'City:', 'wp-travel-engine' ); ?></td>
-			<td style="width: 50%;text-align: right;"><strong><?php esc_html_e( $this->get_billing_city(), 'wp-travel-engine' ); ?></strong></td>
-		</tr>
-		<tr>
-			<td style="color: #566267;"><?php esc_html_e( 'Country:', 'wp-travel-engine' ); ?></td>
-			<td style="width: 50%;text-align: right;"><strong><?php esc_html_e( $this->get_billing_country(), 'wp-travel-engine' ); ?></strong></td>
-		</tr>
+		<?php
+		$billing_fields = array(
+			__( 'Booking Name:', 'wp-travel-engine' )    => $this->get_billing_fullname(),
+			__( 'Booking Email:', 'wp-travel-engine' )   => $this->get_billing_email(),
+			__( 'Booking Address:', 'wp-travel-engine' ) => $this->get_billing_address(),
+			__( 'City:', 'wp-travel-engine' )            => $this->get_billing_city(),
+			__( 'Country:', 'wp-travel-engine' )         => $this->get_billing_country(),
+		);
+		foreach ( $billing_fields as $label => $value ) {
+			if ( empty( trim( $value ) ) ) {
+				continue;
+			}
+			?>
+			<tr>
+				<td style="color: #566267;"><?php echo esc_html( $label ); ?></td>
+				<td style="width: 50%;text-align: right;"><strong><?php echo esc_html( $value ); ?></strong></td>
+			</tr>
+			<?php
+		}
+		?>
 		<?php
 		return ob_get_clean();
 	}
@@ -1236,6 +1240,8 @@ class Template_Tags extends TemplateTags {
 
 		$payments_data = $_booking->get_payments_data();
 
+		$traveller_details = $this->get_traveller_details();
+
 		$meta_tags = array(
 			'{trip_url}'                  => $this->get_trip_url(),
 			'{name}'                      => $this->get_billing_first_name(),
@@ -1266,13 +1272,13 @@ class Template_Tags extends TemplateTags {
 			'{payment_method}'            => $this->get_payment_method( $this->payment->ID ),
 			'{billing_details}'           => $this->get_billing_details(),
 			'{additional_note}'           => $this->get_additional_note(),
-			'{traveller_details}'         => $this->get_traveller_details(), // @deprecated 6.7.9 This is deprecated tags that need to remove after addon fixed typos.
-			'{traveler_details}'          => $this->get_traveller_details(),
+			'{traveller_details}'         => $traveller_details, // @deprecated 6.7.9 This is deprecated tags that need to remove after addon fixed typos.
+			'{traveler_details}'          => $traveller_details,
 			'{emergency_details}'         => $this->get_emergency_details(),
 			'{trip_booking_summary}'      => $this->get_trip_booking_summary(),
 			'{trip_payment_details}'      => $this->get_trip_booking_payment(),
 			'{trip_booking_details}'      => $this->get_trip_booking_details(),
-			'{booked_trip_name}'          => html_entity_decode( get_the_title( $this->trip->ID ), ENT_QUOTES, 'UTF-8' ),
+			'{booked_trip_name}'          => html_entity_decode( $this->trip->title ?: 'Untitled Trip', ENT_QUOTES, 'UTF-8' ),
 			'{customer_first_name}'       => $this->get_billing_first_name(),
 			'{customer_last_name}'        => $this->get_billing_last_name(),
 			'{customer_full_name}'        => $this->get_billing_fullname(),
@@ -1557,6 +1563,11 @@ class Template_Tags extends TemplateTags {
 		return ob_get_clean();
 	}
 
+	/**
+	 * Get the Traveller details.
+	 *
+	 * @return string
+	 */
 	public function get_traveller_details() {
 		if ( empty( $this->traveller_details ) ) {
 			return '';
@@ -1570,10 +1581,10 @@ class Template_Tags extends TemplateTags {
 				</td>
 			</tr>
 			<?php
-			$traveller_details = array();
+			$traveller_details     = array();
+			$traveller_form_fields = new TravellerFormFields();
 			foreach ( $this->traveller_details as $details ) {
-				$traveller_form_fields = new TravellerFormFields();
-				$traveller_details[]   = $traveller_form_fields->with_values( $details, new Booking( $this->booking->ID ) );
+				$traveller_details[] = $traveller_form_fields->with_values( $details, new Booking( $this->booking->ID ) );
 			}
 			foreach ( $traveller_details as $index => $traveller_detail ) :
 				$traveller_label = sprintf( __( 'Traveller %1$d%2$s', 'wp-travel-engine' ), $index + 1, $index === 0 ? __( ' (Lead Traveller)', 'wp-travel-engine' ) : '' );

@@ -34,12 +34,14 @@ $show_trip_counts = isset( $settings->{'layoutFilters'}['showTripCounts'] ) && $
 								fill="#2183DF" />
 						</svg>
 					</a>
-					<?php if ( $show_trip_counts ) :
+					<?php
+					if ( $show_trip_counts ) :
 						$count_label = $settings->{'countLabel'};
-						if ( strpos( $settings->{'countLabel'}, '|') !== false ) {
+						if ( strpos( $settings->{'countLabel'}, '|' ) !== false ) {
 							$countlabels = explode( '|', $settings->{'countLabel'} );
 							$count_label = (int) $term_object->count === 1 ? $countlabels[0] : $countlabels[1];
-						} ?>
+						}
+						?>
 						<span class="trip-count"><?php echo esc_html( sprintf( '%1$d %2$s', $term_object->count, $count_label ) ); ?></span>
 					<?php endif; ?>
 				</h2>

@@ -52,7 +52,7 @@ if ( ! empty( $tabs['id'] ) ) : ?>
 					?>
 				</div>
 			<?php endif; ?>
-			<div class="tab-inner-wrapper" role="presentation" style="order: <?php echo esc_attr( $order ); ?>;">
+			<div class="tab-inner-wrapper" role="presentation">
 				<?php
 				$order = 1;
 				foreach ( array_values( $tabs['id'] ) as $index => $values ) :

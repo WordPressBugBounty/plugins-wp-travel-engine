@@ -1,6 +1,7 @@
 <?php
 /**
  * Trip Archive Template.
+ *
  * @package Wp_Travel_Engine
  * @since 5.9
  */

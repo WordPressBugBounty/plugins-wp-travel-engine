@@ -49,8 +49,8 @@ $overview_section_title = isset( $wp_travel_engine_setting['overview_section_tit
 			<div class="wpte-field wpte-text wpte-floated">
 				<label class="wpte-field-label"><?php esc_html_e( 'Section Title', 'wp-travel-engine' ); ?></label>
 				<input type="text" name="wp_travel_engine_setting[trip_highlights_title]"
-					   value="<?php echo esc_attr( $trip_highlights_title ); ?>"
-					   placeholder="<?php esc_attr_e( 'Enter Here', 'wp-travel-engine' ); ?>">
+						value="<?php echo esc_attr( $trip_highlights_title ); ?>"
+						placeholder="<?php esc_attr_e( 'Enter Here', 'wp-travel-engine' ); ?>">
 				<span
 					class="wpte-tooltip"><?php esc_html_e( 'Enter title for the Trip Highlights section.', 'wp-travel-engine' ); ?></span>
 			</div>

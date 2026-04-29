@@ -48,7 +48,7 @@ $scale_rating = $scale_text[ $rating_index ];
 			<div class="trip-rating-stars">
 				<div class="trip-rating-stars-placeholder-group">
 					<?php
-					for ( $i = 0; $i < 5; $i ++ ) {
+					for ( $i = 0; $i < 5; $i++ ) {
 						?>
 						<svg width="19" height="18" viewBox="0 0 19 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 							<path
@@ -61,7 +61,7 @@ $scale_rating = $scale_text[ $rating_index ];
 				</div>
 				<div class="trip-rating-stars-rated-group" style="width: <?php echo (int) $average_rating / 5 * 100; ?>%">
 					<?php
-					for ( $i = 0; $i < 5; $i ++ ) {
+					for ( $i = 0; $i < 5; $i++ ) {
 						?>
 						<svg width="19" height="18" viewBox="0 0 19 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 							<path

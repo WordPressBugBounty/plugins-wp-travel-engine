@@ -183,7 +183,6 @@ class Wp_Travel_Engine_Tabs {
 	public function wp_travel_engine_enquiry_metabox_callback( $tab_args ) {
 		include WP_TRAVEL_ENGINE_BASE_PATH . '/admin/meta-parts/enquiry.php';
 	}
-
 }
 
 new Wp_Travel_Engine_Tabs();

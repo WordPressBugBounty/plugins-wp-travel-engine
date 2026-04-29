@@ -27,7 +27,7 @@ $taxonomies_slugs = array(
 	'trip_types' => 'trip-types',
 );
 
-$taxonomy_slug = isset( $taxonomies_slugs[ $attributes['taxonomy'] ] ) ? $taxonomies_slugs[ $attributes['taxonomy'] ] : $attributes['taxonomy'];
+$taxonomy_slug            = isset( $taxonomies_slugs[ $attributes['taxonomy'] ] ) ? $taxonomies_slugs[ $attributes['taxonomy'] ] : $attributes['taxonomy'];
 $show_heading             = wte_array_get( $attributes, 'showTitle', false );
 $show_section_description = wte_array_get( $attributes, 'showSubtitle', false );
 $view_all_link            = wte_array_get( $attributes, 'viewAllLink', '' ) != '' ? trailingslashit( $attributes['viewAllLink'] ) : home_url( $taxonomy_slug );

@@ -1386,4 +1386,16 @@ class Trip extends PostModel {
 
 		$this->plain_start_date = $start_date;
 	}
+
+	/**
+	 * Get trip capacity for dates with time constraints.
+	 *
+	 * @param string $date Optional. Specific date to filter (format: Y-m-d or Y-m-dTH:i).
+	 *
+	 * @return string|int|array Empty string if no data or unlimited, int for single date, array for all dates.
+	 * @since 6.7.10
+	 */
+	public function get_trip_capacity( string $date = '' ) {
+		return apply_filters( 'wptravelengine_fsd_get_data_of', false, $this->post->ID, $date );
+	}
 }

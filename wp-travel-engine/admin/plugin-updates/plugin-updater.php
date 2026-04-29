@@ -9,7 +9,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * @since 5.0.0
  */
-//require_once plugin_dir_path( WP_TRAVEL_ENGINE_FILE_PATH ) . 'admin/plugin-updates/core-pre-update.php';
+// require_once plugin_dir_path( WP_TRAVEL_ENGINE_FILE_PATH ) . 'admin/plugin-updates/core-pre-update.php';
 /**
  * Extensions Updater.
  */

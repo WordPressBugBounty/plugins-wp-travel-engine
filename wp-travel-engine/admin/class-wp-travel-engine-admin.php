@@ -397,11 +397,13 @@ class Wp_Travel_Engine_Admin {
 	 *
 	 * @since 5.1.1
 	 * @updated 6.7.0
+	 * @since 6.7.10 Dispatches `wptravelengine.plugin.updated` event with version info on plugin upgrade.
 	 */
 	public function prepare_filter_params( $force = false ) {
 		$version = str_replace( '.', '', WP_TRAVEL_ENGINE_VERSION );
 		if ( 'done' !== get_option( "wte_search_params_updated_{$version}", false ) || $force ) {
 			Events::schedule();
+			Events::add_event( 'wptravelengine.plugin.updated', 0, 'plugin' );
 			TripSearch::update_metas_for_trip_search();
 			update_option( "wte_search_params_updated_{$version}", 'done', true );
 			self::disable_autoload();

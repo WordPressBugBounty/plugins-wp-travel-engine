@@ -33,7 +33,6 @@ if ( ! class_exists( 'WP_Travel_Engine_Admin_Permalink_Settings', false ) ) :
 
 			add_action( 'admin_init', array( $this, 'settings_init' ) );
 			add_action( 'admin_init', array( $this, 'settings_save' ) );
-
 		}
 
 		/**

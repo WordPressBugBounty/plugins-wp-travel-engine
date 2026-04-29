@@ -12,8 +12,8 @@
 use WPTravelEngine\Blocks\SampleData;
 
 global $wtetrip;
-$form_layout = get_option( 'wp_travel_engine_settings', array() )[ 'pricing_section_layout' ] ?? 'layout-1';
-$pricing     = [];
+$form_layout = get_option( 'wp_travel_engine_settings', array() )['pricing_section_layout'] ?? 'layout-1';
+$pricing     = array();
 if ( $render->is_editor() ) {
 	$pricing = SampleData::prices();
 } else {
@@ -24,9 +24,9 @@ if ( $render->is_editor() ) {
 	if ( isset( $package->{'package-categories'} ) ) {
 		$package_categories       = (object) $package->{'package-categories'};
 		$categories_in_package    = $package_categories->c_ids;
-		$pricing_categories       = wte_get_terms_by_id( 'trip-packages-categories', [ 'hide_empty' => false ] );
+		$pricing_categories       = wte_get_terms_by_id( 'trip-packages-categories', array( 'hide_empty' => false ) );
 		$primary_pricing_category = get_option( 'primary_pricing_category', 0 );
-		$dynamic_package          = $attributes_parser->get( 'priceCategory' ) ?: [ $primary_pricing_category ];
+		$dynamic_package          = $attributes_parser->get( 'priceCategory' ) ?: array( $primary_pricing_category );
 		$filtered_ids             = array_intersect( $categories_in_package, $dynamic_package );
 		$categories_in_package    = array_values( $filtered_ids );
 		// To display primary pricing category first.
@@ -46,25 +46,25 @@ if ( $render->is_editor() ) {
 			$sale_price = $has_sale ? $package_categories->sale_prices[ $c_id ] : $price;
 			$per_label  = ! empty( $pricing_categories[ $c_id ]->name ) ? $pricing_categories[ $c_id ]->name : $package_categories->labels[ $c_id ];
 
-			$pricing[] = [
+			$pricing[] = array(
 				'price'      => $price,
 				'sale_price' => $sale_price,
 				'has_sale'   => $has_sale,
 				'per_label'  => $per_label,
-			];
+			);
 		}
 	}
 }
 ?>
 <div <?php $attributes_parser->wrapper_attributes(); ?>>
-	<div class="wpte-bf-price-wrap<?php echo $attributes_parser->get("enableDivider") ? ' has-divider' : ''; ?>">
-		<?php foreach ( $pricing as $data ): ?>
+	<div class="wpte-bf-price-wrap<?php echo $attributes_parser->get( 'enableDivider' ) ? ' has-divider' : ''; ?>">
+		<?php foreach ( $pricing as $data ) : ?>
 			<div class="wpte-bf-price">
 				<span class="wpte-bf-reg-price">
 					<?php
-					$regular_price = wte_get_formated_price( $data[ 'price' ], '', $attributes_parser->get( 'displayFormat' ) );
+					$regular_price = wte_get_formated_price( $data['price'], '', $attributes_parser->get( 'displayFormat' ) );
 					echo wp_kses(
-						str_replace( '%regular_price%', $data[ 'has_sale' ] ? "<del>{$regular_price}</del>" : '', $attributes_parser->get( 'pricePrefix' ) ),
+						str_replace( '%regular_price%', $data['has_sale'] ? "<del>{$regular_price}</del>" : '', $attributes_parser->get( 'pricePrefix' ) ),
 						array(
 							'span' => array(
 								'class' => array(),
@@ -75,12 +75,12 @@ if ( $render->is_editor() ) {
 						)
 					);
 					?>
-                </span>
+				</span>
 				<span class="wpte-bf-offer-price">
 					<?php
-					$sale_price = is_numeric( $data[ 'sale_price' ] ) ? $data[ 'sale_price' ] : $data[ 'price' ];
-					$sale_price = wte_get_formated_price( $sale_price, '', $attributes_parser->get( 'displayFormat' ) );
-					$label              = $data[ 'per_label' ];
+					$sale_price         = is_numeric( $data['sale_price'] ) ? $data['sale_price'] : $data['price'];
+					$sale_price         = wte_get_formated_price( $sale_price, '', $attributes_parser->get( 'displayFormat' ) );
+					$label              = $data['per_label'];
 					$priceDisplayFormat = $attributes_parser->get( 'priceDisplayFormat' );
 					$priceDisplayFormat = str_replace( '%price_category%', $label, $priceDisplayFormat );
 					echo wp_kses(
@@ -90,12 +90,12 @@ if ( $render->is_editor() ) {
 							$priceDisplayFormat
 						),
 						array(
-							'ins' => array( 'class' => array(), ),
-							'div' => array( 'class' => array(), ),
+							'ins' => array( 'class' => array() ),
+							'div' => array( 'class' => array() ),
 						)
 					);
 					?>
-                </span>
+				</span>
 			</div>
 		<?php endforeach; ?>
 	</div>

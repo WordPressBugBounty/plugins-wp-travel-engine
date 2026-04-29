@@ -1494,12 +1494,17 @@ class Booking extends PostModel {
 			throw new InvalidArgumentException( 'Payment ID #' . $payment_id . ' is not found in the booking #' . $this->get_id() . '.' );
 		}
 
+		$previous_payment_status = $_payment->get_payment_status();
+
+		if ( 'completed' === $previous_payment_status ) {
+			return;
+		}
+
 		$args['payment_metadata'] = is_array( $args['payment_metadata'] ) ? $args['payment_metadata'] : array();
 		$args['booking_metadata'] = is_array( $args['booking_metadata'] ) ? $args['booking_metadata'] : array();
 
-		$payable_amount          = $calculator->subtract( (string) $_payment->get_payable_amount(), (string) $paid_amount );
-		$previous_payment_status = $_payment->get_payment_status();
-		$paid_amount             = $calculator->add( (string) $paid_amount, $gateway_fee );
+		$payable_amount = $calculator->subtract( (string) $_payment->get_payable_amount(), (string) $paid_amount );
+		$paid_amount    = $calculator->add( (string) $paid_amount, $gateway_fee );
 
 		$_payment_metas = array(
 			'payable'              => array(
@@ -1542,9 +1547,7 @@ class Booking extends PostModel {
 			wptravelengine_send_booking_emails( $payment_id, 'order_confirmation', 'all' );
 		}
 
-		if ( 'completed' !== $previous_payment_status ) {
-			Events::add_event( 'wptravelengine.booking.payment.completed', $_payment->get_id(), $_payment->get_post_type() );
-		}
+		Events::add_event( 'wptravelengine.booking.payment.completed', $_payment->get_id(), $_payment->get_post_type() );
 	}
 
 	/**

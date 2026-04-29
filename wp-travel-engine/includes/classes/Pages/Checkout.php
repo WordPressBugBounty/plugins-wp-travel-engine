@@ -31,6 +31,14 @@ class Checkout extends BasePage {
 
 	public bool $is_checkout_page = true;
 
+	/**
+	 * Summary of payment_completed
+	 *
+	 * @var bool
+	 * @since 6.7.10
+	 */
+	public bool $payment_completed = false;
+
 	public function __construct( Cart $cart ) {
 		$this->cart            = $cart;
 		$this->global_settings = wptravelengine_settings()->get();
@@ -529,6 +537,7 @@ class Checkout extends BasePage {
 	 *
 	 * @return array
 	 * @since 6.7.0
+	 * @since 6.7.10 Updated Payment status for thank you page.
 	 */
 	public function get_fragments_after_line_items(): array {
 		$override_fragments_after_total = apply_filters( 'wptravelengine_checkout_page_override_fragments_after_total', array(), $this );
@@ -553,10 +562,18 @@ class Checkout extends BasePage {
 		$summary_rows += $this->get_fee_rows( 'tax_inclusive' );
 		$summary_rows += $this->get_fee_rows( 'tax' );
 		$summary_rows += $this->get_fee_rows( 'tax_exclusive' );
+		if ( $this->is_checkout_page ) {
+			$payable_label = __( 'Payable Now', 'wp-travel-engine' );
+		} elseif ( false === $this->payment_completed ) {
+			$payable_label = __( 'Payable Amount', 'wp-travel-engine' );
+		} else {
+			$payable_label = __( 'Amount Paid', 'wp-travel-engine' );
+		}
+
 		$summary_rows += $this->get_row(
 			array(
 				'key'   => 'payable_now',
-				'label' => sprintf( '<strong>%s</strong>', $this->is_checkout_page ? __( 'Payable Now', 'wp-travel-engine' ) : __( 'Amount Paid', 'wp-travel-engine' ) ),
+				'label' => sprintf( '<strong>%s</strong>', $payable_label ),
 				'type'  => 'payable',
 			)
 		);

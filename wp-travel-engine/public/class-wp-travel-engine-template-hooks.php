@@ -435,7 +435,7 @@ class WP_Travel_Engine_Template_Hooks {
 
 			if ( 0.00 === floatval( $sale_price ) ) :
 				?>
-				<div class="wpte-bf-price">
+				<div class="wpte-bf-price wpte-is-free">
 					<span class="wpte-bf-reg-price">
 						<?php if ( $has_sale ) : ?>
 							<span class="wpte-bf-price-from"><?php esc_html_e( 'From', 'wp-travel-engine' ); ?></span>
@@ -443,7 +443,7 @@ class WP_Travel_Engine_Template_Hooks {
 						<?php endif; ?>
 					</span>
 					<span class="wpte-bf-offer-price">
-						<ins class="wpte-bf-offer-amount wpte-is-free"><?php esc_html_e( 'Free', 'wp-travel-engine' ); ?></ins>
+						<ins class="wpte-bf-offer-amount"><?php esc_html_e( 'Free', 'wp-travel-engine' ); ?></ins>
 						<div class="wpte-bf-pqty"><?php printf( esc_html( $price_per_label ), esc_html( $per_label ) ); ?></div>
 					</span>
 				</div>

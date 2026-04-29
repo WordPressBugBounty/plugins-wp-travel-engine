@@ -10,6 +10,9 @@
  * @var bool $show_more_btn
  * @var bool $show_less_btn
  * @var int $count
+ * @var array $valid_statuses
+ * @var array $destinations
+ * @var array $activities
  */
 ?>
 

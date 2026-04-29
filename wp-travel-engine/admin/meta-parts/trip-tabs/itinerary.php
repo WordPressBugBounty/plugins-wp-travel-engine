@@ -60,7 +60,7 @@ $arr_keys = isset( $trip_itineraries['itinerary_title'] ) ? array_keys( $trip_it
 			</div> <!-- .wpte-repeater-block -->
 			<?php
 		endif;
-		$i++;
+		++$i;
 	endforeach;
 	if ( empty( $arr_keys ) ) :
 		?>

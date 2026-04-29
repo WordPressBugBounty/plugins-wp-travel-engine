@@ -9,7 +9,6 @@
 namespace WPTravelEngine\Pages\Admin;
 
 use WPTravelEngine\Interfaces\AdminPage;
-use WPTravelEngine\Core\Models\Post\Booking;
 use WPTravelEngine\Core\Models\Post\Trip;
 
 /**
@@ -53,6 +52,13 @@ class UpcomingTours implements AdminPage {
 	public int $position;
 
 	/**
+	 * Cached cache version for the current request (avoids repeated get_transient calls).
+	 *
+	 * @var int|null
+	 */
+	private static ?int $cache_version = null;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -61,10 +67,19 @@ class UpcomingTours implements AdminPage {
 		$this->menu_title  = __( 'Upcoming Tours', 'wp-travel-engine' );
 		$this->capability  = 'manage_options';
 		$this->position    = 1;
+	}
 
-		// Clear cache when bookings are created or updated
+	/**
+	 * Register hooks that clear the upcoming tours transient cache.
+	 *
+	 * @return void
+	 * @since 6.7.10
+	 */
+	public static function register_cache_hooks() {
 		add_action( 'wptravelengine.booking.created', array( __CLASS__, 'clear_cache' ), 10 );
 		add_action( 'wptravelengine.booking.updated', array( __CLASS__, 'clear_cache' ), 10 );
+		add_action( 'created_term', array( __CLASS__, 'clear_cache' ), 10 );
+		add_action( 'update_option_WPLANG', array( __CLASS__, 'clear_cache' ), 10 );
 	}
 
 	/**
@@ -85,6 +100,7 @@ class UpcomingTours implements AdminPage {
 	public static function get_upcoming_tours_html( array $args = array() ) {
 		ob_start();
 		wptravelengine_get_admin_template( 'upcoming-tours/partials/content.php', self::get_template_args( $args ) );
+
 		return ob_get_clean();
 	}
 
@@ -100,6 +116,7 @@ class UpcomingTours implements AdminPage {
 		if ( ! is_string( $datetime ) || '' === trim( $datetime ) ) {
 			return array(
 				'date_time' => '',
+				'year'      => '',
 				'month'     => '',
 				'day'       => '',
 				'time'      => '',
@@ -109,6 +126,7 @@ class UpcomingTours implements AdminPage {
 		if ( false === $time_stamp ) {
 			return array(
 				'date_time' => '',
+				'year'      => '',
 				'month'     => '',
 				'day'       => '',
 				'time'      => '',
@@ -116,12 +134,65 @@ class UpcomingTours implements AdminPage {
 		}
 		$tz_utc = new \DateTimeZone( 'UTC' );
 		$time   = strpos( $datetime, 'T' ) !== false ? wp_date( get_option( 'time_format', 'g:i a' ), $time_stamp, $tz_utc ) : '';
+
 		return array(
 			'date_time' => wp_date( 'M d, Y', $time_stamp, $tz_utc ) . $time,
+			'year'      => wp_date( 'Y', $time_stamp, $tz_utc ),
 			'month'     => wp_date( 'M', $time_stamp, $tz_utc ),
 			'day'       => wp_date( 'd', $time_stamp, $tz_utc ),
 			'time'      => $time,
 		);
+	}
+
+	/**
+	 * Get filtered terms.
+	 *
+	 * @param string $taxonomy Taxonomy.
+	 *
+	 * @return array
+	 */
+	public static function get_filtered_terms( $taxonomy ) {
+		$cache_key = 'wptravelengine_upcoming_tours_terms_' . $taxonomy . '_' . self::get_cache_version();
+
+		// Try to get from cache first
+		$cached = get_transient( $cache_key );
+		if ( false !== $cached ) {
+			return $cached;
+		}
+
+		$terms = get_terms(
+			array(
+				'taxonomy' => $taxonomy,
+			)
+		);
+
+		if ( empty( $terms ) || is_wp_error( $terms ) ) {
+			return array();
+		}
+
+		$grouped_terms = array();
+		$term_filtered = array();
+
+		// Group terms by parent
+		foreach ( $terms as $term ) {
+			$grouped_terms[ $term->parent ][] = $term;
+		}
+		if ( isset( $grouped_terms[0] ) ) {
+			foreach ( $grouped_terms[0] as $parent ) {
+				$term_filtered[ $parent->slug ] = $parent->name;
+				if ( isset( $grouped_terms[ $parent->term_id ] ) ) {
+
+					foreach ( $grouped_terms[ $parent->term_id ] as $child ) {
+						$term_filtered[ $child->slug ] = '- ' . $child->name;
+					}
+				}
+			}
+		}
+
+		// Cache for 1 hour (terms change infrequently)
+		set_transient( $cache_key, $term_filtered, HOUR_IN_SECONDS );
+
+		return $term_filtered;
 	}
 
 	/**
@@ -139,10 +210,6 @@ class UpcomingTours implements AdminPage {
 				'from' => wp_date( 'Y-m-d', strtotime( 'last sunday' ) ),
 				'to'   => wp_date( 'Y-m-d', strtotime( 'next saturday' ) ),
 			),
-			'next_week'    => array(
-				'from' => wp_date( 'Y-m-d', strtotime( 'next saturday' ) ),
-				'to'   => wp_date( 'Y-m-d', strtotime( 'next saturday' ) ),
-			),
 			'next_15_days' => array(
 				'from' => wp_date( 'Y-m-d' ),
 				'to'   => wp_date( 'Y-m-d', strtotime( '+15 days' ) ),
@@ -151,6 +218,35 @@ class UpcomingTours implements AdminPage {
 				'from' => wp_date( 'Y-m-d', strtotime( 'first day of this month' ) ),
 				'to'   => wp_date( 'Y-m-d', strtotime( 'last day of this month' ) ),
 			),
+			'next_month'   => array(
+				'from' => wp_date( 'Y-m-d', strtotime( 'first day of next month' ) ),
+				'to'   => wp_date( 'Y-m-d', strtotime( 'last day of next month' ) ),
+			),
+			'this_year'    => array(
+				'from' => wp_date( 'Y-m-d', strtotime( 'first day of january this year' ) ),
+				'to'   => wp_date( 'Y-m-d', strtotime( 'last day of december this year' ) ),
+			),
+			'next_year'    => array(
+				'from' => wp_date( 'Y-m-d', strtotime( 'first day of january next year' ) ),
+				'to'   => wp_date( 'Y-m-d', strtotime( 'last day of december next year' ) ),
+			),
+		);
+	}
+
+	/**
+	 * Get filtered statuses.
+	 *
+	 * @return array
+	 * @since 6.7.10
+	 */
+	public static function get_filtered_statuses() {
+		return apply_filters(
+			'wptravelengine_upcoming_tours_status_options',
+			array(
+				'all'          => __( 'All Status (Default)', 'wp-travel-engine' ),
+				'available'    => __( 'Available', 'wp-travel-engine' ),
+				'fully_booked' => __( 'Fully Booked', 'wp-travel-engine' ),
+			)
 		);
 	}
 
@@ -160,124 +256,251 @@ class UpcomingTours implements AdminPage {
 	 * @param array $args Arguments.
 	 *
 	 * @return array
+	 * @since 6.7.10
 	 */
 	public static function get_template_args( array $args = array() ) {
 		$request = wp_parse_args( // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_wp_parse_args
 			$args,
 			array(
-				'date'   => 'all',
-				'count'  => 10,
-				'status' => 'all',
+				'date'        => 'all',
+				'count'       => 10,
+				'offset'      => 0,
+				'status'      => 'all',
+				'keywords'    => '',
+				'destination' => '',
+				'activity'    => '',
 			)
 		);
 		$trips   = array();
-		$status  = isset( $request['status'] ) ? sanitize_text_field( $request['status'] ) : 'all';
-		// Get valid statuses (allow plugins to add custom statuses)
-		$valid_statuses = apply_filters( 'wptravelengine_upcoming_tours_valid_statuses', array( 'all', 'booked' ) );
-		// Ensure status is one of the valid values
-		if ( ! in_array( $status, $valid_statuses, true ) ) {
-			$status = 'all';
+
+		$status      = $request['status'];
+		$keywords    = $request['keywords'];
+		$destination = $request['destination'];
+		$activity    = $request['activity'];
+
+		// Parse date filter for database query
+		$booking_args = array();
+		if ( isset( $request['date'] ) && $request['date'] !== 'all' ) {
+			$date_range = json_decode( stripslashes( $request['date'] ), true );
+			if ( is_array( $date_range ) && isset( $date_range['from'], $date_range['to'] ) ) {
+				$booking_args['date_from'] = $date_range['from'];
+				$booking_args['date_to']   = $date_range['to'];
+			}
 		}
 
-		// Get trips from bookings (only if status is 'all' or 'booked').
-		if ( $status === 'all' || $status === 'booked' ) {
-			// Get bookings with caching (already filtered to future dates)
-			$bookings = self::get_post_bookings();
+		$trips_cache_key = 'wptravelengine_upcoming_tours_trips_' . self::get_cache_version() . '_' . md5( wp_json_encode( $booking_args ) );
+		$trips           = get_transient( $trips_cache_key );
+		if ( false === $trips ) {
+			$trips = array();
+		}
 
-			// Prime post meta cache for bookings to avoid N+1 queries
-			if ( ! empty( $bookings ) ) {
-				update_postmeta_cache( wp_list_pluck( $bookings, 'ID' ) );
+		if ( empty( $trips ) && in_array( $status, array_keys( self::get_filtered_statuses() ), true ) ) {
+			// get_post_bookings() already primes the booking meta cache
+			$bookings = self::get_post_bookings( $booking_args );
+
+			$trip_ids     = array();
+			$booking_data = array();
+			foreach ( $bookings as $booking ) {
+				$trip_id       = $booking['trip_id'];
+				$trip_datetime = $booking['trip_datetime'];
+
+				$trip_ids[] = $trip_id;
+
+				$u_id = $trip_id . '_' . $trip_datetime;
+
+				if ( ! isset( $booking_data[ $u_id ] ) ) {
+					$booking_data[ $u_id ] = array(
+						'trip_id'       => $trip_id,
+						'trip_datetime' => $trip_datetime,
+						'travellers'    => 0,
+					);
+				}
+				$booking_data[ $u_id ]['travellers'] += $booking['travellers'];
 			}
 
-			// Collect unique trip IDs for bulk meta caching
-			$trip_ids = array();
-			foreach ( $bookings as $booking ) {
-				$booking_model = new Booking( $booking->ID );
-				$trip_id       = $booking_model->get_trip_id();
-				if ( $trip_id ) {
-					$trip_ids[] = $trip_id;
-				}
-				$trip_datetime = $booking_model->get_trip_datetime();
+			$unique_trip_ids = array_unique( $trip_ids );
+			if ( ! empty( $unique_trip_ids ) ) {
+				update_postmeta_cache( $unique_trip_ids );
 
-				// Additional safety check (though get_post_bookings already filters)
-				if ( ! $trip_datetime || $trip_datetime < wp_date( 'Y-m-d' ) ) {
+				update_object_term_cache( $unique_trip_ids, 'trip' );
+			}
+
+			$trip_instances = array();
+			foreach ( $booking_data as $u_id => $data ) {
+				$trip_id       = $data['trip_id'];
+				$trip_datetime = $data['trip_datetime'];
+				$travellers    = $data['travellers'];
+
+				if ( isset( $trips[ $u_id ] ) ) {
+					// Trip already exists, just add travellers
+					$trips[ $u_id ]['travellers'] += $travellers;
 					continue;
 				}
 
-				if ( isset( $request['date'] ) && $request['date'] !== 'all' ) {
-					$date_range = json_decode( stripslashes( $request['date'] ), true );
-
-					if ( strtotime( $trip_datetime ) < strtotime( $date_range['from'] . ' 00:00:00' ) || strtotime( $trip_datetime ) > strtotime( $date_range['to'] . ' 23:59:59' ) ) {
-						continue;
-					}
-				}
-
-				$u_id       = $trip_id . '_' . $trip_datetime;
-				$travellers = 0;
-				foreach ( $booking_model->get_trip_pax() as $pax ) {
-					$travellers += (int) $pax;
-				}
-				// Travellers meta is change if custom reservation (booking is edited from booking details page).
-				if ( $travellers <= 0 ) {
-					$data       = $booking_model->get_data();
-					$travellers = $data['booked_trips'][0]['number_of_travellers'] ?? 0;
-				}
-				if ( ! isset( $trips[ $u_id ] ) ) {
+				if ( ! isset( $trip_instances[ $trip_id ] ) ) {
 					try {
-						$trip = new Trip( $trip_id );
+						$trip_instances[ $trip_id ] = new Trip( $trip_id );
 					} catch ( \Exception $e ) {
 						continue;
 					}
+				}
+				$trip = $trip_instances[ $trip_id ];
 
-					$trips[ $u_id ] = array(
-						'permalink'  => $trip->get_permalink(),
-						'title'      => $trip->get_title(),
-						'datetime'   => self::get_formatted_date( $trip_datetime ),
-						'travellers' => 0,
-						'image'      => $trip->get_gallery_images()[0]['src'] ?? '',
+				$destinations_data = array();
+				$destinations      = get_the_terms( $trip_id, 'destination' );
+				if ( is_array( $destinations ) ) {
+					foreach ( $destinations as $term ) {
+						$destinations_data[ $term->slug ] = $term->name;
+					}
+				}
+
+				$activities_data = array();
+				$activities      = get_the_terms( $trip_id, 'activities' );
+				if ( is_array( $activities ) ) {
+					foreach ( $activities as $term ) {
+						$activities_data[ $term->slug ] = $term->name;
+					}
+				}
+
+				// Calculation of Booking Seats for Booking Progress Bar.
+				$capacity_data = $trip->get_trip_capacity( $trip_datetime );
+				$bar           = null;
+				$is_sold_out   = false;
+
+				if ( false !== $capacity_data && $travellers > 0 ) {
+					if ( ! empty( $capacity_data ) ) {
+						$capacity     = $capacity_data['total']['capacity'] ?? '';
+						$booked_seats = ( (int) $capacity_data['total']['booked_seats'] === $travellers ) ? (int) $capacity_data['total']['booked_seats'] : $travellers;
+					} else {
+						$capacity = $booked_seats = $travellers;
+					}
+					$is_unlimited = '' === $capacity || (int) $capacity <= 0;
+					$is_sold_out  = ! $is_unlimited && (int) $capacity > 0 && $booked_seats >= (int) $capacity;
+
+					$bar = array(
+						'capacity'                => $is_unlimited ? '' : max( (int) $capacity, (int) $booked_seats ),
+						'booked_seats'            => $booked_seats,
+						'progress'                => $is_unlimited ? 100 : ( $is_sold_out ? 100 : min( 100, round( $booked_seats / (int) $capacity * 100 ) ) ),
+						'has_capacity_adjustment' => ! $is_unlimited && ( (int) $capacity < (int) $travellers || ( $capacity_data['includes_deleted'] ?? false ) ),
 					);
 				}
-				$trips[ $u_id ]['travellers'] += $travellers;
+
+				$trips[ $u_id ] = array(
+					'trip_id'      => $trip_id,
+					'permalink'    => $trip->get_permalink(),
+					'title'        => $trip->get_title(),
+					'timestamp'    => strtotime( $trip_datetime ),
+					'datetime'     => self::get_formatted_date( $trip_datetime ),
+					'travellers'   => $travellers,
+					'image'        => $trip->get_gallery_images()[0]['src'] ?? '',
+					'duration'     => self::get_trip_duration( $trip ),
+					'destinations' => $destinations_data,
+					'activities'   => $activities_data,
+					'is_sold_out'  => $is_sold_out,
+					'bar'          => $bar,
+				);
 			}
 
-			// Prime trip meta cache
-			if ( ! empty( $trip_ids ) ) {
-				update_postmeta_cache( array_unique( $trip_ids ) );
-			}
+			// Cache the complete trips data for 15 minutes
+			set_transient( $trips_cache_key, $trips, 15 * MINUTE_IN_SECONDS );
 		}
 
 		/**
 		 * Allow plugins to modify trips array (e.g., add custom entries, filter by status, etc.).
 		 *
-		 * @param array  $trips   Trips array.
-		 * @param string $status  Current status filter.
-		 * @param array  $request Request arguments.
+		 * @param array $trips Trips array.
+		 * @param string $status Current status filter.
+		 * @param array $request Request arguments.
 		 *
 		 * @return array Modified trips array.
 		 * @since 6.7.0
 		 */
 		$trips = apply_filters( 'wptravelengine_upcoming_tours_modify_trips', $trips, $status, $request );
 
-		array_multisort(
-			array_map( 'strtotime', array_column( array_column( $trips, 'datetime' ), 'date_time' ) ),
-			SORT_ASC,
-			$trips
+		// Apply search filter
+		if ( ! empty( $keywords ) ) {
+			$trips = array_filter(
+				$trips,
+				function ( $trip ) use ( $keywords ) {
+					return stripos( $trip['title'], $keywords ) !== false;
+				}
+			);
+		}
+
+		// Apply destination filter (check if slug exists as key)
+		if ( ! empty( $destination ) ) {
+			$trips = array_filter(
+				$trips,
+				function ( $trip ) use ( $destination ) {
+					return isset( $trip['destinations'][ $destination ] );
+				}
+			);
+		}
+
+		// Apply activity filter (check if slug exists as key)
+		if ( ! empty( $activity ) ) {
+			$trips = array_filter(
+				$trips,
+				function ( $trip ) use ( $activity ) {
+					return isset( $trip['activities'][ $activity ] );
+				}
+			);
+		}
+
+		// Apply status filter
+		if ( $status !== 'all' ) {
+			$trips = array_filter(
+				$trips,
+				function ( $trip ) use ( $status ) {
+					switch ( $status ) {
+						case 'available':
+							return ! ( $trip['is_sold_out'] ?? false );
+
+						case 'fully_booked':
+							return $trip['is_sold_out'] ?? false;
+
+						default:
+							return true;
+					}
+				}
+			);
+		}
+
+		foreach ( array_keys( $trips ) as $key ) {
+			if ( ! isset( $trips[ $key ]['timestamp'] ) ) {
+				$datetime                   = substr( $key, strpos( $key, '_' ) + 1 );
+				$trips[ $key ]['timestamp'] = (int) strtotime( $datetime );
+			}
+		}
+
+		uasort(
+			$trips,
+			function ( $a, $b ) {
+				return (int) $a['timestamp'] <=> (int) $b['timestamp'];
+			}
 		);
 
 		$count         = $request['count'];
-		$show_more_btn = count( $trips ) > $count;
+		$offset        = max( 0, (int) $request['offset'] );
+		$total         = count( $trips );
+		$show_more_btn = $total > $offset + $count;
+		$trips         = array_slice( $trips, $offset, $count );
+		$show_less_btn = ( $offset + count( $trips ) ) > 10;
 
-		$trips = $show_more_btn ? array_slice( $trips, 0, $count ) : $trips;
+		$dates          = self::get_filtered_dates();
+		$valid_statuses = self::get_filtered_statuses();
+		$destinations   = self::get_filtered_terms( 'destination' );
+		$activities     = self::get_filtered_terms( 'activities' );
 
-		$show_less_btn = 10 < count( $trips );
-
-		$dates = self::get_filtered_dates();
 		return compact(
 			'dates',
 			'trips',
 			'show_more_btn',
 			'show_less_btn',
-			'count'
+			'count',
+			'valid_statuses',
+			'destinations',
+			'activities',
 		);
 	}
 
@@ -291,83 +514,91 @@ class UpcomingTours implements AdminPage {
 	public static function get_details_html( $id ) {
 		$bookings_total = 0;
 		$bookings       = array();
-		// Use cached bookings for details view as well
-		foreach ( self::get_post_bookings() as $booking ) {
-			$booking_model  = new Booking( $booking->ID );
-			$trip_id        = $booking_model->get_trip_id();
-			$start_datetime = $booking_model->get_trip_datetime();
+		$trip_details   = array();
 
-			if ( $id !== $trip_id . '_' . $start_datetime ) {
+		// Parse ID to extract trip_id and datetime ({trip_id}_{datetime})
+		$id_parts       = explode( '_', $id, 2 );
+		$trip_id        = isset( $id_parts[0] ) ? absint( $id_parts[0] ) : 0;
+		$start_datetime = $id_parts[1] ?? '';
+
+		if ( ! $trip_id || ! $start_datetime ) {
+			ob_start();
+			wptravelengine_get_admin_template( 'upcoming-tours/partials/details.php', compact( 'trip_details', 'bookings' ) );
+
+			return ob_get_clean();
+		}
+
+		// Fetch only bookings for this specific trip (much faster than all bookings)
+		$all_bookings = self::get_post_bookings( array( 'trip_id' => $trip_id ) );
+
+		foreach ( $all_bookings as $booking ) {
+			// Only process bookings matching the exact datetime
+			if ( $id !== $booking['trip_id'] . '_' . $booking['trip_datetime'] ) {
 				continue;
 			}
-			$trip       = new Trip( $trip_id );
-			$travellers = 0;
-			foreach ( $booking_model->get_trip_pax() as $pax ) {
-				$travellers += $pax;
-			}
-			// Travellers meta is change if custom reservation (booking is edited from booking details page).
-			if ( $travellers <= 0 ) {
-				$data       = $booking_model->get_data();
-				$travellers = $data['booked_trips'][0]['number_of_travellers'] ?? 0;
-			}
-			$bookings[ $booking->ID ] = array(
-				'id'           => $booking->ID,
-				'billing_info' => $booking_model->get_billing_fname() . ' ' . $booking_model->get_billing_lname(),
-				'travellers'   => $travellers,
+
+			$bookings[ $booking['booking_id'] ] = array(
+				'id'           => $booking['booking_id'],
+				'billing_info' => $booking['billing_info'],
+				'travellers'   => $booking['travellers'],
 			);
-			$bookings_total          += $booking_model->get_total();
-			$trip_details             = array(
-				'title'      => $trip->get_title(),
-				'image'      => $trip->get_gallery_images()[0]['src'] ?? '',
-				'duration'   => self::get_trip_duration( $trip ),
-				'start_date' => wptravelengine_format_trip_datetime( $start_datetime ),
-				'end_date'   => wptravelengine_format_trip_end_datetime( $start_datetime, $trip ),
-				'travellers' => isset( $trip_details['travellers'] ) ? $trip_details['travellers'] + $travellers : $travellers,
-				'total'      => wte_get_formated_price( $bookings_total ),
-			);
+			$bookings_total                    += $booking['total'];
+
+			// Accumulate total travellers
+			if ( ! isset( $trip_details['travellers'] ) ) {
+				$trip_details['travellers'] = 0;
+			}
+			$trip_details['travellers'] += $booking['travellers'];
 		}
+
+		// Build trip details once if we found matching bookings
+		if ( $trip_id && $start_datetime ) {
+			try {
+				$trip = new Trip( $trip_id );
+
+				$trip_details['title']      = $trip->get_title();
+				$trip_details['image']      = $trip->get_gallery_images()[0]['src'] ?? '';
+				$trip_details['duration']   = self::get_trip_duration( $trip );
+				$trip_details['start_date'] = wptravelengine_format_trip_datetime( $start_datetime );
+				$trip_details['end_date']   = wptravelengine_format_trip_end_datetime( $start_datetime, $trip );
+				$trip_details['total']      = wte_get_formated_price( $bookings_total );
+			} catch ( \Exception $e ) {
+				// Handle invalid trip
+			}
+		}
+
 		ob_start();
 		wptravelengine_get_admin_template( 'upcoming-tours/partials/details.php', compact( 'trip_details', 'bookings' ) );
+
 		return ob_get_clean();
 	}
 
 	/**
-	 * Get post bookings.
+	 * Get post bookings filtered by date range and optionally by trip_id.
+	 * Note: Since datetime is stored in serialized order_trips meta for older bookings,
+	 * we can't filter datetime at database level. We fetch bookings and filter in PHP.
 	 *
-	 * @param array $args Optional query arguments.
+	 * @param array $args Optional query arguments including 'date_from', 'date_to', and 'trip_id'.
+	 *
 	 * @return array
 	 */
 	private static function get_post_bookings( array $args = array() ) {
-		// Get cache version for invalidation
-		$cache_version = wp_cache_get( 'wptravelengine_upcoming_tours_version', 'wptravelengine_upcoming_tours' );
-		if ( false === $cache_version ) {
-			$cache_version = 1;
-			wp_cache_set( 'wptravelengine_upcoming_tours_version', $cache_version, 'wptravelengine_upcoming_tours', 2592000 );
-		}
+		$cache_key = 'wptravelengine_upcoming_tours_bookings_' . self::get_cache_version() . '_' . md5( wp_json_encode( $args ) );
 
-		// Build cache key based on arguments and version
-		$cache_key = 'wptravelengine_upcoming_tours_bookings_' . $cache_version . '_' . md5( wp_json_encode( $args ) );
-
-		// Try to get from cache first (5 minute cache)
-		$cached = wp_cache_get( $cache_key, 'wptravelengine_upcoming_tours' );
+		// Try to get from cache first (15 minute cache)
+		$cached = get_transient( $cache_key );
 		if ( false !== $cached ) {
 			return $cached;
 		}
-
-		// Default query args - only get bookings with future trip dates
-		$default_args = array(
+		$query_args = array(
 			'post_type'      => 'booking',
-			'posts_per_page' => -1,
+			'posts_per_page' => - 1,
 			'post_status'    => 'publish',
 			'meta_query'     => array(
 				array(
 					'key'     => 'wp_travel_engine_booking_status',
-					'value'   => array( 'booked', 'pending' ),
+					'value'   => array( 'booked' ),
 					'compare' => 'IN',
-				),
-				array(
-					'key'     => 'wp_travel_engine_booking_setting',
-					'compare' => 'EXISTS',
 				),
 				array(
 					'relation' => 'OR',
@@ -387,38 +618,147 @@ class UpcomingTours implements AdminPage {
 			'order'          => 'DESC',
 		);
 
-		$query_args = wp_parse_args( $args, $default_args );
+		// Filter by trip_id at database level if provided ( either from wp_travel_engine_booking_setting | cart_info ).
+		if ( ! empty( $args['trip_id'] ) ) {
+			$trip_id   = absint( $args['trip_id'] );
+			$trip_id_s = (string) $trip_id;
+			// Use serialized string format s:LENGTH:"VALUE" to avoid LIKE false positives.
+			// e.g. s:1:"1" won't match s:2:"10" or s:3:"100".
+			$serialized = 's:' . strlen( $trip_id_s ) . ':"' . $trip_id_s . '"';
+
+			$query_args['meta_query'][] = array(
+				'relation' => 'OR',
+				array(
+					'key'     => 'wp_travel_engine_booking_setting',
+					'value'   => $serialized,
+					'compare' => 'LIKE',
+				),
+				array(
+					'key'     => 'cart_info',
+					'value'   => '"trip_id";i:' . $trip_id . ';',
+					'compare' => 'LIKE',
+				),
+			);
+		}
 
 		$bookings = get_posts( $query_args );
 
-		// Prime post meta cache for all bookings to avoid N+1 queries
+		// Prime post meta cache to avoid N+1 queries
 		if ( ! empty( $bookings ) ) {
 			update_postmeta_cache( wp_list_pluck( $bookings, 'ID' ) );
 		}
 
-		// Filter bookings to only include those with future trip dates
+		// Filter by date in PHP since datetime is in serialized order_trips
 		$filtered_bookings = array();
 		$today             = wp_date( 'Y-m-d' );
+		$date_from         = $args['date_from'] ?? null;
+		$date_to           = $args['date_to'] ?? null;
 
 		foreach ( $bookings as $booking ) {
-			$booking_model = wptravelengine_get_booking( $booking );
+			try {
+				$booking_model = wptravelengine_get_booking( $booking );
+				$trip_id       = $booking_model->get_trip_id();
+				$trip_datetime = $booking_model->get_trip_datetime();
 
-			if ( ! $booking_model ) {
+				if ( ! $trip_id || ! $trip_datetime ) {
+					continue;
+				}
+
+				// Extract date part only for comparison (remove time if present)
+				$trip_date_only = strpos( $trip_datetime, 'T' ) !== false ? substr( $trip_datetime, 0, 10 ) : $trip_datetime;
+
+				// Filter: Apply date range if specified
+				if ( $date_from && $date_to ) {
+					if ( $trip_date_only < $date_from || $trip_date_only > $date_to ) {
+						continue;
+					}
+				}
+
+				// Filter: Only future dates (from today onwards)
+				if ( $trip_date_only < $today ) {
+					continue;
+				}
+
+				$travellers = 0;
+				foreach ( $booking_model->get_trip_pax() as $pax ) {
+					$travellers += (int) $pax;
+				}
+				if ( $travellers <= 0 ) {
+					$data       = $booking_model->get_data();
+					$travellers = $data['booked_trips'][0]['number_of_travellers'] ?? 0;
+				}
+
+				$filtered_bookings[] = array(
+					'booking_id'    => $booking->ID,
+					'trip_id'       => $trip_id,
+					'trip_datetime' => $trip_datetime,
+					'travellers'    => $travellers,
+					'billing_info'  => trim( $booking_model->get_billing_fname() . ' ' . $booking_model->get_billing_lname() ),
+					'total'         => $booking_model->get_total(),
+				);
+			} catch ( \Exception $e ) {
 				continue;
-			}
-
-			$trip_datetime = $booking_model->get_trip_datetime();
-
-			// Only include bookings with future trip dates
-			if ( $trip_datetime && $trip_datetime >= $today ) {
-				$filtered_bookings[] = $booking;
 			}
 		}
 
-		// Cache for 5 minutes
-		wp_cache_set( $cache_key, $filtered_bookings, 'wptravelengine_upcoming_tours', 300 );
+		// Cache for 15 minutes
+		set_transient( $cache_key, $filtered_bookings, 15 * MINUTE_IN_SECONDS );
 
 		return $filtered_bookings;
+	}
+
+	/**
+	 * Render collapsible meta (destinations/activities) with "show more" functionality.
+	 *
+	 * @param array  $items Array of items to display.
+	 * @param string $icon_id SVG icon ID (e.g., 'marker-pin', 'compas').
+	 * @param string $label_singular Singular label for aria-label (e.g., 'destinations', 'activities').
+	 *
+	 * @return string HTML output.
+	 * @since 6.7.10
+	 */
+	public static function render_collapsible_meta( $items, $icon_id, $label_singular ) {
+		if ( empty( $items ) ) {
+			return '';
+		}
+
+		$items_count = count( $items );
+		$output      = '<span class="wpte-trip-meta">';
+		$output     .= sprintf(
+			'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#%s"></use></svg>',
+			esc_attr( $icon_id )
+		);
+
+		if ( $items_count > 2 ) {
+			$full_text  = implode( ', ', $items );
+			$short_text = implode( ', ', array_slice( $items, 0, 2 ) );
+			$more_count = $items_count - 2;
+			$label      = sprintf(
+			/* translators: %s: singular label (e.g., destinations, activities) */
+				__( 'Show more %s', 'wp-travel-engine' ),
+				$label_singular
+			);
+
+			$output .= sprintf(
+				'<span class="wpte-trip-collapsible-meta" data-full-text="%s" data-short-text="%s" data-more-count="%d">',
+				esc_attr( $full_text ),
+				esc_attr( $short_text ),
+				esc_attr( $more_count )
+			);
+			$output .= esc_html( $short_text );
+			$output .= sprintf(
+				' <span class="wpte-trip-collapsible-meta-more" role="button" aria-expanded="false" tabindex="0" aria-label="%s">+ %d more</span>',
+				esc_attr( $label ),
+				esc_html( $more_count )
+			);
+			$output .= '</span>';
+		} else {
+			$output .= esc_html( implode( ', ', $items ) );
+		}
+
+		$output .= '</span>';
+
+		return $output;
 	}
 
 	/**
@@ -432,13 +772,37 @@ class UpcomingTours implements AdminPage {
 		$trip_duration         = $trip->get_trip_duration() . ' ' . $trip->get_trip_duration_unit();
 		$trip_duration_minutes = '';
 		$trip_nights           = '';
+
 		if ( $trip->get_meta( 'trip_type' ) === 'single' ) {
-			$trip_duration_minutes = $trip->get_meta( 'trip_duration_minutes' ) . ' minutes';
+			$minutes = $trip->get_meta( 'trip_duration_minutes' );
+			if ( ! empty( $minutes ) && (int) $minutes > 0 ) {
+				$trip_duration_minutes = $minutes . ' minutes';
+			}
 		} elseif ( $trip->get_trip_duration_unit() === 'days' ) {
-			$trip_nights = $trip->get_setting( 'trip_duration_nights' ) ? $trip->get_setting( 'trip_duration_nights' ) . ' ' . __( 'Nights', 'wp-travel-engine' ) : '';
+			$nights = $trip->get_setting( 'trip_duration_nights' );
+			if ( ! empty( $nights ) && (int) $nights > 0 ) {
+				$trip_nights = $nights . ' ' . __( 'Nights', 'wp-travel-engine' );
+			}
 		}
 
 		return trim( $trip_duration . ' ' . $trip_nights . ' ' . $trip_duration_minutes );
+	}
+
+	/**
+	 * Get cache version, fetching from object cache only once per request.
+	 *
+	 * @return int
+	 */
+	private static function get_cache_version(): int {
+		if ( null === self::$cache_version ) {
+			$ver                 = get_transient( 'wptravelengine_upcoming_tours_version' );
+			self::$cache_version = false === $ver ? 1 : (int) $ver;
+			if ( false === $ver ) {
+				set_transient( 'wptravelengine_upcoming_tours_version', self::$cache_version, 30 * DAY_IN_SECONDS );
+			}
+		}
+
+		return self::$cache_version;
 	}
 
 	/**
@@ -448,9 +812,9 @@ class UpcomingTours implements AdminPage {
 	 * @since 6.7.0
 	 */
 	public static function clear_cache() {
-		// Increment cache version to invalidate all cached bookings
-		$current_version = wp_cache_get( 'wptravelengine_upcoming_tours_version', 'wptravelengine_upcoming_tours' );
-		$new_version     = ( false !== $current_version ) ? (int) $current_version + 1 : 1;
-		wp_cache_set( 'wptravelengine_upcoming_tours_version', $new_version, 'wptravelengine_upcoming_tours', 2592000 );
+		$current_version     = get_transient( 'wptravelengine_upcoming_tours_version' );
+		$new_version         = ( false !== $current_version ) ? (int) $current_version + 1 : 1;
+		self::$cache_version = $new_version;
+		set_transient( 'wptravelengine_upcoming_tours_version', $new_version, 30 * DAY_IN_SECONDS );
 	}
 }

@@ -35,7 +35,7 @@ $wp_travel_engine_tabs = get_post_meta( $post->ID, 'wp_travel_engine_setting', t
 				</li>
 				<?php
 			}
-			$i++;
+			++$i;
 		}
 	}
 	?>

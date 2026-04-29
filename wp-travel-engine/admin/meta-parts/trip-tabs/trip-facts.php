@@ -110,11 +110,11 @@ $template_shortcode = "&lt;?php echo do_shortcode('[Trip_Info_Shortcode id=" . $
 										<?php
 									break;
 
-								case 'textarea';
+								case 'textarea':
 									?>
 												<textarea id="wp_travel_engine_setting[trip_facts][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $key ); ?>]" name="wp_travel_engine_setting[trip_facts][<?php echo esc_attr( $key ); ?>][<?php echo esc_attr( $key ); ?>]" placeholder="<?php echo esc_attr( isset( $global_trip_facts['input_placeholder'][ $key ] ) ? $global_trip_facts['input_placeholder'][ $key ] : '' ); ?>" ><?php echo wp_kses_post( isset( $trip_settings['trip_facts'][ $key ][ $key ] ) ? $trip_settings['trip_facts'][ $key ][ $key ] : '' ); ?></textarea>
 										<?php
-										break;
+									break;
 
 								default:
 									?>

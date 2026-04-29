@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 6.7.9
+Stable tag: 6.7.10
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -349,14 +349,11 @@ Please send us an email via [support ticket](https://wptravelengine.com/support-
 
 == Changelog ==
 
-= 6.7.9 - 5th March 2026 =
+= 6.7.10 - 29th April 2026 =
 
-* New Feature: Added support for translating email content using TranslatePress, making it easy to localize emails into multiple languages.
-* Improved: Email previews and test emails now update instantly without saving, allowing admins to quickly review layouts using sample data.
-* Fixed: Fixed an issue where Yoast SEO analysis failed if the Maps tab was left empty.
-* Fixed: Resolved an issue where the Thank You page showed incorrect content due to Yoast SEO removing required URL parameters.
-* Fixed: Corrected formatting issues with bank instructions on the checkout page and in email templates.
-* Deprecated: Certain email tags are now deprecated and will be removed in a future release.
+* Improved: Enhanced the Upcoming Tours interface with filters, a seat availability bar, and a search option for easier navigation.
+* Fixed: Corrected the amount displayed on the Thank You page to match the actual payment status.
+* Fixed: Resolved issue where trip end time displayed incorrectly when using translated hour and minute formats.
 
 [See changelog for all versions](https://plugins.svn.wordpress.org/wp-travel-engine/trunk/changelog.txt).
 

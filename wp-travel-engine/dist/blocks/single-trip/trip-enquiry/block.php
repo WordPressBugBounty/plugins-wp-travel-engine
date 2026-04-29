@@ -56,7 +56,7 @@ if ( function_exists( 'get_privacy_policy_url' ) && get_privacy_policy_url() ) {
 		class="wte_enquiry_contact_form-wrap <?php echo $attributes_parser->get( 'formLabel' ) == true ? 'form-label-enabled' : ''; ?>"
 		id="wte_enquiry_form_scroll_wrapper">
 		<form name="wte_enquiry_contact_form" action="#" method="post" id="wte_enquiry_contact_form"
-			  class="wte_enquiry_contact_form">
+				class="wte_enquiry_contact_form">
 			<?php
 			$form_field->init( $enquiry_form_fields )->render();
 			if ( ! isset( $privacy_policy_lbl ) ) {

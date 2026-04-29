@@ -13,23 +13,23 @@ $settings                      = wptravelengine_settings()->get();
 $wp_travel_engine_dashboard_id = isset( $settings['pages']['wp_travel_engine_dashboard_page'] ) ? esc_attr( $settings['pages']['wp_travel_engine_dashboard_page'] ) : wp_travel_engine_get_page_id( 'my-account' );
 
 // Verify booking access: check if booking exists and belongs to logged-in user (by billing email).
-$invalid_booking = false;
+$invalid_booking   = false;
 $booking_not_found = false;
 if ( ! empty( $_GET['booking_id'] ) ) { // phpcs:ignore
-	$booking_id = absint( $_GET['booking_id'] );
+	$booking_id   = absint( $_GET['booking_id'] );
 	$booking_post = get_post( $booking_id );
-	
+
 	if ( ! $booking_post || 'booking' !== $booking_post->post_type ) {
 		$booking_not_found = true;
 	} elseif ( is_user_logged_in() ) {
 		try {
 			$booking_email = ( new \WPTravelEngine\Core\Models\Post\Booking( $booking_id ) )->get_billing_email();
-			$is_owner = ! empty( $booking_email ) && $booking_email === ( wp_get_current_user()->user_email ?? '' );
+			$is_owner      = ! empty( $booking_email ) && $booking_email === ( wp_get_current_user()->user_email ?? '' );
 			// Fallback: Check if booking is in user's booking array (legacy support)
 			if ( ! $is_owner && ! empty( $bookings ) && is_array( $bookings ) && in_array( $booking_id, $bookings, true ) ) {
 				$is_owner = true;
 			}
-			$booking = $is_owner ? $booking_id : 0;
+			$booking         = $is_owner ? $booking_id : 0;
 			$invalid_booking = ! $is_owner;
 		} catch ( \Exception $e ) {
 			error_log( sprintf( 'Booking access check failed for booking %d: %s', $booking_id, $e->getMessage() ) );
@@ -44,7 +44,8 @@ if ( ! empty( $_GET['booking_id'] ) ) { // phpcs:ignore
 	<div class="wpte-lrf-block-wrap">
 		<div class="wpte-lrf-block">
 			<?php
-			if ( $booking_not_found ) : ?>
+			if ( $booking_not_found ) :
+				?>
 				<div class="wpte-error-message wpte-booking-not-found">
 					<h5 class="wpte-error-title"><?php esc_html_e( 'Booking Not Found', 'wp-travel-engine' ); ?></h5>
 					<?php esc_html_e( 'We couldn\'t find a booking with that ID. Please check the URL, verify your booking reference number, or return to your dashboard.', 'wp-travel-engine' ); ?>

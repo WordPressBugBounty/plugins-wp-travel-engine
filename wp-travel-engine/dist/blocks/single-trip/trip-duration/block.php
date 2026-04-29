@@ -16,18 +16,18 @@ global $wtetrip;
 
 if ( $render->is_editor() ) {
 	$duration_data = SampleData::duration();
-	$duration = $duration_data[ 'duration' ];
-	$duration_unit = $duration_data[ 'duration_unit' ];
+	$duration      = $duration_data['duration'];
+	$duration_unit = $duration_data['duration_unit'];
 } else {
 
 	$post_meta = get_post_meta( $wtetrip->post->ID, 'wp_travel_engine_setting', true );
 
-	$duration      = $post_meta[ 'trip_duration' ] ?? '';
-	$duration_unit = $post_meta[ 'trip_duration_unit' ] ?? 'days';
+	$duration      = $post_meta['trip_duration'] ?? '';
+	$duration_unit = $post_meta['trip_duration_unit'] ?? 'days';
 
 }
 
-if ( ! is_numeric( $duration ) || ! in_array( $duration_unit, [ 'days', 'hours' ] ) ) {
+if ( ! is_numeric( $duration ) || ! in_array( $duration_unit, array( 'days', 'hours' ) ) ) {
 	return;
 }
 ?>
@@ -41,7 +41,7 @@ if ( ! is_numeric( $duration ) || ! in_array( $duration_unit, [ 'days', 'hours' 
 					<?php
 					if ( 'days' === $duration_unit ) {
 						echo esc_html( _nx( 'Day', 'Days', $duration, 'days', 'wp-travel-engine' ) );
-					} else if ( 'hours' === $duration_unit ) {
+					} elseif ( 'hours' === $duration_unit ) {
 						echo esc_html( _nx( 'Hour', 'Hours', $duration, 'hours', 'wp-travel-engine' ) );
 					}
 					?>

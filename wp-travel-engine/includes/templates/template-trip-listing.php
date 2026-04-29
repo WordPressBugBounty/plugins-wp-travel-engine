@@ -10,7 +10,14 @@ use WPTravelEngine\Modules\TripSearch;
 TripSearch::enqueue_assets();
 
 get_header();
-$active_theme = get_option( 'template', '' );
+do_action( 'wp_travel_engine_trip_archive_outer_wrapper' );
+do_action( 'wp_travel_engine_trip_archive_wrap' );
+do_action( 'wp_travel_engine_trip_archive_outer_wrapper_close' );
+get_footer();
+return;
+
+// TODO: Remove below code once stability is confirmed.
+
 ?>
 	<div id="wte-crumbs">
 		<?php
@@ -18,6 +25,8 @@ $active_theme = get_option( 'template', '' );
 		?>
 	</div>
 <?php
+
+$active_theme           = get_option( 'template', '' );
 $wte_trip_tax_post_args = array(
 	'post_type'      => 'trip',
 	'posts_per_page' => - 1,

@@ -184,12 +184,14 @@ function wptravelengine_normalize_numeric_val( $value, $type = 'int' ) {
  *
  * @param int|Trip $trip Trip ID or Trip instance.
  * @param string   $set_duration_type Set duration type. Accepts: 'days', 'nights', 'both'.
+ * @param bool     $do_translation Whether to return translated labels or not. Default is true.
  *
  * @return array Trip duration in array format.
  *
  * @since 6.6.0
+ * @since 6.7.10 Added $do_translation param to support raw (non-translated) labels for end trip date calculation.
  */
-function wptravelengine_get_trip_duration_arr( $trip, string $set_duration_type = 'both' ): array {
+function wptravelengine_get_trip_duration_arr( $trip, string $set_duration_type = 'both', bool $do_translation = true ): array {
 
 	$trip = wptravelengine_get_trip( $trip );
 
@@ -202,34 +204,62 @@ function wptravelengine_get_trip_duration_arr( $trip, string $set_duration_type 
 
 	$duration_label = array();
 	if ( $trip_duration && in_array( $set_duration_type, array( 'both', 'days' ) ) ) {
-		$duration_label[] = sprintf( __( '%1$d %2$s', 'wp-travel-engine' ), $trip_duration, wptravelengine_get_label_by_slug( $trip->get_trip_duration_unit(), $trip_duration ) );
+		$duration_label[] = $trip_duration . ' ' . wptravelengine_get_label_by_slug( $trip->get_trip_duration_unit(), $trip_duration, $do_translation );
 	}
 
 	$trip_duration_unit = $trip->get_trip_duration_unit();
 	if ( 'days' === $trip_duration_unit && 'multi' === $trip_type && in_array( $set_duration_type, array( 'both', 'nights' ) ) ) {
 		$nights = $trip->get_setting( 'trip_duration_nights' );
 		if ( $nights ) {
-			$duration_label[] = $trip->get_trip_nights();
+			$duration_label[] = $nights . ' ' . wptravelengine_get_label_by_slug( 'night', $nights, $do_translation );
 		}
 	}
 
-	return apply_filters( 'wptravelengine_trip_duration_arr', $duration_label, $trip, $set_duration_type );
+	return apply_filters( 'wptravelengine_trip_duration_arr', $duration_label, $trip, $set_duration_type, $do_translation );
 }
 
 /**
  * Get the label of provided slug and count.
  *
- * @param string     $slug Slug of the label to get.
- * @param int|string $count Count of the label to get.
+ * @param string     $slug           Slug of the label to get.
+ * @param int|string $count          Count of the label to get.
+ * @param bool       $do_translation Whether to return translated label. Default true.
  *
  * @return string Label of the provided slug.
  * @since 6.4.1
  * @updated 6.5.2
  * @since 6.7.3 Added support for (person) plural labels.
  * @since 6.7.8 Added filter for modification & performance improvement from property cache.
+ * @since 6.7.10 Added $do_translation param to support raw (non-translated) labels.
  */
-function wptravelengine_get_label_by_slug( string $slug, $count = 1 ): string {
-	static $slug_array = null;
+function wptravelengine_get_label_by_slug( string $slug, $count = 1, bool $do_translation = true ): string {
+	static $slug_array     = null;
+	static $raw_slug_array = null;
+
+	if ( null === $raw_slug_array ) {
+		$raw_slug_array = array(
+			'day'    => array(
+				'single' => 'Day',
+				'plural' => 'Days',
+			),
+			'night'  => array(
+				'single' => 'Night',
+				'plural' => 'Nights',
+			),
+			'hour'   => array(
+				'single' => 'Hour',
+				'plural' => 'Hours',
+			),
+			'minute' => array(
+				'single' => 'Minute',
+				'plural' => 'Minutes',
+			),
+			'person' => array(
+				'single' => 'Person',
+				'plural' => 'People',
+			),
+		);
+	}
 
 	if ( null === $slug_array ) {
 		$slug_array = apply_filters(
@@ -271,11 +301,13 @@ function wptravelengine_get_label_by_slug( string $slug, $count = 1 ): string {
 		$slug = $singular_map[ $slug ];
 	}
 
-	if ( ! isset( $slug_array[ $slug ] ) ) {
+	$active_array = $do_translation ? $slug_array : $raw_slug_array;
+
+	if ( ! isset( $active_array[ $slug ] ) ) {
 		return '';
 	}
 
-	return $slug_array[ $slug ][ 2 > intval( $count ) ? 'single' : 'plural' ];
+	return $active_array[ $slug ][ 2 > intval( $count ) ? 'single' : 'plural' ];
 }
 
 /**
@@ -910,7 +942,7 @@ function wte_jwt_decode( string $jwt, string $key ) {
  * @return void
  */
 function wte_log( $data, $name = 'data', $dump = false, $raw = true ) {
-	if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+	if ( defined( 'WPTE_DEBUG' ) && WPTE_DEBUG ) {
 		if ( $raw ) {
 			error_log( print_r( $data, true ), 3, WP_CONTENT_DIR . '/wte.log' ); // phpcs:ignore
 

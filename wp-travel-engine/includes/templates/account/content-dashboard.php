@@ -13,13 +13,13 @@ wp_travel_engine_print_notices();
 // Set User.
 $current_user         = $args['current_user'];
 $user_dashboard_menus = wp_travel_engine_sort_array_by_priority( $args['dashboard_menus'] );
-$bookings = array();
-$bookings_glance = false;
+$bookings             = array();
+$bookings_glance      = false;
 
 if ( ! empty( $current_user->user_email ) ) {
 	$customer_id = \WPTravelEngine\Core\Models\Post\Customer::is_exists( $current_user->user_email );
 	if ( $customer_id ) {
-		$customer = new \WPTravelEngine\Core\Models\Post\Customer( $customer_id );
+		$customer          = new \WPTravelEngine\Core\Models\Post\Customer( $customer_id );
 		$customer_bookings = $customer->get_meta( 'wp_travel_engine_bookings' );
 		if ( ! empty( $customer_bookings ) && is_array( $customer_bookings ) ) {
 			$bookings = array_map( 'intval', $customer_bookings );
@@ -33,7 +33,7 @@ if ( ! empty( $current_user->user_email ) ) {
 $user_bookings = get_user_meta( $current_user->ID, 'wp_travel_engine_user_bookings', true );
 if ( ! empty( $user_bookings ) && is_array( $user_bookings ) ) {
 	$user_bookings = array_map( 'intval', $user_bookings );
-	$bookings = array_unique( array_merge( $bookings, $user_bookings ) );
+	$bookings      = array_unique( array_merge( $bookings, $user_bookings ) );
 }
 
 // Resverse Chronological Order For Bookings.
