@@ -165,11 +165,15 @@ class Assets extends AssetsAbstract {
 
 	/**
 	 * Register Plugin Scripts.
+	 *
+	 * @since 6.7.11 Added wte-trip-faqs style and script registration.
 	 */
 	protected function register_plugin_scripts() {
 		/* @var PluginSettings $plugin_settings */
 		$this->register_style( Asset::register( 'style-trip-booking-modal', 'public/components/style-trip-booking-modal.css' ) );
 		$this->register_style( Asset::register( 'single-trip', 'public/single-trip.css' ) );
+		$this->register_style( Asset::register( 'wte-trip-faqs', 'public/trip-faqs.css' ) );
+		$this->register_script( Asset::register( 'wte-trip-faqs', 'public/trip-faqs.js' ) );
 		$this->register_style( Asset::register( 'wte-blocks-index', 'blocks/index.css' ) );
 
 		$this->register_style( Asset::register( 'wptravelengine-rtl', 'public/wte-rtl.css' ) );
@@ -712,6 +716,8 @@ class Assets extends AssetsAbstract {
 
 	/**
 	 * Localize Scripts.
+	 *
+	 * @since 6.7.11 Added faq_settings_url to admin localize data.
 	 */
 	public function get_global_localize_data() {
 		$settings = get_option( 'wp_travel_engine_settings', array() );
@@ -806,7 +812,15 @@ class Assets extends AssetsAbstract {
 		}
 
 		if ( is_admin() ) {
-			$l10n[ 'admin_url' ] = admin_url( '/' );
+			$l10n[ 'admin_url' ]       = admin_url( '/' );
+			$l10n[ 'faq_settings_url' ] = add_query_arg(
+				array(
+					'post_type' => 'booking',
+					'page'      => 'class-wp-travel-engine-admin.php',
+					'wpte-tab'  => 'faqs',
+				),
+				admin_url( 'edit.php' )
+			) . '#display-single-trip';
 		}
 
 		global $post;
@@ -1243,4 +1257,5 @@ class Assets extends AssetsAbstract {
 		wp_set_script_translations( 'wptravelengine-customer-edit', 'wp-travel-engine', $languages_path );
 		wp_set_script_translations( 'wptravelengine-upcoming-tours', 'wp-travel-engine', $languages_path );
 	}
+
 }

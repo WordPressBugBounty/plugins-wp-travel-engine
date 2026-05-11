@@ -13,11 +13,12 @@ $wptravelengine_trip_settings   = get_post_meta( $post->ID, 'wp_travel_engine_se
 $enable_video_gallery           = $wptravelengine_trip_settings['enable_video_gallery'] ?? false;
 $banner_layout                  = $wptravelengine_settings['trip_banner_layout'] ?? 'banner-default';
 $default_banner_class           = ! $related_query && 'banner-default' === $banner_layout ? ' banner-layout-default' : ''; // Add default class for banner only.
+$is_archive                     = is_archive() || ( isset( $_POST['action'] ) && 'wte_show_ajax_result' === $_POST['action'] );
 
 // Determine appropriate image size based on context.
-if ( $related_query || is_archive() ) {
-	// Archive/related trips use smaller images (374x226).
-	$default_image_size = 'trip-thumb-size';
+if ( $related_query || $is_archive ) {
+	// Archive/related trips use smaller images (500x500) if show_original_size_image is disabled.
+	$default_image_size = wptravelengine_toggled( $wptravelengine_settings['show_original_size_image'] ?? false ) ? 'full' : 'trip-thumb-size';
 } elseif ( 'banner-default' === $banner_layout ) {
 	$default_image_size = 'full';
 } else {

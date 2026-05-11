@@ -219,6 +219,7 @@ class Payment extends PostModel {
 	 *
 	 * @return ?Payment
 	 * @throws InvalidArgumentException
+	 * @since 6.7.11 Fixed transient lookup failure by adding meta-query fallback when transient is missing (e.g. object-cache issues).
 	 */
 	public static function from_payment_key( string $payment_key ): ?Payment {
 		if ( empty( $payment_key ) ) {
@@ -226,6 +227,25 @@ class Payment extends PostModel {
 		}
 
 		$payment_id = get_transient( 'payment_key_' . $payment_key );
+
+		// Fallback: query payment by meta if transient not found (e.g., object cache issues).
+		if ( ! $payment_id ) {
+			$query = new \WP_Query(
+				array(
+					'post_type'        => 'wte-payments',
+					'posts_per_page'   => 1,
+					'meta_key'         => 'payment_key',
+					'meta_value'       => $payment_key,
+					'fields'           => 'ids',
+					'no_found_rows'    => true,
+					'suppress_filters' => true,
+				)
+			);
+			if ( ! empty( $query->posts ) ) {
+				$payment_id = $query->posts[0];
+				set_transient( 'payment_key_' . $payment_key, $payment_id, 24 * HOUR_IN_SECONDS );
+			}
+		}
 
 		if ( ! $payment_id ) {
 			throw new InvalidArgumentException( 'Invalid Payment Key' );

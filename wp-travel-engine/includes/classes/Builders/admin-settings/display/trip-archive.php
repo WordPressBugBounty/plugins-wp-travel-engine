@@ -287,6 +287,16 @@ return apply_filters(
 									'field_type' => 'DIVIDER',
 								),
 								array(
+									'label'       => __( 'Show Original Size Images', 'wp-travel-engine' ),
+									'description' => __( 'Enable to display trip listing images at their original uploaded size instead of the cropped thumbnail.', 'wp-travel-engine' ),
+									'field_type'  => 'SWITCH',
+									'name'        => 'card_new_layout.enable_original_size_image',
+									'isNew'       => version_compare( WP_TRAVEL_ENGINE_VERSION, '6.7.13', '<' ),
+								),
+								array(
+									'field_type' => 'DIVIDER',
+								),
+								array(
 									'label'       => __( 'Trip Duration', 'wp-travel-engine' ),
 									'description' => __( 'Choose how the trip duration should be displayed, not applicable for hourly trips.', 'wp-travel-engine' ),
 									'field_type'  => 'SELECT_BUTTON',

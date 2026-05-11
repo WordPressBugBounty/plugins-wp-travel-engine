@@ -1648,7 +1648,17 @@ function wte_get_active_single_trip_tabs() {
 				}
 				break;
 			case 'faqs':
-				if ( empty( $post_meta['faq']['faq_title'] ) ) {
+				$has_old_faqs = ! empty( $post_meta['faq']['faq_title'] );
+				$has_new_faqs = false;
+				if ( ! empty( $post_meta['faqs_data']['categories'] ) ) {
+					foreach ( $post_meta['faqs_data']['categories'] as $category ) {
+						if ( ! empty( $category['faqs'] ) ) {
+							$has_new_faqs = true;
+							break;
+						}
+					}
+				}
+				if ( ! $has_old_faqs && ! $has_new_faqs ) {
 					unset( $settings['trip_tabs']['id'][ $value ] );
 				}
 				break;

@@ -45,6 +45,7 @@ use const WP_TRAVEL_ENGINE_FILE_PATH;
 use WPTravelEngine\Core\Models\Post\TripPackages;
 use WPTravelEngine\Core\Controllers\RestAPI\V2\Booking as BookingController;
 use WPTravelEngine\Core\Models\Post\Payment;
+use WPTravelEngine\Core\Shortcodes\TripFaq;
 use WPTravelEngine\Pages\Admin\UpcomingTours;
 
 /**
@@ -1631,6 +1632,7 @@ final class Plugin {
 	 * Init shortcodes.
 	 *
 	 * @since    1.0.0
+	 * @since 6.7.11 Added TripFaq shortcode registration.
 	 */
 	public function init_shortcodes() {
 		ShortcodeRegistry::make()
@@ -1640,7 +1642,8 @@ final class Plugin {
 						->register( General::class )
 						->register( TripCheckout::class )
 						->register( UserAccount::class )
-						->register( TripsList::class );
+						->register( TripsList::class )
+						->register( TripFaq::class );
 	}
 
 	/**

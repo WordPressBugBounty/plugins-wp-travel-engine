@@ -1454,6 +1454,7 @@ class Booking extends PostModel {
 	 * @return void
 	 * @since 6.7.0
 	 * @since 6.7.1 Added support for send_booking_emails, send_payment_emails arguments and payment event trigger.
+	 * @since 6.7.11 Added wptravelengine_verify_payment_success_status filter to allow bypassing completed-status guard.
 	 */
 	public function sync_payment_success_metas( int $payment_id, float $paid_amount, array $args = array() ): void {
 		$args = wp_parse_args(
@@ -1496,7 +1497,7 @@ class Booking extends PostModel {
 
 		$previous_payment_status = $_payment->get_payment_status();
 
-		if ( 'completed' === $previous_payment_status ) {
+		if ( apply_filters( 'wptravelengine_verify_payment_success_status', true, $this ) && 'completed' === $previous_payment_status ) {
 			return;
 		}
 

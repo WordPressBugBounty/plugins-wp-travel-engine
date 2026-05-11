@@ -316,10 +316,11 @@ class BookingProcess {
 	 * Triggers Payment Gateway.
 	 *
 	 * @return void
+	 * @since 6.7.11 Increased transient expiry to 24 hours; added payment_key meta storage.
 	 */
 	protected function payment_gateway_process() {
 		global $wte_cart;
-		set_transient( "payment_key_{$this->payment->get_payment_key()}", $this->payment->get_id(), 60 * 10 );
+		set_transient( "payment_key_{$this->payment->get_payment_key()}", $this->payment->get_id(), 24 * HOUR_IN_SECONDS );
 
 		$payment_gateway = PaymentGateways::instance()->get_payment_gateway( $this->payment_method );
 
@@ -554,7 +555,8 @@ class BookingProcess {
 						->set_meta( 'payment_status', 'pending' )
 						->set_meta( 'billing_info', $this->billing_info )
 						->set_meta( 'payment_source', 'checkout' )
-						->set_meta( 'is_due_payment', $this->payment_type === 'due' ? 'yes' : 'no' );
+						->set_meta( 'is_due_payment', $this->payment_type === 'due' ? 'yes' : 'no' )
+						->set_meta( 'payment_key', $payment_model->get_payment_key() );
 
 		$payment_types = apply_filters(
 			'wte_payment_modes_and_titles',
@@ -765,7 +767,7 @@ class BookingProcess {
 	 * @return bool
 	 */
 	public static function is_traveler_information_save_request(): bool {
-		return check_ajax_referer( 'wp_travel_engine_final_confirmation_nonce', 'nonce', false );
+		return isset( $_REQUEST['nonce'] ) && check_ajax_referer( 'wp_travel_engine_final_confirmation_nonce', 'nonce', false );
 	}
 
 	/**

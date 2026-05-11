@@ -63,9 +63,11 @@ class TripSearch {
 				has_shortcode( $post->post_content, 'WTE_Trip_Search' ) ||
 				has_block( 'wptravelenginepagesblocks/archive-trip', $post ) ||
 				has_block( 'wptravelenginepagesblocks/trip-search', $post ) ||
-				has_block( 'wptravelengine/trip-search', $post )
+				has_block( 'wptravelengine/trip-search', $post ) ||
+				self::has_elementor_shortcode( $post->ID, 'WTE_Trip_Search' )
 				) {
 					self::enqueue_styles();
+					self::enqueue_scripts();
 					self::enqueue_trip_search_scripts();
 				}
 			}
@@ -129,6 +131,29 @@ class TripSearch {
 			10,
 			2
 		);
+
+		/**
+		 * Enqueue scripts and styles for Elementor preview mode.
+		 *
+		 * This ensures that when the WTE_Trip_Search shortcode is added or edited
+		 * in the Elementor Editor, all necessary JS and CSS assets are loaded.
+		 */
+		if ( defined( 'ELEMENTOR_VERSION' ) ) {
+			add_action(
+				'elementor/preview/enqueue_scripts',
+				function () {
+					$post_id = get_the_ID();
+					if ( ! $post_id ) {
+						return;
+					}
+					if ( self::has_elementor_shortcode( $post_id, 'WTE_Trip_Search' ) ) {
+						self::enqueue_assets();
+						self::enqueue_trip_search_scripts();
+					}
+				},
+				99
+			);
+		}
 	}
 
 	/**
@@ -1128,6 +1153,23 @@ class TripSearch {
 		ob_start();
 		wptravelengine_get_template( 'template-trip-search-form.php', array( 'direction' => $atts['direction'] ) );
 		return ob_get_clean();
+	}
+
+	/**
+	 * Checks if a given shortcode exists in Elementor's stored page data.
+	 *
+	 * @param int    $post_id   Post ID to check.
+	 * @param string $shortcode Shortcode tag to look for.
+	 * @static
+	 * @return boolean True if shortcode found in Elementor data.
+	 * @since 6.7.11
+	 */
+	private static function has_elementor_shortcode( int $post_id, string $shortcode ): bool {
+		if ( ! defined( 'ELEMENTOR_VERSION' ) ) {
+			return false;
+		}
+		$elementor_data = get_post_meta( $post_id, '_elementor_data', true );
+		return ! empty( $elementor_data ) && false !== strpos( $elementor_data, '"' . $shortcode . '"' );
 	}
 
 	/**

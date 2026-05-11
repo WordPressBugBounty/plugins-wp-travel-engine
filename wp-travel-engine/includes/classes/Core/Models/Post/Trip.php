@@ -174,6 +174,7 @@ class Trip extends PostModel {
 	 * Get the services.
 	 *
 	 * @return array
+	 * @since 6.7.11 Added wptravelengine_trip_services filter.
 	 */
 	public function get_services(): array {
 
@@ -261,7 +262,7 @@ class Trip extends PostModel {
 			);
 		}
 
-		return $data;
+		return apply_filters( 'wptravelengine_trip_services', $data, $this->ID );
 	}
 
 	/**

@@ -179,28 +179,81 @@ class SEO {
 	 * @param array $settings
 	 * @param int   $post_id
 	 * @return array|null
+	 * @since 6.7.11 Added category-based FAQ structure support with legacy flat format fallback.
 	 */
 	private static function build_faq_schema( $settings, $post_id ) {
-		if ( empty( $settings['faq']['faq_title'] ) || ! is_array( $settings['faq']['faq_title'] ) ) {
-			return null;
+		$faqs = array();
+
+		// New category-based structure takes priority.
+		$faqs_data = $settings['faqs_data'] ?? array();
+		if ( ! empty( $faqs_data['categories'] ) && is_array( $faqs_data['categories'] ) ) {
+			$global_faq_map = wptravelengine_get_global_faq_map();
+			foreach ( $faqs_data['categories'] as $category ) {
+				if ( empty( $category['faqs'] ) || ! is_array( $category['faqs'] ) ) {
+					continue;
+				}
+				$category_name = strip_tags( $category['name'] ?? '' );
+				foreach ( $category['faqs'] as $faq ) {
+					$question  = (string) ( $faq['question'] ?? '' );
+					$answer    = (string) ( $faq['answer'] ?? '' );
+					$source_id = (string) ( $faq['sourceId'] ?? '' );
+
+					if ( ! empty( $faq['addedInBulk'] ) && '' !== $source_id ) {
+						if ( ! isset( $global_faq_map[ $source_id ] ) ) {
+							continue;
+						}
+						$question = $global_faq_map[ $source_id ]['question'];
+						$answer   = $global_faq_map[ $source_id ]['answer'];
+					}
+
+					if ( empty( trim( $question ) ) ) {
+						continue;
+					}
+
+					$question = strip_tags( preg_replace( '/<p\b[^>]*>(.*?)<\/p>/i', '$1', $question ) );
+					$answer   = strip_tags( preg_replace( '/<p\b[^>]*>(.*?)<\/p>/i', '$1', $answer ) );
+
+					$entry = array(
+						'@type'          => 'Question',
+						'name'           => esc_attr( $question ),
+						'acceptedAnswer' => array(
+							'@type' => 'Answer',
+							'text'  => esc_attr( $answer ),
+						),
+					);
+
+					if ( ! empty( $category_name ) ) {
+						$entry['about'] = array(
+							'@type' => 'Thing',
+							'name'  => esc_attr( $category_name ),
+						);
+					}
+
+					$faqs[] = $entry;
+				}
+			}
+		} elseif ( ! empty( $settings['faq']['faq_title'] ) && is_array( $settings['faq']['faq_title'] ) ) {
+			// Legacy flat format fallback.
+			foreach ( array_keys( $settings['faq']['faq_title'] ) as $value ) {
+				$question = $settings['faq']['faq_title'][ $value ] ?? '';
+				$answer   = $settings['faq']['faq_content'][ $value ] ?? '';
+
+				$question = strip_tags( preg_replace( '/<p\b[^>]*>(.*?)<\/p>/i', '$1', $question ) );
+				$answer   = strip_tags( preg_replace( '/<p\b[^>]*>(.*?)<\/p>/i', '$1', $answer ) );
+
+				$faqs[] = array(
+					'@type'          => 'Question',
+					'name'           => esc_attr( $question ),
+					'acceptedAnswer' => array(
+						'@type' => 'Answer',
+						'text'  => esc_attr( $answer ),
+					),
+				);
+			}
 		}
 
-		$faqs = array();
-		foreach ( array_keys( $settings['faq']['faq_title'] ) as $value ) {
-			$question = $settings['faq']['faq_title'][ $value ] ?? '';
-			$answer   = $settings['faq']['faq_content'][ $value ] ?? '';
-
-			$question = preg_replace( '/<p\b[^>]*>(.*?)<\/p>/i', '', strip_tags( $question ) );
-			$answer   = preg_replace( '/<p\b[^>]*>(.*?)<\/p>/i', '', strip_tags( $answer ) );
-
-			$faqs[] = array(
-				'@type'          => 'Question',
-				'name'           => esc_attr( $question ),
-				'acceptedAnswer' => array(
-					'@type' => 'Answer',
-					'text'  => esc_attr( $answer ),
-				),
-			);
+		if ( empty( $faqs ) ) {
+			return null;
 		}
 
 		return apply_filters(

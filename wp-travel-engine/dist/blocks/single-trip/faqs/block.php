@@ -18,20 +18,58 @@ if ( $render->is_editor() ) {
 } else {
 
 	$post_meta = get_post_meta( $wtetrip->post->ID, 'wp_travel_engine_setting', true );
-	$trip_faqs = ( $post_meta['faq'] ?? false );
+	$faqs      = array();
 
-	if ( ! $trip_faqs || ! is_array( $trip_faqs['faq_title'] ) ) {
-		return;
+	// Check for new category-based format first.
+	$faqs_data = ( $post_meta['faqs_data'] ?? false );
+	if ( $faqs_data && isset( $faqs_data['categories'] ) && is_array( $faqs_data['categories'] ) ) {
+		$global_faq_map = wptravelengine_get_global_faq_map();
+		$global_faq_ids = array_keys( $global_faq_map );
+
+		foreach ( $faqs_data['categories'] as $category ) {
+			if ( isset( $category['faqs'] ) && is_array( $category['faqs'] ) ) {
+				foreach ( $category['faqs'] as $faq ) {
+					$source_id     = (string) ( $faq['sourceId'] ?? '' );
+					$added_in_bulk = isset( $faq['addedInBulk'] ) ? (bool) $faq['addedInBulk'] : false;
+
+					if ( $added_in_bulk && '' !== $source_id && ! in_array( $source_id, $global_faq_ids, true ) ) {
+						continue;
+					}
+
+					$question = $faq['question'] ?? '';
+					$answer   = $faq['answer'] ?? '';
+
+					if ( $added_in_bulk && '' !== $source_id && isset( $global_faq_map[ $source_id ] ) ) {
+						$question = $global_faq_map[ $source_id ]['question'];
+						$answer   = $global_faq_map[ $source_id ]['answer'];
+					}
+
+					$faqs[] = array(
+						'question' => $question,
+						'answer'   => $answer,
+					);
+				}
+			}
+		}
+	} else {
+		// Fallback to legacy format.
+		$trip_faqs = ( $post_meta['faq'] ?? false );
+
+		if ( $trip_faqs && is_array( $trip_faqs['faq_title'] ) ) {
+			foreach ( $trip_faqs['faq_title'] as $key => $faq_title ) {
+				if ( isset( $trip_faqs['faq_content'][ $key ] ) ) {
+					$faqs[] = array(
+						'question' => $faq_title,
+						'answer'   => $trip_faqs['faq_content'][ $key ],
+					);
+				}
+			}
+		}
 	}
 
-	$faqs = array();
-	foreach ( $trip_faqs['faq_title'] as $key => $faq_title ) {
-		if ( isset( $trip_faqs['faq_content'][ $key ] ) ) {
-			$faqs[] = array(
-				'question' => $faq_title,
-				'answer'   => $trip_faqs['faq_content'][ $key ],
-			);
-		}
+	// Return if no FAQs found.
+	if ( empty( $faqs ) ) {
+		return;
 	}
 }
 

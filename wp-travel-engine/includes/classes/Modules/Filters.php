@@ -41,6 +41,11 @@ class Filters {
 		$this->register_taxonomies();
 	}
 
+	/**
+	 * Register custom filter taxonomies.
+	 *
+	 * @since 6.7.11 Added rest_base to custom taxonomy registration.
+	 */
 	private function register_taxonomies() {
 		$filters = get_option( 'wte_custom_filters', array() );
 
@@ -53,6 +58,7 @@ class Filters {
 						'name' => $filter['label'],
 					),
 					'show_in_rest' => true,
+					'rest_base'    => 'wptravelengine_custom_taxonomy_' . $filter['slug'],
 					'hierarchical' => $filter['hierarchical'],
 					'sort'         => true,
 				)

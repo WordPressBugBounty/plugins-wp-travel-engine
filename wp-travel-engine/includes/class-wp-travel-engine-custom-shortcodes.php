@@ -59,6 +59,7 @@ class WP_Travel_Engine_Custom_Shortcodes {
 
 	/*
 	** @since 5.5.7
+	** @since 6.7.11 Skip WP_Query when wishlist is empty to prevent fatal error.
 	*/
 	public function wishlist_shortcode( $attr ) {
 		$attr = shortcode_atts(
@@ -67,24 +68,26 @@ class WP_Travel_Engine_Custom_Shortcodes {
 			'wte_wishlist'
 		);
 
-		ob_start();
+		$query                 = null;
 		$current_user_wishlist = wptravelengine_user_wishlists();
-		$current_user_wishlist = is_array( $current_user_wishlist ) ? $current_user_wishlist : array( 0 );
+		if ( ! empty( $current_user_wishlist ) && is_array( $current_user_wishlist ) ) {
+			$query = new WP_Query(
+				array(
+					'post_type'   => WP_TRAVEL_ENGINE_POST_TYPE,
+					'post_status' => 'publish',
+					'post__in'    => $current_user_wishlist,
+					'orderby'     => 'post__in',
+					'paged'       => get_query_var( 'paged' ),
+				)
+			);
+		}
 
-		$query = new WP_Query(
-			array(
-				'post_type'   => WP_TRAVEL_ENGINE_POST_TYPE,
-				'post_status' => 'publish',
-				'post__in'    => $current_user_wishlist,
-				'orderby'     => 'post__in',
-				'paged'       => get_query_var( 'paged' ),
-			)
-		);
+		ob_start();
 		?>
 		<div>
 			<div class="wte-category-outer-wrap wte-user-wishlists">
 				<?php
-				if ( 0 === $query->post_count ) {
+				if ( null === $query || 0 === $query->post_count ) {
 					$button_txt    = __( 'Explore Trips', 'wp-travel-engine' );
 					$site_url      = get_site_url();
 					$trip_page_url = $site_url . '/trip';

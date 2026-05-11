@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 6.7.10
+Stable tag: 6.7.11
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -349,11 +349,13 @@ Please send us an email via [support ticket](https://wptravelengine.com/support-
 
 == Changelog ==
 
-= 6.7.10 - 29th April 2026 =
+= 6.7.11 - 11th May 2026 =
 
-* Improved: Enhanced the Upcoming Tours interface with filters, a seat availability bar, and a search option for easier navigation.
-* Fixed: Corrected the amount displayed on the Thank You page to match the actual payment status.
-* Fixed: Resolved issue where trip end time displayed incorrectly when using translated hour and minute formats.
+* Improved: Added indicator chips to Pricing categories and date selections for better visibility and clarity.
+* New Feature: Added a global setting to display archive page images in their original size.
+* New Feature: Added Global FAQs support, allowing FAQs to be reused across multiple trips while still supporting trip-specific FAQs.
+* Fixed: Resolved an issue where slider layouts were not displaying correctly in Elementor edit mode, ensuring accurate previews during editing.
+* Fixed: Corrected an issue causing the Thank You page to return a 404 error on hosting environments with object caching enabled.
 
 [See changelog for all versions](https://plugins.svn.wordpress.org/wp-travel-engine/trunk/changelog.txt).
 

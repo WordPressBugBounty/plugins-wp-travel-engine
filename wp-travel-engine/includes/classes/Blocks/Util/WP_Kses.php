@@ -14,11 +14,19 @@ class WP_Kses {
 	/**
 	 * @return array
 	 * @since 6.3.4
+	 * @since 6.7.11 Added style tag support; use local copy instead of mutating global $allowedposttags.
 	 */
 	public function wptravelengine_post() {
 		global $allowedposttags;
 
-		$allowedposttags['iframe'] = array(
+		$tags = $allowedposttags;
+
+		$tags['style'] = array(
+			'type'  => true,
+			'media' => true,
+		);
+
+		$tags['iframe'] = array(
 			'src'             => true,
 			'width'           => true,
 			'height'          => true,
@@ -29,7 +37,7 @@ class WP_Kses {
 			'referrerpolicy'  => true,
 		);
 
-		return $allowedposttags;
+		return $tags;
 	}
 
 	public function allowed_html( $allowed_tags, $context ) {

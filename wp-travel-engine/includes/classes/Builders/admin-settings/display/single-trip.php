@@ -511,6 +511,22 @@ return apply_filters(
 							),
 						),
 					),
+					array(
+						'title'  => __( 'FAQs', 'wp-travel-engine' ),
+						'id'     => 'faqs',
+						'fields' => array(
+							array(
+								'field_type' => 'ALERT',
+								'status'     => 'info',
+								'content'    => __( 'Create reusable FAQs that can be used across multiple trips.', 'wp-travel-engine' ),
+							),
+							array(
+								'field_type' => 'FAQ_LIST',
+								'name'       => 'faqs.items',
+								'divider'    => true,
+							),
+						),
+					),
 				),
 			),
 		),

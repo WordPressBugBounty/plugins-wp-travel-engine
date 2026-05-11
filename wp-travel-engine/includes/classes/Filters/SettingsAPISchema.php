@@ -551,6 +551,27 @@ class SettingsAPISchema {
 	}
 
 	/**
+	 * Prepare FAQs Settings.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return array
+	 * @since 6.7.11
+	 */
+	protected function prepare_faqs_settings( WP_REST_Request $request ): array {
+
+		$settings = array();
+
+		$faq_items = $this->plugin_settings->get( 'faqs.items', array() );
+
+		$settings['faqs'] = array(
+			'items' => is_array( $faq_items ) ? $faq_items : array(),
+		);
+
+		return $settings;
+	}
+
+	/**
 	 * Process zaps data.
 	 *
 	 * @param array $zaps Zaps data.
@@ -599,6 +620,7 @@ class SettingsAPISchema {
 			$this->prepare_zapier_settings( $request ),
 			$this->prepare_wetravel_settings( $request ),
 			$this->prepare_user_history_settings( $request ),
+			$this->prepare_faqs_settings( $request ),
 		);
 	}
 
@@ -1307,6 +1329,54 @@ class SettingsAPISchema {
 	}
 
 	/**
+	 * Process FAQs Settings.
+	 *
+	 * @param WP_REST_Request $request             Request object.
+	 * @param Settings        $settings_controller Settings controller instance.
+	 *
+	 * @return void
+	 * @since 6.7.11
+	 */
+	protected function set_faqs_details( WP_REST_Request $request, Settings $settings_controller ) {
+
+		if ( ! isset( $request['faqs'] ) ) {
+			return;
+		}
+
+		$faqs = $request['faqs'];
+
+		if ( isset( $faqs['items'] ) && is_array( $faqs['items'] ) ) {
+			// Validate: every FAQ must have a non-empty question.
+			foreach ( $faqs['items'] as $faq ) {
+				if ( is_array( $faq ) && empty( trim( $faq['question'] ?? '' ) ) ) {
+					$settings_controller->set_bad_request(
+						'faq_question_required',
+						sprintf( __( '%1$sFAQ Title%2$s must not be empty.', 'wp-travel-engine' ), '<strong>', '</strong>' ),
+						'faqs.items'
+					);
+					return;
+				}
+			}
+
+			$faq_items = array();
+			foreach ( $faqs['items'] as $faq ) {
+				if ( ! is_array( $faq ) ) {
+					continue;
+				}
+				if ( ! empty( $faq['question'] ) || ! empty( $faq['answer'] ) ) {
+					$faq_items[] = array(
+						'id'       => $faq['id'] ?? '',
+						'question' => $faq['question'] ?? '',
+						'answer'   => $faq['answer'] ?? '',
+					);
+				}
+			}
+			$this->plugin_settings->set( 'faqs.items', $faq_items );
+			wptravelengine_get_global_faq_map( true );
+		}
+	}
+
+	/**
 	 * Update Addons Settings.
 	 *
 	 * @param WP_REST_Request $request Request object.
@@ -1332,5 +1402,6 @@ class SettingsAPISchema {
 		$this->set_zapier_details( $request );
 		$this->set_we_travel_details( $request );
 		$this->set_user_history_details( $request );
+		$this->set_faqs_details( $request, $settings_controller );
 	}
 }

@@ -442,6 +442,22 @@ class TripMetaTabs {
 					),
 				),
 				array(
+					'divider' => true,
+					'field'   => array(
+						'type'  => 'SHORTCODE',
+						'title' => __( 'To display FAQs of this tour in posts/pages/tabs/widgets use the following <strong>Shortcode.</strong>', 'wp-travel-engine' ),
+						'code'  => "[wte_trip_faqs id='{$post->ID}']",
+					),
+				),
+				array(
+					'divider' => false,
+					'field'   => array(
+						'type'  => 'SHORTCODE',
+						'title' => __( 'To display FAQs of this tour in posts/pages/tabs/widgets, please use below <strong>PHP Function.</strong>', 'wp-travel-engine' ),
+						'code'  => "<?php echo do_shortcode('[wte_trip_faqs id={$post->ID}]'); ?>",
+					),
+				),
+				array(
 					'field'      => array(
 						'type'  => 'SHORTCODE',
 						'title' => __( 'To display downloadable file list in posts/pages/tabs and widget, please use following <strong>Shortcode.</strong>', 'wp-travel-engine' ),

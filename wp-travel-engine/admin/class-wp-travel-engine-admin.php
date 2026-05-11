@@ -42,9 +42,10 @@ class Wp_Travel_Engine_Admin {
 	 * @param string $version The version of this plugin.
 	 *
 	 * @since    1.0.0
+	 * @since 6.7.11 Changed trip-thumb-size dimensions from 374×226 to 500×500.
 	 */
 	public function __construct( $plugin_name, $version ) {
-		add_image_size( 'trip-thumb-size', 374, 226, true ); // 260 pixels wide by 210 pixels tall, hard crop mode
+		add_image_size( 'trip-thumb-size', 500, 500, true ); // 500 pixels wide by 500 pixels tall, hard crop mode
 		add_image_size( 'destination-thumb-size', 600, 810, true ); // 260 pixels wide by 210 pixels tall, hard crop mode
 		add_image_size( 'destination-thumb-trip-size', 410, 250, true );
 		add_image_size( 'activities-thumb-size', 600, 810, true ); // 260 pixels wide by 210 pixels tall, hard crop mode

@@ -59,19 +59,31 @@ if ( $show_carousel && $trip_instance->is_enabled_image_gallery() && count( $tri
 			 * To disable: add_filter( 'wptravelengine_enable_image_optimization', '__return_false' );
 			 *
 			 * @since 6.7.8
-			 * @param bool $enabled Whether image optimization is enabled. Default true.
+			 * @param bool Whether image optimization is enabled. Default true.
 			 */
 			$enable_image_optimization = apply_filters( 'wptravelengine_enable_image_optimization', true );
 
 			if ( $enable_image_optimization ) {
-				// Use fixed dimensions for archive cards (300x300) for better performance and consistency
-				$img_attrs = array(
-					'loading' => 'lazy',
-					'width'   => 300,
-					'height'  => 300,
-				);
-
-				the_post_thumbnail( $size, $img_attrs );
+				$post_thumbnail_id = get_post_thumbnail_id();
+				/**
+				 * @since 6.7.11 Use original image size if setting is enabled to fix crop/blur image.
+				 * Applies to all trip card contexts: archives, shortcodes, related trips, wishlist, etc.
+				 */
+				$size      = wptravelengine_toggled( $engine_settings['show_original_size_image'] ?? false ) ? 'full' : 'trip-thumb-size';
+				$image_src = wp_get_attachment_image_src( $post_thumbnail_id, $size );
+				if ( $image_src ) {
+					$img_alt = get_post_meta( $post_thumbnail_id, '_wp_attachment_image_alt', true ) ?: get_the_title();
+					?>
+					<img
+						src="<?php echo esc_url( $image_src[0] ); ?>"
+						width="<?php echo esc_attr( $image_src[1] ?: 300 ); ?>"
+						height="<?php echo esc_attr( $image_src[2] ?: 300 ); ?>"
+						loading="lazy"
+						alt="<?php echo esc_attr( $img_alt ); ?>"
+						class="wp-post-image"
+					/>
+					<?php
+				}
 			} else {
 				the_post_thumbnail( $size, array( 'loading' => 'lazy' ) );
 			}

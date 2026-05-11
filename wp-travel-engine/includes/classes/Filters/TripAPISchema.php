@@ -191,6 +191,64 @@ class TripAPISchema {
 			'type'        => 'boolean',
 		);
 
+		// FAQs schema with categories support.
+		$schema['faqs_data'] = array(
+			'description' => __( 'Trip FAQs with categories.', 'wp-travel-engine' ),
+			'type'        => 'object',
+			'properties'  => array(
+				'sectionTitle' => array(
+					'description' => __( 'FAQs section title.', 'wp-travel-engine' ),
+					'type'        => 'string',
+				),
+				'categories'   => array(
+					'description' => __( 'FAQ categories.', 'wp-travel-engine' ),
+					'type'        => 'array',
+					'items'       => array(
+						'type'       => 'object',
+						'properties' => array(
+							'id'   => array(
+								'description' => __( 'Category ID.', 'wp-travel-engine' ),
+								'type'        => 'string',
+							),
+							'name' => array(
+								'description' => __( 'Category name.', 'wp-travel-engine' ),
+								'type'        => 'string',
+							),
+							'faqs' => array(
+								'description' => __( 'FAQs in this category.', 'wp-travel-engine' ),
+								'type'        => 'array',
+								'items'       => array(
+									'type'       => 'object',
+									'properties' => array(
+										'id'          => array(
+											'description' => __( 'FAQ ID.', 'wp-travel-engine' ),
+											'type'        => 'string',
+										),
+										'question'    => array(
+											'description' => __( 'FAQ question.', 'wp-travel-engine' ),
+											'type'        => 'string',
+										),
+										'answer'      => array(
+											'description' => __( 'FAQ answer.', 'wp-travel-engine' ),
+											'type'        => 'string',
+										),
+										'addedInBulk' => array(
+											'description' => __( 'FAQ added in bulk.', 'wp-travel-engine' ),
+											'type'        => 'boolean',
+										),
+										'sourceId'    => array(
+											'description' => __( 'Global FAQ source ID (when added in bulk).', 'wp-travel-engine' ),
+											'type'        => 'string',
+										),
+									),
+								),
+							),
+						),
+					),
+				),
+			),
+		);
+
 		return $schema;
 	}
 
@@ -356,6 +414,7 @@ class TripAPISchema {
 	 * @param TripController  $controller
 	 *
 	 * @return array
+	 * @since 6.7.11 Added prepare_faqs call.
 	 */
 	public function trip_edit_api_prepare( array $data, WP_REST_Request $request, TripController $controller ): array {
 
@@ -365,6 +424,7 @@ class TripAPISchema {
 		$this->prepare_extra_services( $data, $request );
 		$this->prepare_file_downloads( $data, $request );
 		$this->prepare_partial_payment( $data, $request );
+		$this->prepare_faqs( $data, $request );
 
 		return $data;
 	}
@@ -376,6 +436,7 @@ class TripAPISchema {
 	 * @param TripController  $controller
 	 *
 	 * @return void
+	 * @since 6.7.11 Added update_faqs call.
 	 */
 	public function trip_edit_api_update( WP_REST_Request $request, TripController $controller ): void {
 
@@ -386,6 +447,7 @@ class TripAPISchema {
 		$this->update_extra_services( $request );
 		$this->update_file_downloads( $request );
 		$this->update_partial_payment( $request, $controller );
+		$this->update_faqs( $request, $controller );
 	}
 
 	/**
@@ -497,5 +559,188 @@ class TripAPISchema {
 		if ( isset( $request['full_payment_enable'] ) ) {
 			$this->trip_settings->set( 'trip_full_payment_enabled', $request['full_payment_enable'] ? 'yes' : 'no' );
 		}
+	}
+
+	/**
+	 * Prepares the FAQs data.
+	 *
+	 * @param array           $data
+	 * @param WP_REST_Request $request
+	 *
+	 * @since 6.7.11
+	 * @return void
+	 */
+	protected function prepare_faqs( array &$data, WP_REST_Request $request ): void {
+
+		$settings_available = function_exists( 'wptravelengine_settings' );
+		$global_faq_map     = wptravelengine_get_global_faq_map();
+		$global_faq_ids     = array_keys( $global_faq_map );
+
+		$faqs_data = $this->trip->get_setting( 'faqs_data', array() );
+
+		// If new structure exists, use it.
+		if ( ! empty( $faqs_data ) && is_array( $faqs_data ) ) {
+			$data['faqs_data'] = array(
+				'sectionTitle' => (string) ( $faqs_data['sectionTitle'] ?? '' ),
+				'categories'   => array(),
+			);
+
+			if ( ! empty( $faqs_data['categories'] ) && is_array( $faqs_data['categories'] ) ) {
+				foreach ( $faqs_data['categories'] as $category ) {
+					$faqs_array = array();
+					if ( ! empty( $category['faqs'] ) && is_array( $category['faqs'] ) ) {
+						foreach ( $category['faqs'] as $faq ) {
+							$source_id     = (string) ( $faq['sourceId'] ?? '' );
+							$added_in_bulk = isset( $faq['addedInBulk'] ) ? (bool) $faq['addedInBulk'] : false;
+							if (
+								$added_in_bulk
+								&& '' !== $source_id
+								&& $settings_available
+								&& ! in_array( $source_id, $global_faq_ids, true )
+							) {
+								continue;
+							}
+
+							$faq_item = array(
+								'id'       => (string) ( $faq['id'] ?? '' ),
+								'question' => (string) ( $faq['question'] ?? '' ),
+								'answer'   => (string) ( $faq['answer'] ?? '' ),
+							);
+
+							// For bulk-added FAQs, use global question/answer only as fallback when no trip-level override has been saved.
+							if ( $added_in_bulk && '' !== $source_id && isset( $global_faq_map[ $source_id ] ) ) {
+								if ( '' === $faq_item['question'] ) {
+									$faq_item['question'] = $global_faq_map[ $source_id ]['question'];
+								}
+								if ( '' === $faq_item['answer'] ) {
+									$faq_item['answer'] = $global_faq_map[ $source_id ]['answer'];
+								}
+							}
+
+							if ( isset( $faq['addedInBulk'] ) ) {
+								$faq_item['addedInBulk'] = (bool) $faq['addedInBulk'];
+							}
+							if ( isset( $faq['sourceId'] ) ) {
+								$faq_item['sourceId'] = $source_id;
+							}
+							$faqs_array[] = $faq_item;
+						}
+					}
+
+					$data['faqs_data']['categories'][] = array(
+						'id'   => (string) ( $category['id'] ?? '' ),
+						'name' => (string) ( $category['name'] ?? '' ),
+						'faqs' => $faqs_array,
+					);
+				}
+			}
+		} else {
+			// Transform legacy format for backward compatibility.
+			$legacy_faq = $this->trip->get_setting( 'faq', array() );
+			if ( ! empty( $legacy_faq['faq_title'] ) && is_array( $legacy_faq['faq_title'] ) ) {
+				$faqs_array = array();
+				foreach ( $legacy_faq['faq_title'] as $key => $question ) {
+					$faqs_array[] = array(
+						'id'       => 'faq-legacy-' . $key,
+						'question' => (string) $question,
+						'answer'   => (string) ( $legacy_faq['faq_content'][ $key ] ?? '' ),
+					);
+				}
+
+				// Get legacy section title.
+				$legacy_section_title = $this->trip->get_setting( 'faq_section_title', '' );
+
+				$data['faqs_data'] = array(
+					'sectionTitle' => (string) $legacy_section_title,
+					'categories'   => array(
+						array(
+							'id'   => 'category-legacy-general',
+							'name' => __( 'General', 'wp-travel-engine' ),
+							'faqs' => $faqs_array,
+						),
+					),
+				);
+			}
+		}
+	}
+
+	/**
+	 * Updates the FAQs data.
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @since 6.7.11
+	 * @return void
+	 */
+	protected function update_faqs( WP_REST_Request $request, TripController $controller ): void {
+
+		if ( ! isset( $request['faqs_data'] ) ) {
+			return;
+		}
+
+		$faqs_data = $request['faqs_data'];
+
+		// Validate: every FAQ must have a non-empty question.
+		if ( ! empty( $faqs_data['categories'] ) && is_array( $faqs_data['categories'] ) ) {
+			foreach ( $faqs_data['categories'] as $category ) {
+				if ( ! is_array( $category ) || empty( $category['faqs'] ) ) {
+					continue;
+				}
+				foreach ( $category['faqs'] as $faq ) {
+					if ( is_array( $faq ) && empty( trim( $faq['question'] ?? '' ) ) ) {
+						$controller->set_bad_request(
+							'faq_title_required',
+							sprintf( __( '%1$sFAQ Title%2$s must not be empty.', 'wp-travel-engine' ), '<strong>', '</strong>' ),
+							'faqs_data'
+						);
+						return;
+					}
+				}
+			}
+		}
+
+		$categories = array();
+
+		foreach ( $faqs_data['categories'] ?? array() as $category ) {
+			if ( ! is_array( $category ) ) {
+				continue;
+			}
+
+			$faqs_array = array();
+			foreach ( $category['faqs'] ?? array() as $faq ) {
+				if ( ! is_array( $faq ) ) {
+					continue;
+				}
+
+				$faq_item = array(
+					'id'       => $faq['id'] ?? '',
+					'question' => $faq['question'] ?? '',
+					'answer'   => $faq['answer'] ?? '',
+				);
+
+				if ( isset( $faq['addedInBulk'] ) ) {
+					$faq_item['addedInBulk'] = (bool) $faq['addedInBulk'];
+				}
+				if ( isset( $faq['sourceId'] ) ) {
+					$faq_item['sourceId'] = $faq['sourceId'];
+				}
+
+				$faqs_array[] = $faq_item;
+			}
+
+			$categories[] = array(
+				'id'   => $category['id'] ?? '',
+				'name' => $category['name'] ?? '',
+				'faqs' => $faqs_array,
+			);
+		}
+
+		$this->trip_settings->set(
+			'faqs_data',
+			array(
+				'sectionTitle' => $faqs_data['sectionTitle'] ?? '',
+				'categories'   => $categories,
+			)
+		);
 	}
 }

@@ -486,6 +486,7 @@ class Template_Tags extends TemplateTags {
 	 * Get trip booking Summary details.
 	 *
 	 * @since 6.5.0
+	 * @since 6.7.11 Skip empty line item groups; added wptravelengine_email_manual_trigger_{type} action.
 	 *
 	 * @return string
 	 */
@@ -602,20 +603,30 @@ class Template_Tags extends TemplateTags {
 
 			} else {
 				foreach ( $line_items as $line_item => $_items ) {
-					$label = $this->get_line_item_label( $line_item );
-					?>
-					<tr>
-						<td colspan="2"><strong><?php echo esc_html( $label ); ?></strong></td>
-					</tr>
-					<?php
-					foreach ( $_items as $item ) {
-						?>
-						<tr>
-							<td style="color: #566267;"><?php echo esc_html( $item['label'] ?? '' ) . ': ' . $item['quantity'] . ' x ' . wptravelengine_the_price( $item['price'], false ); ?></td>
-							<td style="width: 50%;text-align: right;"><strong><?php echo wptravelengine_the_price( $item['total'], false ); ?></strong></td>
-						</tr>
-						<?php
+					if ( empty( $_items ) ) {
+						continue;
 					}
+
+					if ( ! has_action( 'wptravelengine_email_manual_trigger_' . $line_item ) ) {
+						$label = $this->get_line_item_label( $line_item );
+						if ( $label ) {
+							?>
+							<tr>
+								<td colspan="2"><strong><?php echo esc_html( $label ); ?></strong></td>
+							</tr>
+							<?php
+						}
+						foreach ( $_items as $item ) {
+							?>
+							<tr>
+								<td style="color: #566267;"><?php echo esc_html( $item['label'] ?? '' ) . ': ' . esc_html( $item['quantity'] ) . ' x ' . wptravelengine_the_price( $item['price'], false ); ?></td>
+								<td style="width: 50%;text-align: right;"><strong><?php echo wptravelengine_the_price( $item['total'], false ); ?></strong></td>
+							</tr>
+							<?php
+						}
+					}
+
+					do_action( 'wptravelengine_email_manual_trigger_' . $line_item, $_items, (array) $cart_info );
 				}
 			}
 		endforeach;
@@ -1630,8 +1641,9 @@ class Template_Tags extends TemplateTags {
 	 * This function returns label for line items of cart.
 	 *
 	 * @since 6.7.9
+	 * @since 6.7.11 Changed visibility from public to protected.
 	 */
-	public function get_line_item_label( $line_item ) {
+	protected function get_line_item_label( $line_item ) {
 
 		switch ( $line_item ) :
 			case 'pricing_category':

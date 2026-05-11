@@ -648,17 +648,8 @@ $trip_meta_tabs = array(
 		'icon'              => 'message',
 		'fields'            => array(
 			array(
-				'label'   => __( 'Section Title', 'wp-travel-engine' ),
-				'divider' => true,
-				'field'   => array(
-					'name'        => 'faqs_title',
-					'type'        => 'TEXT',
-					'placeholder' => __( 'Enter FAQs Title', 'wp-travel-engine' ),
-				),
-			),
-			array(
 				'field' => array(
-					'name' => 'faqs',
+					'name' => 'faqs_data',
 					'type' => 'FAQS',
 				),
 			),

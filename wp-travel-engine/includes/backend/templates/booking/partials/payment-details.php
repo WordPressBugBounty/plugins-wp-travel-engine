@@ -236,7 +236,7 @@ echo $fee_hidden_markups;
 	<div class="wpte-payment-summary-card">
 		<h3 class="wpte-payment-summary-title"><?php esc_html_e( 'Payment Summary', 'wp-travel-engine' ); ?></h3>
 		<table class="wpte-payment-summary-table">
-			<tr>
+			<tr class="wpte-payment-deposit">
 				<td><?php esc_html_e( 'Total Deposit Amount', 'wp-travel-engine' ); ?></td>
 				<td><?php wptravelengine_the_price( '', true, $pricing_arguments ); ?></td>
 			</tr>

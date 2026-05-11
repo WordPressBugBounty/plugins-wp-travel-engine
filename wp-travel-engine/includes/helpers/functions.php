@@ -2612,3 +2612,68 @@ function wptravelengine_create_events_table() {
 	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 	dbDelta( $sql );
 }
+
+/**
+ * Build a map of active global FAQ items keyed by their ID.
+ *
+ * @since 6.7.11
+ * @return array<string, array{question: string, answer: string}>
+ */
+function wptravelengine_get_global_faq_map( bool $force_refresh = false ): array {
+	static $map = null;
+	if ( null !== $map && ! $force_refresh ) {
+		return $map;
+	}
+
+	if ( ! function_exists( 'wptravelengine_settings' ) ) {
+		return array();
+	}
+
+	$global_settings  = wptravelengine_settings()->get();
+	$global_faq_items = $global_settings['faqs']['items'] ?? array();
+	$map              = array();
+
+	if ( is_array( $global_faq_items ) ) {
+		foreach ( $global_faq_items as $global_faq ) {
+			$global_id = (string) ( $global_faq['id'] ?? '' );
+			if ( '' !== $global_id ) {
+				$map[ $global_id ] = array(
+					'question' => (string) ( $global_faq['question'] ?? $global_faq['faq_title'] ?? '' ),
+					'answer'   => (string) ( $global_faq['answer'] ?? $global_faq['faq_content'] ?? '' ),
+				);
+			}
+		}
+	}
+
+	return $map;
+}
+
+/**
+ * Remove orphaned bulk-imported FAQs from a categories array.
+ *
+ * @since 6.7.11
+ * @param array<int, array> $categories     FAQ categories array from faqs_data['categories'].
+ * @param string[]          $global_faq_ids IDs that currently exist in Global Settings.
+ * @return array<int, array>
+ */
+function wptravelengine_filter_orphaned_faqs( array $categories, array $global_faq_ids ): array {
+	foreach ( $categories as $cat_index => $category ) {
+		if ( empty( $category['faqs'] ) || ! is_array( $category['faqs'] ) ) {
+			continue;
+		}
+
+		$filtered_faqs = array();
+		foreach ( $category['faqs'] as $faq ) {
+			$added_in_bulk = isset( $faq['addedInBulk'] ) ? (bool) $faq['addedInBulk'] : false;
+			$source_id     = (string) ( $faq['sourceId'] ?? $faq['globalFaqId'] ?? '' );
+
+			if ( $added_in_bulk && '' !== $source_id && ! in_array( $source_id, $global_faq_ids, true ) ) {
+				continue;
+			}
+			$filtered_faqs[] = $faq;
+		}
+		$categories[ $cat_index ]['faqs'] = $filtered_faqs;
+	}
+
+	return $categories;
+}
