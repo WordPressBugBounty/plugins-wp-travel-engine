@@ -1752,7 +1752,8 @@ class Booking extends PostType {
 
 			if ( $customer_model instanceof Customer ) {
 				if ( ! email_exists( $billing_email ) ) {
-					$customer_model->maybe_register_as_user( true );
+					$force = apply_filters( 'wptravelengine_admin_booking_force_register_user', true, $customer_model, $booking );
+					$customer_model->maybe_register_as_user( $force );
 				}
 
 				do_action( 'wptravelengine_after_customer_created', $customer_model->ID );

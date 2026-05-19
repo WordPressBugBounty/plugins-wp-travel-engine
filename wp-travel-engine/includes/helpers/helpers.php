@@ -1324,10 +1324,10 @@ function wptravelengine_get_option( $option_name, $key = null ) {
 /**
  * Return All Settings of WP travel Engine.
  *
- * @deprecated 6.0.0
+ * @since 6.7.12 - Reverted deprecated label ( deprecated 6.0.0 ); already redirected to new function.
  */
 function wp_travel_engine_get_settings( $key = null ) {
-	wptravelengine_deprecated_function( __FUNCTION__, '6.0.0', 'wptravelengine_settings' );
+	// wptravelengine_deprecated_function( __FUNCTION__, '6.0.0', 'wptravelengine_settings' );
 
 	return wptravelengine_settings()->get( $key );
 }

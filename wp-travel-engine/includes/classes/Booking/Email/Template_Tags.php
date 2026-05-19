@@ -10,6 +10,8 @@ namespace WPTravelEngine\Booking\Email;
 use WPTravelEngine\Core\Models\Post\Trip;
 use WPTravelEngine\Core\Models\Settings\Options;
 use WPTravelEngine\Builders\FormFields\TravellerFormFields;
+use WPTravelEngine\Builders\FormFields\BillingFormFields;
+use WPTravelEngine\Builders\FormFields\EmergencyFormFields;
 use WPTravelEngine\Email\TemplateTags;
 use WPTravelEngine\Helpers\Countries;
 use WPTravelEngine\Helpers\CartInfoParser;
@@ -1033,28 +1035,12 @@ class Template_Tags extends TemplateTags {
 		echo $htmls;
 		?>
 		<tr>
-			<td colspan="2" style="font-size: 16px;line-height: 1.75;font-weight: bold;padding: 8px 0 4px;"><?php esc_html_e( 'Billing Details:', 'wp-travel-engine' ); ?></td>
+			<td colspan="2">
+				<?php
+				echo $this->get_billing_details();
+				?>
+			</td>
 		</tr>
-		<?php
-		$billing_fields = array(
-			__( 'Booking Name:', 'wp-travel-engine' )    => $this->get_billing_fullname(),
-			__( 'Booking Email:', 'wp-travel-engine' )   => $this->get_billing_email(),
-			__( 'Booking Address:', 'wp-travel-engine' ) => $this->get_billing_address(),
-			__( 'City:', 'wp-travel-engine' )            => $this->get_billing_city(),
-			__( 'Country:', 'wp-travel-engine' )         => $this->get_billing_country(),
-		);
-		foreach ( $billing_fields as $label => $value ) {
-			if ( empty( trim( $value ) ) ) {
-				continue;
-			}
-			?>
-			<tr>
-				<td style="color: #566267;"><?php echo esc_html( $label ); ?></td>
-				<td style="width: 50%;text-align: right;"><strong><?php echo esc_html( $value ); ?></strong></td>
-			</tr>
-			<?php
-		}
-		?>
 		<?php
 		return ob_get_clean();
 	}
@@ -1452,67 +1438,66 @@ class Template_Tags extends TemplateTags {
 		return ob_get_clean();
 	}
 
+	/**
+	 * Get the Billing details.
+	 *
+	 * @return string
+	 * @since 6.7.12 Updated billing details with other updated form fields.
+	 */
 	public function get_billing_details() {
 		if ( empty( $this->billing_details ) ) {
 			return '';
 		}
+		$billing_form_fields = new BillingFormFields();
+		$fields              = $billing_form_fields->with_values( $this->billing_details );
 		ob_start();
 		?>
 		<table width="100%">
 			<tr>
-				<td class="title-holder" style="margin: 0;" valign="top">
-					<h3 class="alignleft"><?php echo esc_html__( 'Billing Details', 'wp-travel-engine' ); ?></h3>
-				</td>
+				<td colspan="2" style="font-size: 16px;line-height: 1.75;font-weight: bold;padding: 8px 0 4px;"><?php esc_html_e( 'Billing Details:', 'wp-travel-engine' ); ?></td>
 			</tr>
 			<?php
-			foreach ( $this->billing_details as $key => $value ) {
-				// Map keys to more readable formats
-				$key_map = array(
-					'fname'   => 'First Name',
-					'lname'   => 'Last Name',
-					'email'   => 'Email',
-					'phone'   => 'Phone',
-					'address' => 'Address',
-					'city'    => 'City',
-					'country' => 'Country',
-				);
-
-				if ( array_key_exists( $key, $key_map ) ) {
-					$key = $key_map[ $key ];
+			foreach ( $fields as $field ) :
+				if ( empty( $field['value'] ) ) {
+					continue;
 				}
-				if ( is_array( $value ) ) {
-					$value = implode( ', ', $value );
-				}
+				$value          = $field['value'] ?? '';
 				$countries_list = Countries::list();
-				if ( isset( $countries_list[ $value ] ) ) {
-					$value = $countries_list[ $value ];
+				if ( $field['type'] == 'country_dropdown' ) {
+					$value = $countries_list[ $value ] ?? '';
 				}
 				?>
 				<tr>
-					<td><?php echo esc_html( ucfirst( $key ) ); ?></td>
-					<td>
+					<td style="color: #566267;"><?php echo esc_html( ucfirst( $field['field_label'] ) ); ?></td>
+					<td style="width: 50%;text-align: right;">
 						<?php
 						if ( filter_var( $value, FILTER_VALIDATE_URL ) ) :
 							?>
 							<a href="<?php echo esc_url( $value ); ?>"
 								target="_blank"><?php echo esc_html( basename( $value ) ); ?></a>
 						<?php else : ?>
-							<?php echo esc_html( $value ); ?>
+							<strong><?php echo is_array( $value ) ? esc_html( implode( ', ', $value ) ) : esc_html( $value ?? '' ); ?></strong>
 						<?php endif; ?>
 					</td>
 				</tr>
-				<?php
-			}
-			?>
+			<?php endforeach; ?>
 		</table>
 		<?php
 		return ob_get_clean();
 	}
 
+	/**
+	 * Get the Emergency details.
+	 *
+	 * @return string
+	 * @since 6.7.12 Updated EmergencyFormFields Dynamic form fields get to display dynamic fields.
+	 */
 	public function get_emergency_details() {
 		if ( empty( $this->emergency_details ) ) {
 			return '';
 		}
+		$emergency_form_fields = new EmergencyFormFields();
+		$fields                = $emergency_form_fields->with_values( $this->emergency_details, new Booking( $this->booking->ID ) );
 		ob_start();
 		?>
 		<table width="100%">
@@ -1522,39 +1507,18 @@ class Template_Tags extends TemplateTags {
 				</td>
 			</tr>
 			<?php
-			foreach ( $this->emergency_details as $key => $value ) {
-				// Map keys to more readable formats
-				$key_map = array(
-					'title'    => 'Title',
-					'fname'    => 'First Name',
-					'lname'    => 'Last Name',
-					'email'    => 'Email',
-					'phone'    => 'Phone',
-					'address'  => 'Address',
-					'city'     => 'City',
-					'country'  => 'Country',
-					'relation' => 'Relation',
-				);
-
-				if ( array_key_exists( $key, $key_map ) ) {
-					$key = $key_map[ $key ];
+			foreach ( $fields as $field ) :
+				if ( empty( $field['value'] ) ) {
+					continue;
 				}
-				if ( isset( $value ) && is_array( $value ) ) {
-					$flat_value = array_map(
-						function ( $item ) {
-							return is_array( $item ) ? implode( ', ', $item ) : strval( $item ?? '' );
-						},
-						$value
-					);
-					$value      = implode( ', ', $flat_value );
-				}
+				$value          = $field['value'];
 				$countries_list = Countries::list();
-				if ( isset( $countries_list[ $value ] ) ) {
-					$value = $countries_list[ $value ];
+				if ( $field['type'] == 'country_dropdown' ) {
+					$value = $countries_list[ $value ] ?? '';
 				}
 				?>
 				<tr>
-					<td><?php echo esc_html( ucfirst( $key ) ); ?></td>
+					<td><?php echo esc_html( ucfirst( $field['field_label'] ) ); ?></td>
 					<td>
 						<?php
 						if ( filter_var( $value, FILTER_VALIDATE_URL ) ) :
@@ -1562,13 +1526,11 @@ class Template_Tags extends TemplateTags {
 							<a href="<?php echo esc_url( $value ); ?>"
 								target="_blank"><?php echo esc_html( basename( $value ) ); ?></a>
 						<?php else : ?>
-							<?php echo esc_html( $value ); ?>
+							<strong><?php echo is_array( $value ) ? esc_html( implode( ', ', $value ) ) : esc_html( $value ?? '' ); ?></strong>
 						<?php endif; ?>
 					</td>
 				</tr>
-				<?php
-			}
-			?>
+			<?php endforeach; ?>
 		</table>
 		<?php
 		return ob_get_clean();
@@ -1613,7 +1575,7 @@ class Template_Tags extends TemplateTags {
 					$value          = isset( $field['value'] ) ? $field['value'] : '';
 					$countries_list = Countries::list();
 					if ( $field['type'] == 'country_dropdown' ) {
-						$value = $countries_list[ $field['value'] ];
+						$value = $countries_list[ $value ] ?? '';
 					}
 					?>
 						<tr>

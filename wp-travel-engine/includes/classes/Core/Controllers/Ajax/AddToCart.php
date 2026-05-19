@@ -213,7 +213,9 @@ class AddToCart extends AjaxController {
 			$wte_cart->clear();
 		}
 
-		$wte_cart->add( $this->request );
+		if ( ! $wte_cart->add( $this->request ) ) {
+			return new WP_Error( 'ADD_TO_CART_ERROR', __( 'Invalid package for this trip.', 'wp-travel-engine' ) );
+		}
 
 		do_action( 'wptravelengine_after_add_to_cart', $wte_cart );
 

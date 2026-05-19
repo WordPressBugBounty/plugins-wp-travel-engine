@@ -393,7 +393,12 @@ class Cart {
 
 			WTE()->session->set( "__cart_{$this->cart_key}", array( 'booking_id' => $booking->get_id() ) );
 		} else {
-			$item       = Item::from_request( $request, $this );
+			$item = Item::from_request( $request, $this );
+
+			if ( is_wp_error( $item ) ) {
+				return false;
+			}
+
 			$attributes = $item->data();
 			do_action( 'wte_before_add_to_cart', $item->trip_id, $attributes );
 

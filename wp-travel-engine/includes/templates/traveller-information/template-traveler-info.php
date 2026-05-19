@@ -129,10 +129,8 @@ if ( isset( $booking_id ) ) {
 		$form_fields = new WP_Travel_Engine_Form_Field();
 
 		$traveller_fields = WTE_Default_Form_Fields::traveller_information();
-		$traveller_fields = apply_filters( 'wp_travel_engine_traveller_info_fields_display', $traveller_fields );
 
 		$emergency_contact_fields = WTE_Default_Form_Fields::emergency_contact();
-		$emergency_contact_fields = apply_filters( 'wp_travel_engine_emergency_contact_fields_display', $emergency_contact_fields );
 
 		$wp_travel_engine_settings_options = get_option( 'wp_travel_engine_settings', true );
 
@@ -149,8 +147,10 @@ if ( isset( $booking_id ) ) {
 					} else {
 						$field['name'] = sprintf( 'wp_travel_engine_placeorder_setting[place_order][travelers][%s][%d]', $field['name'], $i );
 					}
-					$field['id']            = sprintf( '%s-%d', $field['id'], $i );
-					$field['wrapper_class'] = 'wp-travel-engine-personal-details';
+					$field['id'] = sprintf( '%s-%d', $field['id'], $i );
+					if ( empty( $field['wrapper_class'] ) ) {
+						$field['wrapper_class'] = 'wp-travel-engine-personal-details';
+					}
 
 					if ( isset( $field['attributes']['data-id'] ) ) {
 						$field['attributes']['data-id'] .= '_' . $i;
@@ -174,9 +174,10 @@ if ( isset( $booking_id ) ) {
 						} else {
 							$field['name'] = sprintf( 'wp_travel_engine_placeorder_setting[place_order][relation][%s][%d]', $field['name'], $i );
 						}
-						$field['id']            = sprintf( '%s-%d', $field['id'], $i );
-						$field['wrapper_class'] = 'wp-travel-engine-personal-details';
-
+						$field['id'] = sprintf( '%s-%d', $field['id'], $i );
+						if ( empty( $field['wrapper_class'] ) ) {
+							$field['wrapper_class'] = 'wp-travel-engine-personal-details';
+						}
 						return $field;
 					},
 					$emergency_contact_fields

@@ -236,6 +236,7 @@ class Wp_Travel_Engine_Archive_Hooks {
 				'posts_per_page'      => $feat_trip_num,
 				'wpte_trip_search'    => false,
 				'wpte_featured_query' => true,
+				'post_status'         => 'publish',
 			)
 		);
 
@@ -326,8 +327,9 @@ class Wp_Travel_Engine_Archive_Hooks {
 		}
 
 		$args = array(
-			'post_type' => 'trip',
-			'post__in'  => $trips_array,
+			'post_type'   => 'trip',
+			'post__in'    => $trips_array,
+			'post_status' => 'publish',
 		);
 
 		$featured_query = new \WP_Query( $args );

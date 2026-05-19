@@ -1,5 +1,10 @@
 == Changelog ==
 
+= 6.7.12 - 19th May 2026 =
+* Improved: DatePicker now follows the date format configured in WordPress settings.
+* Fixed: Billing Details now correctly support dynamic fields added through the form editor.
+* Security: Patched an Insecure Direct Object Reference (IDOR) vulnerability.
+
 = 6.7.11 - 11th May 2026 =
 * Improved: Added indicator chips to Pricing categories and date selections for better visibility and clarity.
 * New Feature: Added a global setting to display archive page images in their original size.

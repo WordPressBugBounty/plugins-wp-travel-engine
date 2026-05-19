@@ -147,7 +147,8 @@ class LeadTravellersFormFields extends LeadTravellerFormFields {
 					$field['id']            = sprintf( 'travellers_%d_%s', 0, $name );
 				}
 				$field['field_label'] = isset( $field['placeholder'] ) && '' !== $field['placeholder'] ? $field['placeholder'] : $field['field_label'];
-				$field['default']     = $merged_lead[ $name ] ?? $field['default'] ?? '';
+				$value                = $form_data[ $name ] ?? $field['default'] ?? '';
+				$field['default']     = is_array( $value ) ? implode( ',', $value ) : $value;
 
 				return $field;
 			},

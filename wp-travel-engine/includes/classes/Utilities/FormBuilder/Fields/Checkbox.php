@@ -24,9 +24,11 @@ class Checkbox extends Select {
 
 		$option_attributes = $this->concat_attributes( $this->option_attributes );
 		if ( empty( $this->options ) ) {
-			$checked            = checked( $this->field_value, '1', false );
-			$option_attributes .= ' data-parsley-multiple="checkbox" data-parsley-mincheck="1" data-parsley-required ';
-			$attributes         = array( $this->field_name, '1', $this->field_id, $checked, $option_attributes );
+			$checked = checked( $this->field_value, '1', false );
+			if ( $this->is_required() ) {
+				$option_attributes .= ' data-parsley-multiple="checkbox" data-parsley-mincheck="1" data-parsley-required="true" ';
+			}
+			$attributes = array( $this->field_name, '1', $this->field_id, $checked, $option_attributes );
 
 			return sprintf(
 				'<div class="wpte-checkbox-wrap"><input type="checkbox" name="%1$s" value="%2$s" id="%3$s" %4$s %5$s><label for="%3$s"></label></div>',

@@ -55,9 +55,9 @@ $trip_end_date   = wptravelengine_format_trip_end_datetime( $start_datetime, $tr
 
 $traveller_details = array();
 if ( is_array( $_traveller_details ) ) {
+	$traveller_form_fields = new TravellerFormFields();
 	foreach ( $_traveller_details as $traveller ) {
-		$traveller_form_fields = new TravellerFormFields();
-		$traveller_details[]   = $traveller_form_fields->with_values( $traveller );
+		$traveller_details[] = $traveller_form_fields->with_values( $traveller, $booking_instance );
 	}
 }
 

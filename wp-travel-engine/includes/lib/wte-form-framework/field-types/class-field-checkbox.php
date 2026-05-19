@@ -48,6 +48,14 @@ class WP_Travel_Engine_Form_Field_Checkbox {
 			if ( ! is_array( $this->field['options'] ) ) {
 				$options_arr = json_decode( $this->field['options'], true );
 			}
+			$error_coontainer_id = sprintf( 'error_container-%s', $this->field['id'] );
+			if ( count( $options_arr ) > 1 && ! empty( $this->field['validations']['required'] ) ) {
+				$validations .= sprintf(
+					' data-parsley-multiple="%s" data-parsley-mincheck="1" data-parsley-required="true" data-parsley-errors-container="#%s"',
+					esc_attr( $this->field['id'] ),
+					$error_coontainer_id
+				);
+			}
 			foreach ( $options_arr as $key => $value ) {
 				// Option Attributes.
 				$option_attributes = '';
@@ -67,10 +75,8 @@ class WP_Travel_Engine_Form_Field_Checkbox {
 				} else {
 					$checked = ( $key === $this->field['default'] ) ? 'checked' : '';
 				}
-					$error_coontainer_id = sprintf( 'error_container-%s', $this->field['id'] );
 				if ( count( $options_arr ) > 1 ) {
-					$validations .= 'data-parsley-multiple="checkbox" data-parsley-mincheck="1" data-parsley-required';
-						$output  .= sprintf(
+						$output .= sprintf(
 							'<div class="wpte-bf-checkbox-wrap wpte-checkbox-wrap">
 							<input type="checkbox" name="%s[]" value="%s" id="%s" %s %s %s>
 							<label for="%s">

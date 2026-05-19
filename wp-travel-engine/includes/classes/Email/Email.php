@@ -162,6 +162,7 @@ class Email extends TemplateTags {
 	 * @return mixed
 	 * @since 6.5.0
 	 * @since 6.7.9 Updated to use EmailTranslationManager for translation.
+	 * @since 6.7.12  Added wptravelengine_email_attachments filter.
 	 */
 	public function send() {
 
@@ -170,9 +171,15 @@ class Email extends TemplateTags {
 		}
 
 		// Prepare email data.
-		$to          = array_map( 'trim', explode( ',', $this->get( 'to' ) ) );
-		$headers     = $this->get( 'headers' );
-		$attachments = $this->get( 'attachments' );
+		$to      = array_map( 'trim', explode( ',', $this->get( 'to' ) ) );
+		$headers = $this->get( 'headers' );
+
+		/**
+		 * Filters email attachments before sending.
+		 *
+		 * @since 6.7.12
+		 */
+		$attachments = apply_filters( 'wptravelengine_email_attachments', $this->get( 'attachments' ), $this );
 
 		/**
 		 * Filters email subject & body before applying template tags.

@@ -68,7 +68,7 @@ class EnquiryMail extends AjaxController {
 						$value = sanitize_text_field( $data[ $form_field['name'] ] );
 				}
 
-				$sanitized_data[ $form_field['name'] ] = $value;
+				$sanitized_data[ $form_field['name'] ] = apply_filters( 'wptravelengine_enquiry_form_sanitized_value', $value, $form_field, $data );
 			}
 		}
 
@@ -184,43 +184,13 @@ class EnquiryMail extends AjaxController {
 		if ( ! function_exists( 'wp_handle_upload' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
 		}
-		$uploadedfile = $_FILES;
-		$attachments  = array();
 
-		// Define allowed file types once.
-		$allowed_mimes = array(
-			'jpg|jpeg|jpe' => 'image/jpeg',
-			'png'          => 'image/png',
-			'gif'          => 'image/gif',
-			'pdf'          => 'application/pdf',
-		);
-
-		foreach ( $uploadedfile as $key => $file ) {
-			// Skip if no file was uploaded or there was an upload error.
-			if ( empty( $file['name'] ) || ! empty( $file['error'] ) ) {
-				continue;
-			}
-
-			// Validate file type early.
-			$file_type = wp_check_filetype( $file['name'], $allowed_mimes );
-			if ( ! $file_type['type'] ) {
-				continue;
-			}
-
-			// Handle the file upload.
-			$upload_file = wp_handle_upload(
-				$file,
-				array(
-					'test_form' => false,
-					'mimes'     => $allowed_mimes,
-				)
-			);
-
-			// Add to attachments if successful.
-			if ( $upload_file && ! isset( $upload_file['error'] ) ) {
-				$attachments[ $key ] = $upload_file['file'];
-			}
-		}
+		/**
+		 * 
+		 * Handle Attachments from Addon ( Form Editor ).
+		 * @since 6.7.12
+		 */
+		$attachments  = apply_filters( 'wptravelengine_enquiry_mail_attachments', array(), $_FILES );
 
 		$admin_sent = false;
 		foreach ( $to as $val ) {

@@ -213,12 +213,16 @@ class Item {
 	 * @param WP_REST_Request $request
 	 * @param Cart            $cart
 	 *
-	 * @return Item
+	 * @return Item|\WP_Error
 	 */
-	public static function from_request( WP_REST_Request $request, Cart $cart ): Item {
+	public static function from_request( WP_REST_Request $request, Cart $cart ) {
 		$cart_data = (object) $request->get_json_params();
 
-		$package = new TripPackage( $cart_data->packageID, Trip::make( $cart_data->tripID ) );
+		$trip    = Trip::make( $cart_data->tripID );
+		$package = $trip->packages()->get_package( (int) $cart_data->packageID );
+		if ( null === $package ) {
+			return new \WP_Error( 'invalid_package', __( 'Invalid package for this trip.', 'wp-travel-engine' ) );
+		}
 
 		$trip_price = 0;
 		$travelers  = array();

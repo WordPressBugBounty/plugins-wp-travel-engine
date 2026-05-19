@@ -54,7 +54,8 @@ class LeadTravellerFormFields extends FormField {
 						$field['id'] = sprintf( 'travellers_%s', $name );
 				}
 				$field['field_label'] = isset( $field['placeholder'] ) && $field['placeholder'] !== '' ? $field['placeholder'] : $field['field_label'];
-				$field['value']       = $form_data[ $name ] ?? $field['default'] ?? '';
+				$value                = $form_data[ $name ] ?? $field['default'] ?? '';
+				$field['value']       = is_array( $value ) ? implode( ',', $value ) : $value;
 				// Convert country code to country name to show in the traveller form.
 				$countries_list = Countries::list();
 				if ( $field['type'] == 'country' ) {

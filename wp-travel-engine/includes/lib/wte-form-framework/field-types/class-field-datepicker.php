@@ -20,6 +20,38 @@ class WP_Travel_Engine_Form_Field_Date extends WP_Travel_Engine_Form_Field_Text 
 		return $this;
 	}
 
+	/**
+	 * Get Flatpickr-compatible date format from WordPress date format.
+	 *
+	 * Falls back to Y-m-d for unsupported formats.
+	 *
+	 * @since 6.7.12
+	 *
+	 * @return string
+	 */
+	protected static function get_flatpickr_format(): string {
+
+		$wp_format = get_option( 'date_format', 'Y-m-d' );
+
+		// Unsupported PHP date format characters in Flatpickr.
+		if ( preg_match( '/[SeTOPrUuvtLB]/', $wp_format ) ) {
+			return 'Y-m-d';
+		}
+
+		return strtr(
+			$wp_format,
+			array(
+				'A' => 'K',
+				'a' => 'K',
+				'g' => 'h',
+				'h' => 'G',
+				'G' => 'H',
+				's' => 'S',
+				'S' => '',
+			)
+		);
+	}
+
 	function render( $display = true ) {
 		$output = parent::render( false );
 		wp_enqueue_script( 'wte-fpickr' );
@@ -32,8 +64,8 @@ class WP_Travel_Engine_Form_Field_Date extends WP_Travel_Engine_Form_Field_Text 
 			'<script>;(function() {
 				window.addEventListener("load",function() {
 					var fpArgs = {
-						dateFormat: "Y-m-d",
-						locale: "%3$s"
+						dateFormat: "%3$s",
+						locale: "%4$s"
 					}
 					if("%2$s" == "false") {
 						fpArgs["minDate"] = new Date()
@@ -46,7 +78,8 @@ class WP_Travel_Engine_Form_Field_Date extends WP_Travel_Engine_Form_Field_Text 
 			})();</script>',
 			$this->field['attributes']['data-id'],
 			$max_today,
-			$locale
+			esc_js( self::get_flatpickr_format() ),
+			$locale,
 		);
 
 		// $output .= '<script>';

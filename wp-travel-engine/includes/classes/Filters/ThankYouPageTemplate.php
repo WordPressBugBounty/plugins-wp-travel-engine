@@ -359,9 +359,9 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 
 		$traveller_details = array();
 		if ( is_array( $_traveller_details ) ) {
+			$traveller_form_fields = new TravellerFormFields();
 			foreach ( $_traveller_details as $traveller ) {
-				$traveller_form_fields = new TravellerFormFields();
-				$traveller_details[]   = $traveller_form_fields->with_values( $traveller, $this->booking );
+				$traveller_details[] = $traveller_form_fields->with_values( $traveller, $this->booking );
 			}
 		}
 

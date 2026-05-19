@@ -359,7 +359,7 @@ class SettingsAPISchema {
 			// 'date_layout'               => (string) $this->plugin_settings->get( 'fsd_dates_layout', 'dates_list' ),
 			'number_of_dates'           => (string) $this->plugin_settings->get( 'trip_dates.number', '3' ),
 			'number_of_pagination'      => (string) $this->plugin_settings->get( 'trip_dates.pagination_number', '10' ),
-			'show_without_fsd'          => ! wptravelengine_toggled( $this->plugin_settings->get( 'hide_trips_without_dates', 'no' ) ),
+			'show_without_fsd'          => ! wptravelengine_toggled( $this->plugin_settings->get( 'hide_trips_without_dates', 'yes' ) ),
 			'show_with_available_dates' => ! wptravelengine_toggled( $this->plugin_settings->get( 'hide_trips_without_dates_beyond', 'no' ) ),
 			'number_of_days'            => (string) $this->plugin_settings->get( 'number_of_days_to_hide_trips', '' ),
 		);
