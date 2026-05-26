@@ -5,6 +5,7 @@
  * @var \WPTravelEngine\Core\Models\Post\Booking $booking
  * @since 6.4.0
  */
+use WPTravelEngine\Core\PostTypes\Booking;
 
 $cart_line_items = $cart_info->get_item()->get_line_items();
 
@@ -47,16 +48,38 @@ wptravelengine_set_template_args( compact( 'cart_line_items' ) );
 		<?php
 	endif;
 
-	$status_tag       = sprintf( '<span class="wpte-tag %1$s">%1$s</span>', $booking->get_booking_status() );
-	$admin_edited_tag = wptravelengine_toggled( $booking->get_meta( '_user_edited' ) ) ? sprintf( '<span class="wpte-tag %1$s">%1$s</span>', __( 'Customized Reservation', 'wp-travel-engine' ) ) : '';
+	$status_tag    = sprintf( '<span class="wpte-tag %1$s">%1$s</span>', $booking->get_booking_status_label() );
+	$migration_tag = absint( $booking->get_meta( '_migrated_from' ) ) ? sprintf(
+		'<span class="wpte-tag migrated">%s%s</span>',
+		Booking::BADGE_ICON_MIGRATED,
+		esc_html__( 'Migrated', 'wp-travel-engine' )
+	) : '';
+
+	if ( wptravelengine_toggled( $booking->get_meta( '__is_manual' ) ) ) {
+		$admin_edited_tag = sprintf(
+			'<span class="wpte-tag manual">%s%s</span>',
+			Booking::BADGE_ICON_MANUAL,
+			esc_html__( 'Manual', 'wp-travel-engine' )
+		);
+	} elseif ( wptravelengine_toggled( $booking->get_meta( '_user_edited' ) ) ) {
+		$admin_edited_tag = sprintf(
+			'<span class="wpte-tag warning">%s%s</span>',
+			Booking::BADGE_ICON_MODIFIED,
+			esc_html__( 'Modified', 'wp-travel-engine' )
+		);
+	} else {
+		$admin_edited_tag = '';
+	}
+
 	if ( $booking->get_booking_status() !== 'auto-draft' ) {
 		?>
 		<div class="wpte-page-header-content">
 			<?php
 			printf(
-				'<div class="wpte-tags-wrap">%1$s%2$s</div>',
+				'<div class="wpte-tags-wrap">%1$s%2$s%3$s</div>',
 				$admin_edited_tag,
 				$status_tag,
+				$migration_tag,
 			);
 			?>
 		</div>

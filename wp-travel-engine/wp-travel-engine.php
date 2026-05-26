@@ -15,7 +15,7 @@
  * Plugin Name:       WP Travel Engine - Travel and Tour Booking Plugin
  * Plugin URI:        https://wordpress.org/plugins/wp-travel-engine/
  * Description:       WP Travel Engine is a free travel booking WordPress plugin to create travel and tour packages for tour operators and travel agencies. It is a complete travel management system and includes plenty of useful features. You can create your travel booking website using WP Travel Engine in less than 5 minutes.
- * Version:           6.7.12
+ * Version:           6.8.0
  * Author:            WP Travel Engine
  * Author URI:        https://wptravelengine.com/
  * License:           GPLv3
@@ -24,13 +24,13 @@
  * Domain Path:       /languages
  * Requires at least: 5.8
  * Requires PHP: 7.4
- * Tested up to: 6.9
+ * Tested up to: 7.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
 const WP_TRAVEL_ENGINE_FILE_PATH = __FILE__;
-const WP_TRAVEL_ENGINE_VERSION   = '6.7.12';
+const WP_TRAVEL_ENGINE_VERSION   = '6.8.0';
 
 /**
  * Load plugin updater file

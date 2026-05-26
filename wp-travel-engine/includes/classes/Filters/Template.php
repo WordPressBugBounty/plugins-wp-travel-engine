@@ -181,34 +181,25 @@ class Template {
 	 * Hide traveller emergency information.
 	 *
 	 * @return boolean true if traveller emergency information should be hidden, false otherwise.
+	 * @since 6.8.0 Removed checkout template v1.0 logic.
 	 */
 	public function modify_traveller_emergency_form() {
-		$settings          = get_option( 'wp_travel_engine_settings', array() );
-		$checkout_template = wptravelengine_get_checkout_template_version( $settings );
-
-		if ( $checkout_template == '1.0' ) {
-			return wptravelengine_replace( $settings['travelers_information'], 'no', false, true );
-		}
-
-		if ( $checkout_template == '2.0' ) {
-			return ! ( wptravelengine_toggled( $settings['display_travellers_info'] ) && wptravelengine_replace( $settings['traveller_emergency_details_form'], 'after_checkout', true, false ) );
-		}
-
-		return false;
+		$settings = get_option( 'wp_travel_engine_settings', array() );
+		return ! ( wptravelengine_toggled( $settings['display_travellers_info'] ) && wptravelengine_replace( $settings['traveller_emergency_details_form'], 'after_checkout', true, false ) );
 	}
 
 	/**
 	 * Modify traveller information.
 	 *
 	 * @return string 'yes' if traveller information should be hidden, false otherwise.
+	 * @since 6.8.0 Removed checkout template v1.0 logic.
 	 */
 	public function modify_traveller_form() {
-		$wptravelengine_settings          = get_option( 'wp_travel_engine_settings', array() );
-		$checkout_page_template           = wptravelengine_get_checkout_template_version( $wptravelengine_settings );
-		$is_enabled_travellers_info       = $wptravelengine_settings['display_travellers_info'] ?? 'no';
-		$traveller_emergency_details_form = $wptravelengine_settings['traveller_emergency_details_form'] ?? 'after_checkout';
+		$settings                         = get_option( 'wp_travel_engine_settings', array() );
+		$is_enabled_travellers_info       = $settings['display_travellers_info'] ?? 'no';
+		$traveller_emergency_details_form = $settings['traveller_emergency_details_form'] ?? 'after_checkout';
 
-		if ( $checkout_page_template == '2.0' && $traveller_emergency_details_form == 'on_checkout' && $is_enabled_travellers_info == 'yes' ) {
+		if ( $traveller_emergency_details_form == 'on_checkout' && $is_enabled_travellers_info == 'yes' ) {
 			return 'yes';
 		}
 
@@ -219,21 +210,10 @@ class Template {
 	 * Modify emergency information.
 	 *
 	 * @return boolean true if traveller emergency information should be hidden, false otherwise.
+	 * @since 6.8.0 Removed checkout template v1.0 logic.
 	 */
 	public function modify_emergency_form() {
-		$settings          = get_option( 'wp_travel_engine_settings', array() );
-		$checkout_template = wptravelengine_get_checkout_template_version( $settings );
-
-		// Handle legacy checkout template (1.0).
-		if ( $checkout_template == '1.0' ) {
-			return wptravelengine_replace( $settings['emergency'], '1', true, false );
-		}
-
-		// Handle new checkout template (2.0).
-		if ( $checkout_template == '2.0' ) {
-			return ! ( wptravelengine_toggled( $settings['display_emergency_contact'] ) && wptravelengine_toggled( $settings['display_travellers_info'] ) && in_array( $settings['traveller_emergency_details_form'] ?? 'after_checkout', array( 'on_checkout', 'after_checkout' ) ) );
-		}
-
-		return false;
+		$settings = get_option( 'wp_travel_engine_settings', array() );
+		return ! ( wptravelengine_toggled( $settings['display_emergency_contact'] ) && wptravelengine_toggled( $settings['display_travellers_info'] ) && in_array( $settings['traveller_emergency_details_form'] ?? 'after_checkout', array( 'on_checkout', 'after_checkout' ) ) );
 	}
 }

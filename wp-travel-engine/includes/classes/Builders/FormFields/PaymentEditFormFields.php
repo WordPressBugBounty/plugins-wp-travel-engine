@@ -23,49 +23,12 @@ class PaymentEditFormFields extends BookingEditFormFields {
 
 	protected ?Payment $payment      = null;
 	private const DATEPICKER_OPTIONS = array(
-		'dateFormat' => 'Y-m-d H:i:S',
-		'enableTime' => true,
-		'time_24hr'  => true,
-		'allowInput' => true,
+		'dateFormat'      => 'Y-m-d H:i:S',
+		'enableTime'      => true,
+		'time_24hr'       => true,
+		'allowInput'      => true,
+		'minuteIncrement' => 1,
 	);
-
-	/**
-	 * Enable editing for non-checkout payment fields.
-	 *
-	 * For payments whose source is not 'checkout' (typically created/edited manually
-	 * in admin), this method:
-	 * - Removes readonly attributes from gateway_response and transaction_id.
-	 * - Enables the date field and attaches the Flatpickr date picker with
-	 *   datetime support.
-	 *
-	 * @param array &$fields Form fields array (passed by reference).
-	 *
-	 * @since 6.7.3
-	 * @return void
-	 */
-	private function apply_non_checkout_editability( array &$fields ): void {
-		// Gateway response.
-		if ( isset( $fields['gateway_response']['attributes']['readonly'] ) ) {
-			unset( $fields['gateway_response']['attributes']['readonly'] );
-		}
-
-		// Transaction ID.
-		if ( isset( $fields['transaction_id']['attributes']['readonly'] ) ) {
-			unset( $fields['transaction_id']['attributes']['readonly'] );
-		}
-
-		// Date.
-		if ( isset( $fields['date'] ) ) {
-			if ( isset( $fields['date']['disabled'] ) ) {
-				unset( $fields['date']['disabled'] );
-			}
-			if ( isset( $fields['date']['attributes']['readonly'] ) ) {
-				unset( $fields['date']['attributes']['readonly'] );
-			}
-			$fields['date']['class']                      = ( $fields['date']['class'] ?? 'input' ) . ' wpte-date-picker';
-			$fields['date']['attributes']['data-options'] = wp_json_encode( self::DATEPICKER_OPTIONS );
-		}
-	}
 
 	/**
 	 * Constructor
@@ -75,7 +38,6 @@ class PaymentEditFormFields extends BookingEditFormFields {
 	public function __construct( array $defaults = array(), string $mode = 'edit', array $labels = array() ) {
 		$this->use_legacy_template( true );
 		parent::__construct( $defaults, $mode );
-		static::$mode = $mode;
 
 		// Get the fields and sort them by order
 		$fields = static::structure( $mode );
@@ -209,6 +171,44 @@ class PaymentEditFormFields extends BookingEditFormFields {
 	}
 
 	/**
+	 * Enable editing for non-checkout payment fields.
+	 *
+	 * For payments whose source is not 'checkout' (typically created/edited manually
+	 * in admin), this method:
+	 * - Removes readonly attributes from gateway_response and transaction_id.
+	 * - Enables the date field and attaches the Flatpickr date picker with
+	 *   datetime support.
+	 *
+	 * @param array &$fields Form fields array (passed by reference).
+	 *
+	 * @since 6.7.3
+	 * @return void
+	 */
+	private function apply_non_checkout_editability( array &$fields ): void {
+		// Gateway response.
+		if ( isset( $fields['gateway_response']['attributes']['readonly'] ) ) {
+			unset( $fields['gateway_response']['attributes']['readonly'] );
+		}
+
+		// Transaction ID.
+		if ( isset( $fields['transaction_id']['attributes']['readonly'] ) ) {
+			unset( $fields['transaction_id']['attributes']['readonly'] );
+		}
+
+		// Date.
+		if ( isset( $fields['date'] ) ) {
+			if ( isset( $fields['date']['disabled'] ) ) {
+				unset( $fields['date']['disabled'] );
+			}
+			if ( isset( $fields['date']['attributes']['readonly'] ) ) {
+				unset( $fields['date']['attributes']['readonly'] );
+			}
+			$fields['date']['class']                      = ( $fields['date']['class'] ?? 'input' ) . ' wpte-date-picker';
+			$fields['date']['attributes']['data-options'] = self::DATEPICKER_OPTIONS;
+		}
+	}
+
+	/**
 	 * Sort fields by their order property.
 	 *
 	 * @param array $fields
@@ -280,6 +280,11 @@ class PaymentEditFormFields extends BookingEditFormFields {
 		$field['field_label'] = isset( $field['placeholder'] ) && $field['placeholder'] !== '' ? $field['placeholder'] : $field['field_label'];
 		$field['default']     = $this->defaults[ $name ] ?? $field['default'] ?? '';
 
+		// In readonly/view mode, format the payment date using WordPress date/time settings.
+		if ( 'date' === $name && 'readonly' === static::$mode && ! empty( $field['default'] ) ) {
+			$field['default'] = $this->format_date_for_view( $field['default'], true );
+		}
+
 		if ( static::$mode !== 'edit' ) {
 			$field['option_attributes'] = array(
 				'disabled' => 'disabled',
@@ -312,6 +317,11 @@ class PaymentEditFormFields extends BookingEditFormFields {
 
 		$field['field_label'] = isset( $field['placeholder'] ) && $field['placeholder'] !== '' ? $field['placeholder'] : ( $field['field_label'] ?? '' );
 		$field['default']     = $this->defaults[ $name ] ?? $field['default'] ?? '';
+
+		// In readonly/view mode, format the payment date using WordPress date/time settings.
+		if ( 'date' === $name && 'readonly' === static::$mode && ! empty( $field['default'] ) ) {
+			$field['default'] = $this->format_date_for_view( $field['default'], true );
+		}
 
 		// Set dynamic prefix if currency is available and field explicitly requests it.
 		if ( isset( $field['attributes']['show_prefix'] ) && $field['attributes']['show_prefix'] ) {

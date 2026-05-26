@@ -7821,7 +7821,7 @@ class Freemius extends Freemius_Abstract {
 	 * @param array             $sites
 	 * @param int               $blog_id
 	 */
-	private function maybe_activate_bundle_license( FS_Plugin_License $license = null, $sites = array(), $blog_id = 0 ) {
+	private function maybe_activate_bundle_license( ?FS_Plugin_License $license = null, $sites = array(), $blog_id = 0 ) {
 		if ( ! is_object( $license ) && $this->has_active_valid_license() ) {
 			$license = $this->_license;
 		}
@@ -12462,7 +12462,7 @@ class Freemius extends Freemius_Abstract {
 	 *
 	 * @param \FS_Plugin_License $license
 	 */
-	private function set_license( FS_Plugin_License $license = null ) {
+	private function set_license( ?FS_Plugin_License $license = null ) {
 		$this->_license = $license;
 
 		$this->maybe_update_whitelabel_flag( $license );
@@ -15755,7 +15755,7 @@ class Freemius extends Freemius_Abstract {
 	 *
 	 * @return bool Since 2.3.1 returns if a switch was made.
 	 */
-	function switch_to_blog( $blog_id, FS_Site $install = null, $flush = false ) {
+	function switch_to_blog( $blog_id, ?FS_Site $install = null, $flush = false ) {
 		if ( ! is_numeric( $blog_id ) ) {
 			return false;
 		}
@@ -18275,7 +18275,7 @@ class Freemius extends Freemius_Abstract {
 	private function _activate_addon_account(
 		Freemius $parent_fs,
 		$network_level_or_blog_id = null,
-		FS_Plugin_License $bundle_license = null
+		?FS_Plugin_License $bundle_license = null
 	) {
 		if ( $this->is_registered() ) {
 			// Already activated.
@@ -19875,7 +19875,7 @@ class Freemius extends Freemius_Abstract {
 	 * @param null|int $network_level_or_blog_id Since 2.0.0
 	 * @param \FS_Site $site                     Since 2.0.0
 	 */
-	private function _store_site( $store = true, $network_level_or_blog_id = null, FS_Site $site = null, $is_backup = false ) {
+	private function _store_site( $store = true, $network_level_or_blog_id = null, ?FS_Site $site = null, $is_backup = false ) {
 		$this->_logger->entrance();
 
 		if ( is_null( $site ) ) {

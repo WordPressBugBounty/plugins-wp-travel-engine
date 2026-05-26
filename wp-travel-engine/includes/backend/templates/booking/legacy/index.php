@@ -33,8 +33,9 @@
 			<!-- .wpte-booking-summary-area -->
 			<div class="wpte-booking-summary-area">
 				<?php wptravelengine_get_admin_template( 'booking/legacy/partials/booking-summary.php' ); ?>
-				<?php wptravelengine_get_admin_template( 'booking/legacy/partials/remaining-payment.php' ); ?>
+				<?php // wptravelengine_get_admin_template( 'booking/legacy/partials/remaining-payment.php' ); ?>
 				<?php wptravelengine_get_admin_template( 'booking/legacy/partials/purchase-receipt.php' ); ?>
+				<?php wptravelengine_get_admin_template( 'booking/partials/migrate-button.php' ); ?>
 				<?php do_action( 'wptravelengine_booking_details_sidebar', $booking ); ?>
 			</div> <!-- end .wpte-booking-summary-area -->
 		</div>

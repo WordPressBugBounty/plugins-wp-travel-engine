@@ -195,7 +195,31 @@ class AddToCart extends AjaxController {
 	 */
 	public function add_to_cart() {
 
-		$cart_data = $this->request->get_json_params();
+		$wte_cart = static::process( $this->request );
+
+		if ( is_wp_error( $wte_cart ) ) {
+			return $wte_cart;
+		}
+
+		do_action( 'wptravelengine_after_add_to_cart', $wte_cart );
+
+		return array(
+			'code'     => 'ADD_TO_CART_SUCCESS',
+			'message'  => __( 'Trip added to cart successfully.', 'wp-travel-engine' ),
+			'items'    => $wte_cart->getItems(),
+			'redirect' => add_query_arg( 'wte_id', time(), wptravelengine_get_checkout_url() ),
+		);
+	}
+
+	/**
+	 * Static method to process add to cart.
+	 * Migrated from add_to_cart method of WPTravelEngine\Core\Controllers\Ajax\AddToCart class.
+	 *
+	 * @since 6.8.0
+	 */
+	public static function process( \WP_REST_Request $request ) {
+
+		$cart_data = $request->get_json_params();
 
 		if ( is_null( $cart_data ) ) {
 			return new WP_Error( 'ADD_TO_CART_ERROR', __( 'Invalid data structure.', 'wp-travel-engine' ) );
@@ -213,17 +237,10 @@ class AddToCart extends AjaxController {
 			$wte_cart->clear();
 		}
 
-		if ( ! $wte_cart->add( $this->request ) ) {
+		if ( ! $wte_cart->add( $request ) ) {
 			return new WP_Error( 'ADD_TO_CART_ERROR', __( 'Invalid package for this trip.', 'wp-travel-engine' ) );
 		}
 
-		do_action( 'wptravelengine_after_add_to_cart', $wte_cart );
-
-		return array(
-			'code'     => 'ADD_TO_CART_SUCCESS',
-			'message'  => __( 'Trip added to cart successfully.', 'wp-travel-engine' ),
-			'items'    => $wte_cart->getItems(),
-			'redirect' => add_query_arg( 'wte_id', time(), wptravelengine_get_checkout_url() ),
-		);
+		return $wte_cart;
 	}
 }

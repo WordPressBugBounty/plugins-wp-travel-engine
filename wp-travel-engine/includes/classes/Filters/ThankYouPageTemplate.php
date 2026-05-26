@@ -357,7 +357,8 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 			$trip_end_date = wptravelengine_format_trip_datetime( $order_trip['end_datetime'] );
 		}
 
-		$traveller_details = array();
+		$traveller_details     = array();
+		$traveller_form_fields = new TravellerFormFields();
 		if ( is_array( $_traveller_details ) ) {
 			$traveller_form_fields = new TravellerFormFields();
 			foreach ( $_traveller_details as $traveller ) {

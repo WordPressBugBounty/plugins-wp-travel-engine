@@ -30,7 +30,7 @@ class WP_Travel_Engine_Form_Field_Select {
 	 * Render template for select dropdown
 	 *
 	 * @param boolean $display
-	 * @return void
+	 * @return string|void
 	 */
 	function render( $display = true ) {
 
@@ -111,7 +111,13 @@ class WP_Travel_Engine_Form_Field_Select {
 						endif;
 
 					endforeach;
-
+				elseif ( is_array( $this->field['assoc_option_atts'] ?? '' ) ) :
+					$assoc_option_atts = $this->field['assoc_option_atts'];
+					foreach ( $assoc_option_atts as $att_key => $att_arr ) :
+						if ( isset( $att_arr[ $key ] ) ) :
+							$option_attributes .= sprintf( '%s="%s"', 'data-' . $att_key, $att_arr[ $key ] );
+						endif;
+					endforeach;
 				endif;
 
 				$selected = ( $key == $this->field['default'] ) ? 'selected' : '';

@@ -73,6 +73,7 @@ class WP_Travel_Engine_Form_Field {
 	 * Register form field types.
 	 *
 	 * @return array
+	 * @since 6.8.0 Added `time` field type mapped to `WP_Travel_Engine_Form_Field_Time`.
 	 */
 	public function register_field_types(): array {
 
@@ -156,6 +157,14 @@ class WP_Travel_Engine_Form_Field {
 			'button'           => array(
 				'field_label' => __( 'Button', 'wp-travel-engine' ),
 				'field_class' => 'WP_Travel_Engine_Form_Field_Button',
+			),
+			'package_select'   => array(
+				'field_label' => __( 'Package Select', 'wp-travel-engine' ),
+				'field_class' => 'WP_Travel_Engine_Form_Field_Package_Select',
+			),
+			'time'             => array(
+				'field_label' => __( 'Time', 'wp-travel-engine' ),
+				'field_class' => 'WP_Travel_Engine_Form_Field_Time',
 			),
 		);
 
@@ -343,8 +352,14 @@ class WP_Travel_Engine_Form_Field {
 			$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
 			$field['wrapper_class'] = ( 'text_info' === $field['type'] ) ? $field['wrapper_class'] . ' wp-travel-engine-info-field' : $field['wrapper_class'];
 			$field['default']       = isset( $field['default'] ) ? $field['default'] : '';
-			$field['attributes']    = isset( $field['attributes'] ) ? $field['attributes'] : array();
-			$field['remove_wrap']   = isset( $field['remove_wrap'] ) ? $field['remove_wrap'] : false;
+
+			// Ensure default is a string for field types that pass it through esc_attr().
+			$array_safe_types = array( 'checkbox', 'radio' );
+			if ( is_array( $field['default'] ) && ! in_array( $field['type'], $array_safe_types, true ) ) {
+				$field['default'] = '';
+			}
+			$field['attributes']  = isset( $field['attributes'] ) ? $field['attributes'] : array();
+			$field['remove_wrap'] = isset( $field['remove_wrap'] ) ? $field['remove_wrap'] : false;
 
 			if ( isset( $field['validations']['required'] ) && ( false === $field['validations']['required'] || '' === $field['validations']['required'] || 'false' === $field['validations']['required'] ) ) {
 				unset( $field['validations']['required'] );

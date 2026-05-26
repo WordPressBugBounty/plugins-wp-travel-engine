@@ -247,25 +247,7 @@ class Assets extends AssetsAbstract {
 		// Enqueue checkout template version 2.0 script and style.
 		global $post;
 		if ( wp_travel_engine_is_checkout_page() && isset( $wte_cart ) ) {
-			$shortcode_present = has_shortcode( $post->post_content, 'WP_TRAVEL_ENGINE_PLACE_ORDER' );
-			$version = '1.0';
-
-			if ( $shortcode_present ) {
-				$pattern = get_shortcode_regex();
-				if ( preg_match_all( '/' . $pattern . '/', $post->post_content, $matches ) && array_key_exists( 2, $matches ) ) {
-					foreach ( $matches[2] as $index => $shortcode_name ) {
-						if ( 'WP_TRAVEL_ENGINE_PLACE_ORDER' === $shortcode_name ) {
-							$shortcode_atts = shortcode_parse_atts( $matches[3][$index] );
-							$version = $shortcode_atts['version'] ?? $version;
-						}
-					}
-				}
-			}
-
-			$wptravelengine_settings = get_option( 'wp_travel_engine_settings', array() );
-			$checkout_page_template  = wptravelengine_get_checkout_template_version( $wptravelengine_settings );
-
-			if ( $version === '2.0' || $checkout_page_template === '2.0' || has_shortcode( $post->post_content, 'WPTRAVELENGINE_CHECKOUT' ) ) {
+			if ( has_shortcode( $post->post_content, 'WP_TRAVEL_ENGINE_PLACE_ORDER' ) || has_shortcode( $post->post_content, 'WPTRAVELENGINE_CHECKOUT' ) ) {
 				$this->enqueue_script( 'wte-popper' );
 				$this->enqueue_script( 'wte-tippyjs' );
 				$this->enqueue_style( 'trip-checkout' );

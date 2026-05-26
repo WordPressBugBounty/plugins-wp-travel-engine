@@ -116,6 +116,8 @@ class LeadTravellersFormFields extends LeadTravellerFormFields {
 	 *
 	 * @param array $fields Form fields.
 	 * @return array
+	 *
+	 * @since 6.8.0 Fixed: use $merged_lead instead of $form_data as default value source to prevent blank-field regression.
 	 */
 	protected function map_fields( $fields ) {
 		// Session lead traveller (index 0); merged on top of customer data so current-session input is preserved (e.g. after validation errors).
@@ -147,8 +149,7 @@ class LeadTravellersFormFields extends LeadTravellerFormFields {
 					$field['id']            = sprintf( 'travellers_%d_%s', 0, $name );
 				}
 				$field['field_label'] = isset( $field['placeholder'] ) && '' !== $field['placeholder'] ? $field['placeholder'] : $field['field_label'];
-				$value                = $form_data[ $name ] ?? $field['default'] ?? '';
-				$field['default']     = is_array( $value ) ? implode( ',', $value ) : $value;
+				$field['default']     = $merged_lead[ $name ] ?? $field['default'] ?? '';
 
 				return $field;
 			},

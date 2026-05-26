@@ -17,6 +17,18 @@ use WPTravelEngine\Helpers\Countries;
 class WP_Travel_Engine_Booking_Export {
 
 	/**
+	 * Register Booking Export hooks.
+	 *
+	 * @since 6.8.0
+	 */
+	public static function register_hooks() {
+		$self = new self();
+
+		add_action( 'admin_init', array( $self, 'init' ) );
+		add_action( 'admin_head', array( $self, 'add_booking_export_button' ) );
+	}
+
+	/**
 	 * Safely unserialize data with restricted classes.
 	 * Tries JSON first, then falls back to unserialize with security restrictions.
 	 *
@@ -135,8 +147,7 @@ class WP_Travel_Engine_Booking_Export {
 	 * @param array  $filter_ids Booking IDs.
 	 *
 	 * @since 5.7.4
-	 *
-	 * @modified_since 6.3.5 - Trip Name and booking status filter added.
+	 * @since 6.3.5 Trip Name and booking status filter added.
 	 */
 	public function export_query( $start_date, $end_date, $booking_status, $filter_ids ) {
 		global $wpdb;
@@ -2080,5 +2091,104 @@ class WP_Travel_Engine_Booking_Export {
 		$row_data[]  = ! empty( $admin_notes ) ? $admin_notes : '';
 
 		return $row_data;
+	}
+
+	/**
+	 * Add Booking export button.
+	 *
+	 * @since 5.7.4
+	 * @since 6.3.5 Added the booking export button to the booking page.
+	 * @since 6.8.0 Migrated from WPTravelEngine\Core\PostTypes\Booking to here.
+	 */
+	public function add_booking_export_button() {
+		global $post_type;
+
+		$current_screen = get_current_screen();
+
+		if ( 'edit-booking' !== $current_screen->id ) {
+			return;
+		}
+
+		if ( isset( $_GET['post_type'] ) && 'booking' === $_GET['post_type'] && 'booking' === $post_type ) {
+			// Remove admin notices.
+			remove_all_actions( 'admin_notices' );
+
+			$trips = wp_travel_engine_get_trips_array() ?? array();
+			$trips = array( 'all' => __( 'Select Trip', 'wp-travel-engine' ) ) + $trips;
+
+			$status = wp_travel_engine_get_booking_status() ?? array();
+			$status = array_merge(
+				array(
+					'all' => array(
+						'color' => '',
+						'text'  => __( 'Select Booking Status', 'wp-travel-engine' ),
+					),
+				),
+				$status
+			);
+
+			$trip_selected   = isset( $_REQUEST['trip_id'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['trip_id'] ) ) : 'all';
+			$status_selected = isset( $_REQUEST['booking_status'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['booking_status'] ) ) : 'all';
+
+			?>
+			<form id="wpte-booking-export-form" class="wpte-export-form" method="post">
+				<?php wp_nonce_field( 'booking_export_nonce_action', 'booking_export_nonce' ); ?>
+				<input type="text" data-fpconfig='{"mode":"range","showMonths":"2"}' id="wte-flatpickr__date-range"
+						class="wte-flatpickr">
+				<button id="wpte-booking-export-open-modal" type="button" class="button button-primary">
+					<?php esc_html_e( 'Export Bookings', 'wp-travel-engine' ); ?>
+				</button>
+				<div class="wpte-booking-export-modal-overlay">
+					<div class="wpte-booking-export-modal">
+						<div class="wpte-booking-export-modal-header">
+							<h2><?php esc_html_e( 'Export Bookings', 'wp-travel-engine' ); ?></h2>
+							<button type="button" class="wpte-booking-modal-close">
+								<svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+									xmlns="http://www.w3.org/2000/svg">
+									<path d="M18 6L6 18M6 6L18 18" stroke="#F04438" stroke-width="2"
+											stroke-linecap="round" stroke-linejoin="round" />
+								</svg>
+							</button>
+						</div>
+						<div class="wpte-booking-export-modal-body">
+							<div class="wpte-field">
+								<label
+									for="wpte-booking-export-date"><?php esc_html_e( 'Date', 'wp-travel-engine' ); ?></label>
+								<input style="max-width: 320px;" id="wpte-booking-export-date" type="text"
+										name="wte_booking_range" data-fpconfig='{"mode":"range","showMonths":"2"}'
+										value="<?php echo esc_attr( isset( $_POST['wte_booking_range'] ) ? wp_unslash( $_POST['wte_booking_range'] ) : '' ); ?>"
+										class="wte-flatpickr">
+							</div>
+							<div class="wpte-field">
+								<label
+									for="wpte-booking-export-trip"><?php esc_html_e( 'Trip', 'wp-travel-engine' ); ?></label>
+								<select name="wptravelengine_trip_id" id="wpte-booking-export-trip">
+									<?php foreach ( $trips as $key => $value ) : ?>
+										<option value="<?php echo esc_attr( $key ); ?>"
+												name="wptravelengine_trip_id" <?php selected( $trip_selected, $key ); ?>><?php echo esc_html( $value ); ?></option>
+									<?php endforeach; ?>
+								</select>
+							</div>
+							<div class="wpte-field">
+								<label
+									for="wpte-booking-export-status"><?php esc_html_e( 'Booking Status', 'wp-travel-engine' ); ?></label>
+								<select style="max-width: 320px;" name="wptravelengine_booking_status"
+										id="wpte-booking-export-status">
+									<?php foreach ( $status as $key => $value ) : ?>
+										<option value="<?php echo esc_attr( $key ); ?>"
+												name="wptravelengine_booking_status" <?php selected( $status_selected, $key ); ?>><?php echo esc_html( $value['text'] ); ?></option>
+									<?php endforeach; ?>
+								</select>
+							</div>
+						</div>
+						<div class="wpte-booking-export-modal-footer">
+							<input type="submit" name="booking_export_submit" class="wpte-booking-export-submit button"
+									value="<?php esc_attr_e( 'Export', 'wp-travel-engine' ); ?>">
+						</div>
+					</div>
+				</div>
+			</form>
+			<?php
+		}
 	}
 }

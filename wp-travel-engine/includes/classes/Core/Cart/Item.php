@@ -519,21 +519,30 @@ class Item {
 	protected function generate_id(): string {
 		$trip_time = $this->attrs['trip_time'] ?? '';
 		$trip_date = $this->attrs['trip_date'] ?? '';
+		return self::get_item_id( $this->trip_id, $this->price_key, $trip_time, $trip_date );
+	}
+
+	/**
+	 * Get Item ID statically.
+	 *
+	 * @since 6.8.0
+	 */
+	public static function get_item_id( $trip_id, $price_key = '', $trip_time = '', $trip_date = '' ): string {
 		if ( ! empty( $trip_time ) ) {
 			$suffix = ( new \DateTime( $trip_time ) )->format( 'Y-m-d_H-i' );
 		} else {
 			$suffix = ( new \DateTime( $trip_date ) )->format( 'Y-m-d_H-i' );
 		}
 
-		$cart_item_id = "cart_{$this->trip_id}";
+		$cart_item_id = "cart_{$trip_id}";
 
-		if ( ! empty( $this->price_key ) ) {
-			$cart_item_id .= '_' . $this->price_key;
+		if ( ! empty( $price_key ) ) {
+			$cart_item_id .= '_' . $price_key;
 		}
 
 		$cart_item_id .= "_{$suffix}";
 
-		return apply_filters( 'wp_travel_engine_filter_cart_item_id', $cart_item_id, $this->trip_id );
+		return apply_filters( 'wp_travel_engine_filter_cart_item_id', $cart_item_id, $trip_id );
 	}
 
 	/**

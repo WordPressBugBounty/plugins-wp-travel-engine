@@ -12,6 +12,7 @@ use InvalidArgumentException;
 use WP_Error;
 use WP_Post;
 use WPTravelEngine\Traits\Factory;
+use WPTravelEngine\Utilities\ArrayUtility;
 
 /**
  * Abstract class PostModel.
@@ -51,6 +52,21 @@ abstract class PostModel {
 	 * @var int
 	 */
 	public int $ID;
+
+	/**
+	 * Nested Data.
+	 *
+	 * @since 6.8.0
+	 */
+	protected array $nested_data = array();
+
+	/**
+	 * Depth counter for with_delayed_save() reentrancy. >0 means writes are queued.
+	 *
+	 * @var int
+	 * @since 6.8.0
+	 */
+	private int $hold_save = 0;
 
 	/**
 	 * PostModel Constructor.
@@ -159,8 +175,7 @@ abstract class PostModel {
 	 * @since 6.4.0
 	 */
 	public function has_meta( string $meta_key ): bool {
-		$meta_value = get_post_meta( $this->ID, $meta_key );
-		return count( $meta_value ) > 0;
+		return metadata_exists( 'post', $this->ID, $meta_key );
 	}
 
 	/**
@@ -178,11 +193,14 @@ abstract class PostModel {
 	/**
 	 * Update the post-metadata.
 	 *
-	 * This method is abstract and must be implemented in child classes.
-	 *
-	 * @return bool|int
+	 * @return PostModel|bool|int
+	 * @since 6.8.0 Queues write to __changes when delayed save is active.
 	 */
 	public function update_meta( $meta_key, $meta_value ) {
+		if ( $this->hold_save > 0 ) {
+			return $this->set_meta( $meta_key, $meta_value );
+		}
+
 		/**
 		 * @since 6.3.3 Filter for meta_value before updating.
 		 */
@@ -215,10 +233,35 @@ abstract class PostModel {
 	public function save(): object {
 		foreach ( $this->data['__changes'] as $meta_key => $meta_value ) {
 			$this->update_meta( $meta_key, $meta_value );
-			unset( $this->data[ $meta_key ] );
+			if ( $this->hold_save === 0 ) {
+				unset( $this->data[ $meta_key ] );
+			}
 		}
-		$this->data['__changes'] = array();
+		if ( $this->hold_save === 0 ) {
+			$this->data['__changes'] = array();
+		}
 
+		return $this;
+	}
+
+	/**
+	 * Executes $callback with all meta writes queued in memory,
+	 * then flushes everything to the database in one save() call.
+	 *
+	 * @param callable $callback Receives $this as first argument.
+	 * @return object
+	 * @since 6.8.0
+	 */
+	public function with_delayed_save( callable $callback ): object {
+		++$this->hold_save;
+		try {
+			$callback( $this );
+		} finally {
+			--$this->hold_save;
+		}
+		if ( $this->hold_save === 0 ) {
+			return $this->save();
+		}
 		return $this;
 	}
 
@@ -282,5 +325,79 @@ abstract class PostModel {
 		foreach ( $metadata as $key => $value ) {
 			update_post_meta( $this->ID, $key, $value );
 		}
+	}
+
+	/**
+	 * Has changes.
+	 *
+	 * @since 6.8.0
+	 */
+	public function has_changes(): bool {
+		return ! empty( $this->data['__changes'] );
+	}
+
+	/**
+	 * Get changes.
+	 *
+	 * @since 6.8.0
+	 */
+	public function get_changes(): array {
+		return $this->data['__changes'] ?? array();
+	}
+
+	/**
+	 * Specially designed for array type meta values. It allows setting nested meta values using dot notation.
+	 *
+	 * @param string $meta_key Dot seperated key for nested meta value. E.g. "parent_key.child_key".
+	 * @param mixed  $meta_value The value to be set for the specified meta key.
+	 * @param bool   $force Whether to override the existing value if the meta key already exists. Default is true.
+	 *
+	 * @return $this
+	 * @since 6.8.0
+	 */
+	public function set_nested_meta( string $meta_key, $meta_value, bool $force = true ): PostModel {
+		$meta_key_arr = explode( '.', $meta_key );
+		$first_key    = array_shift( $meta_key_arr );
+
+		if ( ! $force && null !== $this->get_nested_meta( $meta_key ) ) {
+			return $this;
+		}
+
+		if ( ! isset( $this->nested_data[ $first_key ] ) ) {
+			$value                           = $this->get_meta( $first_key );
+			$this->nested_data[ $first_key ] = ArrayUtility::make( is_array( $value ) ? $value : array() );
+		}
+
+		/** @var ArrayUtility $nested_data */
+		$nested_data = $this->nested_data[ $first_key ];
+
+		$nested_data->set( implode( '.', $meta_key_arr ), $meta_value );
+
+		return $this->set_meta( $first_key, $nested_data->value() );
+	}
+
+	/**
+	 * Specially designed for array type meta values. It allows getting nested meta values using dot notation.
+	 *
+	 * @param string $meta_key Dot seperated key for nested meta value. E.g. "parent_key.child_key".
+	 * @param mixed  $default The default value to be returned if the specified meta key is not found.
+	 *
+	 * @return mixed The value of the specified meta key or the default value if the meta key is not found.
+	 * @since 6.8.0
+	 */
+	public function get_nested_meta( string $meta_key, $default = null ) {
+		$meta_key_arr = explode( '.', $meta_key );
+		$first_key    = array_shift( $meta_key_arr );
+
+		$value = $this->get_meta( $first_key );
+
+		if ( ! is_array( $value ) ) {
+			return $default;
+		}
+
+		/** @var ArrayUtility $array_value */
+		$array_value = ArrayUtility::make( $value );
+
+		return empty( $meta_key_arr ) ? $array_value->value() : $array_value->get( implode( '.', $meta_key_arr ), $default );
 	}
 }

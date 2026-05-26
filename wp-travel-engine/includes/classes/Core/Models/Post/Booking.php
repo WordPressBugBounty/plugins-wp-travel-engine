@@ -9,7 +9,6 @@
 namespace WPTravelEngine\Core\Models\Post;
 
 use InvalidArgumentException;
-use stdClass;
 use WP_POST;
 use WPTravelEngine\Abstracts\PostModel;
 use WPTravelEngine\Core\Booking\Inventory;
@@ -18,6 +17,7 @@ use WPTravelEngine\Helpers\Functions;
 use WPTravelEngine\Utilities\ArrayUtility;
 use WPTravelEngine\Utilities\PaymentCalculator;
 use WPTravelEngine\Filters\Events;
+use WPTravelEngine\Core\Cart\Cart;
 
 /**
  * Class Booking.
@@ -64,6 +64,18 @@ class Booking extends PostModel {
 		$status = $this->get_meta( 'wp_travel_engine_booking_status' );
 
 		return ! $status ? $this->post->post_status : $status;
+	}
+
+	/**
+	 * Retrieves booking status label.
+	 *
+	 * @return string Booking status label.
+	 * @since 6.8.0
+	 */
+	public function get_booking_status_label(): string {
+		$status     = strtolower( $this->get_booking_status() );
+		$all_status = wp_travel_engine_get_booking_status();
+		return $all_status[ $status ]['text'] ?? __( 'Pending', 'wp-travel-engine' );
 	}
 
 	/**
@@ -539,6 +551,7 @@ class Booking extends PostModel {
 	 */
 	public function set_billing_info( array $billing_info ) {
 		$this->set_meta( 'billing_info', $billing_info );
+		$this->set_meta( 'wptravelengine_billing_details', $billing_info );
 	}
 
 	/**
@@ -560,25 +573,34 @@ class Booking extends PostModel {
 	}
 
 	/**
-	 * @param $status
+	 * Sets booking status.
 	 *
+	 * @param string $status New booking status.
 	 * @return void
 	 * @since 6.4.0
+	 * @since 6.8.0 No-op when status unchanged to preserve _prev_booking_status.
 	 */
 	public function set_status( $status ) {
-		$this->set_meta( '_prev_booking_status', $this->get_booking_status() );
-		$this->set_meta( 'wp_travel_engine_booking_status', $status );
+		$_prev_booking_status = $this->get_booking_status();
+		if ( $status !== $_prev_booking_status ) {
+			$this->set_meta( '_prev_booking_status', $_prev_booking_status );
+			$this->set_meta( 'wp_travel_engine_booking_status', $status );
+		}
 	}
 
 	/**
-	 * Update Booking Status.
+	 * Saves booking status.
 	 *
+	 * @param string $status New booking status.
 	 * @return $this
+	 * @since 6.8.0 No-op when status unchanged to preserve _prev_booking_status.
 	 */
 	public function update_status( $status ): Booking {
-		$this->update_meta( '_prev_booking_status', $this->get_booking_status() );
-		$this->update_meta( 'wp_travel_engine_booking_status', $status );
-
+		$_prev_booking_status = $this->get_booking_status();
+		if ( $status !== $_prev_booking_status ) {
+			$this->update_meta( '_prev_booking_status', $_prev_booking_status );
+			$this->update_meta( 'wp_travel_engine_booking_status', $status );
+		}
 		return $this;
 	}
 
@@ -1098,7 +1120,7 @@ class Booking extends PostModel {
 	 */
 	public function get_customer(): object {
 		$email_address = $this->get_billing_email();
-		$_customer     = new stdClass();
+		$_customer     = new \stdClass();
 
 		if ( $customer_id = Customer::is_exists( $email_address ) ) {
 			$customer  = new Customer( $customer_id );
@@ -1594,10 +1616,13 @@ class Booking extends PostModel {
 
 		$_payment->sync_metas( array_merge( $args['payment_metadata'], $_payment_metas ) );
 
+		$payment_gateway  = $_payment->get_payment_gateway();
+		$reserve_gateways = array( 'booking_only', 'direct_bank_transfer', 'check_payments' );
+
 		$_booking_metas = array(
 			'_prev_booking_status'                    => $this->get_booking_status(),
 			'wp_travel_engine_booking_payment_status' => 'pending',
-			'wp_travel_engine_booking_status'         => 'pending',
+			'wp_travel_engine_booking_status'         => in_array( $payment_gateway, $reserve_gateways ) ? 'reserved' : 'pending',
 		);
 
 		$this->sync_metas( array_merge( $args['booking_metadata'], $_booking_metas ) );
@@ -1651,16 +1676,80 @@ class Booking extends PostModel {
 
 		$_payment->sync_metas( array_merge( $args['payment_metadata'], $_payment_metas ) );
 
+		$last_payment = $this->get_last_payment();
+		$is_current   = $last_payment instanceof Payment && $last_payment->get_id() === $payment_id;
+
 		$_booking_metas = array(
-			'_prev_booking_status'                    => $this->get_booking_status(),
 			'wp_travel_engine_booking_payment_status' => 'failed',
-			'wp_travel_engine_booking_status'         => 'canceled',
 		);
+
+		if ( $is_current ) {
+			$_booking_metas['_prev_booking_status']            = $this->get_booking_status();
+			$_booking_metas['wp_travel_engine_booking_status'] = 'pending';
+		}
 
 		$this->sync_metas( array_merge( $args['booking_metadata'], $_booking_metas ) );
 
 		if ( 'failed' !== $previous_payment_status ) {
 			Events::add_event( 'wptravelengine.booking.payment.failed', $_payment->get_id(), $_payment->get_post_type() );
 		}
+	}
+
+	/**
+	 * Set payment gateway reference and link it to the booking.
+	 *
+	 * @param string $gateway Gateway slug.
+	 * @param string $ref     Gateway-issued reference string.
+	 * @since 6.8.0
+	 */
+	public function set_payment_gateway_ref( string $gateway, string $ref ): void {
+		$this->set_meta( "wte_pg_{$gateway}_ref", $ref )
+			->set_meta( 'wp_travel_engine_booking_payment_method', $gateway )
+			->set_meta( 'wp_travel_engine_booking_payment_gateway', $gateway );
+	}
+
+	/**
+	 * Default meta datas for the booking.
+	 *
+	 * @param array
+	 * @since 6.8.0
+	 */
+	public static function default_metadatas(): array {
+		return array(
+			'wp_travel_engine_booking_payment_status' => 'pending',
+			'wp_travel_engine_booking_payment_method' => __( 'N/A', 'wp-travel-engine' ),
+			'billing_info'                            => array(),
+			'cart_info'                               => array(
+				'cart_total'   => 0,
+				'cart_partial' => 0,
+				'due'          => 0,
+				'version'      => Cart::CURRENT_VERSION,
+			),
+			'payments'                                => array(),
+			'paid_amount'                             => 0,
+			'due_amount'                              => 0,
+			'wp_travel_engine_booking_status'         => 'pending',
+		);
+	}
+
+	/**
+	 * Create a booking post with required default values.
+	 *
+	 * @param array $args {} Optional. Arguments for creating booking post. Default empty array.
+	 *
+	 * @since 6.8.0
+	 */
+	public static function create_booking( array $args = array() ): Booking {
+		$booking_args = wp_parse_args(
+			$args,
+			array(
+				'post_status' => 'publish',
+				'post_type'   => 'booking',
+				'post_title'  => 'booking',
+				'meta_input'  => self::default_metadatas(),
+			)
+		);
+
+		return parent::create_post( $booking_args );
 	}
 }

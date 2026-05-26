@@ -7,15 +7,11 @@
 namespace WPTravelEngine\Builders\FormFields;
 
 use WPTravelEngine\Abstracts\BookingEditFormFields;
-use WPTravelEngine\Core\Models\Post\Booking;
-use WPTravelEngine\Helpers\Countries;
-class BillingEditFormFields extends BookingEditFormFields {
 
-	protected ?Booking $booking = null;
+class BillingEditFormFields extends BookingEditFormFields {
 
 	public function __construct( array $defaults = array(), string $mode = 'edit' ) {
 		parent::__construct( $defaults, $mode );
-		static::$mode = $mode;
 		$this->init( $this->map_fields( static::structure( $mode ) ) );
 	}
 
@@ -41,27 +37,14 @@ class BillingEditFormFields extends BookingEditFormFields {
 			$field['default']     = $this->defaults[ $name ] ?? $field['default'] ?? '';
 
 			$field['validations']['required'] = false;
-			// Convert country code to country name to show in the billing form.
-			$countries_list = Countries::list();
 			if ( $field['type'] == 'country' ) {
-				foreach ( $countries_list as $key => $value ) {
-					if ( $field['default'] === $value ) {
-						$field['default'] = $key;
-					}
-				}
+				$field = $this->resolve_country_field_default( $field );
 			}
 		}
 
 		// Convert datepicker to text input to fix styling issue and to enable time selection.
 		if ( $field['type'] === 'datepicker' ) {
-			$field['type']       = 'text';
-			$field['class']      = 'wpte-date-picker';
-			$field['attributes'] = array(
-				'data-options' => array(
-					'enableTime' => true,
-					'dateFormat' => 'Y-m-d H:i',
-				),
-			);
+			$field = $this->apply_datepicker_field( $field );
 		}
 
 		if ( $field['type'] == 'file' && ! empty( $field['default'] ) ) {
@@ -98,12 +81,10 @@ class BillingEditFormFields extends BookingEditFormFields {
 			);
 		}
 
-		if ( 'booking' === $current_screen->id && $current_screen->action == 'add' && 'edit' == static::$mode ) :
-			if ( $field['type'] == 'file' && empty( $field['default'] ) ) {
-				return;
-			}
-			return $field;
-		endif;
+		if ( 'booking' === $current_screen->id && $current_screen->action == 'add' && 'edit' == static::$mode
+			&& $field['type'] == 'file' && empty( $field['default'] ) ) {
+			return;
+		}
 
 		return $field;
 	}

@@ -32,6 +32,10 @@ class WTE_Ajax {
 		 * @since 6.4.0
 		 */
 		$ajax_registry->register( Ajax\ResendPurchaseReceipt::class );
+		/**
+		 * @since 6.8.0
+		 */
+		$ajax_registry->register( Ajax\MigrateBooking::class );
 
 		/**
 		 * Adds upcoming tours ajax actions

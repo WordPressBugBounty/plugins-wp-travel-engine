@@ -385,22 +385,24 @@ class Settings {
 	 *
 	 * @return array
 	 * @since 6.5.0
+	 * @since 6.8.0 Added show_header_image_logo setting.
 	 */
 	protected function prepare_emails_settings( WP_REST_Request $request ): array {
 
 		$settings = array();
 
 		$settings['email_settings'] = array(
-			'enquiry_emails' => (array) explode( ',', $this->plugin_settings->get( 'email.enquiry_emailaddress', Options::get( 'admin_email' ) ) ),
-			'sale_emails'    => (array) explode( ',', $this->plugin_settings->get( 'email.emails', Options::get( 'admin_email' ) ) ),
-			'from_name'      => (string) $this->plugin_settings->get( 'email.name', get_bloginfo( 'name' ) ),
-			'from'           => (string) $this->plugin_settings->get( 'email.from', Options::get( 'admin_email' ) ),
-			'reply_to'       => (string) $this->plugin_settings->get( 'email.reply_to', Options::get( 'admin_email' ) ),
-			'logo'           => array(
+			'enquiry_emails'         => (array) explode( ',', $this->plugin_settings->get( 'email.enquiry_emailaddress', Options::get( 'admin_email' ) ) ),
+			'sale_emails'            => (array) explode( ',', $this->plugin_settings->get( 'email.emails', Options::get( 'admin_email' ) ) ),
+			'from_name'              => (string) $this->plugin_settings->get( 'email.name', get_bloginfo( 'name' ) ),
+			'from'                   => (string) $this->plugin_settings->get( 'email.from', Options::get( 'admin_email' ) ),
+			'reply_to'               => (string) $this->plugin_settings->get( 'email.reply_to', Options::get( 'admin_email' ) ),
+			'show_header_image_logo' => wptravelengine_toggled( $this->plugin_settings->get( 'email.show_header_image_logo', '1' ) ),
+			'logo'                   => array(
 				'id'  => (string) $this->plugin_settings->get( 'email.logo.id', Options::get( 'site_icon' ) ),
 				'url' => (string) $this->plugin_settings->get( 'email.logo.url', wp_get_attachment_image_url( Options::get( 'site_icon' ) ) ? wp_get_attachment_image_url( Options::get( 'site_icon' ) ) : '' ),
 			),
-			'footer'         => (string) $this->plugin_settings->get( 'email.footer', 'Copyright © ' . date( 'Y' ) . ' | ' . get_bloginfo( 'name' ) . '. All rights reserved.' ),
+			'footer'                 => (string) $this->plugin_settings->get( 'email.footer', 'Copyright © ' . date( 'Y' ) . ' | ' . get_bloginfo( 'name' ) . '. All rights reserved.' ),
 		);
 
 		return $settings;
@@ -687,20 +689,7 @@ class Settings {
 		$settings['enable_emergency_contact'] = ! wptravelengine_toggled( $this->plugin_settings->get( 'emergency', null ) );
 		$settings['booking_confirmation_msg'] = (string) $this->plugin_settings->get( 'confirmation_msg', 'Thank you for booking the trip. Please check your email for confirmation. Below is your booking detail:' );
 		$settings['gdpr_msg']                 = (string) $this->plugin_settings->get( 'gdpr_msg', 'By contacting us, you agree to our' );
-		// New setting for checkout page template.
-
-		// Determine template version based on user status
-		$is_existing_user = version_compare(
-			get_option( 'wptravelengine_since', false ),
-			WP_TRAVEL_ENGINE_VERSION,
-			'<'
-		);
-
-		// Set checkout settings
-		$settings['checkout_page_template'] = (string) $this->plugin_settings->get(
-			'checkout_page_template',
-			$is_existing_user ? '1.0' : '2.0'
-		);
+		$settings['checkout_page_template']   = '2.0';
 
 		$settings['display_header_footer']            = wptravelengine_toggled( $this->plugin_settings->get( 'display_header_footer', 'no' ) );
 		$settings['display_emergency_contact']        = wptravelengine_toggled( $this->plugin_settings->get( 'display_emergency_contact', 'no' ) );
@@ -1524,6 +1513,7 @@ class Settings {
 	 *
 	 * @return void
 	 * @since 6.5.0
+	 * @since 6.8.0 Added show_header_image_logo setting.
 	 */
 	protected function set_email_settings( WP_REST_Request $request ) {
 		$plugin_settings = $this->plugin_settings;
@@ -1559,6 +1549,10 @@ class Settings {
 					return;
 				}
 				$plugin_settings->set( 'email.reply_to', $request['email_settings']['reply_to'] );
+			}
+
+			if ( isset( $request['email_settings']['show_header_image_logo'] ) ) {
+				$plugin_settings->set( 'email.show_header_image_logo', wptravelengine_replace( $request['email_settings']['show_header_image_logo'], true, 'yes', 'no' ) );
 			}
 
 			if ( isset( $request['email_settings']['logo'] ) ) {
@@ -1940,7 +1934,7 @@ class Settings {
 		}
 
 		if ( isset( $request['checkout_page_template'] ) ) {
-			$plugin_settings->set( 'checkout_page_template', $request['checkout_page_template'] );
+			$plugin_settings->set( 'checkout_page_template', '2.0' );
 		}
 
 		if ( isset( $request['display_header_footer'] ) ) {
@@ -2960,33 +2954,37 @@ class Settings {
 				'description' => __( 'Email Settings', 'wp-travel-engine' ),
 				'type'        => 'object',
 				'properties'  => array(
-					'enquiry_emails' => array(
+					'enquiry_emails'         => array(
 						'description' => __( 'Enquiry Emails', 'wp-travel-engine' ),
 						'type'        => 'array',
 						'items'       => array(
 							'type' => 'string',
 						),
 					),
-					'sale_emails'    => array(
+					'sale_emails'            => array(
 						'description' => __( 'Sale Emails', 'wp-travel-engine' ),
 						'type'        => 'array',
 						'items'       => array(
 							'type' => 'string',
 						),
 					),
-					'from_name'      => array(
+					'from_name'              => array(
 						'description' => __( 'From Name', 'wp-travel-engine' ),
 						'type'        => 'string',
 					),
-					'from'           => array(
+					'from'                   => array(
 						'description' => __( 'From Email', 'wp-travel-engine' ),
 						'type'        => 'string',
 					),
-					'reply_to'       => array(
+					'reply_to'               => array(
 						'description' => __( 'Reply To Email', 'wp-travel-engine' ),
 						'type'        => 'string',
 					),
-					'logo'           => array(
+					'show_header_image_logo' => array(
+						'description' => __( 'Show Header Image/Logo', 'wp-travel-engine' ),
+						'type'        => 'boolean',
+					),
+					'logo'                   => array(
 						'description' => __( 'Header Logo', 'wp-travel-engine' ),
 						'type'        => 'object',
 						'properties'  => array(
@@ -3004,7 +3002,7 @@ class Settings {
 							),
 						),
 					),
-					'footer'         => array(
+					'footer'                 => array(
 						'description' => __( 'Footer Text', 'wp-travel-engine' ),
 						'type'        => 'string',
 					),

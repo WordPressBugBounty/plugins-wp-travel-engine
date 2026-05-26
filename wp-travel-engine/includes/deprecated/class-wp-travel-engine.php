@@ -19,14 +19,16 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Main Class.
  *
- * @deprecated 6.0.0
+ * Compatibility shim. Instance creation is a no-op.
+ *
+ * @since 6.8.0 - Reverted deprecated label ( deprecated 6.0.0 );
  */
 final class Wp_Travel_Engine {
 
 	use Traits\Singleton;
 
 	public function __construct() {
-		wptravelengine_deprecated_class( __CLASS__, '6.0.0', Plugin::class );
+		// wptravelengine_deprecated_class( __CLASS__, '6.0.0', Plugin::class );
 	}
 }
 

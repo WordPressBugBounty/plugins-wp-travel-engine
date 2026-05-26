@@ -304,8 +304,8 @@ function wptravelengine_get_checkout_template_args( array $args = array() ): arr
 	$is_payment_due          = $wte_cart->get_booking_ref();
 	$attributes              = array(
 		'version'               => $checkout_page_template,
-		'header'                => $checkout_page_template == '2.0' && $display_header_footer == 'yes' ? 'default' : 'none',
-		'footer'                => $checkout_page_template == '2.0' && $display_header_footer == 'yes' ? 'default' : 'none',
+		'header'                => $display_header_footer === 'yes' ? 'default' : 'none',
+		'footer'                => $display_header_footer === 'yes' ? 'default' : 'none',
 		'checkout-steps'        => 'show',
 		'tour-details'          => 'show',
 		'tour-details-title'    => 'show',
@@ -458,10 +458,35 @@ function wte_doing_it_wrong( $function, $message, $version ) {
 /**
  * Return array list of all trips.
  *
- * @return array
+ * @param bool $use_titles      Use post titles as array keys instead of post IDs. Default false.
+ * @param bool $attach_manual   Also include manually-created trips (created from booking, any post status).
+ *                              When true, appends ' [ Manually Created ]' suffix to their labels. Default false.
+ * @return array Trip list keyed by post ID (or title when $use_titles is true).
  * @since 6.7.8 Added compatibility with private post status.
+ * @since 6.8.0  Added $attach_manual param to include booking-created trips with label suffix.
  */
-function wp_travel_engine_get_trips_array( $use_titles = false ) {
+function wp_travel_engine_get_trips_array( $use_titles = false, $attach_manual = false ) {
+	$trips_array   = array();
+	$private_label = __( 'Private', 'wp-travel-engine' );
+	$manual_label  = __( 'Manually Created', 'wp-travel-engine' );
+
+	if ( $attach_manual ) {
+		foreach ( (array) get_option( 'wptravelengine_custom_trips', array() ) as $custom_trip_id ) {
+			$trip = get_post( (int) $custom_trip_id );
+
+			if ( ! $trip || 'trip' !== $trip->post_type ) {
+				continue;
+			}
+
+			$label = $trip->post_title . ' [ ' . $manual_label . ' ]';
+			if ( $use_titles ) {
+				$trips_array[ $label ] = $label;
+			} else {
+				$trips_array[ $trip->ID ] = $label;
+			}
+		}
+	}
+
 	$post_statuses = array( 'publish' );
 
 	if ( is_admin() && current_user_can( 'read_private_posts' ) ) {
@@ -478,10 +503,16 @@ function wp_travel_engine_get_trips_array( $use_titles = false ) {
 
 	$trips = get_posts( $args );
 
-	$trips_array   = array();
-	$private_label = __( 'Private', 'wp-travel-engine' );
 	foreach ( $trips as $trip ) {
-		$label = $trip->post_title . ( ( 'private' === $trip->post_status ) ? ' [' . $private_label . ']' : '' );
+		if ( isset( $trips_array[ $trip->ID ] ) ) {
+			continue;
+		}
+
+		$label = $trip->post_title;
+
+		if ( 'private' === $trip->post_status ) {
+			$label .= ' [' . $private_label . ']';
+		}
 
 		if ( $use_titles ) {
 			$trips_array[ $label ] = $label;
@@ -2417,6 +2448,10 @@ function wpte_add_custom_tabs_to_trip_meta( array $trip_meta_tabs ): array {
  */
 function wp_travel_engine_get_booking_status() {
 	$status = array(
+		'reserved' => array(
+			'color' => '#526573',
+			'text'  => __( 'Reserved', 'wp-travel-engine' ),
+		),
 		'pending'  => array(
 			'color' => '#FF9800',
 			'text'  => __( 'Pending', 'wp-travel-engine' ),

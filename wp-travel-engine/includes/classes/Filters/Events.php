@@ -223,6 +223,16 @@ class Events {
 	}
 
 	/**
+	 * Payment updated event.
+	 *
+	 * @param Payment $payment Payment instance.
+	 * @since 6.8.0
+	 */
+	public static function payment_updated( Payment $payment ) {
+		static::add_event( 'wptravelengine.booking.payment.updated', $payment->get_id(), $payment->get_post_type() );
+	}
+
+	/**
 	 * Customer created event.
 	 *
 	 * @param Customer $customer Customer instance.

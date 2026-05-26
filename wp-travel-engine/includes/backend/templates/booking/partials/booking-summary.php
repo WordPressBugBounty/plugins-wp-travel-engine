@@ -41,13 +41,18 @@ $cart_line_items ??= $cart_info->get_item()->get_line_items();
 				);
 
 				foreach ( $cart_line_items as $item_type => $line_items ) :
+					$is_active             = ( 'pricing_category' === $item_type ) ?: wptravelengine_is_addon_active( $item_type );
 					$line_item_group_title = apply_filters( 'wptravelengine_booking_line_item_group_title', $item_type, $line_items );
 					if ( empty( $line_items ) ) {
 						continue;
 					}
 					?>
 					<tr class="title">
-						<td colspan="1"><strong><?php echo esc_html( $line_item_group_title ); ?></strong></td>
+						<td colspan="1"><strong><?php echo esc_html( $line_item_group_title ); ?></strong>
+							<?php if ( ! $is_active ) { ?>
+								<span class="wpte-tag error"><?php echo esc_html__( 'Not Active', 'wp-travel-engine' ); ?></span>
+							<?php } ?>
+						</td>
 					</tr>
 					<?php
 					foreach ( $line_items as $line_item ) {

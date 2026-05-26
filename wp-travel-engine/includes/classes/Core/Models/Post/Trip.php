@@ -73,6 +73,14 @@ class Trip extends PostModel {
 	public string $plain_start_date = '';
 
 	/**
+	 * Package Lists.
+	 *
+	 * @access protected
+	 * @var array
+	 */
+	protected static array $package_lists = array();
+
+	/**
 	 * Constructs a new instance of the Trip class.
 	 *
 	 * This constructor calls the parent constructor and then retrieves
@@ -1398,5 +1406,230 @@ class Trip extends PostModel {
 	 */
 	public function get_trip_capacity( string $date = '' ) {
 		return apply_filters( 'wptravelengine_fsd_get_data_of', false, $this->post->ID, $date );
+	}
+
+	/**
+	 * Creates a manual package post for this trip and appends its ID to the __manual_packages meta.
+	 * Traveler categories are sourced from global plugin settings (trip-packages-categories taxonomy).
+	 *
+	 * @param array $package_data {
+	 *     Package data. All fields optional.
+	 *
+	 *     @type string $name               Package name. Auto-generated if empty.
+	 *     @type string $description        Package description.
+	 *     @type array  $prices             Array of pricing data for each traveler category.
+	 *     @type bool   $time_slots_enable  Whether to enable time slots. Default false.
+	 *     @type array  $time_slots         Day-keyed (MO–SU) arrays of time slot arrays.
+	 *     @type array  $enable_week_days   Day-keyed (MO–SU) booleans.
+	 * }
+	 * @return int Created package post ID, or 0 on failure.
+	 * @since 6.8.0
+	 */
+	public function create_manual_package( array $package_data ): int {
+		$existing_manual = $this->get_meta( '__manual_packages' );
+		$existing_manual = is_array( $existing_manual ) ? $existing_manual : array();
+
+		$name = $package_data['name'] ?? '';
+		if ( empty( $name ) ) {
+			$name = wptravelengine_get_num_suffix( count( $existing_manual ) + 1 );
+		}
+
+		$description = $package_data['description'] ?? '';
+
+		$package_id = wp_insert_post(
+			array(
+				'post_title'   => $name,
+				'post_content' => $description,
+				'post_type'    => 'trip-packages',
+				'post_status'  => 'publish',
+				'post_author'  => get_current_user_id(),
+			)
+		);
+
+		if ( ! $package_id || is_wp_error( $package_id ) ) {
+			return 0;
+		}
+
+		$ava_price_cat = wptravelengine_settings()->get_traveler_categories();
+
+		$primary_category_id = $this->get_meta( 'primary_category' ) ?: wptravelengine_settings()->get_primary_pricing_category()->term_id;
+
+		$group_pricing   = array();
+		$categories_meta = array();
+
+		foreach ( $ava_price_cat as $term ) {
+			$id = $term->term_id;
+
+			$categories_meta['c_ids'][ $id ]                  = $id;
+			$categories_meta['labels'][ $id ]                 = $term->name;
+			$categories_meta['prices'][ $id ]                 = $package_data['prices'][ $id ] ?? 0;
+			$categories_meta['pricing_types'][ $id ]          = 'per-person';
+			$categories_meta['enabled_sale'][ $id ]           = null;
+			$categories_meta['sale_prices'][ $id ]            = '';
+			$categories_meta['min_paxes'][ $id ]              = 0;
+			$categories_meta['enabled_group_discount'][ $id ] = null;
+			$categories_meta['is_primary'][ $id ]             = $id === $primary_category_id;
+
+			$group_pricing[ $id ] = array();
+		}
+
+		$default_week_days = array_combine( array( 'MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU' ), array_fill( 0, 7, false ) );
+
+		$time_slots       = $package_data['time_slots'] ?? null;
+		$enable_week_days = $package_data['enable_week_days'] ?? $default_week_days;
+
+		wp_update_post(
+			array(
+				'ID'         => $package_id,
+				'post_title' => $name,
+				'meta_input' => array_filter(
+					array(
+						'trip_ID'                  => $this->ID,
+						'enable_weekly_time_slots' => ! empty( $package_data['time_slots_enable'] ) ? 'yes' : 'no',
+						'weekly_time_slots'        => ! empty( $time_slots ) ? $time_slots : null,
+						'enable_week_days'         => $enable_week_days,
+						'package-categories'       => $categories_meta,
+						'group-pricing'            => $group_pricing,
+						'package-dates'            => array(),
+						'_primary_category_id'     => $primary_category_id,
+						'is_manual_package'        => 'yes',
+					),
+					fn( $v ) => $v !== null
+				),
+			)
+		);
+
+		$this->update_meta( '__manual_packages', array_unique( array_merge( $existing_manual, array( $package_id ) ) ) );
+
+		return $package_id;
+	}
+
+	/**
+	 * Set manual packages.
+	 *
+	 * @return bool|int
+	 * @since 6.8.0
+	 */
+	public function update_manual_package( int $package_id ) {
+		$existing_manual = $this->get_meta( '__manual_packages' );
+		$existing_manual = is_array( $existing_manual ) ? $existing_manual : array();
+		return $this->update_meta( '__manual_packages', array_unique( array_merge( $existing_manual, array( $package_id ) ) ) );
+	}
+
+	/**
+	 * Creates Trip statically with provided post_status and title.
+	 *
+	 * @return ?Trip
+	 * @since 6.8.0
+	 */
+	public static function create( string $title, string $post_status = 'draft' ) {
+		$new_id = wp_insert_post(
+			array(
+				'post_type'   => WP_TRAVEL_ENGINE_POST_TYPE,
+				'post_title'  => wp_slash( $title ),
+				'post_status' => $post_status,
+				'post_author' => get_current_user_id(),
+			)
+		);
+
+		if ( is_wp_error( $new_id ) || ! $new_id ) {
+			return null;
+		}
+
+		$trip = new Trip( $new_id );
+
+		$default_settings = apply_filters(
+			'wptravelengine_custom_trip_edit_settings',
+			array(
+				'trip_code'                  => "WTE-{$new_id}",
+				'partial_payment_enable'     => 'yes',
+				'partial_payment_use'        => 'global',
+				'partial_payment_amount'     => 0,
+				'partial_payment_percent'    => 0,
+				'partial_payment_type'       => 'amount',
+				'partial_payment_use_global' => 'yes',
+			),
+			$new_id
+		);
+
+		$trip->sync_metas(
+			array(
+				'is_created_from_booking'  => 'yes',
+				'wp_travel_engine_setting' => $default_settings,
+			)
+		);
+
+		$custom_trips   = get_option( 'wptravelengine_custom_trips', array() );
+		$custom_trips[] = $new_id;
+		update_option( 'wptravelengine_custom_trips', $custom_trips );
+
+		return $trip;
+	}
+
+	/**
+	 * Get manual packages.
+	 *
+	 * @param int $trip_id Trip ID.
+	 *
+	 * @return array
+	 * @since 6.8.0
+	 */
+	public static function get_manual_packages( int $trip_id ): array {
+		$m_pkg_ids = get_post_meta( $trip_id, '__manual_packages', true );
+		$m_pkg_ids = is_array( $m_pkg_ids ) ? $m_pkg_ids : array();
+
+		$manual_packages = array();
+		$stale_found     = false;
+		foreach ( $m_pkg_ids as $p_id ) {
+			$post = get_post( $p_id );
+			if ( $post ) {
+				$manual_packages[ $p_id ] = $post;
+			} else {
+				$stale_found = true;
+			}
+		}
+
+		if ( $stale_found ) {
+			update_post_meta( $trip_id, '__manual_packages', array_keys( $manual_packages ) );
+		}
+
+		return $manual_packages;
+	}
+
+	/**
+	 * Get available packages.
+	 *
+	 * @param int  $trip_id Trip ID.
+	 * @param bool $attach_manual Whether to get add manual packages too or not. Default false.
+	 *
+	 * @return array
+	 * @since 6.8.0
+	 */
+	public static function get_packages( int $trip_id, bool $attach_manual = false ): array {
+		$key = $trip_id . '_' . (string) $attach_manual;
+
+		if ( ! isset( static::$package_lists[ $key ] ) ) {
+			$pkgs   = \WPTravelEngine\Packages\get_packages_by_trip_id( $trip_id );
+			$m_pkgs = static::get_manual_packages( $trip_id );
+
+			static::$package_lists[ $key ] = $pkgs + $m_pkgs;
+		}
+
+		return static::$package_lists[ $key ];
+	}
+
+	/**
+	 * Check if package available.
+	 *
+	 * @param int  $trip_id Trip ID.
+	 * @param int  $package_id Package ID.
+	 * @param bool $attach_manual Whether to check in manual packages too or not. Default false.
+	 *
+	 * @return bool
+	 * @since 6.8.0
+	 */
+	public static function package_exists( int $trip_id, int $package_id, bool $attach_manual = false ): bool {
+		$pacakges = static::get_packages( $trip_id, $attach_manual );
+		return isset( $pacakges[ $package_id ] );
 	}
 }

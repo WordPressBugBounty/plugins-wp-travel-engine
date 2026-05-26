@@ -38,10 +38,11 @@ wptravelengine_set_template_args( array( 'is_new_booking' => false ) );
 			</div> <!-- end .wpte-booking-fields-area -->
 
 			<!-- .wpte-booking-summary-area -->
-			<div class="wpte-booking-summary-area">
+			<div class="wpte-booking-summary-area" data-target-id="booking-summary">
 				<?php wptravelengine_get_admin_template( 'booking/partials/booking-summary.php' ); ?>
 				<?php wptravelengine_get_admin_template( 'booking/partials/remaining-payment.php' ); ?>
 				<?php wptravelengine_get_admin_template( 'booking/partials/purchase-receipt.php' ); ?>
+				<?php wptravelengine_get_admin_template( 'booking/partials/migrate-button.php' ); ?>
 				<?php do_action( 'wptravelengine_booking_details_sidebar', $booking ); ?>
 				<?php
 				// If no action is registered, show the commission template from the core plugin.

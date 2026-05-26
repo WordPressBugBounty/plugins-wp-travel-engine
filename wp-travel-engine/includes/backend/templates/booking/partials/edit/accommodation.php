@@ -14,7 +14,7 @@
 // Check if accommodation addon is active
 $is_accommodation_active = wptravelengine_is_addon_active( 'accommodation' );
 $readonly_attr           = ! $is_accommodation_active || 'readonly' === $template_mode ? 'readonly' : '';
-$disabled_attr           = ! $is_accommodation_active || 'readonly' === $template_mode ? 'disabled' : '';
+
 ?>
 
 <div class="wpte-form-section" data-target-id="accommodation">
@@ -55,14 +55,14 @@ $disabled_attr           = ! $is_accommodation_active || 'readonly' === $templat
 											name="line_items[accommodation][label][<?php echo $accommodation_index; ?>]"
 											value="<?php echo esc_attr( $accommodation_item['label'] ); ?>"
 											class="wpte-checkout__input" data-parsley-required-message="This value is required"
-											<?php echo $disabled_attr; ?>>
+											<?php echo $readonly_attr; ?>>
 									</td>
 									<td style="text-align: center;">
 										<input type="number"
 											name="line_items[accommodation][quantity][<?php echo $accommodation_index; ?>]"
 											value="<?php echo esc_attr( $accommodation_item['quantity'] ); ?>" min="1"
 											class="wpte-checkout__input" data-parsley-required-message="This value is required"
-											<?php echo $disabled_attr; ?>>
+											<?php echo $readonly_attr; ?>>
 									</td>
 									<td style="text-align: center;">
 										<input type="number"
@@ -70,13 +70,13 @@ $disabled_attr           = ! $is_accommodation_active || 'readonly' === $templat
 											value="<?php echo esc_attr( $accommodation_item['price'] ); ?>" min="0" step="0.01"
 											class="wpte-checkout__input wpte-cost-input"
 											data-parsley-required-message="This value is required" data-parsley-type="number"
-											data-parsley-pattern="^\d+(\.\d{1,2})?$" <?php echo $disabled_attr; ?>>
+											data-parsley-pattern="^\d+(\.\d{1,2})?$" <?php echo $readonly_attr; ?>>
 									</td>
 									<td style="text-align: center;">
 										<input type="hidden"
 											name="line_items[accommodation][total][<?php echo $accommodation_index; ?>]"
 											value="<?php echo esc_attr( $accommodation_item['total'] ); ?>">
-										<button class="wpte-button wpte-delete-button wpte-table-delete-row" type="button" <?php echo $disabled_attr; ?>>
+										<button class="wpte-button wpte-delete-button wpte-table-delete-row" type="button" <?php echo $readonly_attr; ?>>
 											<svg width="20" height="20" viewBox="0 0 20 20" fill="none"
 												xmlns="http://www.w3.org/2000/svg">
 												<path

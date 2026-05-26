@@ -3,9 +3,9 @@ Contributors: wptravelengine
 Plugin link: https://wptravelengine.com/
 Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
-Tested up to: 6.9
+Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 6.7.12
+Stable tag: 6.8.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -349,11 +349,14 @@ Please send us an email via [support ticket](https://wptravelengine.com/support-
 
 == Changelog ==
 
-= 6.7.12 - 19th May 2026 =
+= 6.8.0 - 26th May 2026 =
 
-* Improved: DatePicker now follows the date format configured in WordPress settings.
-* Fixed: Billing Details now correctly support dynamic fields added through the form editor.
-* Security: Patched an Insecure Direct Object Reference (IDOR) vulnerability.
+* New Feature: Added an option to enable or disable the email header image.
+* New Feature: Added migration support for bookings using old checkout calculations.
+* Improved: Optimized booking save performance with noticeable improvements to the booking edit experience.
+* Improved: Added a Reserved booking status for booking-only, bank transfer, and check payment methods.
+* Changed: Removed the option to switch between the old and new checkout experience. The new checkout is now used by default.
+* Security: Hardened session data handling to prevent PHP Object Injection vulnerabilities.
 
 [See changelog for all versions](https://plugins.svn.wordpress.org/wp-travel-engine/trunk/changelog.txt).
 

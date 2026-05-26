@@ -295,9 +295,8 @@ class FSE_Template {
 		// Retrieve settings to determine the inclusion of header and footer
 		$wptravelengine_settings = get_option( 'wp_travel_engine_settings', array() );
 		$is_checkout_page        = $template->slug === 'template-trip-checkout';
-		$checkout_version        = wptravelengine_get_checkout_template_version( $wptravelengine_settings );
 		$display_header_footer   = $wptravelengine_settings['display_header_footer'] ?? 'no';
-		$include_header_footer   = $is_checkout_page && $checkout_version === '2.0' && $display_header_footer === 'yes';
+		$include_header_footer   = $is_checkout_page && $display_header_footer === 'yes';
 
 		// Add header template part conditionally
 		if ( ! $is_checkout_page || $include_header_footer ) {

@@ -18,12 +18,15 @@ use WPTravelEngine\Utilities\RequestParser;
  */
 class ExternalPayment {
 
+	/**
+	 * Handles external payment request identified by `_payment_key`.
+	 *
+	 * @param RequestParser $request Incoming HTTP request containing `_payment_key`.
+	 * @since 6.8.0 Redirects to 404 if the key is missing, expired, the booking ID is absent, or {@see AddToCart} returns a WP_Error.
+	 */
 	public function __construct( RequestParser $request ) {
-		$key = $request->get_param( '_payment_key' );
-
-		$result = array(
-			'redirect' => home_url( '/404' ),
-		);
+		$result = false;
+		$key    = $request->get_param( '_payment_key' );
 
 		if ( $data = get_transient( '_payment_key_' . $key ) ) {
 			$data = json_decode( $data, true );
@@ -44,7 +47,17 @@ class ExternalPayment {
 				);
 
 				$result = AddToCart::create( $request )->add_to_cart();
+
+				if ( is_wp_error( $result ) ) {
+					$result = false;
+				}
 			}
+		}
+
+		if ( ! $result ) {
+			$result = array(
+				'redirect' => home_url( '/404' ),
+			);
 		}
 
 		if ( ! headers_sent() ) {

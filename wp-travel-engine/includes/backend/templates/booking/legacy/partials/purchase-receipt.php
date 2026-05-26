@@ -1,18 +1,17 @@
 <?php
 /**
+ * @var WPTravelEngine\Core\Models\Post\Booking $booking
  * @since 6.4.0
  */
 
-/**
- * @var Booking $booking
- */
-
-use WPTravelEngine\Core\Models\Post\Booking;
-
+$migrated_to_id = absint( $booking->get_meta( '_migrated_to' ) );
+if ( $migrated_to_id && get_post( $migrated_to_id ) ) {
+	return;
+}
 ?>
 
 <div>
-	<button type="button" class="wpte-button wpte-outlined"
+	<button type="button" class="wpte-button wpte-outlined wpte-button-full"
 			data-booking-id="<?php echo esc_attr( $booking->get_id() ); ?>" id="wte-resend-purchase-receipt"
 			data-nonce="<?php echo wp_create_nonce( 'wte_resend_purchase_receipt' ); ?>">
 		<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">

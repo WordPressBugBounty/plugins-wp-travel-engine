@@ -24,7 +24,7 @@ $order_trip = $cart_info->get_item();
 <?php endif ?>
 <!-- booking-detail-fields -->
 <div class="wpte-form-section" data-target-id="trip-details">
-	<div class="wpte-fields-grid" data-columns="3">
+	<div class="wpte-fields-grid wpte-booking-info-grid" data-columns="6">
 		<?php $order_trip_form_fields->render(); ?>
 	</div>
 </div>

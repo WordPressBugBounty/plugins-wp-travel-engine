@@ -7,7 +7,6 @@
 
 namespace WPTravelEngine\Builders\FormFields;
 
-use WPTravelEngine\Helpers\Countries;
 use WPTravelEngine\Core\Models\Post\Customer;
 
 
@@ -38,37 +37,7 @@ class BillingFormFields extends FormField {
 	}
 
 	protected function map_fields( $fields, $booking_ref ) {
-		// Initialize billing form data with session data as fallback.
-		$billing_form_data = WTE()->session->get( 'billing_form_data' ) ?? array();
-
-		// Get logged in user data if available.
-		$user_data = get_user_by( 'id', get_current_user_id() );
-
-		if ( $user_data ) {
-			$customer_id = Customer::is_exists( $user_data->user_email );
-			if ( $customer_id ) {
-				$customer_data     = new Customer( $customer_id );
-				$billing_form_data = array_merge(
-					array(
-						'fname' => $customer_data->get_customer_fname(),
-						'lname' => $customer_data->get_customer_lname(),
-						'email' => $customer_data->get_customer_email(),
-					),
-					$customer_data->get_customer_addresses()
-				);
-			}
-		}
-
-		// Override with booking data if available.
-		if ( $booking_ref ) {
-			$booking_data = get_post_meta( $booking_ref, 'wptravelengine_billing_details', true );
-			if ( $booking_data ) {
-				$billing_form_data = $booking_data;
-			}
-		}
-		if ( ! $billing_form_data ) {
-			$billing_form_data = array();
-		}
+		$billing_form_data = $this->get_billing_form_data( $booking_ref );
 
 		return array_map(
 			function ( $field ) use ( $billing_form_data ) {
@@ -104,6 +73,50 @@ class BillingFormFields extends FormField {
 	}
 
 	/**
+	 * Resolves billing form data from booking, customer, or session.
+	 *
+	 * Priority: booking meta > session data (merged with customer defaults) > empty array.
+	 *
+	 * @param int|null $booking_ref Booking post ID.
+	 *
+	 * @return array
+	 * @since 6.8.0
+	 */
+	protected function get_billing_form_data( $booking_ref ): array {
+		if ( $booking_ref ) {
+			$booking_data = get_post_meta( $booking_ref, 'wptravelengine_billing_details', true );
+			if ( is_array( $booking_data ) && ! empty( $booking_data ) ) {
+				return $booking_data;
+			}
+		}
+
+		$session_data = WTE()->session->get( 'billing_form_data' );
+		$session_data = is_array( $session_data ) ? $session_data : array();
+
+		$user = get_user_by( 'id', get_current_user_id() );
+		if ( ! $user ) {
+			return $session_data;
+		}
+
+		$customer_id = Customer::is_exists( $user->user_email );
+		if ( ! $customer_id ) {
+			return $session_data;
+		}
+
+		$customer          = new Customer( $customer_id );
+		$customer_defaults = array_merge(
+			array(
+				'fname' => $customer->get_customer_fname(),
+				'lname' => $customer->get_customer_lname(),
+				'email' => $customer->get_customer_email(),
+			),
+			$customer->get_customer_addresses()
+		);
+
+		return array_merge( $customer_defaults, array_filter( $session_data ) );
+	}
+
+	/**
 	 * @param array $form_data
 	 * @return array
 	 */
@@ -133,26 +146,9 @@ class BillingFormFields extends FormField {
 						$field['id']   = sprintf( 'billing_%s', $name );
 					}
 					$field['field_label'] = isset( $field['placeholder'] ) && $field['placeholder'] !== '' ? $field['placeholder'] : $field['field_label'];
-					$field['default']     = $billing_form_data[ $name ] ?? $field['default'] ?? '';
-
-					$value          = $form_data[ $name ] ?? $field['default'] ?? '';
-					$field['value'] = is_array( $value ) ? implode( ',', $value ) : $value;
-
-					if ( $field['type'] == 'country' ) {
-						// Convert country code to country name to show in the billing form.
-						$countries_list = Countries::list();
-						if ( isset( $field['value'] ) && is_string( $field['value'] ) && isset( $countries_list[ $field['value'] ] ) ) {
-							$field['value'] = $countries_list[ $field['value'] ];
-						}
-					}
-
-					if ( $field['type'] === 'trips_list' ) {
-						// Convert trip id to trip name to show in the billing form.
-						$trips_list = wp_travel_engine_get_trips_array();
-						if ( isset( $field['value'] ) && is_string( $field['value'] ) && isset( $trips_list[ $field['value'] ] ) ) {
-							$field['value'] = $trips_list[ $field['value'] ];
-						}
-					}
+					$value                = $form_data[ $name ] ?? $field['default'] ?? '';
+					$field['default']     = $value;
+					$field['value']       = self::resolve_display_value( $value, $field['type'] );
 				}
 
 				return $field;

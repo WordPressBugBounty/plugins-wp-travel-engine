@@ -7,8 +7,6 @@
 
 namespace WPTravelEngine\Builders\FormFields;
 
-use WPTravelEngine\Helpers\Countries;
-
 use WTE_Default_Form_Fields;
 
 /**
@@ -68,22 +66,7 @@ class TravellerFormFields extends FormField {
 				}
 				$field['field_label'] = isset( $field['placeholder'] ) && $field['placeholder'] !== '' ? $field['placeholder'] : $field['field_label'];
 				$value                = $form_data[ $name ] ?? $field['default'] ?? '';
-				$field['value']       = is_array( $value ) ? implode( ',', $value ) : $value;
-				if ( $field['type'] == 'country' ) {
-					// Convert country code to country name to show in the billing form.
-					$countries_list = Countries::list();
-					if ( isset( $field['value'] ) && is_string( $field['value'] ) && isset( $countries_list[ $field['value'] ] ) ) {
-						$field['value'] = $countries_list[ $field['value'] ];
-					}
-				}
-
-				if ( $field['type'] === 'trips_list' ) {
-					// Convert trip id to trip name to show in the billing form.
-					$trips_list = wp_travel_engine_get_trips_array();
-					if ( isset( $field['value'] ) && is_string( $field['value'] ) && isset( $trips_list[ $field['value'] ] ) ) {
-						$field['value'] = $trips_list[ $field['value'] ];
-					}
-				}
+				$field['value']       = self::resolve_display_value( $value, $field['type'] );
 				return $field;
 			},
 			$this->fields

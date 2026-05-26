@@ -45,6 +45,14 @@ class Template_Tags extends TemplateTags {
 	 */
 	public $called_from_payment_details = false;
 
+	/**
+	 * Constructor.
+	 *
+	 * @since 6.8.0 Use get_post_meta() directly for traveller_details to bypass magic property caching.
+	 *
+	 * @param int $booking_id Booking post ID.
+	 * @param int $payment_id Payment post ID.
+	 */
 	public function __construct( $booking_id, $payment_id ) {
 		$this->booking = get_post( $booking_id );
 		$this->payment = get_post( $payment_id );
@@ -59,7 +67,7 @@ class Template_Tags extends TemplateTags {
 
 		$this->billing_details = (array) ( $this->booking->wptravelengine_billing_details ?? array() );
 
-		$this->traveller_details = (array) ( $this->booking->wptravelengine_travelers_details ?? array() );
+		$this->traveller_details = (array) ( get_post_meta( $booking_id, 'wptravelengine_travelers_details', true ) ?: array() );
 
 		$this->emergency_details = (array) ( $this->booking->wptravelengine_emergency_details ?? array() );
 
@@ -489,6 +497,7 @@ class Template_Tags extends TemplateTags {
 	 *
 	 * @since 6.5.0
 	 * @since 6.7.11 Skip empty line item groups; added wptravelengine_email_manual_trigger_{type} action.
+	 * @since 6.8.0 Escape trip date output; end date reads from $trip->end_datetime instead of wptravelengine_format_trip_end_datetime().
 	 *
 	 * @return string
 	 */
@@ -533,15 +542,13 @@ class Template_Tags extends TemplateTags {
 			</tr>
 			<tr>
 				<td style="color: #566267;"><?php esc_html_e( 'Trip Date:', 'wp-travel-engine' ); ?></td>
-				<td style="width: 50%;text-align: right;"><strong><?php echo wptravelengine_format_trip_datetime( $trip->datetime ); ?></strong></td>
+				<td style="width: 50%;text-align: right;"><strong><?php echo esc_html( wptravelengine_format_trip_datetime( $trip->datetime ) ); ?></strong></td>
 			</tr>
 			<tr>
 				<td style="color: #566267;"><?php esc_html_e( 'Trip End Date:', 'wp-travel-engine' ); ?></td>
 				<td style="width: 50%;text-align: right;"><strong>
 				<?php
-					echo esc_html(
-						wptravelengine_format_trip_end_datetime( $trip->datetime, $trip_modal )
-					);
+					echo esc_html( wptravelengine_format_trip_datetime( $trip->end_datetime ) );
 				?>
 					</strong>
 				</td>
@@ -1216,6 +1223,9 @@ class Template_Tags extends TemplateTags {
 		return is_null( $trip ) ? '' : $trip->get_trip_code();
 	}
 
+	/**
+	 * Build and register email template tags.
+	 */
 	public function get_email_tags() {
 
 		$trip = $this->trip;
@@ -1282,8 +1292,8 @@ class Template_Tags extends TemplateTags {
 			'{customer_email}'            => $this->get_billing_email(),
 			'{trip_booked_date}'          => $this->get_current_date(),
 			'{trip_start_date}'           => wptravelengine_format_trip_datetime( $trip->datetime ),
-			'{trip_end_date}'             => wptravelengine_format_trip_datetime( isset( $order_trip['end_datetime'] ) ? $order_trip['end_datetime'] : '' ),
-			'{no_of_travellers}'          => $this->get_no_of_travellers(), // @depreacted next This is deprecated tags that need to remove after addon like ( automator, waitlist ) fixed typos.
+			'{trip_end_date}'             => wptravelengine_format_trip_datetime( $this->cart_info_parser->get_item()->get_end_date() ),
+			'{no_of_travellers}'          => $this->get_no_of_travellers(), // @deprecated 6.8.0 This is a deprecated tag; remove after addons (automator, waitlist) are updated.
 			'{no_of_travelers}'           => $this->get_no_of_travellers(),
 			'{trip_total_price}'          => $this->get_total_amount(),
 			'{trip_paid_amount}'          => wptravelengine_the_price_with_decimal( $_booking->get_total_paid_amount(), false ),

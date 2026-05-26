@@ -24,7 +24,6 @@ class CheckoutV2 extends Checkout {
 		global $wte_cart;
 
 		$wptravelengine_settings = get_option( 'wp_travel_engine_settings', array() );
-		$checkout_page_template  = wptravelengine_get_checkout_template_version( $wptravelengine_settings );
 		$display_header_footer   = $wptravelengine_settings['display_header_footer'] ?? 'no';
 		$show_travellers_info    = $wptravelengine_settings['display_travellers_info'] ?? 'yes';
 		$show_emergency_contact  = $wptravelengine_settings['display_emergency_contact'] ?? '';
@@ -34,9 +33,9 @@ class CheckoutV2 extends Checkout {
 		$show_coupon_form        = $wptravelengine_settings['show_discount'] ?? 'yes';
 		$is_payment_due          = $wte_cart->get_booking_ref() ?? false;
 		return array(
-			'version'               => $checkout_page_template,
-			'header'                => $checkout_page_template == '2.0' && $display_header_footer == 'yes' ? 'default' : 'none',
-			'footer'                => $checkout_page_template == '2.0' && $display_header_footer == 'yes' ? 'default' : 'none',
+			'version'               => '2.0',
+			'header'                => $display_header_footer === 'yes' ? 'default' : 'none',
+			'footer'                => $display_header_footer === 'yes' ? 'default' : 'none',
 			'checkout-steps'        => 'show',
 			'tour-details'          => 'show',
 			'tour-details-title'    => 'show',
@@ -84,12 +83,6 @@ class CheckoutV2 extends Checkout {
 			wte_get_template( 'account/form-login.php' );
 
 			return ob_get_clean();
-		}
-
-		$checkout_page_template = wptravelengine_get_checkout_template_version( $wptravelengine_settings );
-		// Simplified conditional check for outputting based on version
-		if ( $atts['version'] === '1.0' || ( $atts['version'] !== '2.0' && $checkout_page_template == '1.0' ) ) {
-			return parent::output( $atts );
 		}
 
 		Assets::instance()

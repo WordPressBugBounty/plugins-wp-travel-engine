@@ -9,16 +9,17 @@ namespace WPTravelEngine\Core;
 use WPTravelEngine\Core\Booking\Inventory;
 
 /**
- * @deprecated 6.0.0
+ * Compatibility shim for WPTravelEngine\Core\Booking\Inventory.
+ *
+ * @since 6.8.0 - Reverted deprecated label ( deprecated 6.0.0 );
  */
 class Booking_Inventory extends Inventory {
 
 	public function __construct() {
-		_deprecated_class( __CLASS__, '6.0.0', 'WPTravelEngine\Core\Booking\Inventory' );
+		// _deprecated_class( __CLASS__, '6.0.0', 'WPTravelEngine\Core\Booking\Inventory' );
 	}
 
 	/**
-	 *
 	 * @since 6.0.0
 	 */
 	public function get_trip_inventory( $trip_id ) {

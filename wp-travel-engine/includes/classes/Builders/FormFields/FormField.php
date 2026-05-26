@@ -167,4 +167,46 @@ class FormField extends \WP_Travel_Engine_Form_Field {
 
 		return $this;
 	}
+
+	/**
+	 * Converts a raw field value to its display string.
+	 *
+	 * Handles array-to-string conversion and type-specific lookups
+	 * (country code → name, trip ID → title) so that child classes
+	 * don't duplicate the same conversion logic.
+	 *
+	 * @param mixed  $value Raw value (string or array).
+	 * @param string $type  Field type key (e.g. 'country', 'trips_list').
+	 *
+	 * @return string Display-ready value.
+	 * @since 6.8.0
+	 */
+	public static function resolve_display_value( $value, string $type ): string {
+		if ( is_array( $value ) ) {
+			$value = implode( ',', $value );
+		}
+
+		// @TODO: Actual field type is country_dropdown but already in lots of places even after field there is extraction of country name again so to avoid that we are keeping this check for now but in future we should remove this and directly use country_dropdown as type.
+		if ( 'country' === $type ) {
+			$countries = \WPTravelEngine\Helpers\Countries::list();
+			if ( isset( $countries[ $value ] ) ) {
+				return $countries[ $value ];
+			}
+		}
+
+		if ( 'trips_list' === $type ) {
+			$trips = wp_travel_engine_get_trips_array();
+			if ( isset( $trips[ $value ] ) ) {
+				return $trips[ $value ];
+			}
+		}
+
+		if ( 'datepicker' === $type ) {
+			if ( ! empty( $value ) ) {
+				return wp_date( get_option( 'date_format', 'Y-m-d' ), strtotime( $value ) );
+			}
+		}
+
+		return (string) $value;
+	}
 }

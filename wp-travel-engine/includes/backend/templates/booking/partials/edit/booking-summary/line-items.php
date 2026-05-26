@@ -32,15 +32,16 @@ $pricing_arguments = array(
 );
 
 foreach ( $cart_line_items as $item_type => $line_items ) :
-	if ( $item_type == 'pricing_category' || $item_type == 'pickup_point' ) {
-		$is_booking_edit_enabled = true;
-	} else {
-		$is_booking_edit_enabled = false;
-	}
+	$is_active = ( 'pricing_category' === $item_type ) ?: wptravelengine_is_addon_active( $item_type );
+
 	$line_item_group_title = apply_filters( 'wptravelengine_booking_line_item_group_title', $item_type, $line_items );
 	?>
 	<tr class="title">
-		<td colspan="2"><strong><?php echo esc_html( $line_item_group_title ); ?></strong></td>
+		<td colspan="2"><strong><?php echo esc_html( $line_item_group_title ); ?></strong>
+			<?php if ( ! $is_active ) { ?>
+				<span class="wpte-tag error"><?php echo esc_html__( 'Not Active', 'wp-travel-engine' ); ?></span>
+			<?php } ?>
+		</td>
 	</tr>
 	<tr>
 		<td colspan="2" style="padding: 0;">
@@ -62,18 +63,20 @@ foreach ( $cart_line_items as $item_type => $line_items ) :
 							<div style="display: flex;align-items:center;gap:.5em;">
 							<span class="wpte-line-item-label" data-traveller-category-id="<?php echo esc_attr( $category_id ); ?>"><?php echo esc_html( $line_item['label'] ); ?>:</span>
 							<span class="wpte-line-item-quantity"><?php echo esc_html( $quantity ); ?></span> ×
-								<?php if ( $item_type == 'pricing_category' || $item_type == 'pickup_point' ) { ?>
+								<?php if ( $item_type === 'pricing_category' || $item_type === 'pickup_point' ) { ?>
 									<input type="hidden"
 										name="line_items[<?php echo esc_attr( $item_type ); ?>][<?php echo esc_attr( $category_id ); ?>][quantity][]"
 										value="<?php echo esc_attr( $quantity ); ?>"
 										class="wpte-line-item-quantity-input"
-										data-category-id="<?php echo esc_attr( $category_id ); ?>">
+										data-category-id="<?php echo esc_attr( $category_id ); ?>"
+										<?php echo $is_active ? '' : 'disabled'; ?>
+										>
 									<input type="number"
 											name="line_items[<?php echo esc_attr( $item_type ); ?>][<?php echo esc_attr( $category_id ); ?>][price][]"
 											value="<?php echo esc_attr( $line_item['price'] ); ?>"
 											style="min-width: 50px;" min="0" step="any"
 											data-category-id="<?php echo esc_attr( $category_id ); ?>"
-											<?php echo $is_booking_edit_enabled ? '' : 'readonly'; ?>>
+											<?php echo $is_active ? '' : 'disabled'; ?>>
 								<?php } else { ?>
 									<span class="wpte-line-item-price"><?php echo esc_html( $price ); ?></span>
 								<?php } ?>
@@ -89,7 +92,9 @@ foreach ( $cart_line_items as $item_type => $line_items ) :
 			</table>
 		</td>
 	</tr>
-<?php endforeach; ?>
+	<?php
+endforeach;
+?>
 
 <script type="text/html" id="tmpl-cart-line-item-pricing-category">
 	<tr data-category-id="{{data.categoryId}}">

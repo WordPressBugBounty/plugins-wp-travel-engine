@@ -27,11 +27,11 @@ wptravelengine_set_template_args( array( 'is_new_booking' => true ) );
 			<p><?php esc_html_e( 'This action cannot be undone. It will permanently remove this traveller from the booking.', 'wp-travel-engine' ); ?></p>
 		</div>
 		<div class="wpte-button-group">
-			<button type="button" class="wpte-button wpte-solid wpte-traveller-delete">
-				<?php esc_html_e( 'Delete Traveller', 'wp-travel-engine' ); ?>
-			</button>
 			<button type="button" class="wpte-button wpte-outlined wpte-cancel">
 				<?php esc_html_e( 'Cancel', 'wp-travel-engine' ); ?>
+			</button>
+			<button type="button" class="wpte-button wpte-solid wpte-traveller-delete wpte-user-delete">
+				<?php esc_html_e( 'Delete Traveller', 'wp-travel-engine' ); ?>
 			</button>
 		</div>
 	</div>
@@ -82,7 +82,7 @@ wptravelengine_set_template_args( array( 'is_new_booking' => true ) );
 				<!-- end booking-detail-fields -->
 			</div>
 
-			<div class="wpte-booking-summary-area">
+			<div class="wpte-booking-summary-area" data-target-id="booking-summary">
 				<?php wptravelengine_get_admin_template( 'booking/partials/edit/booking-summary.php' ); ?>
 
 				<?php wptravelengine_get_admin_template( 'booking/partials/edit/booking-status.php' ); ?>

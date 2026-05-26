@@ -75,6 +75,29 @@ class ArrayUtility {
 	}
 
 	/**
+	 * Remove from array.
+	 *
+	 * @param string $key The key to be removed in dot-separated form.
+	 *
+	 * @return ArrayUtility
+	 * @since 6.8.0
+	 */
+	public function remove( string $key ): ArrayUtility {
+		$keys    = explode( '.', $key );
+		$lastKey = array_pop( $keys );
+		$data    = &$this->data;
+		foreach ( $keys as $key ) {
+			if ( ! isset( $data[ $key ] ) || ! is_array( $data[ $key ] ) ) {
+				return $this;
+			}
+			$data = &$data[ $key ];
+		}
+		unset( $data[ $lastKey ] );
+
+		return $this;
+	}
+
+	/**
 	 * Get the value of the array.
 	 *
 	 * @return mixed

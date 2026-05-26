@@ -199,6 +199,11 @@ final class Plugin {
 	private function check_version() {
 		if ( ! defined( 'IFRAME_REQUEST' ) ) {
 			if ( version_compare( get_option( 'wptravelengine_version', '0.0.0' ), WP_TRAVEL_ENGINE_VERSION, '<' ) ) {
+				$plugin_settings = get_option( 'wp_travel_engine_settings', array() );
+				if ( isset( $plugin_settings['checkout_page_template'] ) && '1.0' === $plugin_settings['checkout_page_template'] ) {
+					$plugin_settings['checkout_page_template'] = '2.0';
+					update_option( 'wp_travel_engine_settings', $plugin_settings );
+				}
 				update_option( 'wptravelengine_version', WP_TRAVEL_ENGINE_VERSION );
 			}
 			if ( version_compare( get_option( 'wptravelengine_trip_version', '0.0.0' ), WP_TRAVEL_ENGINE_TRIP_VERSION, '<' ) ) {
@@ -226,7 +231,6 @@ final class Plugin {
 		add_action( 'admin_init', array( \WTE_Ajax::class, 'ajax_request_middleware' ) );
 		add_action( 'admin_init', array( $this, 'plugin_inline_update_notices' ) );
 		add_action( 'admin_notices', array( $this, 'booking_dashboard_notice' ), 99 );
-		add_action( 'admin_notices', array( $this, 'legacy_checkout_template_notice' ) );
 		add_action( 'comment_post', array( $this, 'on_insert_comment' ) );
 	}
 
@@ -282,44 +286,6 @@ final class Plugin {
 					'p'      => array(),
 					'strong' => array(),
 					'br'     => array(),
-				)
-			)
-		);
-	}
-
-	/**
-	 * Display admin notice for sites still using the legacy (1.0) checkout template.
-	 *
-	 * @return void
-	 * @since 6.7.8
-	 */
-	public function legacy_checkout_template_notice() {
-		if ( wptravelengine_is_new_user() ) {
-			return;
-		}
-
-		$settings          = get_option( 'wp_travel_engine_settings', array() );
-		$checkout_template = wptravelengine_get_checkout_template_version( $settings );
-
-		// Show notice only when the legacy (1.0) template is in use.
-		if ( '1.0' !== $checkout_template ) {
-			return;
-		}
-
-		$settings_url = admin_url( 'admin.php?page=class-wp-travel-engine-admin.php#checkout_settings' );
-		$message      = sprintf(
-			/* translators: 1: opening anchor tag, 2: closing anchor tag */
-			__( 'WP Travel Engine: You are using the legacy checkout page. Please change it to the new version. From version 6.8.0, the legacy checkout page will be discontinued. %1$sClick here to set up your checkout page.%2$s', 'wp-travel-engine' ),
-			'<a href="' . esc_url( $settings_url ) . '">',
-			'</a>'
-		);
-
-		printf(
-			'<div class="notice notice-warning"><p>%s</p></div>',
-			wp_kses(
-				$message,
-				array(
-					'a' => array( 'href' => array() ),
 				)
 			)
 		);
@@ -1276,6 +1242,13 @@ final class Plugin {
 		if ( ! class_exists( 'CWPatternImport\CW_Pattern_Import' ) ) {
 			require_once sprintf( '%s/includes/classes/Modules/pattern-inserter/class-import-patterns.php', WP_TRAVEL_ENGINE_BASE_PATH );
 		}
+
+		/**
+		 * Booking Export File.
+		 *
+		 * @since 6.8.0
+		 */
+		include_once sprintf( '%sadmin/class-wp-travel-engine-booking-export.php', WP_TRAVEL_ENGINE_ABSPATH );
 	}
 
 	/**
@@ -1404,7 +1377,7 @@ final class Plugin {
 		/**
 		 * @since 5.5.3
 		 */
-		add_action( 'save_post_booking', array( Core\Models\Post\Booking::class, 'save_post_booking' ), 20, 3 );
+		// add_action( 'save_post_booking', array( Core\Models\Post\Booking::class, 'save_post_booking' ), 20, 3 );
 
 		/**
 		 * @since 5.5.3

@@ -106,7 +106,7 @@ class WP_Session_Utils {
 	 *
 	 * @since 6.5.2
 	 */
-	public static function get_expired_sessions( int $time = null ) {
+	public static function get_expired_sessions( ?int $time = null ) {
 		global $wpdb;
 		$time  = $time ?: time();
 		$query = $wpdb->prepare(

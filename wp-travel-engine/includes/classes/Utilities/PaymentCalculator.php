@@ -69,6 +69,8 @@ final class PaymentCalculator {
 	 * @return string Result of addition.
 	 */
 	public function add( string $a, string $b ): string {
+		$a = $this->to_decimal_string( $a );
+		$b = $this->to_decimal_string( $b );
 		if ( $this->has_bcmath ) {
 			return bcadd( $a, $b, $this->scale );
 		}
@@ -83,6 +85,8 @@ final class PaymentCalculator {
 	 * @return string Result of subtraction.
 	 */
 	public function subtract( string $a, string $b ): string {
+		$a = $this->to_decimal_string( $a );
+		$b = $this->to_decimal_string( $b );
 		if ( $this->has_bcmath ) {
 			return bcsub( $a, $b, $this->scale );
 		}
@@ -97,6 +101,8 @@ final class PaymentCalculator {
 	 * @return string Result of multiplication.
 	 */
 	public function multiply( string $a, string $b ): string {
+		$a = $this->to_decimal_string( $a );
+		$b = $this->to_decimal_string( $b );
 		if ( $this->has_bcmath ) {
 			return bcmul( $a, $b, $this->scale );
 		}
@@ -112,6 +118,8 @@ final class PaymentCalculator {
 	 * @throws InvalidArgumentException If divisor is zero.
 	 */
 	public function divide( string $a, string $b ): string {
+		$a = $this->to_decimal_string( $a );
+		$b = $this->to_decimal_string( $b );
 		if ( $this->has_bcmath ) {
 			if ( bccomp( $b, '0', $this->scale ) === 0 ) {
 				throw new InvalidArgumentException( 'Division by zero is not allowed' );
@@ -132,9 +140,6 @@ final class PaymentCalculator {
 	 * @return string Calculated tax amount.
 	 */
 	public function calculate_tax( string $amount, string $taxRate ): string {
-		if ( $this->has_bcmath ) {
-			return bcmul( $amount, $taxRate, $this->scale );
-		}
 		return $this->multiply( $amount, $taxRate );
 	}
 
@@ -159,6 +164,8 @@ final class PaymentCalculator {
 	 * @return int Returns 0 if equal, 1 if $a > $b, -1 if $a < $b.
 	 */
 	public function compare( string $a, string $b ): int {
+		$a = $this->to_decimal_string( $a );
+		$b = $this->to_decimal_string( $b );
 		if ( $this->has_bcmath ) {
 			return bccomp( $a, $b, $this->scale );
 		}
@@ -184,6 +191,7 @@ final class PaymentCalculator {
 	 * @return string Normalized value.
 	 */
 	public function normalize( string $value ): string {
+		$value = $this->to_decimal_string( $value );
 		if ( $this->has_bcmath ) {
 			return bcadd( $value, '0', $this->scale );
 		}
@@ -198,7 +206,7 @@ final class PaymentCalculator {
 	 * @since 6.7.7
 	 */
 	public function abs( string $value ): string {
-		$value = (string) abs( floatval( $value ) );
+		$value = $this->to_decimal_string( (string) abs( floatval( $this->to_decimal_string( $value ) ) ) );
 		return $this->normalize( $value );
 	}
 
@@ -273,6 +281,8 @@ final class PaymentCalculator {
 			throw new InvalidArgumentException( 'max(): Array must contain at least one element' );
 		}
 
+		$args = array_map( fn( $v ) => $this->to_decimal_string( strval( $v ) ), $args );
+
 		if ( ! $this->has_bcmath ) {
 			return strval( max( array_map( 'floatval', $args ) ) );
 		}
@@ -309,6 +319,8 @@ final class PaymentCalculator {
 			throw new InvalidArgumentException( 'min(): Array must contain at least one element' );
 		}
 
+		$args = array_map( fn( $v ) => $this->to_decimal_string( strval( $v ) ), $args );
+
 		if ( ! $this->has_bcmath ) {
 			return strval( min( array_map( 'floatval', $args ) ) );
 		}
@@ -324,5 +336,20 @@ final class PaymentCalculator {
 		}
 
 		return $min;
+	}
+
+	/**
+	 * Expands scientific notation (e.g. '1.1111111111111112E+31') to a plain decimal string.
+	 * BCMath silently truncates values containing 'e'; this guard prevents data corruption.
+	 *
+	 * @param string $value Value to convert.
+	 * @return string Plain decimal string.
+	 * @since 6.8.0
+	 */
+	private function to_decimal_string( string $value ): string {
+		if ( stripos( $value, 'e' ) !== false && is_numeric( $value ) ) {
+			return rtrim( rtrim( sprintf( '%.20F', floatval( $value ) ), '0' ), '.' );
+		}
+		return $value;
 	}
 }

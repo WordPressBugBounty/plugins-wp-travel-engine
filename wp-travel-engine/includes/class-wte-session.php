@@ -54,18 +54,21 @@ class WTE_Session {
 	 * @return mixed      session data.
 	 */
 	public function get( string $key ) {
-		$key = sanitize_key( $key );
+		$key   = sanitize_key( $key );
+		$value = $this->session[ $key ] ?? null;
 
-		if ( isset( $this->session[ $key ] ) ) {
-			// Check if JSON encoded.
-			if ( is_string( $this->session[ $key ] ) && ( is_array( json_decode( $this->session[ $key ], true ) ) ) ) {
-				return json_decode( $this->session[ $key ], true );
-			}
-
-			return maybe_unserialize( $this->session[ $key ] );
+		if ( null === $value ) {
+			return false;
 		}
 
-		return false;
+		if ( is_string( $value ) ) {
+			$decoded = json_decode( $value, true );
+			if ( JSON_ERROR_NONE === json_last_error() && is_array( $decoded ) ) {
+				return $decoded;
+			}
+		}
+
+		return wptravelengine_maybe_unserialize( $value );
 	}
 
 	/**

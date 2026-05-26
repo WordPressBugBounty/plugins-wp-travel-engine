@@ -11,8 +11,9 @@ namespace WPTravelEngine\Core\Trip;
 use WPTravelEngine\Core\Models\Post\Booking as BookingModel;
 
 /**
+ * Compatibility shim. Do not use — extend WPTravelEngine\Core\Models\Post\Booking directly.
  *
- * @deprecated 6.0.0
+ * @since 6.8.0 - Reverted deprecated label ( deprecated 6.0.0 );
  */
 class Booking extends BookingModel {
 
@@ -20,7 +21,7 @@ class Booking extends BookingModel {
 	 * @inheritDoc
 	 */
 	public function __construct( $booking_id = null ) {
-		wptravelengine_deprecated_class( __CLASS__, '6.0.0', 'WPTravelEngine\Core\Models\Post\Booking' );
+		// wptravelengine_deprecated_class( __CLASS__, '6.0.0', 'WPTravelEngine\Core\Models\Post\Booking' );
 		if ( ! is_null( $booking_id ) ) {
 			parent::__construct( $booking_id );
 		}
@@ -34,20 +35,7 @@ class Booking extends BookingModel {
 				'post_status' => 'publish',
 				'post_type'   => 'booking',
 				'post_title'  => 'booking',
-				'meta_input'  => array(
-					'wp_travel_engine_booking_payment_status' => 'pending',
-					'wp_travel_engine_booking_payment_method' => __( 'N/A', 'wp-travel-engine' ),
-					'billing_info'                    => array(),
-					'cart_info'                       => array(
-						'cart_total'   => 0,
-						'cart_partial' => 0,
-						'due'          => 0,
-					),
-					'payments'                        => array(),
-					'paid_amount'                     => 0,
-					'due_amount'                      => 0,
-					'wp_travel_engine_booking_status' => 'pending',
-				),
+				'meta_input'  => parent::default_metadatas(),
 			)
 		);
 	}
@@ -70,7 +58,7 @@ class Booking extends BookingModel {
 	}
 
 	public function update_booking_status( $status, $update ) {
-		_deprecated_function( __METHOD__, '6.0.0', 'WPTravelEngine\Core\Models\Post\Booking::update_status' );
+		// _deprecated_function( __METHOD__, '6.0.0', 'WPTravelEngine\Core\Models\Post\Booking::update_status' );
 		$this->update_status( $status );
 	}
 

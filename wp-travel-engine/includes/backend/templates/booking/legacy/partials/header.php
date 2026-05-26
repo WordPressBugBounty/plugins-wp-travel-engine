@@ -43,20 +43,25 @@ use WPTravelEngine\Core\Models\Post\Booking;
 		);
 		?>
 	</div>
+	<?php
+	$_migrated_to_id   = absint( $booking->get_meta( '_migrated_to' ) );
+	$_already_migrated = $_migrated_to_id && get_post( $_migrated_to_id );
+	$_migrate_label    = $_already_migrated
+		? __( 'Re-Migrate Booking', 'wp-travel-engine' )
+		: __( 'Migrate to New Booking', 'wp-travel-engine' );
+	?>
 	<div class="wpte-button-group">
-		<?php if ( 'edit' === $template_mode ) : ?>
-			<div class="wpte-button-group">
-				<button style="display:block;" id="wpte-booking-submit-button" type="submit"
-						class="wpte-button wpte-solid"><?php echo __( 'Save', 'wp-travel-engine' ); ?></button>
-			</div>
-		<?php else : ?>
-			<a id="wpte-booking-edit-button"
-				type="button"
-				href="<?php echo esc_url( admin_url( "post.php?post={$booking->get_id()}&action=edit&wptravelengine_action=edit" ) ); ?>"
-				class="wpte-button wpte-outlined">
-				<?php echo __( 'Edit', 'wp-travel-engine' ); ?>
-			</a>
-		<?php endif ?>
+		<div>
+			<button type="button" class="wpte-button wpte-outlined" id="wpte-migrate-booking"
+					data-booking-id="<?php echo esc_attr( $booking->get_id() ); ?>"
+					data-nonce="<?php echo wp_create_nonce( 'wptravelengine_migrate_booking' ); ?>"
+					data-migrated-booking-id="<?php echo esc_attr( $_already_migrated ? $_migrated_to_id : '' ); ?>">
+				<?php echo esc_html( $_migrate_label ); ?>
+				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path d="M21 9H7.5C5.01472 9 3 11.0147 3 13.5C3 15.9853 5.01472 18 7.5 18H12M21 9L17 5M21 9L17 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+				</svg>
+			</button>
+		</div>
 	</div>
 	<!-- </div> -->
 </header> <!-- end .wpte-page-header -->

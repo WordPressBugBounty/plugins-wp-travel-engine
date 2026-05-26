@@ -43,17 +43,18 @@ $_traveller_details = $booking_instance->get_meta( 'wptravelengine_travelers_det
 $trip = new Trip( $trip_id );
 $cart = $booking_instance->get_cart_info();
 
-$start_datetime  = $order_trip['datetime'];
-$trip_start_date = wptravelengine_format_trip_datetime( $start_datetime );
-$trip_end_date   = wptravelengine_format_trip_end_datetime( $start_datetime, $trip );
+$_start_date = $booking_instance->get_meta( 'trip_datetime' );
 
-// if ( isset( $cart['items'][0] ) && is_array( $cart['items'][0] ) ) {
-// ** @var array $cart_item */
-// $trip_start_date = wptravelengine_format_trip_datetime( $cart['items'][0]['trip_date'] ) ?? $trip_start_date;
-// $trip_end_date   = isset( $cart['items'][0]['end_date'] ) ? wptravelengine_format_trip_datetime( $cart['items'][0]['end_date'] ) : $trip_end_date;
-// }
+$trip_start_date = wptravelengine_format_trip_datetime( $_start_date );
+$trip_end_date   = wptravelengine_format_trip_datetime(
+	$booking_instance->get_nested_meta(
+		'wp_travel_engine_booking_setting.place_order.tenddate',
+		wptravelengine_format_trip_end_datetime( $_start_date, $trip )
+	)
+);
 
-$traveller_details = array();
+$traveller_details     = array();
+$traveller_form_fields = new TravellerFormFields();
 if ( is_array( $_traveller_details ) ) {
 	$traveller_form_fields = new TravellerFormFields();
 	foreach ( $_traveller_details as $traveller ) {

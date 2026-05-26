@@ -67,7 +67,7 @@ class PluginSettings extends BaseSetting {
 	 * @return mixed
 	 * @since 6.2.0
 	 */
-	public function get( string $key = null, $default_value = null ) {
+	public function get( ?string $key = null, $default_value = null ) {
 
 		if ( isset( $this->callbacks[ $key ?? '' ] ) ) {
 			$value = call_user_func( $this->callbacks[ $key ] );

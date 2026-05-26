@@ -7,7 +7,6 @@
 namespace WPTravelEngine\Builders\FormFields;
 
 use WPTravelEngine\Abstracts\BookingEditFormFields;
-use WPTravelEngine\Helpers\Countries;
 use WTE_Default_Form_Fields;
 /**
  * Form field class to render billing form fields.
@@ -25,8 +24,7 @@ class EmergencyEditFormFields extends BookingEditFormFields {
 
 	public function __construct( array $defaults = array(), string $mode = 'edit', $booking = null ) {
 		parent::__construct( $defaults, $mode );
-		$this->count  = $defaults['index'] ?? ( $defaults['total_count'] ?? 0 ) + 1;
-		static::$mode = $mode;
+		$this->count = $defaults['index'] ?? ( $defaults['total_count'] ?? 0 ) + 1;
 		$this->init( $this->map_fields( static::structure( $mode, $booking ) ) );
 	}
 
@@ -53,27 +51,14 @@ class EmergencyEditFormFields extends BookingEditFormFields {
 			$field['field_label']             = isset( $field['placeholder'] ) && $field['placeholder'] !== '' ? $field['placeholder'] : ( $field['field_label'] ?? '' );
 			$field['default']                 = $this->defaults[ $name ] ?? $field['default'] ?? '';
 			$field['validations']['required'] = false;
-			// Convert country code to country name to show in the emergency form.
-			$countries_list = Countries::list();
 			if ( $field['type'] == 'country' ) {
-				foreach ( $countries_list as $key => $value ) {
-					if ( $field['default'] === $value ) {
-						$field['default'] = $key;
-					}
-				}
+				$field = $this->resolve_country_field_default( $field );
 			}
 		}
 
 		// Convert datepicker to text input to fix styling issue and to enable time selection.
 		if ( $field['type'] === 'datepicker' ) {
-			$field['type']       = 'text';
-			$field['class']      = 'wpte-date-picker';
-			$field['attributes'] = array(
-				'data-options' => array(
-					'enableTime' => true,
-					'dateFormat' => 'Y-m-d H:i',
-				),
-			);
+			$field = $this->apply_datepicker_field( $field );
 		}
 
 		if ( static::$mode !== 'edit' && ! ( $field['skip_disabled'] ?? false ) ) {
@@ -98,7 +83,7 @@ class EmergencyEditFormFields extends BookingEditFormFields {
 	 * @param object $booking
 	 * @return array
 	 */
-	static function structure( string $mode = 'edit', $booking = null ): array {
+	public static function structure( string $mode = 'edit', $booking = null ): array {
 		if ( $booking && $booking->get_meta( 'traveller_page_type' ) == 'old' ) {
 			return WTE_Default_Form_Fields::emergency_contact();
 		} else {

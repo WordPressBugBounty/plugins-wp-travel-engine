@@ -67,7 +67,7 @@ class BaseSetting {
 	 *
 	 * @return mixed The value of the setting, or the default value if not found.
 	 */
-	public function get( string $key = null, $default_value = null ) {
+	public function get( ?string $key = null, $default_value = null ) {
 		if ( is_null( $key ) ) {
 			return $this->settings->value();
 		}

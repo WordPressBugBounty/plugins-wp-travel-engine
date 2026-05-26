@@ -3,6 +3,7 @@
  * Admin Email Settings.
  *
  * @since 6.5.0
+ * @since 6.8.0 Added new setting to show/hide header image/logo in email receipts.
  */
 
 return apply_filters(
@@ -58,7 +59,15 @@ return apply_filters(
 					'title'      => __( 'Branding', 'wp-travel-engine' ),
 				),
 				array(
+					'label'       => __( 'Show Header Image/Logo', 'wp-travel-engine' ),
+					'description' => __( 'When enabled, the header image/logo will be shown in the purchase receipts.', 'wp-travel-engine' ),
+					'field_type'  => 'SWITCH',
+					'name'        => 'email_settings.show_header_image_logo',
+					'isNew'       => version_compare( WP_TRAVEL_ENGINE_VERSION, '6.8.3', '<=' ),
+				),
+				array(
 					'label'       => __( 'Header Image/Logo', 'wp-travel-engine' ),
+					'condition'   => 'email_settings.show_header_image_logo === true',
 					'field_type'  => 'GALLERY',
 					'fileTypes'   => array( 'image' ),
 					'buttonLabel' => __( 'Upload Logo', 'wp-travel-engine' ),

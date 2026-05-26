@@ -127,7 +127,9 @@ function wptravelengine_trip_booking_modal_data( $trip_id ) {
 }
 
 /**
- * Check if the user is new user.
+ * Check if the user is new user (installed on this version, not upgraded).
+ *
+ * Reserved for future use in conditional UX logic.
  *
  * @since 6.6.7
  */
@@ -145,12 +147,10 @@ function wptravelengine_is_new_user(): bool {
  * @param array $settings The settings array. Defaults to an empty array.
  * @return string The checkout page template version.
  * @since 6.7.8
+ * @since 6.8.0 Always returns '2.0'; v1.0 discontinued.
  */
 function wptravelengine_get_checkout_template_version( array $settings = array() ): string {
-	if ( wptravelengine_is_new_user() ) {
-		return '2.0';
-	}
-	return $settings['checkout_page_template'] ?? '1.0';
+	return '2.0';
 }
 
 /**
@@ -341,17 +341,21 @@ function wptravelengine_get_label_by_slug( string $slug, $count = 1, bool $do_tr
  *                     - payu_money_bolt
  *                     - accommodation
  *                     - travel-insurance
+ *                     - travel_insurance (alias)
  *                     - waitlist
  *                     - installment-payments
+ *                     - extra_service (alias for extra-services)
+ *                     - pickup_point
  *
- * @return ?bool Returns true if addon is active, false if inactive, null if invalid addon
+ * @return bool Returns true if addon is active, false if inactive or invalid addon slug
  * @since 6.2.2
- * @since 6.7.8 Added filter for modification & performance improvement from property cache.
+ * @since 6.7.8 Performance improvement via static property cache.
+ * @since 6.8.0 Added aliases (extra_service, travel_insurance, pickup_point), applied wptravelengine.is.addon.active filter, and changed return type to strict bool.
  */
-function wptravelengine_is_addon_active( string $addon ) {
+function wptravelengine_is_addon_active( string $addon ): bool {
 
 	if ( empty( $addon ) ) {
-		return null;
+		return false;
 	}
 
 	static $addon_files = null;
@@ -362,6 +366,7 @@ function wptravelengine_is_addon_active( string $addon ) {
 			'fixed-starting-dates' => 'WTE_FIXED_DEPARTURE_FILE_PATH',
 			'partial-payment'      => 'WP_TRAVEL_ENGINE_PARTIAL_PAYMENT_FILE_PATH',
 			'extra-services'       => 'WTE_EXTRA_SERVICES_FILE_PATH',
+			'extra_service'        => 'WTE_EXTRA_SERVICES_FILE_PATH',
 			'file-downloads'       => 'WTEFD_FILE_PATH',
 			'group-discount'       => 'WP_TRAVEL_ENGINE_GROUP_DISCOUNT_FILE_PATH',
 			'advanced-itinerary'   => 'WTEAD_FILE_PATH',
@@ -386,12 +391,16 @@ function wptravelengine_is_addon_active( string $addon ) {
 			'waitlist'             => 'WPTRAVELENGINE_WAITLIST_DIR_PATH',
 			'accommodation'        => 'WPTRAVELENGINE_ACCOMMODATION_DIR_PATH',
 			'travel-insurance'     => 'WPTRAVELENGINE_TRAVEL_INSURANCE_DIR_PATH',
+			'travel_insurance'     => 'WPTRAVELENGINE_TRAVEL_INSURANCE_DIR_PATH',
 			'installment-payments' => 'WPTRAVELENGINE_INSTALLMENT_PAYMENTS_PATH',
+			'pickup_point'         => 'WPTRAVELENGINE_PICKUP_POINTS_FILE',
 		);
 	}
 
+	$addon_files = apply_filters( 'wptravelengine.is.addon.active', $addon_files );
+
 	if ( ! isset( $addon_files[ $addon ] ) ) {
-		return null;
+		return false;
 	}
 
 	return defined( $addon_files[ $addon ] ) && file_exists( constant( $addon_files[ $addon ] ) );
@@ -635,7 +644,7 @@ function wptravelengine_deprecated_class( $class, $version, $replacement = null 
  *
  * @return false|string Page URL.
  */
-function wptravelengine_get_page_url( string $page, string $default = null ) {
+function wptravelengine_get_page_url( string $page, ?string $default = null ) {
 	$settings = PluginSettings::make();
 	$page_id  = $settings->get( "pages.{$page}", null );
 
@@ -2676,4 +2685,23 @@ function wptravelengine_filter_orphaned_faqs( array $categories, array $global_f
 	}
 
 	return $categories;
+}
+
+/**
+ * Safe alternative to maybe_unserialize that prevents PHP object injection.
+ *
+ * Mirrors WordPress's maybe_unserialize() but passes $options to unserialize()
+ * so object instantiation is blocked by default (allowed_classes: false).
+ *
+ * @param mixed $data    Value to maybe-unserialize.
+ * @param array $options Options passed to unserialize(). Defaults to no allowed classes.
+ * @return mixed         Unserialized value, or original $data if not serialized.
+ * @since 6.8.0
+ */
+function wptravelengine_maybe_unserialize( $data, array $options = array( 'allowed_classes' => false ) ) {
+	if ( is_serialized( $data ) ) {
+		return @unserialize( trim( $data ), $options ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
+	}
+
+	return $data;
 }
