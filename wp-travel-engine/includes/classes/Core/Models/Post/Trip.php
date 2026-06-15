@@ -1140,15 +1140,22 @@ class Trip extends PostModel {
 	 * @param bool   $related_trip Related trip or not for recommendation.
 	 *
 	 * @return
+	 * @since 6.8.1 Filters sold-out FSDs before building available months list.
 	 */
 	public function fsds_content( $fsds, $dates_layout, $related_trip = false ) {
 		$return = array();
 		if ( 'months' === $dates_layout ) {
+			$available_fsds           = array_filter(
+				$fsds,
+				function ( $fsd ) {
+					return $fsd['is_seats_available'] ?? ( '' === ( $fsd['seats_left'] ?? '' ) || ( $fsd['seats_left'] ?? 1 ) > 0 );
+				}
+			);
 			$available_months         = array_map(
 				function ( $fsd ) {
 					return date_i18n( 'n', strtotime( $fsd['start_date'] ) );
 				},
-				$fsds
+				$available_fsds
 			);
 			$available_dates_in_month = array_count_values( $available_months );
 			$available_months         = array_flip( $available_months );

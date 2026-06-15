@@ -255,8 +255,9 @@ class Wp_Travel_Engine_Archive_Hooks {
 				if ( ! $query->get( 'wpte_trip_search' ) || intval( $query->get( 'paged' ) ) > 1 ) {
 					return $posts;
 				}
-				$merged_posts      = array_merge( $featured_query->posts, $posts );
-				$query->post_count = count( $merged_posts );
+				$merged_posts        = array_merge( $featured_query->posts, $posts );
+				$query->post_count   = count( $merged_posts );
+				$query->found_posts += count( $featured_query->posts );
 				return $merged_posts;
 			},
 			10,

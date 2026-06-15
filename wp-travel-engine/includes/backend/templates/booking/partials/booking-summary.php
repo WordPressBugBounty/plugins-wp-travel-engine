@@ -9,9 +9,10 @@
  */
 global $wte_cart;
 
-$excl              = $wte_cart->get_exclusion_label( $cart_info->get_fees() );
-$payments_total    = $booking->get_payments_data()['totals'] ?? array();
-$cart_line_items ??= $cart_info->get_item()->get_line_items();
+$excl                = $wte_cart->get_exclusion_label( $cart_info->get_fees() );
+$payments_total      = $booking->get_payments_data()['totals'] ?? array();
+$cart_line_items   ??= $cart_info->get_item()->get_line_items();
+$pricing_arguments ??= array();
 ?>
 
 <div class="wpte-booking-summary">
@@ -56,16 +57,22 @@ $cart_line_items ??= $cart_info->get_item()->get_line_items();
 					</tr>
 					<?php
 					foreach ( $line_items as $line_item ) {
-						$quantity = (float) $line_item['quantity'] ?? 0;
-						$price    = (float) $line_item['price'] ?? 0;
-						$total    = (float) ( isset( $line_item['total'] ) && $line_item['total'] > 0 ? $line_item['total'] : $price * $quantity );
+						$label     = esc_html( (string) ( $line_item['label'] ?? '' ) );
+						$quantity  = esc_html( (int) ( $line_item['quantity'] ?? 0 ) );
+						$price     = (float) ( $line_item['price'] ?? 0 );
+						$total     = (float) ( ( ( $line_item['total'] ?? 0 ) > 0 ) ? $line_item['total'] : ( $price * $quantity ) );
+						$_label    = ( $item_type === 'pricing_category' && isset( $line_item['pricingType'] ) ) ? wptravelengine_get_pricing_type( false, $line_item['pricingType'] )['label'] ?? '' : '';
+						$per_label = $_label ? '/ ' . $_label : '';
+
+						$_args = apply_filters( 'wptravelengine_booking_summary_args', compact( 'label', 'quantity', 'price', 'total', 'per_label', 'pricing_arguments' ), $item_type, $line_item );
+
 						printf(
-							'<tr><td colspan="2" class="pricing-details"><span class="wpte-line-item-label">%1$s: <span class="wpte-line-item-quantity">%2$d x %3$s %4$s</span></span></td><td class="pricing-total"><b>%5$s</b</td></tr>',
-							esc_html( $line_item['label'] ?? '' ),
-							esc_html( $quantity ?? 0 ),
-							wptravelengine_the_price( $price, false, $pricing_arguments ),
-							( $item_type === 'pricing_category' && isset( $line_item['pricingType'] ) ) ? '/ ' . wptravelengine_get_pricing_type( false, $line_item['pricingType'] )['label'] ?? '' : '',
-							wptravelengine_the_price( $total, false, $pricing_arguments ),
+							'<tr><td colspan="2" class="pricing-details"><span class="wpte-line-item-label">%1$s: <span class="wpte-line-item-quantity">%2$d x %3$s %4$s</span></span></td><td class="pricing-total"><b>%5$s</b></td></tr>',
+							$_args['label'],
+							$_args['quantity'],
+							wptravelengine_the_price( $_args['price'], false, $_args['pricing_arguments'] ),
+							$_args['per_label'],
+							wptravelengine_the_price( $_args['total'], false, $_args['pricing_arguments'] ),
 						);
 					}
 				endforeach;
@@ -75,7 +82,7 @@ $cart_line_items ??= $cart_info->get_item()->get_line_items();
 			if ( $deductible_items ) {
 				foreach ( $deductible_items as $line_item ) {
 					printf(
-						'<tr class="wpte-booking-discount"><td colspan="2">%1$s</td><td class="pricing-total"><b>-%2$s</b</td></tr>',
+						'<tr class="wpte-booking-discount"><td colspan="2">%1$s</td><td class="pricing-total"><b>-%2$s</b></td></tr>',
 						esc_html( $line_item['label'] ?? '' ),
 						wptravelengine_the_price_with_decimal( $line_item['value'] && $line_item['value'] > 0 ? $line_item['value'] : $cart_info->get_totals( 'total_' . $line_item['name'] ) ?? 0, false, $pricing_arguments )
 					);

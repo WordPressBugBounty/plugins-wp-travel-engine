@@ -223,6 +223,7 @@ class MigrateBooking {
 		switch ( $status ) {
 			case 'completed':
 			case 'captured':
+			case 'success':
 				$payment_amount = get_post_meta( $old_payment_id, 'payment_amount', true );
 				$amount_value   = is_array( $payment_amount )
 					? (float) ( $payment_amount['value'] ?? 0 )
@@ -241,6 +242,12 @@ class MigrateBooking {
 
 			case 'failed':
 				$booking->sync_payment_failed_metas( $new_payment_id, $payable_amount );
+				break;
+
+			default:
+				if ( $status ) {
+					update_post_meta( $new_payment_id, 'payment_status', $status );
+				}
 				break;
 		}
 	}
@@ -528,7 +535,7 @@ class MigrateBooking {
 	protected function copy_post_meta( int $from_id, int $to_id ): void {
 		foreach ( get_post_meta( $from_id ) as $meta_key => $meta_values ) {
 			foreach ( $meta_values as $meta_value ) {
-				add_post_meta( $to_id, $meta_key, wptravelengine_maybe_unserialize( $meta_value ) );
+				add_post_meta( $to_id, $meta_key, maybe_unserialize( $meta_value ) );
 			}
 		}
 	}

@@ -48,12 +48,12 @@ class General extends Shortcode {
 	 */
 	public function output( $atts ): string {
 		ob_start();
-		if ( isset( $atts['template'] ) ) {
-			$template = $atts['template'];
-			wte_get_template(
-				$template,
-				$atts
-			);
+		if ( isset( $atts['template'] ) && '' !== $atts['template'] ) {
+			// Strip directory traversal — allow only a safe basename.
+			$template = sanitize_file_name( basename( $atts['template'] ) );
+			if ( '' !== $template ) {
+				wte_get_template( $template, $atts );
+			}
 		}
 
 		return ob_get_clean();

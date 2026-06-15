@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 6.8.0
+Stable tag: 6.8.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -349,14 +349,12 @@ Please send us an email via [support ticket](https://wptravelengine.com/support-
 
 == Changelog ==
 
-= 6.8.0 - 26th May 2026 =
+= 6.8.1 - 15th June 2026 =
 
-* New Feature: Added an option to enable or disable the email header image.
-* New Feature: Added migration support for bookings using old checkout calculations.
-* Improved: Optimized booking save performance with noticeable improvements to the booking edit experience.
-* Improved: Added a Reserved booking status for booking-only, bank transfer, and check payment methods.
-* Changed: Removed the option to switch between the old and new checkout experience. The new checkout is now used by default.
-* Security: Hardened session data handling to prevent PHP Object Injection vulnerabilities.
+* Improved: Added new sort options for trip dates (Recently Added, Newest, Oldest) on Trip Edit page (display only).
+* Fixed: Enquiry forms now display an error message if an enquiry cannot be sent.
+* Fixed: Sold-out departure months no longer appear as available in trip availability listings.
+* Security: Strengthened profile image upload validation to better protect uploaded files from unauthorized file relocation.
 
 [See changelog for all versions](https://plugins.svn.wordpress.org/wp-travel-engine/trunk/changelog.txt).
 

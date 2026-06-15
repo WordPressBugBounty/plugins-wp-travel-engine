@@ -39,8 +39,16 @@ class Inventory {
 		return $this->get_booking_inventory_record( $this->trip_id );
 	}
 
-	public static function get_original_trip_id( $trip_id ) {
-		return apply_filters( 'wpml_object_id', (int) $trip_id, WP_TRAVEL_ENGINE_POST_TYPE, true, apply_filters( 'wpml_default_language', null ) );
+	/**
+	 * Resolve the original-language trip ID via WPML, falling back to the input if WPML is absent or returns null.
+	 *
+	 * @param int|string $trip_id Trip post ID (may be a translated post ID on WPML sites).
+	 * @return int Original-language trip post ID, or the cast input as a fallback.
+	 * @since 6.8.1 Added fallback trip_id
+	 */
+	public static function get_original_trip_id( $trip_id ): int {
+		$original_id = apply_filters( 'wpml_object_id', (int) $trip_id, WP_TRAVEL_ENGINE_POST_TYPE, true, apply_filters( 'wpml_default_language', null ) );
+		return (int) ( $original_id ?? $trip_id );
 	}
 
 	public function get_booking_inventory_record( $trip_id ) {
@@ -67,9 +75,17 @@ class Inventory {
 			return;
 		}
 
-		list( $prefix, $trip_id, $price_key, $trip_date, $trip_time ) = explode( '_', $date_key );
+		$parts = explode( '_', $date_key );
+		if ( count( $parts ) < 5 ) {
+			return;
+		}
+		list( $prefix, $trip_id, $price_key, $trip_date, $trip_time ) = $parts;
 
-		$trip_id    = self::get_original_trip_id( $trip_id );
+		$trip_id = self::get_original_trip_id( $trip_id );
+		if ( ! $trip_id ) {
+			return;
+		}
+
 		$_price_key = get_post_meta( $price_key, '_original_package_id', true );
 		if ( ! empty( $_price_key ) ) {
 			$price_key = $_price_key;

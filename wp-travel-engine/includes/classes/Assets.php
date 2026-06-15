@@ -245,15 +245,12 @@ class Assets extends AssetsAbstract {
 		$this->register_script( Asset::register( 'trip-thank-you', 'public/thank-you.js' ) );
 
 		// Enqueue checkout template version 2.0 script and style.
-		global $post;
 		if ( wp_travel_engine_is_checkout_page() && isset( $wte_cart ) ) {
-			if ( has_shortcode( $post->post_content, 'WP_TRAVEL_ENGINE_PLACE_ORDER' ) || has_shortcode( $post->post_content, 'WPTRAVELENGINE_CHECKOUT' ) ) {
-				$this->enqueue_script( 'wte-popper' );
-				$this->enqueue_script( 'wte-tippyjs' );
-				$this->enqueue_style( 'trip-checkout' );
-				$this->enqueue_script( 'trip-checkout' );
-				$this->dequeue_style( 'wte_trip_review_public' );
-			}
+			$this->enqueue_script( 'wte-popper' );
+			$this->enqueue_script( 'wte-tippyjs' );
+			$this->enqueue_style( 'trip-checkout' );
+			$this->enqueue_script( 'trip-checkout' );
+			$this->dequeue_style( 'wte_trip_review_public' );
 		}
 
 		// Trip Archive.

@@ -158,11 +158,7 @@ class Booking extends PostType {
 			$title = __( 'Traveller(s)', 'wp-travel-engine' );
 		}
 		if ( 'extra_service' === $title ) {
-			if ( wptravelengine_settings()->get( 'extra_service_title' ) !== '' ) {
-				$title = wptravelengine_settings()->get( 'extra_service_title' );
-			} else {
-				$title = __( 'Extra Services', 'wp-travel-engine' );
-			}
+			$title = wptravelengine_settings()->get( 'extra_service_title' ) ?: __( 'Extra Services', 'wp-travel-engine' );
 		}
 
 		return $title;
@@ -658,12 +654,13 @@ class Booking extends PostType {
 
 	/**
 	 * Appends pill-style status badges to the booking title in the admin list.
-	 * Only renders on the "All" and "Published" list tabs.
+	 * Renders on the "All" and "Published" list tabs, and on all search results.
 	 *
 	 * @param string[] $states Existing post states.
 	 * @param \WP_Post $post   Current post.
 	 * @return string[]
 	 * @since 6.8.0
+	 * @since 6.8.1 Badges now render in search results regardless of post_status parameter.
 	 */
 	public function append_booking_state_badges( array $states, \WP_Post $post ): array {
 		if ( 'booking' !== $post->post_type ) {
@@ -672,7 +669,7 @@ class Booking extends PostType {
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$current_status = sanitize_key( $_GET['post_status'] ?? '' );
-		if ( $current_status && 'publish' !== $current_status ) {
+		if ( empty( $_GET['s'] ) && $current_status && 'publish' !== $current_status ) {
 			return $states;
 		}
 
@@ -736,9 +733,14 @@ class Booking extends PostType {
 	}
 
 	/**
-	 * Exclude original bookings that have been migrated from the admin listing.
+	 * Exclude deprecated bookings from the admin listing.
+	 * Search requests skip the exclusion so deprecated bookings remain findable.
 	 *
+	 * @param \WP_Query $query Current query.
+	 *
+	 * @return void
 	 * @since 6.8.0
+	 * @since 6.8.1 Search requests skip post__not_in so deprecated bookings appear in results.
 	 */
 	public function exclude_migrated_bookings( \WP_Query $query ): void {
 		global $pagenow;
@@ -756,6 +758,10 @@ class Booking extends PostType {
 		if ( isset( $_GET['wte_deprecated'] ) ) {
 			$query->set( 'post__in', ! empty( $deprecated_ids ) ? $deprecated_ids : array( 0 ) );
 			$query->set( 'post_status', 'any' );
+			return;
+		}
+
+		if ( ! empty( $_GET['s'] ) ) {
 			return;
 		}
 

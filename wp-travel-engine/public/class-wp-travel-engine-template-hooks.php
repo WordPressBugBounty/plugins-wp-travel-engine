@@ -431,7 +431,7 @@ class WP_Travel_Engine_Template_Hooks {
 				)
 			);
 
-			$price_per_label = apply_filters( 'wptravelengine_price_per_label', __( '/ %s', 'wp-travel-engine' ) );
+			$price_per_label = apply_filters( 'wptravelengine_price_per_label', sprintf( __( '/ %s', 'wp-travel-engine' ), esc_html( $per_label ) ) );
 
 			if ( 0.00 === floatval( $sale_price ) ) :
 				?>
@@ -444,7 +444,7 @@ class WP_Travel_Engine_Template_Hooks {
 					</span>
 					<span class="wpte-bf-offer-price">
 						<ins class="wpte-bf-offer-amount"><?php esc_html_e( 'Free', 'wp-travel-engine' ); ?></ins>
-						<div class="wpte-bf-pqty"><?php printf( esc_html( $price_per_label ), esc_html( $per_label ) ); ?></div>
+						<div class="wpte-bf-pqty"><?php esc_html_e( $price_per_label, 'wp-travel-engine' ); ?></div>
 					</span>
 				</div>
 				<?php
@@ -459,7 +459,7 @@ class WP_Travel_Engine_Template_Hooks {
 					</span>
 					<span class="wpte-bf-offer-price">
 						<ins class="wpte-bf-offer-amount"><?php \wte_the_formated_price( $sale_price ); ?></ins>
-						<div class="wpte-bf-pqty"><?php printf( esc_html( $price_per_label ), esc_html( $per_label ) ); ?></div>
+						<div class="wpte-bf-pqty"><?php esc_html_e( $price_per_label, 'wp-travel-engine' ); ?></div>
 					</span>
 				</div>
 				<?php

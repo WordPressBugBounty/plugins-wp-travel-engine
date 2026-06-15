@@ -1,5 +1,11 @@
 == Changelog ==
 
+= 6.8.1 - 15th June 2026 =
+* Improved: Added new sort options for trip dates (Recently Added, Newest, Oldest) on Trip Edit page (display only).
+* Fixed: Enquiry forms now display an error message if an enquiry cannot be sent.
+* Fixed: Sold-out departure months no longer appear as available in trip availability listings.
+* Security: Strengthened profile image upload validation to better protect uploaded files from unauthorized file relocation.
+
 = 6.8.0 - 26th May 2026 =
 * New Feature: Added an option to enable or disable the email header image.
 * New Feature: Added migration support for bookings using old checkout calculations.

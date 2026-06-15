@@ -23,6 +23,9 @@ $available_months         = array();
 $available_dates_in_month = array();
 
 foreach ( $fsds as $index => $fsd ) {
+	if ( ! ( $fsd['is_seats_available'] ?? ( '' === ( $fsd['seats_left'] ?? '' ) || ( $fsd['seats_left'] ?? 1 ) > 0 ) ) ) {
+		continue;
+	}
 	$month                              = date_i18n( 'n', strtotime( $fsd['start_date'] ) );
 	$available_months[ $month ]       ??= $index;
 	$available_dates_in_month[ $month ] = ( $available_dates_in_month[ $month ] ?? 0 ) + 1;

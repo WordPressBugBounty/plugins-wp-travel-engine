@@ -84,6 +84,7 @@ class EnquiryMail extends AjaxController {
 	 * Sends mail to subscriber and admin.
 	 *
 	 * @since 3.0.0
+	 * @since 6.8.1 Added failed-mail else branch to return type:failed response.
 	 */
 	protected function process_request() {
 
@@ -240,10 +241,13 @@ class EnquiryMail extends AjaxController {
 				 * Hook - after_enquiry_sent
 				 */
 				do_action( 'wp_travel_engine_after_enquiry_sent', $post_id );
+			} else {
+				$result[ 'type' ]    = 'failed';
+				$result[ 'message' ] = __( 'Sorry, your query could not be sent at the moment. Please try again later.', 'wp-travel-engine' );
 			}
 		} else {
 			$result[ 'type' ]    = 'failed';
-			$result[ 'message' ] = __( 'Sorry, your query could not be sent at the moment. May be try again later. Thank You.', 'wp-travel-engine' );
+			$result[ 'message' ] = __( 'Sorry, your query could not be sent at the moment. Please try again later.', 'wp-travel-engine' );
 		}
 
 		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {

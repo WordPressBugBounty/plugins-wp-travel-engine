@@ -40,13 +40,17 @@ return apply_filters(
 				'options'    => $payment_gateway,
 			),
 			array(
-				'divider'     => true,
 				'label'       => __( 'Payment Gateways', 'wp-travel-engine' ),
 				'help'        => __( 'Check the payment gateways to enable on the checkout page. You can configure each payment gateway settings by switching to the Payment gateway settings tab.', 'wp-travel-engine' ),
 				'description' => __( 'Check the payment gateways to enable on the checkout page. You can configure each payment gateway settings by switching to the Payment gateway settings tab.', 'wp-travel-engine' ),
 				'field_type'  => 'PAYMENT_GATEWAYS',
 				'name'        => 'payment_gateways',
 				'options'     => $payment_gateway,
+			),
+			array(
+				'visibility' => ! defined( 'PAYLEXER_FILE' ),
+				'label'      => true,
+				'field_type' => 'PAYLEXER_PROMO',
 			),
 			array(
 				'field_type' => 'ALERT',

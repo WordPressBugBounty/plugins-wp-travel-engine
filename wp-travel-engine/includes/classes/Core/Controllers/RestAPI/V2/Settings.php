@@ -89,6 +89,56 @@ class Settings {
 				'permission_callback' => array( $this, 'get_permission' ),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/paylexer/gateways',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_paylexer_gateways' ),
+				'permission_callback' => array( $this, 'get_permission' ),
+			)
+		);
+	}
+
+	/**
+	 * Proxy PayLexer gateway catalog (avoids browser CORS).
+	 *
+	 * @since 6.8.1
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_paylexer_gateways() {
+		$endpoint  = 'https://app.paylexer.com/api/v1/payment-gateways/catalog';
+		$cache_key = 'wte_paylexer_gateways_catalog';
+		$cached    = get_transient( $cache_key );
+
+		if ( false !== $cached ) {
+			return new WP_REST_Response( $cached, 200 );
+		}
+
+		$response = wp_remote_get(
+			$endpoint,
+			array(
+				'timeout' => 10,
+				'headers' => array( 'Accept' => 'application/json' ),
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return new WP_Error( 'paylexer_fetch_failed', $response->get_error_message(), array( 'status' => 502 ) );
+		}
+
+		$code = wp_remote_retrieve_response_code( $response );
+		$body = wp_remote_retrieve_body( $response );
+		$data = json_decode( $body, true );
+
+		if ( $code < 200 || $code >= 300 || ! is_array( $data ) ) {
+			return new WP_Error( 'paylexer_bad_response', 'Unexpected upstream response.', array( 'status' => 502 ) );
+		}
+
+		set_transient( $cache_key, $data, WEEK_IN_SECONDS );
+
+		return new WP_REST_Response( $data, 200 );
 	}
 
 	/**

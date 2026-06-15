@@ -550,6 +550,7 @@ class Wp_Travel_Engine_Form_Handler {
 	 * @param boolean|string|int $user_id
 	 *
 	 * @return mixed
+	 * @since 6.8.1 Added tmp-dir source validation to reject arbitrary uploads-dir paths before rename.
 	 */
 	public static function set_user_profile_image( $image_url = false, $user_id = false ) {
 
@@ -593,11 +594,24 @@ class Wp_Travel_Engine_Form_Handler {
 			if ( file_exists( $image_url ) ) :
 				$src_real = realpath( $image_url );
 				if ( $src_real && is_file( $src_real ) && strpos( wp_normalize_path( $src_real ), wp_normalize_path( $base_real ) ) === 0 ) {
-					@rename( $src_real, $img_file_name );
+					// Only files inside the WP Travel Engine tmp dir are valid sources.
+					$wptravelengine_tmp_path = realpath( trailingslashit( $uploads['basedir'] ) . 'wp-travel-engine/tmp' );
+					$src_normalized          = wp_normalize_path( $src_real );
+					$tmp_normalized          = trailingslashit( wp_normalize_path( $wptravelengine_tmp_path ) );
+					$is_from_tmp_dir         = $wptravelengine_tmp_path && strpos( $src_normalized, $tmp_normalized ) === 0;
+					if ( $is_from_tmp_dir ) {
+						if ( ! @rename( $src_real, $img_file_name ) ) {
+							return false;
+						}
+					}
 				}
 			endif;
 
 		endif;
+
+		if ( ! file_exists( $img_file_name ) ) {
+			return false;
+		}
 
 		$attachment = array(
 			'post_mime_type' => $img_filetype['type'],
