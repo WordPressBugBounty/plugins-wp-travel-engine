@@ -34,6 +34,7 @@ class ThankYou extends Shortcode {
 	 */
 	public function __construct() {
 		add_filter( 'body_class', array( $this, 'body_class' ) );
+		add_action( 'wp', array( $this, 'maybe_destroy_session' ), 1 );
 	}
 
 	/**
@@ -45,6 +46,27 @@ class ThankYou extends Shortcode {
 		return array(
 			'legacy' => false,
 		);
+	}
+
+	/**
+	 * Clear the booking session on thank-you page load, preserving wishlist data.
+	 * Expires the session cookie so subsequent pages can be served from cache.
+	 *
+	 * @since 6.8.2
+	 */
+	public function maybe_destroy_session() {
+		if ( ! isset( $_GET['payment_key'] ) ) {
+			return;
+		}
+		global $post;
+		if ( ! $post || ! has_shortcode( $post->post_content, self::TAG ) ) {
+			return;
+		}
+		$wishlists = WTE()->session->get( 'user_wishlists' );
+		WTE()->session->destroy();
+		if ( ! empty( $wishlists ) ) {
+			WTE()->session->set( 'user_wishlists', $wishlists );
+		}
 	}
 
 	/**

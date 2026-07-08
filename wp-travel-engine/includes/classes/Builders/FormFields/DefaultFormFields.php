@@ -259,8 +259,9 @@ class DefaultFormFields extends \WTE_Default_Form_Fields {
 		foreach ( $payment_gateways as $key => $payment_gateway ) {
 			$payment_gateways_options[ $key ] = $payment_gateway['label'];
 		}
-		$payment_gateways_options = array( '' => __( 'Choose a Payment Gateway', 'wp-travel-engine' ) ) + $payment_gateways_options;
-		$payment_gateways_options = apply_filters( 'wptravelengine_payments_form_fields_options', $payment_gateways_options );
+		$payment_gateways_options['other'] = __( 'Other', 'wp-travel-engine' );
+		$payment_gateways_options          = array( '' => __( 'Choose a Payment Gateway', 'wp-travel-engine' ) ) + $payment_gateways_options;
+		$payment_gateways_options          = apply_filters( 'wptravelengine_payments_form_fields_options', $payment_gateways_options );
 
 		$fields = apply_filters(
 			'wptravelengine_payments_form_fields',

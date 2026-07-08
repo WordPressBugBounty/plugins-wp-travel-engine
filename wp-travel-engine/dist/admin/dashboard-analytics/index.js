@@ -1397,7 +1397,7 @@
   ${e=>{var t,n;return"outlined"===e.variant&&`\n    color: ${null!==(t=e?.colors?.primary)&&void 0!==t?t:"var(--primary-color)"};\n    border-color: ${null!==(n=e?.colors?.primary)&&void 0!==n?n:"var(--primary-color)"};'};\n  `}}
   ${e=>{var t,n;return"ghost"===e.variant&&`\n    color: ${null!==(t=e?.colors?.primary)&&void 0!==t?t:"#000000"};\n    padding: 0 0 2px;\n    background: none !important;\n    box-shadow: none;\n    border-radius: 0;\n    border: none;\n    border-bottom: 1px solid ${null!==(n=e?.colors?.primary)&&void 0!==n?n:"#000000"};\n    &:hover{\n      border-color: transparent;\n    }\n  `}}
   ${e=>e.isLoading&&'\n    &::after{\n      content: "";\n      flex: 0 0 1em;\n      width: 1em;\n      height: 1em;\n      border-radius: 50%;\n      border: 2px solid rgba(0,0,0, .2);\n      border-top-color: currentColor;\n      animation: spin 1s linear infinite;\n    }\n  '}
-`,Hf=((0,r.forwardRef)((({variant:t="",colors:n={},children:r,...i},o)=>(0,e.createElement)(Ff,{colors:n,variant:t,...i,ref:o},r))),t=>({error:n=!1,label:i=!1,help:o,description:a,suffix:s,prefix:l,variant:c,colors:u={},divider:d=!1,className:p,visibility:h=!0,label_icon:f,isNew:g,isBeta:m,direction:v,gap:b=null,required:y=!1,...x})=>{const[w,C]=(0,r.useState)(null),M=(0,r.useRef)(),_=t,k="boolean"==typeof i,E=s?.props,D=l?.props;return(0,r.useEffect)((()=>{}),[n]),w&&!n&&(w.style.borderColor=null,w.style.backgroundColor=null),(0,e.createElement)(e.Fragment,null,h&&(0,e.createElement)(hy,{className:`wpte-form-control ${null!=p?p:""} ${yc()({"wpte-has-label-icon":f})}`,colors:u,divider:d,direction:v,gap:b},i&&(0,e.createElement)("label",null,f&&(0,e.createElement)("span",{dangerouslySetInnerHTML:{__html:f}}),(0,e.createElement)("div",null,(0,e.createElement)("span",{dangerouslySetInnerHTML:{__html:!k&&i+(y?' <span class="wpte-required">*</span>':"")||""}}),m&&(0,e.createElement)("span",{className:yc()({"wpte-feature-tag":!0,beta:m})},"Beta"),g&&(0,e.createElement)("span",{className:yc()({"wpte-feature-tag":!0,new:g})},"New")),o&&(0,e.createElement)(wf,{content:(0,e.createElement)("div",{dangerouslySetInnerHTML:{__html:o}})},(0,e.createElement)("span",{ref:M,style:{display:"flex"}},(0,e.createElement)(Uf,{name:"help"})))),(0,e.createElement)("div",{className:"wpte-input-control"},n&&(0,e.createElement)(gy,{className:"wpte-error",color:u?.error?.color},n.message),(0,e.createElement)("div",{className:`wpte-input-ui${s?" suffix":""}${l?" prefix":""} ${null!=c?c:""}`},D?.field?.readOnly?(0,e.createElement)("div",{className:`wpte-input-ui ${D?.variant||""}`},(0,e.createElement)("span",{className:"wpte-prefix-value"},D?.field?.defaultValue)):null!=l?l:null,(0,e.createElement)(_,{...x,colors:u}),E?.field?.readOnly?(0,e.createElement)("div",{className:`wpte-input-ui ${E?.variant||""}`},(0,e.createElement)("span",{className:"wpte-suffix-value"},E?.field?.defaultValue)):null!=s?s:null),a&&(0,e.createElement)("p",{className:"wpte-help-text",dangerouslySetInnerHTML:{__html:a}}))))});Hf.Group=({cols:t,label:n=!1,description:r,colors:i={},divider:o=!1,children:a,className:s,visibility:l=!0,gap:c=null,background:u=!1})=>{const d="boolean"==typeof n;return(0,e.createElement)(e.Fragment,null,l&&(0,e.createElement)(hy,{className:`wpte-form-control ${null!=s?s:""}`,colors:i,divider:o,cols:t,gap:c,background:u},n&&(0,e.createElement)("label",{dangerouslySetInnerHTML:{__html:!d&&n||""}}),(0,e.createElement)("div",{className:"wpte-input-control"},a,r&&(0,e.createElement)("p",{className:"wpte-help-text",dangerouslySetInnerHTML:{__html:r}}))))},Hf.Divider=({colors:t})=>(0,e.createElement)(fy,{colors:t});const Bf=Hf;vc.div`
+`,Hf=((0,r.forwardRef)((({variant:t="",colors:n={},children:r,...i},o)=>(0,e.createElement)(Ff,{colors:n,variant:t,...i,ref:o},r))),t=>({error:n=!1,label:i=!1,help:o,description:a,suffix:s,prefix:l,variant:c,colors:u={},divider:d=!1,className:p,visibility:h=!0,label_icon:f,isNew:g,isBeta:m,direction:v,gap:b=null,required:y=!1,...x})=>{const[w,C]=(0,r.useState)(null),M=(0,r.useRef)(),_=t,k="boolean"==typeof i,E=s?.props,D=l?.props;return(0,r.useEffect)((()=>{}),[n]),w&&!n&&(w.style.borderColor=null,w.style.backgroundColor=null),(0,e.createElement)(e.Fragment,null,h&&(0,e.createElement)(hy,{className:`wpte-form-control ${null!=p?p:""} ${yc()({"wpte-has-label-icon":f})}`,colors:u,divider:d,direction:v,gap:b,isInvalid:n},i&&(0,e.createElement)("label",null,f&&(0,e.createElement)("span",{dangerouslySetInnerHTML:{__html:f}}),(0,e.createElement)("div",null,(0,e.createElement)("span",{dangerouslySetInnerHTML:{__html:!k&&i+(y?' <span class="wpte-required">*</span>':"")||""}}),m&&(0,e.createElement)("span",{className:yc()({"wpte-feature-tag":!0,beta:m})},"Beta"),g&&(0,e.createElement)("span",{className:yc()({"wpte-feature-tag":!0,new:g})},(0,Z.__)("New","wp-travel-engine"))),o&&(0,e.createElement)(wf,{content:(0,e.createElement)("div",{dangerouslySetInnerHTML:{__html:o}})},(0,e.createElement)("span",{ref:M,style:{display:"flex"}},(0,e.createElement)(Uf,{name:"help"})))),(0,e.createElement)("div",{className:"wpte-input-control"},n&&(0,e.createElement)(gy,{className:"wpte-error",color:u?.error?.color},n.message),(0,e.createElement)("div",{className:`wpte-input-ui${s?" suffix":""}${l?" prefix":""} ${null!=c?c:""}`},D?.field?.readOnly?(0,e.createElement)("div",{className:`wpte-input-ui ${D?.variant||""}`},(0,e.createElement)("span",{className:"wpte-prefix-value"},D?.field?.defaultValue)):null!=l?l:null,(0,e.createElement)(_,{...x,colors:u}),E?.field?.readOnly?(0,e.createElement)("div",{className:`wpte-input-ui ${E?.variant||""}`},(0,e.createElement)("span",{className:"wpte-suffix-value"},E?.field?.defaultValue)):null!=s?s:null),a&&(0,e.createElement)("p",{className:"wpte-help-text",dangerouslySetInnerHTML:{__html:a}}))))});Hf.Group=({cols:t,label:n=!1,description:r,colors:i={},divider:o=!1,children:a,className:s,visibility:l=!0,gap:c=null,background:u=!1})=>{const d="boolean"==typeof n;return(0,e.createElement)(e.Fragment,null,l&&(0,e.createElement)(hy,{className:`wpte-form-control wpte-form-control-group ${null!=s?s:""}`,colors:i,divider:o,cols:t,gap:c,background:u},n&&(0,e.createElement)("label",{dangerouslySetInnerHTML:{__html:!d&&n||""}}),(0,e.createElement)("div",{className:"wpte-input-control"},a,r&&(0,e.createElement)("p",{className:"wpte-help-text",dangerouslySetInnerHTML:{__html:r}}))))},Hf.Divider=({colors:t})=>(0,e.createElement)(fy,{colors:t});const Bf=Hf;vc.div`
 
     button.insert-media{
         color: ${e=>e.colors?.primary};
@@ -1942,7 +1942,7 @@
         width: 100%;
         max-width: 900px !important;
     }
-`,(0,r.forwardRef)((({control:t,values:n,colors:r,options:i=[],register:o,isMultiple:a,...s},l)=>a?t?(0,e.createElement)(oy,{control:t,name:o?.name,key:o?.name,render:({field:{onChange:t}})=>(0,e.createElement)(Of,{value:Rf().get(n,o?.name)||[],onChange:t,options:i,isMultiple:!0,...s})}):(0,e.createElement)(Of,{options:i,isMultiple:!0,...s}):(0,e.createElement)("select",{ref:l,...o,...s},i?.map((t=>Array.isArray(t?.options)?(0,e.createElement)("optgroup",{key:t.label,label:t.label},t.options.map((t=>(0,e.createElement)("option",{key:t.value,value:t.value,dangerouslySetInnerHTML:{__html:t.label}})))):(0,e.createElement)("option",{key:t.value,value:t.value,dangerouslySetInnerHTML:{__html:t.label}})))))),vc.button`
+`,(0,r.forwardRef)((({control:t,values:n,colors:r,options:i=[],register:o,isMultiple:a,...s},l)=>a?t?(0,e.createElement)(oy,{control:t,name:o?.name,key:o?.name,render:({field:{onChange:t}})=>(0,e.createElement)(Of,{value:Rf().get(n,o?.name)||[],onChange:t,options:i,isMultiple:!0,className:"wpte-multiple-select",...s})}):(0,e.createElement)(Of,{className:"wpte-multiple-select",options:i,isMultiple:!0,...s}):(0,e.createElement)("select",{ref:l,...o,...s},i?.map((t=>Array.isArray(t?.options)?(0,e.createElement)("optgroup",{key:t.label,label:t.label},t.options.map((t=>(0,e.createElement)("option",{key:t.value,value:t.value,dangerouslySetInnerHTML:{__html:t.label}})))):(0,e.createElement)("option",{key:t.value,value:t.value,dangerouslySetInnerHTML:{__html:t.label}})))))),vc.button`
     position: relative;
     background-color: transparent;
     color: #0F1D23;
@@ -2261,13 +2261,14 @@
         margin-bottom: 24px;
     }
     ${e=>e.divider&&`\n        &:not(:last-child){\n            padding-bottom: 24px;\n            border-bottom: 1px solid ${e?.colors?.border};\n        }\n    `}
+
     &.wpte-has-label-icon{
         align-items: center;
         > label{
             gap: 12px;
         }
     }
-    .wpte-input-control {
+    > .wpte-input-control {
         flex: auto;
         display: flex;
         flex-wrap: wrap;
@@ -2276,12 +2277,6 @@
         max-width: 100%;
         position: relative;
 
-        .wpte-error{
-            position: absolute;
-            bottom: 100%;
-            left: 0;
-            white-space: nowrap;
-        }
         > .wpte-form-control{
             margin: 0 !important;
         }
@@ -2405,6 +2400,31 @@
                 }
             }
         }
+
+        > .wpte-input-ui{
+            ${e=>e.isInvalid&&'\n                > input:not([typ="checkbox"], [type="radio"]), select, textarea{\n                    border-color: #FF0000;\n                }\n            '}
+        }
+    }
+    &.wpte-form-control-group{
+        > .wpte-input-control{
+            ${e=>e.cols&&"\n                flex-flow: row wrap;    \n            "}
+        }
+    }
+    .wpte-multiple-select{
+        > * {
+            font-size: 16px;
+            .cw__badge-container{
+                font-size: 14px;
+                line-height: 1;
+                &:empty{
+                    display: none;
+                }
+            }
+            .cw__custom-select__input-wrapper{
+                line-height: 1.7;
+                padding: 8px 14px;
+            }
+        }
     }
     > label{
         flex: 0 0 30%;
@@ -2435,16 +2455,13 @@
     }
      ${e=>"vertical"===e.direction&&"\n        flex-direction: column;\n        > label{\n            flex: unset;\n            max-width: 100%;\n        }\n    "}
     .wpte-feature-tag{
-        font-size: 12px;
+        font-size: 10px;
         line-height: 1;
         font-weight: normal;
         text-transform: capitalize;
-        text-transform: capitalize;
         background-color: #efefef;
         border-radius: 15px;
-        padding: 2px 8px;
-        margin: 0 6px;
-        padding: 2px 8px;
+        padding: 2px 4px;
         margin: 0 6px;
         &.beta{
             background-color: #F2D645;
@@ -2518,15 +2535,16 @@
     height: 0px !important;
     background: none !important;
 `,gy=vc.span`
-    display: inline-block;
+    display: block;
     padding: 2px 12px;
+    width: 100%;
     border-left: 2px solid ${e=>e?.color};
-    background-color: #fff;
     color: ${e=>e?.color};
     font-size: 14px;
     font-weight: 500;
     line-height: 1.7;
     margin: 0 0 6px;
+    align-self: flex-start;
 `,my=(vc.div`
     &::after{
         content: none !important;
@@ -2576,6 +2594,7 @@
 `,(function(){for(var e=arguments.length,t=new Array(e),n=0;n<e;n++)t[n]=arguments[n];return ql(t)})`
     body{
         --cw__border-color: #D8E6FC;
+        height: auto;
     }
     .tippy-box{
         &[data-theme="light"]{
@@ -2816,6 +2835,7 @@
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
+                    flex: 1;
                 }
             }
             li{

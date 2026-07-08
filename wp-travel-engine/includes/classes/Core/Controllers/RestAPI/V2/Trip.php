@@ -234,11 +234,20 @@ class Trip extends WP_REST_Posts_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return bool|WP_Error True if the request has access to delete the package, WP_Error object otherwise.
 	 * @since 6.5.2
+	 * @since 6.8.2 Validate package_id ownership and type to prevent arbitrary post deletion.
 	 */
 	public function delete_package_permissions_check( $request ) {
-		$post = get_post( $request['id'] );
+		$trip = get_post( $request['id'] );
 
-		if ( ! current_user_can( 'edit_post', $post->ID ) ) {
+		if ( ! $trip || 'trip' !== $trip->post_type ) {
+			return new WP_Error(
+				'rest_post_not_found',
+				__( 'Trip not found.', 'wp-travel-engine' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		if ( ! current_user_can( 'edit_post', $trip->ID ) ) {
 			return new WP_Error(
 				'rest_cannot_delete',
 				__( 'Sorry, you are not allowed to delete packages for this trip.', 'wp-travel-engine' ),
@@ -246,11 +255,11 @@ class Trip extends WP_REST_Posts_Controller {
 			);
 		}
 
-		if ( ! $post ) {
+		if ( ! Post\Trip::package_exists( (int) $trip->ID, (int) $request['package_id'] ) || ! current_user_can( 'delete_post', (int) $request['package_id'] ) ) {
 			return new WP_Error(
-				'rest_post_not_found',
-				__( 'Trip not found.', 'wp-travel-engine' ),
-				array( 'status' => 404 )
+				'rest_cannot_delete',
+				__( 'Invalid package for this trip.', 'wp-travel-engine' ),
+				array( 'status' => 403 )
 			);
 		}
 
@@ -263,11 +272,21 @@ class Trip extends WP_REST_Posts_Controller {
 	 * @param WP_REST_Request $request
 	 *
 	 * @return mixed
+	 * @since 6.8.2 Re-assert package ownership before deletion (defense in depth).
 	 */
 	public function delete_package( WP_REST_Request $request ) {
 		try {
+			$trip = wptravelengine_get_trip( $request->get_param( 'id' ) );
+
+			if ( ! $trip || ! Post\Trip::package_exists( (int) $request->get_param( 'id' ), (int) $request['package_id'] ) ) {
+				return new WP_Error(
+					'rest_cannot_delete',
+					__( 'Invalid package for this trip.', 'wp-travel-engine' ),
+					array( 'status' => 403 )
+				);
+			}
+
 			if ( wp_delete_post( $request['package_id'], true ) ) {
-				$trip = new Post\Trip( $request->get_param( 'id' ) );
 				if ( (int) $trip->get_meta( 'primary_package' ) === (int) $request['package_id'] ) {
 					$trip->delete_meta( 'primary_package' );
 				}

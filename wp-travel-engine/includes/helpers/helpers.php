@@ -3293,3 +3293,35 @@ function wptravelengine_all_email_tags(): array {
 		),
 	);
 }
+
+/**
+ * Whether a trip departure date falls within a coupon's restriction window.
+ *
+ * Returns true when no restriction is enforced or when the date is inside the
+ * (optional) after/before bounds. Returns false on an empty date when a
+ * restriction is enforced.
+ *
+ * @since 6.8.2
+ *
+ * @param bool   $has_restriction Whether the coupon enforces a trip-date window.
+ * @param string $after           Earliest allowed trip date (inclusive), or empty.
+ * @param string $before          Latest allowed trip date (inclusive), or empty.
+ * @param string $trip_date       Trip departure date to validate.
+ *
+ * @return bool
+ */
+function wptravelengine_coupon_is_restriction_date( bool $has_restriction, $after, $before, $trip_date ): bool {
+	if ( ! $has_restriction ) {
+		return true;
+	}
+	if ( empty( $trip_date ) ) {
+		return false;
+	}
+	if ( ! empty( $after ) && $trip_date < $after ) {
+		return false;
+	}
+	if ( ! empty( $before ) && $trip_date > $before ) {
+		return false;
+	}
+	return true;
+}

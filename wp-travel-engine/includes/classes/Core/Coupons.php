@@ -15,15 +15,18 @@ namespace WPTravelEngine\Core;
 class Coupons {
 
 	/**
-	 * Checks available coupons in specific trip.
+	 * Whether at least one active coupon exists site-wide for the checkout form to render.
 	 *
-	 * @return boolean
+	 * Trip-id restriction, trip-date window, minimum spend etc. are enforced when the
+	 * coupon is actually applied (see ApplyCoupon controller). Hiding the form based on
+	 * restricted_trips here prevented users on non-restricted-trip pages from seeing the
+	 * form even when they had a valid code for another trip; we now only gate on
+	 * coupon-level validity (status, usage cap, start/expiry window).
+	 *
 	 * @since 6.7.1 Refined the query to improve performance.
+	 * @since 6.8.2  Stopped gating on restricted_trips so the form always appears when any active coupon exists.
 	 */
 	public static function is_coupon_available() {
-		global $wte_cart;
-		$trip_id = $wte_cart->get_cart_trip_ids()[0] ?? '';
-
 		$args = array(
 			'post_type'   => 'wte-coupon',
 			'post_status' => 'publish',
@@ -38,50 +41,36 @@ class Coupons {
 
 		$coupons = get_posts( $args );
 
-		$valid_coupon_exists = false;
-		$today               = wp_date( 'Y-m-d' );
+		$today = wp_date( 'Y-m-d' );
 
 		foreach ( $coupons as $coupon ) {
-
 			$meta = get_post_meta( $coupon->ID, 'wp_travel_engine_coupon_metas', true );
-
 			if ( ! is_array( $meta ) ) {
 				continue;
 			}
 
-			// Usage count
+			// Usage count vs limit.
 			$usage_count = (int) get_post_meta( $coupon->ID, 'wp_travel_engine_coupon_usage_count', true );
-
-			// Coupon limit
-			$limit = isset( $meta['restriction']['coupon_limit_number'] ) ? (int) $meta['restriction']['coupon_limit_number'] : '';
-
-			if ( $limit !== '' && $limit !== 0 && $usage_count >= $limit ) {
+			$limit       = isset( $meta['restriction']['coupon_limit_number'] ) ? (int) $meta['restriction']['coupon_limit_number'] : 0;
+			if ( $limit > 0 && $usage_count >= $limit ) {
 				continue;
 			}
 
-			// Expiry date
+			// Expiry date.
 			$expiry = $meta['general']['coupon_expiry_date'] ?? '';
 			if ( $expiry && $expiry < $today ) {
 				continue;
 			}
 
-			// Start date
+			// Start date.
 			$start = $meta['general']['coupon_start_date'] ?? '';
 			if ( $start && $start > $today ) {
 				continue;
 			}
 
-			// Trip restriction
-			$restricted_trips = $meta['restriction']['restricted_trips'] ?? array();
-
-			if ( ! empty( $restricted_trips ) && ! in_array( (string) $trip_id, array_map( 'strval', (array) $restricted_trips ), true ) ) {
-				continue;
-			}
-
-			$valid_coupon_exists = true;
-			break;
+			return true;
 		}
 
-		return $valid_coupon_exists;
+		return false;
 	}
 }

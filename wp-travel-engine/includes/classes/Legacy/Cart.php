@@ -749,12 +749,11 @@ class Cart {
 						'name'            => 'coupon',
 						'label'           => sprintf(
 							__( 'Coupon: %1$s (%2$s)', 'wp-travel-engine' ),
-							$coupon->code(),
-							$coupon->type() === 'percentage' ? $coupon->value() . '%' : '',
-							// wptravelengine_the_price( $coupon->value(), false, false ),
+							$coupon->code,
+							'percentage' === $coupon->type ? ( $coupon->value . '%' ) : wptravelengine_the_price( $coupon->value, false, false ),
 						),
-						'adjustment_type' => $coupon->type(),
-						'percentage'      => $coupon->value(),
+						'adjustment_type' => $coupon->type,
+						'percentage'      => $coupon->value,
 					)
 				)
 			);

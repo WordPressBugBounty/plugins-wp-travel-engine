@@ -162,7 +162,7 @@ class Wp_Travel_Engine_Archive_Hooks {
 	 */
 	public function archive_pre_get_posts( $query ) {
 
-		$post_not_in = $query->get( 'post__not_in', array() );
+		$post_not_in = (array) $query->get( 'post__not_in', array() );
 
 		if ( ! is_admin() && $query->is_main_query() ) {
 			if ( $query->is_post_type_archive( WP_TRAVEL_ENGINE_POST_TYPE ) || $query->is_tax ) {
@@ -199,7 +199,7 @@ class Wp_Travel_Engine_Archive_Hooks {
 			$post_not_in = array_merge( $post_not_in, self::$featured_trip_ids );
 		}
 
-		$custom_trips = get_option( 'wptravelengine_custom_trips', array() );
+		$custom_trips = (array) get_option( 'wptravelengine_custom_trips', array() );
 
 		$query->set( 'post__not_in', array_unique( array_merge( $post_not_in, $custom_trips ) ) );
 	}

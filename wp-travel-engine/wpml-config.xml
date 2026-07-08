@@ -154,6 +154,7 @@
 			<key name="trip_dates">
 				<key name="number"/>
 			</key>
+			<key name="pricing_widget_enquiry_message"></key>
 		</key>
 		<key name="wptravelengine_pricing_type">
 			<key name="*"/>

@@ -79,7 +79,14 @@ function wp_session_start() {
 	return $wp_session->session_started();
 }
 if ( ! defined( 'WP_CLI' ) || false === WP_CLI ) {
-	add_action( 'plugins_loaded', 'wp_session_start' );
+	add_action(
+		'plugins_loaded',
+		function () {
+			if ( isset( $_COOKIE[ WP_TRAVEL_ENGINE_SESSION_COOKIE ] ) ) {
+				wp_session_start();
+			}
+		}
+	);
 }
 
 /**
@@ -110,6 +117,9 @@ function wp_session_unset() {
  * Write session data and end session
  */
 function wp_session_write_close() {
+	if ( ! WP_Session::is_started() ) {
+		return;
+	}
 	$wp_session = WP_Session::get_instance();
 
 	$wp_session->write_data();

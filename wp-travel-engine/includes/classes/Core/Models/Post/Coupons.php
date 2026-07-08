@@ -94,6 +94,52 @@ class Coupons extends PostModel {
 	}
 
 	/**
+	 * Whether the coupon enforces a trip-departure-date window.
+	 *
+	 * @since 6.8.2
+	 */
+	public function has_trip_date_restriction(): bool {
+		$general = $this->get_coupon_general_values();
+		return wptravelengine_toggled( $general['trip_date_restriction_enabled'] ?? 'no' );
+	}
+
+	/**
+	 * Earliest allowed trip departure date (inclusive).
+	 *
+	 * @since 6.8.2
+	 */
+	public function get_trip_starts_after(): string {
+		$general = $this->get_coupon_general_values();
+		return $general['trip_starts_after'] ?? '';
+	}
+
+	/**
+	 * Latest allowed trip departure date (inclusive).
+	 *
+	 * @since 6.8.2
+	 */
+	public function get_trip_starts_before(): string {
+		$general = $this->get_coupon_general_values();
+		return $general['trip_starts_before'] ?? '';
+	}
+
+	/**
+	 * Validate coupon against a trip departure date.
+	 *
+	 * Returns true when no restriction is set or when the given trip date falls within the configured window.
+	 *
+	 * @since 6.8.2
+	 */
+	public function is_valid_for_trip_date( $trip_date ): bool {
+		return wptravelengine_coupon_is_restriction_date(
+			$this->has_trip_date_restriction(),
+			$this->get_trip_starts_after(),
+			$this->get_trip_starts_before(),
+			$trip_date
+		);
+	}
+
+	/**
 	 * Retrieves restriction values of the coupon.
 	 *
 	 * @return array Coupon restriction values

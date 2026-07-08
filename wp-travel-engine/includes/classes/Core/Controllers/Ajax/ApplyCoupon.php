@@ -23,11 +23,13 @@ class ApplyCoupon extends AjaxController {
 	/**
 	 * Process Request.
 	 * Coupon code is applied.
+	 *
+	 * @since 6.8.2 Source trip IDs from server-side cart only; client-supplied trip_ids removed to prevent coupon restriction bypass.
 	 */
 	public function process_request() {
 		global $wte_cart;
 		$apply_coupon_code = $this->request->get_param( 'CouponCode' );
-		$apply_trip_ids    = $this->request->get_param( 'trip_ids' ) ?? wp_json_encode( $wte_cart->get_cart_trip_ids() );
+		$apply_trip_ids    = wp_json_encode( $wte_cart->get_cart_trip_ids() );
 		if ( empty( $apply_coupon_code ) ) { // phpcs:ignore
 			\wp_send_json_error(
 				new \WP_Error( 'WTE_INVALID_REQUEST', __( 'Coupon Code is required.', 'wp-travel-engine' ) )
@@ -68,6 +70,30 @@ class ApplyCoupon extends AjaxController {
 				new \WP_Error( 'WTE_COUPON_INVALID', __( 'Coupon Code could not be applied to the selected Trip.', 'wp-travel-engine' ) )
 			);
 			die;
+		}
+
+		// Trip departure date window validation.
+		if ( $coupon_instance->has_trip_date_restriction() ) {
+			$trip_date = '';
+			foreach ( $wte_cart->getItems( true ) as $cart_item ) {
+				if ( (int) $cart_item->trip_id === (int) $trip_id ) {
+					$trip_date = $cart_item->trip_date ?? '';
+					break;
+				}
+			}
+			if ( ! $coupon_instance->is_valid_for_trip_date( $trip_date ) ) {
+				\wp_send_json_error(
+					new \WP_Error(
+						'WTE_COUPON_TRIP_DATE_INVALID',
+						sprintf(
+							/* translators: 1: coupon code. */
+							__( 'Coupon "%1$s" is not valid for the selected trip departure date.', 'wp-travel-engine' ),
+							sanitize_text_field( wp_unslash( $apply_coupon_code ) )
+						)
+					)
+				);
+				die;
+			}
 		}
 
 		$coupon_limit_number = $coupon_instance->get_coupon_limit_number();

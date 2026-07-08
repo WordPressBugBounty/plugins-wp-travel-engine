@@ -7,12 +7,14 @@
 namespace WPTravelEngine\Modules;
 
 use WPTravelEngine\Modules\CouponCode\Ajax;
+use WPTravelEngine\Modules\CouponCode\Banner;
 
 class CouponCode {
 	public function __construct() {
 		defined( 'WP_TRAVEL_ENGINE_COUPONS_POST_TYPE' ) || define( 'WP_TRAVEL_ENGINE_COUPONS_POST_TYPE', 'wte-coupon' );
 
 		new Ajax();
+		new Banner();
 
 		$this->init_hooks();
 	}
@@ -62,7 +64,7 @@ class CouponCode {
 
 				$messages['wte-coupon'] = array(
 					0  => '', // Unused. Messages start at index 1.
-					1  => sprintf( __( '%1$s updated. <a href="%2$s">View %3$s</a>', 'wp-travel-engine' ), $post_object->labels->singular_name, esc_url( get_permalink( $post_ID ) ), $post_object->labels->singular_name ),
+					1  => sprintf( __( '%s updated.', 'wp-travel-engine' ), $post_object->labels->singular_name ),
 					2  => __( 'Custom field updated.', 'wp-travel-engine' ),
 					3  => __( 'Custom field deleted.', 'wp-travel-engine' ),
 					4  => sprintf( __( '%s updated.', 'wp-travel-engine' ), $post_object->labels->singular_name ),
@@ -83,13 +85,6 @@ class CouponCode {
 				if ( WP_TRAVEL_ENGINE_COUPONS_POST_TYPE !== $post_type ) {
 					return;
 				}
-				wp_enqueue_style( 'jquery-ui' );
-				add_action(
-					'admin_head',
-					function () {
-						echo '<style>span.wp-travel-engine-info-msg{background:#1eb823;padding:10px;color:#fff;font-weight:800}span.wp-travel-engine-error-msg{background:#e63333;padding:10px;color:#fff;font-weight:800}.select2-container-multi .select2-choices{min-height:26px;max-width:440px}</style>';
-					}
-				);
 				\add_meta_box( WP_TRAVEL_ENGINE_COUPONS_POST_TYPE . '-details', __( 'Coupon Options', 'wp-travel-engine' ), array( __CLASS__, 'add_coupon_metabox_field_callback' ), WP_TRAVEL_ENGINE_COUPONS_POST_TYPE, 'normal', 'high' );
 			},
 			10,
@@ -127,6 +122,9 @@ class CouponCode {
 		return ! ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) && current_user_can( 'edit_post', $post_id ) && ! wp_is_post_revision( $post_id );
 	}
 
+	/**
+	 * @since 6.8.2 Added max discount, behavior, trip date restriction, min travelers, min spend fields.
+	 */
 	public static function get_coupon_edit_form_schema() {
 		$schema = array(
 			'wp_travel_engine_coupon_code' => array(
@@ -154,7 +152,34 @@ class CouponCode {
 								'type'              => 'text',
 								'sanitize_callback' => 'wp_filter_nohtml_kses',
 							),
-
+							'trip_date_restriction_enabled' => array(
+								'type'              => 'text',
+								'sanitize_callback' => 'wp_filter_nohtml_kses',
+							),
+							'trip_starts_after'  => array(
+								'type'              => 'text',
+								'sanitize_callback' => 'wp_filter_nohtml_kses',
+							),
+							'trip_starts_before' => array(
+								'type'              => 'text',
+								'sanitize_callback' => 'wp_filter_nohtml_kses',
+							),
+							'show_banner'        => array(
+								'type'              => 'text',
+								'sanitize_callback' => 'wp_filter_nohtml_kses',
+							),
+							'banner_message'     => array(
+								'type'              => 'text',
+								'sanitize_callback' => 'wp_filter_nohtml_kses',
+							),
+							'banner_bg_color'    => array(
+								'type'              => 'text',
+								'sanitize_callback' => 'sanitize_hex_color',
+							),
+							'banner_text_color'  => array(
+								'type'              => 'text',
+								'sanitize_callback' => 'sanitize_hex_color',
+							),
 						),
 					),
 					'restriction' => array(
@@ -172,40 +197,78 @@ class CouponCode {
 		return $schema;
 	}
 
+	/**
+	 * Save coupon metabox.
+	 *
+	 * @since 6.8.2 Save new coupon fields: max discount cap, behavior, trip date restriction window, min travelers, min spend.
+	 */
 	public static function save_wte_coupon_metabox( $coupon_id ) {
-		$coupon = get_post( $coupon_id );
-		if ( ! is_null( $coupon ) && WP_TRAVEL_ENGINE_COUPONS_POST_TYPE !== $coupon->post_type ) {
-			return; // No works here.
+		if ( ! self::can_update_coupon( $coupon_id ) ) {
+			return;
 		}
-		// phpcs:disable
+
+		$coupon = get_post( $coupon_id );
+		if ( is_null( $coupon ) || WP_TRAVEL_ENGINE_COUPONS_POST_TYPE !== $coupon->post_type ) {
+			return;
+		}
+
+		if ( ! isset( $_POST['wte_coupon_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['wte_coupon_nonce'] ) ), 'wte_save_coupon' ) ) {
+			return;
+		}
+
 		empty( $_POST['wp_travel_engine_coupon_code'] ) || update_post_meta( $coupon->ID, 'wp_travel_engine_coupon_code', wp_filter_nohtml_kses( wp_unslash( $_POST['wp_travel_engine_coupon_code'] ) ) );
 
-		if ( isset( $_POST['wp_travel_engine_coupon'] ) ) {
-			$_data = array();
-			$coupon_data = wte_clean(wp_unslash( $_POST['wp_travel_engine_coupon'] ));
-			if ( isset( $coupon_data['general'] ) ) {
-				$general = $coupon_data['general'];
-				array_walk( $general, function( &$item ) {
-					$item = wp_filter_nohtml_kses( $item );
-				} );
-				$_data['general'] = $general;
-			}
-			if ( isset( $coupon_data['restriction'] ) ) {
-				$restriction = $coupon_data['restriction'];
-				array_walk( $restriction, function( &$item ) {
-					if ( is_array( $item ) ) {
-						$item = array_map( 'wp_filter_nohtml_kses', $item );
-					} else {
-						$item = wp_filter_nohtml_kses( $item );
-					}
-				}  );
-				$_data['restriction'] = $restriction;
-			}
-			update_post_meta( $coupon->ID, 'wp_travel_engine_coupon_metas', $_data );
+		if ( ! isset( $_POST['wp_travel_engine_coupon'] ) ) {
+			return;
 		}
-		// phpcs:enable
+
+		$coupon_data = wte_clean( wp_unslash( $_POST['wp_travel_engine_coupon'] ) );
+		$_data       = array();
+
+		if ( isset( $coupon_data['general'] ) && is_array( $coupon_data['general'] ) ) {
+			$general = $coupon_data['general'];
+
+			$allowed_types = array( 'fixed', 'percentage' );
+
+			$_data['general'] = array(
+				'coupon_type'                   => in_array( $general['coupon_type'] ?? '', $allowed_types, true ) ? $general['coupon_type'] : 'fixed',
+				'coupon_value'                  => isset( $general['coupon_value'] ) ? wp_filter_nohtml_kses( $general['coupon_value'] ) : '',
+				'coupon_start_date'             => isset( $general['coupon_start_date'] ) ? wp_filter_nohtml_kses( $general['coupon_start_date'] ) : '',
+				'coupon_expiry_date'            => isset( $general['coupon_expiry_date'] ) ? wp_filter_nohtml_kses( $general['coupon_expiry_date'] ) : '',
+				'trip_date_restriction_enabled' => ( isset( $general['trip_date_restriction_enabled'] ) && in_array( $general['trip_date_restriction_enabled'], array( 'yes', 'on', '1', 1, true ), true ) ) ? 'yes' : 'no',
+				'trip_starts_after'             => isset( $general['trip_starts_after'] ) ? wp_filter_nohtml_kses( $general['trip_starts_after'] ) : '',
+				'trip_starts_before'            => isset( $general['trip_starts_before'] ) ? wp_filter_nohtml_kses( $general['trip_starts_before'] ) : '',
+				'show_banner'                   => ( isset( $general['show_banner'] ) && in_array( $general['show_banner'], array( 'yes', 'on', '1', 1, true ), true ) ) ? 'yes' : 'no',
+				'banner_message'                => isset( $general['banner_message'] ) ? wp_filter_nohtml_kses( $general['banner_message'] ) : '',
+				'banner_bg_color'               => isset( $general['banner_bg_color'] ) ? ( sanitize_hex_color( $general['banner_bg_color'] ) ?? '' ) : '',
+				'banner_text_color'             => isset( $general['banner_text_color'] ) ? ( sanitize_hex_color( $general['banner_text_color'] ) ?? '' ) : '',
+			);
+		}
+
+		if ( isset( $coupon_data['restriction'] ) && is_array( $coupon_data['restriction'] ) ) {
+			$restriction = $coupon_data['restriction'];
+
+			$_data['restriction'] = array(
+				'restricted_trips'    => isset( $restriction['restricted_trips'] ) ? array_map( 'absint', (array) $restriction['restricted_trips'] ) : array(),
+				'coupon_limit_number' => isset( $restriction['coupon_limit_number'] ) && '' !== $restriction['coupon_limit_number'] ? absint( $restriction['coupon_limit_number'] ) : '',
+			);
+		}
+
+		update_post_meta( $coupon->ID, 'wp_travel_engine_coupon_metas', $_data );
+
+		// Dedicated indexed key so the banner query avoids a serialized LIKE scan.
+		if ( 'yes' === ( $_data['general']['show_banner'] ?? 'no' ) ) {
+			update_post_meta( $coupon->ID, 'wp_travel_engine_coupon_show_banner', 'yes' );
+		} else {
+			delete_post_meta( $coupon->ID, 'wp_travel_engine_coupon_show_banner' );
+		}
+
+		delete_transient( Banner::TRANSIENT_KEY );
 	}
 
+	/**
+	 * @since 6.8.2 Falls back to post creation date when coupon start date is blank; normalises start/end to midnight before comparing.
+	 */
 	public static function is_coupon_date_valid( $coupon_id ) {
 		if ( empty( $coupon_id ) ) {
 			return false;
@@ -214,8 +277,14 @@ class CouponCode {
 		$coupon_metas       = get_post_meta( $coupon_id, 'wp_travel_engine_coupon_metas', true );
 		$general_tab        = isset( $coupon_metas['general'] ) ? $coupon_metas['general'] : array();
 		$coupon_expiry_date = isset( $general_tab['coupon_expiry_date'] ) ? $general_tab['coupon_expiry_date'] : '';
+		$coupon_start_date  = isset( $general_tab['coupon_start_date'] ) ? $general_tab['coupon_start_date'] : '';
 
-		$coupon_start_date = isset( $general_tab['coupon_start_date'] ) ? $general_tab['coupon_start_date'] : '';
+		if ( empty( $coupon_start_date ) ) {
+			$post_date = get_post_field( 'post_date', $coupon_id );
+			if ( ! empty( $post_date ) ) {
+				$coupon_start_date = $post_date;
+			}
+		}
 
 		// Check Coupon Status.
 		$coupon_status = get_post_status( $coupon_id );
@@ -226,28 +295,25 @@ class CouponCode {
 
 		$date_now = new \DateTime();
 		$date_now->setTime( 0, 0, 0, 0 );
-		if ( ! empty( $coupon_expiry_date ) ) {
 
-			try {
-				$coupon_start_date = new \DateTime( $coupon_start_date );
-			} catch ( \Exception $e ) {
-				return false;
-			}
-			try {
-				$coupon_end_date = new \DateTime( $coupon_expiry_date );
-			} catch ( \Exception $e ) {
-				return false;
-			}
-
-			return $date_now <= $coupon_end_date && $date_now >= $coupon_start_date;
-		} else {
-			try {
-				$coupon_start_date = new \DateTime( $coupon_start_date );
-				return $date_now >= $coupon_start_date;
-			} catch ( \Exception $e ) {
-				return false;
-			}
+		try {
+			$start = new \DateTime( $coupon_start_date );
+			$start->setTime( 0, 0, 0, 0 );
+		} catch ( \Exception $e ) {
+			return false;
 		}
+
+		if ( ! empty( $coupon_expiry_date ) ) {
+			try {
+				$end = new \DateTime( $coupon_expiry_date );
+				$end->setTime( 0, 0, 0, 0 );
+			} catch ( \Exception $e ) {
+				return false;
+			}
+			return $date_now <= $end && $date_now >= $start;
+		}
+
+		return $date_now >= $start;
 	}
 
 	public static function coupon_can_be_applied( $coupon_id, $trip_id ) {
@@ -357,10 +423,10 @@ class CouponCode {
 			SELECT post_id
 			FROM $wpdb->postmeta
 			WHERE meta_key = %s
-			AND meta_value = %s
+			AND meta_value = BINARY %s
 		",
 			$meta_key,
-			esc_sql( $code )
+			$code
 		);
 
 		$results = $wpdb->get_results( $sql );

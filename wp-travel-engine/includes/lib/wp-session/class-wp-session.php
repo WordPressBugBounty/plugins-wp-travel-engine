@@ -210,6 +210,16 @@ final class WP_Session extends Recursive_ArrayAccess {
 	}
 
 	/**
+	 * Check if the session singleton has been created without triggering creation.
+	 *
+	 * @since 6.8.2
+	 * @return bool
+	 */
+	public static function is_started(): bool {
+		return (bool) self::$instance;
+	}
+
+	/**
 	 * Return the read-only cache expiration value.
 	 *
 	 * @return int

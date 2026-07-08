@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 6.8.1
+Stable tag: 6.8.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -349,12 +349,16 @@ Please send us an email via [support ticket](https://wptravelengine.com/support-
 
 == Changelog ==
 
-= 6.8.1 - 15th June 2026 =
+= 6.8.2 - 8th July 2026 =
 
-* Improved: Added new sort options for trip dates (Recently Added, Newest, Oldest) on Trip Edit page (display only).
-* Fixed: Enquiry forms now display an error message if an enquiry cannot be sent.
-* Fixed: Sold-out departure months no longer appear as available in trip availability listings.
-* Security: Strengthened profile image upload validation to better protect uploaded files from unauthorized file relocation.
+* New Feature: Introduced a promotional banner that automatically highlights active coupons on specific trips.
+* New Feature: Added trip departure date restrictions, allowing coupons to be limited to bookings within a specific date range.
+* Improved: Enhanced session handling to prevent unnecessary cookie creation.
+* Improved: Redesigned the coupon edit page for a more intuitive management experience.
+* Improved: Enhanced validation checks for merchant and payment information in PayPal Standard payments.
+* Security: Fixed a coupon trip restriction validation bypass vulnerability.
+* Security: Strengthened validation checks to prevent unauthorized modifications to system settings.
+* Security: Patched an Insecure Direct Object Reference (IDOR) vulnerability in trip package deletion.
 
 [See changelog for all versions](https://plugins.svn.wordpress.org/wp-travel-engine/trunk/changelog.txt).
 

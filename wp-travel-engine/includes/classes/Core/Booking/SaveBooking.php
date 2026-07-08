@@ -761,6 +761,7 @@ class SaveBooking {
 		$cart_info['totals']['deposit']             = '0.00';
 		$cart_info['totals']['total_extra_charges'] = '0.00';
 
+		$total_paid_amt = '0.00';
 		$success_status = wptravelengine_success_payment_status();
 
 		foreach ( $items as $payment_data ) {
@@ -847,6 +848,8 @@ class SaveBooking {
 				)
 			);
 
+			$total_paid_amt = $calc->add( $total_paid_amt, (string) $paid_amount );
+
 			if ( is_numeric( $due_amount = $this->request->get_param( 'due_amount' ) ) ) {
 				$payment_model->set_meta(
 					'payable',
@@ -901,7 +904,7 @@ class SaveBooking {
 		 *
 		 * @since 6.7.6
 		 */
-		$this->booking->set_meta( 'total_paid_amount', (float) $paid_amount );
+		$this->booking->set_meta( 'total_paid_amount', (float) $total_paid_amt );
 
 		if ( is_numeric( $paid_amount = $this->request->get_param( 'paid_amount' ) ) ) {
 			$this->booking->set_meta( 'paid_amount', (float) $paid_amount );

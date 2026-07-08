@@ -19,7 +19,6 @@ if ( isset( $coupons[0] ) ) : // Checks if has at least one coupon applied.
 				</div>
 			<div class="wpte-checkout__coupon-content">
 			<?php
-			esc_html_e( 'Coupon ', 'wp-travel-engine' );
 				echo esc_html( $coupon['label'] ?? '' );
 				esc_html_e( ' Applied', 'wp-travel-engine' );
 			?>

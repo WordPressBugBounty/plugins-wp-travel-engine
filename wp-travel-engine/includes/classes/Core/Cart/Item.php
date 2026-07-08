@@ -791,6 +791,7 @@ class Item {
 						new PricingCategory(
 							$this->cart,
 							array(
+								'id'          => $package_traveler->id,
 								'label'       => $package_traveler->label,
 								'quantity'    => $pax,
 								'price'       => apply_filters(

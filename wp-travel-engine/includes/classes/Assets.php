@@ -155,6 +155,7 @@ class Assets extends AssetsAbstract {
 		$this->register_script( Asset::register( 'wptravelengine-settings', 'admin/global-settings.js' ) );
 		$this->register_script( Asset::register( 'wptravelengine-trip-edit', 'admin/trip-edit.js' ) );
 		$this->register_script( Asset::register( 'wptravelengine-booking-edit', 'admin/booking-edit.js' ) );
+		$this->register_script( Asset::register( 'wptravelengine-coupon-edit', 'admin/coupon-edit.js' )->dependencies( [ 'wte-fpickr' ] ) )->localize( 'wptravelengine-coupon-edit', 'wteL10n' );
 		$this->register_script( Asset::register( 'wptravelengine-booking-legacy-edit', 'admin/booking-legacy-edit.js' ) );
 		$this->register_script( Asset::register( 'wptravelengine-customer-edit', 'admin/customer-edit.js' ) );
 		$this->register_script( Asset::register( 'wptravelengine-upcoming-tours', 'admin/upcoming-tours.js' ) );
@@ -1233,6 +1234,7 @@ class Assets extends AssetsAbstract {
 		wp_set_script_translations( 'wp-travel-engine', 'wp-travel-engine', $languages_path );
 		wp_set_script_translations( 'wptravelengine-trip-edit', 'wp-travel-engine', $languages_path );
 		wp_set_script_translations( 'wptravelengine-booking-edit', 'wp-travel-engine', $languages_path );
+		wp_set_script_translations( 'wptravelengine-coupon-edit', 'wp-travel-engine', $languages_path );
 		wp_set_script_translations( 'wptravelengine-customer-edit', 'wp-travel-engine', $languages_path );
 		wp_set_script_translations( 'wptravelengine-upcoming-tours', 'wp-travel-engine', $languages_path );
 	}

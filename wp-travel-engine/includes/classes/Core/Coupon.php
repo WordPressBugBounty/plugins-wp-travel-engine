@@ -23,17 +23,17 @@ class Coupon {
 	/**
 	 * @var string
 	 */
-	protected string $name;
+	public string $name;
 
 	/**
 	 * @var int
 	 */
-	protected int $id;
+	public int $id;
 
 	/**
 	 * @var string
 	 */
-	protected $code;
+	public $code;
 
 	/**
 	 * @var array
@@ -44,13 +44,13 @@ class Coupon {
 	 * @var string
 	 * @since 6.0.0
 	 */
-	protected $type = '';
+	public $type = '';
 
 	/**
 	 * @var float
 	 * @since 6.0.0
 	 */
-	protected float $value = 0;
+	public float $value = 0;
 
 	public function __construct( int $coupon_id ) {
 		$coupon = get_post( $coupon_id );
@@ -76,6 +76,8 @@ class Coupon {
 	 * @param string $discount_code The code of the coupon to retrieve.
 	 *
 	 * @return \WP_Error|self Returns a coupon object if found, or a WP_Error object if not found.
+	 *
+	 * @since 6.8.2 Match is now case-sensitive; collation matches are filtered with a strict comparison.
 	 */
 	public static function by_code( string $discount_code ) {
 		$args = array(
@@ -87,14 +89,20 @@ class Coupon {
 				),
 			),
 			'fields'         => 'ids',
-			'posts_per_page' => 1,
+			'posts_per_page' => -1,
 		);
 
+		// The meta_query comparison relies on the column collation, which is
+		// case-insensitive by default. Fetch all collation matches and enforce a
+		// strict, case-sensitive comparison below.
 		$post_ids = get_posts( $args );
 
-		if ( isset( $post_ids[0] ) ) {
+		foreach ( $post_ids as $post_id ) {
+			if ( 0 !== strcmp( (string) get_post_meta( (int) $post_id, 'wp_travel_engine_coupon_code', true ), $discount_code ) ) {
+				continue;
+			}
 			try {
-				return new self( (int) $post_ids[0] );
+				return new self( (int) $post_id );
 			} catch ( \InvalidArgumentException $e ) {
 				return new \WP_Error( 'coupon_not_found', __( 'Coupon not found', 'wp-travel-engine' ) );
 			}
@@ -105,26 +113,6 @@ class Coupon {
 
 	public function is_active(): bool {
 		return get_post_status( $this->id ) === 'publish';
-	}
-
-	public function id() {
-		return $this->id;
-	}
-
-	public function code() {
-		return $this->code;
-	}
-
-	public function name(): string {
-		return $this->name;
-	}
-
-	public function type() {
-		return $this->type;
-	}
-
-	public function value() {
-		return $this->value;
 	}
 
 	public function start_date() {
@@ -141,6 +129,41 @@ class Coupon {
 
 	public function allowed_trips() {
 		return $this->settings['restriction']['restricted_trips'] ?? array();
+	}
+
+	/**
+	 * @since 6.8.2
+	 */
+	public function has_trip_date_restriction(): bool {
+		return wptravelengine_toggled( $this->settings['general']['trip_date_restriction_enabled'] ?? 'no' );
+	}
+
+	/**
+	 * @since 6.8.2
+	 */
+	public function trip_starts_after() {
+		return $this->settings['general']['trip_starts_after'] ?? '';
+	}
+
+	/**
+	 * @since 6.8.2
+	 */
+	public function trip_starts_before() {
+		return $this->settings['general']['trip_starts_before'] ?? '';
+	}
+
+	/**
+	 * Validate coupon against a trip's departure date.
+	 *
+	 * @since 6.8.2
+	 */
+	public function is_valid_for_trip_date( $trip_date ): bool {
+		return wptravelengine_coupon_is_restriction_date(
+			$this->has_trip_date_restriction(),
+			$this->trip_starts_after(),
+			$this->trip_starts_before(),
+			$trip_date
+		);
 	}
 
 	public function is_expired(): bool {
@@ -178,10 +201,7 @@ class Coupon {
 	}
 
 	public function calculated_value( $total ) {
-		$coupon_type  = $this->type();
-		$coupon_value = $this->value();
-
-		return static::calculate_value( $total, $coupon_type, $coupon_value );
+		return static::calculate_value( $total, $this->type, $this->value );
 	}
 
 	/**

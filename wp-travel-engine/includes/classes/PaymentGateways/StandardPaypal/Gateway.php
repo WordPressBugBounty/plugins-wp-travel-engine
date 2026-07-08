@@ -175,6 +175,39 @@ class Gateway extends BaseGateway {
 				file_put_contents( 'ipn_success.log', wp_json_encode( array( 'data' => $transactionData ), JSON_PRETTY_PRINT ) . PHP_EOL, LOCK_EX | FILE_APPEND );
 			}
 
+			// Validate merchant identity.
+			$paypal_id      = strtolower( trim( (string) PluginSettings::make()->get( 'paypal_id' ) ) );
+			$receiver_email = strtolower( trim( sanitize_text_field( wp_unslash( $_POST['receiver_email'] ?? '' ) ) ) );
+			$business       = strtolower( trim( sanitize_text_field( wp_unslash( $_POST['business'] ?? '' ) ) ) );
+			$receiver_id    = strtolower( trim( sanitize_text_field( wp_unslash( $_POST['receiver_id'] ?? '' ) ) ) );
+			if ( $paypal_id === '' || ! in_array( $paypal_id, array( $receiver_email, $business, $receiver_id ), true ) ) {
+				header( 'HTTP/1.1 200 OK' );
+				return;
+			}
+
+			// Enforce currency match.
+			if ( sanitize_text_field( wp_unslash( $_POST['mc_currency'] ?? '' ) ) !== $payment->get_payable_currency() ) {
+				header( 'HTTP/1.1 200 OK' );
+				return;
+			}
+
+			// Halt on duplicate txn_id.
+			$transaction_id = sanitize_text_field( wp_unslash( $_REQUEST['txn_id'] ?? '' ) );
+			if ( $transaction_id && $transaction_id === $payment->get_meta( '_transaction_id' ) ) {
+				header( 'HTTP/1.1 200 OK' );
+				return;
+			}
+
+			// Validate payment amount for Completed IPNs (1-cent tolerance for float rounding).
+			if ( 'Completed' === ( $_REQUEST['payment_status'] ?? '' ) ) {
+				$amount   = (float) wp_unslash( $_REQUEST['mc_gross'] ?? '0' );
+				$expected = $payment->get_payable_amount();
+				if ( $amount < ( $expected - 0.01 ) ) {
+					header( 'HTTP/1.1 200 OK' );
+					return;
+				}
+			}
+
 			/**
 			 * @since 6.7.0
 			 */
@@ -216,15 +249,7 @@ class Gateway extends BaseGateway {
 	 * @return void
 	 */
 	protected function handle_notification_request_before_v4( Booking $booking, Payment $payment, $transactionData ) {
-		$message = '';
-		if ( sanitize_text_field( wp_unslash( $_POST['mc_currency'] ) ) != $payment->get_payable_currency() ) {
-			$message .= "\nCurrency does not match those assigned in settings\n";
-		}
-
-		$transaction_id = sanitize_text_field( wp_unslash( $_REQUEST['txn_id'] ) ) ?? false;
-		if ( $transaction_id === $payment->get_meta( '_transaction_id' ) ) {
-			header( 'HTTP/1.1 200 OK' );
-		}
+		$transaction_id = sanitize_text_field( wp_unslash( $_REQUEST['txn_id'] ?? '' ) );
 
 		if ( isset( $_REQUEST['payment_status'] ) ) {
 			$payment->set_meta( 'payment_status', strtolower( sanitize_text_field( wp_unslash( $_REQUEST['payment_status'] ) ) ) );
@@ -272,15 +297,7 @@ class Gateway extends BaseGateway {
 	 * @since 6.7.0
 	 */
 	protected function handle_notification_request_in_v4( Booking $booking, Payment $payment, $transactionData ) {
-		$message = '';
-		if ( sanitize_text_field( wp_unslash( $_POST['mc_currency'] ) ) != $payment->get_payable_currency() ) {
-			$message .= "\nCurrency does not match those assigned in settings\n";
-		}
-
-		$transaction_id = sanitize_text_field( wp_unslash( $_REQUEST['txn_id'] ) ) ?? false;
-		if ( $transaction_id === $payment->get_meta( '_transaction_id' ) ) {
-			header( 'HTTP/1.1 200 OK' );
-		}
+		$transaction_id = sanitize_text_field( wp_unslash( $_REQUEST['txn_id'] ?? '' ) );
 
 		if ( isset( $_REQUEST['payment_status'] ) ) {
 			$payment->sync_metas(

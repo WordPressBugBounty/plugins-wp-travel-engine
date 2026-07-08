@@ -102,6 +102,13 @@ class WTE_Ajax {
 		 */
 		$ajax_registry->register( Ajax\SendTestEmail::class );
 
+		/**
+		 * Set Difficulty Term AJAX action
+		 *
+		 * @since 6.8.2
+		 */
+		$ajax_registry->register( Ajax\SetDifficultyTerm::class );
+
 		add_action(
 			'wp_ajax_nopriv_email_test',
 			function () {
@@ -291,10 +298,10 @@ class WTE_Ajax {
 				'callback'     => array( '\Wp_Travel_Engine_Public', 'wte_payment_gateway' ),
 				'nonce_action' => 'wp_rest',
 			),
-			'wte_set_difficulty_term_level'         => array(
-				'callback'     => array( __CLASS__, 'set_difficulty_term_level' ),
-				'nonce_action' => 'wp_xhr',
-			),
+			// 'wte_set_difficulty_term_level'         => array(
+			// 'callback'     => array( __CLASS__, 'set_difficulty_term_level' ),
+			// 'nonce_action' => 'wp_xhr',
+			// ),
 			// 'wte_user_wishlist'                     => array(
 			// 'callback'     => array( __CLASS__, 'wte_user_wishlist' ),
 			// 'nonce_action' => 'wp_xhr',
@@ -403,10 +410,18 @@ class WTE_Ajax {
 
 
 	/**
-	 *
 	 * @since 5.5.7
+	 * @deprecated 6.8.2 Use {@see \WPTravelEngine\Core\Controllers\Ajax\SetDifficultyTerm} instead.
 	 */
 	public static function set_difficulty_term_level( $post_data ) {
+		_deprecated_function( __METHOD__, '6.8.2', '\WPTravelEngine\Core\Controllers\Ajax\SetDifficultyTerm' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error(
+				new \WP_Error( 'insufficient_permissions', __( 'You do not have permission to perform this action.', 'wp-travel-engine' ) ),
+				403
+			);
+			return;
+		}
 		// save in options.
 		$difficulty_level                        = get_option( 'difficulty_level_by_terms', array() );
 		$term                                    = get_term( $post_data['term_id'] );

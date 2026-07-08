@@ -37,13 +37,28 @@ class WTE_Session {
 	 * Setup the WP_Session instance
 	 *
 	 * @access public
-	 * @return array
+	 * @return array|void
 	 * @since 1.5
+	 * @since 6.8.2 Skip eager creation for visitors without an existing session cookie (#2507).
 	 */
 	public function init() {
+		if ( ! isset( $_COOKIE[ WP_TRAVEL_ENGINE_SESSION_COOKIE ] ) ) {
+			return;
+		}
 		$this->session = WP_Session::get_instance();
 
 		return $this->session;
+	}
+
+	/**
+	 * Ensure a session exists, creating one if needed. Called before any write operation.
+	 *
+	 * @since 6.8.2
+	 */
+	private function ensure_session() {
+		if ( empty( $this->session ) ) {
+			$this->session = WP_Session::get_instance();
+		}
 	}
 
 	/**
@@ -54,6 +69,9 @@ class WTE_Session {
 	 * @return mixed      session data.
 	 */
 	public function get( string $key ) {
+		if ( empty( $this->session ) ) {
+			return false;
+		}
 		$key   = sanitize_key( $key );
 		$value = $this->session[ $key ] ?? null;
 
@@ -75,6 +93,7 @@ class WTE_Session {
 	 * @since 6.3.3
 	 */
 	public function set_json( $key, $value ) {
+		$this->ensure_session();
 		$key = sanitize_key( $key );
 		if ( is_array( $value ) ) {
 			$this->session[ $key ] = wp_json_encode( $value );
@@ -92,6 +111,7 @@ class WTE_Session {
 	 * @return mixed
 	 */
 	public function set( $key, $value ) {
+		$this->ensure_session();
 		$key = sanitize_key( $key );
 		if ( is_array( $value ) ) {
 			$this->session[ $key ] = serialize( $value );
@@ -110,9 +130,33 @@ class WTE_Session {
 	 * @return boolean
 	 */
 	public function delete( $key ) {
+		if ( empty( $this->session ) ) {
+			return true;
+		}
 		$key = sanitize_key( $key );
 		unset( $this->session[ $key ] );
 
 		return ! isset( $this->session[ $key ] );
+	}
+
+	/**
+	 * Destroy the session: clear DB records and expire the browser cookie.
+	 * Called after booking confirmation so subsequent page visits are not blocked from cache.
+	 *
+	 * @since 6.8.2
+	 */
+	public function destroy() {
+		if ( ! empty( $this->session ) ) {
+			$session_id = $this->session->session_id;
+			$this->session->reset();
+			delete_option( "_wp_session_{$session_id}" );
+			delete_option( "_wp_session_expires_{$session_id}" );
+			$this->session = null;
+		}
+
+		if ( isset( $_COOKIE[ WP_TRAVEL_ENGINE_SESSION_COOKIE ] ) ) {
+			setcookie( WP_TRAVEL_ENGINE_SESSION_COOKIE, '', time() - YEAR_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN );
+			unset( $_COOKIE[ WP_TRAVEL_ENGINE_SESSION_COOKIE ] );
+		}
 	}
 }
