@@ -503,10 +503,36 @@ class Booking extends PostModel {
 	 *
 	 * @return array Travelers
 	 * @since 6.4.0 Retrieves travelers info from wptravelengine_travelers_details and in particular format.
+	 * @since 6.8.3 Adds `cat_id`/`cat_label` per traveler from cart_info's subtotal_reservations.
 	 */
 	public function get_travelers(): array {
 		if ( $this->has_meta( 'wptravelengine_travelers_details' ) ) {
-			return $this->get_meta( 'wptravelengine_travelers_details' ) ?? array();
+			$travelers = $this->get_meta( 'wptravelengine_travelers_details' ) ?? array();
+			$items     = $this->get_cart_info( 'items' ) ?? array();
+
+			$pc_travelers  = $items[0]['subtotal_reservations']['travelers'] ?? array();
+			$pc_line_items = $items[0]['line_items']['pricing_category'] ?? array();
+
+			$traveler_count = count( $travelers );
+
+			$i = 0;
+			$k = 0;
+			foreach ( $pc_travelers as $price_category ) {
+				for ( $j = 0; $j < $price_category['quantity']; $j++ ) {
+					if ( $k >= $traveler_count ) {
+						break 2;
+					}
+
+					$id = $travelers[ $k ]['cat_id'] ?? $price_category['id'];
+
+					$travelers[ $k ]['cat_id']      = $id;
+					$travelers[ $k ]['cat_label'] ??= $pc_line_items[ $i ]['label'] ?? "Category - {$id}";
+					++$k;
+				}
+				++$i;
+			}
+
+			return $travelers;
 		}
 
 		// Check for legacy format.
@@ -1751,5 +1777,17 @@ class Booking extends PostModel {
 		);
 
 		return parent::create_post( $booking_args );
+	}
+
+	/**
+	 * Get Booking End DateTime.
+	 *
+	 * @return string Booking End DateTime
+	 * @since 6.8.3
+	 */
+	public function get_end_datetime(): string {
+		$order_trips = $this->get_order_items();
+
+		return $order_trips[0]['end_datetime'] ?? $this->get_nested_meta( 'wp_travel_engine_booking_setting.place_order.tenddate', '' );
 	}
 }

@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 6.8.2
+Stable tag: 6.8.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -349,16 +349,12 @@ Please send us an email via [support ticket](https://wptravelengine.com/support-
 
 == Changelog ==
 
-= 6.8.2 - 8th July 2026 =
+= 6.8.3 - 21st July 2026 =
 
-* New Feature: Introduced a promotional banner that automatically highlights active coupons on specific trips.
-* New Feature: Added trip departure date restrictions, allowing coupons to be limited to bookings within a specific date range.
-* Improved: Enhanced session handling to prevent unnecessary cookie creation.
-* Improved: Redesigned the coupon edit page for a more intuitive management experience.
-* Improved: Enhanced validation checks for merchant and payment information in PayPal Standard payments.
-* Security: Fixed a coupon trip restriction validation bypass vulnerability.
-* Security: Strengthened validation checks to prevent unauthorized modifications to system settings.
-* Security: Patched an Insecure Direct Object Reference (IDOR) vulnerability in trip package deletion.
+* New Feature: Added a streamlined onboarding experience that can be completed in less than three minutes.
+* New Feature: Added an option to display the pricing type label (e.g., "Per Person") next to the trip price on trip cards and single trip pages.
+* Improved: Duration filter slider now displays smart formatting — trips under 24 hours show as hours, longer trips show as days.
+* Fixed: Trip search filters now correctly stay scoped to the current taxonomy archive page when sidebar filters are applied.
 
 [See changelog for all versions](https://plugins.svn.wordpress.org/wp-travel-engine/trunk/changelog.txt).
 

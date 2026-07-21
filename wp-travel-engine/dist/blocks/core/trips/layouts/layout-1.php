@@ -4,6 +4,8 @@
  */
 list( $settings, $trip, $results, $meta, $is_featured, $wte_global, $details, $pax_label ) = $args;
 
+$_pricing_type_label = wptravelengine_get_trip_pricing_type_label( $trip->ID );
+
 ?>
 <div class="category-trips-single" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
 	<div class="category-trips-single-inner-wrap">
@@ -144,7 +146,11 @@ list( $settings, $trip, $results, $meta, $is_featured, $wte_global, $details, $p
 								</div>
 							<?php endif; ?>
 							<span class="price-holder">
-								<span class="actual-price"><?php echo wte_esc_price( wte_get_formated_price_html( $meta->has_sale ? $meta->sale_price : $meta->price ) ); ?></span> <!-- phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -->
+								<span class="actual-price"><?php echo wte_esc_price( wte_get_formated_price_html( $meta->has_sale ? $meta->sale_price : $meta->price ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+									<?php if ( wte_array_get( $settings, 'layoutFilters.showPricingTypeLabel', false ) && $_pricing_type_label ) : ?>
+									<span class="pricing-label"><?php echo esc_html( sprintf( _x( '/ %s', 'price per label', 'wp-travel-engine' ), $_pricing_type_label ) ); ?></span>
+									<?php endif; ?>
+								</span>
 								<?php if ( wte_array_get( $settings, 'layoutFilters.showStrikedPrice', true ) && $meta->has_sale ) : ?>
 								<span class="striked-price"><?php echo wte_esc_price( wte_get_formated_price_html( $meta->price ) ); ?></span> <!-- phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -->
 								<?php endif; ?>

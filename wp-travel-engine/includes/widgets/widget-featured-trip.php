@@ -40,8 +40,9 @@ class WTE_Featured_Trips_Widget extends WP_Widget {
 	 */
 	public function widget( $args, $instance ) {
 		extract( $args );
-		$title    = apply_filters( 'widget_title', isset( $instance['title'] ) ? $instance['title'] : '' );
-		$num_post = ! empty( $instance['num_post'] ) ? $instance['num_post'] : 3;
+		$title                   = apply_filters( 'widget_title', isset( $instance['title'] ) ? $instance['title'] : '' );
+		$num_post                = ! empty( $instance['num_post'] ) ? $instance['num_post'] : 3;
+		$show_pricing_type_label = ! empty( $instance['show_pricing_type_label'] );
 
 		//phpcs:disable
 		echo $before_widget;
@@ -62,7 +63,8 @@ class WTE_Featured_Trips_Widget extends WP_Widget {
 		if ( $query->have_posts() ) {
 			while ( $query->have_posts() ) {
 				$query->the_post();
-				$details = wte_get_trip_details( get_the_ID() );
+				$details                         = wte_get_trip_details( get_the_ID() );
+				$details['show_pricing_type_label'] = $show_pricing_type_label;
 				wte_get_template( 'widgets/content-widget-feat-trip.php', $details );
 			}
 		}
@@ -91,6 +93,10 @@ class WTE_Featured_Trips_Widget extends WP_Widget {
 			<label for="<?php echo esc_attr( $this->get_field_name( 'num_post' ) ); ?>"><?php esc_html_e( 'Number of Posts:', 'wp-travel-engine' ); ?></label>
 			<input class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'num_post' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'num_post' ) ); ?>" type="text" value="<?php echo esc_attr( $num_post ); ?>" />
 		</p>
+		<p>
+			<input type="checkbox" id="<?php echo esc_attr( $this->get_field_id( 'show_pricing_type_label' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'show_pricing_type_label' ) ); ?>" <?php checked( isset( $instance['show_pricing_type_label'] ) ? $instance['show_pricing_type_label'] : false ); ?> />
+			<label for="<?php echo esc_attr( $this->get_field_id( 'show_pricing_type_label' ) ); ?>"><?php esc_html_e( 'Show Pricing Type Label', 'wp-travel-engine' ); ?></label>
+		</p>
 		<?php
 	}
 
@@ -105,9 +111,10 @@ class WTE_Featured_Trips_Widget extends WP_Widget {
 	 * @return array Updated safe values to be saved.
 	 */
 	public function update( $new_instance, $old_instance ) {
-		$instance             = array();
-		$instance['title']    = ! empty( $new_instance['title'] ) ? strip_tags( $new_instance['title'] ) : '';
-		$instance['num_post'] = ! empty( $new_instance['num_post'] ) ? absint( $new_instance['num_post'] ) : '';
+		$instance                            = array();
+		$instance['title']                   = ! empty( $new_instance['title'] ) ? strip_tags( $new_instance['title'] ) : '';
+		$instance['num_post']                = ! empty( $new_instance['num_post'] ) ? absint( $new_instance['num_post'] ) : '';
+		$instance['show_pricing_type_label'] = ! empty( $new_instance['show_pricing_type_label'] );
 
 		return $instance;
 	}

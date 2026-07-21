@@ -582,7 +582,8 @@ class SaveBooking {
 
 			$travellers['_class_name'] = wp_slash( PricingCategory::class );
 			$travellers['pricingType'] = $this->booking->get_nested_meta( "{$curr_metakey_prefix}.pricingType", 'per-person' );
-			$travellers['label']       = $term ? $term->name : ( 'Category ' . $travellers['id'] );
+			$travellers['label']       = $term ? $term->name : $this->booking->get_nested_meta( "{$curr_metakey_prefix}.label", 'Category ' . $travellers['id'] );
+			$travellers['exists']      = (bool) $term;
 
 			$_line_items['pricing_category'][ $i ] = $travellers;
 

@@ -427,6 +427,14 @@ return apply_filters(
 								'field_type' => 'DIVIDER',
 							),
 							array(
+								'label'       => __( 'Show Pricing Type Label', 'wp-travel-engine' ),
+								'description' => __( 'Display the pricing type (e.g. "/ person" or "/ group") next to the trip price on cards.', 'wp-travel-engine' ),
+								'field_type'  => 'SWITCH',
+								'name'        => 'related_trip_new_layout.enable_pricing_type_label',
+								'divider'     => true,
+								'isNew'       => version_compare( WP_TRAVEL_ENGINE_VERSION, '6.8.4', '<' ),
+							),
+							array(
 								'condition'  => 'related_trips.enable === true',
 								'label'      => __( 'New Layout for Related Trips', 'wp-travel-engine' ),
 								// 'description' => __( 'Enable to display new design in related trip section.', 'wp-travel-engine' ),

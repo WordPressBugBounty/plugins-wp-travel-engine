@@ -281,29 +281,10 @@ class ViewBooking {
 			return $travellers;
 		}
 
-		$pricing_categories = get_terms(
-			array(
-				'taxonomy'   => 'trip-packages-categories',
-				'hide_empty' => false,
-				'orderby'    => 'term_id',
-				'fields'     => 'id=>name',
-			)
-		);
-
-		if ( is_wp_error( $pricing_categories ) ) {
-			$pricing_categories = array();
-		}
-
-		$category_name_to_id = array_flip( $pricing_categories );
-
 		$result = array();
 		foreach ( $travellers as $index => $traveller ) {
 			$traveller['index'] = $index;
-			$category           = $traveller['pricing_category'] ?? '';
-			if ( isset( $category_name_to_id[ $category ] ) ) {
-				$traveller['pricing_category'] = $category_name_to_id[ $category ];
-			}
-			$result[] = new TravellerEditFormFields( $traveller, $mode, $this->booking );
+			$result[]           = new TravellerEditFormFields( $traveller, $mode, $this->booking );
 		}
 
 		return $result;

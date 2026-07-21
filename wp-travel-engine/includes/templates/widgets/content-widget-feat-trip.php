@@ -55,8 +55,18 @@ $is_featured_widget = true;
 						<?php echo wte_esc_price( wte_get_formated_price_html( $trip_price ) ); ?>
 					</span>
 					<?php endif; ?>
-					<span class="actual-price">
-						<?php echo wte_esc_price( wte_get_formated_price_html( $display_price ) ); ?>
+					<span class="price-wrapper">
+						<span class="actual-price">
+							<?php echo wte_esc_price( wte_get_formated_price_html( $display_price ) ); ?>
+						</span>
+						<?php if ( ( $show_pricing_type_label ?? false ) ) : ?>
+							<?php $_fw_pricing_label = wptravelengine_get_trip_pricing_type_label( $trip_instance ); ?>
+							<?php if ( $_fw_pricing_label ) : ?>
+							<span class="pricing-label">
+								<?php echo esc_html( sprintf( _x( '/ %s', 'price per label', 'wp-travel-engine' ), $_fw_pricing_label ) ); ?>
+							</span>
+							<?php endif; ?>
+						<?php endif; ?>
 					</span>
 				</span>
 			</div>

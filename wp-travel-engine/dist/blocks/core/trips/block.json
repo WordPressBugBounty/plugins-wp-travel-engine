@@ -73,6 +73,7 @@
         "showTitle": true,
         "showPrice": true,
         "showStrikedPrice": true,
+        "showPricingTypeLabel": false,
         "showDuration": true,
         "showLocation": true,
         "showReviews": false,

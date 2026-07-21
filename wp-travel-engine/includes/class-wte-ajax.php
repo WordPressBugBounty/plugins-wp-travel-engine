@@ -158,20 +158,20 @@ class WTE_Ajax {
 		// );
 
 		// Onboard Dynamic Recommendation
-		add_action(
-			'wp_ajax_wte_onboard_dynamic_recommendation',
-			array(
-				'\WP_TRAVEL_ENGINE_ONBOARDING_PROCESS',
-				'wte_onboard_dynamic_recommendation_callback',
-			)
-		);
-		add_action(
-			'wp_ajax_nopriv_wte_onboard_dynamic_recommendation',
-			array(
-				'\WP_TRAVEL_ENGINE_ONBOARDING_PROCESS',
-				'wte_onboard_dynamic_recommendation_callback',
-			)
-		);
+		// add_action(
+		// 'wp_ajax_wte_onboard_dynamic_recommendation',
+		// array(
+		// '\WP_TRAVEL_ENGINE_ONBOARDING_PROCESS',
+		// 'wte_onboard_dynamic_recommendation_callback',
+		// )
+		// );
+		// add_action(
+		// 'wp_ajax_nopriv_wte_onboard_dynamic_recommendation',
+		// array(
+		// '\WP_TRAVEL_ENGINE_ONBOARDING_PROCESS',
+		// 'wte_onboard_dynamic_recommendation_callback',
+		// )
+		// );
 
 		$actions = array(
 			// 'wte_enquiry_send_mail'                 => array(
@@ -181,12 +181,12 @@ class WTE_Ajax {
 			// ),
 			// ),
 			// [x]
-			'wpte_onboard_save_function'            => array(
-				'callback' => array(
-					'\WP_TRAVEL_ENGINE_ONBOARDING_PROCESS',
-					'wpte_onboard_save_function_callback',
-				),
-			),
+			// 'wpte_onboard_save_function'            => array(
+			// 'callback' => array(
+			// '\WP_TRAVEL_ENGINE_ONBOARDING_PROCESS',
+			// 'wpte_onboard_save_function_callback',
+			// ),
+			// ),
 			// [x]
 			'wp_add_trip_info'                      => array(
 				'callback' => array(

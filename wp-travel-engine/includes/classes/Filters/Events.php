@@ -1,20 +1,25 @@
 <?php
 /**
- * Events dispatcher hooks.
+ * Domain event emitters — queue events for the Events dispatcher.
  *
  * @since 6.5.2
  */
 
 namespace WPTravelEngine\Filters;
 
-use WPTravelEngine\Core\Models\Post\Booking;
-use WPTravelEngine\Core\Models\Post\Customer;
-use WPTravelEngine\Core\Models\Post\Enquiry;
-use WPTravelEngine\Core\Models\Post\Payment;
+use WPTravelEngine\Core\Models\Post;
 use WPTravelEngine\Core\Models\Review;
 use WPTravelEngine\Helpers\Translators;
+use WPTravelEngine\Abstracts\EventTable;
 
-class Events {
+/**
+ * Domain event vocabulary plus the queue's cron dispatch, write path, and
+ * existence checks; extends `EventTable`, which owns table creation/migration
+ * and pruning of old triggered rows.
+ *
+ * @since 6.8.3 Made child class of new `EventTable` parent.
+ */
+class Events extends EventTable {
 
 	/**
 	 * Table name.
@@ -31,13 +36,13 @@ class Events {
 	private static array $events_data = array();
 
 	/**
-	 * Constructor.
+	 * @inheritDoc
 	 */
 	public function __construct() {
-		global $wpdb;
-		static::$table_name = $wpdb->prefix . 'wptravelengine_events';
-		add_action( 'wptravelengine_check_events', array( $this, 'check_events' ) );
+		parent::__construct();
+		static::$table_name = $this->table_name();
 		add_action( 'updated_postmeta', array( $this, 'trigger_payment_status_update' ), 10, 4 );
+		add_action( 'wptravelengine_check_events', array( $this, 'check_events' ) );
 		add_action( 'shutdown', array( $this, 'process_events' ) );
 	}
 
@@ -46,6 +51,7 @@ class Events {
 	 *
 	 * @since 6.7.1
 	 * @since 6.7.9 Added support for TranslatePress language.
+	 * @since 6.8.3 Writes via `Table::upsert()`; resets `triggered`/`triggered_at` on collision.
 	 */
 	public function process_events() {
 
@@ -53,9 +59,6 @@ class Events {
 			return;
 		}
 
-		global $wpdb;
-
-		$table            = static::$table_name;
 		$processed_events = array();
 		foreach ( self::$events_data as $__data ) :
 
@@ -68,28 +71,21 @@ class Events {
 
 			$__data['trigger_time'] ??= gmdate( 'Y-m-d H:i:s', time() + 60 );
 
-			// Use %i placeholder for table name (WP 6.2+)
-			$sql = $wpdb->prepare(
-				'INSERT INTO %i (`object_id`, `event_name`, `object_type`, `event_data`, `trigger_time`, `event_created_at`)
-				VALUES (%d, %s, %s, %s, %s, %s)
-				ON DUPLICATE KEY UPDATE
-					`event_data` = VALUES(`event_data`),
-					`trigger_time` = VALUES(`trigger_time`),
-					`event_created_at` = VALUES(`event_created_at`)
-				',
-				$table,
-				$__data['object_id'],
-				$__data['event_name'],
-				$__data['object_type'],
-				wp_json_encode( $__data['event_data'] ),
-				$__data['trigger_time'],
-				current_time( 'mysql', true )
+			$result = $this->upsert(
+				array(
+					'object_id'        => $__data['object_id'],
+					'event_name'       => $__data['event_name'],
+					'object_type'      => $__data['object_type'],
+					'event_data'       => wp_json_encode( $__data['event_data'] ),
+					'trigger_time'     => $__data['trigger_time'],
+					'event_created_at' => current_time( 'mysql', true ),
+					'triggered'        => 0,
+					'triggered_at'     => null,
+				)
 			);
 
-			$result = $wpdb->query( $sql );
-
 			if ( $result ) {
-				$processed_events[ $__data['object_id'] . '_' . $__data['object_type'] ] = $wpdb->insert_id;
+				$processed_events[ $__data['object_id'] . '_' . $__data['object_type'] ] = $result;
 			}
 
 		endforeach;
@@ -104,8 +100,9 @@ class Events {
 	 *
 	 * @return void
 	 * @since 6.6.9
+	 * @since 6.8.3 Added `void` return type.
 	 */
-	public static function schedule() {
+	public static function schedule(): void {
 		if ( ! wp_next_scheduled( 'wptravelengine_check_events' ) ) {
 			wp_schedule_event( time(), 'every_minute', 'wptravelengine_check_events' );
 		}
@@ -115,17 +112,20 @@ class Events {
 	 * Trigger customer creation event.
 	 *
 	 * @return void
+	 * @since 6.8.3 Filters on `triggered = 0` and marks rows `triggered` instead of deleting them.
 	 */
 	public function check_events() {
 
-		global $wpdb;
+		$now = current_time( 'mysql', true );
 
-		$table = $wpdb->prefix . 'wptravelengine_events';
-		$now   = current_time( 'mysql', true );
+		$events = $this->where(
+			array(
+				array( 'triggered', '=', 0 ),
+				array( 'trigger_time', '<=', $now ),
+			)
+		);
 
-		// Use %i placeholder for table name (WP 6.2+)
-		$prepare = $wpdb->prepare( 'SELECT * FROM %i WHERE `trigger_time` <= %s', $table, $now );
-		$events  = $wpdb->get_results( $prepare, ARRAY_A );
+		$triggered_ids = array();
 
 		foreach ( $events as $event ) :
 
@@ -134,16 +134,16 @@ class Events {
 			try {
 				switch ( $object_type ) :
 					case 'customer':
-						$object = new Customer( $object_id );
+						$object = new Post\Customer( $object_id );
 						break;
 					case 'enquiry':
-						$object = new Enquiry( $object_id );
+						$object = new Post\Enquiry( $object_id );
 						break;
 					case 'booking':
-						$object = new Booking( $object_id );
+						$object = new Post\Booking( $object_id );
 						break;
 					case 'wte-payments':
-						$object = new Payment( $object_id );
+						$object = new Post\Payment( $object_id );
 						break;
 					case 'comment':
 						$comment = get_comment( $object_id );
@@ -166,9 +166,19 @@ class Events {
 
 			do_action( $event_name, $object, json_decode( $event_data, true ) );
 
-			$wpdb->delete( $table, compact( 'id' ), array( '%d' ) );
+			$triggered_ids[] = (int) $id;
 
 		endforeach;
+
+		if ( ! empty( $triggered_ids ) ) {
+			$this->update_where(
+				array( array( 'id', 'IN', $triggered_ids ) ),
+				array(
+					'triggered'    => 1,
+					'triggered_at' => current_time( 'mysql', true ),
+				)
+			);
+		}
 	}
 
 	/**
@@ -193,7 +203,7 @@ class Events {
 		$success_values = array_keys( wptravelengine_payment_status() );
 
 		if ( 'wte-payments' === $post->post_type && in_array( $meta_value, $success_values, true ) ) {
-			$payment = new Payment( $post );
+			$payment = new Post\Payment( $post );
 			if ( wptravelengine_toggled( $payment->get_meta( 'is_due_payment' ) ) ) {
 				static::due_payment_completed( $payment );
 			} else {
@@ -205,73 +215,73 @@ class Events {
 	/**
 	 * Payment created event.
 	 *
-	 * @param Payment $payment Payment instance.
+	 * @param Post\Payment $payment Payment instance.
 	 * @since 6.7.8
 	 */
-	public static function payment_created( Payment $payment ) {
+	public static function payment_created( Post\Payment $payment ) {
 		static::add_event( 'wptravelengine.booking.payment.completed', $payment->get_id(), $payment->get_post_type() );
 	}
 
 	/**
 	 * Due payment completed event.
 	 *
-	 * @param Payment $payment Payment instance.
+	 * @param Post\Payment $payment Payment instance.
 	 * @since 6.7.8
 	 */
-	public static function due_payment_completed( Payment $payment ) {
+	public static function due_payment_completed( Post\Payment $payment ) {
 		static::add_event( 'wptravelengine.booking.due.payment.completed', $payment->get_id(), $payment->get_post_type() );
 	}
 
 	/**
 	 * Payment updated event.
 	 *
-	 * @param Payment $payment Payment instance.
+	 * @param Post\Payment $payment Payment instance.
 	 * @since 6.8.0
 	 */
-	public static function payment_updated( Payment $payment ) {
+	public static function payment_updated( Post\Payment $payment ) {
 		static::add_event( 'wptravelengine.booking.payment.updated', $payment->get_id(), $payment->get_post_type() );
 	}
 
 	/**
 	 * Customer created event.
 	 *
-	 * @param Customer $customer Customer instance.
+	 * @param Post\Customer $customer Customer instance.
 	 * @return void
 	 */
-	public static function customer_created( Customer $customer ) {
+	public static function customer_created( Post\Customer $customer ) {
 		static::add_event( 'wptravelengine.customer.created', $customer->get_id(), $customer->get_post_type() );
 	}
 
 	/**
 	 * Enquiry created event.
 	 *
-	 * @param Enquiry $enquiry Enquiry instance.
+	 * @param Post\Enquiry $enquiry Enquiry instance.
 	 *
 	 * @return void
 	 */
-	public static function enquiry_created( Enquiry $enquiry ) {
+	public static function enquiry_created( Post\Enquiry $enquiry ) {
 		static::add_event( 'wptravelengine.enquiry.created', $enquiry->get_id(), $enquiry->get_post_type() );
 	}
 
 	/**
 	 * Booking created event.
 	 *
-	 * @param Booking $booking Booking instance.
+	 * @param Post\Booking $booking Booking instance.
 	 *
 	 * @return void
 	 */
-	public static function booking_created( Booking $booking ) {
+	public static function booking_created( Post\Booking $booking ) {
 		static::add_event( 'wptravelengine.booking.created', $booking->get_id(), $booking->get_post_type() );
 	}
 
 	/**
 	 * Booking updated event.
 	 *
-	 * @param Booking $booking Booking instance.
+	 * @param Post\Booking $booking Booking instance.
 	 *
 	 * @return void
 	 */
-	public static function booking_updated( Booking $booking ) {
+	public static function booking_updated( Post\Booking $booking ) {
 		static::add_event( 'wptravelengine.booking.updated', $booking->get_id(), $booking->get_post_type() );
 	}
 
@@ -312,6 +322,7 @@ class Events {
 	 * @param string $object_type Object type.
 	 *
 	 * @return bool
+	 * @since 6.8.3 Uses `Table::exists_where()`; only counts rows where `triggered = 0`.
 	 */
 	public static function exists( string $event_name, int $object_id, string $object_type ): bool {
 		// Check pending in-memory events first (race condition prevention)
@@ -323,20 +334,14 @@ class Events {
 			}
 		}
 
-		// Check database
-		global $wpdb;
-
-		$table = static::$table_name;
-
-		// Use %i placeholder for table name (WP 6.2+)
-		$sql_check = $wpdb->prepare(
-			'SELECT 1 FROM %i WHERE object_id = %d AND event_name = %s AND object_type = %s LIMIT 1',
-			$table,
-			$object_id,
-			$event_name,
-			$object_type
+		// Check database.
+		return static::instance()->exists_where(
+			array(
+				array( 'object_id', '=', $object_id ),
+				array( 'event_name', '=', $event_name ),
+				array( 'object_type', '=', $object_type ),
+				array( 'triggered', '=', 0 ),
+			)
 		);
-
-		return $wpdb->get_var( $sql_check ) !== null;
 	}
 }

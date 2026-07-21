@@ -879,3 +879,24 @@ function wptravelengine_the_price_with_decimal( $price, bool $echo = true, $html
 
 	return $output;
 }
+
+/**
+ * Get the pricing type label for a trip's primary package.
+ *
+ * @since 6.8.3
+ * @param int|\WPTravelEngine\Core\Models\Post\Trip $trip Trip ID or Trip instance.
+ * @return string Lowercase pricing type label (e.g. "person", "group"), or empty string.
+ */
+function wptravelengine_get_trip_pricing_type_label( $trip ): string {
+	$trip = wptravelengine_get_trip( $trip );
+	if ( ! $trip ) {
+		return '';
+	}
+	$package = $trip->get_primary_package();
+	if ( ! $package ) {
+		return '';
+	}
+	$pricing_type_key  = $package->primary_pricing_category->get( 'pricing_type', 'per-person' );
+	$pricing_type_info = wptravelengine_get_pricing_type( false, $pricing_type_key );
+	return strtolower( $pricing_type_info['label'] ?? '' );
+}

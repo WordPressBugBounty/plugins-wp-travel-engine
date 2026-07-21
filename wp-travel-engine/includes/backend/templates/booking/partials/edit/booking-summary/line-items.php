@@ -48,14 +48,10 @@ foreach ( $cart_line_items as $item_type => $line_items ) :
 			<table data-line-item__<?php echo esc_attr( $item_type ); ?>_section>
 				<?php
 				foreach ( $line_items as $line_item ) {
-					if ( empty( $line_item['category_id'] ) && $item_type == 'pricing_category' ) {
-						$pricing_category         = get_term_by( 'name', $line_item['label'], 'trip-packages-categories' );
-						$line_item['category_id'] = $pricing_category->term_id ?? '';
-					}
-					$category_id  = $line_item['category_id'] ?? '';
+					$category_id  = $item_type == 'pricing_category' ? ( $line_item['id'] ?? $line_item['category_id'] ?? '' ) : '';
 					$traveller_id = $line_item['traveller_id'] ?? '';
-					$quantity     = (float) $line_item['quantity'] ?? 0;
-					$price        = (float) $line_item['price'] ?? 0;
+					$quantity     = (float) ( $line_item['quantity'] ?? 0 );
+					$price        = (float) ( $line_item['price'] ?? 0 );
 					$total        = (float) ( isset( $line_item['total'] ) && $line_item['total'] > 0 ? $line_item['total'] : $quantity * $price );
 					?>
 					<tr data-category-id="<?php echo esc_attr( $category_id ); ?>" data-traveller-id="<?php echo esc_attr( $traveller_id ); ?>">
@@ -73,7 +69,7 @@ foreach ( $cart_line_items as $item_type => $line_items ) :
 										>
 									<input type="number"
 											name="line_items[<?php echo esc_attr( $item_type ); ?>][<?php echo esc_attr( $category_id ); ?>][price][]"
-											value="<?php echo esc_attr( $line_item['price'] ); ?>"
+											value="<?php echo esc_attr( $price ); ?>"
 											style="min-width: 50px;" min="0" step="any"
 											data-category-id="<?php echo esc_attr( $category_id ); ?>"
 											<?php echo $is_active ? '' : 'disabled'; ?>>

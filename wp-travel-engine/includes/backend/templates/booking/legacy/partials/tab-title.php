@@ -1,10 +1,8 @@
 <?php
 /**
  * @var array $remaining_payment
- * @var Booking $booking
+ * @var WPTravelEngine\Core\Models\Post\Booking $booking
  */
-
-use WPTravelEngine\Core\Models\Post\Booking;
 ?>
 
 <!-- .wpte-tabs -->

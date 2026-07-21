@@ -542,13 +542,13 @@ class Template_Tags extends TemplateTags {
 			</tr>
 			<tr>
 				<td style="color: #566267;"><?php esc_html_e( 'Trip Date:', 'wp-travel-engine' ); ?></td>
-				<td style="width: 50%;text-align: right;"><strong><?php echo esc_html( wptravelengine_format_trip_datetime( $trip->datetime ) ); ?></strong></td>
+				<td style="width: 50%;text-align: right;"><strong><?php echo esc_html( wptravelengine_format_trip_datetime( $booking->get_trip_datetime() ) ); ?></strong></td>
 			</tr>
 			<tr>
 				<td style="color: #566267;"><?php esc_html_e( 'Trip End Date:', 'wp-travel-engine' ); ?></td>
 				<td style="width: 50%;text-align: right;"><strong>
 				<?php
-					echo esc_html( wptravelengine_format_trip_datetime( $trip->end_datetime ) );
+					echo esc_html( wptravelengine_format_trip_datetime( $booking->get_end_datetime() ) );
 				?>
 					</strong>
 				</td>

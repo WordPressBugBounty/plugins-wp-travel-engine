@@ -590,6 +590,7 @@ class UpcomingTours implements AdminPage {
 		if ( false !== $cached ) {
 			return $cached;
 		}
+
 		$query_args = array(
 			'post_type'      => 'booking',
 			'posts_per_page' => - 1,
@@ -617,6 +618,16 @@ class UpcomingTours implements AdminPage {
 			'orderby'        => 'date',
 			'order'          => 'DESC',
 		);
+
+		/**
+		 * Filter the full WP_Query args used to fetch Upcoming Tours bookings.
+		 *
+		 * @param array $query_args WP_Query arguments.
+		 * @param array $args       Context args ( date_from, date_to, trip_id ).
+		 *
+		 * @since 6.8.3
+		 */
+		$query_args = apply_filters( 'wptravelengine_upcoming_tours_query_args', $query_args, $args );
 
 		// Filter by trip_id at database level if provided ( either from wp_travel_engine_booking_setting | cart_info ).
 		if ( ! empty( $args['trip_id'] ) ) {

@@ -150,6 +150,8 @@ class Wp_Travel_Engine_Activator {
 			return;
 		}
 
+		set_transient( 'wte_onboarding_redirect', true, 30 );
+
 		$template_pages = array(
 			'trip_types'  => array(
 				'title'    => 'Trip Types',

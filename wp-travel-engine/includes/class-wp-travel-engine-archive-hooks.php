@@ -442,7 +442,7 @@ class Wp_Travel_Engine_Archive_Hooks {
 					self::$query    ??= $wp_query;
 					$foundpostss      = '<div class="wte-filter-foundposts">';
 					$show_found_posts = ! empty( array_diff( array_keys( $_GET ), array( 'view_mode', 'wte_orderby' ) ) );
-				if ( $show_found_posts && self::$query ) {
+				if ( $show_found_posts && self::$query && self::$query->found_posts > 0 ) {
 					$foundpostss .= sprintf(
 						_nx( '%1$s Trip Found', '%1$s Trips Found', self::$query->found_posts, 'number of trips', 'wp-travel-engine' ),
 						'<strong>' . number_format_i18n( self::$query->found_posts ) . '</strong>'

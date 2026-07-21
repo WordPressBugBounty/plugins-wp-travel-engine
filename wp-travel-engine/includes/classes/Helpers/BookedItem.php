@@ -109,6 +109,14 @@ class BookedItem {
 		}
 	}
 
+	/**
+	 * Prepares line items.
+	 *
+	 * @param array $data Booked item data.
+	 *
+	 * @return array Line items.
+	 * @since 6.8.3 Fills pricing_category ids from `subtotal_reservations.travelers`
+	 */
 	protected function parse_line_items( $data ) {
 		$line_items = array( 'pricing_category' => array() );
 		if ( defined( 'WTE_EXTRA_SERVICES_FILE_PATH' ) ) {
@@ -151,6 +159,22 @@ class BookedItem {
 					},
 					$extra_line_items
 				);
+			}
+		}
+
+		/**
+		 * @since 6.8.3
+		 */
+		$items = $data['subtotal_reservations']['travelers'] ?? array();
+		if ( ! empty( $line_items['pricing_category'] ) ) {
+			$i = 0;
+			foreach ( $items as $item ) {
+				foreach ( $line_items['pricing_category'] as $j => $line_item ) {
+					if ( ! isset( $line_item['id'] ) && $i === $j ) {
+						$line_items['pricing_category'][ $j ]['id'] = $item['id'];
+					}
+				}
+				++$i;
 			}
 		}
 

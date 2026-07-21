@@ -178,7 +178,20 @@ class TripSearch {
 		<div data-value-format="duration" class="wpte-trip__adv-field wpte__select-field"
 			data-range-slider="#<?php echo esc_attr( $id ); ?>"
 			data-range="<?php echo esc_attr( implode( ',', $range ) ); ?>" data-min="<?php echo esc_attr( $range['min_value'] ); ?>" data-max="<?php echo esc_attr( $range['max_value'] ); ?>"
-			data-suffix="<?php esc_attr_e( 'Days', 'wp-travel-engine' ); ?>">
+			data-suffixes="
+			<?php
+			echo esc_attr(
+				wp_json_encode(
+					array(
+						'hour'  => __( 'Hour', 'wp-travel-engine' ),
+						'hours' => __( 'Hours', 'wp-travel-engine' ),
+						'day'   => __( 'Day', 'wp-travel-engine' ),
+						'days'  => __( 'Days', 'wp-travel-engine' ),
+					)
+				)
+			);
+			?>
+							">
 			<?php
 			self::search_filter_icon( $args, 'duration' );
 			?>
@@ -236,6 +249,7 @@ class TripSearch {
 	 * Get the data to be localized.
 	 *
 	 * @return array
+	 * @since 6.8.3 Added queried_taxonomy and queried_term_slug to localized data for trip taxonomy archive pages.
 	 */
 	public static function get_localized_data() {
 
@@ -275,6 +289,8 @@ class TripSearch {
 			'destination_nonce'      => wp_create_nonce( 'wpte_ajax_load_more_destination' ),
 			'is_search'              => $is_search_page,
 			'is_tax'                 => ! $is_search_page && is_tax( get_object_taxonomies( 'trip', 'names' ) ),
+			'queried_taxonomy'       => ! $is_search_page && is_tax( get_object_taxonomies( 'trip', 'names' ) ) ? ( get_queried_object()->taxonomy ?? '' ) : '',
+			'queried_term_slug'      => ! $is_search_page && is_tax( get_object_taxonomies( 'trip', 'names' ) ) ? ( get_queried_object()->slug ?? '' ) : '',
 			'min_cost'               => (int) $price_range['min_value'],
 			'max_cost'               => (int) $price_range['max_value'],
 			'min_duration'           => (int) $duration_range['min_value'],
@@ -596,7 +612,7 @@ class TripSearch {
 		if ( $max_duration > -1 ) {
 			$meta_query[] = array(
 				'key'     => '_s_duration',
-				'value'   => array( $min_duration * 24, $max_duration * 24 ),
+				'value'   => array( $min_duration, $max_duration ),
 				'compare' => 'BETWEEN',
 				'type'    => 'numeric',
 			);
@@ -656,6 +672,25 @@ class TripSearch {
 	}
 
 	/**
+	 * Formats a raw hour value into a human-readable duration string.
+	 * Values under 24 display as hours; 24+ display as days.
+	 *
+	 * @since 6.8.3
+	 * @param int $hours Raw hour value from _s_duration meta.
+	 * @return string
+	 */
+	private static function format_duration_smart( $hours ): string {
+		$hours = (int) $hours;
+		if ( $hours < 24 ) {
+			/* translators: %d: number of hours */
+			return sprintf( _n( '%d Hour', '%d Hours', $hours, 'wp-travel-engine' ), $hours );
+		}
+		$days = (int) round( $hours / 24 );
+		/* translators: %d: number of days */
+		return sprintf( _n( '%d Day', '%d Days', $days, 'wp-travel-engine' ), $days );
+	}
+
+	/**
 	 * Retrieves the price range.
 	 *
 	 * @param boolean $new_format Whether to return the range in the new format
@@ -677,11 +712,10 @@ class TripSearch {
 	 * @return object The range object.
 	 */
 	private static function get_range( $range_type ): object {
+		static $runtime_ranges = array();
 
-		$range = wp_cache_get( $range_type, 'options' );
-
-		if ( $range ) {
-			return $range;
+		if ( isset( $runtime_ranges[ $range_type ] ) ) {
+			return $runtime_ranges[ $range_type ];
 		}
 
 		global $wpdb;
@@ -703,8 +737,6 @@ class TripSearch {
 		if ( ! empty( $results ) ) {
 			$range = $results;
 			if ( 'wpte_duration_range' === $range_type ) {
-				$range->min_value    = $range->min = floor( (int) $range->min_value / 24 );
-				$range->max_value    = ceil( (int) $range->max_value / 24 );
 				$range->min_duration = $range->min_value;
 				$range->max_duration = $range->max_value;
 			} else {
@@ -713,9 +745,9 @@ class TripSearch {
 			}
 		}
 
-		wp_cache_add( $range_type, $range, 'options' );
+		$runtime_ranges[ $range_type ] = (object) $range;
 
-		return (object) $range;
+		return $runtime_ranges[ $range_type ];
 	}
 
 	/**
@@ -967,7 +999,20 @@ class TripSearch {
 		?>
 		<div class="advanced-search-field search-duration search-trip-type"
 			data-value-format="duration"
-			data-suffix="<?php echo esc_attr__( 'Days', 'wp-travel-engine' ); ?>"
+			data-suffixes="
+			<?php
+			echo esc_attr(
+				wp_json_encode(
+					array(
+						'hour'  => __( 'Hour', 'wp-travel-engine' ),
+						'hours' => __( 'Hours', 'wp-travel-engine' ),
+						'day'   => __( 'Day', 'wp-travel-engine' ),
+						'days'  => __( 'Days', 'wp-travel-engine' ),
+					)
+				)
+			);
+			?>
+							"
 			data-min="<?php echo esc_attr( $duration_range['min_value'] ); ?>"
 			data-max="<?php echo esc_attr( $duration_range['max_value'] ); ?>"
 			data-range="<?php echo esc_attr( $min_duration . ',' . $max_duration ); ?>"
@@ -977,10 +1022,10 @@ class TripSearch {
 				<div id="duration-slider-range" data-min-key="mindur" data-max-key="maxdur"></div>
 				<div class="wpte-slider-values">
 					<span id="min-duration" class="min-duration" name="min-duration" data-value-min-display>
-						<?php printf( esc_html__( '%1$s Days', 'wp-travel-engine' ), esc_html( round( $min_duration ) ) ); ?>
+						<?php echo esc_html( self::format_duration_smart( $min_duration ) ); ?>
 					</span>
 					<span class="max-duration" id="max-duration" name="max-duration" data-value-max-display>
-						<?php printf( esc_html__( '%1$s Days', 'wp-travel-engine' ), esc_html( round( $max_duration ) ) ); ?>
+						<?php echo esc_html( self::format_duration_smart( $max_duration ) ); ?>
 					</span>
 				</div>
 			</div>

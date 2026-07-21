@@ -438,7 +438,7 @@ class Booking extends PostType {
 		$pricing_category_field = array(
 			'type'          => 'select',
 			'wrapper_class' => 'row-repeater',
-			'field_label'   => __( 'Traveller(s)', 'wp-travel-engine' ),
+			'field_label'   => __( 'Price Category', 'wp-travel-engine' ),
 			'name'          => 'travelers[pricing_category]',
 			'id'            => 'pricing_category',
 			'class'         => 'input',

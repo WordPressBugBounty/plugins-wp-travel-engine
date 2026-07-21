@@ -297,6 +297,16 @@ return apply_filters(
 									'field_type' => 'DIVIDER',
 								),
 								array(
+									'label'       => __( 'Show Pricing Type Label', 'wp-travel-engine' ),
+									'description' => __( 'Display the pricing type (e.g. "/ person" or "/ group") next to the trip price on cards.', 'wp-travel-engine' ),
+									'field_type'  => 'SWITCH',
+									'name'        => 'card_new_layout.enable_pricing_type_label',
+									'isNew'       => version_compare( WP_TRAVEL_ENGINE_VERSION, '6.8.4', '<' ),
+								),
+								array(
+									'field_type' => 'DIVIDER',
+								),
+								array(
 									'label'       => __( 'Trip Duration', 'wp-travel-engine' ),
 									'description' => __( 'Choose how the trip duration should be displayed, not applicable for hourly trips.', 'wp-travel-engine' ),
 									'field_type'  => 'SELECT_BUTTON',

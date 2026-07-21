@@ -23,6 +23,12 @@ class TravellerEditFormFields extends BookingEditFormFields {
 		$this->init( $this->map_fields( static::structure( $mode, $defaults['index'] ?? 'new_traveller', $booking ) ) );
 	}
 
+	/**
+	 * @param array $field Field definition.
+	 *
+	 * @return array
+	 * @since 6.8.3 Binds pricing_category from `cat_id`/`cat_label`; keeps a deleted category's option.
+	 */
 	protected function map_field( $field ) {
 
 		$name = null;
@@ -42,10 +48,17 @@ class TravellerEditFormFields extends BookingEditFormFields {
 			$field['id']          = sprintf( 'travellers[%s][%s]', $name, $this->count );
 			$field['field_label'] = isset( $field['placeholder'] ) && $field['placeholder'] !== '' ? $field['placeholder'] : ( $field['field_label'] ?? '' );
 
-			$field['default']                 = $this->defaults[ $name ] ?? $field['default'] ?? '';
+			// Field name must stay `pricing_category` for form submission; default comes from cat_id.
+			$default_key                      = 'pricing_category' === $name ? 'cat_id' : $name;
+			$field['default']                 = $this->defaults[ $default_key ] ?? $field['default'] ?? '';
 			$field['validations']['required'] = false;
 			if ( $field['type'] == 'country' ) {
 				$field = $this->resolve_country_field_default( $field );
+			}
+
+			if ( 'pricing_category' === $name && $field['default'] !== '' && ! isset( $field['options'][ $field['default'] ] ) ) {
+				$label            = $this->defaults['cat_label'] ?? '';
+				$field['options'] = array( $field['default'] => $label !== '' ? $label : $field['default'] ) + ( $field['options'] ?? array() );
 			}
 		}
 

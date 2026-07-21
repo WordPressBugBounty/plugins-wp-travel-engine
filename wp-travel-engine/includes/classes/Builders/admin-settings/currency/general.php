@@ -38,12 +38,13 @@ return apply_filters(
 		'id'     => 'currency-general',
 		'fields' => array(
 			array(
-				'label'       => __( 'Payment Currency', 'wp-travel-engine' ),
-				'description' => __( 'Choose the base currency for the trips pricing.', 'wp-travel-engine' ),
-				'field_type'  => 'SELECT',
-				'name'        => 'currency_code',
-				'divider'     => true,
-				'options'     => $payment_currency,
+				'label'        => __( 'Payment Currency', 'wp-travel-engine' ),
+				'description'  => __( 'Choose the base currency for the trips pricing.', 'wp-travel-engine' ),
+				'field_type'   => 'SELECT',
+				'name'         => 'currency_code',
+				'divider'      => true,
+				'options'      => $payment_currency,
+				'isSearchable' => true,
 			),
 			array(
 				'label'       => __( 'Display Currency Symbol or Code', 'wp-travel-engine' ),

@@ -34,35 +34,33 @@ if ( ! empty( $primary_pricing_category_id ) && isset( $pricing_categories[ $pri
 	$primary_pricing_category = reset( $pricing_categories );
 }
 
+$_items = $cart_info->data['items'][0]['travelers'] ?? array();
+
 // Build pricing category assignment map from cart line items
 $pricing_category_map = array();
 if ( ! empty( $cart_line_items['pricing_category'] ) ) {
-	$traveller_index = 0;
-	foreach ( $cart_line_items['pricing_category'] as $pricing_category ) {
-		$quantity = isset( $pricing_category['quantity'] ) ? intval( $pricing_category['quantity'] ) : 1;
+	$outer_index    = 0;
+	$traveler_index = 0;
+	foreach ( $_items as $key => $val ) {
+		$pricing_category = $cart_line_items['pricing_category'][ $outer_index ] ?? array();
+		++$outer_index;
 
-		// Try to get category_id from different possible keys
-		$category_id = '';
-		if ( isset( $pricing_category['category_id'] ) ) {
-			$category_id = $pricing_category['category_id'];
-		} elseif ( isset( $pricing_category['label'] ) ) {
-			// Try to get term by name if category_id is not set
-			$term = get_term_by( 'name', $pricing_category['label'], 'trip-packages-categories' );
-			if ( $term && ! is_wp_error( $term ) ) {
-				$category_id = $term->term_id;
-			}
+		if ( empty( $pricing_category ) ) {
+			continue;
 		}
 
-		// Assign this pricing category to the number of travelers based on quantity
-		for ( $j = 0; $j < $quantity; $j++ ) {
+		$qty = intval( $pricing_category['quantity'] ?? 1 );
+
+		$category_id = $pricing_category['id'] ?? $pricing_category['category_id'] ?? $key;
+
+		for ( $j = 0; $j < $qty; $j++ ) {
 			if ( ! empty( $category_id ) ) {
-				$pricing_category_map[ $traveller_index ] = $category_id;
+				$pricing_category_map[ $traveler_index ] = $category_id;
 			}
-			++$traveller_index;
+			++$traveler_index;
 		}
 	}
 }
-
 
 $booked_travelers_count = $cart_info->get_item()->travelers_count;
 if ( empty( $travellers_form_fields ) ) {
@@ -74,7 +72,7 @@ if ( empty( $travellers_form_fields ) ) {
 
 		// Set pricing category if available in the map
 		if ( isset( $pricing_category_map[ $i ] ) ) {
-			$defaults['pricing_category'] = $pricing_category_map[ $i ];
+			$defaults['cat_id'] = $pricing_category_map[ $i ];
 		}
 		$travellers_form_fields[] = new TravellerEditFormFields(
 			$defaults,
@@ -89,17 +87,17 @@ if ( empty( $travellers_form_fields ) ) {
 			$current_defaults = $traveller_form_field->get_defaults();
 
 			// Only set pricing category if it's not already set or is empty
-			if ( empty( $current_defaults['pricing_category'] ) || $current_defaults['pricing_category'] === 'selectoption' ) {
-				$current_defaults['pricing_category'] = $pricing_category_map[ $index ];
+			if ( empty( $current_defaults['cat_id'] ) || $current_defaults['cat_id'] === 'selectoption' ) {
+				$current_defaults['cat_id'] = $pricing_category_map[ $index ];
 
 				// Recreate the traveller form field with updated defaults
 				$travellers_form_fields[ $index ] = new TravellerEditFormFields(
 					array_merge(
 						$current_defaults,
 						array(
-							'index'            => $index,
-							'total_count'      => $booked_travelers_count,
-							'pricing_category' => $pricing_category_map[ $index ],
+							'index'       => $index,
+							'total_count' => $booked_travelers_count,
+							'cat_id'      => $pricing_category_map[ $index ],
 						)
 					),
 					$template_mode ?? 'edit',
@@ -118,7 +116,7 @@ if ( ! empty( $travellers_form_fields ) && count( $travellers_form_fields ) < $b
 
 		// Set pricing category if available in the map
 		if ( isset( $pricing_category_map[ $i ] ) ) {
-			$defaults['pricing_category'] = $pricing_category_map[ $i ];
+			$defaults['cat_id'] = $pricing_category_map[ $i ];
 		}
 
 		$travellers_form_fields[] = new TravellerEditFormFields(
@@ -183,46 +181,25 @@ if ( ! empty( $travellers_form_fields ) && count( $travellers_form_fields ) < $b
 											?>
 										</td>
 										<td style="text-align: center;" class="wpte-pricing-category-label">
-											<?php
-											$fields                 = $traveller_form_fields->get_defaults();
-											$pricing_category_value = '';
-											foreach ( $fields as $field ) {
-												if ( isset( $field['name'] ) && preg_match( '/pricing_category/', $field['name'] ) ) {
-													$pricing_category_value = isset( $field['default'] ) ? $field['default'] : '';
-													break;
-												}
-											}
+										<?php
+										// @since 6.8.3 Falls back to `cat_label` when the term's been deleted.
+										$defaults  = $traveller_form_fields->get_defaults();
+										$cat_id    = $defaults['cat_id'] ?? '';
+										$cat_label = $defaults['cat_label'] ?? '';
 
-											// If not found in fields, try to get from the form fields object defaults
-											if ( empty( $pricing_category_value ) ) {
-												$defaults               = $traveller_form_fields->get_defaults();
-												$pricing_category_value = $defaults['pricing_category'] ?? '';
-											}
+										$pricing_category_value = $cat_label;
+										if ( ! empty( $cat_id ) ) {
+											$pricing_category       = get_term_by( 'id', $cat_id, 'trip-packages-categories' );
+											$pricing_category_value = $pricing_category ? $pricing_category->name : $cat_label;
+										}
 
-											// Convert ID to name if it's numeric, or get name if it's already a name
-											if ( ! empty( $pricing_category_value ) ) {
-												if ( is_numeric( $pricing_category_value ) ) {
-													// It's an ID, get the name
-													$pricing_category       = get_term_by( 'id', $pricing_category_value, 'trip-packages-categories' );
-													$pricing_category_value = $pricing_category ? $pricing_category->name : '';
-												} else {
-													// It's already a name, use it directly
-													$pricing_category       = get_term_by( 'name', $pricing_category_value, 'trip-packages-categories' );
-													$pricing_category_value = $pricing_category ? $pricing_category->name : $pricing_category_value;
-												}
-											}
+										if ( empty( $pricing_category_value ) || 'selectoption' === $pricing_category_value ) {
+											$pricing_category_value = __( 'Not Set', 'wp-travel-engine' );
+										}
 
-											if ( empty( $pricing_category_value ) ) {
-												$pricing_category_value = __( 'Not Set', 'wp-travel-engine' );
-											}
-
-											if ( $pricing_category_value == 'selectoption' || $pricing_category_value == '' ) {
-												$pricing_category_value = __( 'Not Set', 'wp-travel-engine' );
-											}
-
-											// Display the pricing category value
-											echo esc_html( $pricing_category_value );
-											?>
+										// Display the pricing category value.
+										echo esc_html( $pricing_category_value );
+										?>
 										</td>
 										<td style="text-align: center;">
 											<button class="wpte-button wpte-toggle-button" type="button">

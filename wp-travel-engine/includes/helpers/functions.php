@@ -2599,6 +2599,7 @@ function wptravelengine_generate_key( string $input ): string {
 /**
  * @return void
  * @since 6.5.2
+ * @since 6.8.3 Added `triggered`, `triggered_at` columns so fired events are kept (not deleted) until pruned.
  */
 function wptravelengine_create_events_table() {
 	global $wpdb;
@@ -2614,6 +2615,8 @@ function wptravelengine_create_events_table() {
 		event_data LONGTEXT NOT NULL,
 		trigger_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		event_created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		triggered TINYINT(1) UNSIGNED NOT NULL DEFAULT 0,
+		triggered_at DATETIME NULL DEFAULT NULL,
 		PRIMARY KEY (id),
 		UNIQUE KEY unique_event (object_id, event_name, object_type)
 	) $charset_collate;";

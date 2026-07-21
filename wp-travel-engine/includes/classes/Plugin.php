@@ -139,7 +139,7 @@ final class Plugin {
 		$schema_filters = new SettingsAPISchema();
 		$schema_filters->hooks();
 
-		new Events();
+		Events::instance();
 
 		TripAPISchema::instance();
 
@@ -385,8 +385,6 @@ final class Plugin {
 		 * @since 6.5.2
 		 */
 		add_filter( 'cron_schedules', array( $this, 'add_custom_cron_schedule' ) );
-
-		add_action( 'plugins_loaded', array( $this, 'add_event_table' ) );
 
 		add_action(
 			'wp',
@@ -636,17 +634,6 @@ final class Plugin {
 		}
 
 		return $roles;
-	}
-
-	/**
-	 * @return void
-	 * @since 6.5.2
-	 */
-	public function add_event_table() {
-		if ( version_compare( get_option( 'wptravelengine_version' ), '6.6.0', '<' ) ) {
-			wptravelengine_create_events_table();
-			Events::schedule();
-		}
 	}
 
 	/**

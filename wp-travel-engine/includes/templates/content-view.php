@@ -33,15 +33,16 @@ $wp_travel_engine_setting = $trip_instance->get_meta( 'wp_travel_engine_setting'
 
 $related_trip = ( '' === $view_mode );
 
-$trip_carousel            = $related_trip ? $show_related_trip_carousel : $show_trip_carousel;
-$trip_listing             = $related_trip ? $related_new_trip_listing : $new_trip_listing;
-$display_available_months = $related_trip ? $show_related_available_months : $show_available_months;
-$display_map              = $related_trip ? $show_related_map : $show_map;
-$display_wishlist         = $related_trip ? $show_related_wishlist : $show_wishlist;
-$display_trip_tags        = $related_trip ? $show_related_trip_tags : $show_trip_tags;
-$display_difficulty_tax   = $related_trip ? $show_related_difficulty_tax : $show_difficulty_tax;
-$display_date_layout      = $related_trip ? $show_related_date_layout : $show_date_layout;
-$featured_tag             = $related_trip ? $show_related_featured_tag : $show_featured_tag;
+$trip_carousel              = $related_trip ? $show_related_trip_carousel : $show_trip_carousel;
+$trip_listing               = $related_trip ? $related_new_trip_listing : $new_trip_listing;
+$display_available_months   = $related_trip ? $show_related_available_months : $show_available_months;
+$display_map                = $related_trip ? $show_related_map : $show_map;
+$display_wishlist           = $related_trip ? $show_related_wishlist : $show_wishlist;
+$display_trip_tags          = $related_trip ? $show_related_trip_tags : $show_trip_tags;
+$display_difficulty_tax     = $related_trip ? $show_related_difficulty_tax : $show_difficulty_tax;
+$display_date_layout        = $related_trip ? $show_related_date_layout : $show_date_layout;
+$featured_tag               = $related_trip ? $show_related_featured_tag : $show_featured_tag;
+$display_pricing_type_label = $related_trip ? ( $show_related_pricing_type_label ?? false ) : ( $show_pricing_type_label ?? false );
 
 $new_date_layout = ( $trip_listing && $display_available_months ) || ( ! $trip_listing && ! $display_available_months );
 $new_date_layout = ! isset( $plugin_settings['display_new_trip_listing'] ) || ( isset( $plugin_settings['display_new_trip_listing'] ) && $new_date_layout );
@@ -243,6 +244,16 @@ echo $trip_listing ? ' wpte_new-layout' : '';
 								?>
 								<span class="price-holder">
 									<span class="actual-price"><?php echo wte_esc_price( wte_get_formated_price( $display_price ) ); ?></span>
+									<?php
+									if ( $display_pricing_type_label ) :
+										$_cv_pricing_label = wptravelengine_get_trip_pricing_type_label( $trip_instance );
+										if ( $_cv_pricing_label ) :
+											?>
+									<span class="pricing-label"><?php echo esc_html( sprintf( _x( '/ %s', 'price per label', 'wp-travel-engine' ), $_cv_pricing_label ) ); ?></span>
+											<?php
+										endif;
+									endif;
+									?>
 									<?php if ( $on_sale ) : ?>
 									<span class="striked-price"><?php echo wte_esc_price( wte_get_formated_price( $trip_price ) ); ?></span>
 									<?php endif; ?>

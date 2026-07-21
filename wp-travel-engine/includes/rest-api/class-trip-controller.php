@@ -43,6 +43,27 @@ class TripController extends \WP_REST_Posts_Controller {
 	}
 
 	/**
+	 * Adds pricing_type_label to the REST response.
+	 *
+	 * Uses the v1 endpoint because Gutenberg blocks fetch trips via /wptravelengine/v1/trip,
+	 * not the newer V2 REST API.
+	 *
+	 * @since 6.8.3
+	 * @param \WP_Post         $item    Trip post object.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	public function prepare_item_for_response( $item, $request ) {
+		$response = parent::prepare_item_for_response( $item, $request );
+		$data     = $response->get_data();
+
+		$data['pricing_type_label'] = wptravelengine_get_trip_pricing_type_label( $item->ID );
+
+		$response->set_data( $data );
+		return $response;
+	}
+
+	/**
 	 * Filters Rest Query Args.
 	 *
 	 * @param array           $args

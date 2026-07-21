@@ -563,6 +563,7 @@ class Settings {
 			'enable_available_months'    => wptravelengine_toggled( $this->plugin_settings->get( 'show_available_months', '1' ) ),
 			'enable_available_dates'     => wptravelengine_toggled( $this->plugin_settings->get( 'show_available_dates', '1' ) ?? false ),
 			'enable_original_size_image' => wptravelengine_toggled( $this->plugin_settings->get( 'show_original_size_image', '0' ) ),
+			'enable_pricing_type_label'  => wptravelengine_toggled( $this->plugin_settings->get( 'pricing_type_label', '0' ) ),
 		);
 
 		$settings['trip_duration_label_on_card'] = (string) $this->plugin_settings->get( 'set_duration_type', 'days' );
@@ -621,17 +622,18 @@ class Settings {
 		$settings['pricing_widget_enquiry_message'] = (string) $this->plugin_settings->get( 'pricing_widget_enquiry_message', '' );
 
 		$settings['related_trip_new_layout'] = array(
-			'enable'                  => wptravelengine_toggled( $this->plugin_settings->get( 'related_display_new_trip_listing' ) ),
-			'enable_slider'           => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_trip_carousel', '1' ) ),
-			'enable_featured_tag'     => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_featured_tag', '1' ) ),
-			'enable_wishlist'         => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_wishlist', '1' ) ),
-			'enable_map'              => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_map', '1' ) ),
-			'enable_excerpt'          => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_excerpt', '1' ) ),
-			'enable_difficulty'       => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_difficulty_tax', '1' ) ),
-			'enable_tags'             => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_trip_tags', '1' ) ),
-			'enable_fsd'              => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_date_layout', '1' ) ),
-			'enable_available_months' => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_available_months', '1' ) ),
-			'enable_available_dates'  => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_available_dates', '1' ) ),
+			'enable'                    => wptravelengine_toggled( $this->plugin_settings->get( 'related_display_new_trip_listing' ) ),
+			'enable_slider'             => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_trip_carousel', '1' ) ),
+			'enable_featured_tag'       => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_featured_tag', '1' ) ),
+			'enable_wishlist'           => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_wishlist', '1' ) ),
+			'enable_map'                => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_map', '1' ) ),
+			'enable_excerpt'            => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_excerpt', '1' ) ),
+			'enable_difficulty'         => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_difficulty_tax', '1' ) ),
+			'enable_tags'               => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_trip_tags', '1' ) ),
+			'enable_fsd'                => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_date_layout', '1' ) ),
+			'enable_available_months'   => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_available_months', '1' ) ),
+			'enable_available_dates'    => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_available_dates', '1' ) ),
+			'enable_pricing_type_label' => wptravelengine_toggled( $this->plugin_settings->get( 'show_related_pricing_type_label', '0' ) ),
 		);
 
 		$settings['enable_trip_info'] = wptravelengine_toggled( $this->plugin_settings->get( 'show_trip_facts', 'no' ) );
@@ -1719,6 +1721,10 @@ class Settings {
 		if ( isset( $request['card_new_layout']['enable_original_size_image'] ) ) {
 			$plugin_settings->set( 'show_original_size_image', wptravelengine_replace( $request['card_new_layout']['enable_original_size_image'], true, '1', '0' ) );
 		}
+
+		if ( isset( $request['card_new_layout']['enable_pricing_type_label'] ) ) {
+			$plugin_settings->set( 'pricing_type_label', wptravelengine_replace( $request['card_new_layout']['enable_pricing_type_label'], true, '1', '0' ) );
+		}
 	}
 
 	/**
@@ -1851,6 +1857,10 @@ class Settings {
 
 		if ( isset( $request['related_trip_new_layout']['enable_available_dates'] ) ) {
 			$plugin_settings->set( 'show_related_available_dates', wptravelengine_replace( $request['related_trip_new_layout']['enable_available_dates'], true, '1', '0' ) );
+		}
+
+		if ( isset( $request['related_trip_new_layout']['enable_pricing_type_label'] ) ) {
+			$plugin_settings->set( 'show_related_pricing_type_label', wptravelengine_replace( $request['related_trip_new_layout']['enable_pricing_type_label'], true, '1', '0' ) );
 		}
 
 		if ( isset( $request['enable_trip_info'] ) ) {
@@ -3292,6 +3302,11 @@ class Settings {
 						'description' => __( 'Display Original Size Image or Not', 'wp-travel-engine' ),
 						'type'        => 'boolean',
 					),
+					'enable_pricing_type_label'  => array(
+						'description' => __( 'Display Pricing Type Label (e.g. / person, / group) or Not', 'wp-travel-engine' ),
+						'type'        => 'boolean',
+						'default'     => false,
+					),
 				),
 			),
 			'trip_duration_label_on_card'      => array(
@@ -3398,49 +3413,54 @@ class Settings {
 				'description' => __( 'New Trip Layout', 'wp-travel-engine' ),
 				'type'        => 'object',
 				'properties'  => array(
-					'enable'                  => array(
+					'enable'                    => array(
 						'description' => __( 'New Trip Layout Enabled or Not', 'wp-travel-engine' ),
 						'type'        => 'boolean',
 					),
-					'enable_slider'           => array(
+					'enable_slider'             => array(
 						'description' => __( 'Display Slider or Not', 'wp-travel-engine' ),
 						'type'        => 'boolean',
 					),
-					'enable_featured_tag'     => array(
+					'enable_featured_tag'       => array(
 						'description' => __( 'Display Featured or Not', 'wp-travel-engine' ),
 						'type'        => 'boolean',
 					),
-					'enable_wishlist'         => array(
+					'enable_wishlist'           => array(
 						'description' => __( 'Display Wishlist or Not', 'wp-travel-engine' ),
 						'type'        => 'boolean',
 					),
-					'enable_map'              => array(
+					'enable_map'                => array(
 						'description' => __( 'Display Map or Not', 'wp-travel-engine' ),
 						'type'        => 'boolean',
 					),
-					'enable_excerpt'          => array(
+					'enable_excerpt'            => array(
 						'description' => __( 'Display Related Trip Excerpt or Not', 'wp-travel-engine' ),
 						'type'        => 'boolean',
 					),
-					'enable_difficulty'       => array(
+					'enable_difficulty'         => array(
 						'description' => __( 'Display Difficulty or Not', 'wp-travel-engine' ),
 						'type'        => 'boolean',
 					),
-					'enable_tags'             => array(
+					'enable_tags'               => array(
 						'description' => __( 'Display Tags or Not', 'wp-travel-engine' ),
 						'type'        => 'boolean',
 					),
-					'enable_fsd'              => array(
+					'enable_fsd'                => array(
 						'description' => __( 'Display Next Departure Dates or Not', 'wp-travel-engine' ),
 						'type'        => 'boolean',
 					),
-					'enable_available_months' => array(
+					'enable_available_months'   => array(
 						'description' => __( 'Display Available Months or Not', 'wp-travel-engine' ),
 						'type'        => 'boolean',
 					),
-					'enable_available_dates'  => array(
+					'enable_available_dates'    => array(
 						'description' => __( 'Display Available Dates or Not', 'wp-travel-engine' ),
 						'type'        => 'boolean',
+					),
+					'enable_pricing_type_label' => array(
+						'description' => __( 'Display Pricing Type Label or Not', 'wp-travel-engine' ),
+						'type'        => 'boolean',
+						'default'     => false,
 					),
 				),
 			),

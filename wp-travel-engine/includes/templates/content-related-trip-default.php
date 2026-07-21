@@ -93,7 +93,19 @@ $duration_label = wptravelengine_get_trip_duration_arr( $trip_data ?? $post, 'da
 							</del>
 						<?php endif; ?>
 						<span class="wte-trip-sale-price">
-							<?php echo wte_esc_price( wte_get_formated_price( $display_price ) ); ?>
+							<?php
+							echo wte_esc_price( wte_get_formated_price( $display_price ) );
+							if ( ( $show_related_pricing_type_label ?? false ) ) :
+								?>
+								<span class="pricing-label">
+									<?php
+									$_rel_pricing_label = wptravelengine_get_trip_pricing_type_label( $trip_data );
+									if ( $_rel_pricing_label ) {
+										echo esc_html( sprintf( _x( '/ %s', 'price per label', 'wp-travel-engine' ), $_rel_pricing_label ) );
+									}
+									?>
+								</span>
+							<?php endif; ?>
 						</span>
 					</div>
 					<?php
