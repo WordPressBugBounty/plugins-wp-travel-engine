@@ -107,7 +107,7 @@ if ( ! empty( $cart_items ) ) :
 					?>
 					<div class="detail-item">
 						<strong
-							class="item-label"><?php esc_html_e( 'Number of Traveller(s):', 'wp-travel-engine' ); ?></strong>
+							class="item-label"><?php esc_html_e( 'Number of Traveler(s):', 'wp-travel-engine' ); ?></strong>
 						<span
 							class="value"><?php echo esc_html( $cart_item['pax']['adult'] ); ?> X <?php echo wp_kses_post( wte_get_formated_price( $travelr_per_pricing_price, '', '', false, false, true ) ); ?></span>
 					</div>
@@ -119,7 +119,7 @@ if ( ! empty( $cart_items ) ) :
 
 						<div class="detail-item">
 							<strong
-								class="item-label"><?php esc_html_e( 'Number of Child Traveller(s):', 'wp-travel-engine' ); ?></strong>
+								class="item-label"><?php esc_html_e( 'Number of Child Traveler(s):', 'wp-travel-engine' ); ?></strong>
 							<span
 								class="value"><?php echo esc_html( $cart_item['pax']['child'] ); ?> X <?php echo wp_kses_post( wte_get_formated_price( $child_per_pricing_price, '', '', false, false, true ) ); ?></span>
 						</div>

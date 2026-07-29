@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 6.8.3
+Stable tag: 6.8.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -349,12 +349,13 @@ Please send us an email via [support ticket](https://wptravelengine.com/support-
 
 == Changelog ==
 
-= 6.8.3 - 21st July 2026 =
+= 6.8.4 - 29th July 2026 =
 
-* New Feature: Added a streamlined onboarding experience that can be completed in less than three minutes.
-* New Feature: Added an option to display the pricing type label (e.g., "Per Person") next to the trip price on trip cards and single trip pages.
-* Improved: Duration filter slider now displays smart formatting — trips under 24 hours show as hours, longer trips show as days.
-* Fixed: Trip search filters now correctly stay scoped to the current taxonomy archive page when sidebar filters are applied.
+* New Feature: Added support for setting maximum traveler capacity per pricing category globally across all packages or individually for each package.
+* Fixed: Resolved an issue where Gutenberg block content was not correctly detected for translation in WPML across all plugin blocks.
+* Fixed: Resolved an issue where FAQs from both trip pages and Global Settings were not correctly available for translation in WPML.
+* Fixed: Resolved an issue where the Trip Highlight section did not display when the Overview section was empty.
+* Security: Patched an Insecure Direct Object Reference (IDOR) vulnerability.
 
 [See changelog for all versions](https://plugins.svn.wordpress.org/wp-travel-engine/trunk/changelog.txt).
 

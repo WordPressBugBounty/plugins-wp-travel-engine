@@ -47,7 +47,7 @@
 								<span>
 								<?php
 									$travellers_count = absint( $trip['travellers'] );
-									echo esc_html( sprintf( _n( '%d Traveller', '%d Travellers', $travellers_count, 'wp-travel-engine' ), $travellers_count ) );
+									echo esc_html( sprintf( _n( '%d Traveler', '%d Travelers', $travellers_count, 'wp-travel-engine' ), $travellers_count ) );
 								?>
 								</span>
 							</div>

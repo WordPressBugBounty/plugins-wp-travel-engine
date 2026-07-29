@@ -15,7 +15,7 @@ if ( isset( $lead_travellers_form_fields ) && isset( $lead_travellers_form_field
 <div class="wpte-checkout__box collapsible <?php echo $show_title ? 'open' : ''; ?>">
 	<?php if ( $show_title ) : ?>
 		<h3 class="wpte-checkout__box-title">
-			<?php echo __( 'Lead Traveller Details', 'wp-travel-engine' ); ?>
+			<?php echo __( 'Lead Traveler Details', 'wp-travel-engine' ); ?>
 			<button type="button" class="wpte-checkout__box-toggle-button">
 				<svg>
 					<use xlink:href="#chevron-down"></use>

@@ -57,12 +57,21 @@ class Trip extends PostModel {
 	protected ?TripPackage $primary_package = null;
 
 	/**
-	 * The inventory of available packages.
+	 * The inventory of available packages, cached per $with_trashed variant.
 	 *
 	 * @var array
 	 * @since 6.6.7
+	 * @since 6.8.4 Keyed by (int) $with_trashed to cache both variants.
 	 */
 	protected array $my_booked_seats = array();
+
+	/**
+	 * Cached bookings for this trip (default args only).
+	 *
+	 * @var Booking[]|null
+	 * @since 6.8.4
+	 */
+	protected ?array $bookings_cache = null;
 
 	/**
 	 * The start date of the trip without fsd addon.
@@ -176,7 +185,6 @@ class Trip extends PostModel {
 		}
 		$settings = $value;
 	}
-
 
 	/**
 	 * Get the services.
@@ -1361,18 +1369,25 @@ class Trip extends PostModel {
 	}
 
 	/**
-	 * Get the trip booked seats of only available packages.
+	 * Get the trip booked seats.
+	 *
+	 * @param bool $with_trashed When false (default), only non-trashed packages are included.
+	 *                            When true, returns the full unfiltered trip inventory.
 	 *
 	 * @return array
 	 * @since 6.6.7
+	 * @since 6.8.4 Added $with_trashed param.
 	 */
-	public function get_my_booked_seats(): array {
+	public function get_my_booked_seats( bool $with_trashed = false ): array {
+		$cache_key = (int) $with_trashed;
 
-		if ( empty( $this->my_booked_seats ) ) {
-			$this->my_booked_seats = $this->get_inventory()->inventory_of_( array_flip( $this->get_all_package_ids() ) );
+		if ( ! isset( $this->my_booked_seats[ $cache_key ] ) ) {
+			$this->my_booked_seats[ $cache_key ] = $with_trashed
+				? $this->get_inventory()->inventory()
+				: $this->get_inventory()->inventory_of_( array_flip( $this->get_all_package_ids() ) );
 		}
 
-		return $this->my_booked_seats;
+		return $this->my_booked_seats[ $cache_key ];
 	}
 
 	/**
@@ -1638,5 +1653,125 @@ class Trip extends PostModel {
 	public static function package_exists( int $trip_id, int $package_id, bool $attach_manual = false ): bool {
 		$pacakges = static::get_packages( $trip_id, $attach_manual );
 		return isset( $pacakges[ $package_id ] );
+	}
+
+	/**
+	 * Strips the given tab ids' title/content entries out of this trip's `wp_travel_engine_setting` meta
+	 *
+	 * @param array $tab_ids Ids of the trip tabs removed from settings.
+	 *
+	 * @return bool True if the trip settings were updated, false otherwise.
+	 * @since 6.8.4
+	 */
+	public function cleanup_trip_tabs( array $tab_ids ): bool {
+
+		$tab_ids = array_filter( array_map( 'absint', $tab_ids ) );
+
+		if ( empty( $tab_ids ) ) {
+			return false;
+		}
+
+		$changed = false;
+		foreach ( $tab_ids as $tab_id ) {
+			if ( $this->get_setting( "tab_content.{$tab_id}_wpeditor" ) !== null ) {
+				$this->set_setting( "tab_content.{$tab_id}_wpeditor", null );
+				$changed = true;
+			}
+
+			if ( $this->get_setting( "tab_{$tab_id}_title" ) !== null ) {
+				$this->set_setting( "tab_{$tab_id}_title", null );
+				$changed = true;
+			}
+		}
+
+		if ( $changed ) {
+			$this->save();
+		}
+
+		return $changed;
+	}
+
+	/**
+	 * Gets the capacity-per-price-category settings for the trip.
+	 *
+	 * Stored in its own `cap_per_cat` meta-key, separate from
+	 * `wp_travel_engine_setting`.
+	 *
+	 * @return array
+	 * @since 6.8.4
+	 */
+	public function get_cap_per_cat(): array {
+		return (array) ( $this->get_meta( 'cap_per_cat' ) ?: array(
+			'enabled'        => 'no',
+			'mode'           => 'same',
+			'limits'         => array(),
+			'package_limits' => array(),
+		) );
+	}
+
+	/**
+	 * Checks the trip's cap-per-category state.
+	 *
+	 * @param string $check 'enabled' — feature is on; 'same' — single shared limit; 'different' — per-package limits.
+	 *
+	 * @return bool
+	 * @since 6.8.4
+	 */
+	public function is_cap_per_cat( string $check ): bool {
+		$cap_per_cat = $this->get_cap_per_cat();
+		switch ( $check ) {
+			case 'enabled':
+				return wptravelengine_toggled( $cap_per_cat['enabled'] ?? 'no' );
+			case 'same':
+				return 'different' !== ( $cap_per_cat['mode'] ?? 'same' );
+			case 'different':
+				return 'different' === ( $cap_per_cat['mode'] ?? 'same' );
+			default:
+				return false;
+		}
+	}
+
+	/**
+	 * Get all bookings for this trip.
+	 *
+	 * Queries booking posts whose `cart_info` meta references this trip ID
+	 * and returns them as Booking model instances.
+	 *
+	 * @param array $args Optional WP_Query args to override defaults.
+	 *
+	 * @return Booking[]
+	 * @since 6.8.4
+	 */
+	public function get_bookings( array $args = array() ): array {
+		$use_cache = empty( $args );
+
+		if ( $use_cache && null !== $this->bookings_cache ) {
+			return $this->bookings_cache;
+		}
+
+		$args = wp_parse_args(
+			$args,
+			array(
+				'post_type'        => 'booking',
+				'post_status'      => 'any',
+				'posts_per_page'   => -1,
+				'paged'            => 1,
+				'suppress_filters' => true,
+			)
+		);
+
+		$args['meta_query'][] = array(
+			'key'     => 'cart_info',
+			'value'   => 's:7:"trip_id";i:' . $this->ID . ';',
+			'compare' => 'LIKE',
+		);
+
+		$result = array_values( array_filter( array_map( 'wptravelengine_get_booking', ( new \WP_Query( $args ) )->posts ) ) );
+
+		if ( $use_cache ) {
+			$this->bookings_cache = $result;
+		}
+
+		return $result;
 	}
 }

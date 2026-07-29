@@ -45,7 +45,7 @@
 		<label for="<?php echo esc_attr( $name ); ?>[extra_service_desc][<?php echo esc_attr( $index ); ?>]">
 			<?php esc_html_e( 'Service Description', 'wp-travel-engine' ); ?>
 			<span class="tooltip"
-				title="<?php esc_html_e( 'Select Service Unit if the service cost is Per Unit or Per Traveller. This will be displayed in the booking form in the front-end.', 'wp-travel-engine' ); ?>">
+				title="<?php esc_html_e( 'Select Service Unit if the service cost is Per Unit or Per Traveler. This will be displayed in the booking form in the front-end.', 'wp-travel-engine' ); ?>">
 				<i class="fas fa-question-circle"></i>
 			</span>
 		</label>
@@ -70,7 +70,7 @@
 					<?php esc_html_e( 'Per Unit', 'wp-travel-engine' ); ?>
 				</option>
 				<option value="traveler" <?php selected( 'traveler', $extra_service_unit ); ?>>
-					<?php esc_html_e( 'Per Traveller', 'wp-travel-engine' ); ?>
+					<?php esc_html_e( 'Per Traveler', 'wp-travel-engine' ); ?>
 				</option>
 			</select>
 		</div>

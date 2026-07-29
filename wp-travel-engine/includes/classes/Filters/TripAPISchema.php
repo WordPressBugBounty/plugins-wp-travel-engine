@@ -9,6 +9,7 @@
 namespace WPTravelEngine\Filters;
 
 use WP_REST_Request;
+use WPTravelEngine\Core\Booking\Inventory;
 use WPTravelEngine\Core\Models\Post\Trip;
 use WPTravelEngine\Utilities\ArrayUtility;
 use WPTravelEngine\Core\Models\Settings\Options;
@@ -65,6 +66,8 @@ class TripAPISchema {
 		add_filter( 'wptravelengine_trip_api_schema', array( $this, 'trip_edit_api_schema' ), 10, 2 );
 		add_filter( 'wptravelengine_rest_prepare_trip', array( $this, 'trip_edit_api_prepare' ), 10, 3 );
 		add_action( 'wptravelengine_api_update_trip', array( $this, 'trip_edit_api_update' ), 10, 2 );
+
+		add_filter( 'wptravelengine_package_date_parser_prepare_date', array( $this, 'attach_def_pricings' ), 3, 3 );
 	}
 
 	/**
@@ -742,5 +745,25 @@ class TripAPISchema {
 				'categories'   => $categories,
 			)
 		);
+	}
+
+	/**
+	 * Inject remaining_seats per pricing category into the date data sent to the booking modal.
+	 *
+	 * remaining_seats = max_seats - already_booked_for_that_category_on_that_date
+	 *
+	 * @param array                                        $date_data      Prepared date data array (contains 'pricing').
+	 * @param \WPTravelEngine\Core\Models\Post\TripPackage $package Trip package object.
+	 * @param string                                       $formatted_date Date string in Y-m-d format.
+	 *
+	 * @return array
+	 *
+	 * @since 6.8.4
+	 */
+	public function attach_def_pricings( array $date_data, $package, string $formatted_date ): array {
+		if ( $package->get_trip()->is_cap_per_cat( 'enabled' ) ) {
+			$date_data['pricing'] = $package->get_default_pricings( $formatted_date );
+		}
+		return $date_data;
 	}
 }

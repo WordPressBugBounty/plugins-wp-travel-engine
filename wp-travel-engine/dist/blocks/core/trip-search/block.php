@@ -129,7 +129,7 @@ $is_horizontal = isset( $attributes->{'searchFormOrientation'} ) && $attributes-
 			}
 			?>
 			<div class="wpte-trip__submit-field">
-				<button type="submit" class="wpte-trip__search-submit"><?php echo esc_html__( $attributes->{'searchButtonLabel'}, 'wp-travel-engine' ); ?></button>
+				<button type="submit" class="wpte-trip__search-submit"><?php echo esc_html( $attributes->{'searchButtonLabel'} ); ?></button>
 			</div>
 		</form>
 	</div>

@@ -41,13 +41,18 @@
 					<key name="highlight_text" />
 				</key>
 			</key>
-			<key name="faq_section_title"/>
-			<key name="faq">
-				<key name="faq_title">
-					<key name="*"/>
-				</key>
-				<key name="faq_content">
-					<key name="*"/>
+			<key name="faqs_data">
+				<key name="sectionTitle"/>
+				<key name="categories">
+					<key name="*">
+						<key name="name"/>
+						<key name="faqs">
+							<key name="*">
+								<key name="question"/>
+								<key name="answer"/>
+							</key>
+						</key>
+					</key>
 				</key>
 			</key>
 			<key name="itinerary">
@@ -126,6 +131,14 @@
 				<key name="instruction"/>
 			</key>
 			<key name="currency_code"/>
+			<key name="faqs">
+				<key name="items">
+					<key name="*">
+						<key name="question"/>
+						<key name="answer"/>
+					</key>
+				</key>
+			</key>
 			<key name="book_btn_txt"/>
 			<key name="query_subject"/>
 			<key name="confirmation_msg"/>
@@ -171,4 +184,47 @@
 			<tag>BOOK_CONFIRMATION</tag>
 		</shortcode>
 	</shortcodes>
+	<!-- gutenberg blocks section -->
+	<gutenberg-blocks>
+		<gutenberg-block type="wptravelengine/trips" translate="1">
+			<key name="sectionHeading" />
+			<key name="sectionDescription" />
+			<key name="viewMoreButtonText" />
+		</gutenberg-block>
+		<gutenberg-block type="wptravelengine/terms" translate="1">
+			<key name="title" />
+			<key name="subtitle" />
+			<key name="linkText" />
+			<key name="countLabel" />
+		</gutenberg-block>
+		<gutenberg-block type="wptravelengine/trip-search" translate="1">
+			<key name="title" />
+			<key name="subtitle" />
+			<key name="searchButtonLabel" />
+			<key name="searchFilters" encoding="json">
+				<key name="*">
+					<key name="label" />
+					<key name="default" />
+				</key>
+			</key>
+		</gutenberg-block>
+		<gutenberg-block type="wptravelengine/activities" translate="1">
+			<key name="title" />
+			<key name="subtitle" />
+			<key name="linkText" />
+			<key name="countLabel" />
+		</gutenberg-block>
+		<gutenberg-block type="wptravelengine/destinations" translate="1">
+			<key name="title" />
+			<key name="subtitle" />
+			<key name="linkText" />
+			<key name="countLabel" />
+		</gutenberg-block>
+		<gutenberg-block type="wptravelengine/trip-types" translate="1">
+			<key name="title" />
+			<key name="subtitle" />
+			<key name="linkText" />
+			<key name="countLabel" />
+		</gutenberg-block>
+	</gutenberg-blocks>
 </wpml-config>

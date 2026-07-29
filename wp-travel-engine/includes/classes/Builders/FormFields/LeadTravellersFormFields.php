@@ -61,7 +61,7 @@ class LeadTravellersFormFields extends LeadTravellerFormFields {
 	public function lead_traveller_form_fields() {
 		?>
 			<div id="wpte-lead-traveller" class="wpte-checkout__form-section">
-				<h5 class="wpte-checkout__form-title"><?php echo esc_html( sprintf( /* translators: %d: traveller number */ __( 'Lead Traveller %d', 'wp-travel-engine' ), 1 ) ); ?></h5>
+				<h5 class="wpte-checkout__form-title"><?php echo esc_html( sprintf( /* translators: %d: traveller number */ __( 'Lead Traveler %d', 'wp-travel-engine' ), 1 ) ); ?></h5>
 				<?php
 				$this->render_traveler_fields( $this->fields );
 				?>

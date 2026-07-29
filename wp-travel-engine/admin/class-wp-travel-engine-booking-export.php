@@ -1008,7 +1008,7 @@ class WP_Travel_Engine_Booking_Export {
 			$header,
 			array(
 				__( 'Payment Gateway', 'wp-travel-engine' ),
-				__( 'No. of Travellers', 'wp-travel-engine' ),
+				__( 'No. of Travelers', 'wp-travel-engine' ),
 				__( 'Booking Date', 'wp-travel-engine' ),
 				__( 'Trip Date', 'wp-travel-engine' ),
 				__( 'Trip End Date', 'wp-travel-engine' ),

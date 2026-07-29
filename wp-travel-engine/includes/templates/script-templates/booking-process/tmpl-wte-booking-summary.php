@@ -39,7 +39,7 @@ cartTotal = Object.values(cartTotal).length < 1 ? 0 : Object.values(cartTotal).r
 		<div class="wte-booking-trip-info">
 			<# if(Object.values(travelerRecord).length > 0 ) { /* ifovtr */#>
 			<div class="wte-booking-details">
-				<h6 class="wte-booking-details-title"><?php esc_html_e( 'Travellers', 'wp-travel-engine' ); ?></h6>
+				<h6 class="wte-booking-details-title"><?php esc_html_e( 'Travelers', 'wp-travel-engine' ); ?></h6>
 				<ul>
 					<# for( var cid in travelerRecord ) {
 						var count = !! travelerRecord[cid] ? travelerRecord[cid] : 0

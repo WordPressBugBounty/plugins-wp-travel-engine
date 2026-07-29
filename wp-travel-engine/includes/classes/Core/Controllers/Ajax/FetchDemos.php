@@ -2,7 +2,7 @@
 /**
  * Fetch Demos Ajax Controller.
  *
- * Proxies the rishidemos.com demos API so the onboarding carousel
+ * Proxies the wptravelenginedemo.com demos API so the onboarding carousel
  * can display real starter sites without CORS issues.
  *
  * @package WPTravelEngine/Core/Controllers/Ajax
@@ -26,7 +26,14 @@ class FetchDemos extends AjaxController {
 	/**
 	 * Base URL for the remote demo server.
 	 */
-	private const BASE_URL = 'https://rishidemos.com/wp-json/';
+	private const BASE_URL = 'https://wptravelenginedemo.com/wp-json/';
+
+	/**
+	 * Demo IDs to include from the remote response.
+	 *
+	 * @since 6.8.4
+	 */
+	private const ALLOWED_IDS = array( '81', '73', '89', '428', '65', '183', '182', '377', '418', '444', '437', '908', '929', '994', '1107', '1117', '1126', '1136', '1145' );
 
 	/**
 	 * Verify nonce and capability.
@@ -70,7 +77,7 @@ class FetchDemos extends AjaxController {
 		$raw = $this->fetch_from_api(
 			self::BASE_URL . 'demoimporterplusapi/v1/dipa-demos/',
 			array(
-				'per_page' => 20,
+				'per_page' => 100,
 				'page'     => 1,
 			)
 		);
@@ -84,6 +91,13 @@ class FetchDemos extends AjaxController {
 		if ( ! is_array( $items ) ) {
 			return new \WP_Error( 'invalid_response', __( 'Invalid response from demo server.', 'wp-travel-engine' ) );
 		}
+
+		$items = array_filter(
+			$items,
+			function ( $demo ) {
+				return in_array( (string) ( $demo['id'] ?? '' ), self::ALLOWED_IDS, true );
+			}
+		);
 
 		$demos = array_values(
 			array_map(

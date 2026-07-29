@@ -249,7 +249,7 @@ $trip_meta_tabs = array(
 				),
 			),
 			array(
-				'label' => __( 'Minimum Travellers Per Booking', 'wp-travel-engine' ),
+				'label' => __( 'Minimum Travelers Per Booking', 'wp-travel-engine' ),
 				'field' => array(
 					'name'       => 'participants.min',
 					'type'       => 'NUMBER',
@@ -265,7 +265,7 @@ $trip_meta_tabs = array(
 				),
 			),
 			array(
-				'label' => __( 'Total Travellers Seats', 'wp-travel-engine' ),
+				'label' => __( 'Total Travelers Seats', 'wp-travel-engine' ),
 				'field' => array(
 					'name'       => 'participants.max',
 					'type'       => 'NUMBER',
@@ -317,6 +317,14 @@ $trip_meta_tabs = array(
 					'isGroupDisountActive' => wptravelengine_is_addon_active( 'group-discount' ),
 					'isFSDActive'          => wptravelengine_is_addon_active( 'fixed-starting-dates' ),
 					'pricingCategories'    => $pricing_categories,
+				),
+			),
+			array(
+				'field' => array(
+					'type'              => 'CAPACITY_PER_CATEGORY',
+					'name'              => 'capacity_per_category',
+					'pricingCategories' => $pricing_categories ?? array(),
+					'direction'         => 'vertical',
 				),
 			),
 		),

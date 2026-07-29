@@ -357,7 +357,7 @@ class Template_Tags extends TemplateTags {
 
 					<?php endif; ?>
 					<tr>
-						<td><?php esc_html_e( 'Travellers', 'wp-travel-engine' ); ?></td>
+						<td><?php esc_html_e( 'Travelers', 'wp-travel-engine' ); ?></td>
 						<td class="alignright"><?php echo esc_html( array_sum( $trip->pax ) ); ?></td>
 					</tr>
 					<tr>
@@ -554,11 +554,11 @@ class Template_Tags extends TemplateTags {
 				</td>
 			</tr>
 			<tr>
-				<td style="color: #566267;"><?php esc_html_e( 'Travellers:', 'wp-travel-engine' ); ?></td>
+				<td style="color: #566267;"><?php esc_html_e( 'Travelers:', 'wp-travel-engine' ); ?></td>
 				<td style="width: 50%;text-align: right;"><strong><?php echo esc_html( $travelers_count ); ?></strong></td>
 			</tr>
 			<tr>
-				<td colspan="2"><strong><?php esc_html_e( 'Traveller(s):', 'wp-travel-engine' ); ?></strong></td>
+				<td colspan="2"><strong><?php esc_html_e( 'Traveler(s):', 'wp-travel-engine' ); ?></strong></td>
 			</tr>
 			<?php
 			if ( ! $is_triggered_manually ) {
@@ -1560,7 +1560,7 @@ class Template_Tags extends TemplateTags {
 		<table width="100%">
 			<tr>
 				<td class="title-holder" style="margin: 0;" valign="top">
-					<h3 class="alignleft"><?php echo esc_html__( 'Traveller Details', 'wp-travel-engine' ); ?></h3>
+					<h3 class="alignleft"><?php echo esc_html__( 'Traveler Details', 'wp-travel-engine' ); ?></h3>
 				</td>
 			</tr>
 			<?php
@@ -1570,7 +1570,7 @@ class Template_Tags extends TemplateTags {
 				$traveller_details[] = $traveller_form_fields->with_values( $details, new Booking( $this->booking->ID ) );
 			}
 			foreach ( $traveller_details as $index => $traveller_detail ) :
-				$traveller_label = sprintf( __( 'Traveller %1$d%2$s', 'wp-travel-engine' ), $index + 1, $index === 0 ? __( ' (Lead Traveller)', 'wp-travel-engine' ) : '' );
+				$traveller_label = sprintf( __( 'Traveler %1$d%2$s', 'wp-travel-engine' ), $index + 1, $index === 0 ? __( ' (Lead Traveler)', 'wp-travel-engine' ) : '' );
 				?>
 				<tr>
 					<td>

@@ -486,6 +486,6 @@
       }
     }
   },
-  "textdomain": "wptravelengine-trip-blocks",
+  "textdomain": "wp-travel-engine",
   "render": "file:./block.php"
 }

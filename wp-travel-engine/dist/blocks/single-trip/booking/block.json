@@ -9,7 +9,7 @@
   "description": "Display essential trip details, including price, discount, highlights and availability button.",
   "script": [],
   "example": {},
-  "textdomain": "wptravelengine",
+  "textdomain": "wp-travel-engine",
   "attributes": {
     "formLayout": {
       "type": "string",

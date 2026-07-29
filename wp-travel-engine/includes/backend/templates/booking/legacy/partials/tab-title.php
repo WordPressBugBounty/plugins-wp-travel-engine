@@ -13,7 +13,7 @@
 	</li>
 	<?php if ( $booking->get_travelers() || 'edit' === $template_mode ) : ?>
 		<li class="wpte-tab-item">
-			<a href="#" class="wpte-tab" data-target="travellers"><?php echo __( 'Travellers', 'wp-travel-engine' ); ?></a>
+			<a href="#" class="wpte-tab" data-target="travellers"><?php echo __( 'Travelers', 'wp-travel-engine' ); ?></a>
 		</li>
 	<?php endif; ?>
 	<?php if ( $booking->get_emergency_contacts() || 'edit' === $template_mode ) : ?>

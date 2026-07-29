@@ -206,7 +206,7 @@ class ResendPurchaseReceipt extends AjaxController {
 						</tr>
 					<?php endif; ?>
 					<tr>
-						<td><?php esc_html_e( 'Travellers', 'wp-travel-engine' ); ?></td>
+						<td><?php esc_html_e( 'Travelers', 'wp-travel-engine' ); ?></td>
 						<td class="alignright"><?php echo esc_html( $order_trip->travelers_count() ); ?></td>
 					</tr>
 					<tr>

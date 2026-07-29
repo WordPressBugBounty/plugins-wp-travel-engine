@@ -2629,6 +2629,7 @@ function wptravelengine_create_events_table() {
  * Build a map of active global FAQ items keyed by their ID.
  *
  * @since 6.7.11
+ * @since 6.8.4 Updated global settings fetch method to get fresh uncached data.
  * @return array<string, array{question: string, answer: string}>
  */
 function wptravelengine_get_global_faq_map( bool $force_refresh = false ): array {
@@ -2637,13 +2638,10 @@ function wptravelengine_get_global_faq_map( bool $force_refresh = false ): array
 		return $map;
 	}
 
-	if ( ! function_exists( 'wptravelengine_settings' ) ) {
-		return array();
-	}
+	$plugin_settings  = new PluginSettings();
+	$global_faq_items = $plugin_settings->get( 'faqs.items' ) ?? array();
 
-	$global_settings  = wptravelengine_settings()->get();
-	$global_faq_items = $global_settings['faqs']['items'] ?? array();
-	$map              = array();
+	$map = array();
 
 	if ( is_array( $global_faq_items ) ) {
 		foreach ( $global_faq_items as $global_faq ) {

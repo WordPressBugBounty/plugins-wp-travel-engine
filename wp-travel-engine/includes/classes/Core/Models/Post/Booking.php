@@ -1790,4 +1790,32 @@ class Booking extends PostModel {
 
 		return $order_trips[0]['end_datetime'] ?? $this->get_nested_meta( 'wp_travel_engine_booking_setting.place_order.tenddate', '' );
 	}
+
+	/**
+	 * Gets the booked quantity per price category for a package on a date/time.
+	 *
+	 * @param int $package_id Package ID.
+	 *
+	 * @return array<int, int> Category ID => booked quantity.
+	 * @since 6.8.4
+	 */
+	public function get_booked_count( int $package_id ): array {
+		$items = $this->get_cart_info( 'items' );
+
+		if ( ! is_array( $items ) ) {
+			return array();
+		}
+
+		$cart_key = ( new Inventory( $this->get_trip_id() ) )->get_cart_key( $package_id, $this->get_trip_datetime() );
+
+		foreach ( $items as $item ) {
+			if ( ! is_array( $item ) || ( $item['id'] ?? null ) !== $cart_key ) {
+				continue;
+			}
+
+			return is_array( $item['pax'] ?? null ) ? $item['pax'] : array();
+		}
+
+		return array();
+	}
 }

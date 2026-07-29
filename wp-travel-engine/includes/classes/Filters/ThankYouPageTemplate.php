@@ -205,7 +205,7 @@ class ThankYouPageTemplate extends CheckoutPageTemplate {
 				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Trip Code:', 'wp-travel-engine' ), $trip->get_trip_code() ),
 				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Starts on:', 'wp-travel-engine' ), wptravelengine_format_trip_datetime( $trip_start_date ) ),
 				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Ends on:', 'wp-travel-engine' ), $trip_end_date ),
-				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'No. of Travellers:', 'wp-travel-engine' ), $travelers_count ),
+				sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'No. of Travelers:', 'wp-travel-engine' ), $travelers_count ),
 			);
 
 			$item_details[] = apply_filters( 'wptravelengine_checkout_page_item_' . __FUNCTION__, $item, $trip, $cart_item );

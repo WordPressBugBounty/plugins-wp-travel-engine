@@ -468,6 +468,6 @@
   "viewScript": [
     "parsley"
   ],
-  "textdomain": "wptravelengine",
+  "textdomain": "wp-travel-engine",
   "render": "file:./block.php"
 }

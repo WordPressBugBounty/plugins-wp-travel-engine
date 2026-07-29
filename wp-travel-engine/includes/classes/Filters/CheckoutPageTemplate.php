@@ -570,7 +570,7 @@ class CheckoutPageTemplate extends BookingProcessPageTemplate {
 	public function print_pricing_category_line_items_title() {
 		?>
 		<tr>
-			<td><strong><?php _e( 'Traveller(s):', 'wp-travel-engine' ); ?></strong></td>
+			<td><strong><?php _e( 'Traveler(s):', 'wp-travel-engine' ); ?></strong></td>
 			<td></td>
 		</tr>
 		<?php

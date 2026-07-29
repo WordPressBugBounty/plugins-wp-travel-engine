@@ -1037,6 +1037,6 @@
     "wte-fixed-departure-dates",
     "wte-fsd-admin"
   ],
-  "textdomain": "wptravelengine",
+  "textdomain": "wp-travel-engine",
   "render": "file:./block.php"
 }

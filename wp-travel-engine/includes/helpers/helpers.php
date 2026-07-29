@@ -1637,6 +1637,9 @@ function wp_travel_engine_get_raw_referer() {
 	// phpcs:enable
 }
 
+/**
+ * @since 6.8.4 Overview tab is no longer hidden when Trip Highlights has content, even if Overview text is empty.
+ */
 function wte_get_active_single_trip_tabs() {
 	global $post;
 
@@ -1661,7 +1664,7 @@ function wte_get_active_single_trip_tabs() {
 
 		switch ( $settings['trip_tabs']['field'][ $value ] ) {
 			case 'wp_editor':
-				if ( ! isset( $post_meta['tab_content'][ $key . '_wpeditor' ] ) || empty( $post_meta['tab_content'][ $key . '_wpeditor' ] ) ) {
+				if ( empty( $post_meta['tab_content'][ $key . '_wpeditor' ] ?? '' ) && empty( $post_meta['trip_highlights'] ?? '' ) ) {
 					unset( $settings['trip_tabs']['id'][ $value ] );
 				}
 				break;
@@ -1679,7 +1682,7 @@ function wte_get_active_single_trip_tabs() {
 				}
 				break;
 			case 'faqs':
-				$has_old_faqs = ! empty( $post_meta['faq']['faq_title'] );
+				$has_old_faqs = ! array_key_exists( 'faqs_data', (array) $post_meta ) && ! empty( $post_meta['faq']['faq_content'] );
 				$has_new_faqs = false;
 				if ( ! empty( $post_meta['faqs_data']['categories'] ) ) {
 					foreach ( $post_meta['faqs_data']['categories'] as $category ) {

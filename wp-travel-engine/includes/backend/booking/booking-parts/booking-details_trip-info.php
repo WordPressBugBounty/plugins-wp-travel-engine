@@ -117,7 +117,7 @@ $currency = $cart_info['currency'];
 					</li>
 					<?php do_action( 'wptravelengine_before_trip_travellers', $order_trip ); ?>
 					<li>
-						<b><?php esc_html_e( 'Travellers', 'wp-travel-engine' ); ?></b>
+						<b><?php esc_html_e( 'Travelers', 'wp-travel-engine' ); ?></b>
 					</li>
 					<?php
 					$pricing_categories = get_terms(

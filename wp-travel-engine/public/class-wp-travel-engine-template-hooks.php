@@ -564,7 +564,7 @@ class WP_Travel_Engine_Template_Hooks {
 		 */
 		$booking_steps = array(
 			'date'       => __( 'Select a Date', 'wp-travel-engine' ),
-			'travellers' => __( 'Travellers', 'wp-travel-engine' ),
+			'travellers' => __( 'Travelers', 'wp-travel-engine' ),
 		);
 		$booking_steps = apply_filters( 'wte_trip_booking_steps', $booking_steps );
 

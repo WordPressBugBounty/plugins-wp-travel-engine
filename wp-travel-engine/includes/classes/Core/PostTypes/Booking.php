@@ -155,7 +155,7 @@ class Booking extends PostType {
 	 */
 	public function add_booking_line_item_title( string $title, array $item ): string {
 		if ( 'pricing_category' === $title ) {
-			$title = __( 'Traveller(s)', 'wp-travel-engine' );
+			$title = __( 'Traveler(s)', 'wp-travel-engine' );
 		}
 		if ( 'extra_service' === $title ) {
 			$title = wptravelengine_settings()->get( 'extra_service_title' ) ?: __( 'Extra Services', 'wp-travel-engine' );

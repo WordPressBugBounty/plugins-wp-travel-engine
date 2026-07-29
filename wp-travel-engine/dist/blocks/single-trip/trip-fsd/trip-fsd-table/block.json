@@ -488,6 +488,6 @@
     "wte-redux",
     "jquery-fancy-box"
   ],
-  "textdomain": "wptravelengine",
+  "textdomain": "wp-travel-engine",
   "render": "file:./block.php"
 }

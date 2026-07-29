@@ -8,7 +8,7 @@
 use WPTravelEngine\Helpers\Countries;
 $trip_details    = array(
 	'{tdate}'    => __( 'Trip Start Date', 'wp-travel-engine' ),
-	'{traveler}' => __( 'Total Traveller(s)', 'wp-travel-engine' ),
+	'{traveler}' => __( 'Total Traveler(s)', 'wp-travel-engine' ),
 );
 $billing_details = array(
 	'{fullname}'        => __( 'Booking Name', 'wp-travel-engine' ),

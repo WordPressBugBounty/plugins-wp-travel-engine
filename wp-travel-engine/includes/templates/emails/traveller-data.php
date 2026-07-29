@@ -8,7 +8,7 @@ echo '<hr/>';
 <table class="invoice-items" width="100%" cellpadding="0" cellspacing="0" borde>
 <tr>
 	<td class="title-holder" style="margin: 0;" valign="top">
-		<h3 class="alignleft"><?php echo esc_html__( 'Traveller Details', 'wp-travel-engine' ); ?></h3>
+		<h3 class="alignleft"><?php echo esc_html__( 'Traveler Details', 'wp-travel-engine' ); ?></h3>
 	</td>
 	<td></td>
 </tr>
@@ -19,13 +19,13 @@ for ( $i = 1; $i <= $pno; $i++ ) {
 	?>
 		<tr>
 			<td>
-				<h3 class="alignleft"><?php printf( esc_html__( 'Traveller %1$s', 'wp-travel-engine' ), (int) $i ); ?></h3>
+				<h3 class="alignleft"><?php printf( esc_html__( 'Traveler %1$s', 'wp-travel-engine' ), (int) $i ); ?></h3>
 			</td>
 		</tr>
 		<?php if ( isset( $personal_options['travelers'] ) ) : ?>
 			<tr>
 				<td class="title-holder" style="margin: 0;" valign="top">
-					<h3 class="alignleft"><?php echo esc_html__( 'Traveller information', 'wp-travel-engine' ); ?></h3>
+					<h3 class="alignleft"><?php echo esc_html__( 'Traveler information', 'wp-travel-engine' ); ?></h3>
 				</td>
 				<td></td>
 			</tr>

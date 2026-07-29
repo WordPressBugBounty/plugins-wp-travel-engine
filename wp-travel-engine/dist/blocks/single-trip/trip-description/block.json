@@ -12,7 +12,7 @@
   ],
   "description": "Enjoy complete control over your trip description.",
   "script": [],
-  "textdomain": "wptravelengine",
+  "textdomain": "wp-travel-engine",
   "attributes": {
     "alignment": {
       "type": "string",

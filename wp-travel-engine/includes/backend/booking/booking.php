@@ -10,7 +10,7 @@ $wp_travel_engine_settings         = get_post_meta( $post->ID, 'wp_travel_engine
 $wp_travel_engine_booking_settings = get_post_meta( $post->ID, 'wp_travel_engine_booking_setting', true );
 
 if ( ! isset( $wp_travel_engine_settings['place_order'] ) || $wp_travel_engine_settings['place_order'] == '' ) {
-	esc_html_e( 'Travellers info not available.', 'wp-travel-engine' );
+	esc_html_e( 'Travelers info not available.', 'wp-travel-engine' );
 
 	return;
 }
@@ -26,7 +26,7 @@ $relation_options = $wp_travel_engine_settings['place_order'];
 		<div class='wp-travel-engine-personal-details-wrapper'>
 			<div class='personal-options-title'>
 				<?php
-				esc_html_e( 'Personal details for Traveller: ', 'wp-travel-engine' );
+				esc_html_e( 'Personal details for Traveler: ', 'wp-travel-engine' );
 				echo esc_html( (int) $i );
 				?>
 			</div>
@@ -229,7 +229,7 @@ $relation_options = $wp_travel_engine_settings['place_order'];
 			<div class='wp-travel-engine-relation-details-wrapper'>
 				<div class='relation-options-title'>
 					<?php
-					esc_html_e( 'Emergency contact details for Traveller: ', 'wp-travel-engine' );
+					esc_html_e( 'Emergency contact details for Traveler: ', 'wp-travel-engine' );
 					echo esc_html( (int) $i );
 					?>
 				</div>
@@ -355,7 +355,7 @@ $relation_options = $wp_travel_engine_settings['place_order'];
 			<div class="wp-travel-engine-medical-details-wrapper">
 				<div class='relation-options-title'>
 					<?php
-					esc_html_e( 'Medical details for Traveller: ', 'wp-travel-engine' );
+					esc_html_e( 'Medical details for Traveler: ', 'wp-travel-engine' );
 					echo esc_html( (int) $i );
 					?>
 				</div>

@@ -36,7 +36,7 @@ use WPTravelEngine\Helpers\Countries;
 	<?php
 	if ( is_array( $traveller_details ?? '' ) ) :
 		foreach ( $traveller_details as $index => $traveller_detail ) :
-			$traveller_label = sprintf( __( 'Traveller %1$d%2$s', 'wp-travel-engine' ), $index + 1, $index === 0 ? __( ' (Lead Traveller)', 'wp-travel-engine' ) : '' );
+			$traveller_label = sprintf( __( 'Traveler %1$d%2$s', 'wp-travel-engine' ), $index + 1, $index === 0 ? __( ' (Lead Traveler)', 'wp-travel-engine' ) : '' );
 			?>
 			<div class="wpte-thankyou__block">
 				<div class="wpte-thankyou__block-title"><?php echo esc_html( $traveller_label ); ?></div>

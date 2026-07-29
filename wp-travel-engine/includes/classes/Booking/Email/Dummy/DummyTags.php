@@ -305,7 +305,7 @@ class DummyTags extends EmailTags {
 				<td class="alignright"><?php echo esc_html( wp_date( get_option( 'date_format', 'Y-m-d' ), strtotime( $trip->end_datetime ), new \DateTimeZone( 'utc' ) ) ); ?></td>
 			</tr>
 			<tr>
-				<td><?php esc_html_e( 'Travellers', 'wp-travel-engine' ); ?></td>
+				<td><?php esc_html_e( 'Travelers', 'wp-travel-engine' ); ?></td>
 				<td class="alignright"><?php echo esc_html( array_sum( $trip->pax ) ); ?></td>
 			</tr>
 			<tr>
@@ -415,11 +415,11 @@ class DummyTags extends EmailTags {
 			<td style="width: 50%;text-align: right;"><strong><?php echo wptravelengine_format_trip_datetime( $trip->end_datetime ); ?></strong></td>
 		</tr>
 		<tr>
-			<td style="color: #566267;"><?php esc_html_e( 'Travellers', 'wp-travel-engine' ); ?>:</td>
+			<td style="color: #566267;"><?php esc_html_e( 'Travelers', 'wp-travel-engine' ); ?>:</td>
 			<td style="width: 50%;text-align: right;"><strong><?php echo esc_html( $travelers_count ); ?></strong></td>
 		</tr>
 		<tr>
-			<td colspan="2"><strong><?php esc_html_e( 'Traveller(s):', 'wp-travel-engine' ); ?></strong></td>
+			<td colspan="2"><strong><?php esc_html_e( 'Traveler(s):', 'wp-travel-engine' ); ?></strong></td>
 		</tr>
 		<?php
 		foreach ( $trip->pax as $category => $tcount ) :
@@ -555,11 +555,11 @@ class DummyTags extends EmailTags {
 		<table width="100%">
 			<tr>
 				<td class="title-holder" style="margin: 0;" valign="top">
-					<h3 class="alignleft"><?php esc_html_e( 'Traveller Details', 'wp-travel-engine' ); ?></h3>
+					<h3 class="alignleft"><?php esc_html_e( 'Traveler Details', 'wp-travel-engine' ); ?></h3>
 				</td>
 			</tr>
 			<tr>
-				<td><h3><?php esc_html_e( 'Traveller 1 (Lead Traveller)', 'wp-travel-engine' ); ?></h3></td>
+				<td><h3><?php esc_html_e( 'Traveler 1 (Lead Traveler)', 'wp-travel-engine' ); ?></h3></td>
 			</tr>
 			<?php foreach ( $traveller as $key => $value ) : ?>
 				<?php

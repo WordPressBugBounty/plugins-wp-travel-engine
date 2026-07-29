@@ -32,7 +32,7 @@
 		<div class="wte-selected-package-description">{{{selectedPackage && selectedPackage.content.rendered}}}</div>
 		<hr>
 		<div class="wte-option-heading">
-			<span class="text-left"><?php esc_html_e( 'Travellers', 'wp-travel-engine' ); ?></span>
+			<span class="text-left"><?php esc_html_e( 'Travelers', 'wp-travel-engine' ); ?></span>
 			<span class="text-right"><?php esc_html_e( 'Quantity', 'wp-travel-engine' ); ?></span>
 		</div>
 		<div class="wte-trip-options">
@@ -84,7 +84,7 @@
 							<div class="wpte-select-options-wrapper">
 								<ul class="options-list">
 									<li class="list-heading">
-										<span class="no-travelers"><?php esc_html_e( 'Number Of Travellers', 'wp-travel-engine' ); ?></span>
+										<span class="no-travelers"><?php esc_html_e( 'Number Of Travelers', 'wp-travel-engine' ); ?></span>
 										<# if ( pc.pricingType === 'per-person' ) { #>
 										<span class="price-per-person"><?php esc_html_e( 'Price/Person', 'wp-travel-engine' ); ?></span>
 										<# } #>

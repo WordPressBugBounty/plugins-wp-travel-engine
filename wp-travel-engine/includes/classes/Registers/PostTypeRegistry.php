@@ -22,9 +22,10 @@ class PostTypeRegistry extends Registrable {
 	 * Register a post type.
 	 *
 	 * @param string $class_name The post type class.
-	 * @return void
+	 * @return static
+	 * @since 6.8.4 Return static for method chaining.
 	 */
-	public function register( string $class_name ): void {
+	public function register( string $class_name ): static {
 		$instance = new $class_name();
 
 		register_post_type( $instance->get_post_type(), $instance->get_args() );
@@ -34,6 +35,8 @@ class PostTypeRegistry extends Registrable {
 		foreach ( $taxonomies as $key => $taxonomy ) {
 			self::register_taxonomy( $key, $instance->get_post_type(), $taxonomy );
 		}
+
+		return $this;
 	}
 
 	/**

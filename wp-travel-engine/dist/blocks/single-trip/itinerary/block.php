@@ -195,7 +195,7 @@ if ( $render->is_editor() ) {
 												if ( in_array( $val, $cloned_meals_inc, true ) ) {
 													echo esc_html( $iti_meals_array[ $val ] );
 													if ( $i < $count && $i !== $count ) {
-														echo ', ';
+														echo esc_html_x( ', ', 'list separator between meal names', 'wp-travel-engine' );
 													}
 												}
 												++$i;

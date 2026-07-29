@@ -33,7 +33,7 @@ wp_enqueue_script( 'jquery-ui-datepicker' );
 				<span><?php echo esc_html( wte_get_formated_date( $trip_start_date ) ); ?></span>
 			</li>
 			<li>
-				<b><?php esc_html_e( 'Travellers', 'wp-travel-engine' ); ?></b>
+				<b><?php esc_html_e( 'Travelers', 'wp-travel-engine' ); ?></b>
 				<span><?php echo esc_html( $booked_travellers ); ?></span>
 			</li>
 			<li>
@@ -86,7 +86,7 @@ wp_enqueue_script( 'jquery-ui-datepicker' );
 				</span>
 			</li>
 			<li>
-				<b><?php esc_html_e( 'Travellers', 'wp-travel-engine' ); ?></b>
+				<b><?php esc_html_e( 'Travelers', 'wp-travel-engine' ); ?></b>
 				<span>
 					<div class="wpte-field wpte-number">
 						<input type="number" min="1" step="1"

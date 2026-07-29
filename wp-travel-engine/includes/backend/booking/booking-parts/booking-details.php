@@ -52,7 +52,7 @@ if ( is_null( $booking_details ) ) {
 			</li>
 			<li class="wpte-tab-item">
 				<a href="#" class="wpte-tab"
-					data-target="travellers"><?php echo __( 'Travellers', 'wp-travel-engine' ); ?></a>
+					data-target="travellers"><?php echo __( 'Travelers', 'wp-travel-engine' ); ?></a>
 			</li>
 			<li class="wpte-tab-item">
 				<a href="#" class="wpte-tab"
@@ -118,7 +118,7 @@ if ( is_null( $booking_details ) ) {
 						</div>
 						<div class="wpte-field">
 							<label
-								for="no-of-travellers"><?php echo __( 'No. of Travellers', 'wp-travel-engine' ); ?></label>
+								for="no-of-travellers"><?php echo __( 'No. of Travelers', 'wp-travel-engine' ); ?></label>
 							<input type="text" id="no-of-travellers" disabled>
 						</div>
 						<div class="wpte-field">
@@ -133,7 +133,7 @@ if ( is_null( $booking_details ) ) {
 						<div class="wpte-accordion">
 							<div class="wpte-accordion-header">
 								<h3 class="wpte-accordion-title">
-									<?php echo __( 'Traveller(s) Details', 'wp-travel-engine' ); ?></h3>
+									<?php echo __( 'Traveler(s) Details', 'wp-travel-engine' ); ?></h3>
 								<button type="button" class="wpte-accordion-toggle">
 									<svg width="20" height="20" viewBox="0 0 20 20" fill="none"
 										xmlns="http://www.w3.org/2000/svg">
@@ -144,7 +144,7 @@ if ( is_null( $booking_details ) ) {
 							</div>
 							<div class="wpte-accordion-content">
 								<h5 class="wpte-accordion-subtitle">
-									<?php echo __( 'Traveller 1 (Adult)', 'wp-travel-engine' ); ?></h5>
+									<?php echo __( 'Traveler 1 (Adult)', 'wp-travel-engine' ); ?></h5>
 								<div class="wpte-fields-grid" data-columns="2">
 									<div class="wpte-field">
 										<label
@@ -184,7 +184,7 @@ if ( is_null( $booking_details ) ) {
 								</div>
 								<hr>
 								<h5 class="wpte-accordion-subtitle">
-									<?php echo __( 'Traveller 2 (Child)', 'wp-travel-engine' ); ?></h5>
+									<?php echo __( 'Traveler 2 (Child)', 'wp-travel-engine' ); ?></h5>
 								<div class="wpte-fields-grid" data-columns="2">
 									<div class="wpte-field">
 										<label
@@ -282,7 +282,7 @@ if ( is_null( $booking_details ) ) {
 							<tbody>
 								<tr class="title">
 									<td colspan="2">
-										<strong><?php echo __( 'Traveller(s):', 'wp-travel-engine' ); ?></strong></td>
+										<strong><?php echo __( 'Traveler(s):', 'wp-travel-engine' ); ?></strong></td>
 								</tr>
 								<tr>
 									<td>Adult: 2 x $3,500</td>

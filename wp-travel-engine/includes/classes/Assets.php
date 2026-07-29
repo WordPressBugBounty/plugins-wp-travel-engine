@@ -768,7 +768,7 @@ class Assets extends AssetsAbstract {
 				wte_default_labels(),
 				array(
 					// Translators: %s: Minimum Number of Traveller.
-					'invalidCartTraveler'  => __( 'No. of Travellers\' should be at least %s', 'wp-travel-engine' ),
+					'invalidCartTraveler'  => __( 'No. of Travelers\' should be at least %s', 'wp-travel-engine' ),
 					// Translators: %s: Maximum Number of Traveller.
 					'availableSeatsExceed' => __( 'The number of pax can not exceed more than %s', 'wp-travel-engine' ),
 					// Translators: %s: Minimum Number of Extra Services.

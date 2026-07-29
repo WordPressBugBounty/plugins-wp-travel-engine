@@ -22,7 +22,7 @@ endif;
 	<div class="wpte-block-wrap">
 		<div class="wpte-block">
 			<div class="wpte-title-wrap">
-				<h4 class="wpte-title"><?php esc_html_e( 'Traveller Details', 'wp-travel-engine' ); ?></h4>
+				<h4 class="wpte-title"><?php esc_html_e( 'Traveler Details', 'wp-travel-engine' ); ?></h4>
 			</div>
 			<div class="wpte-block-content wpte-floated">
 				<?php if ( isset( $personal_options ) && ! empty( $personal_options ) ) : ?>
@@ -32,7 +32,7 @@ endif;
 						?>
 						<div class="wpte-toggle-item">
 							<div class="wpte-toggle-title">
-								<a href="Javascript:void(0);"><?php printf( esc_html__( 'Traveller %1$s', 'wp-travel-engine' ), (int) $i ); ?></a>
+								<a href="Javascript:void(0);"><?php printf( esc_html__( 'Traveler %1$s', 'wp-travel-engine' ), (int) $i ); ?></a>
 							</div>
 							<div class="wpte-toggle-content">
 								<div class="wpte-prsnl-dtl-blk wpte-floated">
@@ -43,7 +43,7 @@ endif;
 										</a>
 									</div>
 									<?php if ( isset( $personal_options['travelers'] ) ) : ?>
-										<h4><?php esc_html_e( 'Traveller information', 'wp-travel-engine' ); ?></h4>
+										<h4><?php esc_html_e( 'Traveler information', 'wp-travel-engine' ); ?></h4>
 										<div class="wpte-prsnl-dtl-blk-content">
 											<?php do_action( 'wptravelengine_before_travellers_information', $personal_options['travelers'], $post->ID ); ?>
 											<ul class="wpte-list">

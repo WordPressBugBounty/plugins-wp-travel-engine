@@ -81,7 +81,7 @@ $wte_options     = get_option( 'wp_travel_engine_settings', true );
 				?>
 				<div class="wpte-bf-step-content wpte-bf-content-travellers" data-mintravellers="<?php echo esc_attr( $min_pax ); ?>" data-maxtravellers="<?php echo esc_attr( $max_pax ); ?>">
 					<div class="wpte-bf-traveler-block-wrap">
-						<div class="wpte-bf-block-title"><?php esc_html_e( 'Add Travellers', 'wp-travel-engine' ); ?></div>
+						<div class="wpte-bf-block-title"><?php esc_html_e( 'Add Travelers', 'wp-travel-engine' ); ?></div>
 						<div class="wpte-bf-traveler-member">
 							<?php do_action( 'wte_bf_travellers_input_fields' ); ?>
 						</div>
@@ -101,7 +101,7 @@ $wte_options     = get_option( 'wp_travel_engine_settings', true );
 						<div class="wpte-bf-toggle-content">
 							<button class="wpte-bf-toggle-close wpte-btn">X</button>
 							<table class="wpte-bf-travellers-price-table">
-								<caption><?php esc_html_e( 'Travellers', 'wp-travel-engine' ); ?></caption>
+								<caption><?php esc_html_e( 'Travelers', 'wp-travel-engine' ); ?></caption>
 								<tbody>
 									<tr>
 										<td>1

@@ -132,7 +132,7 @@ if ( ! empty( $travellers_form_fields ) && count( $travellers_form_fields ) < $b
 	<?php if ( 'edit' === $template_mode || ! empty( $travellers_form_fields ) ) : ?>
 		<div class="wpte-accordion">
 			<div class="wpte-accordion-header">
-				<h3 class="wpte-accordion-title"><?php echo __( 'Traveller(s) Details', 'wp-travel-engine' ); ?></h3>
+				<h3 class="wpte-accordion-title"><?php echo __( 'Traveler(s) Details', 'wp-travel-engine' ); ?></h3>
 				<button type="button" class="wpte-accordion-toggle">
 					<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.66667" stroke-linecap="round"
@@ -175,7 +175,7 @@ if ( ! empty( $travellers_form_fields ) && count( $travellers_form_fields ) < $b
 											// Display both first and last name values, or fallback to "Traveller X" if name not available
 											$full_name = trim( $fname_value . ' ' . $lname_value );
 											if ( empty( $full_name ) ) {
-												$full_name = sprintf( __( 'Traveller %d', 'wp-travel-engine' ), $index + 1 );
+												$full_name = sprintf( __( 'Traveler %d', 'wp-travel-engine' ), $index + 1 );
 											}
 											echo esc_html( $full_name );
 											?>
@@ -246,7 +246,7 @@ if ( ! empty( $travellers_form_fields ) && count( $travellers_form_fields ) < $b
 							data-template="traveller-template" data-target="[data-traveller-section]"
 							data-line-item-template="cart-line-item-pricing-category"
 							data-line-item-target="[data-line-item__pricing_category_section]">
-							<?php echo __( '+ Add Traveller', 'wp-travel-engine' ); ?>
+							<?php echo __( '+ Add Traveler', 'wp-travel-engine' ); ?>
 						</button>
 					</div>
 				<?php endif; ?>
@@ -257,7 +257,7 @@ if ( ! empty( $travellers_form_fields ) && count( $travellers_form_fields ) < $b
 <script type="text/html" id="tmpl-traveller-template">
 
 	<tr class="wpte-new-traveller">
-		<td><?php echo __( 'New Traveller', 'wp-travel-engine' ); ?></td>
+		<td><?php echo __( 'New Traveler', 'wp-travel-engine' ); ?></td>
 		<td style="text-align: center;" class="wpte-pricing-category-label"><?php echo esc_html( $primary_pricing_category ); ?></td>
 		<td style="text-align: center;">
 			<button class="wpte-button wpte-toggle-button" type="button">

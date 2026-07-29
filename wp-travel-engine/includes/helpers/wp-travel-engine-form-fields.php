@@ -423,7 +423,7 @@ function wp_travel_engine_traveller_information_fields( $no_travellers = 1 ) {
 				'class'    => 'relation-options-title',
 				'tag'      => 'div',
 				/* translators: %d: traveller number */
-				'title'    => sprintf( __( 'Personal details for Traveller: %d', 'wp-travel-engine' ), $i ),
+				'title'    => sprintf( __( 'Personal details for Traveler: %d', 'wp-travel-engine' ), $i ),
 				'priority' => 9,
 			),
 
@@ -612,7 +612,7 @@ function wp_travel_engine_traveller_information_fields( $no_travellers = 1 ) {
 					'class'    => 'relation-options-title',
 					'tag'      => 'div',
 					/* translators: %d: traveller number */
-					'title'    => sprintf( __( 'Emergency contact details for Traveller: %d', 'wp-travel-engine' ), $i ),
+					'title'    => sprintf( __( 'Emergency contact details for Traveler: %d', 'wp-travel-engine' ), $i ),
 					'priority' => 120,
 				),
 

@@ -21,9 +21,10 @@ class MetaboxRegistry extends Registrable {
 	 *
 	 * @param string $class_name The class.
 	 *
-	 * @return void
+	 * @return static
+	 * @since 6.8.4 Return static for method chaining.
 	 */
-	public function register( string $class_name ): void {
+	public function register( string $class_name ): static {
 		$this->items[ $class_name::ID ] = $class_name;
 
 		$instance = new $class_name();
@@ -36,5 +37,7 @@ class MetaboxRegistry extends Registrable {
 			$instance::CONTEXT,
 			$instance::PRIORITY
 		);
+
+		return $this;
 	}
 }

@@ -31,7 +31,7 @@ wptravelengine_set_template_args( array( 'is_new_booking' => true ) );
 				<?php esc_html_e( 'Cancel', 'wp-travel-engine' ); ?>
 			</button>
 			<button type="button" class="wpte-button wpte-solid wpte-traveller-delete wpte-user-delete">
-				<?php esc_html_e( 'Delete Traveller', 'wp-travel-engine' ); ?>
+				<?php esc_html_e( 'Delete Traveler', 'wp-travel-engine' ); ?>
 			</button>
 		</div>
 	</div>

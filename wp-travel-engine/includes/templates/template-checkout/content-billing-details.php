@@ -27,7 +27,7 @@
 		<div class="wpte-copy-from-lead-travelers" style="margin: 0 0 24px;">
 			<input type="checkbox" id="wpte-copy-from-lead-travelers" name="wpte-copy-from-lead-travelers" value="1">
 			<label for="wpte-copy-from-lead-travelers">
-				<?php esc_html_e( 'Same as Lead Traveller', 'wp-travel-engine' ); ?>
+				<?php esc_html_e( 'Same as Lead Traveler', 'wp-travel-engine' ); ?>
 			</label>
 			</div>
 		<?php endif; ?>

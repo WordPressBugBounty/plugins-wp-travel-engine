@@ -1241,15 +1241,46 @@ class Settings {
 	 */
 	protected function set_trip_tabs( WP_REST_Request $request ) {
 		if ( isset( $request['trip_tabs'] ) ) {
+			$existing_ids = (array) ( $this->plugin_settings->get( 'trip_tabs' )['id'] ?? array() );
+
 			$trip_tabs = array(
-				'id'     => array_column( $request['trip_tabs'], 'id', 'id' ),
-				'name'   => array_column( $request['trip_tabs'], 'name', 'id' ),
-				'field'  => array_column( $request['trip_tabs'], 'field', 'id' ),
-				'icon'   => array_column( $request['trip_tabs'], 'icon', 'id' ),
-				'enable' => array_column( $request['trip_tabs'], 'enable', 'id' ),
+				'id'     => array(),
+				'name'   => array(),
+				'field'  => array(),
+				'icon'   => array(),
+				'enable' => array(),
 			);
 
-			$trip_tabs['enable'] = wptravelengine_replace( $trip_tabs['enable'], true, 'yes', 'no' );
+			foreach ( $request['trip_tabs'] as $tab ) {
+				$id = $tab['id'];
+
+				$trip_tabs['id'][ $id ]     = $id;
+				$trip_tabs['name'][ $id ]   = $tab['name'] ?? null;
+				$trip_tabs['field'][ $id ]  = $tab['field'] ?? null;
+				$trip_tabs['icon'][ $id ]   = $tab['icon'] ?? null;
+				$trip_tabs['enable'][ $id ] = wptravelengine_replace( $tab['enable'] ?? null, true, 'yes', 'no' );
+
+				unset( $existing_ids[ $id ] );
+			}
+
+			$removed_trip_tab_ids = $existing_ids;
+			if ( ! empty( $removed_trip_tab_ids ) ) {
+
+				global $wpdb;
+
+				$trip_ids = $wpdb->get_col(
+					$wpdb->prepare(
+						"SELECT ID FROM {$wpdb->posts} WHERE post_type = %s",
+						WP_TRAVEL_ENGINE_POST_TYPE
+					)
+				);
+
+				foreach ( $trip_ids as $trip_id ) {
+					if ( $trip = wptravelengine_get_trip( $trip_id ) ) {
+						$trip->cleanup_trip_tabs( $removed_trip_tab_ids );
+					}
+				}
+			}
 
 			$this->plugin_settings->set( 'trip_tabs', $trip_tabs );
 		}
@@ -3607,7 +3638,7 @@ class Settings {
 				'type'        => 'boolean',
 			),
 			'enable_travellers_info'           => array(
-				'description' => __( 'Travellers Information Enabled or Not', 'wp-travel-engine' ),
+				'description' => __( 'Travelers Information Enabled or Not', 'wp-travel-engine' ),
 				'type'        => 'boolean',
 			),
 			'enable_multi_price_list'          => array(
@@ -3658,7 +3689,7 @@ class Settings {
 				'type'        => 'boolean',
 			),
 			'display_travellers_info'          => array(
-				'description' => __( 'Show Travellers Information', 'wp-travel-engine' ),
+				'description' => __( 'Show Travelers Information', 'wp-travel-engine' ),
 				'type'        => 'boolean',
 			),
 			'display_emergency_contact'        => array(
@@ -3666,12 +3697,12 @@ class Settings {
 				'type'        => 'boolean',
 			),
 			'traveller_emergency_details_form' => array(
-				'description' => __( 'Traveller and Emergency Details Form', 'wp-travel-engine' ),
+				'description' => __( 'Traveler and Emergency Details Form', 'wp-travel-engine' ),
 				'type'        => 'string',
 				'enum'        => array( 'on_checkout', 'after_checkout' ),
 			),
 			'travellers_details_type'          => array(
-				'description' => __( 'Travellers Details Type', 'wp-travel-engine' ),
+				'description' => __( 'Travelers Details Type', 'wp-travel-engine' ),
 				'type'        => 'string',
 				'enum'        => array( 'all', 'only_lead' ),
 			),

@@ -725,7 +725,7 @@ class Wp_Travel_Engine_Admin {
 			'booking_date'   => esc_html__( 'Date', 'wp-travel-engine' ),
 			'trip_date'      => esc_html__( 'Trip Date', 'wp-travel-engine' ),
 			'tname'          => esc_html__( 'Trip Name', 'wp-travel-engine' ),
-			'travelers'      => esc_html__( 'Travellers', 'wp-travel-engine' ),
+			'travelers'      => esc_html__( 'Travelers', 'wp-travel-engine' ),
 			'booking_status' => esc_html__( 'Booking Status', 'wp-travel-engine' ),
 			'paid'           => esc_html__( 'Total Paid', 'wp-travel-engine' ),
 			'remaining'      => esc_html__( 'Remaining Payment', 'wp-travel-engine' ),

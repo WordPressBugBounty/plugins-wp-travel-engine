@@ -86,7 +86,7 @@ if ( isset( $wp_travel_engine_setting['trip_prev_price'] ) && $wp_travel_engine_
 				<div class="travelers-number-input">
 					<label for="travelers-no">
 					<?php
-					$no_of_travelers = __( 'Number of Adult Travellers: ', 'wp-travel-engine' );
+					$no_of_travelers = __( 'Number of Adult Travelers: ', 'wp-travel-engine' );
 					echo esc_html( apply_filters( 'wp_travel_engine_no_of_travelers_text', $no_of_travelers ) );
 					?>
 					</label>
@@ -105,9 +105,9 @@ if ( isset( $wp_travel_engine_setting['trip_prev_price'] ) && $wp_travel_engine_
 					if ( class_exists( 'Wte_Trip_Currency_Converter_Init' ) ) {
 						$actual_price = $obj->convert_trip_price( $post, $actual_price );
 					}
-					echo '<div class="discount-price-per-traveler"><strong>' . esc_html__( 'Cost Per Adult Traveller: ', 'wp-travel-engine' ) . '</strong><div class="per-adult-amount"><span class="currency">' . esc_html( $currency ) . ' </span><span class="discount-price-traveler">' . esc_html( $actual_price ) . '</span>&nbsp;<span class="currency-code">' . esc_html( $code ) . '</span></div></div>';
+					echo '<div class="discount-price-per-traveler"><strong>' . esc_html__( 'Cost Per Adult Traveler: ', 'wp-travel-engine' ) . '</strong><div class="per-adult-amount"><span class="currency">' . esc_html( $currency ) . ' </span><span class="discount-price-traveler">' . esc_html( $actual_price ) . '</span>&nbsp;<span class="currency-code">' . esc_html( $code ) . '</span></div></div>';
 					if ( isset( $wp_travel_engine_setting['child-group']['discount'] ) && isset( $wp_travel_engine_setting['group']['child'] ) && $wp_travel_engine_setting['group']['child'] != '' ) {
-						echo '<div class="discount-price-per-child-traveler"><strong>' . esc_html__( 'Cost Per Child Traveller: ', 'wp-travel-engine' ) . '</strong><div class="per-adult-amount"><span class="currency">' . esc_html( $currency ) . ' </span><span class="discount-price-child-traveler">' . esc_html( $actual_price ) . '</span>&nbsp;<span class="currency-code">' . esc_html( $code ) . '</span></div></div>';
+						echo '<div class="discount-price-per-child-traveler"><strong>' . esc_html__( 'Cost Per Child Traveler: ', 'wp-travel-engine' ) . '</strong><div class="per-adult-amount"><span class="currency">' . esc_html( $currency ) . ' </span><span class="discount-price-child-traveler">' . esc_html( $actual_price ) . '</span>&nbsp;<span class="currency-code">' . esc_html( $code ) . '</span></div></div>';
 					}
 				}
 				?>

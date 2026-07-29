@@ -17,7 +17,7 @@
 			<div id="wte-package-editor{{idSuffix}}" class="wte-package-editor" style="display:none;">
 				<div class="wpte-tab-sub wpte-horizontal-tab">
 					<div class="wpte-tab-wrap wte-tabs">
-						<a href="#wpte-tab-pricing-categories-{{tripPackage.id}}" data-toggle="tab" class="wte-tab current" ><?php echo esc_html__( 'Pricing Categories', 'wp-travel-engine' ); ?></a>
+						<a href="#wpte-tab-pricing-categories-{{tripPackage.id}}" data-toggle="tab" class="wte-tab current" ><?php echo esc_html__( 'Price Categories', 'wp-travel-engine' ); ?></a>
 						<a href="#wpte-tab-pricing-dates-{{tripPackage.id}}" data-toggle="tab" class="wte-tab"><?php echo esc_html__( 'Dates', 'wp-travel-engine' ); ?></a>
 						<a href="#wpte-tab-pricing-general-{{tripPackage.id}}" data-toggle="tab" class="wte-tab" ><?php echo esc_html__( 'General', 'wp-travel-engine' ); ?></a>
 					</div>

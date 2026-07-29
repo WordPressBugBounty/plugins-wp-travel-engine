@@ -138,7 +138,7 @@ if ( isset( $booking_id ) ) {
 		update_post_meta( $booking_id, 'traveller_page_type', 'old' );
 
 		for ( $i = 1; $i <= $total_pax; $i++ ) {
-			echo '<div class="relation-options-title">' . sprintf( esc_html__( 'Personal details for Traveller: #%1$s', 'wp-travel-engine' ), (int) $i ) . '</div>';
+			echo '<div class="relation-options-title">' . sprintf( esc_html__( 'Personal details for Traveler: #%1$s', 'wp-travel-engine' ), (int) $i ) . '</div>';
 
 			$modified_traveller_fields = array_map(
 				function ( $field ) use ( $i ) {
@@ -165,7 +165,7 @@ if ( isset( $booking_id ) ) {
 			$show_emergency_contact = apply_filters( 'wptravelengine_hide_emergency_form', $wp_travel_engine_settings_options['emergency'] );
 
 			if ( ! $show_emergency_contact ) {
-				echo '<div class="relation-options-title">' . sprintf( esc_html__( 'Emergency contact details for Traveller: #%1$s', 'wp-travel-engine' ), esc_html( $i ) ) . '</div>';
+				echo '<div class="relation-options-title">' . sprintf( esc_html__( 'Emergency contact details for Traveler: #%1$s', 'wp-travel-engine' ), esc_html( $i ) ) . '</div>';
 
 				$modified_emergency_contact_fields = array_map(
 					function ( $field ) use ( $i ) {
@@ -202,5 +202,5 @@ if ( isset( $booking_id ) ) {
 	</script>
 	<?php
 } else {
-	printf( esc_html__( 'No Traveller Information!!', 'wp-travel-engine' ) );
+	printf( esc_html__( 'No Traveler Information!!', 'wp-travel-engine' ) );
 }

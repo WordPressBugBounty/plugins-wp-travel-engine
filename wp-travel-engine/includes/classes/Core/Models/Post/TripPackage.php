@@ -83,6 +83,23 @@ class TripPackage extends PostModel {
 	public array $categories_pricings = array();
 
 	/**
+	 * The default pricing per date, keyed by date.
+	 *
+	 * @var array
+	 * @since 6.8.4
+	 */
+	protected array $def_cat_date = array();
+
+	/**
+	 * Booked pax per category per date, built in one pass: [ cat_id => [ date => count ] ].
+	 * null = not yet computed.
+	 *
+	 * @var array|null
+	 * @since 6.8.4
+	 */
+	protected ?array $booked_per_cat_date = null;
+
+	/**
 	 * The primary pricing category.
 	 *
 	 * @var TravelerCategory
@@ -335,7 +352,7 @@ class TripPackage extends PostModel {
 
 					$dates[ $date ]['times']   = $times;
 					$dates[ $date ]['seats']   = $seats;
-					$dates[ $date ]['pricing'] = $this->get_default_pricings();
+					$dates[ $date ]['pricing'] = $this->get_default_pricings( $date );
 				}
 			} else {
 				$package_date_parser = wptravelengine_get_date_parser(
@@ -365,28 +382,46 @@ class TripPackage extends PostModel {
 	/**
 	 * Returns the default traveler categories pricing.
 	 *
+	 * @param string|null $date When null (default), works as before, caching into
+	 *                           `$this->categories_pricings`. When given, caches into
+	 *                           `$this->def_cat_date[ $date ]` instead.
+	 *
 	 * @return array
 	 * @since 6.3.1
+	 * @since 6.8.4 Added $date param.
 	 */
-	protected function get_default_pricings(): array {
-		if ( empty( $this->categories_pricings ) ) {
-			$this->categories_pricings    = array();
+	public function get_default_pricings( ?string $date = null ): array {
+		$pricings = null !== $date ? ( $this->def_cat_date[ $date ] ?? array() ) : $this->categories_pricings;
+
+		if ( empty( $pricings ) ) {
+			$pricings                     = array();
 			$traveler_categories          = $this->get_traveler_categories();
-			$primary_traveler_category_id = $traveler_categories->get_primary_traveler_category()->get( 'id' );
+			$primary_traveler_category_id = $traveler_categories->get_primary_traveler_category()->id;
+
 			foreach ( $traveler_categories as $traveler_category ) {
 				/** @var TravelerCategory $traveler_category */
-				$this->categories_pricings[] = array(
-					'id'                => $traveler_category->get( 'id' ),
+				$cat_id = $traveler_category->id;
+
+				$pricings[] = array(
+					'id'                => $cat_id,
 					'label'             => $traveler_category->get( 'label' ),
 					'price'             => $traveler_category->get( 'has_sale' ) ? $traveler_category->get( 'sale_price' ) : $traveler_category->get( 'price' ),
 					'is_primary'        => $traveler_category->get( 'id' ) === $primary_traveler_category_id,
 					'has_group_pricing' => $traveler_category->get( 'enabled_group_discount' ),
 					'group_pricing'     => $traveler_category->get( 'group_pricing' ),
+					'seats_left'        => $this->get_cat_seats_left( $cat_id, $date ),
+					'max_cap'           => $this->get_cat_max_cap( $cat_id ),
 				);
+			}
+
+			if ( null !== $date ) {
+				$this->def_cat_date[ $date ] = $pricings;
+			} else {
+				$this->categories_pricings = $pricings;
 			}
 		}
 
-		return apply_filters( 'wptravelengine_trip_package_default_pricings', $this->categories_pricings, $this );
+		return apply_filters( 'wptravelengine_trip_package_default_pricings', $pricings, $this );
 	}
 
 	/**
@@ -430,7 +465,7 @@ class TripPackage extends PostModel {
 	}
 
 	/**
-	 * Sets primary pricing category details.
+	 * Sets primary Price category details.
 	 *
 	 * @return void
 	 * @since 6.1.0
@@ -514,5 +549,160 @@ class TripPackage extends PostModel {
 		$sale_percentage = ( $this->has_sale && $price > 0 ) ? round( ( ( $price - $sale_price ) / $price ) * 100 ) : 0;
 
 		return compact( 'price', 'sale_price', 'group_pricing', 'has_sale', 'sale_percentage' );
+	}
+
+	/**
+	 * Gets the max seat capacity configured for a Price category on this package,
+	 * based on the trip's `cap_per_cat` settings.
+	 *
+	 * @param int|null $cat_id Price category ID. When null, sums the max cap across all traveler
+	 *                          categories, returning '' if any of them is non-numeric (unlimited/disabled).
+	 *
+	 * @return int|string Max capacity, or '' when unlimited/disabled.
+	 * @since 6.8.4
+	 * @since 6.8.4 Added support for $cat_id = null to sum max cap across all traveler categories.
+	 */
+	public function get_cat_max_cap( ?int $cat_id = null ) {
+		if ( null === $cat_id ) {
+			$total = 0;
+
+			foreach ( $this->get_traveler_categories() as $traveler_category ) {
+				if ( ! is_numeric( $traveler_category->get( 'price' ) ) ) {
+					continue;
+				}
+
+				$max_cap = $this->get_cat_max_cap( $traveler_category->id );
+
+				if ( ! is_numeric( $max_cap ) ) {
+					return '';
+				}
+
+				$total += $max_cap;
+			}
+
+			return $total;
+		}
+
+		if ( ! $this->trip->is_cap_per_cat( 'enabled' ) ) {
+			return '';
+		}
+
+		$cap_per_cat = $this->trip->get_cap_per_cat();
+
+		if ( $this->trip->is_cap_per_cat( 'different' ) ) {
+			$pkg_entry = current(
+				array_filter(
+					$cap_per_cat['package_limits'] ?? array(),
+					fn( $pl ) => (int) ( $pl['package_id'] ?? 0 ) === $this->ID
+				)
+			);
+			$limits    = is_array( $pkg_entry ) ? ( $pkg_entry['limits'] ?? array() ) : array();
+		} else {
+			$limits = $cap_per_cat['limits'] ?? array();
+		}
+
+		foreach ( $limits as $limit ) {
+			if ( (int) ( $limit['id'] ?? 0 ) === $cat_id ) {
+				return '' === ( $limit['max_seats'] ?? '' ) ? '' : (int) $limit['max_seats'];
+			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * Builds and caches a [cat_id => [date => booked_count]] table in one pass over all
+	 * published bookings. Called at most once per TripPackage instance per request.
+	 *
+	 * @return array
+	 * @since 6.8.4
+	 */
+	protected function get_booked_per_cat_date(): array {
+		if ( null !== $this->booked_per_cat_date ) {
+			return $this->booked_per_cat_date;
+		}
+
+		$bookings = $this->trip->get_bookings( array( 'post_status' => 'publish' ) );
+
+		$this->booked_per_cat_date = array();
+
+		if ( empty( $bookings ) ) {
+			return $this->booked_per_cat_date;
+		}
+
+		$package_ids = $this->trip->is_cap_per_cat( 'same' ) ? $this->trip->get_all_package_ids() : array( $this->ID );
+
+		foreach ( $bookings as $booking ) {
+			$booking_date = substr( $booking->get_trip_datetime(), 0, 10 );
+			foreach ( $package_ids as $pkg_id ) {
+				foreach ( $booking->get_booked_count( $pkg_id ) as $c_id => $qty ) {
+					$this->booked_per_cat_date[ $c_id ][ $booking_date ] = ( $this->booked_per_cat_date[ $c_id ][ $booking_date ] ?? 0 ) + (int) $qty;
+				}
+			}
+		}
+
+		return $this->booked_per_cat_date;
+	}
+
+	/**
+	 * Gets the seats left capacity configured for a Price category on this package.
+	 *
+	 * @param int|null    $cat_id Price category ID. When null, sums the seats left across all traveler
+	 *                             categories, returning '' if any of them is non-numeric (unlimited/disabled).
+	 * @param string|null $date   Y-m-d date to check. When provided, returns a scalar (int seats left,
+	 *                             or '' when unlimited). When null, returns array<string, int> keyed by date.
+	 *
+	 * @return int|string|array Seats left, or '' when unlimited/disabled.
+	 * @since 6.8.4
+	 * @since 6.8.4 Added support for $cat_id = null to sum seats left across all traveler categories.
+	 */
+	public function get_cat_seats_left( ?int $cat_id = null, ?string $date = null ) {
+		if ( null === $cat_id ) {
+			$totals = null !== $date ? 0 : array();
+
+			foreach ( $this->get_traveler_categories() as $traveler_category ) {
+				if ( ! is_numeric( $traveler_category->get( 'price' ) ) ) {
+					continue;
+				}
+
+				$seats_left = $this->get_cat_seats_left( $traveler_category->id, $date );
+
+				if ( null !== $date ) {
+					if ( ! is_numeric( $seats_left ) ) {
+						return '';
+					}
+
+					$totals += $seats_left;
+					continue;
+				}
+
+				if ( ! is_array( $seats_left ) ) {
+					return '';
+				}
+
+				foreach ( $seats_left as $seats_left_date => $seats_left_for_date ) {
+					$totals[ $seats_left_date ] = ( $totals[ $seats_left_date ] ?? 0 ) + $seats_left_for_date;
+				}
+			}
+
+			return $totals;
+		}
+
+		$max_cap = $this->get_cat_max_cap( $cat_id );
+
+		if ( ! is_numeric( $max_cap ) ) {
+			return $max_cap;
+		}
+
+		$booked_by_date = $this->get_booked_per_cat_date()[ $cat_id ] ?? array();
+
+		if ( null !== $date ) {
+			return max( 0, $max_cap - ( $booked_by_date[ $date ] ?? 0 ) );
+		}
+
+		return array_map(
+			fn( $booked ) => max( 0, $max_cap - $booked ),
+			$booked_by_date
+		);
 	}
 }

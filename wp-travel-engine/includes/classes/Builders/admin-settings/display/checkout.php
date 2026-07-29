@@ -15,7 +15,7 @@ $checkout_fields = array(
 		'divider'     => true,
 	),
 	array(
-		'label'       => __( 'Show Traveller Information Form', 'wp-travel-engine' ),
+		'label'       => __( 'Show Traveler Information Form', 'wp-travel-engine' ),
 		'description' => __( 'When enabled, providing information for all travellers will be mandatory.', 'wp-travel-engine' ),
 		'field_type'  => 'SWITCH',
 		'name'        => 'display_travellers_info',
@@ -23,14 +23,14 @@ $checkout_fields = array(
 	),
 	array(
 		'label'       => __( 'Show Emergency Contact Form', 'wp-travel-engine' ),
-		'description' => __( 'Enable this option to include a section for emergency contact details in the Traveller Information form.', 'wp-travel-engine' ),
+		'description' => __( 'Enable this option to include a section for emergency contact details in the Traveler Information form.', 'wp-travel-engine' ),
 		'field_type'  => 'SWITCH',
 		'name'        => 'display_emergency_contact',
 		'condition'   => 'display_travellers_info === true',
 		'divider'     => true,
 	),
 	array(
-		'label'      => __( 'Display Traveller and Emergency Details', 'wp-travel-engine' ),
+		'label'      => __( 'Display Traveler and Emergency Details', 'wp-travel-engine' ),
 		'field_type' => 'SELECT_BUTTON',
 		'name'       => 'traveller_emergency_details_form',
 		'condition'  => 'display_travellers_info === true',
@@ -47,18 +47,18 @@ $checkout_fields = array(
 		'divider'    => true,
 	),
 	array(
-		'label'       => __( 'Collect Traveller Information', 'wp-travel-engine' ),
+		'label'       => __( 'Collect Traveler Information', 'wp-travel-engine' ),
 		'description' => __( 'Choose whether to collect information for all travellers or only the main traveller during checkout.', 'wp-travel-engine' ),
 		'field_type'  => 'SELECT_BUTTON',
 		'name'        => 'travellers_details_type',
 		'condition'   => 'display_travellers_info === true && traveller_emergency_details_form === on_checkout',
 		'options'     => array(
 			array(
-				'label' => __( 'All Travellers', 'wp-travel-engine' ),
+				'label' => __( 'All Travelers', 'wp-travel-engine' ),
 				'value' => 'all',
 			),
 			array(
-				'label' => __( 'Only Lead Traveller', 'wp-travel-engine' ),
+				'label' => __( 'Only Lead Traveler', 'wp-travel-engine' ),
 				'value' => 'only_lead',
 			),
 		),

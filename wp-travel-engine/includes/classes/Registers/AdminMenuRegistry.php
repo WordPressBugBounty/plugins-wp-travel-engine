@@ -21,10 +21,11 @@ class AdminMenuRegistry extends Registrable {
 	 *
 	 * @param string $class_name The class representing the admin page.
 	 *
-	 * @return void
+	 * @return static
 	 * @throws \InvalidArgumentException If the class is not an AdminMenuPage.
+	 * @since 6.8.4 Return static for method chaining.
 	 */
-	public function register( string $class_name ): void {
+	public function register( string $class_name ): static {
 		if ( ! is_subclass_of( $class_name, AdminMenuPage::class ) ) {
 			throw new \InvalidArgumentException( "Class '$class_name' must extend AdminMenuPage" );
 		}
@@ -39,6 +40,8 @@ class AdminMenuRegistry extends Registrable {
 		}
 
 		$this->items[ $class_name::SLUG ] = $class_name;
+
+		return $this;
 	}
 
 	/**

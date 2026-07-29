@@ -638,7 +638,7 @@
       }
     }
   },
-  "textdomain": "wptravelengine",
+  "textdomain": "wp-travel-engine",
   "viewScript": [
     "owl-carousel"
   ],

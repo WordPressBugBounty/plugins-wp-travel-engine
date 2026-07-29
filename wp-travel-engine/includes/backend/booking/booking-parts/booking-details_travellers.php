@@ -12,7 +12,7 @@ global $post;
 	<div class="wpte-block-wrap">
 		<div class="wpte-block">
 			<div class="wpte-title-wrap">
-				<h4 class="wpte-title"><?php esc_html_e( 'Traveller Details', 'wp-travel-engine' ); ?></h4>
+				<h4 class="wpte-title"><?php esc_html_e( 'Traveler Details', 'wp-travel-engine' ); ?></h4>
 			</div>
 			<div class="wpte-block-content wpte-floated">
 				<?php
@@ -24,7 +24,7 @@ global $post;
 						?>
 						<div class="wpte-toggle-item">
 							<div class="wpte-toggle-title">
-								<a href="Javascript:void(0);"><?php printf( esc_html__( 'Traveller %1$s', 'wp-travel-engine' ), (int) $i ); ?></a>
+								<a href="Javascript:void(0);"><?php printf( esc_html__( 'Traveler %1$s', 'wp-travel-engine' ), (int) $i ); ?></a>
 							</div>
 							<div class="wpte-toggle-content">
 								<div class="wpte-prsnl-dtl-blk wpte-floated">
@@ -34,7 +34,7 @@ global $post;
 											<?php esc_html_e( 'Edit', 'wp-travel-engine' ); ?>
 										</a>
 									</div>
-										<h4><?php esc_html_e( 'Traveller information', 'wp-travel-engine' ); ?></h4>
+										<h4><?php esc_html_e( 'Traveler information', 'wp-travel-engine' ); ?></h4>
 										<div class="wpte-prsnl-dtl-blk-content">
 											<?php do_action( 'wptravelengine_before_travellers_information', $traveller_information, $post->ID ); ?>
 											<ul class="wpte-list">

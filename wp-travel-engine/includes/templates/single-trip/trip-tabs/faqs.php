@@ -47,7 +47,7 @@ if ( ! empty( $faqs_data['sectionTitle'] ) ) {
 
 // Check if we have FAQs from new or old structure
 $has_faqs = false;
-if ( ! empty( $faqs_data['categories'] ) ) {
+if ( isset( $faqs_data['categories'] ) ) {
 	foreach ( $faqs_data['categories'] as $category ) {
 		if ( ! empty( $category['faqs'] ) ) {
 			$has_faqs = true;

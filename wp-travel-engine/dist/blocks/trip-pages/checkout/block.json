@@ -7,6 +7,6 @@
   "category": "widgets",
   "description": "Trip Checkout Page.",
   "attributes": {},
-  "textdomain": "wptravelengine",
+  "textdomain": "wp-travel-engine",
   "render": "file:./block.php"
 }

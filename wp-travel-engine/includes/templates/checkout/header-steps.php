@@ -16,7 +16,7 @@ $checkout_completed_steps = apply_filters(
 			'class' => 'completed',
 		),
 		'travelers' => array(
-			'label' => __( 'Travellers', 'wp-travel-engine' ),
+			'label' => __( 'Travelers', 'wp-travel-engine' ),
 			'class' => 'completed',
 		),
 	)

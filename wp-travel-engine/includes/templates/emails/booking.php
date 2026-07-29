@@ -5,7 +5,7 @@
 use WPTravelEngine\Helpers\Countries;
 $trip_details    = array(
 	'{tdate}'    => __( 'Trip Start Date', 'wp-travel-engine' ),
-	'{traveler}' => __( 'Total Traveller(s)', 'wp-travel-engine' ),
+	'{traveler}' => __( 'Total Traveler(s)', 'wp-travel-engine' ),
 );
 $billing_details = array(
 	'{fullname}'        => __( 'Booking Name', 'wp-travel-engine' ),
@@ -61,7 +61,7 @@ $payment_details = array(
 									<table class="invoice-items" cellpadding="0" cellspacing="0">
 										<tr>
 											<td class="title-holder" style="margin: 0;" valign="top">
-												<h3 class="alignleft"><?php echo esc_html__( 'Traveller Details', 'wp-travel-engine' ); ?></h3>
+												<h3 class="alignleft"><?php echo esc_html__( 'Traveler Details', 'wp-travel-engine' ); ?></h3>
 											</td>
 										</tr>
 										<!-- Trip Details -->

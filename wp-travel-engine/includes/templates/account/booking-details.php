@@ -203,7 +203,7 @@ if ( $booking_instance->is_curr_cart() ) {
 							sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Trip Code:', 'wp-travel-engine' ), $trip->get_trip_code() ),
 							sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Starts on:', 'wp-travel-engine' ), $start_date ),
 							sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Ends on:', 'wp-travel-engine' ), $end_date ),
-							sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'No. of Travellers:', 'wp-travel-engine' ), $travelers_count ),
+							sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'No. of Travelers:', 'wp-travel-engine' ), $travelers_count ),
 						);
 
 						$tour_details[] = $item;

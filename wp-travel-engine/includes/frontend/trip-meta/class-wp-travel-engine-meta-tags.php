@@ -127,7 +127,7 @@ class Wp_Travel_Engine_Meta_Tags {
 		// Get booking steps.
 		$booking_steps = array(
 			__( 'Select a Date', 'wp-travel-engine' ),
-			__( 'Travellers', 'wp-travel-engine' ),
+			__( 'Travelers', 'wp-travel-engine' ),
 		);
 		$booking_steps = apply_filters( 'wte_trip_booking_steps', $booking_steps );
 

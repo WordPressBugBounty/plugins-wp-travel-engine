@@ -495,7 +495,7 @@ class Checkout extends BasePage {
 			),
 			sprintf(
 				'<tr><td>%s</td><td><strong>%s</strong></td></tr>',
-				__( 'No. of Travellers:', 'wp-travel-engine' ),
+				__( 'No. of Travelers:', 'wp-travel-engine' ),
 				esc_html( $trip_data['travelers'] ?? '' )
 			),
 		);

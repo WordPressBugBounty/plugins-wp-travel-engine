@@ -441,7 +441,7 @@ class Wp_Travel_Engine_Public {
 							</li>
 							<li><span>
 							<?php
-							$no_of_travelers = __( 'Number of Travellers: ', 'wp-travel-engine' );
+							$no_of_travelers = __( 'Number of Travelers: ', 'wp-travel-engine' );
 							echo esc_html( apply_filters( 'wp_travel_engine_no_of_travelers_text', $no_of_travelers ) );
 							?>
 								<input type="number" min="1" name="travelers[]" class="travelers-number" value=""

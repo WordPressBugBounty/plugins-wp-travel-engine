@@ -44,18 +44,18 @@
 					<span class="wpte-meta-value"><?php echo esc_html( $trip_details['end_date'] ); ?></span>
 				</div>
 				<div class="wpte-meta-item">
-					<span class="wpte-meta-label"><?php _e( 'No. of Travellers:', 'wp-travel-engine' ); ?></span>
+					<span class="wpte-meta-label"><?php _e( 'No. of Travelers:', 'wp-travel-engine' ); ?></span>
 					<span class="wpte-meta-value"><?php echo esc_html( $trip_details['travellers'] ); ?></span>
 				</div>
 			</div>
 
 			<div class="wpte-traveller-details">
-				<h3><?php _e( 'Traveller(s) Details:', 'wp-travel-engine' ); ?></h3>
+				<h3><?php _e( 'Traveler(s) Details:', 'wp-travel-engine' ); ?></h3>
 				<div class="wpte-traveller-list">
 					<?php foreach ( $bookings as $booking ) : ?>
 						<div class="wpte-traveller-item">
 							<span class="wpte-traveller-name"><?php echo esc_html( $booking['billing_info'] ); ?></span>
-							<span class="wpte-traveller-count"><?php echo esc_html( $booking['travellers'] ); ?> <?php _e( 'Travellers', 'wp-travel-engine' ); ?></span>
+							<span class="wpte-traveller-count"><?php echo esc_html( $booking['travellers'] ); ?> <?php _e( 'Travelers', 'wp-travel-engine' ); ?></span>
 							<a href="<?php echo esc_url( get_edit_post_link( $booking['id'], 'display' ) ); ?>" target="_blank" class="wpte-details-link"><?php _e( 'Details', 'wp-travel-engine' ); ?></a>
 						</div>
 					<?php endforeach; ?>

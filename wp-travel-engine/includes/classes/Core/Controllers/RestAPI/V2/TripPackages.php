@@ -212,12 +212,14 @@ class TripPackages extends WP_REST_Posts_Controller {
 				$group_pricing
 			);
 
+			$cat_id = (int) $category->get( 'id', 0 );
+
 			$get_pricing_type              = $category->get( 'pricing_type', 'per-person' );
 			$pricing_label                 = wptravelengine_get_pricing_type( false, $get_pricing_type );
 			$price                         = $category->get( 'price', '' );
 			$sale_price                    = $category->get( 'sale_price', '' );
 			$data['traveler_categories'][] = array(
-				'id'                => (int) $category->get( 'id', 0 ),
+				'id'                => $cat_id,
 				'label'             => $category->get( 'label', '' ),
 				'price'             => is_numeric( $price ) ? (float) $price : '',
 				'age_group'         => $category->get( 'age_group', '' ),
@@ -231,8 +233,9 @@ class TripPackages extends WP_REST_Posts_Controller {
 				'has_group_pricing' => wptravelengine_toggled( $category->get( 'enabled_group_discount', false ) && ! empty( $group_pricing ) ),
 				'group_pricing'     => $group_pricing,
 				'min_pax'           => $min_pax,
-				'max_pax'           => '',
+				'max_pax'           => $trip_package->get_cat_max_cap( $cat_id ),
 				'description'       => $category->get( 'description', '' ),
+				'is_primary'        => $trip_package->primary_pricing_category->id === $cat_id,
 			);
 
 		}

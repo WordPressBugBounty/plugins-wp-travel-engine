@@ -4,17 +4,30 @@
  *
  * @since 5.5.3
  */
-
 namespace WPTravelEngine\Core\Booking;
 
+use WPTravelEngine\Core\Cart\Item;
+
 class Inventory {
+
+	/**
+	 * Positional pointers for cart_key parts (index 0 is the `cart` prefix).
+	 *
+	 * @since 6.8.4
+	 */
+	public const CART_KEY_POINTERS = array(
+		'trip_id'    => 1,
+		'package_id' => 2,
+		'trip_date'  => 3,
+		'trip_time'  => 4,
+	);
 
 	/**
 	 * Constructor.
 	 *
 	 * @param int $trip_id Trip ID.
 	 */
-	protected int $trip_id;
+	public int $trip_id;
 
 	/**
 	 * Booking Object.
@@ -221,5 +234,45 @@ class Inventory {
 	 */
 	public function inventory_of_( array $ids ): array {
 		return array_intersect_key( $this->inventory(), $ids );
+	}
+
+	/**
+	 * Gets the cart-item key for a package on a given date/time.
+	 *
+	 * @param int    $package_id Package ID.
+	 * @param string $date_time  `Y-m-d` or `Y-m-dTH:i`.
+	 *
+	 * @return string
+	 * @since 6.8.4
+	 */
+	public function get_cart_key( int $package_id, string $date_time ): string {
+		$parts = explode( 'T', $date_time );
+
+		if ( ! empty( $parts[1] ) ) {
+			$trip_date = $parts[0];
+			$trip_time = "{$trip_date} {$parts[1]}";
+		} else {
+			$trip_date = $date_time;
+			$trip_time = '';
+		}
+
+		return Item::get_item_id( $this->trip_id, $package_id, $trip_time, $trip_date );
+	}
+
+	/**
+	 * Dissects a cart_key, plucking out a single named limb.
+	 *
+	 * cart_key shape: `cart_{trip_id}_{package_id}_{trip_date}_{trip_time}`.
+	 *
+	 * @param string $cart_key `cart_...` key.
+	 * @param string $target   `trip_id`, `package_id`, `trip_date`, or `trip_time`.
+	 *
+	 * @return string|null
+	 * @since 6.8.4
+	 */
+	public static function pick_cart_key( string $cart_key, string $target ): ?string {
+		$parts = explode( '_', $cart_key );
+
+		return $parts[ self::CART_KEY_POINTERS[ $target ] ?? -1 ] ?? null;
 	}
 }

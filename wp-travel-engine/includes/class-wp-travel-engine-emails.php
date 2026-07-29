@@ -686,7 +686,7 @@ class WPTE_Booking_Emails extends WP_Travel_Engine_Emails {
 					</tr>
 					<tr>
 						<td>
-							<?php esc_html_e( 'Travellers', 'wp-travel-engine' ); ?>
+							<?php esc_html_e( 'Travelers', 'wp-travel-engine' ); ?>
 						</td>
 						<td class="alignright">
 							<?php echo esc_html( array_sum( $trip->pax ) ); ?>

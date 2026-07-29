@@ -17,6 +17,75 @@ class Wp_Travel_Engine_Tabs {
 		add_action( 'save_post', array( $this, 'wp_travel_engine_save_trip_price_meta_box_data' ) );
 		add_action( 'set_object_terms', array( $this, 'save_difficulty_as_meta' ), 10, 4 );
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ) );
+
+		// Runs after every plugin's box is registered (e.g. Yoast).
+		add_action( 'add_meta_boxes_trip', array( $this, 'move_trip_settings_to_top' ), 100 );
+
+		// Must run before `wp_default_packages` (priority 10) preloads this meta.
+		add_action( 'wp_default_scripts', array( $this, 'open_metabox_panel' ), 0 );
+
+		// Keeps Trip Settings expanded
+		add_filter( 'postbox_classes_trip_trip_pricing_id', array( $this, 'keep_trip_settings_expanded' ) );
+	}
+
+	/**
+	 * @since 6.8.4
+	 */
+	public function move_trip_settings_to_top() {
+		global $wp_meta_boxes;
+
+		if ( empty( $wp_meta_boxes['trip']['normal']['high']['trip_pricing_id'] ) ) {
+			return;
+		}
+
+		$trip_settings_box = $wp_meta_boxes['trip']['normal']['high']['trip_pricing_id'];
+		unset( $wp_meta_boxes['trip']['normal']['high']['trip_pricing_id'] );
+
+		$wp_meta_boxes['trip']['normal']['high'] = array( 'trip_pricing_id' => $trip_settings_box ) + $wp_meta_boxes['trip']['normal']['high'];
+	}
+
+	/**
+	 * @since 6.8.4
+	 */
+	public function open_metabox_panel() {
+		global $pagenow;
+
+		if ( ! is_admin() || ! in_array( $pagenow, array( 'post.php', 'post-new.php' ), true ) ) {
+			return;
+		}
+
+		$post_type = isset( $_GET['post'] ) ? get_post_type( (int) $_GET['post'] ) : ( $_GET['post_type'] ?? 'post' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		if ( 'trip' !== $post_type ) {
+			return;
+		}
+
+		global $wpdb;
+		$meta_key = $wpdb->get_blog_prefix() . 'persisted_preferences';
+		$user_id  = get_current_user_id();
+		$prefs    = get_user_meta( $user_id, $meta_key, true );
+
+		if ( ! is_array( $prefs ) ) {
+			$prefs = array();
+		}
+
+		// Respect an explicit user choice; only seed the default once.
+		if ( array_key_exists( 'metaBoxesMainIsOpen', $prefs['core/edit-post'] ?? array() ) ) {
+			return;
+		}
+
+		$prefs['core/edit-post']['metaBoxesMainIsOpen']     = true;
+		$prefs['core/edit-post']['metaBoxesMainOpenHeight'] = 650;
+		$prefs['_modified']                                 = gmdate( 'Y-m-d\TH:i:s.v\Z' );
+
+		update_user_meta( $user_id, $meta_key, $prefs );
+	}
+
+	/**
+	 * @since 6.8.4
+	 */
+	public function keep_trip_settings_expanded( $classes ) {
+		return array_diff( $classes, array( 'closed' ) );
 	}
 
 	public function save_difficulty_as_meta( $object_id, $terms, $tt_ids, $taxonomy ) {
@@ -62,10 +131,32 @@ class Wp_Travel_Engine_Tabs {
 	 * Tab for notice listing and settings.
 	 *
 	 * @param array $tab_args Tab Arguments.
+	 * @since 6.8.4 Blocks header-click collapse, hides the reorder-down button, and hides the "Distraction free" Options menu item.
 	 */
 	public function wp_travel_engine_trip_price_metabox_callback( $tab_args ) {
 		wp_enqueue_script( 'wptravelengine-trip-edit' );
 		wp_enqueue_script( 'wptravelengine-exports' );
+
+		// Blocks header-click collapse; `.handlediv` still toggles.
+		wp_add_inline_script(
+			'wptravelengine-trip-edit',
+			"document.addEventListener( 'click', function ( e ) {
+				if ( ! e.target.closest( '#trip_pricing_id' ) ) {
+					return;
+				}
+				if ( e.target.closest( '.postbox-header' ) && ! e.target.closest( '.handle-actions' ) ) {
+					e.stopPropagation();
+				}
+			}, true );"
+		);
+
+		// Disabled the lower button; 2nd item in the Options "View" group is
+		// always "Distraction free" (fixed core markup, no filter for it).
+		echo '<style>
+			#trip_pricing_id .handle-order-lower { display: none; }
+			.more-menu-dropdown__content .components-menu-group:first-of-type button:nth-of-type(2) { display: none; }
+		</style>';
+
 		include plugin_dir_path( __FILE__ ) . 'meta-parts/trip-metas.php';
 	}
 

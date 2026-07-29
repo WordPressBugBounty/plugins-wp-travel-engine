@@ -7,6 +7,6 @@
   "category": "widgets",
   "description": "Trip Search Result Page.",
   "attributes": {},
-  "textdomain": "wptravelengine",
+  "textdomain": "wp-travel-engine",
   "render": "file:./block.php"
 }

@@ -83,7 +83,7 @@ class TourPackages {
 				}
 
 				$modified_submenu[13] = array(
-					__( 'Pricing Categories', 'wp-travel-engine' ),
+					__( 'Price Categories', 'wp-travel-engine' ),
 					'manage_categories',
 					'edit-tags.php?taxonomy=trip-packages-categories&amp;post_type=trip',
 				);
@@ -187,12 +187,12 @@ class TourPackages {
 				<tr class="form-field">
 					<th class="row">
 						<label
-							for="package-primary-catgory"><?php esc_html_e( 'Set as Primary Pricing Category', 'wp-travel-engine' ); ?></label>
+							for="package-primary-catgory"><?php esc_html_e( 'Set as Primary Price Category', 'wp-travel-engine' ); ?></label>
 					</th>
 					<td>
 						<input type="checkbox" <?php checked( $tag->term_id, $meta_value ); ?>
 								name="is_primary_pricing_catgory" value="1" id="package-primary-catgory">
-						<p><?php esc_html_e( 'If checked, this category will be treated as primary pricing category in packages and trip price will be the price of this category.', 'wp-travel-engine' ); ?></p>
+						<p><?php esc_html_e( 'If checked, this category will be treated as primary price category in packages and trip price will be the price of this category.', 'wp-travel-engine' ); ?></p>
 					</td>
 				</tr>
 				<tr class="form-field">
@@ -237,9 +237,9 @@ class TourPackages {
 				?>
 				<div class="form-field">
 					<label
-						for="package-primary-catgory"><?php esc_html_e( 'Set as Primary Pricing Category', 'wp-travel-engine' ); ?></label>
+						for="package-primary-catgory"><?php esc_html_e( 'Set as Primary Price Category', 'wp-travel-engine' ); ?></label>
 					<input type="checkbox" name="is_primary_pricing_catgory" value="1" id="package-primary-catgory">
-					<p><?php esc_html_e( 'If checked, this category will be treated as primary pricing category in packages and trip price will be the price of this category.', 'wp-travel-engine' ); ?></p>
+					<p><?php esc_html_e( 'If checked, this category will be treated as primary price category in packages and trip price will be the price of this category.', 'wp-travel-engine' ); ?></p>
 				</div>
 				<div class="form-field">
 					<label for="category-age-group"><?php esc_html_e( 'Age Group', 'wp-travel-engine' ); ?></label>

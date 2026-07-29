@@ -158,8 +158,8 @@ class Wp_Travel_Engine_Mail_Template {
 			$purchase_receipt .= __( 'Trip Name: {trip_url}', 'wp-travel-engine' ) . '<br />';
 			$purchase_receipt .= __( 'Trip Cost: {tprice}', 'wp-travel-engine' ) . '<br />';
 			$purchase_receipt .= __( 'Trip Start Date : {tdate}', 'wp-travel-engine' ) . '<br />';
-			$purchase_receipt .= __( 'Total Number of Traveller(s): {traveler}', 'wp-travel-engine' ) . '<br />';
-			// $purchase_receipt .= __( 'Total Number of Child Traveller(s): {child-traveler}', 'wp-travel-engine' ) . '<br />';
+			$purchase_receipt .= __( 'Total Number of Traveler(s): {traveler}', 'wp-travel-engine' ) . '<br />';
+			// $purchase_receipt .= __( 'Total Number of Child Traveler(s): {child-traveler}', 'wp-travel-engine' ) . '<br />';
 			$purchase_receipt .= __( 'Booking Url: {booking_url}', 'wp-travel-engine' ) . '<br />';
 			$purchase_receipt .= __( 'Total Cost: {price}', 'wp-travel-engine' ) . '<br />';
 			$purchase_receipt .= __( 'Thank you.', 'wp-travel-engine' ) . '<br />';
@@ -308,8 +308,8 @@ class Wp_Travel_Engine_Mail_Template {
 			$book_receipt .= '<br />' . __( 'Trip Name : {trip_url}', 'wp-travel-engine' ) . '<br />';
 			$book_receipt .= __( 'Trip Cost:  {tprice}', 'wp-travel-engine' ) . '<br />';
 			$book_receipt .= __( 'Trip Start Date : {tdate}', 'wp-travel-engine' ) . '<br />';
-			$book_receipt .= __( 'Total Number of Traveller(s): {traveler}', 'wp-travel-engine' ) . '<br />';
-			// $book_receipt .= __( 'Total Number of Child Traveller(s): {child-traveler}', 'wp-travel-engine' ) . '<br />';
+			$book_receipt .= __( 'Total Number of Traveler(s): {traveler}', 'wp-travel-engine' ) . '<br />';
+			// $book_receipt .= __( 'Total Number of Child Traveler(s): {child-traveler}', 'wp-travel-engine' ) . '<br />';
 			$book_receipt .= __( 'Trip Booking URL: {booking_url}', 'wp-travel-engine' ) . '<br />';
 			$book_receipt .= __( 'Total Cost: {price}', 'wp-travel-engine' ) . '<br />';
 			$book_receipt .= __( 'Thank you.', 'wp-travel-engine' ) . '<br />';

@@ -364,6 +364,7 @@ class Trip extends WP_REST_Posts_Controller {
 	 *
 	 * @return void
 	 * @since 6.2.2
+	 * @since 6.8.4 Added capacity_per_category support.
 	 */
 	protected function set_core_settings( WP_REST_Request $request ): void {
 
@@ -893,6 +894,10 @@ class Trip extends WP_REST_Posts_Controller {
 		if ( ! $trip->get_meta( '_s_price' ) ) {
 			$trip->set_meta( '_s_price', $trip->get_price() );
 		}
+
+		if ( isset( $request['capacity_per_category'] ) ) {
+			$trip->set_meta( 'cap_per_cat', wptravelengine_replace( $request['capacity_per_category'], true, 'yes', 'no', 'enabled' ) );
+		}
 	}
 
 	/**
@@ -903,6 +908,7 @@ class Trip extends WP_REST_Posts_Controller {
 	 * TODO: Create methods in trip modal to get these values, like $trip->get_code, $trip->get_duration, etc.
 	 *
 	 * @return WP_Error|WP_HTTP_Response|WP_REST_Response
+	 * @since 6.8.4 Added capacity_per_category to response.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 
@@ -963,6 +969,8 @@ class Trip extends WP_REST_Posts_Controller {
 			'min' => (int) $trip->get_setting( 'trip_minimum_pax', 1 ),
 			'max' => $trip->get_maximum_participants(),
 		);
+
+		$data['capacity_per_category'] = wptravelengine_replace( $trip->get_cap_per_cat(), 'yes', true, false, 'enabled' );
 
 		$map_img_id = $trip->get_setting( 'map.image_url', array() );
 		$trip_imgs  = array();
@@ -1299,6 +1307,8 @@ class Trip extends WP_REST_Posts_Controller {
 	 * @return array
 	 */
 	public static function prepare_package_data( Post\TripPackage $trip_package ): array {
+		return TripPackages::prepare_package_data( $trip_package );
+		// TODO: Remove before deployment
 		$data = array();
 		/**
 		 * @var Post\TripPackage $trip_package
@@ -1387,11 +1397,11 @@ class Trip extends WP_REST_Posts_Controller {
 
 		$item_properties = array(
 			// Trip specific properties.
-			'trip_code'            => array(
+			'trip_code'             => array(
 				'description' => __( 'Trip code.', 'wp-travel-engine' ),
 				'type'        => 'string',
 			),
-			'duration'             => array(
+			'duration'              => array(
 				'description' => __( 'Trip duration.', 'wp-travel-engine' ),
 				'type'        => 'object',
 				'properties'  => array(
@@ -1410,7 +1420,7 @@ class Trip extends WP_REST_Posts_Controller {
 					),
 				),
 			),
-			'cut_off_time'         => array(
+			'cut_off_time'          => array(
 				'description' => __( 'Trip cut off time.', 'wp-travel-engine' ),
 				'type'        => 'object',
 				'context'     => array( 'view', 'edit' ),
@@ -1432,7 +1442,7 @@ class Trip extends WP_REST_Posts_Controller {
 					),
 				),
 			),
-			'age_limit'            => array(
+			'age_limit'             => array(
 				'description' => __( 'Trip age.', 'wp-travel-engine' ),
 				'type'        => 'object',
 				'properties'  => array(
@@ -1452,7 +1462,7 @@ class Trip extends WP_REST_Posts_Controller {
 					),
 				),
 			),
-			'participants'         => array(
+			'participants'          => array(
 				'description' => __( 'Minimum and maximum participants for booking this trip.', 'wp-travel-engine' ),
 				'type'        => 'object',
 				'properties'  => array(
@@ -1472,33 +1482,75 @@ class Trip extends WP_REST_Posts_Controller {
 					),
 				),
 			),
-			'overview_title'       => array(
+			'capacity_per_category' => array(
+				'description' => __( 'Capacity per pricing category.', 'wp-travel-engine' ),
+				'type'        => 'object',
+				'properties'  => array(
+					'enabled'        => array(
+						'type' => 'boolean',
+					),
+					'mode'           => array(
+						'type' => 'string',
+						'enum' => array( 'same', 'different' ),
+					),
+					'limits'         => array(
+						'type'  => 'array',
+						'items' => array(
+							'type'       => 'object',
+							'properties' => array(
+								'id'        => array( 'type' => 'integer' ),
+								'max_seats' => array( 'type' => array( 'integer', 'string' ) ),
+							),
+						),
+					),
+					'package_limits' => array(
+						'type'  => 'array',
+						'items' => array(
+							'type'       => 'object',
+							'properties' => array(
+								'package_id' => array( 'type' => array( 'integer', 'null' ) ),
+								'limits'     => array(
+									'type'  => 'array',
+									'items' => array(
+										'type'       => 'object',
+										'properties' => array(
+											'id'        => array( 'type' => 'integer' ),
+											'max_seats' => array( 'type' => array( 'integer', 'string' ) ),
+										),
+									),
+								),
+							),
+						),
+					),
+				),
+			),
+			'overview_title'        => array(
 				'description' => __( 'Trip overview title.', 'wp-travel-engine' ),
 				'type'        => 'string',
 				'context'     => array( 'edit' ),
 			),
-			'overview'             => array(
+			'overview'              => array(
 				'description' => __( 'Trip overview.', 'wp-travel-engine' ),
 				'type'        => 'string',
 			),
-			'highlights_title'     => array(
+			'highlights_title'      => array(
 				'description' => __( 'Trip highlights title.', 'wp-travel-engine' ),
 				'type'        => 'string',
 				'context'     => array( 'edit' ),
 			),
-			'highlights'           => array(
+			'highlights'            => array(
 				'description' => __( 'Trip highlights.', 'wp-travel-engine' ),
 				'type'        => 'array',
 				'items'       => array(
 					'type' => 'string',
 				),
 			),
-			'itinerary_title'      => array(
+			'itinerary_title'       => array(
 				'description' => __( 'Trip itinerary title.', 'wp-travel-engine' ),
 				'type'        => 'string',
 				'context'     => array( 'edit' ),
 			),
-			'itineraries'          => array(
+			'itineraries'           => array(
 				'description' => __( 'Trip itineraries.', 'wp-travel-engine' ),
 				'type'        => 'array',
 				'items'       => array(
@@ -1585,41 +1637,41 @@ class Trip extends WP_REST_Posts_Controller {
 					),
 				),
 			),
-			'cost_title'           => array(
+			'cost_title'            => array(
 				'description' => __( 'Trip cost title.', 'wp-travel-engine' ),
 				'type'        => 'string',
 				'context'     => array( 'edit' ),
 			),
-			'cost_includes_title'  => array(
+			'cost_includes_title'   => array(
 				'description' => __( 'Trip cost includes title.', 'wp-travel-engine' ),
 				'type'        => 'string',
 				'context'     => array( 'edit' ),
 			),
-			'cost_includes'        => array(
+			'cost_includes'         => array(
 				'description' => __( 'Trip cost includes.', 'wp-travel-engine' ),
 				'type'        => 'array',
 				'items'       => array(
 					'type' => 'string',
 				),
 			),
-			'cost_excludes_title'  => array(
+			'cost_excludes_title'   => array(
 				'description' => __( 'Trip cost excludes title.', 'wp-travel-engine' ),
 				'type'        => 'string',
 				'context'     => array( 'edit' ),
 			),
-			'cost_excludes'        => array(
+			'cost_excludes'         => array(
 				'description' => __( 'Trip cost excludes.', 'wp-travel-engine' ),
 				'type'        => 'array',
 				'items'       => array(
 					'type' => 'string',
 				),
 			),
-			'trip_info_title'      => array(
+			'trip_info_title'       => array(
 				'description' => __( 'Trip info title.', 'wp-travel-engine' ),
 				'type'        => 'string',
 				'context'     => array( 'edit' ),
 			),
-			'trip_info'            => array(
+			'trip_info'             => array(
 				'description' => __( 'Trip facts.', 'wp-travel-engine' ),
 				'type'        => 'array',
 				'items'       => array(
@@ -1653,13 +1705,13 @@ class Trip extends WP_REST_Posts_Controller {
 					),
 				),
 			),
-			'gallery_enable'       => array(
+			'gallery_enable'        => array(
 				'description' => __( 'Trip gallery enabled.', 'wp-travel-engine' ),
 				'type'        => 'boolean',
 				'enum'        => array( true, false ),
 				'context'     => array( 'edit' ),
 			),
-			'gallery'              => array(
+			'gallery'               => array(
 				'description' => __( 'Trip image gallery.', 'wp-travel-engine' ),
 				'type'        => 'array',
 				'items'       => array(
@@ -1681,13 +1733,13 @@ class Trip extends WP_REST_Posts_Controller {
 					'context'    => array( 'view' ),
 				),
 			),
-			'video_gallery_enable' => array(
+			'video_gallery_enable'  => array(
 				'description' => __( 'Trip video gallery enabled.', 'wp-travel-engine' ),
 				'type'        => 'boolean',
 				'enum'        => array( true, false ),
 				'context'     => array( 'edit' ),
 			),
-			'video_gallery'        => array(
+			'video_gallery'         => array(
 				'description' => __( 'Trip video gallery.', 'wp-travel-engine' ),
 				'type'        => 'array',
 				'items'       => array(
@@ -1704,12 +1756,12 @@ class Trip extends WP_REST_Posts_Controller {
 					),
 				),
 			),
-			'map_title'            => array(
+			'map_title'             => array(
 				'description' => __( 'Trip map title.', 'wp-travel-engine' ),
 				'type'        => 'string',
 				'context'     => array( 'edit' ),
 			),
-			'trip_map'             => array(
+			'trip_map'              => array(
 				'description' => __( 'Trip map.', 'wp-travel-engine' ),
 				'type'        => 'object',
 				'properties'  => array(
@@ -1740,12 +1792,12 @@ class Trip extends WP_REST_Posts_Controller {
 					),
 				),
 			),
-			'faqs_title'           => array(
+			'faqs_title'            => array(
 				'description' => __( 'Trip FAQs title.', 'wp-travel-engine' ),
 				'type'        => 'string',
 				'context'     => array( 'edit' ),
 			),
-			'faqs'                 => array(
+			'faqs'                  => array(
 				'description' => __( 'Trip FAQs.', 'wp-travel-engine' ),
 				'type'        => 'array',
 				'items'       => array(
@@ -1762,7 +1814,7 @@ class Trip extends WP_REST_Posts_Controller {
 					),
 				),
 			),
-			'packages'             => array(
+			'packages'              => array(
 				'description' => __( 'Trip packages.', 'wp-travel-engine' ),
 				'type'        => 'array',
 				'context'     => array( 'edit' ),
@@ -2028,7 +2080,7 @@ class Trip extends WP_REST_Posts_Controller {
 					),
 				),
 			),
-			'custom_tabs'          => array(
+			'custom_tabs'           => array(
 				'description' => __( 'Trip custom tabs.', 'wp-travel-engine' ),
 				'type'        => 'object',
 				'properties'  => array(
