@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv3.
 msgid ""
 msgstr ""
-"Project-Id-Version: WP Travel Engine - Travel and Tour Booking Plugin 6.8.4\n"
+"Project-Id-Version: WP Travel Engine - Travel and Tour Booking Plugin 6.8.5\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wptravelengine\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-07-29T11:19:51+00:00\n"
+"POT-Creation-Date: 2026-08-03T08:46:55+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wp-travel-engine\n"
@@ -401,7 +401,7 @@ msgstr ""
 #: includes/classes/Booking/Email/Dummy/DummyTags.php:300
 #: includes/classes/Booking/Email/Dummy/DummyTags.php:410
 #: includes/classes/Booking/Email/Template_Tags.php:349
-#: includes/classes/Plugin.php:667
+#: includes/classes/Plugin.php:675
 msgid "Trip Date"
 msgstr ""
 
@@ -417,7 +417,7 @@ msgstr ""
 #: includes/classes/Core/PostTypes/Booking.php:307
 #: includes/dashboard/class-wp-travel-engine-enquiry-form-shortcodes.php:45
 #: includes/dashboard/class-wp-travel-engine-enquiry-form-shortcodes.php:112
-#: includes/helpers/helpers.php:1219
+#: includes/helpers/helpers.php:1239
 msgid "Trip Name"
 msgstr ""
 
@@ -480,7 +480,7 @@ msgstr ""
 #: includes/backend/booking/booking-parts/booking-details.php:205
 #: includes/backend/booking/booking.php:89
 #: includes/backend/booking/customer.php:13
-#: includes/class-wte-default-form-fields.php:276
+#: includes/class-wte-default-form-fields.php:274
 #: includes/classes/Booking/Email/Dummy/DummyTags.php:526
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:58
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:503
@@ -552,7 +552,7 @@ msgstr ""
 #: includes/backend/booking/booking.php:122
 #: includes/backend/booking/customer.php:24
 #: includes/class-wte-default-form-fields.php:62
-#: includes/class-wte-default-form-fields.php:321
+#: includes/class-wte-default-form-fields.php:319
 #: includes/classes/Booking/Email/Dummy/DummyTags.php:530
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:111
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:530
@@ -597,7 +597,7 @@ msgstr ""
 #: includes/classes/Core/Models/Post/Booking.php:1746
 #: includes/helpers/functions.php:2331
 #: includes/helpers/functions.php:2357
-#: includes/helpers/helpers.php:2482
+#: includes/helpers/helpers.php:2505
 msgid "N/A"
 msgstr ""
 
@@ -994,7 +994,7 @@ msgstr ""
 #: includes/classes/Modules/TripSearch.php:188
 #: includes/classes/Modules/TripSearch.php:1009
 #: includes/helpers/functions.php:269
-#: dist/admin/trip-edit.js:5424
+#: dist/admin/trip-edit.js:5432
 msgid "Day"
 msgstr ""
 
@@ -1009,9 +1009,9 @@ msgstr ""
 #: includes/classes/Modules/TripSearch.php:303
 #: includes/classes/Modules/TripSearch.php:1010
 #: includes/helpers/functions.php:270
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
 msgid "Days"
 msgstr ""
 
@@ -1074,7 +1074,7 @@ msgid "Note: By clicking yes, you will get an additional messages menu inside Tr
 msgstr ""
 
 #: admin/class-wp-travel-engine-admin.php:2346
-#: includes/classes/Plugin.php:1788
+#: includes/classes/Plugin.php:1796
 msgid "Dismiss this notice."
 msgstr ""
 
@@ -1108,7 +1108,7 @@ msgstr ""
 #: includes/classes/Builders/FormFields/OrderTripEditFormFields.php:351
 #: includes/classes/Core/Controllers/Ajax/EnquiryPreview.php:69
 #: includes/classes/Core/Controllers/Ajax/ResendPurchaseReceipt.php:189
-#: includes/helpers/helpers.php:3190
+#: includes/helpers/helpers.php:3218
 #: includes/templates/script-templates/tmpl-wte-packages.php:7
 msgid "Package Name"
 msgstr ""
@@ -1121,12 +1121,12 @@ msgstr ""
 #: includes/helpers/privacy-functions.php:121
 #: includes/templates/content--template-taxonomy.php:98
 #: includes/templates/emails/booking/notification.php:14
-#: dist/admin/exports.js:4075
-#: dist/admin/exports.js:4114
-#: dist/admin/global-settings.js:3982
-#: dist/admin/global-settings.js:4021
-#: dist/admin/trip-edit.js:4089
-#: dist/admin/trip-edit.js:4128
+#: dist/admin/exports.js:4081
+#: dist/admin/exports.js:4120
+#: dist/admin/global-settings.js:3988
+#: dist/admin/global-settings.js:4027
+#: dist/admin/trip-edit.js:4095
+#: dist/admin/trip-edit.js:4134
 msgid "Name"
 msgstr ""
 
@@ -1217,7 +1217,7 @@ msgstr ""
 #: admin/class-wp-travel-engine-admin.php:3121
 #: includes/classes/Builders/admin-settings/extensions/group-discount.php:17
 #: includes/classes/Filters/schemas/Group-discount.php:14
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 #: dist/bundle/trip-booking-modal.bundle.js:2
 #: dist/public/components/trip-booking-modal.js:2
 #: dist/public/exports.js:2
@@ -1389,7 +1389,7 @@ msgstr ""
 #: includes/classes/Booking/Email/Dummy/DummyTags.php:414
 #: includes/classes/Booking/Email/Template_Tags.php:354
 #: includes/classes/Core/Controllers/Ajax/ResendPurchaseReceipt.php:204
-#: includes/classes/Plugin.php:674
+#: includes/classes/Plugin.php:682
 msgid "Trip End Date"
 msgstr ""
 
@@ -1401,8 +1401,8 @@ msgid "Accommodation"
 msgstr ""
 
 #: admin/class-wp-travel-engine-booking-export.php:1024
-#: admin/meta-parts/trip-metas.php:667
-#: admin/meta-parts/trip-metas.php:668
+#: admin/meta-parts/trip-metas.php:674
+#: admin/meta-parts/trip-metas.php:675
 #: includes/backend/booking/booking-parts/booking-details_trip-info.php:178
 #: includes/backend/templates/booking/partials/tabs/extra-services.php:14
 #: includes/class-wp-travel-engine-emails.php:741
@@ -1413,7 +1413,7 @@ msgstr ""
 #: includes/classes/Core/PostTypes/Booking.php:161
 #: includes/classes/Filters/CheckoutPageTemplate.php:586
 #: includes/classes/Filters/SettingsAPISchema.php:185
-#: includes/classes/Plugin.php:1657
+#: includes/classes/Plugin.php:1665
 #: includes/templates/checkout/header-steps.php:35
 #: includes/templates/checkout/mini-cart-before-coupon.php:13
 #: dist/bundle/trip-booking-modal.bundle.js:2
@@ -1496,12 +1496,12 @@ msgid "Discount Code"
 msgstr ""
 
 #: admin/class-wp-travel-engine-booking-export.php:1070
-#: dist/admin/coupon-edit.js:3510
+#: dist/admin/coupon-edit.js:3516
 msgid "Discount Percentage"
 msgstr ""
 
 #: admin/class-wp-travel-engine-booking-export.php:1071
-#: dist/admin/coupon-edit.js:3510
+#: dist/admin/coupon-edit.js:3516
 msgid "Discount Amount"
 msgstr ""
 
@@ -1573,9 +1573,9 @@ msgid "No messages available"
 msgstr ""
 
 #: admin/class-wp-travel-engine-messages-list.php:114
-#: dist/admin/exports.js:4114
-#: dist/admin/global-settings.js:4021
-#: dist/admin/trip-edit.js:4128
+#: dist/admin/exports.js:4120
+#: dist/admin/global-settings.js:4027
+#: dist/admin/trip-edit.js:4134
 msgid "Subject"
 msgstr ""
 
@@ -1657,7 +1657,7 @@ msgstr ""
 
 #: admin/meta-parts/tabs-inner/itinerary-setting.php:44
 #: admin/meta-parts/trip-tabs/itinerary.php:82
-#: dist/admin/trip-edit.js:5424
+#: dist/admin/trip-edit.js:5432
 msgid "Add Itinerary"
 msgstr ""
 
@@ -1679,8 +1679,8 @@ msgstr ""
 #: includes/classes/Builders/admin-settings/performance/general.php:12
 #: includes/classes/Filters/TripAPISchema.php:661
 #: includes/templates/script-templates/tmpl-wte-package-single.php:22
-#: dist/admin/trip-edit.js:5266
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5272
+#: dist/admin/trip-edit.js:5765
 msgid "General"
 msgstr ""
 
@@ -1696,7 +1696,7 @@ msgstr ""
 #: includes/classes/Modules/TripCode.php:194
 #: includes/classes/Modules/TripCode.php:209
 #: includes/classes/Modules/TripCode.php:228
-#: includes/classes/Plugin.php:1773
+#: includes/classes/Plugin.php:1781
 msgid "Trip Code"
 msgstr ""
 
@@ -1718,10 +1718,10 @@ msgstr ""
 #: includes/templates/content-related-trip-default.php:148
 #: includes/templates/template-trip-search-form.php:15
 #: includes/templates/trip-card/card-aside.php:16
-#: dist/admin/exports.js:4075
-#: dist/admin/global-settings.js:3982
-#: dist/admin/trip-edit.js:4089
-#: dist/admin/trip-edit.js:5424
+#: dist/admin/exports.js:4081
+#: dist/admin/global-settings.js:3988
+#: dist/admin/trip-edit.js:4095
+#: dist/admin/trip-edit.js:5432
 #: dist/blocks/editor/editor.js:1403
 msgid "Duration"
 msgstr ""
@@ -1790,22 +1790,27 @@ msgstr ""
 msgid "Date & Price"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:333
-#: admin/meta-parts/trip-metas.php:334
-#: admin/meta-parts/trip-metas.php:349
-#: admin/meta-parts/trip-metas.php:358
-#: admin/meta-parts/trip-metas.php:728
+#: admin/meta-parts/trip-metas.php:325
+#, php-format
+msgid "You can set a maximum seat limit for each price category, either the same across all packages or different per package. <a href=\"%1$s\" target=\"_blank\">Learn more</a>"
+msgstr ""
+
+#: admin/meta-parts/trip-metas.php:340
+#: admin/meta-parts/trip-metas.php:341
+#: admin/meta-parts/trip-metas.php:356
+#: admin/meta-parts/trip-metas.php:365
+#: admin/meta-parts/trip-metas.php:735
 #: admin/meta-parts/trip-tabs/overview.php:17
-#: includes/helpers/helpers.php:1284
+#: includes/helpers/helpers.php:1304
 msgid "Overview"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:344
-#: admin/meta-parts/trip-metas.php:368
-#: admin/meta-parts/trip-metas.php:396
-#: admin/meta-parts/trip-metas.php:461
-#: admin/meta-parts/trip-metas.php:533
-#: admin/meta-parts/trip-metas.php:617
+#: admin/meta-parts/trip-metas.php:351
+#: admin/meta-parts/trip-metas.php:375
+#: admin/meta-parts/trip-metas.php:403
+#: admin/meta-parts/trip-metas.php:468
+#: admin/meta-parts/trip-metas.php:540
+#: admin/meta-parts/trip-metas.php:624
 #: admin/meta-parts/trip-tabs/custom-tabs.php:33
 #: admin/meta-parts/trip-tabs/editor.php:34
 #: admin/meta-parts/trip-tabs/faqs.php:19
@@ -1817,107 +1822,107 @@ msgstr ""
 #: admin/meta-parts/trip-tabs/trip-facts.php:26
 #: admin/partials/trip/edit/tab-pricing/tab-pricing__settings.php:16
 #: includes/classes/Filters/TripMetaTabs.php:106
-#: includes/helpers/helpers.php:2407
-#: dist/admin/trip-edit.js:5266
+#: includes/helpers/helpers.php:2430
+#: dist/admin/trip-edit.js:5272
 msgid "Section Title"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:353
+#: admin/meta-parts/trip-metas.php:360
 #: admin/meta-parts/trip-tabs/overview.php:22
 #: admin/meta-parts/trip-tabs/overview.php:33
 #: dist/blocks/editor/editor.js:1403
 msgid "Trip Description"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:364
+#: admin/meta-parts/trip-metas.php:371
 #: admin/meta-parts/trip-tabs/overview.php:46
 msgid "Trip Highlights"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:373
+#: admin/meta-parts/trip-metas.php:380
 #: includes/classes/Builders/admin-settings/general/trip-settings.php:39
 #: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2993
 #: public/class-wp-travel-engine-template-hooks.php:1092
 msgid "Highlights"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:385
-#: admin/meta-parts/trip-metas.php:386
-#: admin/meta-parts/trip-metas.php:402
+#: admin/meta-parts/trip-metas.php:392
+#: admin/meta-parts/trip-metas.php:393
+#: admin/meta-parts/trip-metas.php:409
 #: admin/meta-parts/trip-tabs/itinerary.php:18
-#: includes/helpers/helpers.php:1285
+#: includes/helpers/helpers.php:1305
 msgid "Itinerary"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:397
+#: admin/meta-parts/trip-metas.php:404
 #: admin/meta-parts/trip-tabs/itinerary.php:27
 msgid "Enter title for the trip itinerary section tab content."
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:406
-#: admin/meta-parts/trip-metas.php:412
+#: admin/meta-parts/trip-metas.php:413
+#: admin/meta-parts/trip-metas.php:419
 msgid "Itinerary Description"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:407
+#: admin/meta-parts/trip-metas.php:414
 msgid "Enter description for the trip itinerary section tab content."
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:420
+#: admin/meta-parts/trip-metas.php:427
 msgid "<strong>NOTE:</strong> Need additional itinerary fields or require rich text editing for the itinerary? Advanced Itinerary Builder extension provides a rich text editor, sleeping mode, meals, ability to add photos to each day and more. <a href=\"https://wptravelengine.com/plugins/advanced-itinerary-builder/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro\" target=\"_blank\">Get Advanced Itinerary Builder extension now</a>"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:429
+#: admin/meta-parts/trip-metas.php:436
 msgid "<p>You can add, edit and delete sleep modes via <strong>WP Travel Engine > Settings > Extensions > Advanced Itinerary Builder.</strong></p>"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:450
-#: admin/meta-parts/trip-metas.php:451
-#: admin/meta-parts/trip-metas.php:466
+#: admin/meta-parts/trip-metas.php:457
+#: admin/meta-parts/trip-metas.php:458
+#: admin/meta-parts/trip-metas.php:473
 msgid "Includes/Excludes"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:472
-#: admin/meta-parts/trip-metas.php:480
+#: admin/meta-parts/trip-metas.php:479
+#: admin/meta-parts/trip-metas.php:487
 #: admin/meta-parts/trip-tabs/includes-excludes.php:34
 msgid "Cost Includes"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:476
+#: admin/meta-parts/trip-metas.php:483
 #: admin/meta-parts/trip-tabs/includes-excludes.php:37
 msgid "Cost Includes Title"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:484
-#: admin/meta-parts/trip-metas.php:510
+#: admin/meta-parts/trip-metas.php:491
+#: admin/meta-parts/trip-metas.php:517
 #: admin/meta-parts/trip-tabs/includes-excludes.php:42
 #: admin/meta-parts/trip-tabs/includes-excludes.php:60
 msgid "List Of Services"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:489
+#: admin/meta-parts/trip-metas.php:496
 msgid "List of services that are included."
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:497
-#: admin/meta-parts/trip-metas.php:506
+#: admin/meta-parts/trip-metas.php:504
+#: admin/meta-parts/trip-metas.php:513
 #: admin/meta-parts/trip-tabs/includes-excludes.php:51
 msgid "Cost Excludes"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:501
+#: admin/meta-parts/trip-metas.php:508
 #: admin/meta-parts/trip-tabs/includes-excludes.php:55
 msgid "Cost Excludes Title"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:514
+#: admin/meta-parts/trip-metas.php:521
 msgid "List of services that are excluded."
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:522
-#: admin/meta-parts/trip-metas.php:523
-#: admin/meta-parts/trip-metas.php:538
-#: admin/meta-parts/trip-metas.php:735
+#: admin/meta-parts/trip-metas.php:529
+#: admin/meta-parts/trip-metas.php:530
+#: admin/meta-parts/trip-metas.php:545
+#: admin/meta-parts/trip-metas.php:742
 #: includes/backend/booking/booking-parts/booking-details_trip-info.php:29
 #: includes/backend/booking/legacy/booking-parts/trip-info.php:9
 #: includes/classes/Builders/admin-settings/general/trip-settings.php:29
@@ -1926,126 +1931,126 @@ msgid_plural "Trips Info"
 msgstr[0] ""
 msgstr[1] ""
 
-#: admin/meta-parts/trip-metas.php:542
+#: admin/meta-parts/trip-metas.php:549
 msgid "Trip Info Selection"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:543
+#: admin/meta-parts/trip-metas.php:550
 #: admin/meta-parts/trip-tabs/trip-facts.php:53
 msgid "Select the trip fact title and click on add fact button to enter trip fact data."
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:553
-#: admin/meta-parts/trip-metas.php:554
-#: admin/meta-parts/trip-metas.php:786
+#: admin/meta-parts/trip-metas.php:560
+#: admin/meta-parts/trip-metas.php:561
+#: admin/meta-parts/trip-metas.php:793
 #: dist/blocks/single-trip/trip-gallery/block.php:192
 #: includes/templates/single-trip/main-gallery.php:173
 #: public/class-wp-travel-engine-template-hooks.php:145
 msgid "Gallery"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:564
+#: admin/meta-parts/trip-metas.php:571
 #: admin/meta-parts/trip-tabs/gallery.php:34
 msgid "Enable Image Gallery"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:572
+#: admin/meta-parts/trip-metas.php:579
 msgid "Max. file size 5MB Supports: JPG,PNG,WebP images"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:580
+#: admin/meta-parts/trip-metas.php:587
 #: includes/class-wp-travel-engine-taxonomy-thumb.php:105
 #: includes/class-wp-travel-engine-taxonomy-thumb.php:260
-#: dist/admin/trip-edit.js:5424
+#: dist/admin/trip-edit.js:5432
 msgid "Add Image"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:589
+#: admin/meta-parts/trip-metas.php:596
 #: admin/meta-parts/trip-tabs/gallery.php:66
 msgid "Enable Video Gallery"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:606
-#: admin/meta-parts/trip-metas.php:607
-#: admin/meta-parts/trip-metas.php:779
+#: admin/meta-parts/trip-metas.php:613
+#: admin/meta-parts/trip-metas.php:614
+#: admin/meta-parts/trip-metas.php:786
 #: includes/class-wp-travel-engine-custom-shortcodes.php:340
-#: includes/helpers/helpers.php:1289
+#: includes/helpers/helpers.php:1309
 msgid "Map"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:622
+#: admin/meta-parts/trip-metas.php:629
 msgid "Enter map title"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:626
+#: admin/meta-parts/trip-metas.php:633
 #: admin/meta-parts/trip-tabs/map.php:24
 msgid "Map Image"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:633
+#: admin/meta-parts/trip-metas.php:640
 #: admin/meta-parts/trip-tabs/map.php:27
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
 msgid "Upload Image"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:637
+#: admin/meta-parts/trip-metas.php:644
 msgid "Map iframe Code"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:648
-#: admin/meta-parts/trip-metas.php:649
+#: admin/meta-parts/trip-metas.php:655
+#: admin/meta-parts/trip-metas.php:656
 #: includes/classes/Builders/admin-settings/display/single-trip.php:523
-#: includes/helpers/helpers.php:1288
+#: includes/helpers/helpers.php:1308
 msgid "FAQs"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:685
-#: admin/meta-parts/trip-metas.php:686
+#: admin/meta-parts/trip-metas.php:692
+#: admin/meta-parts/trip-metas.php:693
 msgid "Shortcodes"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:724
+#: admin/meta-parts/trip-metas.php:731
 msgid "Overview & Info"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:745
+#: admin/meta-parts/trip-metas.php:752
 #: admin/partials/trip/edit/tab-pricing/tab-pricing__packages.php:11
 #: includes/templates/script-templates/tmpl-wte-packages.php:4
 msgid "Packages"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:752
+#: admin/meta-parts/trip-metas.php:759
 #: admin/partials/trip/edit/tab-pricing/tab-pricing__settings.php:10
 msgid "Date Settings"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:763
+#: admin/meta-parts/trip-metas.php:770
 msgid "Partial Payments"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:775
+#: admin/meta-parts/trip-metas.php:782
 msgid "Map & Gallery"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:873
-#: admin/meta-parts/trip-metas.php:874
+#: admin/meta-parts/trip-metas.php:880
+#: admin/meta-parts/trip-metas.php:881
 msgid "Increase Revenue"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:890
+#: admin/meta-parts/trip-metas.php:897
 #: includes/classes/Builders/admin-settings/extensions/file-downloads.php:18
 #: includes/classes/Filters/TripMetaTabs.php:252
 msgid "File Downloads"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:900
+#: admin/meta-parts/trip-metas.php:907
 msgid "Custom Booking Link"
 msgstr ""
 
-#: admin/meta-parts/trip-metas.php:912
-#: admin/meta-parts/trip-metas.php:913
+#: admin/meta-parts/trip-metas.php:919
+#: admin/meta-parts/trip-metas.php:920
 msgid "Advanced Settings"
 msgstr ""
 
@@ -2054,7 +2059,7 @@ msgstr ""
 #: admin/meta-parts/trip-tabs/custom-tabs.php:41
 #: admin/meta-parts/trip-tabs/editor.php:30
 #: admin/meta-parts/trip-tabs/editor.php:42
-#: includes/helpers/helpers.php:2416
+#: includes/helpers/helpers.php:2439
 msgid "Tab Content"
 msgstr ""
 
@@ -2110,7 +2115,7 @@ msgstr ""
 #: includes/onboard-process/views/onboard-process.php:434
 #: includes/templates/script-templates/booking-process/wte-booking.php:99
 #: includes/templates/script-templates/booking-process/wte-booking.php:100
-#: dist/admin/onboarding.js:3174
+#: dist/admin/onboarding.js:3180
 #: dist/bundle/trip-booking-modal.bundle.js:2
 #: dist/public/components/trip-booking-modal.js:2
 #: dist/public/exports.js:2
@@ -2138,9 +2143,9 @@ msgstr ""
 #: admin/meta-parts/trip-tabs/faqs.php:67
 #: includes/backend/templates/booking/partials/edit/travel-insurance.php:120
 #: includes/backend/templates/booking/partials/travel-insurance.php:51
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
 msgid "Question"
 msgstr ""
 
@@ -2148,10 +2153,10 @@ msgstr ""
 #: admin/meta-parts/trip-tabs/faqs.php:71
 #: includes/backend/templates/booking/partials/edit/travel-insurance.php:121
 #: includes/backend/templates/booking/partials/travel-insurance.php:52
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
-#: dist/admin/trip-edit.js:5266
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
+#: dist/admin/trip-edit.js:5272
 msgid "Answer"
 msgstr ""
 
@@ -2167,7 +2172,7 @@ msgid "FAQ Answer"
 msgstr ""
 
 #: admin/meta-parts/trip-tabs/faqs.php:80
-#: dist/admin/trip-edit.js:5266
+#: dist/admin/trip-edit.js:5272
 msgid "Add FAQs"
 msgstr ""
 
@@ -2281,7 +2286,7 @@ msgid "Enable minimum and maximum age required restriction for booking this trip
 msgstr ""
 
 #: admin/meta-parts/trip-tabs/general.php:155
-#: includes/helpers/helpers.php:2629
+#: includes/helpers/helpers.php:2652
 msgid "Minimum Age"
 msgstr ""
 
@@ -2290,7 +2295,7 @@ msgid "Enter minimum age"
 msgstr ""
 
 #: admin/meta-parts/trip-tabs/general.php:159
-#: includes/helpers/helpers.php:2637
+#: includes/helpers/helpers.php:2660
 msgid "Maximum Age"
 msgstr ""
 
@@ -2359,7 +2364,7 @@ msgstr ""
 #: admin/meta-parts/trip-tabs/itinerary.php:46
 #: admin/meta-parts/trip-tabs/itinerary.php:68
 #: admin/meta-parts/trip-tabs/itinerary.php:86
-#: dist/admin/trip-edit.js:5424
+#: dist/admin/trip-edit.js:5432
 msgid "Day "
 msgstr ""
 
@@ -2442,7 +2447,7 @@ msgid "Infant"
 msgstr ""
 
 #: admin/meta-parts/trip-tabs/pricing.php:29
-#: includes/helpers/helpers.php:3088
+#: includes/helpers/helpers.php:3112
 msgid "Group"
 msgstr ""
 
@@ -2491,10 +2496,10 @@ msgstr ""
 #: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3010
 #: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3016
 #: includes/templates/script-templates/tmpl-wte-package-category-single.php:42
-#: dist/admin/exports.js:3658
-#: dist/admin/global-settings.js:3565
-#: dist/admin/trip-edit.js:3672
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/exports.js:3664
+#: dist/admin/global-settings.js:3571
+#: dist/admin/trip-edit.js:3678
+#: dist/admin/trip-edit.js:5765
 msgid "Pricing Type"
 msgstr ""
 
@@ -2541,7 +2546,7 @@ msgid "Global Trip Info not found. Please add trip info in the global settings p
 msgstr ""
 
 #: admin/partials/partial-multiple-pricing.php:17
-#: dist/admin/trip-edit.js:4778
+#: dist/admin/trip-edit.js:4784
 msgid "Service Name"
 msgstr ""
 
@@ -2559,7 +2564,7 @@ msgstr ""
 
 #: admin/partials/partial-multiple-pricing.php:46
 #: admin/partials/partial-multiple-pricing.php:54
-#: dist/admin/trip-edit.js:4778
+#: dist/admin/trip-edit.js:4784
 msgid "Service Description"
 msgstr ""
 
@@ -2604,10 +2609,10 @@ msgid "Need further assistance?"
 msgstr ""
 
 #: admin/partials/plugin-updates/getting-started/getting-started.php:128
-#: dist/admin/exports.js:3510
-#: dist/admin/global-settings.js:4570
-#: dist/admin/onboarding.js:3459
-#: dist/admin/trip-edit.js:3524
+#: dist/admin/exports.js:3516
+#: dist/admin/global-settings.js:4576
+#: dist/admin/onboarding.js:3465
+#: dist/admin/trip-edit.js:3530
 msgid "Contact Support"
 msgstr ""
 
@@ -2771,7 +2776,7 @@ msgstr ""
 #: dist/blocks/core/trips/layouts/layout-2.php:15
 #: dist/blocks/core/trips/layouts/layout-3.php:14
 #: dist/blocks/core/trips/layouts/layout-4.php:16
-#: includes/helpers/helpers.php:116
+#: includes/helpers/helpers.php:136
 #, php-format
 msgid "%1$s%% Off"
 msgstr ""
@@ -2806,14 +2811,14 @@ msgstr ""
 
 #: dist/blocks/core/trips/layouts/layout-1.php:189
 #: dist/blocks/core/trips/layouts/layout-1.php:221
-#: includes/classes/Core/Models/Post/Trip.php:1171
+#: includes/classes/Core/Models/Post/Trip.php:1177
 #: includes/templates/layouts/new-date-layout.php:6
 #: dist/blocks/editor/editor.js:1403
 msgid "Available through out the year:"
 msgstr ""
 
 #: dist/blocks/core/trips/layouts/layout-1.php:221
-#: includes/classes/Core/Models/Post/Trip.php:1171
+#: includes/classes/Core/Models/Post/Trip.php:1177
 #: dist/blocks/editor/editor.js:1403
 msgid "Available in the following months:"
 msgstr ""
@@ -2837,16 +2842,16 @@ msgid "Please activate WP Travel Engine - Advanced Itinerary addon for this bloc
 msgstr ""
 
 #: dist/blocks/single-trip/itinerary-chart/block.php:72
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
 msgid "M."
 msgstr ""
 
 #: dist/blocks/single-trip/itinerary-chart/block.php:73
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
 #: dist/blocks/editor/trip-blocks.js:2
 msgid "FT."
 msgstr ""
@@ -2869,12 +2874,12 @@ msgid "Breakfast"
 msgstr ""
 
 #: dist/blocks/single-trip/itinerary/block.php:186
-#: dist/admin/trip-edit.js:5424
+#: dist/admin/trip-edit.js:5432
 msgid "Lunch"
 msgstr ""
 
 #: dist/blocks/single-trip/itinerary/block.php:187
-#: dist/admin/trip-edit.js:5424
+#: dist/admin/trip-edit.js:5432
 msgid "Dinner"
 msgstr ""
 
@@ -2886,9 +2891,9 @@ msgstr ""
 #: dist/blocks/single-trip/itinerary/block.php:236
 #: includes/class-wp-travel-engine-ui-pointers.php:132
 #: includes/class-wp-travel-engine-ui-pointers.php:135
-#: dist/admin/exports.js:3725
-#: dist/admin/global-settings.js:3632
-#: dist/admin/trip-edit.js:3739
+#: dist/admin/exports.js:3731
+#: dist/admin/global-settings.js:3638
+#: dist/admin/trip-edit.js:3745
 msgid "Close"
 msgstr ""
 
@@ -2920,7 +2925,7 @@ msgstr ""
 #: dist/blocks/single-trip/trip-booking-button/block.php:52
 #: includes/frontend/trip-meta/trip-meta-parts/trip-prices-sidebar-widget.php:144
 #: includes/helpers/functions.php:122
-#: includes/helpers/helpers.php:855
+#: includes/helpers/helpers.php:875
 msgid "Check Availability"
 msgstr ""
 
@@ -3041,7 +3046,7 @@ msgstr ""
 #: includes/helpers/functions.php:65
 #: includes/helpers/functions.php:2309
 #: includes/helpers/functions.php:2347
-#: includes/helpers/helpers.php:2462
+#: includes/helpers/helpers.php:2485
 #: includes/templates/account/tab-content/bookings/bookings-html.php:11
 #: includes/templates/account/tab-content/bookings/bookings-manager.php:44
 #: includes/templates/account/tab-content/bookings/bookings-manager.php:47
@@ -3059,7 +3064,7 @@ msgstr ""
 #: includes/backend/booking/legacy/booking-parts/payment-details.php:19
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:294
 #: includes/helpers/functions.php:2312
-#: includes/helpers/helpers.php:2470
+#: includes/helpers/helpers.php:2493
 msgid "Refunded"
 msgstr ""
 
@@ -3177,8 +3182,8 @@ msgstr ""
 #: includes/backend/booking/booking.php:78
 #: includes/backend/booking/booking.php:277
 #: includes/backend/booking/customer.php:10
-#: includes/class-wte-default-form-fields.php:243
-#: includes/class-wte-default-form-fields.php:443
+#: includes/class-wte-default-form-fields.php:241
+#: includes/class-wte-default-form-fields.php:441
 #: includes/classes/Booking/Email/Dummy/DummyTags.php:525
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:38
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:487
@@ -3227,7 +3232,7 @@ msgid "Qty"
 msgstr ""
 
 #: includes/backend/booking/booking-parts/booking-details.php:250
-#: includes/helpers/helpers.php:1286
+#: includes/helpers/helpers.php:1306
 msgid "Cost"
 msgstr ""
 
@@ -3283,7 +3288,7 @@ msgstr ""
 #: includes/classes/Booking/Email/Template_Tags.php:437
 #: includes/classes/Booking/Email/Template_Tags.php:723
 #: includes/classes/Core/Controllers/Ajax/ResendPurchaseReceipt.php:242
-#: includes/classes/Plugin.php:748
+#: includes/classes/Plugin.php:756
 #: includes/templates/content-cart.php:70
 #: includes/templates/emails/booking/confirmation.php:21
 msgid "Subtotal"
@@ -3311,7 +3316,7 @@ msgstr ""
 #: includes/classes/Booking/Email/Template_Tags.php:710
 #: includes/classes/Booking/Email/Template_Tags.php:904
 #: includes/classes/Core/Controllers/Ajax/ResendPurchaseReceipt.php:294
-#: includes/classes/Plugin.php:787
+#: includes/classes/Plugin.php:795
 #: includes/frontend/trip-meta/trip-meta-parts/trip-price-bak.php:123
 #: includes/frontend/trip-meta/trip-meta-parts/trip-price-bak.php:130
 #: includes/frontend/trip-meta/trip-meta-parts/trip-price.php:94
@@ -3325,7 +3330,7 @@ msgid "Total"
 msgstr ""
 
 #: includes/backend/booking/booking-parts/booking-details.php:349
-#: includes/classes/Plugin.php:797
+#: includes/classes/Plugin.php:805
 msgid "Deposit Today"
 msgstr ""
 
@@ -3336,7 +3341,7 @@ msgstr ""
 #: includes/classes/Booking/Email/Template_Tags.php:792
 #: includes/classes/Booking/Email/Template_Tags.php:1025
 #: includes/classes/Pages/Checkout.php:587
-#: includes/classes/Plugin.php:807
+#: includes/classes/Plugin.php:815
 msgid "Amount Due"
 msgstr ""
 
@@ -3451,7 +3456,7 @@ msgstr ""
 #: includes/classes/Utilities/FormBuilder/Fields/CurrencyPicker.php:41
 #: includes/onboard-process/views/onboard-process.php:45
 #: dist/admin/onboarding.js:2
-#: dist/admin/onboarding.js:3196
+#: dist/admin/onboarding.js:3202
 msgid "Currency"
 msgstr ""
 
@@ -3547,18 +3552,18 @@ msgstr ""
 
 #: includes/backend/booking/booking.php:47
 #: includes/backend/booking/booking.php:246
-#: includes/class-wte-default-form-fields.php:203
-#: includes/class-wte-default-form-fields.php:403
+#: includes/class-wte-default-form-fields.php:201
+#: includes/class-wte-default-form-fields.php:401
 #: includes/classes/Builders/admin-settings/payments/bank-transfer.php:17
 #: includes/classes/Builders/admin-settings/payments/check-payments.php:17
 #: includes/classes/Helpers/Functions.php:559
 #: includes/classes/Helpers/Functions.php:679
-#: includes/helpers/helpers.php:2412
+#: includes/helpers/helpers.php:2435
 #: includes/helpers/wp-travel-engine-form-fields.php:432
 #: includes/helpers/wp-travel-engine-form-fields.php:621
-#: dist/admin/exports.js:3658
-#: dist/admin/global-settings.js:3565
-#: dist/admin/trip-edit.js:3672
+#: dist/admin/exports.js:3664
+#: dist/admin/global-settings.js:3571
+#: dist/admin/trip-edit.js:3678
 #: dist/blocks/editor/editor.js:1403
 msgid "Title"
 msgstr ""
@@ -3572,8 +3577,8 @@ msgstr ""
 #: includes/backend/booking/booking.php:67
 #: includes/backend/booking/booking.php:266
 #: includes/backend/booking/customer.php:7
-#: includes/class-wte-default-form-fields.php:227
-#: includes/class-wte-default-form-fields.php:427
+#: includes/class-wte-default-form-fields.php:225
+#: includes/class-wte-default-form-fields.php:425
 #: includes/classes/Booking/Email/Dummy/DummyTags.php:524
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:18
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:471
@@ -3595,7 +3600,7 @@ msgstr ""
 #: includes/backend/booking/booking.php:288
 #: includes/backend/booking/customer.php:18
 #: includes/backend/templates/customer/partials/profile.php:55
-#: includes/class-wte-default-form-fields.php:290
+#: includes/class-wte-default-form-fields.php:288
 #: includes/classes/Booking/Email/Dummy/DummyTags.php:528
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:76
 #: includes/classes/Filters/SettingsAPISchema.php:286
@@ -3610,7 +3615,7 @@ msgstr ""
 
 #: includes/backend/booking/booking.php:111
 #: includes/backend/booking/customer.php:21
-#: includes/class-wte-default-form-fields.php:306
+#: includes/class-wte-default-form-fields.php:304
 #: includes/classes/Booking/Email/Dummy/DummyTags.php:529
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:95
 #: includes/classes/Helpers/Functions.php:540
@@ -3633,7 +3638,7 @@ msgstr ""
 
 #: includes/backend/booking/booking.php:145
 #: includes/backend/booking/booking.php:299
-#: includes/class-wte-default-form-fields.php:337
+#: includes/class-wte-default-form-fields.php:335
 #: includes/classes/Helpers/Functions.php:612
 #: includes/helpers/wp-travel-engine-form-fields.php:558
 msgid "Post-code"
@@ -3641,8 +3646,8 @@ msgstr ""
 
 #: includes/backend/booking/booking.php:156
 #: includes/backend/booking/booking.php:310
-#: includes/class-wte-default-form-fields.php:353
-#: includes/class-wte-default-form-fields.php:459
+#: includes/class-wte-default-form-fields.php:351
+#: includes/class-wte-default-form-fields.php:457
 #: includes/classes/Booking/Email/Dummy/DummyTags.php:527
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:515
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:621
@@ -3656,14 +3661,14 @@ msgid "Phone"
 msgstr ""
 
 #: includes/backend/booking/booking.php:167
-#: includes/class-wte-default-form-fields.php:259
+#: includes/class-wte-default-form-fields.php:257
 #: includes/classes/Helpers/Functions.php:583
 #: includes/helpers/wp-travel-engine-form-fields.php:485
 msgid "Passport Number"
 msgstr ""
 
 #: includes/backend/booking/booking.php:178
-#: includes/class-wte-default-form-fields.php:370
+#: includes/class-wte-default-form-fields.php:368
 #: includes/classes/Helpers/Functions.php:622
 #: includes/helpers/wp-travel-engine-form-fields.php:589
 msgid "Date of Birth"
@@ -4148,18 +4153,18 @@ msgid "Price Type"
 msgstr ""
 
 #: includes/backend/templates/booking/partials/edit/travel-insurance.php:192
-#: dist/admin/exports.js:3603
-#: dist/admin/exports.js:3658
-#: dist/admin/exports.js:4075
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:3510
-#: dist/admin/global-settings.js:3565
-#: dist/admin/global-settings.js:3982
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:3617
-#: dist/admin/trip-edit.js:3672
-#: dist/admin/trip-edit.js:4089
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:3609
+#: dist/admin/exports.js:3664
+#: dist/admin/exports.js:4081
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:3516
+#: dist/admin/global-settings.js:3571
+#: dist/admin/global-settings.js:3988
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:3623
+#: dist/admin/trip-edit.js:3678
+#: dist/admin/trip-edit.js:4095
+#: dist/admin/trip-edit.js:4499
 msgid "Action"
 msgstr ""
 
@@ -4179,17 +4184,17 @@ msgid "Emergency Details"
 msgstr ""
 
 #: includes/backend/templates/booking/partials/header.php:55
-#: includes/classes/Core/PostTypes/Booking.php:681
+#: includes/classes/Core/PostTypes/Booking.php:682
 msgid "Migrated"
 msgstr ""
 
 #: includes/backend/templates/booking/partials/header.php:62
-#: includes/classes/Core/PostTypes/Booking.php:696
+#: includes/classes/Core/PostTypes/Booking.php:697
 msgid "Manual"
 msgstr ""
 
 #: includes/backend/templates/booking/partials/header.php:68
-#: includes/classes/Core/PostTypes/Booking.php:691
+#: includes/classes/Core/PostTypes/Booking.php:692
 msgid "Modified"
 msgstr ""
 
@@ -4271,7 +4276,7 @@ msgid "Not Set"
 msgstr ""
 
 #: includes/backend/templates/customer/partials/header.php:18
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 msgid "Are you sure you want to delete?"
 msgstr ""
 
@@ -4285,11 +4290,11 @@ msgstr ""
 #: includes/classes/Modules/custom-filters/views/admin-custom-filters-page.php:119
 #: includes/templates/account/form-edit-account.php:65
 #: dist/admin/exports.js:1572
-#: dist/admin/exports.js:4114
+#: dist/admin/exports.js:4120
 #: dist/admin/global-settings.js:2028
-#: dist/admin/global-settings.js:4021
+#: dist/admin/global-settings.js:4027
 #: dist/admin/trip-edit.js:1572
-#: dist/admin/trip-edit.js:4128
+#: dist/admin/trip-edit.js:4134
 msgid "Delete"
 msgstr ""
 
@@ -4511,9 +4516,9 @@ msgid "My account"
 msgstr ""
 
 #: includes/class-wp-travel-engine-activator.php:92
-#: dist/admin/exports.js:4114
-#: dist/admin/global-settings.js:4021
-#: dist/admin/trip-edit.js:4128
+#: dist/admin/exports.js:4120
+#: dist/admin/global-settings.js:4027
+#: dist/admin/trip-edit.js:4134
 msgid "Customer"
 msgstr ""
 
@@ -4569,9 +4574,9 @@ msgstr ""
 #: includes/class-wp-travel-engine-archive-hooks.php:388
 #: includes/classes/Blocks/Blocks.php:89
 #: includes/templates/template-trip-search-form.php:161
-#: dist/admin/exports.js:3603
-#: dist/admin/global-settings.js:3510
-#: dist/admin/trip-edit.js:3068
+#: dist/admin/exports.js:3609
+#: dist/admin/global-settings.js:3516
+#: dist/admin/trip-edit.js:3074
 #: dist/blocks/editor/editor.js:2
 msgid "Search"
 msgstr ""
@@ -4757,9 +4762,9 @@ msgstr ""
 #: includes/classes/Booking/Email/Template_Tags.php:243
 #: includes/classes/Booking/Email/Template_Tags.php:1082
 #: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3795
-#: dist/admin/exports.js:3603
-#: dist/admin/global-settings.js:3510
-#: dist/admin/trip-edit.js:3617
+#: dist/admin/exports.js:3609
+#: dist/admin/global-settings.js:3516
+#: dist/admin/trip-edit.js:3623
 msgid "Account Number"
 msgstr ""
 
@@ -4769,9 +4774,9 @@ msgstr ""
 #: includes/classes/Booking/Email/Template_Tags.php:244
 #: includes/classes/Booking/Email/Template_Tags.php:1083
 #: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3799
-#: dist/admin/exports.js:3603
-#: dist/admin/global-settings.js:3510
-#: dist/admin/trip-edit.js:3617
+#: dist/admin/exports.js:3609
+#: dist/admin/global-settings.js:3516
+#: dist/admin/trip-edit.js:3623
 msgid "Bank Name"
 msgstr ""
 
@@ -4789,9 +4794,9 @@ msgstr ""
 #: includes/classes/Booking/Email/Template_Tags.php:246
 #: includes/classes/Booking/Email/Template_Tags.php:1085
 #: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3807
-#: dist/admin/exports.js:3603
-#: dist/admin/global-settings.js:3510
-#: dist/admin/trip-edit.js:3617
+#: dist/admin/exports.js:3609
+#: dist/admin/global-settings.js:3516
+#: dist/admin/trip-edit.js:3623
 msgid "IBAN"
 msgstr ""
 
@@ -4800,9 +4805,9 @@ msgstr ""
 #: includes/classes/Booking/Email/Dummy/DummyTags.php:637
 #: includes/classes/Booking/Email/Template_Tags.php:247
 #: includes/classes/Booking/Email/Template_Tags.php:1086
-#: dist/admin/exports.js:3603
-#: dist/admin/global-settings.js:3510
-#: dist/admin/trip-edit.js:3617
+#: dist/admin/exports.js:3609
+#: dist/admin/global-settings.js:3516
+#: dist/admin/trip-edit.js:3623
 msgid "BIC/Swift"
 msgstr ""
 
@@ -5235,9 +5240,9 @@ msgstr ""
 
 #: includes/class-wp-travel-engine-taxonomy-thumb.php:91
 #: includes/class-wp-travel-engine-taxonomy-thumb.php:238
-#: dist/admin/exports.js:4075
-#: dist/admin/global-settings.js:3982
-#: dist/admin/trip-edit.js:4089
+#: dist/admin/exports.js:4081
+#: dist/admin/global-settings.js:3988
+#: dist/admin/trip-edit.js:4095
 msgid "Icon"
 msgstr ""
 
@@ -5264,9 +5269,9 @@ msgstr ""
 #: includes/class-wp-travel-engine-taxonomy-thumb.php:124
 #: includes/classes/Builders/admin-settings/payments/bank-transfer.php:25
 #: includes/classes/Builders/admin-settings/payments/check-payments.php:25
-#: dist/admin/exports.js:3658
-#: dist/admin/global-settings.js:3565
-#: dist/admin/trip-edit.js:3672
+#: dist/admin/exports.js:3664
+#: dist/admin/global-settings.js:3571
+#: dist/admin/trip-edit.js:3678
 msgid "Description"
 msgstr ""
 
@@ -5282,7 +5287,7 @@ msgstr ""
 #: includes/class-wp-travel-engine-taxonomy-thumb.php:155
 #: includes/class-wp-travel-engine-taxonomy-thumb.php:190
 #: includes/templates/script-templates/trip-edit/tab-pricing/tmpl-wte-package-general.php:37
-#: dist/admin/trip-edit.js:5722
+#: dist/admin/trip-edit.js:5730
 msgid "Short Description"
 msgstr ""
 
@@ -5403,26 +5408,26 @@ msgid "Cloning post must be of trip posttype."
 msgstr ""
 
 #: includes/class-wte-ajax.php:560
-#: includes/classes/Core/Controllers/Ajax/AddToCart.php:34
-#: includes/classes/Core/Controllers/Ajax/AddToCart.php:225
+#: includes/classes/Core/Controllers/Ajax/AddToCart.php:49
+#: includes/classes/Core/Controllers/Ajax/AddToCart.php:240
 msgid "Invalid data structure."
 msgstr ""
 
 #: includes/class-wte-ajax.php:569
-#: includes/classes/Core/Controllers/Ajax/AddToCart.php:233
+#: includes/classes/Core/Controllers/Ajax/AddToCart.php:248
 msgid "Invalid Trip ID."
 msgstr ""
 
 #: includes/class-wte-ajax.php:667
 #: includes/class-wte-ajax.php:888
 #: includes/class-wte-ajax.php:918
-#: includes/classes/Core/Controllers/Ajax/AddToCart.php:143
-#: includes/classes/Core/Controllers/Ajax/AddToCart.php:175
+#: includes/classes/Core/Controllers/Ajax/AddToCart.php:158
+#: includes/classes/Core/Controllers/Ajax/AddToCart.php:190
 msgid "deprecated because of more params."
 msgstr ""
 
 #: includes/class-wte-ajax.php:688
-#: includes/classes/Core/Controllers/Ajax/AddToCart.php:208
+#: includes/classes/Core/Controllers/Ajax/AddToCart.php:223
 msgid "Trip added to cart successfully."
 msgstr ""
 
@@ -5459,12 +5464,12 @@ msgid "Nonce verification failed."
 msgstr ""
 
 #: includes/class-wte-ajax.php:786
-#: includes/classes/Core/Controllers/Ajax/AddToCart.php:43
+#: includes/classes/Core/Controllers/Ajax/AddToCart.php:58
 msgid "Invalid trip ID."
 msgstr ""
 
 #: includes/class-wte-ajax.php:926
-#: includes/classes/Core/Controllers/Ajax/AddToCart.php:183
+#: includes/classes/Core/Controllers/Ajax/AddToCart.php:198
 msgid "Trip added to cart successfully"
 msgstr ""
 
@@ -5538,15 +5543,15 @@ msgstr ""
 msgid "Enter Your message*"
 msgstr ""
 
-#: includes/class-wte-default-form-fields.php:212
-#: includes/class-wte-default-form-fields.php:412
+#: includes/class-wte-default-form-fields.php:210
+#: includes/class-wte-default-form-fields.php:410
 #: includes/helpers/wp-travel-engine-form-fields.php:441
 #: includes/helpers/wp-travel-engine-form-fields.php:630
 msgid "Please choose..."
 msgstr ""
 
-#: includes/class-wte-default-form-fields.php:213
-#: includes/class-wte-default-form-fields.php:413
+#: includes/class-wte-default-form-fields.php:211
+#: includes/class-wte-default-form-fields.php:411
 #: includes/classes/Helpers/Functions.php:409
 #: includes/classes/Helpers/Functions.php:563
 #: includes/classes/Helpers/Functions.php:683
@@ -5555,8 +5560,8 @@ msgstr ""
 msgid "Mr"
 msgstr ""
 
-#: includes/class-wte-default-form-fields.php:214
-#: includes/class-wte-default-form-fields.php:414
+#: includes/class-wte-default-form-fields.php:212
+#: includes/class-wte-default-form-fields.php:412
 #: includes/classes/Helpers/Functions.php:410
 #: includes/classes/Helpers/Functions.php:564
 #: includes/classes/Helpers/Functions.php:684
@@ -5565,8 +5570,8 @@ msgstr ""
 msgid "Mrs"
 msgstr ""
 
-#: includes/class-wte-default-form-fields.php:215
-#: includes/class-wte-default-form-fields.php:415
+#: includes/class-wte-default-form-fields.php:213
+#: includes/class-wte-default-form-fields.php:413
 #: includes/classes/Helpers/Functions.php:411
 #: includes/classes/Helpers/Functions.php:565
 #: includes/classes/Helpers/Functions.php:685
@@ -5575,8 +5580,8 @@ msgstr ""
 msgid "Ms"
 msgstr ""
 
-#: includes/class-wte-default-form-fields.php:216
-#: includes/class-wte-default-form-fields.php:416
+#: includes/class-wte-default-form-fields.php:214
+#: includes/class-wte-default-form-fields.php:414
 #: includes/classes/Helpers/Functions.php:412
 #: includes/classes/Helpers/Functions.php:566
 #: includes/classes/Helpers/Functions.php:686
@@ -5585,8 +5590,8 @@ msgstr ""
 msgid "Miss"
 msgstr ""
 
-#: includes/class-wte-default-form-fields.php:217
-#: includes/class-wte-default-form-fields.php:417
+#: includes/class-wte-default-form-fields.php:215
+#: includes/class-wte-default-form-fields.php:415
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:262
 #: includes/classes/Helpers/Functions.php:413
 #: includes/classes/Helpers/Functions.php:567
@@ -5601,7 +5606,7 @@ msgstr ""
 msgid "Other"
 msgstr ""
 
-#: includes/class-wte-default-form-fields.php:475
+#: includes/class-wte-default-form-fields.php:473
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:736
 #: includes/classes/Helpers/Functions.php:708
 #: includes/helpers/wp-travel-engine-form-fields.php:689
@@ -5648,7 +5653,7 @@ msgid "Update Now"
 msgstr ""
 
 #: includes/classes/Assets.php:93
-#: includes/classes/Assets.php:1095
+#: includes/classes/Assets.php:1101
 msgid "Click here or Drop new image to update your profile picture"
 msgstr ""
 
@@ -5676,34 +5681,34 @@ msgid "Extra Services marked with * is essential. Please specify a number."
 msgstr ""
 
 #. Translators: 1. Selected Pax Number 2. Minimum number of travellers 3. Maximum Number of Traveller.
-#: includes/classes/Assets.php:1006
+#: includes/classes/Assets.php:1012
 #, php-format
 msgid "Number of pax (%1$s) is not eligible for booking. Please choose travellers number between %2$s and %3$s for this trip."
 msgstr ""
 
 #. Translators: 1. Selected Pax Number 2. Minimum number of travellers 3. Maximum Number of Traveller.
-#: includes/classes/Assets.php:1007
+#: includes/classes/Assets.php:1013
 msgctxt "Booking continue button Label"
 msgid "Continue"
 msgstr ""
 
-#: includes/classes/Assets.php:1149
+#: includes/classes/Assets.php:1155
 msgid "Sure to delete? This action cannot be reverted."
 msgstr ""
 
-#: includes/classes/Assets.php:1150
+#: includes/classes/Assets.php:1156
 msgid "Validation Error. Settings could not be saved."
 msgstr ""
 
-#: includes/classes/Assets.php:1151
+#: includes/classes/Assets.php:1157
 msgid "Text copied to clipboard."
 msgstr ""
 
-#: includes/classes/Assets.php:1152
+#: includes/classes/Assets.php:1158
 msgid "No video URL supplied."
 msgstr ""
 
-#: includes/classes/Assets.php:1153
+#: includes/classes/Assets.php:1159
 msgid "Invalid URL supplied. Please make sure to add valid YouTube or Vimeo video URL"
 msgstr ""
 
@@ -5736,7 +5741,7 @@ msgstr ""
 #: includes/classes/Blocks/Blocks.php:124
 #: includes/classes/Modules/TripSearch.php:797
 #: includes/templates/script-templates/tmpl-wte-package-category-single.php:31
-#: dist/admin/trip-edit.js:4778
+#: dist/admin/trip-edit.js:4784
 #: dist/blocks/editor/editor.js:1403
 #: dist/bundle/trip-booking-modal.bundle.js:2
 #: dist/public/components/trip-booking-modal.js:2
@@ -5803,9 +5808,9 @@ msgstr ""
 #: includes/classes/Blocks/Metadata.php:70
 #: includes/classes/Utilities/FormBuilder/FieldTypes.php:13
 #: includes/lib/wte-form-framework/class-wte-form-field.php:82
-#: dist/admin/exports.js:4075
-#: dist/admin/global-settings.js:3982
-#: dist/admin/trip-edit.js:4089
+#: dist/admin/exports.js:4081
+#: dist/admin/global-settings.js:3988
+#: dist/admin/trip-edit.js:4095
 msgid "Text"
 msgstr ""
 
@@ -5898,7 +5903,7 @@ msgstr ""
 
 #: includes/classes/Booking/Email/Dummy/DummyTags.php:707
 #: includes/classes/Core/Tax.php:33
-#: includes/classes/Plugin.php:769
+#: includes/classes/Plugin.php:777
 #: includes/helpers/tax.php:16
 #, php-format
 msgid "Tax (%s%%)"
@@ -5950,9 +5955,9 @@ msgstr ""
 #: includes/classes/Booking/Email/Template_Tags.php:242
 #: includes/classes/Booking/Email/Template_Tags.php:1081
 #: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3791
-#: dist/admin/exports.js:3603
-#: dist/admin/global-settings.js:3510
-#: dist/admin/trip-edit.js:3617
+#: dist/admin/exports.js:3609
+#: dist/admin/global-settings.js:3516
+#: dist/admin/trip-edit.js:3623
 msgid "Account Name"
 msgstr ""
 
@@ -6926,9 +6931,9 @@ msgid "<strong>NOTE: </strong>After sending the test email and receiving a succe
 msgstr ""
 
 #: includes/classes/Builders/admin-settings/emails/emails-settings.php:97
-#: dist/admin/exports.js:4114
-#: dist/admin/global-settings.js:4021
-#: dist/admin/trip-edit.js:4128
+#: dist/admin/exports.js:4120
+#: dist/admin/global-settings.js:4027
+#: dist/admin/trip-edit.js:4134
 msgid "Send Test Email"
 msgstr ""
 
@@ -7017,7 +7022,7 @@ msgstr ""
 #: includes/classes/Builders/admin-settings/extensions/currency-converter.php:87
 #: includes/templates/trip-card/components/card-price.php:20
 #: public/class-wp-travel-engine-template-hooks.php:446
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 #: dist/bundle/trip-booking-modal.bundle.js:2
 #: dist/public/components/trip-booking-modal.js:2
 #: dist/public/exports.js:2
@@ -7049,9 +7054,9 @@ msgid "Check this option to enable auto rate update"
 msgstr ""
 
 #: includes/classes/Builders/admin-settings/extensions/currency-converter.php:118
-#: dist/admin/exports.js:3603
-#: dist/admin/global-settings.js:3510
-#: dist/admin/trip-edit.js:3617
+#: dist/admin/exports.js:3609
+#: dist/admin/global-settings.js:3516
+#: dist/admin/trip-edit.js:3623
 msgid "Add Currency"
 msgstr ""
 
@@ -8652,7 +8657,7 @@ msgstr ""
 #: includes/classes/Builders/FormFields/DefaultFormFields.php:293
 #: includes/helpers/functions.php:91
 #: includes/helpers/functions.php:2306
-#: includes/helpers/helpers.php:2478
+#: includes/helpers/helpers.php:2501
 msgid "Failed"
 msgstr ""
 
@@ -8785,10 +8790,16 @@ msgid "This is a gateway fee. It is included by the payment gateway."
 msgstr ""
 
 #: includes/classes/Core/Cart/Item.php:224
-#: includes/classes/Core/Controllers/Ajax/AddToCart.php:241
+#: includes/classes/Core/Controllers/Ajax/AddToCart.php:256
 #: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:261
 #: includes/classes/Core/Controllers/RestAPI/V2/Trip.php:284
 msgid "Invalid package for this trip."
+msgstr ""
+
+#: includes/classes/Core/Controllers/Ajax/AddToCart.php:40
+#: includes/classes/Core/Controllers/RestAPI/V2/Booking.php:98
+#: includes/classes/Core/Controllers/RestAPI/V2/Booking.php:132
+msgid "Sorry, you are not allowed to view this resource."
 msgstr ""
 
 #: includes/classes/Core/Controllers/Ajax/ApplyCoupon.php:35
@@ -9147,11 +9158,6 @@ msgstr ""
 msgid "Coupon Discount : %s"
 msgstr ""
 
-#: includes/classes/Core/Controllers/RestAPI/V2/Booking.php:98
-#: includes/classes/Core/Controllers/RestAPI/V2/Booking.php:132
-msgid "Sorry, you are not allowed to view this resource."
-msgstr ""
-
 #: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:302
 msgid "This email is sent to the admin when a booking is confirmed."
 msgstr ""
@@ -9238,9 +9244,9 @@ msgid "Tab ID"
 msgstr ""
 
 #: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2896
-#: dist/admin/exports.js:4075
-#: dist/admin/global-settings.js:3982
-#: dist/admin/trip-edit.js:4089
+#: dist/admin/exports.js:4081
+#: dist/admin/global-settings.js:3988
+#: dist/admin/trip-edit.js:4095
 msgid "Tab Name"
 msgstr ""
 
@@ -9312,16 +9318,16 @@ msgid "Fact Trashable or Not"
 msgstr ""
 
 #: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:2999
-#: dist/admin/exports.js:3658
-#: dist/admin/global-settings.js:3565
-#: dist/admin/trip-edit.js:3672
+#: dist/admin/exports.js:3664
+#: dist/admin/global-settings.js:3571
+#: dist/admin/trip-edit.js:3678
 msgid "Highlight Title"
 msgstr ""
 
 #: includes/classes/Core/Controllers/RestAPI/V2/Settings.php:3003
-#: dist/admin/exports.js:3658
-#: dist/admin/global-settings.js:3565
-#: dist/admin/trip-edit.js:3672
+#: dist/admin/exports.js:3664
+#: dist/admin/global-settings.js:3571
+#: dist/admin/trip-edit.js:3678
 msgid "Highlight Description"
 msgstr ""
 
@@ -10512,17 +10518,17 @@ msgstr ""
 msgid "Coupon not found"
 msgstr ""
 
-#: includes/classes/Core/Models/Post/Trip.php:218
+#: includes/classes/Core/Models/Post/Trip.php:224
 msgid "Unit"
 msgstr ""
 
-#: includes/classes/Core/Models/Post/Trip.php:219
+#: includes/classes/Core/Models/Post/Trip.php:225
 #: dist/admin/booking-edit.js:1
 msgid "Traveler"
 msgstr ""
 
-#: includes/classes/Core/Models/Post/Trip.php:461
-#: includes/helpers/helpers.php:829
+#: includes/classes/Core/Models/Post/Trip.php:467
+#: includes/helpers/helpers.php:849
 #, php-format
 msgctxt "trip duration nights"
 msgid "%s Night"
@@ -10531,9 +10537,9 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of hours
-#: includes/classes/Core/Models/Post/Trip.php:810
+#: includes/classes/Core/Models/Post/Trip.php:816
 #: includes/classes/Modules/TripSearch.php:686
-#: includes/helpers/helpers.php:2899
+#: includes/helpers/helpers.php:2922
 #: dist/blocks/editor/editor.js:1403
 #, php-format,js-format
 msgid "%d Hour"
@@ -10542,9 +10548,9 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of days
-#: includes/classes/Core/Models/Post/Trip.php:816
+#: includes/classes/Core/Models/Post/Trip.php:822
 #: includes/classes/Modules/TripSearch.php:690
-#: includes/helpers/helpers.php:2904
+#: includes/helpers/helpers.php:2927
 #: dist/blocks/editor/editor.js:1403
 #, php-format,js-format
 msgid "%d Day"
@@ -10552,13 +10558,13 @@ msgid_plural "%d Days"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/classes/Core/Models/Post/Trip.php:1098
+#: includes/classes/Core/Models/Post/Trip.php:1104
 #: includes/templates/trip-card/components/card-difficulty.php:27
 #, php-format
 msgid "<span>(%1$s/%2$d)</span>"
 msgstr ""
 
-#: includes/classes/Core/Models/Post/Trip.php:1179
+#: includes/classes/Core/Models/Post/Trip.php:1185
 #: includes/templates/trip-card/components/card-fsd-months.php:71
 msgid "date"
 msgid_plural "dates"
@@ -10623,12 +10629,12 @@ msgid "No Bookings found in Trash."
 msgstr ""
 
 #: includes/classes/Core/PostTypes/Booking.php:441
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "Price Category"
 msgstr ""
 
 #: includes/classes/Core/PostTypes/Booking.php:597
-#: includes/classes/Core/PostTypes/Booking.php:686
+#: includes/classes/Core/PostTypes/Booking.php:687
 msgid "Deprecated"
 msgstr ""
 
@@ -10638,7 +10644,7 @@ msgid "Add New"
 msgstr ""
 
 #: includes/classes/Core/PostTypes/Coupon.php:46
-#: dist/admin/coupon-edit.js:3542
+#: dist/admin/coupon-edit.js:3548
 msgid "Edit Coupon"
 msgstr ""
 
@@ -10762,7 +10768,7 @@ msgstr ""
 
 #: includes/classes/Core/Shortcodes/TripFaq.php:86
 #: includes/templates/single-trip/trip-tabs/faqs.php:45
-#: dist/admin/trip-edit.js:5266
+#: dist/admin/trip-edit.js:5272
 msgid "Frequently Asked Questions"
 msgstr ""
 
@@ -10954,9 +10960,9 @@ msgid "Enable Line Graph"
 msgstr ""
 
 #: includes/classes/Filters/schemas/advanced-itinerary.php:57
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
 msgid "Background Image"
 msgstr ""
 
@@ -11219,9 +11225,9 @@ msgid "User Consent Required or Not"
 msgstr ""
 
 #: includes/classes/Filters/schemas/itinerary-downloader.php:73
-#: dist/admin/exports.js:4114
-#: dist/admin/global-settings.js:4021
-#: dist/admin/trip-edit.js:4128
+#: dist/admin/exports.js:4120
+#: dist/admin/global-settings.js:4027
+#: dist/admin/trip-edit.js:4134
 msgid "Email Content"
 msgstr ""
 
@@ -13850,8 +13856,8 @@ msgid "How long to cache log file lists in minutes (1-2880 minutes)."
 msgstr ""
 
 #: includes/classes/Logger/Admin/LogsPage.php:624
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
 msgid "Save Settings"
 msgstr ""
 
@@ -13968,8 +13974,8 @@ msgid "Add your coupon code below to get your discount."
 msgstr ""
 
 #: includes/classes/Modules/CouponCode/views/checkout-coupon-form.php:32
-#: includes/classes/Plugin.php:1774
-#: dist/admin/coupon-edit.js:3542
+#: includes/classes/Plugin.php:1782
+#: dist/admin/coupon-edit.js:3548
 msgid "Coupon Code"
 msgstr ""
 
@@ -13994,7 +14000,7 @@ msgid "Total after Discount :"
 msgstr ""
 
 #: includes/classes/Modules/custom-filters/views/admin-custom-filters-page.php:7
-#: dist/admin/trip-edit.js:5266
+#: dist/admin/trip-edit.js:5272
 msgid "Category"
 msgstr ""
 
@@ -14296,36 +14302,36 @@ msgstr ""
 msgid "Invalid IPN"
 msgstr ""
 
-#: includes/classes/Plugin.php:633
+#: includes/classes/Plugin.php:641
 msgid "WTE-Customer"
 msgstr ""
 
-#: includes/classes/Plugin.php:758
+#: includes/classes/Plugin.php:766
 #, php-format
 msgid "Discount (%s)"
 msgstr ""
 
-#: includes/classes/Plugin.php:1662
+#: includes/classes/Plugin.php:1670
 msgid "Extra services"
 msgstr ""
 
-#: includes/classes/Plugin.php:1671
+#: includes/classes/Plugin.php:1679
 msgid "User History Addon E-mail Tags"
 msgstr ""
 
-#: includes/classes/Plugin.php:1676
+#: includes/classes/Plugin.php:1684
 msgid "Show buyer's browsing history before making the booking"
 msgstr ""
 
-#: includes/classes/Plugin.php:1732
+#: includes/classes/Plugin.php:1740
 msgid "Every Minute"
 msgstr ""
 
-#: includes/classes/Plugin.php:1775
+#: includes/classes/Plugin.php:1783
 msgid "Advanced Search"
 msgstr ""
 
-#: includes/classes/Plugin.php:1787
+#: includes/classes/Plugin.php:1795
 #, php-format
 msgid "%1$s has been automatically deactivated, the feature providing by the plugin is now available in the WP Travel Engine Core."
 msgstr ""
@@ -14344,9 +14350,9 @@ msgstr ""
 
 #: includes/classes/Utilities/FormBuilder/FieldTypes.php:21
 #: includes/lib/wte-form-framework/class-wte-form-field.php:90
-#: dist/admin/exports.js:4075
-#: dist/admin/global-settings.js:3982
-#: dist/admin/trip-edit.js:4089
+#: dist/admin/exports.js:4081
+#: dist/admin/global-settings.js:3988
+#: dist/admin/trip-edit.js:4095
 msgid "Number"
 msgstr ""
 
@@ -14357,17 +14363,17 @@ msgstr ""
 
 #: includes/classes/Utilities/FormBuilder/FieldTypes.php:29
 #: includes/lib/wte-form-framework/class-wte-form-field.php:98
-#: dist/admin/exports.js:4075
-#: dist/admin/global-settings.js:3982
-#: dist/admin/trip-edit.js:4089
+#: dist/admin/exports.js:4081
+#: dist/admin/global-settings.js:3988
+#: dist/admin/trip-edit.js:4095
 msgid "Select"
 msgstr ""
 
 #: includes/classes/Utilities/FormBuilder/FieldTypes.php:33
 #: includes/lib/wte-form-framework/class-wte-form-field.php:102
-#: dist/admin/exports.js:4075
-#: dist/admin/global-settings.js:3982
-#: dist/admin/trip-edit.js:4089
+#: dist/admin/exports.js:4081
+#: dist/admin/global-settings.js:3988
+#: dist/admin/trip-edit.js:4095
 msgid "Textarea"
 msgstr ""
 
@@ -14570,7 +14576,7 @@ msgstr ""
 #: includes/frontend/trip-meta/trip-meta-parts/trip-price.php:108
 #: includes/frontend/trip-meta/trip-meta-parts/trip-price.php:113
 #: includes/helpers/functions.php:285
-#: includes/helpers/helpers.php:3084
+#: includes/helpers/helpers.php:3108
 #: public/class-wp-travel-engine-template-hooks.php:954
 #: public/class-wp-travel-engine-template-hooks.php:969
 msgid "Person"
@@ -14707,7 +14713,7 @@ msgid "Total Payable Now"
 msgstr ""
 
 #: includes/helpers/functions.php:2192
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Recently Added"
 msgstr ""
 
@@ -14748,7 +14754,7 @@ msgid "WordPress Configuration"
 msgstr ""
 
 #: includes/helpers/functions.php:2345
-#: includes/helpers/helpers.php:2466
+#: includes/helpers/helpers.php:2489
 msgid "Booked"
 msgstr ""
 
@@ -14778,25 +14784,25 @@ msgid_plural "Number of pax in %1$s"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/helpers/helpers.php:114
-#: includes/helpers/helpers.php:126
+#: includes/helpers/helpers.php:134
+#: includes/helpers/helpers.php:146
 #: dist/blocks/editor/editor.js:1403
 #, php-format,js-format
 msgid "%s Off"
 msgstr ""
 
-#: includes/helpers/helpers.php:470
+#: includes/helpers/helpers.php:490
 msgid "Private"
 msgstr ""
 
-#: includes/helpers/helpers.php:471
+#: includes/helpers/helpers.php:491
 #: includes/lib/wte-form-framework/field-types/class-field-package_select.php:42
 #: includes/lib/wte-form-framework/field-types/class-field-package_select.php:99
 #: includes/lib/wte-form-framework/field-types/class-field-trips_select.php:44
 msgid "Manually Created"
 msgstr ""
 
-#: includes/helpers/helpers.php:829
+#: includes/helpers/helpers.php:849
 #, php-format
 msgctxt "trip duration days"
 msgid "%s Day"
@@ -14805,208 +14811,208 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s template
-#: includes/helpers/helpers.php:958
+#: includes/helpers/helpers.php:978
 #, php-format
 msgid "%s does not exist."
 msgstr ""
 
-#: includes/helpers/helpers.php:976
+#: includes/helpers/helpers.php:996
 msgid "action_args should not be overwritten when calling wte_get_template."
 msgstr ""
 
-#: includes/helpers/helpers.php:1287
+#: includes/helpers/helpers.php:1307
 #: includes/templates/script-templates/tmpl-wte-package-single.php:21
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 #: dist/blocks/editor/editor.js:1403
 msgid "Dates"
 msgstr ""
 
 #. translators: %s: human-readable time difference
-#: includes/helpers/helpers.php:2292
+#: includes/helpers/helpers.php:2315
 #, php-format
 msgctxt "%s = human-readable time difference"
 msgid "%s ago"
 msgstr ""
 
-#: includes/helpers/helpers.php:2400
+#: includes/helpers/helpers.php:2423
 msgid "Custom Tab"
 msgstr ""
 
-#: includes/helpers/helpers.php:2429
-#: includes/helpers/helpers.php:2430
+#: includes/helpers/helpers.php:2452
+#: includes/helpers/helpers.php:2453
 msgid "Custom Tabs"
 msgstr ""
 
-#: includes/helpers/helpers.php:2458
+#: includes/helpers/helpers.php:2481
 msgid "Reserved"
 msgstr ""
 
-#: includes/helpers/helpers.php:2474
+#: includes/helpers/helpers.php:2497
 msgid "Canceled"
 msgstr ""
 
-#: includes/helpers/helpers.php:2633
+#: includes/helpers/helpers.php:2656
 msgid "Minimum Age from Trip Settings"
 msgstr ""
 
-#: includes/helpers/helpers.php:2641
+#: includes/helpers/helpers.php:2664
 msgid "Maximum Age from Trip Settings"
 msgstr ""
 
-#: includes/helpers/helpers.php:2649
+#: includes/helpers/helpers.php:2672
 msgid "Minimum and Maximum praticipants from Trip Settings"
 msgstr ""
 
-#: includes/helpers/helpers.php:2657
+#: includes/helpers/helpers.php:2680
 msgid "Trip Difficulty"
 msgstr ""
 
-#: includes/helpers/helpers.php:2671
+#: includes/helpers/helpers.php:2694
 #, php-format
 msgid "List of %s"
 msgstr ""
 
-#: includes/helpers/helpers.php:3244
+#: includes/helpers/helpers.php:3272
 msgid "Your site name"
 msgstr ""
 
-#: includes/helpers/helpers.php:3245
+#: includes/helpers/helpers.php:3273
 msgid "The customer's first name."
 msgstr ""
 
-#: includes/helpers/helpers.php:3246
+#: includes/helpers/helpers.php:3274
 msgid "The customer's full name."
 msgstr ""
 
-#: includes/helpers/helpers.php:3247
+#: includes/helpers/helpers.php:3275
 msgid "The customer's last name."
 msgstr ""
 
-#: includes/helpers/helpers.php:3248
+#: includes/helpers/helpers.php:3276
 msgid "The customer's email address."
 msgstr ""
 
-#: includes/helpers/helpers.php:3249
+#: includes/helpers/helpers.php:3277
 msgid "The buyer's IP Address"
 msgstr ""
 
-#: includes/helpers/helpers.php:3250
+#: includes/helpers/helpers.php:3278
 msgid "The site admin email address."
 msgstr ""
 
-#: includes/helpers/helpers.php:3255
+#: includes/helpers/helpers.php:3283
 msgid "The name of the trip booked."
 msgstr ""
 
-#: includes/helpers/helpers.php:3256
+#: includes/helpers/helpers.php:3284
 msgid "The trip URL for each booked trip"
 msgstr ""
 
-#: includes/helpers/helpers.php:3257
+#: includes/helpers/helpers.php:3285
 msgid "The trip code for each booked trip"
 msgstr ""
 
-#: includes/helpers/helpers.php:3258
+#: includes/helpers/helpers.php:3286
 msgid "The buyer's billing address"
 msgstr ""
 
-#: includes/helpers/helpers.php:3259
+#: includes/helpers/helpers.php:3287
 msgid "The buyer's city"
 msgstr ""
 
-#: includes/helpers/helpers.php:3260
+#: includes/helpers/helpers.php:3288
 msgid "The buyer's country"
 msgstr ""
 
-#: includes/helpers/helpers.php:3261
+#: includes/helpers/helpers.php:3289
 msgid "The trip price"
 msgstr ""
 
-#: includes/helpers/helpers.php:3262
+#: includes/helpers/helpers.php:3290
 msgid "The trip booking link"
 msgstr ""
 
-#: includes/helpers/helpers.php:3263
+#: includes/helpers/helpers.php:3291
 msgid "Payment Method used to checkout."
 msgstr ""
 
-#: includes/helpers/helpers.php:3264
+#: includes/helpers/helpers.php:3292
 msgid "The trip booking & Payment details."
 msgstr ""
 
-#: includes/helpers/helpers.php:3265
+#: includes/helpers/helpers.php:3293
 msgid "The trip booking summary."
 msgstr ""
 
-#: includes/helpers/helpers.php:3266
+#: includes/helpers/helpers.php:3294
 msgid "The trip payment details."
 msgstr ""
 
-#: includes/helpers/helpers.php:3267
+#: includes/helpers/helpers.php:3295
 msgid "The date and time when the trip was booked."
 msgstr ""
 
-#: includes/helpers/helpers.php:3268
+#: includes/helpers/helpers.php:3296
 msgid "The start date of the trip."
 msgstr ""
 
-#: includes/helpers/helpers.php:3269
+#: includes/helpers/helpers.php:3297
 msgid "The end date of the trip."
 msgstr ""
 
-#: includes/helpers/helpers.php:3270
+#: includes/helpers/helpers.php:3298
 msgid "The total number of travelers."
 msgstr ""
 
-#: includes/helpers/helpers.php:3271
+#: includes/helpers/helpers.php:3299
 msgid "The total price of the trip."
 msgstr ""
 
-#: includes/helpers/helpers.php:3272
+#: includes/helpers/helpers.php:3300
 msgid "The amount paid by the customer."
 msgstr ""
 
-#: includes/helpers/helpers.php:3273
+#: includes/helpers/helpers.php:3301
 msgid "The due amount for the trip."
 msgstr ""
 
-#: includes/helpers/helpers.php:3274
+#: includes/helpers/helpers.php:3302
 msgid "The payment ID of trip."
 msgstr ""
 
-#: includes/helpers/helpers.php:3275
+#: includes/helpers/helpers.php:3303
 msgid "The booking order ID"
 msgstr ""
 
-#: includes/helpers/helpers.php:3276
+#: includes/helpers/helpers.php:3304
 msgid "The billing details filled in new checkout template."
 msgstr ""
 
-#: includes/helpers/helpers.php:3277
+#: includes/helpers/helpers.php:3305
 msgid "The traveler's details filled in new checkout template."
 msgstr ""
 
-#: includes/helpers/helpers.php:3278
+#: includes/helpers/helpers.php:3306
 msgid "The emergency contact details filled in new checkout template."
 msgstr ""
 
-#: includes/helpers/helpers.php:3279
+#: includes/helpers/helpers.php:3307
 msgid "The additional note filled in new checkout template."
 msgstr ""
 
-#: includes/helpers/helpers.php:3280
+#: includes/helpers/helpers.php:3308
 msgid "Banks Accounts Details. This tag will be replaced with the bank details and sent to the customer receipt email when Bank Transfer method has been chosen by the customer."
 msgstr ""
 
-#: includes/helpers/helpers.php:3281
+#: includes/helpers/helpers.php:3309
 msgid "Instructions to make check payment."
 msgstr ""
 
-#: includes/helpers/helpers.php:3282
+#: includes/helpers/helpers.php:3310
 msgid "The extra fee for the trip."
 msgstr ""
 
-#: includes/helpers/helpers.php:3296
+#: includes/helpers/helpers.php:3324
 msgid "The link to reset the password."
 msgstr ""
 
@@ -15129,7 +15135,7 @@ msgid "An error occurred. Please try again."
 msgstr ""
 
 #: includes/lib/wte-form-framework/field-types/class-field-button.php:96
-#: dist/admin/onboarding.js:3472
+#: dist/admin/onboarding.js:3478
 msgid "Submit"
 msgstr ""
 
@@ -15338,7 +15344,7 @@ msgstr ""
 
 #: includes/onboard-process/views/onboard-process.php:417
 #: includes/templates/script-templates/booking-process/wte-booking.php:95
-#: dist/admin/onboarding.js:3174
+#: dist/admin/onboarding.js:3180
 #: dist/bundle/trip-booking-modal.bundle.js:2
 #: dist/public/components/trip-booking-modal.js:2
 #: dist/public/exports.js:2
@@ -15346,7 +15352,7 @@ msgid "Back"
 msgstr ""
 
 #: includes/onboard-process/views/onboard-process.php:428
-#: dist/admin/onboarding.js:3459
+#: dist/admin/onboarding.js:3465
 msgid "Go to Dashboard"
 msgstr ""
 
@@ -16062,7 +16068,7 @@ msgid "Proceed to checkout"
 msgstr ""
 
 #: includes/templates/script-templates/tmpl-wte-package-categories.php:10
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 msgid "Package Price Categories"
 msgstr ""
 
@@ -16093,7 +16099,7 @@ msgstr ""
 
 #: includes/templates/script-templates/tmpl-wte-package-single.php:20
 #: includes/tour-packages/packages.php:86
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 msgid "Price Categories"
 msgstr ""
 
@@ -16102,12 +16108,12 @@ msgid "Save and Close"
 msgstr ""
 
 #: includes/templates/script-templates/trip-edit/tab-pricing/dates/tmpl-wte-package-dates.php:33
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Enable Hours"
 msgstr ""
 
 #: includes/templates/script-templates/trip-edit/tab-pricing/tmpl-wte-package-general.php:31
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 msgid "General Package Settings"
 msgstr ""
 
@@ -16703,180 +16709,183 @@ msgstr ""
 #: dist/admin/dashboard-analytics/index.js:1438
 #: dist/admin/exports.js:1466
 #: dist/admin/exports.js:2154
-#: dist/admin/exports.js:3603
+#: dist/admin/exports.js:2254
+#: dist/admin/exports.js:3609
 #: dist/admin/global-settings.js:1922
 #: dist/admin/global-settings.js:2610
-#: dist/admin/global-settings.js:3510
+#: dist/admin/global-settings.js:2710
+#: dist/admin/global-settings.js:3516
 #: dist/admin/onboarding.js:1536
 #: dist/admin/trip-edit.js:1466
 #: dist/admin/trip-edit.js:2154
-#: dist/admin/trip-edit.js:3068
+#: dist/admin/trip-edit.js:2254
+#: dist/admin/trip-edit.js:3074
 #: dist/public/exports.js:1487
 msgid "New"
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3510
+#: dist/admin/coupon-edit.js:3516
 msgid "Site-wide Banner"
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3510
+#: dist/admin/coupon-edit.js:3516
 msgid "Display a promotional banner across the whole site advertising this coupon."
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3510
+#: dist/admin/coupon-edit.js:3516
 msgid "Banner Message"
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3510
+#: dist/admin/coupon-edit.js:3516
 msgid "Use <code>{code}</code> for the coupon code and <code>{value}</code> for the discount amount."
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3510
+#: dist/admin/coupon-edit.js:3516
 msgid "Special Offer! Use code {code} for {value} off your next adventure!"
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3510
+#: dist/admin/coupon-edit.js:3516
 msgid "Background Color"
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3510
+#: dist/admin/coupon-edit.js:3516
 msgid "Text Color"
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3510
+#: dist/admin/coupon-edit.js:3516
 msgid "<i>Enter the percentage to subtract from the total.</i>"
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3510
+#: dist/admin/coupon-edit.js:3516
 msgid "<i>Enter the fixed amount to subtract from the total.</i>"
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3532
+#: dist/admin/coupon-edit.js:3538
 msgid "Apply to Specific Departure Dates"
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3532
+#: dist/admin/coupon-edit.js:3538
 msgid "Coupon applies only to trips departing within the specified date range."
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3532
+#: dist/admin/coupon-edit.js:3538
 msgid "Trip Starts After"
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3532
+#: dist/admin/coupon-edit.js:3538
 msgid "Trip Starts Before"
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3532
+#: dist/admin/coupon-edit.js:3538
 msgid "Example:"
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3532
+#: dist/admin/coupon-edit.js:3538
 msgid "If you set \"Trip Starts After\" to Feb 1 and \"Trip Starts Before\" to Mar 31, this coupon will only work for trips departing in February or March, regardless of when the booking is made."
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3542
-#: dist/admin/onboarding.js:3472
+#: dist/admin/coupon-edit.js:3548
+#: dist/admin/onboarding.js:3478
 msgid "Saving…"
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3542
+#: dist/admin/coupon-edit.js:3548
 msgid "Save Coupon"
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3542
+#: dist/admin/coupon-edit.js:3548
 msgid "Coupon Name"
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3542
+#: dist/admin/coupon-edit.js:3548
 msgid "Internal name for this coupon. Helps you identify it in the list."
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3542
+#: dist/admin/coupon-edit.js:3548
 msgid "e.g. Summer Sale 2026"
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3542
+#: dist/admin/coupon-edit.js:3548
 msgid "Unique code customers type at checkout, e.g. SUMMER20."
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3542
+#: dist/admin/coupon-edit.js:3548
 msgid "WP-TRAVEL-ENGINE-SALE"
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3542
+#: dist/admin/coupon-edit.js:3548
 msgid "Discount Type"
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3542
+#: dist/admin/coupon-edit.js:3548
 msgid "Fixed"
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3542
+#: dist/admin/coupon-edit.js:3548
 msgid "Percentage (%)"
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3542
+#: dist/admin/coupon-edit.js:3548
 msgid "Allow Coupon Use For"
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3542
+#: dist/admin/coupon-edit.js:3548
 msgid "Choose to apply coupons to certain trips only. Select none to apply to all trips."
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3542
+#: dist/admin/coupon-edit.js:3548
 msgid "Select trips"
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3542
+#: dist/admin/coupon-edit.js:3548
 msgid "Coupon Start Date"
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3542
+#: dist/admin/coupon-edit.js:3548
 msgid "The date this coupon becomes active and can be used by travelers. Defaults to coupon creation date if left blank."
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3542
+#: dist/admin/coupon-edit.js:3548
 msgid "Coupon Expiry Date"
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3542
+#: dist/admin/coupon-edit.js:3548
 msgid "The last date travelers can apply this coupon at checkout. After this date, the coupon will automatically become invalid. Leave blank for no expiration."
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3542
+#: dist/admin/coupon-edit.js:3548
 msgid "Coupon Usage Limit"
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3542
+#: dist/admin/coupon-edit.js:3548
 msgid "Unlimited"
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3542
+#: dist/admin/coupon-edit.js:3548
 msgid "No. of times coupon can be used before being obsolete."
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3542
+#: dist/admin/coupon-edit.js:3548
 msgid "Coupon code is required."
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3542
+#: dist/admin/coupon-edit.js:3548
 msgid "Discount value is required."
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3542
+#: dist/admin/coupon-edit.js:3548
 msgid "Discount value must be greater than 0."
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3542
+#: dist/admin/coupon-edit.js:3548
 msgid "Discount percentage cannot exceed 100."
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3542
+#: dist/admin/coupon-edit.js:3548
 msgid "Trip Starts After must be earlier than Trip Starts Before."
 msgstr ""
 
-#: dist/admin/coupon-edit.js:3542
+#: dist/admin/coupon-edit.js:3548
 msgid "Please set at least one date to use Trip Date Restriction."
 msgstr ""
 
@@ -16920,7 +16929,7 @@ msgstr ""
 msgid "Most Popular Trip Type"
 msgstr ""
 
-#: dist/admin/dashboard-analytics/index.js:3054
+#: dist/admin/dashboard-analytics/index.js:3060
 #, js-format
 msgid "Advanced Analytics gives you a clear picture of bookings, revenue, and customer trends - so you always know what’s working (and what’s not). %1$sLearn More.%2$s"
 msgstr ""
@@ -16956,572 +16965,572 @@ msgid "Select Icon"
 msgstr ""
 
 #: dist/admin/exports.js:2006
-#: dist/admin/trip-edit.js:5874
+#: dist/admin/trip-edit.js:5882
 msgid "These fields require addon activation to be visible and functional."
 msgstr ""
 
-#: dist/admin/exports.js:3510
-#: dist/admin/global-settings.js:4570
-#: dist/admin/trip-edit.js:3524
+#: dist/admin/exports.js:3516
+#: dist/admin/global-settings.js:4576
+#: dist/admin/trip-edit.js:3530
 msgid "View Website"
 msgstr ""
 
-#: dist/admin/exports.js:3510
-#: dist/admin/global-settings.js:4570
-#: dist/admin/trip-edit.js:3524
+#: dist/admin/exports.js:3516
+#: dist/admin/global-settings.js:4576
+#: dist/admin/trip-edit.js:3530
 msgid "YouTube Tutorials"
 msgstr ""
 
-#: dist/admin/exports.js:3510
-#: dist/admin/global-settings.js:4570
-#: dist/admin/onboarding.js:3459
-#: dist/admin/trip-edit.js:3524
+#: dist/admin/exports.js:3516
+#: dist/admin/global-settings.js:4576
+#: dist/admin/onboarding.js:3465
+#: dist/admin/trip-edit.js:3530
 msgid "Documentation"
 msgstr ""
 
-#: dist/admin/exports.js:3603
-#: dist/admin/global-settings.js:3510
-#: dist/admin/trip-edit.js:3068
+#: dist/admin/exports.js:3609
+#: dist/admin/global-settings.js:3516
+#: dist/admin/trip-edit.js:3074
 msgid "No Results!"
 msgstr ""
 
-#: dist/admin/exports.js:3603
-#: dist/admin/global-settings.js:3510
-#: dist/admin/trip-edit.js:3068
+#: dist/admin/exports.js:3609
+#: dist/admin/global-settings.js:3516
+#: dist/admin/trip-edit.js:3074
 msgid "No results for "
 msgstr ""
 
-#: dist/admin/exports.js:3603
-#: dist/admin/global-settings.js:3510
-#: dist/admin/trip-edit.js:3617
+#: dist/admin/exports.js:3609
+#: dist/admin/global-settings.js:3516
+#: dist/admin/trip-edit.js:3623
 msgid "Sort code"
 msgstr ""
 
-#: dist/admin/exports.js:3603
-#: dist/admin/global-settings.js:3510
-#: dist/admin/trip-edit.js:3617
+#: dist/admin/exports.js:3609
+#: dist/admin/global-settings.js:3516
+#: dist/admin/trip-edit.js:3623
 msgid "Add Account"
 msgstr ""
 
-#: dist/admin/exports.js:3603
-#: dist/admin/global-settings.js:3510
-#: dist/admin/trip-edit.js:3617
+#: dist/admin/exports.js:3609
+#: dist/admin/global-settings.js:3516
+#: dist/admin/trip-edit.js:3623
 msgid "Currency rate fetched successfully"
 msgstr ""
 
-#: dist/admin/exports.js:3603
-#: dist/admin/global-settings.js:3510
-#: dist/admin/trip-edit.js:3617
+#: dist/admin/exports.js:3609
+#: dist/admin/global-settings.js:3516
+#: dist/admin/trip-edit.js:3623
 msgid "Select Currency Code"
 msgstr ""
 
-#: dist/admin/exports.js:3603
-#: dist/admin/global-settings.js:3510
-#: dist/admin/trip-edit.js:3617
+#: dist/admin/exports.js:3609
+#: dist/admin/global-settings.js:3516
+#: dist/admin/trip-edit.js:3623
 msgid "Failed to fetch rate for"
 msgstr ""
 
-#: dist/admin/exports.js:3603
-#: dist/admin/global-settings.js:3510
-#: dist/admin/trip-edit.js:3617
+#: dist/admin/exports.js:3609
+#: dist/admin/global-settings.js:3516
+#: dist/admin/trip-edit.js:3623
 msgid "All currency rates updated successfully"
 msgstr ""
 
-#: dist/admin/exports.js:3603
-#: dist/admin/global-settings.js:3510
-#: dist/admin/trip-edit.js:3617
+#: dist/admin/exports.js:3609
+#: dist/admin/global-settings.js:3516
+#: dist/admin/trip-edit.js:3623
 msgid "Update all rates"
 msgstr ""
 
-#: dist/admin/exports.js:3621
-#: dist/admin/global-settings.js:3528
-#: dist/admin/trip-edit.js:3635
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/exports.js:3627
+#: dist/admin/global-settings.js:3534
+#: dist/admin/trip-edit.js:3641
+#: dist/admin/trip-edit.js:5691
 msgid "Select Dates"
 msgstr ""
 
-#: dist/admin/exports.js:3621
-#: dist/admin/global-settings.js:3528
-#: dist/admin/trip-edit.js:3635
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/exports.js:3627
+#: dist/admin/global-settings.js:3534
+#: dist/admin/trip-edit.js:3641
+#: dist/admin/trip-edit.js:5691
 msgid "Add Dates"
 msgstr ""
 
-#: dist/admin/exports.js:3621
-#: dist/admin/global-settings.js:3528
-#: dist/admin/trip-edit.js:3635
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/exports.js:3627
+#: dist/admin/global-settings.js:3534
+#: dist/admin/trip-edit.js:3641
+#: dist/admin/trip-edit.js:5691
 msgid "Select a range of dates using the range calendar."
 msgstr ""
 
-#: dist/admin/exports.js:3621
-#: dist/admin/global-settings.js:3528
-#: dist/admin/trip-edit.js:3635
+#: dist/admin/exports.js:3627
+#: dist/admin/global-settings.js:3534
+#: dist/admin/trip-edit.js:3641
 msgid "Repeat Yearly: "
 msgstr ""
 
-#: dist/admin/exports.js:3658
-#: dist/admin/global-settings.js:3565
-#: dist/admin/trip-edit.js:3672
+#: dist/admin/exports.js:3664
+#: dist/admin/global-settings.js:3571
+#: dist/admin/trip-edit.js:3678
 msgid "Help Text"
 msgstr ""
 
-#: dist/admin/exports.js:3658
-#: dist/admin/global-settings.js:3565
-#: dist/admin/trip-edit.js:3672
+#: dist/admin/exports.js:3664
+#: dist/admin/global-settings.js:3571
+#: dist/admin/trip-edit.js:3678
 msgid "Add Highlight"
 msgstr ""
 
-#: dist/admin/exports.js:3658
-#: dist/admin/global-settings.js:3565
-#: dist/admin/trip-edit.js:3672
+#: dist/admin/exports.js:3664
+#: dist/admin/global-settings.js:3571
+#: dist/admin/trip-edit.js:3678
 msgid "Type ( Per )"
 msgstr ""
 
-#: dist/admin/exports.js:3658
-#: dist/admin/global-settings.js:3565
-#: dist/admin/trip-edit.js:3672
+#: dist/admin/exports.js:3664
+#: dist/admin/global-settings.js:3571
+#: dist/admin/trip-edit.js:3678
 msgid "Pricing Description"
 msgstr ""
 
-#: dist/admin/exports.js:3658
-#: dist/admin/global-settings.js:3565
-#: dist/admin/trip-edit.js:3672
+#: dist/admin/exports.js:3664
+#: dist/admin/global-settings.js:3571
+#: dist/admin/trip-edit.js:3678
 msgid "Add Pricing Type"
 msgstr ""
 
-#: dist/admin/exports.js:3725
-#: dist/admin/global-settings.js:3632
-#: dist/admin/trip-edit.js:3739
+#: dist/admin/exports.js:3731
+#: dist/admin/global-settings.js:3638
+#: dist/admin/trip-edit.js:3745
 msgid "Via PayLexer"
 msgstr ""
 
-#: dist/admin/exports.js:3725
-#: dist/admin/global-settings.js:3632
-#: dist/admin/trip-edit.js:3739
+#: dist/admin/exports.js:3731
+#: dist/admin/global-settings.js:3638
+#: dist/admin/trip-edit.js:3745
 #, js-format
 msgid "%d+ gateways"
 msgstr ""
 
-#: dist/admin/exports.js:3725
-#: dist/admin/global-settings.js:3632
-#: dist/admin/trip-edit.js:3739
+#: dist/admin/exports.js:3731
+#: dist/admin/global-settings.js:3638
+#: dist/admin/trip-edit.js:3745
 #, js-format
 msgid "PayLexer is a free platform that connects WP Travel Engine to multiple payment gateways. The list of supported gateways keeps growing. If yours isn't here yet, you can <a href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\"><strong>request a gateway</strong></a>."
 msgstr ""
 
-#: dist/admin/exports.js:3725
-#: dist/admin/global-settings.js:3632
-#: dist/admin/trip-edit.js:3739
+#: dist/admin/exports.js:3731
+#: dist/admin/global-settings.js:3638
+#: dist/admin/trip-edit.js:3745
 msgid "Search payment gateways…"
 msgstr ""
 
-#: dist/admin/exports.js:3725
-#: dist/admin/global-settings.js:3632
-#: dist/admin/trip-edit.js:3739
+#: dist/admin/exports.js:3731
+#: dist/admin/global-settings.js:3638
+#: dist/admin/trip-edit.js:3745
 msgid "Loading gateways…"
 msgstr ""
 
-#: dist/admin/exports.js:3725
-#: dist/admin/global-settings.js:3632
-#: dist/admin/trip-edit.js:3739
+#: dist/admin/exports.js:3731
+#: dist/admin/global-settings.js:3638
+#: dist/admin/trip-edit.js:3745
 msgid "Failed to load gateways."
 msgstr ""
 
-#: dist/admin/exports.js:3725
-#: dist/admin/global-settings.js:3632
-#: dist/admin/trip-edit.js:3739
+#: dist/admin/exports.js:3731
+#: dist/admin/global-settings.js:3638
+#: dist/admin/trip-edit.js:3745
 msgid "Configure"
 msgstr ""
 
-#: dist/admin/exports.js:3725
-#: dist/admin/global-settings.js:3632
-#: dist/admin/trip-edit.js:3739
+#: dist/admin/exports.js:3731
+#: dist/admin/global-settings.js:3638
+#: dist/admin/trip-edit.js:3745
 #: dist/admin/upcoming-tours.js:1
 msgid "Show less"
 msgstr ""
 
-#: dist/admin/exports.js:3725
-#: dist/admin/global-settings.js:3632
-#: dist/admin/trip-edit.js:3739
+#: dist/admin/exports.js:3731
+#: dist/admin/global-settings.js:3638
+#: dist/admin/trip-edit.js:3745
 #, js-format
 msgid "Load more (%d)"
 msgstr ""
 
-#: dist/admin/exports.js:3725
-#: dist/admin/global-settings.js:3632
-#: dist/admin/trip-edit.js:3739
+#: dist/admin/exports.js:3731
+#: dist/admin/global-settings.js:3638
+#: dist/admin/trip-edit.js:3745
 msgid "Sign up at Paylexer and create your free account."
 msgstr ""
 
-#: dist/admin/exports.js:3725
-#: dist/admin/global-settings.js:3632
-#: dist/admin/trip-edit.js:3739
+#: dist/admin/exports.js:3731
+#: dist/admin/global-settings.js:3638
+#: dist/admin/trip-edit.js:3745
 #, js-format
 msgid "Inside your PayLexer dashboard, configure %s and complete any required onboarding (takes ~5 minutes)."
 msgstr ""
 
-#: dist/admin/exports.js:3725
-#: dist/admin/global-settings.js:3632
-#: dist/admin/trip-edit.js:3739
+#: dist/admin/exports.js:3731
+#: dist/admin/global-settings.js:3638
+#: dist/admin/trip-edit.js:3745
 msgid "Link your site to PayLexer and enable the gateway here to start accepting payments."
 msgstr ""
 
-#: dist/admin/exports.js:3725
-#: dist/admin/global-settings.js:3632
-#: dist/admin/trip-edit.js:3739
+#: dist/admin/exports.js:3731
+#: dist/admin/global-settings.js:3638
+#: dist/admin/trip-edit.js:3745
 msgid "Sign up on PayLexer - it's free"
 msgstr ""
 
-#: dist/admin/exports.js:3725
-#: dist/admin/global-settings.js:3632
-#: dist/admin/trip-edit.js:3739
+#: dist/admin/exports.js:3731
+#: dist/admin/global-settings.js:3638
+#: dist/admin/trip-edit.js:3745
 msgid "View documentation"
 msgstr ""
 
-#: dist/admin/exports.js:4034
-#: dist/admin/global-settings.js:3941
-#: dist/admin/trip-edit.js:4048
+#: dist/admin/exports.js:4040
+#: dist/admin/global-settings.js:3947
+#: dist/admin/trip-edit.js:4054
 msgid "E.g. Hotel Stay, Tent Stay..."
 msgstr ""
 
-#: dist/admin/exports.js:4034
-#: dist/admin/global-settings.js:3941
-#: dist/admin/trip-edit.js:4048
+#: dist/admin/exports.js:4040
+#: dist/admin/global-settings.js:3947
+#: dist/admin/trip-edit.js:4054
 msgid "Add Sleep Mode"
 msgstr ""
 
-#: dist/admin/exports.js:4075
-#: dist/admin/global-settings.js:3982
-#: dist/admin/trip-edit.js:4089
+#: dist/admin/exports.js:4081
+#: dist/admin/global-settings.js:3988
+#: dist/admin/trip-edit.js:4095
 msgid "Enter an email address to send a test email."
 msgstr ""
 
-#: dist/admin/exports.js:4075
-#: dist/admin/global-settings.js:3982
-#: dist/admin/trip-edit.js:4089
+#: dist/admin/exports.js:4081
+#: dist/admin/global-settings.js:3988
+#: dist/admin/trip-edit.js:4095
 msgid "Test Email"
 msgstr ""
 
-#: dist/admin/exports.js:4075
-#: dist/admin/global-settings.js:3982
-#: dist/admin/trip-edit.js:4089
+#: dist/admin/exports.js:4081
+#: dist/admin/global-settings.js:3988
+#: dist/admin/trip-edit.js:4095
 msgid "Type"
 msgstr ""
 
-#: dist/admin/exports.js:4075
-#: dist/admin/global-settings.js:3982
-#: dist/admin/trip-edit.js:4089
+#: dist/admin/exports.js:4081
+#: dist/admin/global-settings.js:3988
+#: dist/admin/trip-edit.js:4095
 msgid "Placeholder"
 msgstr ""
 
-#: dist/admin/exports.js:4075
-#: dist/admin/global-settings.js:3982
-#: dist/admin/trip-edit.js:4089
+#: dist/admin/exports.js:4081
+#: dist/admin/global-settings.js:3988
+#: dist/admin/trip-edit.js:4095
 msgid "Add Info"
 msgstr ""
 
-#: dist/admin/exports.js:4075
-#: dist/admin/global-settings.js:3982
-#: dist/admin/trip-edit.js:4089
+#: dist/admin/exports.js:4081
+#: dist/admin/global-settings.js:3988
+#: dist/admin/trip-edit.js:4095
 msgid "Choose input type"
 msgstr ""
 
-#: dist/admin/exports.js:4075
-#: dist/admin/global-settings.js:3982
-#: dist/admin/trip-edit.js:4089
+#: dist/admin/exports.js:4081
+#: dist/admin/global-settings.js:3988
+#: dist/admin/trip-edit.js:4095
 msgid "Add Tab"
 msgstr ""
 
-#: dist/admin/exports.js:4075
-#: dist/admin/global-settings.js:3982
-#: dist/admin/trip-edit.js:4089
+#: dist/admin/exports.js:4081
+#: dist/admin/global-settings.js:3988
+#: dist/admin/trip-edit.js:4095
 msgid "Enter Tab Name"
 msgstr ""
 
-#: dist/admin/exports.js:4075
-#: dist/admin/global-settings.js:3982
-#: dist/admin/trip-edit.js:4089
+#: dist/admin/exports.js:4081
+#: dist/admin/global-settings.js:3988
+#: dist/admin/trip-edit.js:4095
 msgid "Webhook Name"
 msgstr ""
 
-#: dist/admin/exports.js:4075
-#: dist/admin/global-settings.js:3982
-#: dist/admin/trip-edit.js:4089
+#: dist/admin/exports.js:4081
+#: dist/admin/global-settings.js:3988
+#: dist/admin/trip-edit.js:4095
 msgid "Webhook URL"
 msgstr ""
 
-#: dist/admin/exports.js:4075
-#: dist/admin/global-settings.js:3982
-#: dist/admin/trip-edit.js:4089
+#: dist/admin/exports.js:4081
+#: dist/admin/global-settings.js:3988
+#: dist/admin/trip-edit.js:4095
 msgid "Add zapier webhook"
 msgstr ""
 
-#: dist/admin/exports.js:4075
-#: dist/admin/global-settings.js:3982
-#: dist/admin/trip-edit.js:4089
+#: dist/admin/exports.js:4081
+#: dist/admin/global-settings.js:3988
+#: dist/admin/trip-edit.js:4095
 msgid "webhook name"
 msgstr ""
 
-#: dist/admin/exports.js:4075
-#: dist/admin/global-settings.js:3982
-#: dist/admin/trip-edit.js:4089
+#: dist/admin/exports.js:4081
+#: dist/admin/global-settings.js:3988
+#: dist/admin/trip-edit.js:4095
 msgid "webhook url"
 msgstr ""
 
-#: dist/admin/exports.js:4114
-#: dist/admin/global-settings.js:4021
-#: dist/admin/trip-edit.js:4128
+#: dist/admin/exports.js:4120
+#: dist/admin/global-settings.js:4027
+#: dist/admin/trip-edit.js:4134
 msgid "Admin"
 msgstr ""
 
-#: dist/admin/exports.js:4114
-#: dist/admin/global-settings.js:4021
-#: dist/admin/trip-edit.js:4128
+#: dist/admin/exports.js:4120
+#: dist/admin/global-settings.js:4027
+#: dist/admin/trip-edit.js:4134
 msgid "Email Language:"
 msgstr ""
 
-#: dist/admin/exports.js:4114
-#: dist/admin/global-settings.js:4021
-#: dist/admin/trip-edit.js:4128
+#: dist/admin/exports.js:4120
+#: dist/admin/global-settings.js:4027
+#: dist/admin/trip-edit.js:4134
 msgid "Email templates loaded successfully"
 msgstr ""
 
-#: dist/admin/exports.js:4114
-#: dist/admin/global-settings.js:4021
-#: dist/admin/trip-edit.js:4128
+#: dist/admin/exports.js:4120
+#: dist/admin/global-settings.js:4027
+#: dist/admin/trip-edit.js:4134
 msgid "Failed to load email templates. Please try again."
 msgstr ""
 
-#: dist/admin/exports.js:4114
-#: dist/admin/global-settings.js:4021
-#: dist/admin/trip-edit.js:4128
+#: dist/admin/exports.js:4120
+#: dist/admin/global-settings.js:4027
+#: dist/admin/trip-edit.js:4134
 msgid "(Default)"
 msgstr ""
 
-#: dist/admin/exports.js:4114
-#: dist/admin/global-settings.js:4021
-#: dist/admin/trip-edit.js:4128
+#: dist/admin/exports.js:4120
+#: dist/admin/global-settings.js:4027
+#: dist/admin/trip-edit.js:4134
 msgid "Editing translation"
 msgstr ""
 
-#: dist/admin/exports.js:4114
-#: dist/admin/global-settings.js:4021
-#: dist/admin/trip-edit.js:4128
+#: dist/admin/exports.js:4120
+#: dist/admin/global-settings.js:4027
+#: dist/admin/trip-edit.js:4134
 msgid "Update Email Templates"
 msgstr ""
 
-#: dist/admin/exports.js:4114
-#: dist/admin/global-settings.js:4021
-#: dist/admin/trip-edit.js:4128
+#: dist/admin/exports.js:4120
+#: dist/admin/global-settings.js:4027
+#: dist/admin/trip-edit.js:4134
 msgid "Once confirmed, all existing email templates will be replaced with the new versions. <span style='color: #ff0000; font-weight: bold;'>This action is irreversible and cannot be undone.</span> Please make sure to backup your existing templates before proceeding."
 msgstr ""
 
-#: dist/admin/exports.js:4114
-#: dist/admin/global-settings.js:4021
-#: dist/admin/trip-edit.js:4128
+#: dist/admin/exports.js:4120
+#: dist/admin/global-settings.js:4027
+#: dist/admin/trip-edit.js:4134
 msgid "Confirm & Replace"
 msgstr ""
 
-#: dist/admin/exports.js:4114
-#: dist/admin/global-settings.js:4021
-#: dist/admin/trip-edit.js:4128
+#: dist/admin/exports.js:4120
+#: dist/admin/global-settings.js:4027
+#: dist/admin/trip-edit.js:4134
 msgid "Update Templates"
 msgstr ""
 
-#: dist/admin/exports.js:4114
-#: dist/admin/global-settings.js:4021
-#: dist/admin/trip-edit.js:4128
+#: dist/admin/exports.js:4120
+#: dist/admin/global-settings.js:4027
+#: dist/admin/trip-edit.js:4134
 msgid "Enable Notification"
 msgstr ""
 
-#: dist/admin/exports.js:4114
-#: dist/admin/global-settings.js:4021
-#: dist/admin/trip-edit.js:4128
+#: dist/admin/exports.js:4120
+#: dist/admin/global-settings.js:4027
+#: dist/admin/trip-edit.js:4134
 msgid "Enter notification name"
 msgstr ""
 
-#: dist/admin/exports.js:4114
-#: dist/admin/global-settings.js:4021
-#: dist/admin/trip-edit.js:4128
+#: dist/admin/exports.js:4120
+#: dist/admin/global-settings.js:4027
+#: dist/admin/trip-edit.js:4134
 msgid "Enter subject"
 msgstr ""
 
-#: dist/admin/exports.js:4114
-#: dist/admin/global-settings.js:4021
-#: dist/admin/trip-edit.js:4128
+#: dist/admin/exports.js:4120
+#: dist/admin/global-settings.js:4027
+#: dist/admin/trip-edit.js:4134
 #, js-format
 msgid "This email template will be used to send %s mail."
 msgstr ""
 
-#: dist/admin/exports.js:4114
-#: dist/admin/global-settings.js:4021
-#: dist/admin/trip-edit.js:4128
+#: dist/admin/exports.js:4120
+#: dist/admin/global-settings.js:4027
+#: dist/admin/trip-edit.js:4134
 msgid "Personalization"
 msgstr ""
 
-#: dist/admin/exports.js:4114
-#: dist/admin/global-settings.js:4021
-#: dist/admin/trip-edit.js:4128
+#: dist/admin/exports.js:4120
+#: dist/admin/global-settings.js:4027
+#: dist/admin/trip-edit.js:4134
 msgid "Preview Template"
 msgstr ""
 
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
 msgid "No FAQs added yet. Click \"Add FAQ\" to create your first question."
 msgstr ""
 
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
 msgid "Enter question..."
 msgstr ""
 
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
 msgid "Enter your question here..."
 msgstr ""
 
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
 msgid "Add FAQ"
 msgstr ""
 
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
 msgid "Initial Text"
 msgstr ""
 
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
 msgid "Modified Text"
 msgstr ""
 
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
 msgid "Add Text"
 msgstr ""
 
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
 msgid "Itinerary Elevation Chart Settings"
 msgstr ""
 
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
 msgid "Show Chart on Trip Page"
 msgstr ""
 
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
 msgid "Enable this option to show an elevation chart just before itinerary list."
 msgstr ""
 
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
 msgid "Elevation Input Unit"
 msgstr ""
 
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
 msgid "Default: Meter. The unit of entered value on each itinerary will be the selected one and will be used for conversion."
 msgstr ""
 
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
-#: dist/admin/trip-edit.js:5424
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
+#: dist/admin/trip-edit.js:5432
 msgid "Meter"
 msgstr ""
 
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
 msgid "Foot"
 msgstr ""
 
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
 msgid "Show X-Axis"
 msgstr ""
 
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
 msgid "Show Y-Axis"
 msgstr ""
 
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
 msgid "Show Line Graph"
 msgstr ""
 
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
 msgid "Theme Color"
 msgstr ""
 
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
 msgid "Altitude Unit:"
 msgstr ""
 
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
 msgid "Randomize"
 msgstr ""
 
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
-#: dist/admin/trip-edit.js:4493
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
+#: dist/admin/trip-edit.js:4499
 msgid "Altitude (m)"
 msgstr ""
 
-#: dist/admin/exports.js:4479
-#: dist/admin/global-settings.js:4386
+#: dist/admin/exports.js:4485
+#: dist/admin/global-settings.js:4392
 msgid "View Documentation"
 msgstr ""
 
-#: dist/admin/exports.js:4484
-#: dist/admin/global-settings.js:4391
-#: dist/admin/trip-edit.js:4498
+#: dist/admin/exports.js:4490
+#: dist/admin/global-settings.js:4397
+#: dist/admin/trip-edit.js:4504
 msgid "Deprecated Tags Detected"
 msgstr ""
 
-#: dist/admin/exports.js:4484
-#: dist/admin/global-settings.js:4391
-#: dist/admin/trip-edit.js:4498
+#: dist/admin/exports.js:4490
+#: dist/admin/global-settings.js:4397
+#: dist/admin/trip-edit.js:4504
 msgid "The following tags used in your email content or subject line are deprecated. Please replace them with the correct substitutes to ensure your emails render correctly."
 msgstr ""
 
-#: dist/admin/exports.js:4484
-#: dist/admin/global-settings.js:4391
-#: dist/admin/trip-edit.js:4498
+#: dist/admin/exports.js:4490
+#: dist/admin/global-settings.js:4397
+#: dist/admin/trip-edit.js:4504
 msgid "Replace All"
 msgstr ""
 
-#: dist/admin/exports.js:4957
-#: dist/admin/trip-edit.js:5722
+#: dist/admin/exports.js:4963
+#: dist/admin/trip-edit.js:5730
 msgid "Add Group"
 msgstr ""
 
-#: dist/admin/global-settings.js:4570
+#: dist/admin/global-settings.js:4576
 msgid "Quick Links"
 msgstr ""
 
@@ -17537,660 +17546,660 @@ msgstr ""
 msgid "Need Help?"
 msgstr ""
 
-#: dist/admin/onboarding.js:3196
+#: dist/admin/onboarding.js:3202
 msgid "Select the currency you want your trip prices to display in."
 msgstr ""
 
-#: dist/admin/onboarding.js:3196
+#: dist/admin/onboarding.js:3202
 msgid "Base Currency"
 msgstr ""
 
-#: dist/admin/onboarding.js:3196
+#: dist/admin/onboarding.js:3202
 #, js-format
 msgid "You can change the currency symbol, decimal separators, and other formatting options later in <a href=\"%s\">Settings General →</a>"
 msgstr ""
 
-#: dist/admin/onboarding.js:3196
+#: dist/admin/onboarding.js:3202
 msgid "Request failed."
 msgstr ""
 
-#: dist/admin/onboarding.js:3459
+#: dist/admin/onboarding.js:3465
 msgid "Video Tutorials"
 msgstr ""
 
-#: dist/admin/onboarding.js:3459
+#: dist/admin/onboarding.js:3465
 msgid "Your Site is Ready!"
 msgstr ""
 
-#: dist/admin/onboarding.js:3459
+#: dist/admin/onboarding.js:3465
 msgid "Congratulations! You've successfully set up your new site."
 msgstr ""
 
-#: dist/admin/onboarding.js:3459
+#: dist/admin/onboarding.js:3465
 msgid "Create Your First Trip"
 msgstr ""
 
-#: dist/admin/onboarding.js:3459
+#: dist/admin/onboarding.js:3465
 msgid "Join Facebook Community"
 msgstr ""
 
-#: dist/admin/onboarding.js:3459
+#: dist/admin/onboarding.js:3465
 msgid "What's Next?"
 msgstr ""
 
-#: dist/admin/onboarding.js:3459
+#: dist/admin/onboarding.js:3465
 msgid "Optional but recommended"
 msgstr ""
 
-#: dist/admin/onboarding.js:3459
+#: dist/admin/onboarding.js:3465
 msgid "Import a Starter Site"
 msgstr ""
 
-#: dist/admin/onboarding.js:3459
+#: dist/admin/onboarding.js:3465
 msgid "Choose a Starter Layout - the same proven designs top agencies use to launch successfully."
 msgstr ""
 
-#: dist/admin/onboarding.js:3459
+#: dist/admin/onboarding.js:3465
 msgid "<strong>Note:</strong> Clicking import will install the <strong>Demo Importer Plus</strong> plugin to handle the import, and the <strong>Travel Monster</strong> theme to display your content correctly. You can switch themes anytime from <strong>Appearance &gt; Themes</strong> in your dashboard."
 msgstr ""
 
-#: dist/admin/onboarding.js:3459
+#: dist/admin/onboarding.js:3465
 msgid "Installing Travel Monster theme…"
 msgstr ""
 
-#: dist/admin/onboarding.js:3459
+#: dist/admin/onboarding.js:3465
 msgid "<strong>✓ Travel Monster theme installed.</strong> Installing Demo Importer Plus…"
 msgstr ""
 
-#: dist/admin/onboarding.js:3459
+#: dist/admin/onboarding.js:3465
 msgid "<strong>✓ Demo Importer Plus installed.</strong> Redirecting to importer…"
 msgstr ""
 
-#: dist/admin/onboarding.js:3459
+#: dist/admin/onboarding.js:3465
 msgid "Redirecting…"
 msgstr ""
 
-#: dist/admin/onboarding.js:3459
+#: dist/admin/onboarding.js:3465
 msgid "Installing…"
 msgstr ""
 
-#: dist/admin/onboarding.js:3459
+#: dist/admin/onboarding.js:3465
 msgid "Import Starter Site"
 msgstr ""
 
-#: dist/admin/onboarding.js:3461
+#: dist/admin/onboarding.js:3467
 msgid "Trip Base"
 msgstr ""
 
-#: dist/admin/onboarding.js:3461
+#: dist/admin/onboarding.js:3467
 msgid "Trip Destination Base"
 msgstr ""
 
-#: dist/admin/onboarding.js:3461
+#: dist/admin/onboarding.js:3467
 msgid "Trip Activity Base"
 msgstr ""
 
-#: dist/admin/onboarding.js:3472
+#: dist/admin/onboarding.js:3478
 msgid "How Your Trip URL Appears"
 msgstr ""
 
-#: dist/admin/onboarding.js:3472
+#: dist/admin/onboarding.js:3478
 msgid "Choose how your trip links are displayed - clean, easy-to-share URLs make trips simpler to find."
 msgstr ""
 
-#: dist/admin/onboarding.js:3472
+#: dist/admin/onboarding.js:3478
 #, js-format
 msgid "e.g. yourdomain.com/%1$s/%2$s/"
 msgstr ""
 
-#: dist/admin/onboarding.js:3472
+#: dist/admin/onboarding.js:3478
 msgid "Something went wrong. Please try again."
 msgstr ""
 
-#: dist/admin/onboarding.js:3573
+#: dist/admin/onboarding.js:3579
 #, js-format
 msgid "Trusted by %s Travel Agencies Worldwide"
 msgstr ""
 
-#: dist/admin/onboarding.js:3573
+#: dist/admin/onboarding.js:3579
 msgid "Welcome to WP Travel Engine"
 msgstr ""
 
-#: dist/admin/onboarding.js:3573
+#: dist/admin/onboarding.js:3579
 msgid "Let's setup your travel website - follow these quick steps to get started."
 msgstr ""
 
-#: dist/admin/onboarding.js:3573
+#: dist/admin/onboarding.js:3579
 msgid "Currency Settings"
 msgstr ""
 
-#: dist/admin/onboarding.js:3573
+#: dist/admin/onboarding.js:3579
 msgid "Set your website's default currency for all trip prices."
 msgstr ""
 
-#: dist/admin/onboarding.js:3573
+#: dist/admin/onboarding.js:3579
 msgid "Trip URL Structure"
 msgstr ""
 
-#: dist/admin/onboarding.js:3573
+#: dist/admin/onboarding.js:3579
 msgid "Configure how URLs are generated for your trip pages."
 msgstr ""
 
-#: dist/admin/onboarding.js:3573
+#: dist/admin/onboarding.js:3579
 msgid "Import Starter Site Templates"
 msgstr ""
 
-#: dist/admin/onboarding.js:3573
+#: dist/admin/onboarding.js:3579
 msgid "Choose a ready-made starter layout to begin building your site."
 msgstr ""
 
-#: dist/admin/onboarding.js:3573
+#: dist/admin/onboarding.js:3579
 msgid "Takes less than 3 minutes"
 msgstr ""
 
-#: dist/admin/onboarding.js:3573
+#: dist/admin/onboarding.js:3579
 msgid "Get Started"
 msgstr ""
 
-#: dist/admin/onboarding.js:3573
+#: dist/admin/onboarding.js:3579
 msgid "Skip to dashboard"
 msgstr ""
 
-#: dist/admin/trip-edit.js:4778
+#: dist/admin/trip-edit.js:4784
 msgid "Selected Extra Services for the trip."
 msgstr ""
 
-#: dist/admin/trip-edit.js:4778
+#: dist/admin/trip-edit.js:4784
 msgid "Select Extra Services"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5266
+#: dist/admin/trip-edit.js:5272
 msgid "Add FAQs in Bulk"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5266
+#: dist/admin/trip-edit.js:5272
 msgid "Search FAQs..."
 msgstr ""
 
-#: dist/admin/trip-edit.js:5266
+#: dist/admin/trip-edit.js:5272
 msgid "Loading FAQs..."
 msgstr ""
 
-#: dist/admin/trip-edit.js:5266
+#: dist/admin/trip-edit.js:5272
 msgid "No global FAQs available. Please add FAQs in Global Settings first."
 msgstr ""
 
-#: dist/admin/trip-edit.js:5266
+#: dist/admin/trip-edit.js:5272
 msgid "Added"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5266
+#: dist/admin/trip-edit.js:5272
 msgid "No FAQs found matching your search"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5266
+#: dist/admin/trip-edit.js:5272
 msgid "Enter title for the section"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5266
+#: dist/admin/trip-edit.js:5272
 msgid "Failed to load global FAQs"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5266
+#: dist/admin/trip-edit.js:5272
 msgid "Editing a globally imported FAQ will convert it into a local FAQ for this trip. Changes will not affect the global FAQ, and the Global icon will disappear. You can configure this from global settings "
 msgstr ""
 
-#: dist/admin/trip-edit.js:5266
+#: dist/admin/trip-edit.js:5272
 msgid "here"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5266
+#: dist/admin/trip-edit.js:5272
 msgid "Category Name"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5266
+#: dist/admin/trip-edit.js:5272
 msgid "Enter question"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5266
+#: dist/admin/trip-edit.js:5272
 msgid "Globally imported FAQ"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5266
+#: dist/admin/trip-edit.js:5272
 msgid "You can configure this from global settings"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5266
+#: dist/admin/trip-edit.js:5272
 msgid "Delete Category"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5266
+#: dist/admin/trip-edit.js:5272
 msgid "Deleting this category will also delete all FAQs under it. <br/>Are you sure you want to continue?"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5266
+#: dist/admin/trip-edit.js:5272
 msgid "Add New FAQs"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5266
+#: dist/admin/trip-edit.js:5272
 msgid "Add New Category"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5272
+#: dist/admin/trip-edit.js:5278
 msgid "Global Files List"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5272
+#: dist/admin/trip-edit.js:5278
 msgid "Add Global Files"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5272
+#: dist/admin/trip-edit.js:5278
 msgid "Choose the download file from the drop-down and click on <strong>Add Global File</strong> to add Global Files."
 msgstr ""
 
-#: dist/admin/trip-edit.js:5272
+#: dist/admin/trip-edit.js:5278
 msgid "Selected Files for the trip."
 msgstr ""
 
-#: dist/admin/trip-edit.js:5286
+#: dist/admin/trip-edit.js:5293
 msgid "Enter Trip Highlight"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5286
+#: dist/admin/trip-edit.js:5293
 msgid "Add Trip Highlight"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5424
+#: dist/admin/trip-edit.js:5432
 msgid "Itinerary Label"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5424
+#: dist/admin/trip-edit.js:5432
 msgid "Itinerary title"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5424
+#: dist/admin/trip-edit.js:5432
 msgid "Hour(s)"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5424
+#: dist/admin/trip-edit.js:5432
 msgid "Minute(s)"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5424
+#: dist/admin/trip-edit.js:5432
 msgid "You can configure sleep mode from here."
 msgstr ""
 
-#: dist/admin/trip-edit.js:5424
+#: dist/admin/trip-edit.js:5432
 msgid "Sleep Mode Additional Info"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5424
+#: dist/admin/trip-edit.js:5432
 msgid "Untick All"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5424
+#: dist/admin/trip-edit.js:5432
 msgid "Tick All"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5424
+#: dist/admin/trip-edit.js:5432
 msgid "Start Location:"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5424
+#: dist/admin/trip-edit.js:5432
 #: dist/blocks/editor/editor.js:1403
 msgid "Location"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5424
+#: dist/admin/trip-edit.js:5432
 msgid "Altitude"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Daily"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Weekly"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Monthly"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Yearly"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "By default, this trip can be booked throughout the year. Do you have trips with fixed departure dates and want them booked only on these days? Trip Fixed Starting Dates extension allows you to set specific dates when the trips can be booked. <a href='https://wptravelengine.com/plugins/trip-fixed-starting-dates/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro' target='_blank'>Get Trip Fixed Starting Dates extension now</a>"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Newest by Date"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Oldest by Date"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Select Date"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 #, js-format
 msgid "%s Seats"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 #, js-format
 msgid "%s Time Slots"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Conditional Price"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Starting Date"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Add Time"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Enable Repeat"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Select Weekdays:"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Select Months:"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Repeat Until"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Total Seats"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 #, js-format
 msgid "<strong>Heads up:</strong> You've set <strong>Total Traveler Seats to %1$s</strong> but for this date you have set capacity to <strong>%2$s</strong>. The system will still <strong>limit bookings to %1$s travelers</strong> for this date%3$s."
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid " every time slot"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 #, js-format
 msgid "<strong>Heads up:</strong> You've set <strong>Total Traveler Seats to %1$s</strong> but for this date you have set capacity to <strong>%2$s</strong>. The system will <strong>limit bookings to %2$s travelers</strong> for this date%3$s."
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 #, js-format
 msgid "<strong>Heads up:</strong> The system will <strong>limit bookings to %s travelers</strong> for this date%s."
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Availability Label"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Choose Label"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Monday"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Tuesday"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Wednesday"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Thursday"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Friday"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Saturday"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Sunday"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Closed"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5683
+#: dist/admin/trip-edit.js:5691
 msgid "Sort By:"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5722
+#: dist/admin/trip-edit.js:5730
 msgid "Enter short description here"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 msgid "Make this price category primary"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 #, js-format
 msgid "Min %s pax"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 msgid "Regular Price"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 msgid "Please enter a regular price."
 msgstr ""
 
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 msgid "Sale Price"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 msgid "Please enter a sale price."
 msgstr ""
 
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 msgid "Sale price must be less than regular price"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 msgid "Min Pax Per Booking"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 msgid "Set the minimum number of travelers required to book this price category."
 msgstr ""
 
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 #, js-format
 msgid "Because the minimum pax is set to %1$s, customers will need to book <strong>%1$s travelers</strong> while booking this price category."
 msgstr ""
 
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 msgid "Enable Group Pricing"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 msgid "Check this if you want to enable Group Discount. You can add Prices for the different groups."
 msgstr ""
 
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 msgid "<strong>Want to provide group discounts and increase sales? Group Discount allows you to provide group discount on the basis of number booking a tour.</strong> <a href=\"https://wptravelengine.com/plugins/group-discount/?utm_source=free_plugin&utm_medium=pro_addon&utm_campaign=upgrade_to_pro\" target=\"_blank\">Get Group Discount extension now</a>"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 msgid "Availability Labels"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 msgid "Make this package primary"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 msgid "eg: Everest Base Camp Trek"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 msgid "Edit Pricing & Dates"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 msgid "Clone this package"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 msgid "Please note that this action can not be undone."
 msgstr ""
 
-#: dist/admin/trip-edit.js:5757
+#: dist/admin/trip-edit.js:5765
 msgid "Add New Package"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "and"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "have no fixed limit and will accept remaining bookings up to whatever seats are still available in the trip."
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "seat"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "seats"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "has no fixed limit and will accept remaining bookings up to whatever seats are still available in the trip."
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "have no fixed limit and will share remaining bookings up to whatever seats are still available in the trip."
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "Max Seats"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "auto"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "Auto-scaled"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "Allocated seats"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "exceed the"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "seat overall cap. Bookings will stop at"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "regardless of category limits. Review the allocation if needed."
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "Unallocated Seats Left:"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "Set capacity per pricing category?"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "Enable to customize maximum available seats for each active pricing category across all packages."
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "How should capacity limits apply?"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "Same limits for all packages"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "Different limits per package"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "This trip allows"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "seats total. Bookings across all packages count toward this limit."
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "Add priced categories to packages before setting limits."
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "Set maximum available seats per package category:"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "Set maximum available seats for each category:"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "Fixed:"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "Primary"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5843
+#: dist/admin/trip-edit.js:5851
 msgid "Fixed in this package:"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5874
+#: dist/admin/trip-edit.js:5882
 msgid "Add Facts"
 msgstr ""
 
-#: dist/admin/trip-edit.js:5874
+#: dist/admin/trip-edit.js:5882
 #, js-format
 msgid "Customers must book <strong>at least %s travelers per booking</strong>, with a total of <strong>%s seats available per date or each time slot</strong> across all packages."
 msgstr ""
 
-#: dist/admin/trip-edit.js:5874
+#: dist/admin/trip-edit.js:5882
 #, js-format
 msgid "Customers <strong>must book at least %s travelers</strong> to proceed with the booking."
 msgstr ""
 
-#: dist/admin/trip-edit.js:5874
+#: dist/admin/trip-edit.js:5882
 #, js-format
 msgid "A maximum of <strong>%s seats are available per date or each time slot</strong> - across all packages."
 msgstr ""

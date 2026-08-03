@@ -368,7 +368,7 @@ function wp_travel_engine_is_trip_partially_payable( $trip_id ): bool {
 /**
  * Get partial payment data for trip.
  *
- * @return void
+ * @return array
  */
 function wp_travel_engine_get_trip_partial_payment_data( $trip_id ) {
 	$partial_payment           = array();
@@ -425,10 +425,10 @@ function wp_travel_engine_get_trip_partial_payment_data( $trip_id ) {
 /**
  * Get tax data for trip.
  *
- * @return void
+ * @return array
  */
 function wp_travel_engine_get_tax_percentage() {
-
+	$tax_details    = array();
 	$wte_options    = get_option( 'wp_travel_engine_settings', true );
 	$tax_percentage = isset( $wte_options['tax_percentage'] ) ? $wte_options['tax_percentage'] : '';
 	$tax_type       = isset( $wte_options['tax_type_option'] ) ? $wte_options['tax_type_option'] : '';

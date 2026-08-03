@@ -804,15 +804,21 @@ class Assets extends AssetsAbstract {
 		}
 
 		global $post;
-		global $wtetrip;
-		if ( $post instanceof \WP_Post && ( \WP_TRAVEL_ENGINE_POST_TYPE === $post->post_type ) ) {
-			$trip_version = get_post_meta( $post->ID, 'trip_version', true );
-			if ( empty( $trip_version ) ) {
-				$trip_version = '0.0.0';
+
+		$trip = is_object( $post ) ? wptravelengine_get_trip( $post->ID ) : null;
+
+		if ( $trip ) {
+			if ( 'days' === $trip->get_trip_duration_unit() ) {
+				$trip_duration_str = ( (int) ( $trip->get_trip_duration() ?: 1 ) - 1 ) . ' days';
+			} else {
+				$duration_arr      = array_map( 'strtolower', wptravelengine_get_trip_duration_arr( $trip, 'both', false ) );
+				$trip_duration_str = implode( ' ', $duration_arr ) ?: '0 day';
 			}
-			$l10n[ 'tripID' ]      = (int) $post->ID;
-			$l10n[ 'tripVersion' ] = $trip_version;
-			$l10n[ 'legacy' ]      = $wtetrip->use_legacy_trip ?? false;
+
+			$l10n[ 'tripID' ]      = $trip->ID;
+			$l10n[ 'tripVersion' ] = $trip->version();
+			$l10n[ 'legacy' ]      = $trip->use_legacy_trip;
+			$l10n[ 'tripDurationStr' ] = $trip_duration_str;
 		}
 
 		return apply_filters( 'wtel10n', $l10n );

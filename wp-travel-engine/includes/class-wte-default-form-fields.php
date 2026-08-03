@@ -168,7 +168,6 @@ class WTE_Default_Form_Fields {
 	 *
 	 * @return array
 	 * @since 6.3.0
-	 * @deprecated enhancement/booking-details
 	 */
 	public static function billing_form_fields( string $mode = 'edit' ): array {
 		return DefaultFormFields::billing( $mode );
@@ -180,7 +179,6 @@ class WTE_Default_Form_Fields {
 	 * @param string $mode
 	 *
 	 * @return array
-	 * @deprecated enhancement/booking-details
 	 */
 	public static function booking( string $mode = 'edit' ): array {
 		return DefaultFormFields::billing( $mode );

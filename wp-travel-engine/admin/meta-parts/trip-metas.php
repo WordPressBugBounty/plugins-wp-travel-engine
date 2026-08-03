@@ -321,6 +321,13 @@ $trip_meta_tabs = array(
 			),
 			array(
 				'field' => array(
+					'type'    => 'ALERT',
+					'content' => sprintf( __( 'You can set a maximum seat limit for each price category, either the same across all packages or different per package. <a href="%1$s" target="_blank">Learn more</a>', 'wp-travel-engine' ), 'https://docs.wptravelengine.com/article/seat-allocation-and-booking-capacity/#5-maximum-capacity-per-price-category' ),
+					'status'  => 'info',
+				),
+			),
+			array(
+				'field' => array(
 					'type'              => 'CAPACITY_PER_CATEGORY',
 					'name'              => 'capacity_per_category',
 					'pricingCategories' => $pricing_categories ?? array(),

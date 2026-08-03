@@ -22,6 +22,8 @@ class AddToCart extends AjaxController {
 
 	/**
 	 * Process Request.
+	 *
+	 * @since 6.8.5 Added ownership check for caller-supplied `booking_id` to prevent unauthenticated booking data disclosure (IDOR).
 	 */
 	protected function process_request() {
 
@@ -29,7 +31,20 @@ class AddToCart extends AjaxController {
 		 * Maybe using a new cart.
 		 */
 		if ( $this->request->get_param( 'cart_version' ) ) { // phpcs:ignore
+
+			$booking_id = $this->request->get_param( 'booking_id' );
+			if ( ! empty( $booking_id ) && ! current_user_can( 'edit_post', $booking_id ) ) {
+				wp_send_json_error(
+					new WP_Error(
+						'rest_forbidden_context',
+						__( 'Sorry, you are not allowed to view this resource.', 'wp-travel-engine' )
+					),
+					rest_authorization_required_code()
+				);
+			}
+
 			$result = $this->add_to_cart();
+
 			if ( is_wp_error( $result ) ) {
 				wp_send_json_error( new WP_Error( 'ADD_TO_CART_ERROR', __( 'Invalid data structure.', 'wp-travel-engine' ) ) );
 			} else {

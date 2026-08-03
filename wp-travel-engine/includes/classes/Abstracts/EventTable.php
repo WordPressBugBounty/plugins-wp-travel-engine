@@ -53,8 +53,17 @@ abstract class EventTable extends Table {
 	 * so this only runs once per relevant upgrade instead of on every `plugins_loaded`.
 	 *
 	 * @return void
+	 * @since 6.8.5 Added a short-lived transient lock so rapid-fire `plugins_loaded` hits
+	 *             (e.g. a front-end request racing a wp-cron loopback right after activation,
+	 *             before the version options are set) can't pile up repeated `dbDelta()` runs.
 	 */
 	public function maybe_upgrade_table() {
+		if ( get_transient( 'wptravelengine_upgrading_events_table' ) ) {
+			return;
+		}
+
+		set_transient( 'wptravelengine_upgrading_events_table', 1, MINUTE_IN_SECONDS );
+
 		if ( version_compare( get_option( 'wptravelengine_version' ), '6.6.0', '<' ) ) {
 			wptravelengine_create_events_table();
 			static::schedule();
@@ -64,6 +73,8 @@ abstract class EventTable extends Table {
 			wptravelengine_create_events_table();
 			update_option( 'wptravelengine_events_schema_version', '2' );
 		}
+
+		delete_transient( 'wptravelengine_upgrading_events_table' );
 	}
 
 	/**

@@ -6,9 +6,9 @@
 
 namespace WPTravelEngine\Helpers;
 
-use WPTravelEngine\Core\Cart\Items\ExtraService;
-use WPTravelEngine\Core\Cart\Items\PricingCategory;
 use WPTravelEngine\Core\Models\Post\Trip;
+use WPTravelEngine\Core\Cart\Items\PricingCategory;
+
 class BookedItem {
 
 	/**

@@ -656,14 +656,15 @@ class Booking extends PostType {
 	 * Appends pill-style status badges to the booking title in the admin list.
 	 * Renders on the "All" and "Published" list tabs, and on all search results.
 	 *
-	 * @param string[] $states Existing post states.
-	 * @param \WP_Post $post   Current post.
+	 * @param string[]      $states Existing post states.
+	 * @param \WP_Post|null $post   Current post.
 	 * @return string[]
 	 * @since 6.8.0
 	 * @since 6.8.1 Badges now render in search results regardless of post_status parameter.
+	 * @since 6.8.5 Accept nullable $post; core calls get_post_states( null ) from nav-menu setup.
 	 */
-	public function append_booking_state_badges( array $states, \WP_Post $post ): array {
-		if ( 'booking' !== $post->post_type ) {
+	public function append_booking_state_badges( array $states, ?\WP_Post $post ): array {
+		if ( ! $post instanceof \WP_Post || 'booking' !== $post->post_type ) {
 			return $states;
 		}
 

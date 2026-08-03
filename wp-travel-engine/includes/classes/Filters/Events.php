@@ -101,10 +101,11 @@ class Events extends EventTable {
 	 * @return void
 	 * @since 6.6.9
 	 * @since 6.8.3 Added `void` return type.
+	 * @since 6.8.5 First run deferred to +60s instead of `time()` so activation never arms an instantly-due event.
 	 */
 	public static function schedule(): void {
 		if ( ! wp_next_scheduled( 'wptravelengine_check_events' ) ) {
-			wp_schedule_event( time(), 'every_minute', 'wptravelengine_check_events' );
+			wp_schedule_event( time() + 60, 'every_minute', 'wptravelengine_check_events' );
 		}
 	}
 

@@ -1,5 +1,9 @@
 == Changelog ==
 
+= 6.8.5 - 3rd August 2026 =
+* Fixed: Resolved layout issues in the trip edit form fields for better usability.
+* Security: Patched an Insecure Direct Object Reference (IDOR) vulnerability.
+
 = 6.8.4 - 29th July 2026 =
 * New Feature: Added support for setting maximum traveler capacity per pricing category globally across all packages or individually for each package.
 * Fixed: Resolved an issue where Gutenberg block content was not correctly detected for translation in WPML across all plugin blocks.

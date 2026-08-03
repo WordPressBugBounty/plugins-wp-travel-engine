@@ -346,6 +346,12 @@ final class Plugin {
 		}
 	}
 
+	/**
+	 * @since 6.8.5 Activation closure now writes `wptravelengine_version` directly, instead of
+	 *             relying solely on the `admin_init`-gated `check_version()`, so
+	 *             `EventTable::maybe_upgrade_table()` doesn't keep re-running its version-gated
+	 *             check on every request between activation and the next wp-admin page load.
+	 */
 	protected function hooks() {
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
@@ -412,6 +418,8 @@ final class Plugin {
 
 				Events::schedule();
 				wptravelengine_create_events_table();
+
+				update_option( 'wptravelengine_version', WP_TRAVEL_ENGINE_VERSION );
 			}
 		);
 

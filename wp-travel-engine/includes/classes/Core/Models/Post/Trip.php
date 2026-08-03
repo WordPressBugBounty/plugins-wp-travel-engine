@@ -191,8 +191,14 @@ class Trip extends PostModel {
 	 *
 	 * @return array
 	 * @since 6.7.11 Added wptravelengine_trip_services filter.
+	 * @since 6.8.5 Added wptravelengine_trip_extra_services filter to allow add-ons to override the returned services list.
 	 */
 	public function get_services(): array {
+		$_services = apply_filters( 'wptravelengine_trip_extra_services', false, $this );
+
+		if ( false !== $_services ) {
+			return $_services;
+		}
 
 		if ( ! post_type_exists( 'wte-services' ) ) {
 			return array();

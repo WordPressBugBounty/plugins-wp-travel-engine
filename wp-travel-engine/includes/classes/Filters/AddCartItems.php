@@ -7,7 +7,6 @@
 
 namespace WPTravelEngine\Filters;
 
-use WPTravelEngine\Core\Cart\Items\ExtraService;
 use WPTravelEngine\Core\Cart\Adjustments\TaxAdjustment;
 use WPTravelEngine\Core\Cart\Cart;
 use WPTravelEngine\Core\Cart\Adjustments\CouponAdjustment;
@@ -137,8 +136,12 @@ class AddCartItems {
 	 *
 	 * @return void
 	 * @since 6.4.0
+	 * @since 6.8.5 Added wptravelengine_cart_extra_services_handled filter to allow add-ons to short-circuit extra services handling.
 	 */
 	public function add_extra_services( Item $item, $cart_attributes, $cart ) {
+		if ( apply_filters( 'wptravelengine_cart_extra_services_handled', false, $item, $cart_attributes, $cart ) ) {
+			return;
+		}
 
 		if ( ! ( $trip_extras = $item->subtotal_reservations['extraServices'] ?? null ) ) {
 			return;
@@ -156,7 +159,7 @@ class AddCartItems {
 		if ( isset( $extra_services_items ) && ! empty( $extra_services_items ) ) {
 			foreach ( $extra_services_items as $trip_extra ) {
 				$item->add_additional_line_items(
-					new ExtraService(
+					wptravelengine_get_cart_extra_services(
 						$cart,
 						array(
 							'label'    => $trip_extra['label'],
@@ -184,7 +187,7 @@ class AddCartItems {
 				}
 
 				$item->add_additional_line_items(
-					new ExtraService(
+					wptravelengine_get_cart_extra_services(
 						$cart,
 						array(
 							'label'    => $label,

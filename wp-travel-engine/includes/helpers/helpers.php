@@ -22,6 +22,26 @@ use WPTravelEngine\PaymentGateways\PaymentGateways;
 use WPTravelEngine\Utilities\Price;
 use WPTravelEngine\Utilities\RequestParser;
 use WPTravelEngine\Helpers\PackageDateParser;
+use WPTravelEngine\Core\Cart\Items\ExtraService;
+use WPTravelEngine\Core\Cart\Cart;
+
+/**
+ * Get cart extra service item.
+ *
+ * @param Cart  $cart
+ * @param array $args
+ * @return ExtraService
+ * @since 6.8.5
+ */
+function wptravelengine_get_cart_extra_services( Cart $cart, $args ) {
+	$extras_items = apply_filters( 'wptravelengine_cart_extra_services_instance', false, $cart, $args );
+
+	if ( $extras_items instanceof ExtraService ) {
+		return $extras_items;
+	}
+
+	return new ExtraService( $cart, $args );
+}
 
 /**
  * Get PackageDateParser instance.
@@ -1664,7 +1684,10 @@ function wte_get_active_single_trip_tabs() {
 
 		switch ( $settings['trip_tabs']['field'][ $value ] ) {
 			case 'wp_editor':
-				if ( empty( $post_meta['tab_content'][ $key . '_wpeditor' ] ?? '' ) && empty( $post_meta['trip_highlights'] ?? '' ) ) {
+				if ( empty( $post_meta['tab_content'][ $key . '_wpeditor' ] ) ) {
+					if ( ( 1 === $key || '1' === $key ) && ! empty( $post_meta['trip_highlights'] ) ) {
+						break;
+					}
 					unset( $settings['trip_tabs']['id'][ $value ] );
 				}
 				break;
@@ -3076,7 +3099,8 @@ function wptravelengine_redirect_to_thank_you_page( $booking_ref, $payment_key )
  * @param string $key The type of pricing to get.
  * @return array
  * @since v6.6.4
- * @updated 6.6.10
+ * @since 6.6.10
+ * @since 6.8.5 Use translation-ready default labels as they are not editable.
  */
 function wptravelengine_get_pricing_type( $all = false, $key = 'per-person' ) {
 	$defaults = array(
@@ -3091,6 +3115,10 @@ function wptravelengine_get_pricing_type( $all = false, $key = 'per-person' ) {
 	);
 
 	$pricing_type = Options::get( 'wptravelengine_pricing_type', $defaults );
+
+	foreach ( $defaults as $type => $data ) {
+		$pricing_type[ $type ]['label'] = $data['label'];
+	}
 
 	$pricing_types = apply_filters( 'wptravelengine-packages-labels', $pricing_type );
 
