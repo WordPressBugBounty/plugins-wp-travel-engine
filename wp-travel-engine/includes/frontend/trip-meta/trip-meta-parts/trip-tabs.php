@@ -109,11 +109,11 @@
 																	$active_class = $count == 0 ? ' nav-tab-active' : '';
 																	?>
 																	<div class="tab-anchor-wrapper">
-																		<h2 class="wte-tab-title">
-																			<a href="javascript:void(0);"
-																			data-target="<?php echo esc_attr( "#nb-{$val}-configurations" ); ?>"
-																			class="nav-tab nb-tab-trigger<?php echo esc_attr( $active_class ); ?>"
-																			data-configuration="<?php echo esc_attr( $val ); ?>">
+																		<span class="wte-tab-title">
+																			<a href="#"
+																				class="nb-tab-trigger<?php echo esc_attr( $active_class ); ?>"
+																				data-target="<?php echo esc_attr( "#nb-{$val}-configurations" ); ?>"
+																				data-configuration="<?php echo esc_attr( $val ); ?>">
 																				<?php
 																				if ( isset( $saved_tabs['icon'][ $value ] ) && $saved_tabs['icon'][ $value ] != '' ) {
 																					echo '<span class="tab-icon">' . wptravelengine_svg_by_fa_icon( $saved_tabs['icon'][ $value ], false ) . '</span>';
@@ -121,7 +121,7 @@
 																				echo esc_attr( $tab_name );
 																				?>
 																			</a>
-																		</h2>
+																		</span>
 																	</div>
 																	<?php
 																	++$count;

@@ -40,8 +40,8 @@ if ( is_array( $search_filters ) ) {
 
 $layout_filters      = $attributes->{'layoutFilters'};
 $show_duration_range = isset( $attributes->{'layoutFilters'}['showDurationRange'] ) && $attributes->{'layoutFilters'}['showDurationRange'];
-$show_title          = isset( $attributes->{'layoutFilters'}['showTitle'] ) && $attributes->{'layoutFilters'}['showTitle'];
-$show_subtitle       = isset( $attributes->{'layoutFilters'}['showSubtitle'] ) && $attributes->{'layoutFilters'}['showSubtitle'];
+$show_title          = isset( $attributes->{'layoutFilters'}['showTitle'] ) && $attributes->{'layoutFilters'}['showTitle'] && '' !== trim( (string) ( $attributes->{'title'} ?? '' ) );
+$show_subtitle       = isset( $attributes->{'layoutFilters'}['showSubtitle'] ) && $attributes->{'layoutFilters'}['showSubtitle'] && '' !== trim( (string) ( $attributes->{'subtitle'} ?? '' ) );
 // $show_view_all       = isset( $attributes->{'layoutFilters'}['showViewAll'] ) && $attributes->{'layoutFilters'}['showViewAll'];
 $title_level   = isset( $attributes->{'titleLevel'} ) ? $attributes->{'titleLevel'} : 3;
 $is_horizontal = isset( $attributes->{'searchFormOrientation'} ) && $attributes->{'searchFormOrientation'};

@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 6.8.5
+Stable tag: 6.8.6
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -349,10 +349,14 @@ Please send us an email via [support ticket](https://wptravelengine.com/support-
 
 == Changelog ==
 
-= 6.8.5 - 3rd August 2026 =
+= 6.8.6 - 17th August 2026 =
 
-* Fixed: Resolved layout issues in the trip edit form fields for better usability.
-* Security: Patched an Insecure Direct Object Reference (IDOR) vulnerability.
+* New Feature: Added refunded amount tracking through the Booking Edit section.
+* Improved: Time slot picker now respects the WordPress time format setting (12-hour or 24-hour).
+* Improved: Optimized memory usage during plugin activation to reduce unnecessary resource consumption.
+* Improved: Added translation synchronization for trip packages and enhanced package management in translated trips.
+* Fixed: Resolved an issue where free pricing categories incorrectly affected per-group pricing with group discounts.
+* Fixed: Addressed a layout issue on the Single Trip page caused by adding the Trip Search Block to the sidebar.
 
 [See changelog for all versions](https://plugins.svn.wordpress.org/wp-travel-engine/trunk/changelog.txt).
 

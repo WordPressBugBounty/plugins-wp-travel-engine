@@ -855,6 +855,7 @@ function wptravelengine_analytics_trips( $per_page, $page ) {
  * @param string $per_page Per Page Value.
  * @param string $id ID.
  * @param string $query Query Type.
+ * @since 6.8.6 Excludes refunded amounts from the per-trip paid_amount sum.
  */
 function wptravelengine_analytics_trips_queries( $offset, $per_page, $id, $query ) {
 	global $wpdb;
@@ -867,9 +868,10 @@ function wptravelengine_analytics_trips_queries( $offset, $per_page, $id, $query
 			"SELECT
 				SUBSTRING_INDEX(SUBSTRING_INDEX(order_trips.meta_value, ';', 3), ':', -1) AS trip_id,
 				COUNT(*) as trip_count,
-				SUM(IF(paid_amount.meta_key = 'paid_amount', paid_amount.meta_value, 0)) as paid_amount
+				SUM(IF(paid_amount.meta_key = 'paid_amount', paid_amount.meta_value, 0) - COALESCE(refunded_amount.meta_value, 0)) as paid_amount
 			FROM {$wpdb->postmeta} AS order_trips
 			LEFT JOIN {$wpdb->postmeta} AS paid_amount ON order_trips.post_id = paid_amount.post_id
+			LEFT JOIN {$wpdb->postmeta} AS refunded_amount ON order_trips.post_id = refunded_amount.post_id AND refunded_amount.meta_key = 'total_refunded_amount'
 			WHERE
 				order_trips.meta_key = 'order_trips'
 				AND SUBSTRING_INDEX(SUBSTRING_INDEX(order_trips.meta_value, ';', 3), ':', -1) IN
@@ -893,9 +895,10 @@ function wptravelengine_analytics_trips_queries( $offset, $per_page, $id, $query
 				"SELECT COUNT(*) FROM (
 					SELECT SUBSTRING_INDEX(SUBSTRING_INDEX(order_trips.meta_value, ';', 3),':', -1) AS trip_id,
 						COUNT(*) as trip_count,
-						SUM(IF(paid_amount.meta_key = 'paid_amount',paid_amount.meta_value,0)) as paid_amount
+						SUM(IF(paid_amount.meta_key = 'paid_amount',paid_amount.meta_value,0) - COALESCE(refunded_amount.meta_value, 0)) as paid_amount
 					FROM {$wpdb->postmeta} AS order_trips
 					LEFT JOIN {$wpdb->postmeta} AS paid_amount ON order_trips.post_id = paid_amount.post_id
+					LEFT JOIN {$wpdb->postmeta} AS refunded_amount ON order_trips.post_id = refunded_amount.post_id AND refunded_amount.meta_key = 'total_refunded_amount'
 					WHERE order_trips.meta_key = 'order_trips'
 						AND SUBSTRING_INDEX(SUBSTRING_INDEX(order_trips.meta_value, ';', 3),':', -1) IN (
 							SELECT ID FROM {$wpdb->posts}

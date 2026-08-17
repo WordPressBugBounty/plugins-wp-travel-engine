@@ -264,7 +264,8 @@ class PaymentEditFormFields extends BookingEditFormFields {
 	 * @return array
 	 */
 	private function map_template_before_v4( array $field ): array {
-		$name = null;
+		$name          = null;
+		$extra_classes = trim( str_replace( 'row-repeater', '', $field['wrapper_class'] ?? '' ) );
 
 		$field = parent::map_field( $field );
 		if ( preg_match( '#\[([^\]]+)\]\[\]$#', $field['name'], $matches ) ) {
@@ -297,7 +298,7 @@ class PaymentEditFormFields extends BookingEditFormFields {
 			);
 		}
 
-		$field['wrapper_class'] = apply_filters( 'wptravelengine_payment_edit_form_fields_wrapper_class', 'wpte-field', $field );
+		$field['wrapper_class'] = apply_filters( 'wptravelengine_payment_edit_form_fields_wrapper_class', $extra_classes ? 'wpte-field ' . $extra_classes : 'wpte-field', $field );
 
 		return $field;
 	}
@@ -311,6 +312,8 @@ class PaymentEditFormFields extends BookingEditFormFields {
 	 * @since 6.7.0
 	 */
 	private function map_template_in_v4( array $field ): array {
+		$extra_classes = trim( str_replace( 'row-repeater', '', $field['wrapper_class'] ?? '' ) );
+
 		$field = parent::map_field( $field );
 
 		$name = str_replace( 'payments_', '', $field['id'] );
@@ -355,7 +358,7 @@ class PaymentEditFormFields extends BookingEditFormFields {
 			);
 		}
 
-		$field['wrapper_class'] = apply_filters( 'wptravelengine_payment_edit_form_fields_wrapper_class', 'wpte-field', $field );
+		$field['wrapper_class'] = apply_filters( 'wptravelengine_payment_edit_form_fields_wrapper_class', $extra_classes ? 'wpte-field ' . $extra_classes : 'wpte-field', $field );
 
 		return $field;
 	}

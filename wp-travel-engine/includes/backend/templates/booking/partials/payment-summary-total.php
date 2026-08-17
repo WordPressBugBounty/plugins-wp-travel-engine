@@ -59,6 +59,11 @@ $payments_total = $temp_payments_data['totals'] ?? $payments_data['totals'] ?? a
 				);
 			}
 			?>
+			<?php $total_refund = floatval( $payments_total['total_refund'] ?? 0 ); ?>
+			<tr class="wpte-payment-refunded"<?php echo $total_refund > 0 ? '' : ' style="display:none;"'; ?>>
+				<td><?php esc_html_e( 'Refunded Amount', 'wp-travel-engine' ); ?></td>
+				<td><?php wptravelengine_the_price_with_decimal( $total_refund, true, $pricing_arguments ); ?></td>
+			</tr>
 			<tr class="wpte-payment-summary-total wpte-payment-amount">
 				<td><?php esc_html_e( 'Total Amount Paid', 'wp-travel-engine' ); ?></td>
 				<td class="wpte-payment-summary-amount"><?php wptravelengine_the_price_with_decimal( $payments_total['total_paid'] ?? 0, true, $pricing_arguments ); ?></td>

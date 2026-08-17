@@ -399,13 +399,14 @@ class Wp_Travel_Engine_Admin {
 	 * @since 5.1.1
 	 * @updated 6.7.0
 	 * @since 6.7.10 Dispatches `wptravelengine.plugin.updated` event with version info on plugin upgrade.
+	 * @since 6.8.6 Commented update_metas_for_trip_search() call.
 	 */
 	public function prepare_filter_params( $force = false ) {
 		$version = str_replace( '.', '', WP_TRAVEL_ENGINE_VERSION );
 		if ( 'done' !== get_option( "wte_search_params_updated_{$version}", false ) || $force ) {
 			Events::schedule();
 			Events::add_event( 'wptravelengine.plugin.updated', 0, 'plugin' );
-			TripSearch::update_metas_for_trip_search();
+			// TripSearch::update_metas_for_trip_search();
 			update_option( "wte_search_params_updated_{$version}", 'done', true );
 			self::disable_autoload();
 		}
@@ -3531,6 +3532,7 @@ class Wp_Travel_Engine_Admin {
 	 * Gets booking stats for a specific trip.
 	 *
 	 * @since 6.4.0
+	 * @since 6.8.6 Excludes refunded amounts from the revenue total.
 	 */
 	function get_trip_booking_stats( $post_id ) {
 		// Fetch all bookings for the trip with meta key 'order_trips' containing the trip ID.
@@ -3550,29 +3552,19 @@ class Wp_Travel_Engine_Admin {
 			)
 		);
 
-		// Calculate total paid amount.
+		// Calculate total paid amount, net of extra charges (taxes/fees).
 		$total_paid = array_reduce(
 			$trip_bookings,
 			function ( $sum, $booking_id ) {
-				$cart_info = get_post_meta( $booking_id, 'cart_info', true );
+				$booking = wptravelengine_get_booking( $booking_id );
 
-				if ( ! isset( $cart_info['totals'] ) || ! is_array( $cart_info['totals'] ) ) {
+				if ( ! $booking || $booking->is_migrated() ) {
 					return $sum;
 				}
 
-				$totals       = $cart_info['totals'];
-				$payment_type = isset( $cart_info['payment_type'] ) ? $cart_info['payment_type'] : 'full';
-				$total_tax    = isset( $totals['total_tax'] ) ? floatval( $totals['total_tax'] ) : 0;
+				$revenue = $booking->get_revenue();
 
-				if ( $payment_type === 'full' ) {
-					$total            = isset( $totals['total'] ) ? floatval( $totals['total'] ) : 0;
-					$booking_subtotal = $total - $total_tax;
-				} else {
-					$partial_total    = isset( $totals['partial_total'] ) ? floatval( $totals['partial_total'] ) : 0;
-					$booking_subtotal = $partial_total - $total_tax;
-				}
-
-				return $sum + ( $booking_subtotal > 0 ? $booking_subtotal : 0 );
+				return $sum + ( $revenue > 0 ? $revenue : 0 );
 			},
 			0
 		);

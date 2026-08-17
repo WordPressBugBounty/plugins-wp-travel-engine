@@ -1036,7 +1036,7 @@
     }
   }
 
-    ${e=>e.color?`\n  .cw__color-picker-color-block{\n      border: 1px solid #efefef;\n      background-color: ${e.color}\n    }\n    `:"\n    .cw__color-picker-color-block{\n      background: #fff linear-gradient(-45deg,transparent 48%,#ddd 0,#ddd 52%,transparent 0);\n      box-shadow: inset 0 0 0 1px #dddddd;\n    }"}
+    ${e=>e?.color?`\n  .cw__color-picker-color-block{\n      border: 1px solid #efefef;\n      background-color: ${e?.color||""}\n    }\n    `:"\n    .cw__color-picker-color-block{\n      background: #fff linear-gradient(-45deg,transparent 48%,#ddd 0,#ddd 52%,transparent 0);\n      box-shadow: inset 0 0 0 1px #dddddd;\n    }"}
   .cw__color-picker-popover {
     position: absolute;
     z-index: 11;

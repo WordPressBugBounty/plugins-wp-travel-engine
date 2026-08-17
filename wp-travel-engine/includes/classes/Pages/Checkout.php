@@ -538,6 +538,7 @@ class Checkout extends BasePage {
 	 * @return array
 	 * @since 6.7.0
 	 * @since 6.7.10 Updated Payment status for thank you page.
+	 * @since 6.8.6 Adds a refund-adjustment note below the Payable Now row when the booking's deposit was partially refunded.
 	 */
 	public function get_fragments_after_line_items(): array {
 		$override_fragments_after_total = apply_filters( 'wptravelengine_checkout_page_override_fragments_after_total', array(), $this );
@@ -577,6 +578,17 @@ class Checkout extends BasePage {
 				'type'  => 'payable',
 			)
 		);
+
+		$cart_total = $this->cart->get_totals();
+
+		if ( $cart_total['has_refunded'] ?? false ) {
+			$summary_rows += array(
+				'refund_note' => sprintf(
+					'<tr class="wpte-checkout__booking-summary-info"><td colspan="2">%s</td></tr>',
+					Booking::get_refund_fallback_msg()
+				),
+			);
+		}
 
 		if ( 'partial' === $this->cart->get_payment_type() ) {
 			$excl          = $this->cart->get_exclusion_label();

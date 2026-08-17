@@ -101,6 +101,26 @@ function wptravelengine_failed_payment_status() {
 }
 
 /**
+ * Defined refunded payment status.
+ *
+ * @return array
+ * @since 6.8.6
+ */
+function wptravelengine_refund_payment_status() {
+	static $cache = null;
+
+	if ( null === $cache ) {
+		$cache = array(
+			'refunded' => __( 'Refunded', 'wp-travel-engine' ),
+		);
+
+		$cache = apply_filters( 'wptravelengine_refund_payment_status_options', $cache );
+	}
+
+	return $cache;
+}
+
+/**
  * Get trip booking data.
  *
  * @param int|string $trip_id Trip ID.
@@ -2317,11 +2337,12 @@ function wptravelengine_payment_status( $status = null ) {
 			'voucher-received' => __( 'Voucher Received', 'wp-travel-engine' ),
 		);
 
-		$success_status = wptravelengine_success_payment_status();
-		$pending_status = wptravelengine_pending_payment_status();
-		$failed_status  = wptravelengine_failed_payment_status();
+		$success_status  = wptravelengine_success_payment_status();
+		$pending_status  = wptravelengine_pending_payment_status();
+		$failed_status   = wptravelengine_failed_payment_status();
+		$refunded_status = wptravelengine_refund_payment_status();
 
-		$cache = apply_filters( 'wp_travel_engine_payment_status_options', array_merge( $options, $success_status, $pending_status, $failed_status ) );
+		$cache = apply_filters( 'wp_travel_engine_payment_status_options', array_merge( $options, $success_status, $pending_status, $failed_status, $refunded_status ) );
 	}
 
 	if ( is_null( $status ) ) {

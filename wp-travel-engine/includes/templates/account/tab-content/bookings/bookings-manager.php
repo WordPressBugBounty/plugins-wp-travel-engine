@@ -11,11 +11,11 @@ use WPTravelEngine\Core\Models\Post\Booking;
 $booking_details = array();
 foreach ( $args['bookings'] ?? array() as $booking ) {
 
-	if ( empty( get_metadata( 'post', $booking ) ) ) {
+	$booking_instance = wptravelengine_get_booking( $booking );
+	if ( ! $booking_instance ) {
 		continue;
 	}
 
-	$booking_instance = new Booking( $booking );
 	if ( 'publish' !== $booking_instance->post->post_status ) {
 		continue;
 	}

@@ -73,9 +73,9 @@ class TripController extends \WP_REST_Posts_Controller {
 	public function rest_trip_query( $args, $request ) {
 		$query_params = $request->get_query_params();
 		if ( ! isset( $query_params['per_page'] ) ) {
-			$statuses = ! empty( $args['post_status'] ) ? (array) $args['post_status'] : array( 'publish' );
-			$counts   = wp_count_posts( $this->post_type );
-			$total    = array_sum( array_map( fn( $status ) => (int) ( $counts->$status ?? 0 ), $statuses ) );
+			$statuses               = ! empty( $args['post_status'] ) ? (array) $args['post_status'] : array( 'publish' );
+			$counts                 = wp_count_posts( $this->post_type );
+			$total                  = array_sum( array_map( fn( $status ) => (int) ( $counts->$status ?? 0 ), $statuses ) );
 			$args['posts_per_page'] = max( 1, $total );
 		}
 

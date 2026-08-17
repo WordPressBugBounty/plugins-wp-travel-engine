@@ -1444,10 +1444,12 @@ function wp_travel_engine_get_page_id( $page ) {
  * @param string $page page slug.
  *
  * @return string
+ * @since 6.8.6 Falls back to the home URL when the resolved page ID has no permalink.
  */
 function wp_travel_engine_get_page_permalink( $page ) {
-	$page_id   = wp_travel_engine_get_page_id( $page );
-	$permalink = 0 < $page_id ? get_permalink( $page_id ) : get_home_url();
+	$page_id = wp_travel_engine_get_page_id( $page );
+	// get_permalink() is false for a deleted page, which would emit an empty form action.
+	$permalink = ( 0 < $page_id ? get_permalink( $page_id ) : false ) ?: get_home_url();
 
 	return apply_filters( 'wp_travel_engine_get_' . $page . '_page_permalink', $permalink );
 }

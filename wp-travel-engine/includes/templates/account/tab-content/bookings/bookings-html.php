@@ -58,9 +58,17 @@ $map = array(
 				</ul>
 			</div>
 		</div>
-		<div class="wpte-booked-trip-buttons-right">
-			<a class="wpte-lrf-btn-transparent wpte-detail-btn" href="<?php echo esc_url( get_the_permalink() . '?action=booking-details&booking_id=' . $booking_instance->ID . '"' ); ?>"><?php esc_html_e( 'View Details', 'wp-travel-engine' ); ?></a>
-		</div>
+		<?php
+		/**
+		 * @TODO: Remove this if case after Booking is isolated and is not handle from Trip instance.
+		 * @since 6.8.6
+		 */
+		if ( $booking_instance->trip_exists() ) {
+			?>
+			<div class="wpte-booked-trip-buttons-right">
+				<a class="wpte-lrf-btn-transparent wpte-detail-btn" href="<?php echo esc_url( get_the_permalink() . '?action=booking-details&booking_id=' . $booking_instance->ID . '"' ); ?>"><?php esc_html_e( 'View Details', 'wp-travel-engine' ); ?></a>
+			</div>
+		<?php } ?>
 	</div>
 	<?php
 		$payment_link = $booking_instance->get_due_payment_link();

@@ -31,12 +31,14 @@ use WPTravelEngine\Filters\TripAPISchema;
 use WPTravelEngine\Filters\TripMetaTabs;
 use WPTravelEngine\Helpers\Functions;
 use WPTravelEngine\Email\TranslationManager\TranslatePress;
+use WPTravelEngine\Core\PostTypes\TranslateTrip;
 use WPTravelEngine\Helpers\Translators;
 use WPTravelEngine\Modules\CouponCode;
 use WPTravelEngine\Modules\Filters as CustomFilters;
 use WPTravelEngine\Modules\TripCode;
 use WPTravelEngine\Modules\TripSearch;
 use WPTravelEngine\Optimizer\Optimizer;
+use WPTravelEngine\Notices\ClassicEditorNotice;
 use WPTravelEngine\Registers\ShortcodeRegistry;
 use WPTravelEngine\Traits\Singleton;
 use WPTravelEngine\Email\Email;
@@ -133,6 +135,13 @@ final class Plugin {
 		 */
 		new AdminNotice();
 
+		/**
+		 * Classic Editor compatibility notice.
+		 *
+		 * @since 6.8.6
+		 */
+		new ClassicEditorNotice();
+
 		$template_filters = new Template();
 		$template_filters->hooks();
 
@@ -155,6 +164,8 @@ final class Plugin {
 
 		new Translators();
 		new TranslatePress();
+		// @since 6.8.6 Added TranslateTrip Class for Translation.
+		new TranslateTrip();
 
 		$this->set_cart();
 		$this->run();

@@ -83,6 +83,7 @@ class Cart extends LegacyCart {
 	 *
 	 * @return void
 	 * @since 6.7.0
+	 * @since 6.8.6 Adds the booking's refunded amount back to the due amount so a remaining-balance checkout reflects any refund.
 	 */
 	protected function calculate_totals_v4_0(): void {
 		// Initialize calculator
@@ -91,6 +92,7 @@ class Cart extends LegacyCart {
 		$totals                        = $this->totals;
 		$totals['payable_now']         = '0.00';
 		$totals['total_extra_charges'] = '0.00';
+		$totals['has_refunded']        = false;
 
 		$set_to_total = function ( $key, $value ) use ( &$totals, $calculator ) {
 			$current        = $totals[ $key ] ?? '0.00';
@@ -131,27 +133,42 @@ class Cart extends LegacyCart {
 			);
 
 			// Determine amount to apply fees to
-			$amount = '0.00';
+			$amount       = '0.00';
+			$actual_total = $totals['total'];
 			if ( $this->booking_ref ) {
-				$due_amount = get_post_meta( $this->booking_ref, 'total_due_amount', true );
-				$amount     = ! empty( $due_amount ) ? (string) $due_amount : '0.00';
-
-				if ( $calculator->is( $amount, '==', '0.00' ) ) {
-					$amount = $totals['total'];
+				$booking = wptravelengine_get_booking( $this->booking_ref );
+				if ( ! $booking ) {
+					continue;
 				}
 
-				$totals['partial_total'] = $calculator->subtract( $totals['total'], $amount );
+				$due_amount = $booking->get_total_due_amount();
+				$amount     = ! empty( $due_amount ) ? (string) $due_amount : '0.00';
+
+				$refunded_amount = $booking->get_refunded_amount();
+				if ( $refunded_amount > 0.00 ) {
+					$totals['has_refunded'] = true;
+				}
+
+				$actual_total = $calculator->subtract(
+					$totals['total'],
+					(string) $refunded_amount
+				);
+
+				if ( $calculator->is( $amount, '==', '0.00' ) ) {
+					$amount = $actual_total;
+				}
+
+				$totals['partial_total'] = $calculator->subtract( $actual_total, $amount );
 			} else {
 				// Calculate partial total
 				$totals['partial_total'] = $calculator->normalize(
 					PartialPayment::instance()->apply_to_cart_item(
 						$item,
-						(float) $totals['total']
+						(float) $actual_total
 					)
 				);
-				$amount                  = 'partial' === $this->payment_type
-					? $totals['partial_total']
-					: $totals['total'];
+
+				$amount = 'partial' === $this->payment_type ? $totals['partial_total'] : $actual_total;
 			}
 
 			// Apply tax-inclusive fees
@@ -210,7 +227,7 @@ class Cart extends LegacyCart {
 
 			// Calculate due total
 			$totals['due_total'] = $calculator->subtract(
-				$totals['total'],
+				$actual_total,
 				$totals['partial_total']
 			);
 

@@ -113,14 +113,26 @@ class Booking extends PostModel {
 	}
 
 	/**
+	 * Check if booked trip exists.
+	 *
+	 * @since 6.8.6
+	 *
+	 * @return bool
+	 */
+	public function trip_exists(): bool {
+		return get_post_type( $this->get_trip_id() ) === 'trip';
+	}
+
+	/**
 	 * Get Booked Trip Title.
 	 *
 	 * @return string Booked Trip Title
+	 * @since 6.8.6 Get Trip title from order_items as first priority.
 	 */
 	public function get_trip_title() {
-		$trip_id = $this->get_trip_id();
+		$order_trips = $this->get_order_items();
 
-		return get_the_title( $trip_id ) ?? '';
+		return $order_trips['title'] ?? $order_trips[0]['title'] ?? get_the_title( $this->get_trip_id() ) ?? '';
 	}
 
 	/**
@@ -1002,6 +1014,49 @@ class Booking extends PostModel {
 	}
 
 	/**
+	 * Get Revenue.
+	 *
+	 * Nets total_paid_amount against total_extra_charges (taxes/fees passed through
+	 * to the gateway). Current cart version stores total_extra_charges per payment
+	 * reliably; legacy carts often don't separate it out, so total_tax is used as
+	 * a proxy for those payments.
+	 *
+	 * @return float
+	 * @since 6.8.6
+	 */
+	public function get_revenue(): float {
+		$calculator          = PaymentCalculator::for( $this->get_currency() );
+		$is_curr_cart        = $this->is_curr_cart();
+		$total_extra_charges = '0.00';
+
+		foreach ( $this->get_payments() as $payment ) {
+			if ( ! $payment->is_completed() || $payment->is_refunded() ) {
+				continue;
+			}
+
+			$cart_totals   = $payment->get_cart_totals();
+			$extra_charges = $cart_totals['total_extra_charges'] ?? null;
+
+			if ( null === $extra_charges && ! $is_curr_cart ) {
+				// Legacy carts baked fees into tax; use it as the closest proxy.
+
+				$totals = $this->get_cart_info( 'totals' );
+
+				foreach ( $this->get_fees() as $fee ) {
+					$key                 = 'total_' . ( $fee['name'] ?? '' );
+					$total_extra_charges = $calculator->add( $total_extra_charges, (string) ( $totals[ $key ] ?? '0.00' ) );
+				}
+
+				break;
+			} elseif ( is_numeric( $extra_charges ) ) {
+				$total_extra_charges = $calculator->add( $total_extra_charges, (string) $extra_charges );
+			}
+		}
+
+		return (float) $calculator->subtract( (string) $this->get_total_paid_amount(), $total_extra_charges );
+	}
+
+	/**
 	 * Get Total Due Amount.
 	 *
 	 * @return float
@@ -1312,6 +1367,16 @@ class Booking extends PostModel {
 	}
 
 	/**
+	 * Checks whether booking migrated from legacy booking post.
+	 *
+	 * @return bool
+	 * @since 6.8.6
+	 */
+	public function is_migrated(): bool {
+		return (bool) absint( $this->get_meta( '_migrated_to' ) );
+	}
+
+	/**
 	 * Get fees data.
 	 *
 	 * @return array Fees data.
@@ -1374,6 +1439,8 @@ class Booking extends PostModel {
 	 * }
 	 * @since 6.7.0
 	 * @since 6.7.1 Skips calculation for failed payments.
+	 * @since 6.8.6 Adds the payment status slug to each payment entry.
+	 * @since 6.8.6 Nets total_paid/total_deposit against the booking's refunded amount instead of excluding refunded payments entirely.
 	 */
 	public function get_payments_data( bool $success = true ): array {
 
@@ -1388,6 +1455,7 @@ class Booking extends PostModel {
 			'total_paid'      => '0',
 			'total_exclusive' => '0',
 			'total_discount'  => '0',
+			'total_refund'    => '0',
 			'due_exclusive'   => '0',
 			'payable'         => '0',
 			'extra_charges'   => '0',
@@ -1396,29 +1464,46 @@ class Booking extends PostModel {
 		$payments  = array();
 		$fee_types = $this->get_fee_types();
 
-		$calculator = PaymentCalculator::for( $this->get_currency() );
+		$calc = PaymentCalculator::for( $this->get_currency() );
 
 		$discounts = $this->get_discounts();
 
 		foreach ( $this->get_payments() as $payment ) {
 			$cart_totals = $payment->get_cart_totals();
 
-			if ( ! $cart_totals || $payment->is_failed() || ( $success && ! $payment->is_completed() ) ) {
+			$is_refunded = $payment->is_refunded();
+			if ( ! $is_refunded && ( ! $cart_totals || $payment->is_failed() || ( $success && ! $payment->is_completed() ) ) ) {
+				continue;
+			}
+
+			$p_id         = $payment->ID;
+			$refunded_amt = $payment->get_refunded_amount();
+
+			$payments[ $p_id ]['total']         = (string) $payment->get_amount();
+			$payments[ $p_id ]['deposit']       = (string) ( $cart_totals['deposit'] ?? '0.00' );
+			$payments[ $p_id ]['payable']       = (string) ( $cart_totals['payable_now'] ?? '0.00' );
+			$payments[ $p_id ]['extra_charges'] = (string) ( $cart_totals['total_extra_charges'] ?? '0.00' );
+			$payments[ $p_id ]['gateway_fee']   = (string) ( $payment->get_gateway_fee() );
+			$payments[ $p_id ]['is_refunded']   = $is_refunded;
+			$payments[ $p_id ]['refunded_amt']  = $refunded_amt;
+			$payments[ $p_id ]['status']        = $payment->get_payment_status();
+
+			if ( $is_refunded ) {
+				$totals['total_paid']   = $calc->subtract( (string) $totals['total_paid'], (string) $refunded_amt );
+				$totals['total_refund'] = $calc->add( (string) $totals['total_refund'], (string) $refunded_amt );
 				continue;
 			}
 
 			foreach ( $discounts as $_key => $_ ) {
 				if ( isset( $cart_totals[ 'total_' . $_key ] ) ) {
-					$totals['total_discount'] = $calculator->add( $totals['total_discount'], (string) $cart_totals[ 'total_' . $_key ] );
+					$totals['total_discount'] = $calc->add( $totals['total_discount'], (string) $cart_totals[ 'total_' . $_key ] );
 				}
 			}
-
-			$p_id = $payment->ID;
 
 			foreach ( $fee_types['tax_inclusive'] ?? array() as $fee ) {
 				$payments[ $p_id ][ $fee['name'] ]                = (string) ( $cart_totals[ 'total_' . $fee['name'] ] ?? '0.00' );
 				$totals['tax_inclusive'][ $fee['name'] ]['label'] = $fee['label'];
-				$totals['tax_inclusive'][ $fee['name'] ]['value'] = $calculator->add(
+				$totals['tax_inclusive'][ $fee['name'] ]['value'] = $calc->add(
 					$totals['tax_inclusive'][ $fee['name'] ]['value'] ?? '0.00',
 					$payments[ $p_id ][ $fee['name'] ]
 				);
@@ -1430,7 +1515,7 @@ class Booking extends PostModel {
 				}
 				$payments[ $p_id ][ $fee['name'] ]                = (string) ( $cart_totals[ 'total_' . $fee['name'] ] ?? '0.00' );
 				$totals['tax_exclusive'][ $fee['name'] ]['label'] = $fee['label'];
-				$totals['tax_exclusive'][ $fee['name'] ]['value'] = $calculator->add(
+				$totals['tax_exclusive'][ $fee['name'] ]['value'] = $calc->add(
 					$totals['tax_exclusive'][ $fee['name'] ]['value'] ?? '0.00',
 					$payments[ $p_id ][ $fee['name'] ]
 				);
@@ -1440,47 +1525,43 @@ class Booking extends PostModel {
 				$payments[ $p_id ]['tax'] = (string) ( $cart_totals['total_tax'] ?? '0.00' );
 				$totals['tax']            = array(
 					'label' => $fee_types['tax']['label'],
-					'value' => $calculator->add(
+					'value' => $calc->add(
 						$totals['tax']['value'] ?? '0.00',
 						$payments[ $p_id ]['tax']
 					),
 				);
 			}
 
-			$payments[ $p_id ]['total']         = (string) $payment->get_amount();
-			$payments[ $p_id ]['deposit']       = (string) ( $cart_totals['deposit'] ?? '0.00' );
-			$payments[ $p_id ]['payable']       = (string) ( $cart_totals['payable_now'] ?? '0.00' );
-			$payments[ $p_id ]['extra_charges'] = (string) ( $cart_totals['total_extra_charges'] ?? '0.00' );
-			$payments[ $p_id ]['gateway_fee']   = (string) ( $payment->get_gateway_fee() );
-
-			$totals['total_paid']    = $calculator->add(
+			$totals['total_paid']    = $calc->add(
 				$totals['total_paid'] ?? '0.00',
 				$payments[ $p_id ]['total']
 			);
-			$totals['total_deposit'] = $calculator->add(
+			$totals['total_deposit'] = $calc->add(
 				$totals['total_deposit'] ?? '0.00',
 				$payments[ $p_id ]['deposit']
 			);
-			$totals['payable']       = $calculator->add(
+			$totals['payable']       = $calc->add(
 				$totals['payable'] ?? '0.00',
 				$payments[ $p_id ]['payable']
 			);
-			$totals['extra_charges'] = $calculator->add(
+			$totals['extra_charges'] = $calc->add(
 				$totals['extra_charges'] ?? '0.00',
 				$payments[ $p_id ]['extra_charges']
 			);
-			$totals['gateway_fee']   = $calculator->add(
+			$totals['gateway_fee']   = $calc->add(
 				$totals['gateway_fee'] ?? '0.00',
 				$payments[ $p_id ]['gateway_fee']
 			);
 		}
 
 		$totals['total_exclusive'] = (string) $this->get_total();
-		$totals['due_exclusive']   = $calculator->subtract(
+
+		$totals['due_exclusive'] = $calc->subtract(
 			$totals['total_exclusive'],
 			$totals['total_deposit']
 		);
-		$totals['subtotal']        = $calculator->add( $totals['total_exclusive'], $totals['total_discount'] );
+
+		$totals['subtotal'] = $calc->add( $totals['total_exclusive'], $totals['total_discount'] );
 
 		$this->payments_data[ $key ] = compact( 'totals', 'payments' );
 
@@ -1571,15 +1652,17 @@ class Booking extends PostModel {
 
 		$_payment->sync_metas( array_merge( $args['payment_metadata'], $_payment_metas ) );
 
-		$total_paid_amount = $calculator->add( $total_paid_amount, $gateway_fee );
+		$actual_total_paid_amount = $calculator->add( $total_paid_amount, $gateway_fee );
+		$total_paid_amount        = $calculator->subtract( $actual_total_paid_amount, (string) $this->get_refunded_amount() );
 
 		$total_due_amount = $calculator->subtract(
 			$calculator->add( (string) $this->get_total(), $total_extra_charges ),
-			$calculator->subtract( $total_paid_amount, $total_gateway_fee )
+			$calculator->subtract( $actual_total_paid_amount, $total_gateway_fee )
 		);
 
 		$_booking_metas = array(
 			'total_paid_amount'                       => $total_paid_amount,
+			'actual_total_paid_amount'                => $actual_total_paid_amount,
 			'total_due_amount'                        => $total_due_amount,
 			'_prev_booking_status'                    => $this->get_booking_status(),
 			'wp_travel_engine_booking_payment_status' => 'completed',
@@ -1817,5 +1900,24 @@ class Booking extends PostModel {
 		}
 
 		return array();
+	}
+
+	/**
+	 * Get total refunded amount.
+	 *
+	 * @since 6.8.6
+	 */
+	public function get_refunded_amount(): float {
+		return (float) $this->get_meta( 'total_refunded_amount' );
+	}
+
+	/**
+	 * Get the fallback note shown when a booking's initial deposit reflects a partial refund.
+	 *
+	 * @return string
+	 * @since 6.8.6
+	 */
+	public static function get_refund_fallback_msg(): string {
+		return __( 'Part of your deposit was refunded, so the Initial Deposit shown here reflects that adjustment.', 'wp-travel-engine' );
 	}
 }

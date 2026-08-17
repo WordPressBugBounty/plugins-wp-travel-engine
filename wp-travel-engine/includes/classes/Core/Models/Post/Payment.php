@@ -161,6 +161,31 @@ class Payment extends PostModel {
 	}
 
 	/**
+	 * Checks if payment is refunded.
+	 *
+	 * @return bool
+	 * @since 6.8.6
+	 */
+	public function is_refunded(): bool {
+		$refunded_status = wptravelengine_refund_payment_status();
+		return isset( $refunded_status[ $this->get_payment_status() ] );
+	}
+
+	/**
+	 * Get Refunded Amount.
+	 *
+	 * @return float
+	 * @since 6.8.6
+	 */
+	public function get_refunded_amount(): float {
+		if ( ! $this->is_refunded() ) {
+			return 0.00;
+		}
+		$refunded = $this->get_meta( 'refunded_amount' );
+		return is_numeric( $refunded ) ? (float) $refunded : 0.00;
+	}
+
+	/**
 	 * Update Payment Status.
 	 *
 	 * @return void

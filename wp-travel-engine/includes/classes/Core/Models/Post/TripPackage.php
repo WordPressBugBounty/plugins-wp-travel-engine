@@ -127,6 +127,44 @@ class TripPackage extends PostModel {
 	}
 
 	/**
+	 * Get the package title, translatable via the `wptravelengine_trip_package_title` filter.
+	 *
+	 * @return string
+	 * @since 6.8.6
+	 */
+	public function get_title(): string {
+		$title = parent::get_title();
+
+		/**
+		 * Filters the trip package's title, e.g. to translate it.
+		 *
+		 * @param string      $title   The package title.
+		 * @param TripPackage $package The package.
+		 * @since 6.8.6
+		 */
+		return apply_filters( 'wptravelengine_trip_package_title', $title, $this );
+	}
+
+	/**
+	 * Get the package description, translatable via the `wptravelengine_trip_package_description` filter.
+	 *
+	 * @return string
+	 * @since 6.8.6
+	 */
+	public function get_content(): string {
+		$description = parent::get_content();
+
+		/**
+		 * Filters the trip package's description, e.g. to translate it.
+		 *
+		 * @param string      $description The package description.
+		 * @param TripPackage $package     The package.
+		 * @since 6.8.6
+		 */
+		return apply_filters( 'wptravelengine_trip_package_description', $description, $this );
+	}
+
+	/**
 	 * Gets package's categories data.
 	 *
 	 * @return TravelerCategories

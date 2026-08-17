@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Trip Tabs Nav Template
  *
@@ -58,7 +57,7 @@ if ( ! empty( $tabs['id'] ) ) : ?>
 				foreach ( array_values( $tabs['id'] ) as $index => $values ) :
 					?>
 					<div class="tab-anchor-wrapper" role="presentation" style="order: <?php echo esc_attr( $order ); ?>;">
-						<h2 class="wte-tab-title" role="presentation">
+						<span class="wte-tab-title" role="presentation">
 							<a href="#"
 								class="nav-tab nb-tab-trigger <?php echo esc_attr( $index === 0 ? 'nav-tab-active' : '' ); ?>"
 								data-configuration="<?php echo esc_attr( $values ); ?>"
@@ -74,7 +73,7 @@ if ( ! empty( $tabs['id'] ) ) : ?>
 								echo esc_html( $tabs['name'][ $values ] );
 								?>
 							</a>
-						</h2>
+						</span>
 					</div>
 					<?php
 					$order += 2;

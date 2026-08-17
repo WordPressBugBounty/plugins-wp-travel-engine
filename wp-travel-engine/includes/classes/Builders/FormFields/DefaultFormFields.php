@@ -306,6 +306,22 @@ class DefaultFormFields extends \WTE_Default_Form_Fields {
 					'order'         => 3,
 					'options'       => $payment_gateways_options,
 				),
+				'refunded'         => array(
+					'type'          => 'number',
+					'wrapper_class' => 'wpte-refunded-amount-field',
+					'field_label'   => __( 'Refunded Amount', 'wp-travel-engine' ),
+					'name'          => 'payments[refunded][]',
+					'id'            => 'payments_refunded',
+					'class'         => 'input',
+					'attributes'    => array(
+						'step'          => 'any',
+						'data-key'      => 'refunded',
+						'show_prefix'   => true,
+						'wrapper_class' => 'wpte-amount-wrap',
+						'prefix_class'  => 'wpte-amount-currency',
+					),
+					'order'         => 4,
+				),
 				'deposit'          => array(
 					'type'          => 'number',
 					'wrapper_class' => 'row-repeater',

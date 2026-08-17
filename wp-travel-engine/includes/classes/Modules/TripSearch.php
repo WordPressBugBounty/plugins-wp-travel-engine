@@ -154,6 +154,8 @@ class TripSearch {
 				99
 			);
 		}
+
+		add_action( 'wptravelengine.plugin.updated', array( $this, 'update_metas_for_trip_search' ) );
 	}
 
 	/**
@@ -1306,9 +1308,15 @@ class TripSearch {
 	 *
 	 * @static
 	 * @return int The page ID for the search results page, -1 if not found
+	 * @since 6.8.6 Re-resolves the cached page ID when it no longer points at a published page.
 	 */
 	public static function get_page_id() {
 		$page_id = get_option( 'wp_travel_engine_search_page_id', false );
+
+		// A cached ID is truthy even after its page is deleted or trashed, so verify it still resolves.
+		if ( $page_id && 0 < (int) $page_id && 'publish' !== get_post_status( (int) $page_id ) ) {
+			$page_id = false;
+		}
 
 		if ( ! $page_id ) {
 			$settings = get_option( 'wp_travel_engine_settings', array() ); // Not used wp_travel_engine_get_settings due to infinite loop.

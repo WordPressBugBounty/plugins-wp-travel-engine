@@ -827,9 +827,24 @@ class Template_Tags extends TemplateTags {
 	 * @return string
 	 *
 	 * @since 6.7.0
+	 * @since 6.8.6 Nets refunded amount out of the frozen initial_deposit snapshot; shows a refund-adjustment note below Amount Due.
 	 */
 	protected function get_cart_v4_booking_payment_details( $booking ) {
 		global $wte_cart;
+
+		$colors = apply_filters(
+			'wptravelengine_email_template_colors',
+			array(
+				'highlight'           => array(
+					'bg'    => 'rgba(15, 29, 35, 0.04)',
+					'color' => '#0F1D23',
+				),
+				'secondary_highlight' => array(
+					'bg'    => '#147dfe1a',
+					'color' => '#0F1D23',
+				),
+			)
+		);
 
 		$p_data  = $booking->get_payments_data( false );
 		$_totals = $p_data['totals'] ?? array();
@@ -846,28 +861,29 @@ class Template_Tags extends TemplateTags {
 
 		$amounts = array();
 		if ( $is_manual_trigger ) {
+			$initial_deposit = (float) ( $_totals['total_deposit'] ?? $cart_info->get_totals( 'partial_total' ) );
 			$amounts = array(
-				'subtotal'        => $_totals['subtotal'],
-				'deposit'         => $_totals['total_paid'],
-				'due'             => $_totals['due_exclusive'] ?? 0,
-				'tax'             => $_totals['tax']['value'] ?? 0,
-				'total'           => $_totals['total_exclusive'],
-				'initial_deposit' => $_totals['total_deposit'] ?? $cart_info->get_totals( 'partial_total' ),
-				'remaining_total' => max( $_totals['due_exclusive'], 0 ),
-				'gateway_fee'     => $_totals['gateway_fee'] ?? 0,
+				'subtotal'        => (float) $_totals['subtotal'],
+				'deposit'         => (float) $_totals['total_paid'],
+				'due'             => (float) ( $_totals['due_exclusive'] ?? 0 ),
+				'tax'             => (float) ( $_totals['tax']['value'] ?? 0 ),
+				'total'           => (float) $_totals['total_exclusive'],
+				'initial_deposit' => (float) ( $initial_deposit - $booking->get_refunded_amount() ),
+				'remaining_total' => (float) max( $_totals['due_exclusive'] ?? 0, 0 ),
+				'gateway_fee'     => (float) ( $_totals['gateway_fee'] ?? 0 ),
 			);
-
+			unset( $initial_deposit );
 			$payment_type = $amounts['due'] > 0 ? 'partial' : 'full';
 		} else {
 			$amounts = array(
-				'subtotal'        => $cart_info->get_totals( 'subtotal' ),
-				'deposit'         => $payment_model->get_amount(),
-				'due'             => $_totals['due_exclusive'] ?? 0,
-				'tax'             => $cart_info->get_totals( 'total_tax' ),
-				'total'           => $cart_info->get_totals( 'total' ),
-				'initial_deposit' => $cart_info->get_totals( 'partial_total' ),
-				'remaining_total' => $cart_info->get_totals( 'due_total' ),
-				'gateway_fee'     => $payment_model->get_gateway_fee(),
+				'subtotal'        => (float) $cart_info->get_totals( 'subtotal' ),
+				'deposit'         => (float) $payment_model->get_amount(),
+				'due'             => (float) $_totals['due_exclusive'] ?? 0,
+				'tax'             => (float) $cart_info->get_totals( 'total_tax' ),
+				'total'           => (float) $cart_info->get_totals( 'total' ),
+				'initial_deposit' => (float) $cart_info->get_totals( 'partial_total' ),
+				'remaining_total' => (float) $cart_info->get_totals( 'due_total' ),
+				'gateway_fee'     => (float) $payment_model->get_gateway_fee(),
 			);
 		}
 
@@ -900,7 +916,7 @@ class Template_Tags extends TemplateTags {
 		?>
 		<tr>
 			<td colspan="2">
-				<span style="display: flex;padding: 8px 16px;background-color: rgba(15, 29, 35, 0.04);border-radius: 4px;margin: 0 -16px; font-size: 0px;">
+				<span style="display: flex;padding: 8px 16px;background-color: <?php echo esc_attr( $colors['highlight']['bg'] ); ?>;color: <?php echo esc_attr( $colors['highlight']['color'] ); ?>;border-radius: 4px;margin: 0 -16px; font-size: 0px;">
 					<strong style="width: 50%;display: inline-block; font-size: 16px;"><?php esc_html_e( 'Total', 'wp-travel-engine' ); ?></strong>
 					<strong style="width: 50%;text-align: right;display: inline-block; font-size: 16px;">
 					<?php
@@ -919,8 +935,8 @@ class Template_Tags extends TemplateTags {
 		</tr>
 
 		<?php
-		$initial_condition = $payment_type !== 'full' && $amounts['initial_deposit'] > 0;
-		if ( $initial_condition && apply_filters( 'wptravelengine_email_template_initial_deposit_row', true, $cart_info ) ) {
+		$show_initial_deposit = $payment_type !== 'full' && $amounts['initial_deposit'] > 0 && apply_filters( 'wptravelengine_email_template_initial_deposit_row', true, $cart_info );
+		if ( $show_initial_deposit ) {
 			?>
 			<tr>
 				<td><?php esc_html_e( 'Initial Deposit', 'wp-travel-engine' ); ?></td>
@@ -987,7 +1003,7 @@ class Template_Tags extends TemplateTags {
 		<?php if ( 'booking_only' === $payment_gateway || 'check_payments' === $payment_gateway || 'direct_bank_transfer' === $payment_gateway ) { ?>
 		<tr>
 			<td colspan="2">
-				<span style="display: flex;padding: 8px 16px;background-color: #147dfe1a;border-radius: 4px;margin: 0 -16px;">
+				<span style="display: flex;padding: 8px 16px;background-color: <?php echo esc_attr( $colors['secondary_highlight']['bg'] ); ?>;color: <?php echo esc_attr( $colors['secondary_highlight']['color'] ); ?>;border-radius: 4px;margin: 0 -16px;">
 					<strong style="width: 50%;display: inline-block;"><?php esc_html_e( 'Payable Amount', 'wp-travel-engine' ); ?></strong>
 					<strong style="width: 50%;text-align: right;display: inline-block;">
 					<?php
@@ -1010,7 +1026,7 @@ class Template_Tags extends TemplateTags {
 			?>
 			<tr>
 			<td colspan="2">
-				<span style="display: flex;padding: 8px 16px;background-color: #147dfe1a;border-radius: 4px;margin: 0 -16px;">
+				<span style="display: flex;padding: 8px 16px;background-color: <?php echo esc_attr( $colors['secondary_highlight']['bg'] ); ?>;color: <?php echo esc_attr( $colors['secondary_highlight']['color'] ); ?>;border-radius: 4px;margin: 0 -16px;">
 					<strong style="width: 50%;display: inline-block;"><?php esc_html_e( 'Amount Paid', 'wp-travel-engine' ); ?></strong>
 					<strong style="width: 50%;text-align: right;display: inline-block;">
 					<?php
@@ -1025,6 +1041,14 @@ class Template_Tags extends TemplateTags {
 				<td><strong><?php esc_html_e( 'Amount Due', 'wp-travel-engine' ); ?> </strong> <?php echo ( ! empty( $excl_label ) ? '(excl. ' . $excl_label . ')' : '' ); ?></td>
 				<td style="text-align: right;font-size: 16px;"><strong><?php echo wptravelengine_the_price_with_decimal( $amounts['due'], false ); ?></strong></td>
 			</tr>
+				<?php
+			}
+
+			if ( $show_initial_deposit && $booking->get_refunded_amount() > 0 ) {
+				?>
+				<tr>
+					<td colspan="2" style="font-size: 12px;color: #666;"><?php echo esc_html( Booking::get_refund_fallback_msg() ); ?></td>
+				</tr>
 				<?php
 			}
 		}

@@ -371,6 +371,7 @@ class ViewBooking {
 				'payment_source'   => $payment->get_payment_source(),
 				'gateway_fee'      => $payment->get_gateway_fee(),
 				'payable'          => $payment->get_payable_amount(),
+				'refunded'         => ( $_payment_data['refunded_amt'] ?? 0.00 ),
 			);
 
 			foreach ( $this->booking->get_fees() as $value ) {

@@ -19,6 +19,7 @@ use WPTravelEngine\Core\Models\Post;
 use WPTravelEngine\Core\Models\Settings\Options;
 use WPTravelEngine\Utilities\ArrayUtility;
 use WPTravelEngine\Core\Models\Post\TripPackage;
+use WPTravelEngine\Helpers\Translators;
 
 /**
  * REST API: Trip Post Controller class
@@ -235,6 +236,7 @@ class Trip extends WP_REST_Posts_Controller {
 	 * @return bool|WP_Error True if the request has access to delete the package, WP_Error object otherwise.
 	 * @since 6.5.2
 	 * @since 6.8.2 Validate package_id ownership and type to prevent arbitrary post deletion.
+	 * @since 6.8.6 Validate Package delete for Translated Trips.
 	 */
 	public function delete_package_permissions_check( $request ) {
 		$trip = get_post( $request['id'] );
@@ -252,6 +254,14 @@ class Trip extends WP_REST_Posts_Controller {
 				'rest_cannot_delete',
 				__( 'Sorry, you are not allowed to delete packages for this trip.', 'wp-travel-engine' ),
 				array( 'status' => rest_authorization_required_code() )
+			);
+		}
+
+		if ( ! Translators::is_default_language( $trip->ID, 'post_trip' ) ) {
+			return new WP_Error(
+				'rest_cannot_delete',
+				__( 'Packages can only be deleted from the trip\'s original-language version.', 'wp-travel-engine' ),
+				array( 'status' => 403 )
 			);
 		}
 
@@ -299,6 +309,15 @@ class Trip extends WP_REST_Posts_Controller {
 				$previous           = $this->prepare_item_for_response( $trip->post, $request );
 				$remaining_packages = array_diff( (array) $trip->get_meta( 'packages_ids' ), array( $request['package_id'] ) );
 				$trip->set_meta( 'packages_ids', empty( $remaining_packages ) ? '' : $remaining_packages )->save();
+
+				/**
+				 * Fires after a trip package is deleted.
+				 *
+				 * @param Post\Trip $trip       The trip the package was removed from.
+				 * @param int       $package_id The deleted package's ID.
+				 * @since 6.8.6
+				 */
+				do_action( 'wptravelengine_trip_package_deleted', $trip, (int) $request['package_id'] );
 
 				return new WP_REST_Response(
 					array(
@@ -365,6 +384,7 @@ class Trip extends WP_REST_Posts_Controller {
 	 * @return void
 	 * @since 6.2.2
 	 * @since 6.8.4 Added capacity_per_category support.
+	 * @since 6.8.6 Updated Pacakage Title / Description Translation Funcionality.
 	 */
 	protected function set_core_settings( WP_REST_Request $request ): void {
 
@@ -661,11 +681,21 @@ class Trip extends WP_REST_Posts_Controller {
 
 		if ( isset( $request['packages'] ) ) {
 
-			$primary_package_id = $trip->get_meta( 'primary_package' );
+			$primary_package_id  = $trip->get_meta( 'primary_package' );
+			$is_non_default_lang = ! Translators::is_default_language( $trip->ID, 'post_trip' );
 
 			foreach ( $request['packages'] ?? array() as $key => $package ) {
 
 				if ( ! ( $package['_changed'] ?? false ) && ! is_null( $package['id'] ?? null ) ) {
+					continue;
+				}
+
+				if ( $is_non_default_lang && is_null( $package['id'] ?? null ) ) {
+					$this->set_bad_request(
+						'rest_cannot_create_package',
+						__( "Packages can only be added from the trip's original-language version.", 'wp-travel-engine' ),
+						'packages'
+					);
 					continue;
 				}
 
@@ -681,6 +711,15 @@ class Trip extends WP_REST_Posts_Controller {
 							'post_author'  => get_current_user_id(),
 						)
 					);
+
+					/**
+					 * Fires after a new trip package is created (via "Add New Package" or "Clone").
+					 *
+					 * @param Post\Trip $trip       The trip the package was added to.
+					 * @param int       $package_id The newly created package's ID.
+					 * @since 6.8.6
+					 */
+					do_action( 'wptravelengine_trip_package_created', $trip, (int) $package['id'] );
 				}
 
 				if ( $package['is_primary'] || empty( $primary_package_id ) ) {
@@ -828,13 +867,33 @@ class Trip extends WP_REST_Posts_Controller {
 
 			if ( ! isset( $this->errors ) ) {
 				$trip->set_meta( 'packages_ids', $trip_package_ids );
+				$is_translation_active = Translators::is_translation_active();
+				$trip_language         = $is_translation_active ? Translators::get_element_language( $trip->ID, 'post_trip' ) : null;
+				$is_non_default_lang   = ! Translators::is_default_language( $trip->ID, 'post_trip' );
+
 				foreach ( $meta_inputs ?? array() as $meta_input ) {
 					$ID           = array_shift( $meta_input );
 					$post_title   = array_shift( $meta_input );
 					$post_content = array_shift( $meta_input );
 					$meta_input   = array_filter( $meta_input, fn ( $v ) => $v !== null );
+					$postarr      = compact( 'ID', 'meta_input' );
 
-					wp_update_post( compact( 'ID', 'post_title', 'post_content', 'meta_input' ) );
+					if ( $is_translation_active ) {
+						/**
+						 * For passing the default content during register strings.
+						 */
+						$source_package = $is_non_default_lang ? get_post( $ID ) : null;
+
+						Translators::wpml_sync_string( "package_title_{$ID}", $post_title, $trip_language, 'wp-travel-engine', $source_package->post_title ?? null );
+						Translators::wpml_sync_string( "package_description_{$ID}", $post_content, $trip_language, 'wp-travel-engine', $source_package->post_content ?? null );
+					}
+
+					if ( ! $is_non_default_lang ) {
+						$postarr['post_title']   = $post_title;
+						$postarr['post_content'] = $post_content;
+					}
+
+					wp_update_post( $postarr );
 				}
 
 				$available_months = array();
@@ -909,6 +968,7 @@ class Trip extends WP_REST_Posts_Controller {
 	 *
 	 * @return WP_Error|WP_HTTP_Response|WP_REST_Response
 	 * @since 6.8.4 Added capacity_per_category to response.
+	 * @since 6.8.6 Added is_default_language for Package action disable & alert.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 
@@ -924,6 +984,8 @@ class Trip extends WP_REST_Posts_Controller {
 		$data = parent::prepare_item_for_response( $item, $request )->get_data();
 
 		$this->trip = $trip = new Post\Trip( $item->ID );
+
+		$data['is_default_language'] = Translators::is_default_language( $trip->ID, 'post_trip' );
 
 		// Fixed starting dates data.
 		$data['fsd'] = array(

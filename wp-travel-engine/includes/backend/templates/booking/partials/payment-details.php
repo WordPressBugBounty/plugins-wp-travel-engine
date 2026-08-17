@@ -42,12 +42,15 @@ if ( ! $is_new_booking && empty( $payments_edit_form_fields ) ) {
 			<div data-payments-section>
 				<?php
 				foreach ( $payments_edit_form_fields as $index => $payment_edit_form_fields ) :
-					if ( $index > 0 ) :
-						?>
-						<hr>
-					<?php endif; ?>
+					if ( $index > 0 ) {
+						echo '<hr>';
+					}
+
+					$_defaults     = $payment_edit_form_fields->get_defaults();
+					$wrapper_class = 'wpte-fields-grid' . ( 'refunded' === ( $_defaults['status'] ?? '' ) ? ' wpte-has-refunded-status' : '' );
+					?>
 					<h5 class="wpte-accordion-subtitle"><?php printf( 'Payment #%d', $index + 1 ); ?></h5>
-					<div class="wpte-fields-grid" data-columns="2">
+					<div class="<?php echo esc_attr( $wrapper_class ); ?>" data-columns="2">
 						<?php
 						$payment_edit_form_fields->update_fields( 'deposit.field_label', $extra_fields['deposit']['field_label'] );
 						$payment_edit_form_fields->render();
@@ -267,6 +270,10 @@ echo $fee_hidden_markups;
 				);
 			}
 			?>
+			<tr class="wpte-payment-refunded">
+				<td><?php esc_html_e( 'Refunded Amount', 'wp-travel-engine' ); ?></td>
+				<td><?php wptravelengine_the_price( '', true, $pricing_arguments ); ?></td>
+			</tr>
 			<tr class="wpte-payment-summary-total wpte-payment-amount">
 				<td><?php esc_html_e( 'Total Amount Paid', 'wp-travel-engine' ); ?></td>
 				<td class="wpte-payment-summary-amount"><?php wptravelengine_the_price( $payments_total['total'] ?? 0, true, $pricing_arguments ); ?></td>

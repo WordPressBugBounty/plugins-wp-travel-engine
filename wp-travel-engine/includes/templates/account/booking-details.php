@@ -27,6 +27,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $booking_instance = new Booking( $booking );
+/**
+ * @TODO: Remove this if case after Booking is isolated and is not handle from Trip instance.
+ * @since 6.8.6
+ */
+if ( ! $booking_instance->trip_exists() ) {
+	printf(
+		'<div class="wpte-notice wpte-notice-warning">%s</div>',
+		esc_html__( 'Details for this booking are not visible as the associated trip has been deleted. Please contact admin.', 'wp-travel-engine' )
+	);
+	return;
+}
+
 $booking_payments = $booking_instance->get_payments() ?? array();
 $cart_info        = new CartInfoParser( $booking_instance->get_cart_info() ?? array() );
 $settings         = wptravelengine_settings()->get();

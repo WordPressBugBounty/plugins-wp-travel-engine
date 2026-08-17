@@ -763,6 +763,7 @@ class SaveBooking {
 		$cart_info['totals']['total_extra_charges'] = '0.00';
 
 		$total_paid_amt = '0.00';
+		$total_refunded = '0.00';
 		$success_status = wptravelengine_success_payment_status();
 
 		foreach ( $items as $payment_data ) {
@@ -786,79 +787,81 @@ class SaveBooking {
 				$status = $payment_model->get_meta( 'payment_status' );
 			}
 
-			$payment_cart_total = ArrayUtility::make( $payment_model->get_cart_totals() ?: $cart_info['totals'] );
-
-			if ( is_numeric( $p_deposit = $payment_data['deposit'] ?? null ) ) {
-				$p_deposit = $calc->normalize( (string) $p_deposit );
-				$payment_cart_total->set( 'deposit', $p_deposit );
-				$cart_info['totals']['deposit'] = $calc->add(
-					(string) $cart_info['totals']['deposit'],
-					$p_deposit
-				);
-				if ( isset( $success_status[ $status ] ) ) {
-					$actual_deposit_ = $calc->add( $actual_deposit_, $p_deposit );
-				}
-			}
-
-			$extra_fee = '0';
-			foreach ( $fees as $fee ) {
-				if ( 'gateway_fee' === $fee ) {
+			if ( 'refunded' === $status ) {
+				if ( ! is_numeric( $payment_data['refunded'] ) ) {
 					continue;
 				}
-				$p_fee = $payment_data[ $fee ] ?? '';
-				if ( is_numeric( $p_fee ) ) {
-					$p_fee = floatval( $p_fee );
-					if ( $p_fee >= 0.00 ) {
-						$p_fee = $calc->normalize( (string) $p_fee );
-						$payment_cart_total->set( 'total_' . $fee, $p_fee );
-						$extra_fee              = $calc->add( $extra_fee, $p_fee );
-						$this->set_fees[ $fee ] = true;
+				$payment_model->set_meta( 'refunded_amount', (float) $payment_data['refunded'] );
+				$total_refunded = $calc->add( (string) $total_refunded, (string) $payment_data['refunded'] );
+			} else {
+				$payment_cart_total = ArrayUtility::make( $payment_model->get_cart_totals() ?: $cart_info['totals'] );
+
+				if ( is_numeric( $p_deposit = $payment_data['deposit'] ?? null ) ) {
+					$p_deposit = $calc->normalize( (string) $p_deposit );
+					$payment_cart_total->set( 'deposit', $p_deposit );
+					$cart_info['totals']['deposit'] = $calc->add(
+						(string) $cart_info['totals']['deposit'],
+						$p_deposit
+					);
+					if ( isset( $success_status[ $status ] ) ) {
+						$actual_deposit_ = $calc->add( $actual_deposit_, $p_deposit );
 					}
-				} else {
-					$payment_cart_total->remove( 'total_' . $fee );
+				}
+
+				$extra_fee = '0';
+				foreach ( $fees as $fee ) {
+					if ( 'gateway_fee' === $fee ) {
+						continue;
+					}
+					$p_fee = $payment_data[ $fee ] ?? '';
+					if ( is_numeric( $p_fee ) ) {
+						$p_fee = floatval( $p_fee );
+						if ( $p_fee >= 0.00 ) {
+							$p_fee = $calc->normalize( (string) $p_fee );
+							$payment_cart_total->set( 'total_' . $fee, $p_fee );
+							$extra_fee              = $calc->add( $extra_fee, $p_fee );
+							$this->set_fees[ $fee ] = true;
+						}
+					} else {
+						$payment_cart_total->remove( 'total_' . $fee );
+					}
+				}
+
+				if ( '0' !== $extra_fee ) {
+					$payment_cart_total->set( 'total_extra_charges', $extra_fee );
+					$cart_info['totals']['total_extra_charges'] = $extra_fee;
+				}
+
+				$payment_model->set_meta( 'cart_totals', $payment_cart_total->value() );
+
+				$payment_currency = sanitize_text_field( $payment_data['currency'] ?? '' )
+					?: ( $payment_model->get_currency() ?: ( $cart_info['currency'] ?? wptravelengine_settings()->get( 'currency_code', 'USD' ) ) );
+
+				$paid_amount = $payment_data['amount'] ?? null;
+				$payment_model->set_meta(
+					'payment_amount',
+					array(
+						'value'    => is_numeric( $paid_amount ) ? (float) $paid_amount : 0,
+						'currency' => $payment_currency,
+					)
+				);
+
+				$total_paid_amt = $calc->add( $total_paid_amt, (string) $paid_amount );
+
+				if ( is_numeric( $due_amount = $this->request->get_param( 'due_amount' ) ) ) {
+					$payment_model->set_meta(
+						'payable',
+						array(
+							'currency' => $payment_currency,
+							'amount'   => (float) $due_amount,
+						)
+					);
 				}
 			}
-
-			if ( '0' !== $extra_fee ) {
-				$payment_cart_total->set( 'total_extra_charges', $extra_fee );
-				$cart_info['totals']['total_extra_charges'] = $extra_fee;
-			}
-
-			$payment_model->set_meta( 'cart_totals', $payment_cart_total->value() );
 
 			if ( $gateway = $payment_data['gateway'] ?? null ) {
 				$payment_model->set_meta( 'payment_gateway', sanitize_text_field( $gateway ) );
 				$this->booking->set_meta( 'wp_travel_engine_booking_payment_gateway', sanitize_text_field( $gateway ) );
-			}
-
-			$payment_currency = sanitize_text_field( $payment_data['currency'] ?? '' );
-			if ( '' === $payment_currency ) {
-				$payment_currency = $payment_model->get_currency();
-			}
-			if ( '' === $payment_currency ) {
-				$payment_currency = $cart_info['currency'] ?? wptravelengine_settings()->get( 'currency_code', 'USD' );
-			}
-			$payment_currency = $payment_currency ?: 'USD';
-
-			$paid_amount = $payment_data['amount'] ?? null;
-			$payment_model->set_meta(
-				'payment_amount',
-				array(
-					'value'    => is_numeric( $paid_amount ) ? (float) $paid_amount : 0,
-					'currency' => $payment_currency,
-				)
-			);
-
-			$total_paid_amt = $calc->add( $total_paid_amt, (string) $paid_amount );
-
-			if ( is_numeric( $due_amount = $this->request->get_param( 'due_amount' ) ) ) {
-				$payment_model->set_meta(
-					'payable',
-					array(
-						'currency' => $payment_currency,
-						'amount'   => (float) $due_amount,
-					)
-				);
 			}
 
 			if ( $transaction_id = $payment_data['transaction_id'] ?? null ) {
@@ -899,13 +902,16 @@ class SaveBooking {
 
 		$this->booking->set_meta( 'payments', $_payments );
 		$this->booking->set_meta( 'wp_travel_engine_booking_payment_status', $last_status );
+		$this->booking->set_meta( 'total_refunded_amount', (float) $total_refunded );
 
 		/**
 		 * Moved from update_cart_totals to process_payments.
 		 *
 		 * @since 6.7.6
+		 * @since 6.8.6 added actual_total_paid_amount
 		 */
-		$this->booking->set_meta( 'total_paid_amount', (float) $total_paid_amt );
+		$this->booking->set_meta( 'total_paid_amount', (float) $calc->subtract( (string) $total_paid_amt, (string) $total_refunded ) );
+		$this->booking->set_meta( 'actual_total_paid_amount', (float) $total_paid_amt );
 
 		if ( is_numeric( $paid_amount = $this->request->get_param( 'paid_amount' ) ) ) {
 			$this->booking->set_meta( 'paid_amount', (float) $paid_amount );

@@ -21,10 +21,17 @@ foreach ( $all_payments as $key => $payment ) {
 	if ( empty( $payment ) ) {
 		continue;
 	}
+	// A refunded payment shows only its refunded amount; the paid rows are hidden (matches the edit-screen card).
+	$is_refunded = ! empty( $payment['is_refunded'] ?? '' );
+	$row_style   = $is_refunded ? ' style="display:none;"' : '';
 	?>
 	<div class="wpte-payment-card wpte-accordion">
 		<div class="wpte-accordion-header">
-			<h3 class="wpte-accordion-title wpte-payment-card-title"><?php echo esc_html( __( 'Payment', 'wp-travel-engine' ) . ' #' . $key ); ?></h3></button>
+			<h3 class="wpte-accordion-title wpte-payment-card-title">
+				<?php echo esc_html( __( 'Payment', 'wp-travel-engine' ) . ' #' . $key ); ?>
+				<span class="wpte-payment-status-badge<?php echo ( $payment['status'] ?? '' ) ? ' wpte-status-' . esc_attr( $payment['status'] ) : ''; ?>"><?php echo esc_html( ucfirst( $payment['status'] ?? '' ) ); ?></span>
+			</h3>
+		</button>
 			<?php if ( is_admin() ) { ?>
 				<button type="button" class="wpte-accordion-toggle active">
 					<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -35,7 +42,7 @@ foreach ( $all_payments as $key => $payment ) {
 		</div>
 		<div class="wpte-accordion-content">
 			<table class="wpte-payment-card-table">
-				<tr class="wpte-payment-deposit">
+				<tr class="wpte-payment-deposit"<?php echo $row_style; ?>>
 					<td><?php esc_html_e( 'Deposit Amount', 'wp-travel-engine' ); ?></td>
 					<td><?php wptravelengine_the_price_with_decimal( $payment['deposit'], true, $pricing_arguments ); ?></td>
 				</tr>
@@ -44,10 +51,11 @@ foreach ( $all_payments as $key => $payment ) {
 					$price = floatval( $payment[ $fee_name ] ?? 0 );
 					if ( $price > 0.00 ) {
 						printf(
-							'<tr class="wpte-payment-%1$s"><td>%2$s</td><td>%3$s</td></tr>',
+							'<tr class="wpte-payment-%1$s"%4$s><td>%2$s</td><td>%3$s</td></tr>',
 							esc_attr( $fee_name ),
 							esc_html( $fee['label'] ),
-							wptravelengine_the_price_with_decimal( $price, false, $pricing_arguments )
+							wptravelengine_the_price_with_decimal( $price, false, $pricing_arguments ),
+							$row_style
 						);
 					}
 				}
@@ -56,9 +64,10 @@ foreach ( $all_payments as $key => $payment ) {
 					$price = floatval( $payment['tax'] ?? 0 );
 					if ( $price > 0.00 ) {
 						printf(
-							'<tr class="wpte-payment-tax"><td>%1$s</td><td>%2$s</td></tr>',
+							'<tr class="wpte-payment-tax"%3$s><td>%1$s</td><td>%2$s</td></tr>',
 							esc_html( $payments_total['tax']['label'] ),
-							wptravelengine_the_price_with_decimal( $price, false, $pricing_arguments )
+							wptravelengine_the_price_with_decimal( $price, false, $pricing_arguments ),
+							$row_style
 						);
 					}
 				}
@@ -67,24 +76,34 @@ foreach ( $all_payments as $key => $payment ) {
 					$price = floatval( $payment[ $fee_name ] ?? 0 );
 					if ( $price > 0.00 && 'gateway_fee' !== $fee_name ) {
 						printf(
-							'<tr class="wpte-payment-%1$s"><td>%2$s</td><td>%3$s</td></tr>',
+							'<tr class="wpte-payment-%1$s"%4$s><td>%2$s</td><td>%3$s</td></tr>',
 							esc_attr( $fee_name ),
 							esc_html( $fee['label'] ),
-							wptravelengine_the_price_with_decimal( $price, false, $pricing_arguments )
+							wptravelengine_the_price_with_decimal( $price, false, $pricing_arguments ),
+							$row_style
 						);
 					}
 				}
 
 				if ( ( $payment['gateway_fee'] ?? 0 ) > 0.00 ) {
 					printf(
-						'<tr class="wpte-payment-gateway-fee"><td>%1$s</td><td><strong>%2$s</strong></td></tr>',
+						'<tr class="wpte-payment-gateway-fee"%3$s><td>%1$s</td><td><strong>%2$s</strong></td></tr>',
 						esc_html( __( 'Gateway Fee', 'wp-travel-engine' ) ),
-						wptravelengine_the_price_with_decimal( $payment['gateway_fee'] ?? 0, false, $pricing_arguments )
+						wptravelengine_the_price_with_decimal( $payment['gateway_fee'] ?? 0, false, $pricing_arguments ),
+						$row_style
 					);
 				}
 
+				// Refunded payments show a "Refunded Amount" row with the refunded total.
+				if ( $is_refunded ) {
+					printf(
+						'<tr class="wpte-payment-refunded"><td>%1$s</td><td>%2$s</td></tr>',
+						esc_html__( 'Refunded Amount', 'wp-travel-engine' ),
+						wptravelengine_the_price_with_decimal( $payment['refunded_amt'] ?? 0, false, $pricing_arguments )
+					);
+				}
 				?>
-				<tr class="wpte-payment-total wpte-payment-amount">
+				<tr class="wpte-payment-total wpte-payment-amount"<?php echo $row_style; ?>>
 					<td><?php esc_html_e( 'Amount Paid', 'wp-travel-engine' ); ?></td>
 					<td><?php wptravelengine_the_price_with_decimal( $payment['total'], true, $pricing_arguments ); ?></td>
 				</tr>
