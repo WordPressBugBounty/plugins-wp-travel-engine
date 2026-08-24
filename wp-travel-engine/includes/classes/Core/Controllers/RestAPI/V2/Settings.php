@@ -145,11 +145,11 @@ class Settings {
 	 * Checks for permissions.
 	 *
 	 * @return bool
-	 * @return bool
 	 * @since 6.2.0
+	 * @since 6.8.7 Also allow manage_wte_settings, not just manage_options.
 	 */
 	public function get_permission(): bool {
-		return current_user_can( 'manage_options' );
+		return wptravelengine_curr_user_can( 'manage_wte_settings' );
 	}
 
 	/**
@@ -717,11 +717,13 @@ class Settings {
 		$appearance = Options::get( 'wptravelengine_appearance', array() );
 
 		$settings['appearance'] = array(
-			'primary_color'     => (string) ( $appearance['primary_color'] ?? '' ),
-			'primary_color_rgb' => (string) ( $appearance['primary_color_rgb'] ?? '' ),
-			'discount_color'    => (string) ( $appearance['discount_color'] ?? '' ),
-			'featured_color'    => (string) ( $appearance['featured_color'] ?? '' ),
-			'icon_color'        => (string) ( $appearance['icon_color'] ?? '' ),
+			'primary_color'         => (string) ( $appearance['primary_color'] ?? '' ),
+			'primary_color_rgb'     => (string) ( $appearance['primary_color_rgb'] ?? '' ),
+			'discount_color'        => (string) ( $appearance['discount_color'] ?? '' ),
+			'featured_color'        => (string) ( $appearance['featured_color'] ?? '' ),
+			'icon_color'            => (string) ( $appearance['icon_color'] ?? '' ),
+			'warning_message_color' => (string) ( $appearance['warning_message_color'] ?? '#F79009' ),
+			'info_notice_color'     => (string) ( $appearance['info_notice_color'] ?? '#2578EB' ),
 		);
 
 		return $settings;
@@ -1679,6 +1681,13 @@ class Settings {
 
 		if ( isset( $request['appearance']['icon_color'] ) ) {
 			$appearance->set( 'icon_color', sanitize_hex_color( $request['appearance']['icon_color'] ) );
+		}
+
+		if ( isset( $request['appearance']['warning_message_color'] ) ) {
+			$appearance->set( 'warning_message_color', sanitize_hex_color( $request['appearance']['warning_message_color'] ) );
+		}
+		if ( isset( $request['appearance']['info_notice_color'] ) ) {
+			$appearance->set( 'info_notice_color', sanitize_hex_color( $request['appearance']['info_notice_color'] ) );
 		}
 
 		Options::update( 'wptravelengine_appearance', $appearance->value() );
@@ -3103,24 +3112,32 @@ class Settings {
 				'description' => __( 'Appearance Settings', 'wp-travel-engine' ),
 				'type'        => 'object',
 				'properties'  => array(
-					'primary_color'     => array(
+					'primary_color'         => array(
 						'description' => __( 'Primary Color', 'wp-travel-engine' ),
 						'type'        => 'string',
 					),
-					'primary_color_rgb' => array(
+					'primary_color_rgb'     => array(
 						'description' => __( 'Primary Color RGB', 'wp-travel-engine' ),
 						'type'        => 'string',
 					),
-					'discount_color'    => array(
+					'discount_color'        => array(
 						'description' => __( 'Discount Color', 'wp-travel-engine' ),
 						'type'        => 'string',
 					),
-					'featured_color'    => array(
+					'featured_color'        => array(
 						'description' => __( 'Featured Color', 'wp-travel-engine' ),
 						'type'        => 'string',
 					),
-					'icon_color'        => array(
+					'icon_color'            => array(
 						'description' => __( 'Icon Color', 'wp-travel-engine' ),
+						'type'        => 'string',
+					),
+					'warning_message_color' => array(
+						'description' => __( 'Warning Message Color', 'wp-travel-engine' ),
+						'type'        => 'string',
+					),
+					'info_notice_color'     => array(
+						'description' => __( 'Info Notice Color', 'wp-travel-engine' ),
 						'type'        => 'string',
 					),
 				),

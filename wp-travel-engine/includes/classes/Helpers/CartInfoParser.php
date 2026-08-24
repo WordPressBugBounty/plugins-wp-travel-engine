@@ -209,7 +209,10 @@ class CartInfoParser {
 	}
 
 	public function __get( $key ) {
-		if ( method_exists( $this, "get_{$key}" ) ) {
+		if ( 'exclusive_label' === $key ) {
+			$fees = $this->fees;
+			return self::get_exclusive_label( $fees );
+		} elseif ( method_exists( $this, "get_{$key}" ) ) {
 			return $this->{"get_{$key}"}();
 		}
 
@@ -227,5 +230,25 @@ class CartInfoParser {
 	 */
 	public function is_curr_cart_ver( string $op = '==', string $ver = '4.0' ): bool {
 		return version_compare( $this->version, $ver, $op );
+	}
+
+	/**
+	 * Summary of get_exclusive_label
+	 *
+	 * @param mixed $fees
+	 * @return string
+	 * @since 6.8.7
+	 */
+	final public static function get_exclusive_label( $fees ) {
+		$excl  = '';
+		$count = count( $fees );
+
+		for ( $i = $count - 1; $i >= 0; $i-- ) {
+			$label = $fees[ $i ]->label ?? $fees[ $i ]['label'] ?? '';
+			$label = trim( preg_replace( '/\(.*$/', '', $label ) );
+			$excl .= $label . ( $i === 1 ? ' & ' : ( $i > 0 ? ', ' : '' ) );
+		}
+
+		return $excl;
 	}
 }

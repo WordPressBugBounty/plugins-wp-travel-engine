@@ -22,10 +22,11 @@ class PostTypeRegistry extends Registrable {
 	 * Register a post type.
 	 *
 	 * @param string $class_name The post type class.
-	 * @return static
+	 * @return PostTypeRegistry
 	 * @since 6.8.4 Return static for method chaining.
+	 * @since 6.8.7 Return type changed from `static` to `PostTypeRegistry` for PHP 7.4 compatibility.
 	 */
-	public function register( string $class_name ): static {
+	public function register( string $class_name ): PostTypeRegistry {
 		$instance = new $class_name();
 
 		register_post_type( $instance->get_post_type(), $instance->get_args() );

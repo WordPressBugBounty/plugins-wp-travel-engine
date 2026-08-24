@@ -236,6 +236,7 @@ class TripPackages extends WP_REST_Posts_Controller {
 				'max_pax'           => $trip_package->get_cat_max_cap( $cat_id ),
 				'description'       => $category->get( 'description', '' ),
 				'is_primary'        => $trip_package->primary_pricing_category->id === $cat_id,
+				'is_min_required'   => wptravelengine_toggled( $category->get( 'is_min_required', false ) ),
 			);
 
 		}

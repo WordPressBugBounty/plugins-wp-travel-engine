@@ -85,8 +85,6 @@ class BookingEmail extends Email {
 
 		$this->template = wptravelengine_map_email_template( $template );
 
-		$this->set_my_tags();
-
 		return $this;
 	}
 
@@ -145,14 +143,26 @@ class BookingEmail extends Email {
 	/**
 	 * Sets booking email template tags.
 	 *
-	 * @param array $tags The tags.
+	 * @param string $content Rendered email body (still containing `{tag}` placeholders).
+	 * @param string $subject Rendered email subject (still containing `{tag}` placeholders).
 	 *
 	 * @return $this
+	 * @since 6.8.7 Accepts $content/$subject so EmailTags::get_email_tags() can skip resolving
+	 *             tags that don't appear anywhere in this particular email.
 	 */
-	public function set_my_tags(): BookingEmail {
+	public function set_my_tags( string $content = '', string $subject = '' ): BookingEmail {
 		$template_tags = new Template_Tags( $this->booking->ID, $this->payment->ID );
-		$this->set_tags( $template_tags->get_email_tags() );
+		$this->set_tags( $template_tags->get_email_tags( $content, $subject ) );
 		return $this;
+	}
+
+	/**
+	 * @inheritDoc
+	 * @since 6.8.7 Resolves tags against the final subject/body so build_callbacks()
+	 *             skips get_*() calls for {tags} that don't appear in this email.
+	 */
+	protected function resolve_tags( string $body, string $subject ): void {
+		$this->set_my_tags( $body, $subject );
 	}
 
 	/**

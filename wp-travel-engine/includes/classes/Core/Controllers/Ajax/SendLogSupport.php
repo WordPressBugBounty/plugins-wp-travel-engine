@@ -28,10 +28,11 @@ class SendLogSupport extends AjaxController {
 	 * Process request.
 	 *
 	 * @return void
+	 * @since 6.8.7 Also allow view_wte_logs, not just manage_options.
 	 */
 	protected function process_request() {
 		// Check capability
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! wptravelengine_curr_user_can( 'view_wte_logs' ) ) {
 			wp_send_json_error( array( 'message' => __( 'You do not have sufficient permissions.', 'wp-travel-engine' ) ) );
 		}
 

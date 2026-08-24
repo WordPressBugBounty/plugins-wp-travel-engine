@@ -99,6 +99,18 @@ class TravelerCategory {
 	}
 
 	/**
+	 * Get the property value.
+	 *
+	 * @param string $name Name of the property
+	 *
+	 * @return mixed
+	 * @since 6.8.7
+	 */
+	public function __get( string $name ) {
+		return $this->$name ?? null;
+	}
+
+	/**
 	 * @return string
 	 * @since 6.4.3
 	 * @since 6.7.4 Update label retrieval to support WPML translation.

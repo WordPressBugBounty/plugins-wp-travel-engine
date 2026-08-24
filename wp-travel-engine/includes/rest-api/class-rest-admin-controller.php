@@ -7,6 +7,8 @@
  */
 namespace WPTravelEngine\Core\REST_API;
 
+use WP_Error;
+
 /**
  * Admin Rest Controller Class.
  */
@@ -106,14 +108,15 @@ class Admin_Controller extends Controller {
 	 * Checks if a given request has access to read posts.
 	 *
 	 * @since 4.7.0
+	 * @since 6.8.7 Also allow manage_wte_settings, not just manage_options.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
 	 */
 	public function get_items_permissions_check( $request ) {
 
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return new \WP_Error(
+		if ( ! wptravelengine_curr_user_can( 'manage_wte_settings' ) ) {
+			return new WP_Error(
 				'rest_forbidden_context',
 				__( 'Sorry, you are not allowed to read data.', 'wp-travel-engine' ),
 				array( 'status' => rest_authorization_required_code() )

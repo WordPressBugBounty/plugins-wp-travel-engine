@@ -189,6 +189,10 @@ class Email extends TemplateTags {
 		$subject = apply_filters( 'wptravelengine_email_subject', $this->get( 'my_subject' ), $this );
 		$body    = apply_filters( 'wptravelengine_email_content', $this->get( 'body' ), $this );
 
+		// Let subclasses (re)resolve their tags now that subject/body are final, so
+		// tag callbacks that don't appear in either string can be skipped entirely.
+		$this->resolve_tags( $body, $subject );
+
 		// Apply template tags to the translated content.
 		$subject = wp_specialchars_decode( $this->apply_tags( $subject ), ENT_QUOTES );
 		$body    = $this->apply_tags( $body );
@@ -200,6 +204,17 @@ class Email extends TemplateTags {
 
 		return $result;
 	}
+
+	/**
+	 * Hook for subclasses to (re)resolve their tags against the final subject/body,
+	 * right before they get applied. No-op by default.
+	 *
+	 * @param string $body Final email body (still containing `{tag}` placeholders).
+	 * @param string $subject Final email subject (still containing `{tag}` placeholders).
+	 * @return void
+	 * @since 6.8.7
+	 */
+	protected function resolve_tags( string $body, string $subject ): void {}
 
 	/**
 	 * Get email settings.

@@ -24,9 +24,10 @@ class SendTestEmail extends AjaxController {
 	 * Email Template Preview process_request
 	 *
 	 * @since 6.7.9
+	 * @since 6.8.7 Also allow manage_wte_settings, not just manage_options.
 	 */
 	public function process_request() {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! wptravelengine_curr_user_can( 'manage_wte_settings' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'wp-travel-engine' ) ) );
 		}
 		if ( isset( $_POST['content'] ) && ! empty( $_POST['content'] ) ) {

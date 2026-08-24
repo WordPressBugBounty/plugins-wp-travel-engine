@@ -1,12 +1,11 @@
 <?php
 
+use WPTravelEngine\Core\PostTypes;
 use WPTravelEngine\Filters\Events;
-use WPTravelEngine\Builders\AdminSettings;
-use WPTravelEngine\Core\PostTypes\Customer;
+use WPTravelEngine\Core\Capabilities;
 use WPTravelEngine\Helpers\CartInfoParser;
+use WPTravelEngine\Builders\AdminSettings;
 use WPTravelEngine\Core\Models\Post\Booking as BookingModel;
-use WPTravelEngine\Core\Models\Post\Payment as PaymentModel;
-use WPTravelEngine\Modules\TripSearch;
 
 /**
  * The admin-specific functionality of the plugin.
@@ -183,12 +182,11 @@ class Wp_Travel_Engine_Admin {
 	}
 
 	/**
-	 *
 	 * @since 5.5
+	 * @since 6.8.7 Analytics/Settings gate on view_wte_analytics/manage_wte_settings; no longer
+	 *             removes 'Add New', since that collapsed Booking's submenu and broke the list page.
 	 */
 	public function admin_menu() {
-		global $submenu;
-		unset( $submenu['edit.php?post_type=booking'][10] ); // Removes 'Add New'.
 		$menus = array(
 			'wptravelengine-admin-page'          => array(
 				'parent_slug' => 'edit.php?post_type=booking',
@@ -205,7 +203,7 @@ class Wp_Travel_Engine_Admin {
 				'parent_slug' => 'edit.php?post_type=booking',
 				'page_title'  => __( 'Analytics', 'wp-travel-engine' ),
 				'menu_title'  => __( 'Analytics', 'wp-travel-engine' ),
-				'capability'  => 'manage_options',
+				'capability'  => 'view_wte_analytics',
 				'callback'    => function () {
 					include_once plugin_dir_path( WP_TRAVEL_ENGINE_FILE_PATH ) . '/includes/backend/dashboard/dashboard.php';
 				},
@@ -225,7 +223,7 @@ class Wp_Travel_Engine_Admin {
 				'parent_slug' => 'edit.php?post_type=booking',
 				'page_title'  => __( 'WP Travel Engine Admin Settings', 'wp-travel-engine' ),
 				'menu_title'  => __( 'Settings <span class="wte_note_550 hidden"></span>', 'wp-travel-engine' ),
-				'capability'  => 'manage_options',
+				'capability'  => 'manage_wte_settings',
 				'callback'    => array( $this, 'wp_travel_engine_callback_function' ),
 				'position'    => 11,
 			),
@@ -400,6 +398,7 @@ class Wp_Travel_Engine_Admin {
 	 * @updated 6.7.0
 	 * @since 6.7.10 Dispatches `wptravelengine.plugin.updated` event with version info on plugin upgrade.
 	 * @since 6.8.6 Commented update_metas_for_trip_search() call.
+	 * @since 6.8.7 Grants WP Travel Engine - Capabilities to 'administrator' and 'editor' role
 	 */
 	public function prepare_filter_params( $force = false ) {
 		$version = str_replace( '.', '', WP_TRAVEL_ENGINE_VERSION );
@@ -409,6 +408,11 @@ class Wp_Travel_Engine_Admin {
 			// TripSearch::update_metas_for_trip_search();
 			update_option( "wte_search_params_updated_{$version}", 'done', true );
 			self::disable_autoload();
+		}
+
+		if ( ! get_option( 'wptravelengine_capabilities_granted', false ) ) {
+			Capabilities::grant_defaults();
+			update_option( 'wptravelengine_capabilities_granted', true );
 		}
 	}
 
@@ -485,6 +489,7 @@ class Wp_Travel_Engine_Admin {
 	 *
 	 * @return void
 	 * @since 5.6.9
+	 * @since 6.8.7 Give Coupon its own capability_type (`wte-coupon`/`wte-coupons`) instead of sharing Trip's capabilities.
 	 */
 	private function register_post_type_coupons() {
 		$labels = array(
@@ -514,11 +519,10 @@ class Wp_Travel_Engine_Admin {
 			'show_in_admin_bar'  => true,
 			'query_var'          => true,
 			'rewrite'            => array( 'slug' => 'wp-travel-engine-coupon' ),
-			'capability_type'    => 'post',
+			'capability_type'    => array( 'wte-coupon', 'wte-coupons' ),
 			'has_archive'        => false,
 			'hierarchical'       => false,
 			'menu_position'      => null,
-			'capabilities'       => $this->get_capabilities(),
 			'supports'           => array( 'title' ),
 			'menu_icon'          => 'dashicons-location',
 			'with_front'         => false,
@@ -570,69 +574,14 @@ class Wp_Travel_Engine_Admin {
 	 * Register a Trip post type.
 	 *
 	 * @link https://codex.wordpress.org/Function_Reference/register_post_type
+	 * @since 6.8.7 Migrated to delegate to WPTravelEngine\Core\PostTypes\Trip.
 	 */
 	public function wp_travel_engine_register_trip() {
-		$permalink = wp_travel_engine_get_permalink_structure();
+		$trip_post_type = new PostTypes\Trip();
 
-		$labels = array(
-			'name'               => _x( 'Trips', 'post type general name', 'wp-travel-engine' ),
-			'singular_name'      => _x( 'Trip', 'post type singular name', 'wp-travel-engine' ),
-			'menu_name'          => _x( 'Trips', 'admin menu', 'wp-travel-engine' ),
-			'name_admin_bar'     => _x( 'Trip', 'add new on admin bar', 'wp-travel-engine' ),
-			'add_new'            => _x( 'Add New', 'Trip', 'wp-travel-engine' ),
-			'add_new_item'       => esc_html__( 'Add New Trip', 'wp-travel-engine' ),
-			'new_item'           => esc_html__( 'New Trip', 'wp-travel-engine' ),
-			'edit_item'          => esc_html__( 'Edit Trip', 'wp-travel-engine' ),
-			'view_item'          => esc_html__( 'View Trip', 'wp-travel-engine' ),
-			'all_items'          => esc_html__( 'Trips', 'wp-travel-engine' ),
-			'search_items'       => esc_html__( 'Search Trips', 'wp-travel-engine' ),
-			'parent_item_colon'  => esc_html__( 'Parent Trips:', 'wp-travel-engine' ),
-			'not_found'          => esc_html__( 'No Trips found.', 'wp-travel-engine' ),
-			'not_found_in_trash' => esc_html__( 'No Trips found in Trash.', 'wp-travel-engine' ),
-		);
-
-		$wte_trip_svg = base64_encode( '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 23.45 22.48"><title>Asset 2</title><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1" fill="#fff"><path d="M6.71,9.25c-.09.65-.17,1.27-.27,1.89s-.28,1.54-.4,2.31a.36.36,0,0,0,.07.22c.47.73.93,1.47,1.42,2.18a2.27,2.27,0,0,1,.39,1c.18,1.43.38,2.86.57,4.29a1,1,0,1,1-2,.3C6.3,20.31,6.13,19.14,6,18a3.19,3.19,0,0,0-.59-1.62C5,15.76,4.6,15.11,4.18,14.5a.7.7,0,0,0-.26-.22,1.58,1.58,0,0,1-1-1.69q.5-3.54,1-7.06A1.61,1.61,0,0,1,7.19,6a.82.82,0,0,0,.09.41c.19.39.4.77.62,1.14a.82.82,0,0,0,.35.29c1,.37,2.06.71,3.09,1.07a1,1,0,0,1,.35,1.61.83.83,0,0,1-.85.22c-1.32-.44-2.62-.9-3.93-1.35Z"/><path d="M2.4,3.38A1.36,1.36,0,0,1,3.75,5c-.23,1.6-.46,3.2-.71,4.79a3,3,0,0,1-.26,1,1.3,1.3,0,0,1-1.57.63,1.33,1.33,0,0,1-1-1.5Q.61,7.22,1,4.58A1.38,1.38,0,0,1,2.4,3.38Z"/><path d="M3.05,14.2a2.41,2.41,0,0,1,.75.39,14.73,14.73,0,0,1,.91,1.32c-.07.32-.17.63-.22.95a8.43,8.43,0,0,1-1.11,2.42C2.92,20.15,2.43,21,2,21.87a1,1,0,1,1-1.8-1L2.29,17a1.74,1.74,0,0,0,.14-.38c.19-.78.38-1.55.58-2.33Z"/><path d="M8.34,2a2,2,0,0,1-4,0,2,2,0,0,1,4,0Z"/><path d="M10.6,10.94l.56.07c0,.36,0,.73-.06,1.1,0,.68-.11,1.37-.15,2.05-.14,2-.27,4-.4,6L10.43,22c0,.35-.11.51-.31.5s-.28-.16-.25-.52c.11-1.76.23-3.51.34-5.27.1-1.51.19-3,.28-4.53C10.52,11.76,10.56,11.36,10.6,10.94Z"/><path d="M11.31,8.57c-.54-.14-.54-.14-.52-.64s.06-.9.1-1.34c0-.19.1-.31.3-.3s.27.15.26.33C11.4,7.27,11.36,7.91,11.31,8.57Z"/><path d="M18.16,9.25c-.1.65-.17,1.27-.28,1.89s-.27,1.54-.4,2.31a.37.37,0,0,0,.08.22c.47.73.93,1.47,1.42,2.18a2.27,2.27,0,0,1,.39,1c.18,1.43.38,2.86.57,4.29a1,1,0,1,1-2,.3c-.16-1.17-.33-2.34-.47-3.51a3.18,3.18,0,0,0-.58-1.62c-.44-.59-.82-1.24-1.23-1.85a.7.7,0,0,0-.26-.22,1.58,1.58,0,0,1-1-1.69q.5-3.54,1-7.06A1.59,1.59,0,0,1,17.2,4.2,1.62,1.62,0,0,1,18.64,6a.82.82,0,0,0,.08.41q.3.59.63,1.14a.82.82,0,0,0,.35.29c1,.37,2.06.71,3.08,1.07a1,1,0,0,1,.35,1.61.83.83,0,0,1-.85.22c-1.31-.44-2.62-.9-3.92-1.35Z"/><path d="M13.84,3.38A1.36,1.36,0,0,1,15.2,5c-.23,1.6-.47,3.2-.71,4.79a3,3,0,0,1-.26,1,1.3,1.3,0,0,1-1.57.63,1.33,1.33,0,0,1-1-1.5q.38-2.65.77-5.29A1.37,1.37,0,0,1,13.84,3.38Z"/><path d="M14.49,14.2a2.36,2.36,0,0,1,.76.39c.34.41.61.88.91,1.32-.08.32-.17.63-.22.95a8.7,8.7,0,0,1-1.11,2.42c-.46.87-.95,1.72-1.43,2.59a1,1,0,0,1-1.44.47,1,1,0,0,1-.35-1.46L13.74,17a2.46,2.46,0,0,0,.14-.38c.19-.78.38-1.55.58-2.33A.19.19,0,0,1,14.49,14.2Z"/><path d="M19.79,2a2,2,0,1,1-2-2A2,2,0,0,1,19.79,2Z"/><path d="M22.05,10.94l.56.07-.06,1.1c-.05.68-.11,1.37-.16,2.05l-.39,6c-.05.61-.08,1.23-.12,1.85,0,.35-.11.51-.31.5s-.28-.16-.26-.52c.12-1.76.24-3.51.35-5.27.1-1.51.19-3,.28-4.53C22,11.76,22,11.36,22.05,10.94Z"/><path d="M22.76,8.57c-.54-.14-.55-.14-.52-.64s.06-.9.09-1.34c0-.19.11-.31.3-.3a.26.26,0,0,1,.26.33C22.85,7.27,22.8,7.91,22.76,8.57Z"/></g></g></svg>' );
-
-		$args = array(
-			'labels'             => $labels,
-			'description'        => esc_html__( 'Description.', 'wp-travel-engine' ),
-			'public'             => true,
-			'menu_icon'          => 'data:image/svg+xml;base64,' . $wte_trip_svg,
-			'publicly_queryable' => true,
-			'show_ui'            => true,
-			'show_in_menu'       => true,
-			'show_in_rest'       => true,
-			'query_var'          => true,
-			'rewrite'            => array(
-				'slug'       => $permalink['wp_travel_engine_trip_base'],
-				'with_front' => true,
-			),
-			'capability_type'    => 'post',
-			'capabilities'       => $this->get_capabilities(),
-			'has_archive'        => true,
-			'hierarchical'       => false,
-			'menu_position'      => 31,
-			'supports'           => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments', 'revisions' ),
-		);
-
-		register_post_type( 'trip', $args );
-	}
-
-	/**
-	 * Get capabilities.
-	 *
-	 * @return array
-	 * @since 5.9.3
-	 */
-	public function get_capabilities() {
-		return array(
-			'edit_post'          => 'edit_trip',
-			'read_post'          => 'read_trip',
-			'delete_post'        => 'delete_trip',
-			'edit_posts'         => 'edit_trips',
-			'edit_others_posts'  => 'edit_others_trips',
-			'publish_posts'      => 'publish_trips',
-			'read_private_posts' => 'read_private_trips',
+		register_post_type(
+			$trip_post_type->get_post_type(),
+			$trip_post_type->get_args()
 		);
 	}
 
@@ -640,6 +589,7 @@ class Wp_Travel_Engine_Admin {
 	 * Register a Enquiry post type.
 	 *
 	 * @link https://codex.wordpress.org/Function_Reference/register_post_type
+	 * @since 6.8.7 Give Enquiry its own capability_type (`enquiry`/`enquiries`); it previously reused Trip's capabilities due to a duplicate array key.
 	 */
 	function wp_travel_engine_register_enquiry() {
 		$labels = array(
@@ -668,11 +618,10 @@ class Wp_Travel_Engine_Admin {
 			'show_in_menu'       => 'edit.php?post_type=booking',
 			'query_var'          => true,
 			'rewrite'            => array( 'slug' => 'enquiry' ),
-			'capability_type'    => 'post',
+			'capability_type'    => array( 'enquiry', 'enquiries' ),
 			'capabilities'       => array(
 				'create_posts' => 'do_not_allow', // false < WP 4.5, credit @Ewout
 			),
-			'capabilities'       => $this->get_capabilities(),
 			'map_meta_cap'       => true, // Set to `false`, if users are not allowed to edit/delete existing posts
 			'has_archive'        => true,
 			'hierarchical'       => false,
@@ -689,7 +638,7 @@ class Wp_Travel_Engine_Admin {
 	 * @link https://codex.wordpress.org/Function_Reference/register_post_type
 	 */
 	function wp_travel_engine_register_booking() {
-		$booking_post_type = new \WPTravelEngine\Core\PostTypes\Booking();
+		$booking_post_type = new PostTypes\Booking();
 
 		register_post_type(
 			$booking_post_type->get_post_type(),
@@ -703,7 +652,7 @@ class Wp_Travel_Engine_Admin {
 	 * @link https://codex.wordpress.org/Function_Reference/register_post_type
 	 */
 	function wp_travel_engine_register_customer() {
-		$customer_post_type = new Customer();
+		$customer_post_type = new PostTypes\Customer();
 
 		register_post_type(
 			$customer_post_type->get_post_type(),

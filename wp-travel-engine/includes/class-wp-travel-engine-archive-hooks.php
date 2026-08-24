@@ -42,8 +42,9 @@ class Wp_Travel_Engine_Archive_Hooks {
 	 *
 	 * @var int[]
 	 * @since 6.7.3
+	 * @since 6.8.7 change access type from protected to public
 	 */
-	protected static array $featured_trip_ids = array();
+	public static array $featured_trip_ids = array();
 
 	/**
 	 * Constructor.
@@ -159,6 +160,7 @@ class Wp_Travel_Engine_Archive_Hooks {
 	 * @since 5.5.7
 	 * @updated 6.7.0
 	 * @since 6.7.3 Added featured trips processing.
+	 * @since 6.8.7 Applies the price/duration/date meta filters to the main query, and leaves featured trips in place for facet-count queries.
 	 */
 	public function archive_pre_get_posts( $query ) {
 
@@ -189,12 +191,30 @@ class Wp_Travel_Engine_Archive_Hooks {
 				$query->set( 'orderby', $sort_args['orderby'] );
 			}
 
+			/**
+			 * Taxonomy filters travel as public query vars, so WordPress applies them to the
+			 * main query on its own -- the price/duration/departure-month filters do not, and
+			 * the archive renders this query directly whenever `is_tax` is set (both a real
+			 * taxonomy archive and `/trip/?destination=...`). Without this they are silently
+			 * dropped on page load and the listing ignores the selected price range.
+			 */
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$request_data = wp_unslash( $_REQUEST );
+			if ( TripSearch::has_meta_filters( $request_data ) ) {
+				$meta_query = TripSearch::meta_query( $request_data );
+
+				if ( ! empty( $meta_query ) ) {
+					$existing = (array) $query->get( 'meta_query' );
+					$query->set( 'meta_query', empty( $existing ) ? $meta_query : array_merge( $existing, $meta_query ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				}
+			}
+
 			self::$query_args = $query->query_vars;
 
 			$query->set( 'wpte_trip_search', true );
 		}
 
-		if ( $query->get( 'wpte_trip_search' ) && wptravelengine_toggled( wptravelengine_settings()->get( 'show_featured_trips_on_top' ) ) ) {
+		if ( $query->get( 'wpte_trip_search' ) && ! $query->get( 'wpte_facet_query' ) && wptravelengine_toggled( wptravelengine_settings()->get( 'show_featured_trips_on_top' ) ) ) {
 			$this->process_featured_trips();
 			$post_not_in = array_merge( $post_not_in, self::$featured_trip_ids );
 		}

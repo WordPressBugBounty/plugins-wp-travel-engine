@@ -12,6 +12,7 @@ use DateTime;
 use RRule\RRule;
 use WPTravelEngine\Core\Models\Post\Trip;
 use WPTravelEngine\Core\Models\Post\TripPackage;
+use WPTravelEngine\Core\Models\Post\TravelerCategory;
 
 #[\AllowDynamicProperties]
 /**
@@ -367,8 +368,17 @@ class PackageDateParser {
 	 * @return array{0: int, 1: int} Indexed array with seats left and capacity
 	 *
 	 * @since 6.6.7
+	 * @since 6.8.7 Zero out seats left when a required traveler category can't meet its minimum pax for this date.
 	 */
 	public function get_seats_details( string $date, string $time = '00:00' ) {
+		foreach ( $this->package->get_traveler_categories() as $tc ) {
+			/** @var TravelerCategory $tc */
+			$seats_left = $this->package->get_cat_seats_left( $tc->id, $date );
+			if ( is_numeric( $seats_left ) && $tc->is_min_required && $seats_left < $tc->min_pax ) {
+				return array( 0, 0 );
+			}
+		}
+
 		$cat_seats_left = $this->package->get_cat_max_cap( null );
 		$my_seats       = is_numeric( $cat_seats_left ) ? ( is_numeric( $this->seats ) ? min( $cat_seats_left, $this->seats ) : $cat_seats_left ) : $this->seats;
 		$total_seats    = $this->total_seats;
@@ -381,7 +391,7 @@ class PackageDateParser {
 			}
 			$my_seats = $total_seats;
 		} elseif ( ! is_numeric( $total_seats ) ) {
-			return array( max( $my_seats - $booked_seats_for_this_pac, 0 ), $my_seats );
+			return array( $this->get_net_seats_left( max( $my_seats - $booked_seats_for_this_pac, 0 ) ), $my_seats );
 		}
 
 		if ( $this->trip->is_cap_per_cat( 'enabled' ) && $this->trip->is_cap_per_cat( 'different' ) ) {
@@ -403,6 +413,29 @@ class PackageDateParser {
 		$seats_left = min( $remaining_for_package, $remaining_total );
 		$capacity   = ( $seats_left === $remaining_for_package ) ? $available_capacity : $total_seats;
 
-		return array( $seats_left, $capacity );
+		return array( $this->get_net_seats_left( $seats_left ), $capacity );
+	}
+
+	/**
+	 * Processes the min required condition to filter out actual seats left.
+	 * 
+	 * @param int|string $seats_left
+	 * 
+	 * @return int|string
+	 * @since 6.8.7
+	 */
+	protected function get_net_seats_left( $seats_left ) {
+		if ( ! is_numeric( $seats_left ) ) {
+			return $seats_left;
+		}
+
+		foreach ( $this->package->get_traveler_categories() as $tc ) {
+			/** @var TravelerCategory $tc */
+			if ( $tc->is_min_required && $seats_left < $tc->min_pax ) {
+				return 0;
+			}
+		}
+
+		return $seats_left;
 	}
 }

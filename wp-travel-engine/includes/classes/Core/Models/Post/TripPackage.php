@@ -427,6 +427,7 @@ class TripPackage extends PostModel {
 	 * @return array
 	 * @since 6.3.1
 	 * @since 6.8.4 Added $date param.
+	 * @since 6.8.7 Removed inline required-min-pax zeroing; now handled by `PackageDateParser::get_seats_details()`.
 	 */
 	public function get_default_pricings( ?string $date = null ): array {
 		$pricings = null !== $date ? ( $this->def_cat_date[ $date ] ?? array() ) : $this->categories_pricings;
@@ -436,18 +437,23 @@ class TripPackage extends PostModel {
 			$traveler_categories          = $this->get_traveler_categories();
 			$primary_traveler_category_id = $traveler_categories->get_primary_traveler_category()->id;
 
-			foreach ( $traveler_categories as $traveler_category ) {
-				/** @var TravelerCategory $traveler_category */
-				$cat_id = $traveler_category->id;
+			foreach ( $traveler_categories as $tc ) {
+				/** @var TravelerCategory $tc */
+				$cat_id = $tc->id;
+				$seats_left = $this->get_cat_seats_left( $cat_id, $date );
+
+				if ( $tc->is_min_required && is_numeric( $seats_left ) && $seats_left < $tc->min_pax ) {
+					$seats_left = 0;
+				}
 
 				$pricings[] = array(
 					'id'                => $cat_id,
-					'label'             => $traveler_category->get( 'label' ),
-					'price'             => $traveler_category->get( 'has_sale' ) ? $traveler_category->get( 'sale_price' ) : $traveler_category->get( 'price' ),
-					'is_primary'        => $traveler_category->get( 'id' ) === $primary_traveler_category_id,
-					'has_group_pricing' => $traveler_category->get( 'enabled_group_discount' ),
-					'group_pricing'     => $traveler_category->get( 'group_pricing' ),
-					'seats_left'        => $this->get_cat_seats_left( $cat_id, $date ),
+					'label'             => $tc->get( 'label' ),
+					'price'             => $tc->get( 'has_sale' ) ? $tc->get( 'sale_price' ) : $tc->get( 'price' ),
+					'is_primary'        => $tc->get( 'id' ) === $primary_traveler_category_id,
+					'has_group_pricing' => $tc->get( 'enabled_group_discount' ),
+					'group_pricing'     => $tc->get( 'group_pricing' ),
+					'seats_left'        => $seats_left,
 					'max_cap'           => $this->get_cat_max_cap( $cat_id ),
 				);
 			}
@@ -742,5 +748,26 @@ class TripPackage extends PostModel {
 			fn( $booked ) => max( 0, $max_cap - $booked ),
 			$booked_by_date
 		);
+	}
+
+	/**
+	 * Returns the enforced minimum pax for each traveler category marked as required.
+	 *
+	 * @return array<int, int> Price category ID => enforced minimum pax (empty/non-numeric min pax falls back to 1).
+	 * @since 6.8.7
+	 */
+	public function get_required_min_paxes(): array {
+		$min_paxes = array();
+
+		foreach ( $this->get_traveler_categories() as $tc ) {
+			/** @var TravelerCategory $tc */
+			if ( ! $tc->is_min_required ) {
+				continue;
+			}
+
+			$min_paxes[ $tc->id ] = is_numeric( $tc->min_pax ) && $tc->min_pax > 0 ? (int) $tc->min_pax : 1;
+		}
+
+		return $min_paxes;
 	}
 }

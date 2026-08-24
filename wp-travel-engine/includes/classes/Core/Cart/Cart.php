@@ -7,6 +7,8 @@
 
 namespace WPTravelEngine\Core\Cart;
 
+use WPTravelEngine\Helpers\CartInfoParser;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -321,16 +323,6 @@ class Cart extends LegacyCart {
 	 * @since 6.7.0
 	 */
 	public function get_exclusion_label( $fees = null ): string {
-		$excl   = '';
-		$fees ??= $this->get_fees();
-		$count = count( $fees );
-
-		for ( $i = $count - 1; $i >= 0; $i-- ) {
-			$label = $fees[ $i ]->label ?? $fees[ $i ]['label'] ?? '';
-			$label = trim( preg_replace( '/\(.*$/', '', $label ) );
-			$excl .= $label . ( $i === 1 ? ' & ' : ( $i > 0 ? ', ' : '' ) );
-		}
-
-		return $excl;
+		return CartInfoParser::get_exclusive_label( $fees ??= $this->get_fees() );
 	}
 }

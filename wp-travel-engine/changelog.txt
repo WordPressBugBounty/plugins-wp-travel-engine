@@ -1,5 +1,11 @@
 == Changelog ==
 
+= 6.8.7 - 24th August 2026 =
+* New Feature: Added an option to make the price category mandatory in Trip Package.
+* New Feature: Added customizable warning and info notice colors in Appearance Settings.
+* New Feature: Added WP Travel Engine-specific capabilities and compatibility with the Members plugin.
+* Improved: Archive page taxonomy filters now update result counts when selections are made.
+
 = 6.8.6 - 17th August 2026 =
 * New Feature: Added refunded amount tracking through the Booking Edit section.
 * Improved: Time slot picker now respects the WordPress time format setting (12-hour or 24-hour).

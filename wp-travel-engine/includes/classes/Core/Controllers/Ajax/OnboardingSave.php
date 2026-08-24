@@ -36,11 +36,13 @@ class OnboardingSave extends AjaxController {
 
 	/**
 	 * Verify nonce and capability.
+	 *
+	 * @since 6.8.7 Also allow manage_wte_settings, not just manage_options.
 	 */
 	protected function authorize_request() {
 		parent::authorize_request();
 
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! wptravelengine_curr_user_can( 'manage_wte_settings' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Unauthorized', 'wp-travel-engine' ) ) );
 		}
 

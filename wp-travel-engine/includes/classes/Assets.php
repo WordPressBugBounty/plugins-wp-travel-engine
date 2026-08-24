@@ -762,6 +762,7 @@ class Assets extends AssetsAbstract {
 				 */
 				'enableRound' 	=> wptravelengine_toggled( apply_filters( 'wptravelengine_decimal_rounding', 'no' ) ),
 			),
+			'appearances'		 => is_admin() ? array() : get_option( 'wptravelengine_appearance', array() ),
 			'extensions'         => apply_filters( 'wte_active_extensions', $extensions ),
 			'locale'             => get_locale(),
 			'l10n'               => wp_parse_args(

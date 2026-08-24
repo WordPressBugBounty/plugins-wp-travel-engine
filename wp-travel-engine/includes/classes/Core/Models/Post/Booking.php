@@ -565,6 +565,9 @@ class Booking extends PostModel {
 	public function get_emergency_contacts(): array {
 		if ( $this->has_meta( 'wptravelengine_emergency_details' ) ) {
 			$emergency_contacts = $this->get_meta( 'wptravelengine_emergency_details' );
+			if ( empty( $emergency_contacts ) ) {
+				return array();
+			}
 			if ( ! isset( $emergency_contacts[0] ) ) {
 				$emergency_contacts = array( $emergency_contacts );
 			}

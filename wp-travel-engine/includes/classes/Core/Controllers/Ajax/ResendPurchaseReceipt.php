@@ -6,7 +6,6 @@
  */
 namespace WPTravelEngine\Core\Controllers\Ajax;
 
-use WP_Error;
 use WPTravelEngine\Abstracts\AjaxController;
 use WPTravelEngine\Core\Models\Post\Booking as BookingModel;
 use WPTravelEngine\Core\Models\Post\Payment as PaymentModel;
@@ -27,38 +26,6 @@ class ResendPurchaseReceipt extends AjaxController {
 	/**
 	 * Get booking details.
 	 *
-	 * @param array $mail_tags Mail tags.
-	 * @param int   $payment_id Payment ID.
-	 * @param int   $booking_id Booking ID.
-	 * @since 6.4.0
-	 *
-	 * @return array
-	 */
-	public function wptravelengine_booking_mail_tags( $mail_tags, $payment_id, $booking_id ) {
-		$booking           = BookingModel::make( $booking_id );
-		$cart_info         = $booking->get_cart_info();
-		$pricing_arguments = array(
-			'currency_code' => $cart_info['currency'] ?? wptravelengine_settings()->get( 'currency_code', 'USD' ),
-		);
-		$cart_info         = new CartInfoParser( $cart_info );
-		$totals            = $cart_info->get_totals() ?? array();
-
-		return array_merge(
-			$mail_tags,
-			array(
-				'{booking_details}' => $this->get_booking_detail( $booking_id, $mail_tags ),
-				'{subtotal}'        => wte_get_formated_price( $totals['subtotal'], $pricing_arguments['currency_code'], '', true ),
-				'{total}'           => wte_get_formated_price( $totals['total'], $pricing_arguments['currency_code'], '', true ),
-				'{paid_amount}'     => wte_get_formated_price( $booking->get_total_paid_amount(), $pricing_arguments['currency_code'], '', true ),
-				'{due}'             => wte_get_formated_price( $booking->get_total_due_amount(), $pricing_arguments['currency_code'], '', true ),
-				'{price}'           => wte_get_formated_price( $booking->get_total(), $pricing_arguments['currency_code'], '', true ),
-			)
-		);
-	}
-
-	/**
-	 * Get booking details.
-	 *
 	 * @param int $booking_id Booking ID.
 	 * @since 6.4.0
 	 *
@@ -68,6 +35,8 @@ class ResendPurchaseReceipt extends AjaxController {
 
 	/**
 	 * Process request
+	 *
+	 * @since 6.8.7 Removed use of wte_booking_mail_tags filter and its function will be handle from Template Tags itself.
 	 */
 	protected function process_request() {
 		if ( ! $this->validate_request() ) {
@@ -75,7 +44,6 @@ class ResendPurchaseReceipt extends AjaxController {
 		}
 
 		try {
-			add_filter( 'wte_booking_mail_tags', array( $this, 'wptravelengine_booking_mail_tags' ), 10, 3 );
 			$post            = $this->request->get_body_params();
 			$booking_id      = $this->validate_booking( $post );
 			$booking_details = $this->get_booking_details( $booking_id );
@@ -158,11 +126,12 @@ class ResendPurchaseReceipt extends AjaxController {
 	/**
 	 * Get booking detail
 	 *
-	 * @param int   $booking_id Booking ID
-	 * @param array $mail_tags Mail tags
+	 * @param int $booking_id Booking ID
 	 * @return bool|string Booking detail
+	 *
+	 * @since 6.8.7 updated function to static and remove mail_tags params.
 	 */
-	public function get_booking_detail( $booking_id, $mail_tags ) {
+	public static function get_booking_detail( $booking_id ) {
 		$booking          = BookingModel::make( $booking_id );
 		$cart_info        = $booking->get_cart_info() ?? array();
 		$line_items       = $cart_info['items'][0]['line_items'] ?? array();

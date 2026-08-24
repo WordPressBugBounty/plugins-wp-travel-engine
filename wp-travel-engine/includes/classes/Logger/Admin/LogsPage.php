@@ -64,12 +64,13 @@ class LogsPage implements AdminPage {
 	 * Constructor.
 	 *
 	 * @since 6.7.6
+	 * @since 6.8.7 Check view_wte_logs instead of manage_options.
 	 */
 	public function __construct() {
 		$this->parent_slug = 'tools.php';
 		$this->page_title  = __( 'WP Travel Engine Logs', 'wp-travel-engine' );
 		$this->menu_title  = __( 'WTE Logs', 'wp-travel-engine' );
-		$this->capability  = 'manage_options';
+		$this->capability  = 'view_wte_logs';
 		$this->position    = 99;
 	}
 
@@ -78,9 +79,10 @@ class LogsPage implements AdminPage {
 	 *
 	 * @return void
 	 * @since 6.7.6
+	 * @since 6.8.7 Also allow view_wte_logs, not just manage_options.
 	 */
 	public function view(): void {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! wptravelengine_curr_user_can( $this->capability ) ) {
 			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'wp-travel-engine' ) );
 		}
 

@@ -89,6 +89,7 @@ class Booking extends PostType {
 		add_action( 'load-edit.php', array( $this, 'delete_auto_drafts' ) );
 		add_filter( 'views_edit-booking', array( $this, 'fix_booking_view_counts' ) );
 		add_filter( 'display_post_states', array( $this, 'append_booking_state_badges' ), 10, 2 );
+		add_action( 'admin_menu', array( $this, 'modify_submenu' ), 20 );
 
 		\WP_Travel_Engine_Booking_Export::register_hooks();
 		ViewBooking::register_hooks();
@@ -241,6 +242,7 @@ class Booking extends PostType {
 	 * Returns an array containing the arguments used to register the Booing post type.
 	 *
 	 * @return array An array containing the arguments for the Booking post type.
+	 * @since 6.8.7 Give Booking its own capability_type (`booking`/`bookings`) instead of sharing Trip's capabilities.
 	 */
 	public function get_args(): array {
 		return array(
@@ -252,8 +254,7 @@ class Booking extends PostType {
 			'menu_icon'          => $this->get_icon(),
 			'query_var'          => true,
 			'rewrite'            => array( 'slug' => 'booking' ),
-			'capability_type'    => 'post',
-			'capabilities'       => $this->get_capabilities(),
+			'capability_type'    => array( 'booking', 'bookings' ),
 			'map_meta_cap'       => true, // Set to `false`, if users are not allowed to edit/delete existing posts
 			'has_archive'        => true,
 			'hierarchical'       => false,
@@ -267,9 +268,9 @@ class Booking extends PostType {
 	 *
 	 * @return array
 	 * @since 6.4.0
+	 * @since 6.8.7 deprecated, replaced by `get_capabilities()` in `WPTravelEngine\Core\PostTypes\Trip` class.
 	 */
 	public function get_capabilities(): array {
-		// TODO: Add capabilities for the booking post type specifically once we define particular capabilities for the booking post type.
 		return array(
 			'edit_post'          => 'edit_trip',
 			'read_post'          => 'read_trip',
@@ -536,6 +537,32 @@ class Booking extends PostType {
 		}
 
 		return $query;
+	}
+
+	/**
+	 * Tags the "Bookings" list item for `Capabilities::hide_submenu()` to target with CSS,
+	 * and removes "Add New Booking" outright — manual creation goes through
+	 * `redirect_new_booking()`'s auto-draft flow, not this form.
+	 *
+	 * @return void
+	 * @since 6.8.7
+	 */
+	public function modify_submenu(): void {
+		global $submenu;
+
+		$parent = "edit.php?post_type={$this->post_type}";
+
+		if ( empty( $submenu[ $parent ] ) ) {
+			return;
+		}
+
+		foreach ( $submenu[ $parent ] as &$item ) {
+			if ( $parent === $item[2] ) {
+				$item[4] = trim( ( $item[4] ?? '' ) . ' wpte-submenu-bookings' );
+			}
+		}
+
+		remove_submenu_page( $parent, "post-new.php?post_type={$this->post_type}" );
 	}
 
 	/**

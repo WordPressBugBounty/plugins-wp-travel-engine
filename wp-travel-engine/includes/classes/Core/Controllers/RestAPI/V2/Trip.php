@@ -768,9 +768,40 @@ class Trip extends WP_REST_Posts_Controller {
 					);
 				}
 
-				$package_ids            = array_column( $package['traveler_categories'], 'id', 'id' );
-				$primary_category_index = array_search( true, array_column( $package['traveler_categories'], 'is_primary' ) );
-				$primary_category_id    = $package['traveler_categories'][ $primary_category_index ]['id'];
+				$c_ids                  = array();
+				$labels                 = array();
+				$prices                 = array();
+				$pricing_types          = array();
+				$sale_prices            = array();
+				$min_paxes              = array();
+				$enabled_sale           = array();
+				$enabled_group_discount = array();
+				$is_min_required        = array();
+
+				foreach ( $package['traveler_categories'] as $category ) {
+					$id = $category['id'];
+
+					if ( $category['is_primary'] ?? false ) {
+						$primary_category_id = $id;
+					}
+
+					$c_ids[ $id ]         = $id;
+					$labels[ $id ]        = $category['label'];
+					$prices[ $id ]        = $category['price'];
+					$pricing_types[ $id ] = $category['pricing_type']['value'];
+					$sale_prices[ $id ]   = $category['sale_price'];
+					$min_paxes[ $id ]     = $category['min_pax'];
+
+					if ( $category['has_sale'] ) {
+						$enabled_sale[ $id ] = '1';
+					}
+					if ( $category['has_group_pricing'] ) {
+						$enabled_group_discount[ $id ] = '1';
+					}
+					if ( $category['is_min_required'] ) {
+						$is_min_required[ $id ] = '1';
+					}
+				}
 
 				$meta_inputs[] = apply_filters(
 					'wptravelengine_package_meta_inputs',
@@ -783,16 +814,16 @@ class Trip extends WP_REST_Posts_Controller {
 						'weekly_time_slots'        => empty( $package['time_slots'] ) ? null : array_filter( array_combine( range( 1, 7 ), $package['time_slots'] ) ),
 						'enable_week_days'         => $package['enable_week_days'] ?? array_combine( array_values( $weekdays_map ), array_fill( 0, 7, false ) ),
 						'package-categories'       => array_filter(
-							array(
-								'c_ids'                  => $package_ids,
-								'labels'                 => array_column( $package['traveler_categories'], 'label', 'id' ),
-								'prices'                 => array_column( $package['traveler_categories'], 'price', 'id' ),
-								'pricing_types'          => array_combine( $package_ids, array_column( array_column( $package['traveler_categories'], 'pricing_type' ), 'value' ) ),
-								'enabled_sale'           => array_filter( array_combine( $package_ids, array_map( fn ( $val ) => $val ? '1' : null, array_column( $package['traveler_categories'], 'has_sale' ) ) ) ),
-								'sale_prices'            => array_column( $package['traveler_categories'], 'sale_price', 'id' ),
-								'min_paxes'              => array_column( $package['traveler_categories'], 'min_pax', 'id' ),
-								// 'max_paxes'              => array_column( $package[ 'traveler_categories' ], 'max_pax', 'id' ),
-								'enabled_group_discount' => array_filter( array_combine( $package_ids, array_map( fn ( $val ) => $val ? '1' : null, array_column( $package['traveler_categories'], 'has_group_pricing' ) ) ) ),
+							compact(
+								'c_ids',
+								'labels',
+								'prices',
+								'pricing_types',
+								'enabled_sale',
+								'sale_prices',
+								'min_paxes',
+								'enabled_group_discount',
+								'is_min_required',
 							),
 							fn ( $v ) => $v !== null && ! empty( $v )
 						),
@@ -853,7 +884,7 @@ class Trip extends WP_REST_Posts_Controller {
 				// $this->set_bad_request( 'invalid_param', sprintf( __( '%sMaximum Pax%s %s must be greater than 0 in \'%s Package\'.', 'wp-travel-engine' ), '<strong>', '</strong>', $package[ 'name' ] ), "{$package['name']}_max_pax" );
 				// }
 
-				unset( $group_pricing, $package_dates, $package_ids, $last_meta_input, $common_plain_text, $regular_vs_sale_prices, $are_counts_valid, $are_seats_valid, $are_prices_valid, $are_sale_prices_valid, $are_min_paxes_valid, $are_max_paxes_valid );
+				unset( $group_pricing, $package_dates, $c_ids, $labels, $prices, $pricing_types, $sale_prices, $min_paxes, $enabled_sale, $enabled_group_discount, $is_min_required, $last_meta_input, $common_plain_text, $regular_vs_sale_prices, $are_counts_valid, $are_seats_valid, $are_prices_valid, $are_sale_prices_valid, $are_min_paxes_valid, $are_max_paxes_valid );
 			}
 
 			$trip->set_meta( 'primary_package', $primary_package_id );

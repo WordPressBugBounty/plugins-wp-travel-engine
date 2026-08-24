@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Fired during plugin activation
  *
@@ -16,6 +15,7 @@ class Wp_Travel_Engine_Activator {
 	 * Long Description.
 	 *
 	 * @since    1.0.0
+	 * @since 6.8.7 Grants default capability-taxonomy slugs via Capabilities::grant_defaults().
 	 */
 	public static function activate() {
 
@@ -26,6 +26,9 @@ class Wp_Travel_Engine_Activator {
 
 		// Create Roles.
 		self::create_roles();
+
+		// Grant default capability-taxonomy slugs to Administrator/Editor.
+		\WPTravelEngine\Core\Capabilities::grant_defaults();
 
 		$already_shown = get_transient( 'wte_getting_started_page_shown' );
 

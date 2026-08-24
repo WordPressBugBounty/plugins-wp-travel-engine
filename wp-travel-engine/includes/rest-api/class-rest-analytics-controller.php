@@ -9,6 +9,9 @@
 
 namespace WPTravelEngine\Core\REST_API;
 
+use WP_Error;
+use WP_REST_Request;
+
 /**
  * Analytics Rest Controller Class.
  */
@@ -146,11 +149,12 @@ class Analytics_Controller extends Controller {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
+	 * @since 6.8.7 Also allow view_wte_analytics, not just manage_options.
 	 */
 	public function get_items_permissions_check( $request ) {
 
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return new \WP_Error(
+		if ( ! wptravelengine_curr_user_can( 'view_wte_analytics' ) ) {
+			return new WP_Error(
 				'rest_forbidden_context',
 				__( 'Sorry, you are not allowed to read data.', 'wp-travel-engine' ),
 				array( 'status' => rest_authorization_required_code() )

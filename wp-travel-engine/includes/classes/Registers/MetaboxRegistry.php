@@ -21,10 +21,11 @@ class MetaboxRegistry extends Registrable {
 	 *
 	 * @param string $class_name The class.
 	 *
-	 * @return static
+	 * @return MetaboxRegistry
 	 * @since 6.8.4 Return static for method chaining.
+	 * @since 6.8.7 Return type changed from `static` to `MetaboxRegistry` for PHP 7.4 compatibility.
 	 */
-	public function register( string $class_name ): static {
+	public function register( string $class_name ): MetaboxRegistry {
 		$this->items[ $class_name::ID ] = $class_name;
 
 		$instance = new $class_name();

@@ -41,12 +41,17 @@ class TranslateTrip extends Trip {
 	 * Translates a `trip-packages` post's title for any caller using get_the_title()/the_title()
 	 * directly (instead of going through TripPackage::get_title()).
 	 *
-	 * @param string $title   The post title.
-	 * @param int    $post_id The post ID.
+	 * @param string     $title   The post title.
+	 * @param int|string $post_id The post ID. Some callers fire `the_title` manually with a
+	 *                            string ID, so this isn't strictly typed as `int`.
 	 * @return string
+	 * @since 6.8.7 Accept `$post_id` as int|string to avoid a TypeError when a caller fires
+	 *             `the_title` manually with a string ID; guard falsy/non-package IDs.
 	 */
-	public function translate_package_post_title( string $title, int $post_id ): string {
-		if ( 'trip-packages' !== get_post_type( $post_id ) && Translators::is_translation_active() ) {
+	public function translate_package_post_title( string $title, $post_id ): string {
+		$post_id = (int) $post_id;
+
+		if ( ( $post_id && 'trip-packages' !== get_post_type( $post_id ) ) || ! Translators::is_translation_active() ) {
 			return $title;
 		}
 

@@ -149,6 +149,17 @@ abstract class PostModel {
 	}
 
 	/**
+	 * Magic Method: Fallback accessor for undeclared properties.
+	 *
+	 * @param string $name Property name being read.
+	 * @return mixed The value from `$post`.
+	 * @since 6.8.7
+	 */
+	public function __get( string $name ) {
+		return $this->post->$name;
+	}
+
+	/**
 	 * Get a specific post-meta value
 	 *
 	 * This method is abstract and must be implemented in child classes.

@@ -327,6 +327,7 @@ $trip_meta_tabs = array(
 				),
 			),
 			array(
+				'isNew' => version_compare( WP_TRAVEL_ENGINE_VERSION, '6.8.10', '<' ),
 				'field' => array(
 					'type'              => 'CAPACITY_PER_CATEGORY',
 					'name'              => 'capacity_per_category',

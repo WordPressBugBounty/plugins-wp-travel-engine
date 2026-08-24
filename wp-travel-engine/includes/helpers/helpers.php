@@ -24,6 +24,16 @@ use WPTravelEngine\Utilities\RequestParser;
 use WPTravelEngine\Helpers\PackageDateParser;
 use WPTravelEngine\Core\Cart\Items\ExtraService;
 use WPTravelEngine\Core\Cart\Cart;
+use WPTravelEngine\Core\Capabilities;
+
+/**
+ * Check if the current user can perform the provided capability.
+ *
+ * @since 6.8.7
+ */
+function wptravelengine_curr_user_can( string $capability ): bool {
+	return Capabilities::user_can( $capability );
+}
 
 /**
  * Get cart extra service item.
@@ -3310,22 +3320,36 @@ function wptravelengine_all_email_tags(): array {
 		'{bank_details}'              => __( 'Banks Accounts Details. This tag will be replaced with the bank details and sent to the customer receipt email when Bank Transfer method has been chosen by the customer.', 'wp-travel-engine' ),
 		'{check_payment_instruction}' => __( 'Instructions to make check payment.', 'wp-travel-engine' ),
 		'{trip_extra_fee}'            => __( 'The extra fee for the trip.', 'wp-travel-engine' ),
+		'{discount_name}'             => __( 'The name of the discount or coupon applied during the booking process.', 'wp-travel-engine' ),
+		'{discount_amount}'           => __( 'The amount or value of the discount used in the booking.', 'wp-travel-engine' ),
+		'{discount_sign}'             => __( 'The discount sign — percentage (%) or the currency symbol, depending on the discount type.', 'wp-travel-engine' ),
+		'{discount_value}'            => __( 'The discount value, in percentage or currency depending on the discount type.', 'wp-travel-engine' ),
+		'{booking_trips_count}'       => __( 'The number of trips in the booking.', 'wp-travel-engine' ),
+		'{payment_link}'              => __( 'The link to make the due payment.', 'wp-travel-engine' ),
+		'{subtotal}'                  => __( 'The subtotal amount for the booking.', 'wp-travel-engine' ),
+		'{total}'                     => __( 'The total amount for the booking.', 'wp-travel-engine' ),
+		'{paid_amount}'               => __( 'The amount paid for the booking.', 'wp-travel-engine' ),
+		'{total_gateway_fee}'         => __( 'The total gateway fee charged for the payment.', 'wp-travel-engine' ),
 	);
 
 	$subject_keys = array( '{sitename}', '{customer_first_name}', '{customer_full_name}', '{booked_trip_name}', '{booking_id}', '{payment_id}' );
 
 	$all = apply_filters( 'wptravelengine_booking_email_tags', array_merge( $common, $booking ) );
+	ksort( $all );
+
+	$customer_tags = apply_filters(
+		'wptravelengine_customer_email_template_tags',
+		array_merge(
+			$common,
+			array( '{password_reset_link}' => __( 'The link to reset the password.', 'wp-travel-engine' ) )
+		)
+	);
+	ksort( $customer_tags );
 
 	return array(
 		'all'      => $all,
 		'subject'  => apply_filters( 'wptravelengine_email_subject_tags', array_intersect_key( $all, array_flip( $subject_keys ) ) ),
-		'customer' => apply_filters(
-			'wptravelengine_customer_email_template_tags',
-			array_merge(
-				$common,
-				array( '{password_reset_link}' => __( 'The link to reset the password.', 'wp-travel-engine' ) )
-			)
-		),
+		'customer' => $customer_tags,
 	);
 }
 

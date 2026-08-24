@@ -52,16 +52,23 @@ class FilterTripsHtml extends AjaxController {
 	 *
 	 * @return void
 	 * @updated 6.6.0
+	 * @since 6.8.7 Added facets and no_matches to the response for dynamic sidebar filter counts.
 	 */
 	protected function process_request() {
 		self::$post_data = $this->request->get_params();
 		$this->query     = \Wp_Travel_Engine_Archive_Hooks::$query = new \WP_Query( TripSearch::get_query_args( true ) );
 
 		if ( ! $this->query->have_posts() ) {
+			$is_filtered = ! empty( self::$post_data['result'] ) || ! empty( self::$post_data['search'] );
+
 			return wp_send_json_success(
 				array(
-					'foundposts' => apply_filters( 'no_result_found_message', __( 'No results found!', 'wp-travel-engine' ) ),
+					'foundposts' => $is_filtered
+						? esc_html__( 'No trips found for this filter combination.', 'wp-travel-engine' )
+						: apply_filters( 'no_result_found_message', __( 'No results found!', 'wp-travel-engine' ) ),
 					'data'       => '',
+					'facets'     => array(),
+					'no_matches' => $is_filtered,
 				)
 			);
 		}
@@ -99,6 +106,8 @@ class FilterTripsHtml extends AjaxController {
 				'max_page'     => $this->query->max_num_pages,
 				'current_page' => self::$post_data['paged'] ?? 1,
 				'pagination'   => ( ! $_show_more_ && $has_more_posts ) ? $this->get_pagination() : '',
+				'facets'       => TripSearch::facet_counts( $this->query, self::$post_data ),
+				'no_matches'   => false,
 			)
 		);
 	}

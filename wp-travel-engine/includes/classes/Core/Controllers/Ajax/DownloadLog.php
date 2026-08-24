@@ -33,10 +33,11 @@ class DownloadLog extends AjaxController {
 	 * - Filtered: If no 'file' param, downloads filtered logs from all files
 	 *
 	 * @return void
+	 * @since 6.8.7 Also allow view_wte_logs, not just manage_options.
 	 */
 	protected function process_request() {
 		// Check capability
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! wptravelengine_curr_user_can( 'view_wte_logs' ) ) {
 			wp_die( __( 'You do not have sufficient permissions.', 'wp-travel-engine' ), 403 );
 		}
 

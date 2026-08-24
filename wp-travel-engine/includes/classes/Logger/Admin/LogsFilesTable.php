@@ -103,6 +103,7 @@ class LogsFilesTable extends WP_List_Table {
 	 *
 	 * @return void
 	 * @since 6.7.6
+	 * @since 6.8.7 Also allow view_wte_logs, not just manage_options.
 	 */
 	public function process_bulk_action(): void {
 		// Detect when bulk action is being triggered
@@ -113,7 +114,7 @@ class LogsFilesTable extends WP_List_Table {
 		}
 
 		// Security check - capability
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! wptravelengine_curr_user_can( 'view_wte_logs' ) ) {
 			wp_die( esc_html__( 'You do not have sufficient permissions.', 'wp-travel-engine' ) );
 		}
 

@@ -15,7 +15,7 @@ return apply_filters(
 		'fields' => array(
 			array(
 				'field_type' => 'ALERT',
-				'content'    => __( 'The Custom Labels feature in our plugin provides you with the flexibility to personalize static strings on your website. For instance, if the default label in the plugin setting is "Travelers," you can modify it to "Guests." This feature can also serve as a basic tool for translation. <br> Please note, this feature leverages the __() translation function in WordPress and is designed for simple, static strings. It may not support complex or lengthy strings. For advanced modifications or longer strings, you might need to explore alternative solutions or seek professional assistance.', 'wp-travel-engine' ),
+				'content'    => __( 'The Custom Labels feature lets you personalize static strings on your website. For example, if the default label is "Travelers," you can change it to "Guests." This feature also works as a basic translation tool, but it only supports simple, static strings. If a label does not update, or if you need to translate longer or more complex strings, use a translation plugin instead. See our guides for <a href="https://docs.wptravelengine.com/article/how-to-translate-themes-and-plugins-using-loco-translate/" target="_blank" rel="noopener noreferrer">Loco Translate</a> and <a href="https://docs.wptravelengine.com/article/build-a-multilingual-travel-website/" target="_blank" rel="noopener noreferrer">WPML</a>.', 'wp-travel-engine' ),
 				'status'     => 'info',
 			),
 			array(

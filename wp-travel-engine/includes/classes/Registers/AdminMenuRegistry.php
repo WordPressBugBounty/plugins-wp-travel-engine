@@ -21,11 +21,12 @@ class AdminMenuRegistry extends Registrable {
 	 *
 	 * @param string $class_name The class representing the admin page.
 	 *
-	 * @return static
+	 * @return AdminMenuRegistry
 	 * @throws \InvalidArgumentException If the class is not an AdminMenuPage.
 	 * @since 6.8.4 Return static for method chaining.
+	 * @since 6.8.7 Return type changed from `static` to `AdminMenuRegistry` for PHP 7.4 compatibility.
 	 */
-	public function register( string $class_name ): static {
+	public function register( string $class_name ): AdminMenuRegistry {
 		if ( ! is_subclass_of( $class_name, AdminMenuPage::class ) ) {
 			throw new \InvalidArgumentException( "Class '$class_name' must extend AdminMenuPage" );
 		}

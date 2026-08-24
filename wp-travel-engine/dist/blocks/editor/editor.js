@@ -776,6 +776,9 @@
       outline-offset: 2px;
     }
   }
+  .cw__color-picker-reset-button {
+    cursor: pointer !important;
+  }
 `,en.div`
   max-width: 24px;
   background-color: #e5e5f7;

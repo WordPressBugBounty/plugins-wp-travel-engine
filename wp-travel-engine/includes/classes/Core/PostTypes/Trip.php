@@ -8,6 +8,7 @@
 
 namespace WPTravelEngine\Core\PostTypes;
 
+use WPTravelEngine\Core\Capabilities;
 use WPTravelEngine\Abstracts\PostType;
 
 /**
@@ -25,6 +26,42 @@ class Trip extends PostType {
 	 * @var string
 	 */
 	protected string $post_type = 'trip';
+
+	/**
+	 * Constructor.
+	 *
+	 * @since 6.8.7
+	 */
+	public function __construct() {
+		add_action( 'admin_menu', array( $this, 'modify_submenu' ), 20 );
+	}
+
+	/**
+	 * Tags the "Trips" list item for `Capabilities::hide_submenu()` to target with CSS,
+	 * and removes "Add New Trip" for users without `manage_wte_trip`.
+	 *
+	 * @return void
+	 * @since 6.8.7
+	 */
+	public function modify_submenu(): void {
+		global $submenu;
+
+		$parent = "edit.php?post_type={$this->post_type}";
+
+		if ( empty( $submenu[ $parent ] ) ) {
+			return;
+		}
+
+		foreach ( $submenu[ $parent ] as &$item ) {
+			if ( $parent === $item[2] ) {
+				$item[4] = trim( ( $item[4] ?? '' ) . ' wpte-submenu-trips' );
+			}
+		}
+
+		if ( ! Capabilities::user_can( 'manage_wte_trip' ) ) {
+			remove_submenu_page( $parent, "post-new.php?post_type={$this->post_type}" );
+		}
+	}
 
 	/**
 	 * Retrieve the labels for the custom post type.
@@ -88,12 +125,13 @@ class Trip extends PostType {
 				'slug'       => $permalink['wp_travel_engine_trip_base'],
 				'with_front' => true,
 			),
-			'capability_type'    => 'post',
+			'capability_type'    => array( 'trip', 'trips' ),
+			'map_meta_cap'       => true,
 			'has_archive'        => true,
 			'hierarchical'       => false,
 			'menu_position'      => 31,
 			// 'rest_base'              => 'trips',
-			'supports'           => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments' ),
+			'supports'           => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments', 'revisions' ),
 			// 'rest_namespace'        => 'wptravelengine/v2',
 			// 'rest_controller_class' => \WPTravelEngine\Core\Controllers\RestAPI\V2\Trip::class,
 		);

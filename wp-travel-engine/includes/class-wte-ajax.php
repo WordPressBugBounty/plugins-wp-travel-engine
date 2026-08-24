@@ -527,6 +527,15 @@ class WTE_Ajax {
 		update_post_meta( $new_post_id, 'packages_ids', $_new_package_ids );
 		update_post_meta( $new_post_id, 'wte_fsd_booked_seats', array() );
 
+		/**
+		 * Fires after a trip has been cloned.
+		 *
+		 * @param int  $new_post_id   Cloned trip post ID.
+		 * @param int  $post_id       Original trip post ID.
+		 * @since 6.8.7 Add hooks for addon to integrate extra logics.
+		 */
+		do_action( 'wptravelengine_trip_cloned', $new_post_id, $post_id );
+
 		if ( ! is_null( $new_post_id ) ) {
 			wp_send_json_success(
 				array(

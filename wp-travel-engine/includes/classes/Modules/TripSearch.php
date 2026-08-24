@@ -315,15 +315,37 @@ class TripSearch {
 	}
 
 	/**
+	 * Taxonomies rendered as checkbox filters in the sidebar, including
+	 * custom filters registered via the "wte_custom_filters" option.
+	 *
+	 * @return string[]
+	 * @since 6.8.7
+	 */
+	private static function sidebar_taxonomies(): array {
+		return array_merge(
+			array(
+				'destination',
+				'activities',
+				'trip_tag',
+				'difficulty',
+				'trip_types',
+			),
+			array_column( get_option( 'wte_custom_filters', array() ), 'slug' )
+		);
+	}
+
+	/**
 	 * Returns array of sidebar filter data for hidden sidebar.
 	 *
 	 * @access private
 	 * @return array
 	 * @since 6.2.2
+	 * @since 6.8.7 Uses sidebar_taxonomies() for the taxonomy list.
 	 */
 	private static function get_sidebar_filter_data() {
 
 		$data              = array();
+		$sidebar_filters   = self::sidebar_taxonomies();
 		$recursive_checker = null;
 		$recursive_checker = function ( $terms, $children = false ) use ( &$data, &$recursive_checker ) {
 			if ( is_array( $terms ) && count( $terms ) > 0 ) {
@@ -360,17 +382,6 @@ class TripSearch {
 				}
 			}
 		};
-
-		$sidebar_filters = array_merge(
-			array(
-				'destination',
-				'activities',
-				'trip_tag',
-				'difficulty',
-				'trip_types',
-			),
-			array_column( get_option( 'wte_custom_filters', array() ), 'slug' )
-		);
 
 		foreach ( $sidebar_filters as $taxonomy ) {
 			$terms = \wte_get_terms_by_id( $taxonomy );
@@ -516,6 +527,7 @@ class TripSearch {
 	 * @static
 	 * @return array Query arguments for WP_Query
 	 * @updated 6.6.0
+	 * @since 6.8.7 Extracted the tax_query and meta_query building into tax_query() and meta_query().
 	 */
 	public static function get_query_args( $ajax_request = false ) {
 
@@ -537,6 +549,45 @@ class TripSearch {
 			'wpte_trip_search' => true,
 		);
 
+		$tax_query = self::tax_query( $post_data );
+
+		if ( ! empty( $tax_query ) ) {
+			$query_args['tax_query'] = $tax_query; // phpcs:ignore
+		}
+
+		$meta_query = self::meta_query( $post_data );
+
+		if ( ! empty( $meta_query ) ) {
+			$query_args['meta_query'] = $meta_query; // phpcs:ignore
+		}
+
+		// phpcs:disable
+		if ( ! empty( $post_data['sort'] ?? '' ) ) {
+			$order_by   = wte_clean( wp_unslash( $post_data['sort'] ) );
+			$sort_args  = wte_advanced_search_get_order_args( $order_by ); // phpcs:ignore
+			$query_args = array_merge( $query_args, $sort_args );
+		}
+
+		if ( ! empty( $post_data['search'] ?? $post_data['s'] ?? '' ) ) {
+			$query_args['s'] = $post_data['search'] ?? $post_data['s'];
+		}
+		// phpcs:enable
+
+		\Wp_Travel_Engine_Archive_Hooks::$query_args = $query_args;
+
+		return apply_filters( 'query_args_for_trip_filters', $query_args );
+	}
+
+	/**
+	 * Builds the taxonomy tax_query clauses for the current filter request.
+	 *
+	 * @param array       $post_data Raw filter selections (from $_REQUEST or an AJAX request's params).
+	 * @param string|null $exclude   Taxonomy key to leave out of the clause (used for facet counting).
+	 *
+	 * @return array
+	 * @since 6.8.7
+	 */
+	private static function tax_query( array $post_data, ?string $exclude = null ): array {
 		$categories = apply_filters(
 			'wte_filter_categories',
 			array(
@@ -579,19 +630,38 @@ class TripSearch {
 		// phpcs:disable
 		$tax_query = array();
 		foreach ( $categories as $cat => $term_args ) {
-			$category = ( $post_data['result'][ $cat ] ?? '-1' ) != '-1' ? $post_data['result'][ $cat ] : ( $post_data[$cat] ?? '' ); // phpcs:ignore
+			// Compare the resolved taxonomy, not the request key -- several keys
+			// can map to one taxonomy (e.g. both 'trip_types' and 'cat').
+			if ( null !== $exclude && ( $term_args['taxonomy'] ?? $cat ) === $exclude ) {
+				continue;
+			}
+			$category = ( $post_data['result'][ $cat ] ?? '-1' ) != '-1' ? $post_data['result'][ $cat ] : ( $post_data[ $cat ] ?? '' ); // phpcs:ignore
 			if ( ! empty( $category ) ) {
-				$term_args['terms'] = is_string( $category ) && (strpos( $category, ',' ) !== false) ? explode( ',', $category ) : $category;
+				$term_args['terms'] = is_string( $category ) && ( strpos( $category, ',' ) !== false ) ? explode( ',', $category ) : $category;
 				$tax_query[]        = $term_args;
 			}
 		}
+		// phpcs:enable
 
 		if ( ! empty( $tax_query ) ) {
-			$query_args['tax_query'] = $tax_query; // phpcs:ignore
-			$query_args['tax_query']['relation'] = 'AND';
+			$tax_query['relation'] = 'AND';
 		}
 
+		return $tax_query;
+	}
+
+	/**
+	 * Builds the meta_query clauses (price, duration, departure month) for the current request.
+	 *
+	 * @param array $post_data Raw filter selections (from $_REQUEST or an AJAX request's params).
+	 *
+	 * @return array
+	 * @since 6.8.7
+	 */
+	public static function meta_query( array $post_data ): array {
+		// phpcs:disable
 		$meta_query = array();
+
 		// Check Price.
 		$cost_range = self::get_price_range( true );
 		$min_cost   = max( -1, floatval( $post_data['mincost'] ?? $post_data['min-cost'] ?? $cost_range['min_value'] ) );
@@ -630,32 +700,285 @@ class TripSearch {
 			} catch ( \Exception $e ) {
 				$date = str_replace( '-', '', $date );
 			}
-			$meta_query[] = array(
+
+			$date_clause = apply_filters( 'wptravelengine_archive_date_meta_clause', array(
 				'key'     => 'trip_available_months',
 				'value'   => $date,
 				'compare' => 'LIKE',
-			);
+			), $post_data );
+
+			if ( ! empty( $date_clause ) ) {
+				$meta_query[] = $date_clause;
+			}
 		}
+
+		$meta_query = (array) apply_filters( 'wptravelengine_archive_meta_query', $meta_query, $post_data );
 
 		if ( ! empty( $meta_query ) ) {
-			$query_args['meta_query'] = $meta_query; // phpcs:ignore
-			$query_args['meta_query']['relation'] = 'AND'; // phpcs:ignore
-		}
-
-		if ( ! empty( $post_data['sort'] ?? '' ) ) {
-			$order_by   = wte_clean( wp_unslash( $post_data['sort'] ) );
-			$sort_args  = wte_advanced_search_get_order_args( $order_by ); // phpcs:ignore
-			$query_args = array_merge( $query_args, $sort_args );
-		}
-
-		if ( ! empty( $post_data['search'] ?? $post_data['s'] ?? '' ) ) {
-			$query_args['s'] = $post_data['search'] ?? $post_data['s'];
+			$meta_query['relation'] = 'AND';
 		}
 		// phpcs:enable
 
-		\Wp_Travel_Engine_Archive_Hooks::$query_args = $query_args;
+		return $meta_query;
+	}
 
-		return apply_filters( 'query_args_for_trip_filters', $query_args );
+	/**
+	 * Whether the request carries a price, duration or departure-month filter.
+	 *
+	 * The taxonomy filters ride on public query vars so WordPress applies them to the main
+	 * query by itself; these meta-based ones have to be injected explicitly.
+	 *
+	 * @param array $post_data Raw filter selections.
+	 *
+	 * @return bool
+	 * @since 6.8.7
+	 */
+	public static function has_meta_filters( array $post_data ): bool {
+		$keys = (array) apply_filters(
+			'wptravelengine_archive_meta_filter_keys',
+			array(
+				'mincost',
+				'min-cost',
+				'maxcost',
+				'max-cost',
+				'mindur',
+				'min-duration',
+				'maxdur',
+				'max-duration',
+				'date',
+				'trip-chosen-date',
+			),
+			$post_data
+		);
+
+		foreach ( $keys as $key ) {
+			if ( ! empty( $post_data[ $key ] ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Whether the visitor has narrowed the listing at all.
+	 *
+	 * Used to decide how empty options are presented: dropped entirely on an untouched
+	 * listing, kept but disabled once a filter is on.
+	 *
+	 * @return bool
+	 * @since 6.8.7
+	 */
+	public static function is_filtered(): bool {
+		static $has_filters = null;
+
+		if ( null === $has_filters ) {
+			$request = wp_unslash( $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+			$has_filters = ! empty( $request['search'] )
+				|| ! empty( $request['s'] )
+				|| self::has_meta_filters( $request )
+				|| ! empty( self::tax_query( $request ) );
+		}
+
+		return $has_filters;
+	}
+
+	/**
+	 * Post IDs matching the given tax_query exclusion, ignoring pagination.
+	 *
+	 * The main archive query's posts_per_page/paged would otherwise
+	 * truncate the object-ID set used for facet counting to a single page.
+	 *
+	 * @param array       $base_query_args   The main query's query_vars.
+	 * @param string|null $exclude_taxonomy  Taxonomy key to leave out of the tax_query.
+	 * @param array       $post_data         Raw filter selections.
+	 * @param string[]    $exclude_meta_keys Meta keys to leave out of the meta_query, so a
+	 *                                       facet can be counted ignoring its own filter.
+	 *
+	 * @return int[]
+	 * @since 6.8.7
+	 */
+	public static function facet_post_ids( array $base_query_args, ?string $exclude_taxonomy, array $post_data, array $exclude_meta_keys = array() ): array {
+		$args              = $base_query_args;
+		$args['tax_query'] = self::tax_query( $post_data, $exclude_taxonomy ); // phpcs:ignore
+
+		if ( ! empty( $exclude_meta_keys ) && ! empty( $args['meta_query'] ) ) {
+			$args['meta_query'] = array_filter( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				(array) $args['meta_query'],
+				fn( $clause ) => ! is_array( $clause ) || ! in_array( $clause['key'] ?? '', $exclude_meta_keys, true )
+			);
+		}
+
+		$args['fields']         = 'ids';
+		$args['posts_per_page'] = -1;
+		$args['no_found_rows']  = true;
+
+		// Copied query_vars carry 'nopaging' => false + a paged 'offset', which
+		// with posts_per_page = -1 builds an invalid `LIMIT {offset}, -1` clause.
+		$args['nopaging'] = true;
+		unset( $args['offset'], $args['paged'] );
+
+		// Legacy 'taxonomy'/'term' vars leak in and override tax_query otherwise.
+		unset( $args['taxonomy'], $args['term'] );
+
+		$args['wpte_facet_query'] = true;
+
+		$post_ids = ( new \WP_Query( $args ) )->posts;
+
+		$featured = \Wp_Travel_Engine_Archive_Hooks::$featured_trip_ids;
+		if ( ! empty( $featured ) ) {
+			$post_ids = array_merge( $featured, $post_ids );
+		}
+
+		return array_values( array_unique( array_map( 'intval', $post_ids ) ) );
+	}
+
+	/**
+	 * Term counts for the given taxonomies, scoped to a post-ID set.
+	 *
+	 * Relationships are aggregated directly because get_terms()'s own `count` is the
+	 * global, unscoped term_taxonomy.count. Taxonomies sharing an object-ID set are
+	 * counted in a single query rather than one query each.
+	 *
+	 * @param string[] $taxonomies Taxonomies to count terms for.
+	 * @param int[]    $object_ids Post IDs to scope the counts to.
+	 *
+	 * @return array<string, array<int, array{slug:string,count:int}>> Keyed by taxonomy.
+	 * @since 6.8.7
+	 */
+	private static function count_terms( array $taxonomies, array $object_ids ): array {
+		global $wpdb;
+
+		$counts = array_fill_keys( $taxonomies, array() );
+
+		if ( empty( $taxonomies ) || empty( $object_ids ) ) {
+			return $counts;
+		}
+
+		$taxonomy_placeholders = implode( ', ', array_fill( 0, count( $taxonomies ), '%s' ) );
+		$object_placeholders   = implode( ', ', array_fill( 0, count( $object_ids ), '%d' ) );
+
+		$sql = "SELECT tt.taxonomy, t.term_id, t.slug, tr.object_id
+			FROM {$wpdb->term_relationships} tr
+			INNER JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id
+			INNER JOIN {$wpdb->terms} t ON t.term_id = tt.term_id
+			WHERE tt.taxonomy IN ($taxonomy_placeholders) AND tr.object_id IN ($object_placeholders)";
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		$rows = $wpdb->get_results( $wpdb->prepare( $sql, array_merge( $taxonomies, $object_ids ) ) );
+
+		if ( empty( $rows ) ) {
+			return $counts;
+		}
+
+		$slugs   = array();
+		$objects = array();
+		foreach ( $rows as $row ) {
+			$term_id           = (int) $row->term_id;
+			$slugs[ $term_id ] = $row->slug;
+			$objects[ $row->taxonomy ][ $term_id ][ (int) $row->object_id ] = true;
+		}
+
+		foreach ( $objects as $taxonomy => $terms ) {
+			$terms = self::roll_up_children( $taxonomy, $terms, $slugs );
+
+			foreach ( $terms as $term_id => $matched ) {
+				$counts[ $taxonomy ][] = array(
+					'slug'  => $slugs[ $term_id ],
+					'count' => count( $matched ),
+				);
+			}
+		}
+
+		return $counts;
+	}
+
+	/**
+	 * Adds each term's matched objects to its ancestors.
+	 *
+	 * The tax_query for these taxonomies uses 'include_children', so clicking a parent
+	 * also returns trips tagged only with a child; without this the parent under-counts
+	 * (and a parent with no direct trips would render as 0 and be disabled). Object IDs
+	 * are unioned rather than summed so a trip tagged with both parent and child counts once.
+	 *
+	 * @param string                      $taxonomy Taxonomy the terms belong to.
+	 * @param array<int, array<int,bool>> $terms   Matched object IDs keyed by term ID.
+	 * @param array<int, string>          $slugs    Term ID => slug map, extended by reference.
+	 *
+	 * @return array<int, array<int,bool>>
+	 * @since 6.8.7
+	 */
+	private static function roll_up_children( string $taxonomy, array $terms, array &$slugs ): array {
+		if ( ! is_taxonomy_hierarchical( $taxonomy ) ) {
+			return $terms;
+		}
+
+		foreach ( array_keys( $terms ) as $term_id ) {
+			foreach ( get_ancestors( $term_id, $taxonomy, 'taxonomy' ) as $ancestor_id ) {
+				$ancestor_id = (int) $ancestor_id;
+
+				if ( ! isset( $slugs[ $ancestor_id ] ) ) {
+					$ancestor = get_term( $ancestor_id, $taxonomy );
+					if ( ! $ancestor instanceof \WP_Term ) {
+						continue;
+					}
+					$slugs[ $ancestor_id ] = $ancestor->slug;
+				}
+
+				foreach ( array_keys( $terms[ $term_id ] ) as $object_id ) {
+					$terms[ $ancestor_id ][ $object_id ] = true;
+				}
+			}
+		}
+
+		return $terms;
+	}
+
+	/**
+	 * Per-taxonomy term counts scoped to every OTHER active filter, for sidebar facet display.
+	 *
+	 * @param \WP_Query $query     The already-run main results query.
+	 * @param array     $post_data Raw filter selections from the request.
+	 *
+	 * @return array<string, array<int, array{slug:string,count:int}>>
+	 * @since 6.8.7
+	 */
+	public static function facet_counts( \WP_Query $query, array $post_data ): array {
+		$facet_taxonomies = self::sidebar_taxonomies();
+		$base_query_args  = $query->query_vars;
+		$facets           = array();
+
+		$filtered_taxonomies = array();
+		foreach ( $query->query_vars['tax_query'] ?? array() as $clause ) {
+			if ( is_array( $clause ) && isset( $clause['taxonomy'] ) ) {
+				$filtered_taxonomies[ $clause['taxonomy'] ] = true;
+			}
+		}
+
+		// A taxonomy that is itself filtered needs its own clause dropped, so its count
+		// reflects only the OTHER active filters (options within one filter are OR'd).
+		// Every remaining taxonomy shares one unmodified result set.
+		$shared = array();
+		foreach ( $facet_taxonomies as $taxonomy ) {
+			if ( isset( $filtered_taxonomies[ $taxonomy ] ) ) {
+				$object_ids = self::facet_post_ids( $base_query_args, $taxonomy, $post_data );
+				$facets    += self::count_terms( array( $taxonomy ), $object_ids );
+			} else {
+				$shared[] = $taxonomy;
+			}
+		}
+
+		if ( ! empty( $shared ) ) {
+			$facets += self::count_terms( $shared, self::facet_post_ids( $base_query_args, null, $post_data ) );
+		}
+
+		// Keep every taxonomy present: a missing key would leave stale counts in the sidebar.
+		foreach ( $facet_taxonomies as $taxonomy ) {
+			$facets[ $taxonomy ] = $facets[ $taxonomy ] ?? array();
+		}
+
+		return (array) apply_filters( 'wptravelengine_archive_facet_counts', $facets, compact( 'query', 'post_data' ) );
 	}
 
 	/**
@@ -830,11 +1153,56 @@ class TripSearch {
 	}
 
 	/**
+	 * Facet counts as taxonomy => slug => count, for lookups while rendering.
+	 *
+	 * Memoized because taxonomy_filter_html() runs once per taxonomy plus once per nested
+	 * child list, and every one of those calls needs the same map.
+	 *
+	 * @return array<string, array<string, int>>
+	 * @since 6.8.7
+	 */
+	private static function ssr_facet_map(): array {
+		static $map = null;
+
+		if ( null === $map ) {
+			$map = array_map(
+				fn( $facet_terms ) => wp_list_pluck( $facet_terms, 'count', 'slug' ),
+				self::ssr_facets()
+			);
+		}
+
+		return $map;
+	}
+
+	/**
+	 * Memoized facet counts for the server-rendered sidebar, from $_GET.
+	 *
+	 * @return array<string, array<int, array{slug:string,count:int}>>
+	 * @since 6.8.7
+	 */
+	public static function ssr_facets(): array {
+		static $facets = null;
+
+		if ( null !== $facets ) {
+			return $facets;
+		}
+
+		$query = \Wp_Travel_Engine_Archive_Hooks::$query;
+
+		$facets = ( $query instanceof \WP_Query )
+			? self::facet_counts( $query, wp_unslash( $_GET ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			: array();
+
+		return $facets;
+	}
+
+	/**
 	 * Renders the taxonomy filter HTML for trip search.
 	 *
 	 * @param array   $terms    Array of taxonomy terms to display
 	 * @param boolean $children Whether to show child terms
 	 * @static
+	 * @since 6.8.7 Bakes in facet-scoped disabled state / counts.
 	 */
 	public static function taxonomy_filter_html( $terms, $children = false ) {
 
@@ -849,10 +1217,12 @@ class TripSearch {
 				);
 			}
 
-			printf( '<ul class="%1$s">', $children ? 'children' : 'wte-search-terms-list' );
 			// $list_count  = [];
 			$queried_term = get_queried_object();
 			$list_count   = 0;
+			$items        = '';
+			$facet_counts = self::ssr_facet_map();
+			$hide_empty   = ! self::is_filtered();
 			foreach ( $terms as $term ) {
 				if ( isset( $term->parent ) && $term->parent && ! $children ) {
 					continue;
@@ -862,28 +1232,48 @@ class TripSearch {
 					continue;
 				}
 
+				// Null = not facet-tracked, so keep the term's own global count.
+				$counts      = $facet_counts[ $term->taxonomy ] ?? null;
+				$facet_count = null === $counts ? null : (int) ( $counts[ $term->slug ] ?? 0 );
+				$is_disabled = 0 === $facet_count;
+
+				// Unfiltered counts cover the whole catalogue, so an empty term can never be
+				// brought back by narrowing -- drop it. Under a filter it stays listed but
+				// disabled, so options do not jump around while the visitor is clicking.
+				if ( $hide_empty && $is_disabled ) {
+					continue;
+				}
+
 				++$list_count;
 
-				$get_terms        = wte_array_get( $_GET, $term->taxonomy, array() );
-				$get_terms        = is_string( $get_terms ) ? explode( ',', $get_terms ) : ( $get_terms ?: array() );
-				$is_queried_term  = ( $queried_term->taxonomy ?? '' ) === $term->taxonomy && ( $queried_term->slug ?? '' ) === $term->slug;
-				$is_in_url_params = in_array( $term->slug, $get_terms, true );
+				$get_terms  = wte_array_get( $_GET, $term->taxonomy, array() );
+				$get_terms  = is_string( $get_terms ) ? explode( ',', $get_terms ) : ( $get_terms ?: array() );
+				$is_checked = ! $is_disabled && (
+					( ( $queried_term->taxonomy ?? '' ) === $term->taxonomy && ( $queried_term->slug ?? '' ) === $term->slug )
+					|| in_array( $term->slug, $get_terms, true )
+				);
 
 				ob_start();
-				printf( '<li class="%1$s" %2$s>', $children ? 'has-children' : '', ( $list_count > 4 && ! $children ) ? 'style="display: none;"' : '' );
+				printf(
+					'<li class="%1$s%2$s" %3$s>',
+					$children ? 'has-children' : '',
+					$is_disabled ? ' wte-facet-disabled' : '',
+					( $list_count > 4 && ! $children ) ? 'style="display: none;"' : ''
+				);
 				printf(
 					'<label>'
-					. '<input type="checkbox" %1$s value="%2$s" name="%3$s" class="%3$s wte-filter-item"/>'
-					. '<span>%4$s</span>'
+					. '<input type="checkbox" %1$s %2$s value="%3$s" name="%4$s" class="%4$s wte-filter-item"/>'
+					. '<span>%5$s</span>'
 					. '</label>',
-					checked( true, $is_queried_term || $is_in_url_params, false ), // phpcs:ignore
+					checked( true, $is_checked, false ), // phpcs:ignore
+					disabled( true, $is_disabled, false ), // phpcs:ignore
 					esc_attr( $term->slug ),
 					esc_attr( $term->taxonomy ),
 					esc_html( $term->name )
 				);
 
 				if ( apply_filters( 'wte_advanced_search_filters_show_tax_count', true ) ) {
-					printf( '<span class="count">%1$s</span>', $term->count );
+					printf( '<span class="count">%1$s</span>', null !== $facet_count ? $facet_count : $term->count );
 				}
 				if ( is_array( $term->children ) && count( $term->children ) > 0 ) {
 					$_children = array();
@@ -899,9 +1289,16 @@ class TripSearch {
 
 				echo '</li>';
 
-				echo ob_get_clean();
+				$items .= ob_get_clean();
 			}
 
+			// Every term was dropped as empty -- skip the wrapper instead of leaving a bare <ul>.
+			if ( '' === $items ) {
+				return;
+			}
+
+			printf( '<ul class="%1$s">', $children ? 'children' : 'wte-search-terms-list' );
+			echo $items; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			echo '</ul>';
 
 			if ( ! $children && $list_count > 4 ) {
@@ -933,6 +1330,13 @@ class TripSearch {
 
 		$terms = \wte_get_terms_by_id( $taxonomy );
 		if ( empty( $terms ) ) {
+			return;
+		}
+
+		// Nothing in this taxonomy matches the untouched listing, so every option would be
+		// dropped -- skip the section instead of printing a heading over an empty list.
+		$ssr_facets = self::ssr_facets();
+		if ( ! self::is_filtered() && isset( $ssr_facets[ $taxonomy ] ) && empty( $ssr_facets[ $taxonomy ] ) ) {
 			return;
 		}
 

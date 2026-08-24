@@ -3,7 +3,7 @@
  * Booking Details Metabox Content.
  */
 
-if ( ! current_user_can( 'edit_posts' ) ) {
+if ( ! wptravelengine_curr_user_can( 'manage_wte_booking' ) ) {
 	wp_die( __( 'Unauthorized access', 'wp-travel-engine' ) );
 }
 

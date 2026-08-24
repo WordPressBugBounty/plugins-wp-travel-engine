@@ -169,6 +169,7 @@ class Customer extends PostType {
 	 * Returns an array containing the arguments used to register the Customer post type.
 	 *
 	 * @return array An array containing the arguments for the Customer post type.
+	 * @since 6.8.7 Give Customer its own capability_type (`customer`/`customers`) instead of sharing core WP Posts' capabilities.
 	 */
 	public function get_args(): array {
 		return array(
@@ -180,7 +181,7 @@ class Customer extends PostType {
 			'show_in_menu'       => 'edit.php?post_type=booking',
 			'query_var'          => true,
 			'rewrite'            => array( 'slug' => 'customer' ),
-			'capability_type'    => 'post',
+			'capability_type'    => array( 'customer', 'customers' ),
 			'map_meta_cap'       => true,
 			'has_archive'        => true,
 			'hierarchical'       => false,

@@ -46,25 +46,6 @@ class TripCode {
 		add_filter( 'wte_booking_reciept_email_content', array( __CLASS__, 'replace_mail_tags' ), 10, 2 );
 		add_filter( 'wte_purchase_reciept_email_content', array( __CLASS__, 'replace_mail_tags' ), 10, 2 );
 
-		add_filter(
-			'wte_booking_mail_tags',
-			function ( $tags, $payment_id ) {
-				if ( $payment_id ) {
-					$booking_id  = get_post_meta( $payment_id, 'booking_id', true );
-					$order_trips = get_post_meta( $booking_id, 'order_trips', true );
-
-					if ( ! empty( $order_trips ) && is_array( $order_trips ) ) {
-						$trip                = array_shift( $order_trips );
-						$tags['{trip_code}'] = self::get_trip_code( $trip['ID'] );
-					}
-				}
-
-				return $tags;
-			},
-			10,
-			2
-		);
-
 		add_action(
 			'wte_thankyou_after_trip_name',
 			function ( $trip_id ) {

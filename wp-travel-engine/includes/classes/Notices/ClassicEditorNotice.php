@@ -8,20 +8,23 @@
 namespace WPTravelEngine\Notices;
 
 use WP_Post;
+use WPTravelEngine\Abstracts\Notice;
 
-class ClassicEditorNotice {
+class ClassicEditorNotice extends Notice {
 
-	const DISMISS_META_KEY = 'wptravelengine_classic_editor_notice_dismissed';
-	const DISMISS_ACTION   = 'wptravelengine_dismiss_classic_editor_notice';
+	/** Dismiss key for the single notice this class renders. */
+	const DISMISS_KEY = 'classic-editor';
+
+	const TYPE = 'error';
 
 	public function __construct() {
 		if ( ! is_admin() || ! $this->is_classic_editor_active() ) {
 			return;
 		}
 
-		add_action( 'admin_notices', array( $this, 'display' ) );
+		parent::__construct();
+
 		add_action( 'edit_form_after_title', array( $this, 'display_inline' ) );
-		add_action( 'wp_ajax_' . self::DISMISS_ACTION, array( $this, 'handle_dismiss' ) );
 	}
 
 	/**
@@ -38,54 +41,40 @@ class ClassicEditorNotice {
 	}
 
 	/**
-	 * Dismissible notice rendered on admin screens other than the trip editor.
-	 *
-	 * @return void
+	 * @inheritDoc
 	 */
-	public function display(): void {
-		$screen = get_current_screen();
-
-		if ( $screen && 'trip' === $screen->id ) {
-			return;
-		}
-
-		if ( get_user_meta( get_current_user_id(), self::DISMISS_META_KEY, true ) ) {
-			return;
-		}
-
-		$this->render( 'notice notice-error is-dismissible wptravelengine-classic-editor-notice' );
-
-		$data = array(
-			'url'    => admin_url( 'admin-ajax.php' ),
-			'action' => self::DISMISS_ACTION,
-			'nonce'  => wp_create_nonce( self::DISMISS_ACTION ),
-		);
-
-		?>
-		<script>
-		( function () {
-			var config = <?php echo wp_json_encode( $data ); ?>;
-
-			document.addEventListener( 'click', function ( event ) {
-				var button = event.target.closest( '.wptravelengine-classic-editor-notice .notice-dismiss' );
-
-				if ( ! button ) {
-					return;
-				}
-
-				window.fetch( config.url, {
-					method: 'POST',
-					credentials: 'same-origin',
-					body: new URLSearchParams( { action: config.action, nonce: config.nonce } )
-				} );
-			} );
-		} )();
-		</script>
-		<?php
+	protected function dismiss_action(): string {
+		return 'wptravelengine_dismiss_classic_editor_notice';
 	}
 
 	/**
-	 * Inline notice rendered inside the trip editor, below the title.
+	 * @inheritDoc
+	 */
+	protected function meta_key(): string {
+		return 'wptravelengine_classic_editor_notice_dismissed';
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	protected function get_notices(): array {
+		return array( self::DISMISS_KEY => $this->message() );
+	}
+
+	/**
+	 * Dismissible notice rendered on admin screens other than the trip editor.
+	 *
+	 * @inheritDoc
+	 */
+	protected function can_view(): bool {
+		$screen = get_current_screen();
+
+		return ! $screen || 'trip' !== $screen->id;
+	}
+
+	/**
+	 * Inline notice rendered inside the trip editor, below the title. Always shown
+	 * there regardless of dismissal — it's about this specific screen's conflict risk.
 	 *
 	 * @return void
 	 */
@@ -94,37 +83,27 @@ class ClassicEditorNotice {
 			return;
 		}
 
-		$this->render( 'notice notice-error inline' );
-	}
-
-	/**
-	 * Render notice.
-	 *
-	 * @return void
-	 */
-	private function render( string $classes ): void {
-		$deactivate_url = wp_nonce_url(
-			admin_url( 'plugins.php?action=deactivate&plugin=classic-editor%2Fclassic-editor.php' ),
-			'deactivate-plugin_classic-editor/classic-editor.php'
-		);
 		?>
-		<div class="<?php echo esc_attr( $classes ); ?>">
-			<p>
-				<?php esc_html_e( 'Classic Editor Plugin causes conflicts with WP Travel Engine. Please deactivate Classic Editor to avoid issues.', 'wp-travel-engine' ); ?>
-				<a href="<?php echo esc_url( $deactivate_url ); ?>"><?php esc_html_e( 'Deactivate Classic Editor Plugin', 'wp-travel-engine' ); ?></a>
-			</p>
+		<div class="notice notice-error inline">
+			<p><?php echo wp_kses_post( $this->message() ); ?></p>
 		</div>
 		<?php
 	}
 
 	/**
-	 * Handles dismiss.
-	 *
-	 * @return void
+	 * @return string
 	 */
-	public function handle_dismiss(): void {
-		check_ajax_referer( self::DISMISS_ACTION, 'nonce' );
-		update_user_meta( get_current_user_id(), self::DISMISS_META_KEY, true );
-		wp_send_json_success();
+	private function message(): string {
+		$deactivate_url = wp_nonce_url(
+			admin_url( 'plugins.php?action=deactivate&plugin=classic-editor%2Fclassic-editor.php' ),
+			'deactivate-plugin_classic-editor/classic-editor.php'
+		);
+
+		return sprintf(
+			'%s <a href="%s">%s</a>',
+			esc_html__( 'Classic Editor Plugin causes conflicts with WP Travel Engine. Please deactivate Classic Editor to avoid issues.', 'wp-travel-engine' ),
+			esc_url( $deactivate_url ),
+			esc_html__( 'Deactivate Classic Editor Plugin', 'wp-travel-engine' )
+		);
 	}
 }

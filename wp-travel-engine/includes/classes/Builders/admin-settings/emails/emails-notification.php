@@ -8,7 +8,6 @@
 use WPTravelEngine\Core\Models\Settings\Options;
 use WPTravelEngine\Helpers\Translators;
 
-
 $email_tags = wptravelengine_all_email_tags();
 
 return apply_filters(

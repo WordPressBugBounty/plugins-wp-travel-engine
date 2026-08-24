@@ -10,6 +10,7 @@ use Wp_Travel_Engine_Loader;
 use Wp_Travel_Engine_Public;
 use WPTravelEngine\Core\Booking\BookingProcess;
 use WPTravelEngine\Core\Booking\ExternalPayment;
+use WPTravelEngine\Core\Capabilities;
 use WPTravelEngine\Core\Cart\Cart;
 use WPTravelEngine\Core\Controllers\RestAPI\V2\Settings;
 use WPTravelEngine\Core\Controllers\RestAPI\V2\Trip;
@@ -39,6 +40,7 @@ use WPTravelEngine\Modules\TripCode;
 use WPTravelEngine\Modules\TripSearch;
 use WPTravelEngine\Optimizer\Optimizer;
 use WPTravelEngine\Notices\ClassicEditorNotice;
+use WPTravelEngine\Notices\LabelsTranslationNotice;
 use WPTravelEngine\Registers\ShortcodeRegistry;
 use WPTravelEngine\Traits\Singleton;
 use WPTravelEngine\Email\Email;
@@ -142,6 +144,11 @@ final class Plugin {
 		 */
 		new ClassicEditorNotice();
 
+		/**
+		 * @since 6.8.7
+		 */
+		new LabelsTranslationNotice();
+
 		$template_filters = new Template();
 		$template_filters->hooks();
 
@@ -149,6 +156,8 @@ final class Plugin {
 		$schema_filters->hooks();
 
 		Events::instance();
+
+		Capabilities::instance();
 
 		TripAPISchema::instance();
 
@@ -354,6 +363,14 @@ final class Plugin {
 
 		if ( ! empty( $appearance['icon_color'] ) ) {
 			echo '<style>body{--wpte-icon-color: ' . $appearance['icon_color'] . ';}</style>';
+		}
+
+		if ( ! empty( $appearance['warning_message_color'] ) ) {
+			echo '<style>body{--wpte-alert-warning-color: ' . $appearance['warning_message_color'] . '; --wpte-alert-warning-color-rgb: ' . wptravelengine_hex_to_rgb( $appearance['warning_message_color'] ) . ';}</style>';
+		}
+
+		if ( ! empty( $appearance['info_notice_color'] ) ) {
+			echo '<style>body{--wpte-alert-info-color: ' . $appearance['info_notice_color'] . '; --wpte-alert-info-color-rgb: ' . wptravelengine_hex_to_rgb( $appearance['info_notice_color'] ) . ';}</style>';
 		}
 	}
 
@@ -653,181 +670,6 @@ final class Plugin {
 		}
 
 		return $roles;
-	}
-
-	/**
-	 * Get formatted package name
-	 */
-	private function get_package_name( $booking_id, $trip ) {
-		$package_name = get_post_meta( $booking_id, 'package_name', true );
-		if ( empty( $package_name ) ) {
-			return '';
-		}
-
-		$trip_packages = new TripPackages( $trip );
-		foreach ( $trip_packages as $package ) {
-			if ( $package_name == $package->ID ) {
-				return $package->post->post_title;
-			}
-		}
-
-		return '';
-	}
-
-	/**
-	 * Render trip dates section
-	 */
-	private function render_trip_dates( $trip_dates ) {
-		if ( empty( $trip_dates ) ) {
-			return;
-		}
-		?>
-		<tr>
-			<td><?php esc_html_e( 'Trip Date', 'wp-travel-engine' ); ?></td>
-			<td class="alignright"><?php echo esc_html( $trip_dates['start_date'] ?? '' ); ?></td>
-		</tr>
-		<?php
-		if ( ! empty( $trip_dates['end_date'] ) ) :
-			?>
-			<tr>
-				<td><?php esc_html_e( 'Trip End Date', 'wp-travel-engine' ); ?></td>
-				<td class="alignright"><?php echo esc_html( $trip_dates['end_date'] ); ?></td>
-			</tr>
-			<?php
-		endif;
-	}
-
-	/**
-	 * Render traveller pricing details
-	 */
-	private function render_traveller_pricing( $pricing_data, $currency ) {
-		if ( ! is_array( $pricing_data ) ) {
-			return;
-		}
-
-		foreach ( $pricing_data as $detail ) {
-			$price    = $detail['price'] ?? 0;
-			$quantity = intval( $detail['quantity'] ?? 0 );
-			$sum      = $detail['sum'] ?? 0;
-			?>
-			<tr>
-				<td>
-					<?php
-					printf(
-						'%s: %d x $%s = %s',
-						esc_html( $detail['label'] ?? '' ),
-						$quantity,
-						number_format( $price, 2 ),
-						esc_html( $currency ) . number_format( $sum, 2 )
-					);
-					?>
-				</td>
-			</tr>
-			<?php
-		}
-	}
-
-	/**
-	 * Render extra services section
-	 */
-	private function render_extra_services( $extra_data, $currency ) {
-		if ( ! is_array( $extra_data ) ) {
-			return;
-		}
-
-		foreach ( $extra_data as $extra ) {
-			$price    = $extra['price'] ?? 0;
-			$quantity = intval( $extra['qty'] ?? 0 );
-			$total    = $price * $quantity;
-			?>
-			<tr>
-				<td>
-					<?php
-					printf(
-						'%s: %d x $%s = %s',
-						esc_html( $extra['extra_service'] ?? '' ),
-						$quantity,
-						number_format( $price, 2 ),
-						esc_html( $currency ) . number_format( $total, 2 )
-					);
-					?>
-				</td>
-			</tr>
-			<?php
-		}
-	}
-
-	/**
-	 * Render cost summary section
-	 */
-	private function render_cost_summary( $line_items, $currency ) {
-		// Subtotal
-		?>
-		<tr class="title wpte-booking-subtotal">
-			<td colspan="1"><?php esc_html_e( 'Subtotal', 'wp-travel-engine' ); ?></td>
-			<td><?php echo esc_html( $currency ) . number_format( $line_items['totals']['subtotal'] ?? 0, 2 ); ?></td>
-		</tr>
-
-		<?php
-		// Discounts
-		if ( ! empty( $line_items['discounts'] ) ) {
-			foreach ( $line_items['discounts'] as $discount ) {
-				?>
-				<tr class="wpte-booking-discount">
-					<td><?php printf( esc_html__( 'Discount (%s)', 'wp-travel-engine' ), esc_html( $discount['name'] ?? '' ) ); ?></td>
-					<td>-<?php echo esc_html( $currency ) . number_format( $discount['value'] ?? 0, 2 ); ?></td>
-				</tr>
-				<?php
-			}
-		}
-
-		// Tax
-		if ( ! empty( $line_items['tax_amount'] ) && $line_items['tax_amount'] > 0 ) {
-			?>
-			<tr class="wpte-booking-tax">
-				<td><?php printf( esc_html__( 'Tax (%s%%)', 'wp-travel-engine' ), $line_items['tax_amount'] ); ?></td>
-				<td><?php echo esc_html( $currency ) . number_format( $line_items['totals']['total_tax'] ?? 0, 2 ); ?></td>
-			</tr>
-			<?php
-		}
-
-		// Total amounts
-		$this->render_total_amounts( $line_items, $currency );
-	}
-
-	/**
-	 * Render total amounts section
-	 */
-	private function render_total_amounts( $line_items, $currency ) {
-		// Total
-		if ( ! empty( $line_items['total'] ) ) {
-			?>
-			<tr class="wpte-booking-total">
-				<td><?php esc_html_e( 'Total', 'wp-travel-engine' ); ?></td>
-				<td><?php echo esc_html( $currency ) . number_format( $line_items['total'], 2 ); ?></td>
-			</tr>
-			<?php
-		}
-
-		// Deposit
-		if ( ! empty( $line_items['cart_partial'] ) ) {
-			?>
-			<tr>
-				<td><?php esc_html_e( 'Deposit Today', 'wp-travel-engine' ); ?></td>
-				<td><?php echo esc_html( $currency ) . number_format( $line_items['cart_partial'], 2 ); ?></td>
-			</tr>
-			<?php
-		}
-
-		// Amount Due
-		if ( ! empty( $line_items['totals']['due_total'] ) ) {
-			?>
-			<tr>
-				<td><?php esc_html_e( 'Amount Due', 'wp-travel-engine' ); ?></td>
-				<td><?php echo esc_html( $currency ) . number_format( $line_items['totals']['due_total'], 2 ); ?></td>
-			</tr>
-			<?php
-		}
 	}
 
 	/**
