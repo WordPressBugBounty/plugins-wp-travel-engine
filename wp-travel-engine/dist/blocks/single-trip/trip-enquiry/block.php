@@ -25,8 +25,7 @@ if ( function_exists( 'get_privacy_policy_url' ) && get_privacy_policy_url() ) {
 	$privacy_policy_fields['enquiry_confirmation'] = array(
 		'type'              => 'checkbox',
 		'label'             => __( 'Privacy Policy', 'wp-travel-engine' ),
-		// translators: %s: privacy policy link.
-		'options'           => array( 'on' => isset( $wp_travel_engine_settings['gdpr_msg'] ) ? esc_attr( $wp_travel_engine_settings['gdpr_msg'] ) . get_the_privacy_policy_link() . '.' : sprintf( __( 'By contacting us, you agree to our <a href="%1$s">Privacy Policy</a>', 'wp-travel-engine' ), get_privacy_policy_url() ) ),
+		'options'           => array( 'on' => \WP_Travel_Engine_Enquiry_Form_Shortcodes::get_privacy_confirmation_label( $wp_travel_engine_settings ) ),
 		'name'              => 'enquiry_confirmation',
 		'wrapper_class'     => 'row-form confirm-holder',
 		'id'                => 'enquiry_confirmation',

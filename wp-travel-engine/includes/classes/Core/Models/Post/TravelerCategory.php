@@ -135,11 +135,35 @@ class TravelerCategory {
 	 * @param mixed $default The default value to return if the key is not set.
 	 *
 	 * @return mixed
+	 * @since 6.8.8 Included group pricing mapping, sale price checks, and open-ended tier appending for it.
 	 */
 	public function get( $key, $default = null ) {
 		switch ( $key ) {
 			case 'group_pricing':
-				$value = $this->package->get_group_pricing()[ $this->id ] ?? array();
+				$group_pricing = $this->package->get_group_pricing()[ $this->id ] ?? array();
+
+				$value = array();
+				$total = count( $group_pricing );
+				$i     = 0;
+
+				foreach ( $group_pricing as $gp ) {
+					++$i;
+
+					$to    = is_numeric( $gp['to'] ) ? (int) $gp['to'] : '';
+					$from  = is_numeric( $gp['from'] ) ? (int) $gp['from'] : 0;
+					$price = ( is_numeric( $gp['price'] ) && 0.0 !== (float) $gp['price'] ) ? (float) $gp['price'] : $this->get_actual_price();
+
+					$value[] = compact( 'from', 'to', 'price' );
+
+					if ( $total === $i && is_numeric( $gp['from'] ) && is_numeric( $gp['to'] ) && is_numeric( $gp['price'] ) ) {
+						$value[] = array(
+							'from'  => (int) $gp['to'] + 1,
+							'to'    => '',
+							'price' => $this->get_actual_price(),
+						);
+					}
+				}
+
 				break;
 			case 'description':
 				$value = get_term_by( 'id', $this->id, 'trip-packages-categories' )->{$key};
@@ -179,5 +203,25 @@ class TravelerCategory {
 	 */
 	public function get_sale_price() {
 		return $this->sale_price;
+	}
+
+	/**
+	 * Check if traveler category has sale price.
+	 *
+	 * @return bool
+	 * @since 6.8.8
+	 */
+	public function has_sale(): bool {
+		return $this->has_sale ?? false;
+	}
+
+	/**
+	 * Get actual price.
+	 *
+	 * @return float|string
+	 * @since 6.8.8
+	 */
+	public function get_actual_price() {
+		return $this->has_sale() ? $this->sale_price : $this->price;
 	}
 }

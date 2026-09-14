@@ -3,9 +3,9 @@ Contributors: wptravelengine
 Plugin link: https://wptravelengine.com/
 Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 6.8.7
+Stable tag: 6.8.8
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -349,12 +349,11 @@ Please send us an email via [support ticket](https://wptravelengine.com/support-
 
 == Changelog ==
 
-= 6.8.7 - 24th August 2026 =
+= 6.8.8 - 14th September 2026 =
 
-* New Feature: Added an option to make the price category mandatory in Trip Package.
-* New Feature: Added customizable warning and info notice colors in Appearance Settings.
-* New Feature: Added WP Travel Engine-specific capabilities and compatibility with the Members plugin.
-* Improved: Archive page taxonomy filters now update result counts when selections are made.
+* Improved: Enhanced Trip Archive price filters to include trips without packages when filtering by higher or lower prices.
+* Improved: Updated TranslatePress email compatibility to support the new database structure.
+* Fixed: Corrected Trip Archive sorting and sidebar counts to display the correct number of trips.
 
 [See changelog for all versions](https://plugins.svn.wordpress.org/wp-travel-engine/trunk/changelog.txt).
 

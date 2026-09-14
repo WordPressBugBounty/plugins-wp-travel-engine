@@ -52,23 +52,21 @@ $muted_color = $this->color( 'muted' );
 			do_action( 'wptravelengine_email_template_before_extra_services', $cart_info );
 		}
 
-		if ( $this->trip->trip_extras && is_array( $this->trip->trip_extras ) ) :
+		/**
+		 * @since 6.8.8 Updated Extra Services data structure to fix manual booking.
+		 */
+		$extra_services = $line_items['extra_service'] ?? array();
+		if ( ! empty( $extra_services ) ) :
 			?>
 			<tr>
-				<td colspan="2"><strong><?php echo esc_html( $this->global_settings->get( 'extra_service_title', __( 'Extra Services:', 'wp-travel-engine' ) ) ); ?></strong></td>
+				<td colspan="2"><strong><?php echo esc_html( $this->global_settings->get( 'extra_service_title' ) ?: __( 'Extra Services:', 'wp-travel-engine' ) ); ?></strong></td>
 			</tr>
 			<?php
-			foreach ( $this->trip->trip_extras as $tx ) :
-				$tx_total = +$tx['qty'] * +$tx['price'];
+			foreach ( $extra_services as $item ) :
 				?>
 				<tr>
-					<td style="color: <?php echo $muted_color; ?>;">
-					<?php
-					echo esc_html( $tx['extra_service'] . ': ' );
-					echo (int) $tx['qty'] . ' x ' . wptravelengine_the_price( +$tx['price'], false );
-					?>
-					</td>
-					<td style="width: 50%;text-align: right;"><strong><?php echo wptravelengine_the_price( +$tx_total, false ); ?></strong></td>
+					<td style="color: <?php echo $muted_color; ?>;"><?php echo esc_html( $item['label'] ) . ': ' . esc_html( $item['quantity'] ) . ' x ' . wptravelengine_the_price( $item['price'], false ); ?></td>
+					<td style="width: 50%;text-align: right;"><strong><?php echo wptravelengine_the_price( $item['total'], false ); ?></strong></td>
 				</tr>
 				<?php
 			endforeach;

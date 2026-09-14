@@ -108,14 +108,16 @@ class Wp_Travel_Engine_Archive_Hooks {
 				$sort_args['orderby'] = 'comment_count';
 				break;
 			case 'price':
-				$sort_args['meta_key'] = '_s_price';
-				$sort_args['order']    = 'ASC';
-				$sort_args['orderby']  = 'meta_value_num';
+				$sort_args['meta_key']     = '_s_price';
+				$sort_args['order']        = 'ASC';
+				$sort_args['orderby']      = 'meta_value_num';
+				$sort_args['post__not_in'] = self::get_no_package_trip_ids();
 				break;
 			case 'price-desc':
-				$sort_args['meta_key'] = '_s_price';
-				$sort_args['order']    = 'DESC';
-				$sort_args['orderby']  = 'meta_value_num';
+				$sort_args['meta_key']     = '_s_price';
+				$sort_args['order']        = 'DESC';
+				$sort_args['orderby']      = 'meta_value_num';
+				$sort_args['post__not_in'] = self::get_no_package_trip_ids();
 				break;
 			case 'days':
 				$sort_args['meta_key'] = '_s_duration';
@@ -191,6 +193,13 @@ class Wp_Travel_Engine_Archive_Hooks {
 				$query->set( 'orderby', $sort_args['orderby'] );
 			}
 
+			// Trips with no package have no real price to sort by (their _s_price
+			// defaults to 0), so they must be excluded from Highest/Lowest Price
+			// sorting rather than sorting in at the bottom/top as free trips.
+			if ( ! empty( $sort_args['post__not_in'] ) ) {
+				$post_not_in = array_merge( $post_not_in, $sort_args['post__not_in'] );
+			}
+
 			/**
 			 * Taxonomy filters travel as public query vars, so WordPress applies them to the
 			 * main query on its own -- the price/duration/departure-month filters do not, and
@@ -222,6 +231,55 @@ class Wp_Travel_Engine_Archive_Hooks {
 		$custom_trips = (array) get_option( 'wptravelengine_custom_trips', array() );
 
 		$query->set( 'post__not_in', array_unique( array_merge( $post_not_in, $custom_trips ) ) );
+	}
+
+	/**
+	 * Get IDs of published trips that have no package created.
+	 *
+	 * Memoized per-request only (static var) — no persistent cache, so there is
+	 * nothing to invalidate on save.
+	 *
+	 * @since 6.8.8
+	 * @return int[]
+	 */
+	public static function get_no_package_trip_ids(): array {
+		static $ids = null;
+
+		if ( null !== $ids ) {
+			return $ids;
+		}
+
+		$ids = array_map(
+			'intval',
+			get_posts(
+				array(
+					'post_type'      => WP_TRAVEL_ENGINE_POST_TYPE,
+					'post_status'    => 'publish',
+					'posts_per_page' => -1,
+					'fields'         => 'ids',
+					'no_found_rows'  => true,
+					'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+						'relation' => 'OR',
+						array(
+							'key'     => 'packages_ids',
+							'compare' => 'NOT EXISTS',
+						),
+						array(
+							'key'     => 'packages_ids',
+							'value'   => '',
+							'compare' => '=',
+						),
+						array(
+							'key'     => 'packages_ids',
+							'value'   => 'a:0:{}',
+							'compare' => '=',
+						),
+					),
+				)
+			)
+		);
+
+		return $ids;
 	}
 
 	/**

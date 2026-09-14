@@ -1,5 +1,10 @@
 == Changelog ==
 
+= 6.8.8 - 14th September 2026 =
+* Improved: Enhanced Trip Archive price filters to include trips without packages when filtering by higher or lower prices.
+* Improved: Updated TranslatePress email compatibility to support the new database structure.
+* Fixed: Corrected Trip Archive sorting and sidebar counts to display the correct number of trips.
+
 = 6.8.7 - 24th August 2026 =
 * New Feature: Added an option to make the price category mandatory in Trip Package.
 * New Feature: Added customizable warning and info notice colors in Appearance Settings.

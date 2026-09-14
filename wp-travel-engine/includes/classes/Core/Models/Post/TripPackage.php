@@ -439,7 +439,7 @@ class TripPackage extends PostModel {
 
 			foreach ( $traveler_categories as $tc ) {
 				/** @var TravelerCategory $tc */
-				$cat_id = $tc->id;
+				$cat_id     = $tc->id;
 				$seats_left = $this->get_cat_seats_left( $cat_id, $date );
 
 				if ( $tc->is_min_required && is_numeric( $seats_left ) && $seats_left < $tc->min_pax ) {

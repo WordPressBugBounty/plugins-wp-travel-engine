@@ -257,7 +257,7 @@ abstract class EmailTags extends TemplateTags {
 			'{tdate}'                     => array( $this, 'get_trip_start_date' ),
 			'{date}'                      => array( $this, 'get_date' ),
 			'{traveler}'                  => array( $this, 'get_traveler_count' ),
-			'{price}'                     => array( $this, 'get_price' ),
+			'{price}'                     => array( $this, 'get_tprice' ),
 			'{due}'                       => array( $this, 'get_due' ),
 			'{total_cost}'                => array( $this, 'get_total_cost' ),
 			'{traveler_data}'             => array( $this, 'get_traveler_data' ),

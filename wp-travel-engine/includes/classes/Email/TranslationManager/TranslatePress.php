@@ -209,7 +209,10 @@ class TranslatePress {
 			}
 			foreach ( $templates as $template ) {
 				if ( isset( $template['id'], $template['subject'], $template['content'] ) ) {
-					self::update_template_translation( $template['id'], $recipient, $template['subject'], $template['content'], $language );
+					$saved = self::update_template_translation( $template['id'], $recipient, $template['subject'], $template['content'], $language );
+					if ( ! $saved ) {
+						wte_log( "WTE Email Translation: save failed for template {$template['id']} ({$recipient}), language {$language}" );
+					}
 				}
 			}
 		}
@@ -238,9 +241,14 @@ class TranslatePress {
 			return;
 		}
 
-		global $wpdb;
-
 		$originals_table = $trp_data['originals_table'];
+
+		if ( ! self::table_exists( $originals_table ) ) {
+			wte_log( 'WTE Email Translation: originals table does not exist: ' . $originals_table );
+			return;
+		}
+
+		global $wpdb;
 
 		foreach (
 			array(
@@ -262,23 +270,41 @@ class TranslatePress {
 			);
 
 			if ( ! $existing_row ) {
-				$wpdb->insert(
-					$originals_table,
-					array(
-						'original' => $string,
-						'domain'   => $domain,
-						'context'  => $context,
-					),
-					array( '%s', '%s', '%s' )
+				$insert_data    = array(
+					'original' => $string,
+					'domain'   => $domain,
+					'context'  => $context,
 				);
+				$insert_formats = array( '%s', '%s', '%s' );
+
+				/**
+				 * Some TRP versions add a `lookup_hash` column. If present, populate it ourselves
+				 * because TRP can leave it empty until its migration finishes, causing duplicate
+				 * inserts on the unique index.
+				 */
+				if ( method_exists( $trp_data['query'], 'get_gettext_original_lookup_hash' )
+					&& method_exists( $trp_data['query'], 'table_column_exists' )
+					&& $trp_data['query']->table_column_exists( $originals_table, 'lookup_hash' )
+				) {
+					$insert_data['lookup_hash'] = $trp_data['query']->get_gettext_original_lookup_hash( $string, $domain, $context );
+					$insert_formats[]           = '%s';
+				}
+
+				$result = $wpdb->insert( $originals_table, $insert_data, $insert_formats );
+				if ( false === $result ) {
+					wte_log( "WTE Email Translation: failed to register original for context {$context}: " . $wpdb->last_error . ' | query: ' . $wpdb->last_query );
+				}
 			} elseif ( $existing_row->original !== $string ) {
-				$wpdb->update(
+				$result = $wpdb->update(
 					$originals_table,
 					array( 'original' => $string ),
 					array( 'id' => (int) $existing_row->id ),
 					array( '%s' ),
 					array( '%d' )
 				);
+				if ( false === $result ) {
+					wte_log( "WTE Email Translation: failed to update original for context {$context}: " . $wpdb->last_error . ' | query: ' . $wpdb->last_query );
+				}
 			}
 		}
 	}
@@ -307,10 +333,10 @@ class TranslatePress {
 
 		$translation_table = $trp_data['query']->get_gettext_table_name( $language );
 
-		self::update_single_translation( $subject, "wte_email_{$template_id}_{$recipient}_subject", $domain, $translation_table, $trp_data );
-		self::update_single_translation( $content, "wte_email_{$template_id}_{$recipient}_content", $domain, $translation_table, $trp_data );
+		$subject_ok = self::update_single_translation( $subject, "wte_email_{$template_id}_{$recipient}_subject", $domain, $translation_table, $trp_data );
+		$content_ok = self::update_single_translation( $content, "wte_email_{$template_id}_{$recipient}_content", $domain, $translation_table, $trp_data );
 
-		return true;
+		return $subject_ok && $content_ok;
 	}
 
 	/**
@@ -588,14 +614,21 @@ class TranslatePress {
 	 * @param string $domain            Text domain.
 	 * @param string $translation_table Translation table name.
 	 * @param array  $trp_data          Initialised TRP components.
-	 * @return void
+	 * @return bool True on success, false if the write failed.
 	 * @since 6.7.9
+	 * @since 6.8.8 Now returns a success flag instead of void, so failures surface to the caller.
 	 */
-	private static function update_single_translation( string $translated, string $context, string $domain, string $translation_table, array $trp_data ): void {
+	private static function update_single_translation( string $translated, string $context, string $domain, string $translation_table, array $trp_data ): bool {
 		global $wpdb;
 
 		if ( ! self::is_valid_table_name( $translation_table ) ) {
-			return;
+			wte_log( "WTE Email Translation: invalid translation table name for context {$context}: {$translation_table}" );
+			return false;
+		}
+
+		if ( ! self::table_exists( $translation_table ) ) {
+			wte_log( "WTE Email Translation: translation table does not exist for context {$context}: {$translation_table}" );
+			return false;
 		}
 
 		$originals_table = $trp_data['originals_table'];
@@ -610,7 +643,8 @@ class TranslatePress {
 		);
 
 		if ( ! $original_row ) {
-			return;
+			wte_log( "WTE Email Translation: no registered original found for context {$context}, domain {$domain}. Was maybe_register_originals() run for the default language first?" );
+			return false;
 		}
 
 		$original_id   = (int) $original_row->id;
@@ -626,7 +660,7 @@ class TranslatePress {
 		);
 
 		if ( $existing ) {
-			$wpdb->update(
+			$result = $wpdb->update(
 				$translation_table,
 				array(
 					'translated' => $translated,
@@ -640,7 +674,7 @@ class TranslatePress {
 				array( '%d', '%s' )
 			);
 		} else {
-			$wpdb->insert(
+			$result = $wpdb->insert(
 				$translation_table,
 				array(
 					'original'    => $original_text,
@@ -653,6 +687,13 @@ class TranslatePress {
 				array( '%s', '%s', '%s', '%d', '%d', '%s' )
 			);
 		}
+
+		if ( false === $result ) {
+			wte_log( "WTE Email Translation: write failed for context {$context}: " . $wpdb->last_error . ' | query: ' . $wpdb->last_query );
+			return false;
+		}
+
+		return true;
 	}
 
 	/**

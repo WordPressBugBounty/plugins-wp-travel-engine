@@ -125,6 +125,31 @@ class WP_Travel_Engine_Enquiry_Form_Shortcodes {
 		return apply_filters( 'wp_travel_engine_enquiry_fields_display', array_merge( $package_fields, $enquiry_form_fields ), $post_id );
 	}
 
+	/**
+	 * Builds the privacy policy confirmation label, with the policy link opening in a new tab.
+	 *
+	 * @since 6.8.8
+	 *
+	 * @param array $wp_travel_engine_settings Plugin settings.
+	 * @return string
+	 */
+	public static function get_privacy_confirmation_label( $wp_travel_engine_settings ) {
+		$privacy_policy_url = function_exists( 'get_privacy_policy_url' ) ? get_privacy_policy_url() : '';
+
+		$link = $privacy_policy_url ? sprintf(
+			'<a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a>',
+			esc_url( $privacy_policy_url ),
+			__( 'Privacy Policy', 'wp-travel-engine' )
+		) : '';
+
+		if ( ! empty( $wp_travel_engine_settings['gdpr_msg'] ) ) {
+			return esc_html( $wp_travel_engine_settings['gdpr_msg'] ) . $link . '.';
+		}
+
+		// translators: %s: privacy policy link.
+		return sprintf( __( 'By contacting us, you agree to our %s', 'wp-travel-engine' ), $link );
+	}
+
 	// Enquiry form main function
 	public function wpte_enquiry_form( $args = array() ) {
 		// Once Wte-public js and css is handled properly we need to add this below code.
@@ -156,7 +181,7 @@ class WP_Travel_Engine_Enquiry_Form_Shortcodes {
 			$privacy_policy_fields['enquiry_confirmation'] = array(
 				'type'              => 'checkbox',
 				'label'             => __( 'Privacy Policy', 'wp-travel-engine' ),
-				'options'           => array( 'on' => isset( $wp_travel_engine_settings['gdpr_msg'] ) ? esc_attr( $wp_travel_engine_settings['gdpr_msg'] ) . get_the_privacy_policy_link() . '.' : sprintf( __( 'By contacting us, you agree to our <a href="%1$s">Privacy Policy</a>', 'wp-travel-engine' ), get_privacy_policy_url() ) ),
+				'options'           => array( 'on' => self::get_privacy_confirmation_label( $wp_travel_engine_settings ) ),
 				'name'              => 'enquiry_confirmation',
 				'wrapper_class'     => 'row-form confirm-holder',
 				'id'                => 'enquiry_confirmation',

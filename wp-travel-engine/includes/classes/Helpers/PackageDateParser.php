@@ -418,9 +418,9 @@ class PackageDateParser {
 
 	/**
 	 * Processes the min required condition to filter out actual seats left.
-	 * 
+	 *
 	 * @param int|string $seats_left
-	 * 
+	 *
 	 * @return int|string
 	 * @since 6.8.7
 	 */

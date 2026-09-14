@@ -412,6 +412,7 @@ return apply_filters(
 										'default'     => '3',
 										'name'        => 'related_trips.number',
 										'divider'     => true,
+										'min'         => 0,
 									),
 									array(
 										'label'       => __( 'Enable Related Trips By', 'wp-travel-engine' ),

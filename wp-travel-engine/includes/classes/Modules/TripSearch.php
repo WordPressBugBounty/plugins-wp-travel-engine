@@ -844,8 +844,9 @@ class TripSearch {
 	 * @param string[] $taxonomies Taxonomies to count terms for.
 	 * @param int[]    $object_ids Post IDs to scope the counts to.
 	 *
-	 * @return array<string, array<int, array{slug:string,count:int}>> Keyed by taxonomy.
+	 * @return array<string, array<int, array{slug:string,count:int,name:string,parent:string}>> Keyed by taxonomy.
 	 * @since 6.8.7
+	 * @since 6.8.8 Takes a slug/name/parent map, so ancestors carry a label too.
 	 */
 	private static function count_terms( array $taxonomies, array $object_ids ): array {
 		global $wpdb;
@@ -859,7 +860,7 @@ class TripSearch {
 		$taxonomy_placeholders = implode( ', ', array_fill( 0, count( $taxonomies ), '%s' ) );
 		$object_placeholders   = implode( ', ', array_fill( 0, count( $object_ids ), '%d' ) );
 
-		$sql = "SELECT tt.taxonomy, t.term_id, t.slug, tr.object_id
+		$sql = "SELECT tt.taxonomy, t.term_id, t.slug, t.name, tt.parent, tr.object_id
 			FROM {$wpdb->term_relationships} tr
 			INNER JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id
 			INNER JOIN {$wpdb->terms} t ON t.term_id = tt.term_id
@@ -872,21 +873,32 @@ class TripSearch {
 			return $counts;
 		}
 
-		$slugs   = array();
+		$meta    = array();
 		$objects = array();
 		foreach ( $rows as $row ) {
-			$term_id           = (int) $row->term_id;
-			$slugs[ $term_id ] = $row->slug;
+			$term_id          = (int) $row->term_id;
+			$meta[ $term_id ] = array(
+				'slug'   => $row->slug,
+				'name'   => $row->name,
+				'parent' => (int) $row->parent,
+			);
 			$objects[ $row->taxonomy ][ $term_id ][ (int) $row->object_id ] = true;
 		}
 
 		foreach ( $objects as $taxonomy => $terms ) {
-			$terms = self::roll_up_children( $taxonomy, $terms, $slugs );
+			$terms = self::roll_up_children( $taxonomy, $terms, $meta );
 
 			foreach ( $terms as $term_id => $matched ) {
+				$parent_id = $meta[ $term_id ]['parent'];
+
 				$counts[ $taxonomy ][] = array(
-					'slug'  => $slugs[ $term_id ],
-					'count' => count( $matched ),
+					'slug'   => $meta[ $term_id ]['slug'],
+					'count'  => count( $matched ),
+					// Label and parent travel with the count so the sidebar can build an
+					// option the server render left out entirely -- one dropped as empty
+					// has no <li> to update, and only a full reload used to bring it back.
+					'name'   => $meta[ $term_id ]['name'],
+					'parent' => $meta[ $parent_id ]['slug'] ?? '',
 				);
 			}
 		}
@@ -904,12 +916,13 @@ class TripSearch {
 	 *
 	 * @param string                      $taxonomy Taxonomy the terms belong to.
 	 * @param array<int, array<int,bool>> $terms   Matched object IDs keyed by term ID.
-	 * @param array<int, string>          $slugs    Term ID => slug map, extended by reference.
+	 * @param array<int, array>           $meta     Term ID => slug/name/parent map, extended by reference.
 	 *
 	 * @return array<int, array<int,bool>>
 	 * @since 6.8.7
+	 * @since 6.8.8 Takes a slug/name/parent map, so ancestors carry a label too.
 	 */
-	private static function roll_up_children( string $taxonomy, array $terms, array &$slugs ): array {
+	private static function roll_up_children( string $taxonomy, array $terms, array &$meta ): array {
 		if ( ! is_taxonomy_hierarchical( $taxonomy ) ) {
 			return $terms;
 		}
@@ -918,12 +931,16 @@ class TripSearch {
 			foreach ( get_ancestors( $term_id, $taxonomy, 'taxonomy' ) as $ancestor_id ) {
 				$ancestor_id = (int) $ancestor_id;
 
-				if ( ! isset( $slugs[ $ancestor_id ] ) ) {
+				if ( ! isset( $meta[ $ancestor_id ] ) ) {
 					$ancestor = get_term( $ancestor_id, $taxonomy );
 					if ( ! $ancestor instanceof \WP_Term ) {
 						continue;
 					}
-					$slugs[ $ancestor_id ] = $ancestor->slug;
+					$meta[ $ancestor_id ] = array(
+						'slug'   => $ancestor->slug,
+						'name'   => $ancestor->name,
+						'parent' => (int) $ancestor->parent,
+					);
 				}
 
 				foreach ( array_keys( $terms[ $term_id ] ) as $object_id ) {
@@ -941,7 +958,7 @@ class TripSearch {
 	 * @param \WP_Query $query     The already-run main results query.
 	 * @param array     $post_data Raw filter selections from the request.
 	 *
-	 * @return array<string, array<int, array{slug:string,count:int}>>
+	 * @return array<string, array<int, array{slug:string,count:int,name:string,parent:string}>>
 	 * @since 6.8.7
 	 */
 	public static function facet_counts( \WP_Query $query, array $post_data ): array {
@@ -1070,6 +1087,17 @@ class TripSearch {
 			}
 		}
 
+		/**
+		 * Filters the computed min/max bounds for a trip search range, before caching.
+		 *
+		 * @since 6.8.8
+		 *
+		 * @param object $range      Range object with `min_value`/`max_value` (and
+		 *                           `min_price`/`max_price` or `min_duration`/`max_duration`).
+		 * @param string $range_type 'wpte_price_range' or 'wpte_duration_range'.
+		 */
+		$range = apply_filters( 'wptravelengine_search_range_bounds', $range, $range_type );
+
 		$runtime_ranges[ $range_type ] = (object) $range;
 
 		return $runtime_ranges[ $range_type ];
@@ -1177,7 +1205,7 @@ class TripSearch {
 	/**
 	 * Memoized facet counts for the server-rendered sidebar, from $_GET.
 	 *
-	 * @return array<string, array<int, array{slug:string,count:int}>>
+	 * @return array<string, array<int, array{slug:string,count:int,name:string,parent:string}>>
 	 * @since 6.8.7
 	 */
 	public static function ssr_facets(): array {

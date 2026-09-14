@@ -70,6 +70,19 @@
 			<key name="trip_itinerary_title"/>
 			<key name="trip_itinerary_description"/>
 			<key name="trip_facts_title"/>
+			<key name="trip_extra_services">
+				<key name="*">
+					<key name="descriptions">
+						<key name="*"/>
+					</key>
+				</key>
+			</key>
+			<key name="extra_service">
+				<key name="*"/>
+			</key>
+			<key name="extra_service_desc">
+				<key name="*"/>
+			</key>
 		</key>
 	</custom-fields-texts>
 	<admin-texts>

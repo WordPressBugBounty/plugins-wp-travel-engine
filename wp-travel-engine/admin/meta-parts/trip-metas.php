@@ -81,6 +81,8 @@ $trip_meta_tabs = array(
 						'field' => array(
 							'name'       => 'duration.period',
 							'type'       => 'NUMBER',
+							'min'        => 0,
+							'integer'    => true,
 							'attributes' => array(
 								'style' => array( 'width' => '80px' ),
 							),
@@ -110,6 +112,7 @@ $trip_meta_tabs = array(
 							'name'       => 'duration.nights',
 							'type'       => 'NUMBER',
 							'min'        => 0,
+							'integer'    => true,
 							'attributes' => array(
 								'min'   => array(
 									'value'   => 0,

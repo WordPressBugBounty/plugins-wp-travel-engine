@@ -34,7 +34,15 @@ if ( $is_featured && $show_featured_tag ) : ?>
 	<?php
 endif;
 
-if ( $discount_percent > 0 ) :
+/**
+ * Filters whether to show the trip card's discount badge.
+ *
+ * @since 6.8.8
+ *
+ * @param bool $show     Whether to show the discount badge.
+ * @param int  $trip_id  Trip ID.
+ */
+if ( apply_filters( 'wptravelengine_show_trip_discount', $discount_percent > 0, get_the_ID() ) ) :
 	?>
 	<div class="category-disc-feat-wrap">
 		<div class="category-trip-discount">
