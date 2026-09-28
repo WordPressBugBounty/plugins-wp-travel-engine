@@ -317,6 +317,8 @@ class SEO {
 	/**
 	 * Build the product schema.
 	 *
+	 * @since 6.8.9 brand.name now uses the site name instead of the trip title.
+	 *
 	 * @param int    $post_id
 	 * @param array  $trip
 	 * @param string $content
@@ -334,7 +336,7 @@ class SEO {
 				'url'         => esc_url( $trip['trip_url'] ),
 				'brand'       => array(
 					'@type' => 'Brand',
-					'name'  => esc_html( get_the_title( $post_id ) ),
+					'name'  => esc_html( $trip['blog'] ),
 				),
 				'offers'      => array(
 					'@type'           => 'Offer',

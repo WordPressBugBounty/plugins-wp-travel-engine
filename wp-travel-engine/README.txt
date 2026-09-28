@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 6.8.8
+Stable tag: 6.8.9
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -349,11 +349,9 @@ Please send us an email via [support ticket](https://wptravelengine.com/support-
 
 == Changelog ==
 
-= 6.8.8 - 14th September 2026 =
+= 6.8.9 - 27th September 2026 =
 
-* Improved: Enhanced Trip Archive price filters to include trips without packages when filtering by higher or lower prices.
-* Improved: Updated TranslatePress email compatibility to support the new database structure.
-* Fixed: Corrected Trip Archive sorting and sidebar counts to display the correct number of trips.
+* Fixed: Corrected trip structured data so the site name is used for the brand instead of the trip title.
 
 [See changelog for all versions](https://plugins.svn.wordpress.org/wp-travel-engine/trunk/changelog.txt).
 

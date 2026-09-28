@@ -1,5 +1,8 @@
 == Changelog ==
 
+= 6.8.9 - 27th September 2026 =
+* Fixed: Corrected trip structured data so the site name is used for the brand instead of the trip title.
+
 = 6.8.8 - 14th September 2026 =
 * Improved: Enhanced Trip Archive price filters to include trips without packages when filtering by higher or lower prices.
 * Improved: Updated TranslatePress email compatibility to support the new database structure.

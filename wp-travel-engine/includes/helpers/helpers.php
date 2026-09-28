@@ -1717,7 +1717,7 @@ function wte_get_active_single_trip_tabs() {
 				}
 				break;
 			case 'faqs':
-				$has_old_faqs = ! array_key_exists( 'faqs_data', (array) $post_meta ) && ! empty( $post_meta['faq']['faq_content'] );
+				$has_old_faqs = empty( $post_meta['faqs_data']['categories'] ) && ! empty( $post_meta['faq']['faq_content'] );
 				$has_new_faqs = false;
 				if ( ! empty( $post_meta['faqs_data']['categories'] ) ) {
 					foreach ( $post_meta['faqs_data']['categories'] as $category ) {

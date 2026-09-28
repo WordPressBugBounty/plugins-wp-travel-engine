@@ -1,13 +1,13 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WP Travel Engine - Travel and Tour Booking Plugin 6.8.8\n"
+"Project-Id-Version: WP Travel Engine - Travel and Tour Booking Plugin 6.8.9\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wptravelengine\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-14T04:27:52+00:00\n"
+"POT-Creation-Date: 2026-09-28T06:10:05+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language: \n"
 "X-Generator: WP-CLI 2.12.0\n"
@@ -1141,7 +1141,7 @@ msgstr ""
 #: admin/class-wp-travel-engine-admin.php:3071
 #: includes/classes/Builders/admin-settings/extensions/group-discount.php:17
 #: includes/classes/Filters/schemas/Group-discount.php:14
-#: dist/admin/trip-edit.js:5821
+#: dist/admin/trip-edit.js:5820
 #: dist/bundle/trip-booking-modal.bundle.js:2
 #: dist/public/components/trip-booking-modal.js:2
 #: dist/public/exports.js:2
@@ -1603,7 +1603,7 @@ msgstr ""
 #: includes/classes/Filters/TripAPISchema.php:661
 #: includes/templates/script-templates/tmpl-wte-package-single.php:22
 #: dist/admin/trip-edit.js:5328
-#: dist/admin/trip-edit.js:5821
+#: dist/admin/trip-edit.js:5820
 msgid "General"
 msgstr ""
 
@@ -2422,7 +2422,7 @@ msgstr ""
 #: dist/admin/exports.js:3684
 #: dist/admin/global-settings.js:3591
 #: dist/admin/trip-edit.js:3698
-#: dist/admin/trip-edit.js:5821
+#: dist/admin/trip-edit.js:5820
 msgid "Pricing Type"
 msgstr ""
 
@@ -2817,7 +2817,7 @@ msgstr ""
 #: dist/admin/exports.js:3751
 #: dist/admin/global-settings.js:3658
 #: dist/admin/trip-edit.js:3765
-#: dist/admin/trip-edit.js:6098
+#: dist/admin/trip-edit.js:6097
 msgid "Close"
 msgstr ""
 
@@ -4189,7 +4189,7 @@ msgid "Not Set"
 msgstr ""
 
 #: includes/backend/templates/customer/partials/header.php:18
-#: dist/admin/trip-edit.js:5821
+#: dist/admin/trip-edit.js:5820
 msgid "Are you sure you want to delete?"
 msgstr ""
 
@@ -5209,7 +5209,7 @@ msgstr ""
 #: includes/class-wp-travel-engine-taxonomy-thumb.php:155
 #: includes/class-wp-travel-engine-taxonomy-thumb.php:190
 #: includes/templates/script-templates/trip-edit/tab-pricing/tmpl-wte-package-general.php:37
-#: dist/admin/trip-edit.js:5786
+#: dist/admin/trip-edit.js:5785
 msgid "Short Description"
 msgstr ""
 
@@ -6879,7 +6879,7 @@ msgstr ""
 #: includes/classes/Builders/admin-settings/extensions/currency-converter.php:87
 #: includes/templates/trip-card/components/card-price.php:20
 #: public/class-wp-travel-engine-template-hooks.php:446
-#: dist/admin/trip-edit.js:5821
+#: dist/admin/trip-edit.js:5820
 #: dist/bundle/trip-booking-modal.bundle.js:2
 #: dist/public/components/trip-booking-modal.js:2
 #: dist/public/exports.js:2
@@ -10527,7 +10527,7 @@ msgid "No Bookings found in Trash."
 msgstr ""
 
 #: includes/classes/Core/PostTypes/Booking.php:442
-#: dist/admin/trip-edit.js:5907
+#: dist/admin/trip-edit.js:5906
 msgid "Price Category"
 msgstr ""
 
@@ -14841,7 +14841,7 @@ msgstr ""
 
 #: includes/helpers/helpers.php:1317
 #: includes/templates/script-templates/tmpl-wte-package-single.php:21
-#: dist/admin/trip-edit.js:5821
+#: dist/admin/trip-edit.js:5820
 #: dist/blocks/editor/editor.js:1406
 msgid "Dates"
 msgstr ""
@@ -16136,7 +16136,7 @@ msgid "Proceed to checkout"
 msgstr ""
 
 #: includes/templates/script-templates/tmpl-wte-package-categories.php:10
-#: dist/admin/trip-edit.js:5821
+#: dist/admin/trip-edit.js:5820
 msgid "Package Price Categories"
 msgstr ""
 
@@ -16167,7 +16167,7 @@ msgstr ""
 
 #: includes/templates/script-templates/tmpl-wte-package-single.php:20
 #: includes/tour-packages/packages.php:86
-#: dist/admin/trip-edit.js:5821
+#: dist/admin/trip-edit.js:5820
 msgid "Price Categories"
 msgstr ""
 
@@ -16181,7 +16181,7 @@ msgid "Enable Hours"
 msgstr ""
 
 #: includes/templates/script-templates/trip-edit/tab-pricing/tmpl-wte-package-general.php:31
-#: dist/admin/trip-edit.js:5821
+#: dist/admin/trip-edit.js:5820
 msgid "General Package Settings"
 msgstr ""
 
