@@ -2186,6 +2186,7 @@
     border: 1px solid ${e=>e.colors?.input?.border};
     border-radius: 8px;
     overflow: hidden;
+    background-color: #fff;
     table{
         border-collapse: collapse;
         width: 100%;

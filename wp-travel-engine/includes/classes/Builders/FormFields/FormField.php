@@ -180,6 +180,7 @@ class FormField extends \WP_Travel_Engine_Form_Field {
 	 *
 	 * @return string Display-ready value.
 	 * @since 6.8.0
+	 * @since 6.8.10 Added the `wptravelengine_field_display_value` filter for add-on field types.
 	 */
 	public static function resolve_display_value( $value, string $type ): string {
 		if ( is_array( $value ) ) {
@@ -203,10 +204,42 @@ class FormField extends \WP_Travel_Engine_Form_Field {
 
 		if ( 'datepicker' === $type ) {
 			if ( ! empty( $value ) ) {
-				return wp_date( get_option( 'date_format', 'Y-m-d' ), strtotime( $value ) );
+				return self::format_stored_date( (string) $value );
 			}
 		}
 
-		return (string) $value;
+		/**
+		 * Filters the display value of field types core does not format itself.
+		 *
+		 * @param string $display Display-ready value.
+		 * @param string $type    Field type key.
+		 * @since 6.8.10
+		 */
+		return (string) apply_filters( 'wptravelengine_field_display_value', (string) $value, $type );
+	}
+
+	/**
+	 * Formats a stored date value for display.
+	 *
+	 * Only `Y-m-d` is reformatted; older values in the site format (`09/04/2018`) are
+	 * ambiguous between d/m and m/d, so they are printed as stored.
+	 *
+	 * @param string $value Stored date value.
+	 *
+	 * @return string Formatted date for `Y-m-d` input, otherwise the value as stored.
+	 * @since 6.8.10
+	 */
+	public static function format_stored_date( string $value ): string {
+		// Midnight in the site timezone, so wp_date() cannot shift it to a neighbouring day.
+		$parsed = \DateTime::createFromFormat( '!Y-m-d', $value, wp_timezone() );
+
+		// A round trip rejects overflowed dates such as 2026-02-30.
+		if ( ! $parsed || $parsed->format( 'Y-m-d' ) !== $value ) {
+			return $value;
+		}
+
+		$formatted = wp_date( get_option( 'date_format', 'Y-m-d' ), $parsed->getTimestamp() );
+
+		return false === $formatted ? $value : $formatted;
 	}
 }

@@ -25,6 +25,8 @@ class CloneTrip extends AjaxController {
 	/**
 	 * Process request.
 	 * Clone Trip.
+	 *
+	 * @since 6.8.10 Require `manage_wte_trip` + `edit_post` on source.
 	 */
 	protected function process_request() {
 
@@ -36,6 +38,16 @@ class CloneTrip extends AjaxController {
 					'invalid_arguments',
 					__( 'Missing Trip ID.', 'wp-travel-engine' )
 				)
+			);
+		}
+
+		if ( ! wptravelengine_curr_user_can( 'manage_wte_trip' ) || ! current_user_can( 'edit_post', (int) $post_id ) ) {
+			wp_send_json_error(
+				new WP_Error(
+					'WTE_FORBIDDEN',
+					__( 'You are not allowed to clone this trip.', 'wp-travel-engine' )
+				),
+				403
 			);
 		}
 

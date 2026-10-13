@@ -135,7 +135,6 @@ class WTE_Ajax {
 		 * @since 2.2.6
 		 */
 		add_action( 'wp_ajax_wte_fxn_clone_trip_data', array( $this, 'wte_fxn_clone_trip_data' ) );
-		add_action( 'wp_ajax_nopriv_wte_fxn_clone_trip_data', array( $this, 'wte_fxn_clone_trip_data' ) );
 
 		/**
 		 * Send Test Email.
@@ -472,6 +471,7 @@ class WTE_Ajax {
 	 * Ajax callback function to clone trip data.
 	 *
 	 * @since 2.2.6
+	 * @since 6.8.10 Require `manage_wte_trip` + `edit_post` on source; drop the nopriv hook.
 	 */
 	public function wte_fxn_clone_trip_data() {
 
@@ -483,6 +483,14 @@ class WTE_Ajax {
 		}
 
 		$post_id   = (int) $_POST[ 'post_id' ]; // phpcs:ignore
+
+		if ( ! wptravelengine_curr_user_can( 'manage_wte_trip' ) || ! current_user_can( 'edit_post', $post_id ) ) {
+			wp_send_json_error(
+				new \WP_Error( 'WTE_FORBIDDEN', __( 'You are not allowed to clone this trip.', 'wp-travel-engine' ) ),
+				403
+			);
+		}
+
 		$post_type = get_post_type( $post_id );
 
 		if ( WP_TRAVEL_ENGINE_POST_TYPE !== $post_type ) {

@@ -13,6 +13,24 @@ foreach ( $payment_gateways_sorted as $key => $value ) {
 		'icon'  => $value['icon_url'] ?? '',
 	);
 }
+
+$paylexer_plugin = array(
+	'slug'         => 'paylexer',
+	'file'         => '',
+	'can_install'  => current_user_can( 'install_plugins' ),
+	'can_activate' => current_user_can( 'activate_plugins' ),
+);
+
+if ( ! defined( 'PAYLEXER_FILE' ) && is_dir( WP_PLUGIN_DIR . '/' . $paylexer_plugin['slug'] ) ) {
+	if ( ! function_exists( 'get_plugins' ) ) {
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+	}
+	foreach ( array_keys( get_plugins( '/' . $paylexer_plugin['slug'] ) ) as $paylexer_file ) {
+		// REST plugin routes take "dir/file" without the .php extension.
+		$paylexer_plugin['file'] = $paylexer_plugin['slug'] . '/' . preg_replace( '/\.php$/', '', $paylexer_file );
+		break;
+	}
+}
 return apply_filters(
 	'payment_general_settings',
 	array(
@@ -51,6 +69,7 @@ return apply_filters(
 				'visibility' => ! defined( 'PAYLEXER_FILE' ),
 				'label'      => true,
 				'field_type' => 'PAYLEXER_PROMO',
+				'plugin'     => $paylexer_plugin,
 			),
 			array(
 				'field_type' => 'ALERT',

@@ -239,9 +239,14 @@ class Capabilities {
 	}
 
 	/**
-	 * Falls back to `manage_options`, unless `$cap` is explicitly denied.
+	 * DIRECT_CAPS fall back to `manage_options`, unless `$cap` is explicitly denied.
 	 *
-	 * @param string $cap One of the DIRECT_CAPS slugs.
+	 * Post type group caps (`read_wte_*`/`manage_wte_*`) get no fallback; administrators
+	 * already hold them via `expand_capabilities()`.
+	 *
+	 * @since 6.8.10 Restrict the `manage_options` fallback to DIRECT_CAPS.
+	 *
+	 * @param string $cap Capability slug.
 	 * @return bool
 	 */
 	public static function user_can( string $cap ): bool {
@@ -249,7 +254,11 @@ class Capabilities {
 			return false;
 		}
 
-		return current_user_can( $cap ) || current_user_can( 'manage_options' );
+		if ( current_user_can( $cap ) ) {
+			return true;
+		}
+
+		return isset( self::DIRECT_CAPS[ $cap ] ) && current_user_can( 'manage_options' );
 	}
 
 	/**

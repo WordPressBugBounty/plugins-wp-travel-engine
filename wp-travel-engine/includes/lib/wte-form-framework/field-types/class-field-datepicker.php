@@ -64,7 +64,10 @@ class WP_Travel_Engine_Form_Field_Date extends WP_Travel_Engine_Form_Field_Text 
 			'<script>;(function() {
 				window.addEventListener("load",function() {
 					var fpArgs = {
-						dateFormat: "%3$s",
+						// Submit Y-m-d, show the site format.
+						dateFormat: "Y-m-d",
+						altInput: true,
+						altFormat: "%3$s",
 						locale: "%4$s"
 					}
 					if("%2$s" == "false") {

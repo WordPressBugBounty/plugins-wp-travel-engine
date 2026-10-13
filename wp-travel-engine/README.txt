@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 6.8.9
+Stable tag: 6.8.10
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -349,9 +349,11 @@ Please send us an email via [support ticket](https://wptravelengine.com/support-
 
 == Changelog ==
 
-= 6.8.9 - 27th September 2026 =
+= 6.8.10 - 13th October 2026 =
 
-* Fixed: Corrected trip structured data so the site name is used for the brand instead of the trip title.
+* Improved: Updated the Freemius SDK to the latest version.
+* Fixed: Corrected date formatting in the datepicker field to match WordPress date format settings.
+* Fixed: Hid the Clone Trip action and restricted access for users with view-only Trip permissions.
 
 [See changelog for all versions](https://plugins.svn.wordpress.org/wp-travel-engine/trunk/changelog.txt).
 

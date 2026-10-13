@@ -657,6 +657,7 @@ class TripSearch {
 	 *
 	 * @return array
 	 * @since 6.8.7
+	 * @since 6.8.10 Casts price/duration as DECIMAL so fractional values at the range bounds match.
 	 */
 	public static function meta_query( array $post_data ): array {
 		// phpcs:disable
@@ -672,7 +673,7 @@ class TripSearch {
 				'key'     => apply_filters( 'wpte_advance_search_price_filter', '_s_price' ),
 				'value'   => array( $min_cost, $max_cost ),
 				'compare' => 'BETWEEN',
-				'type'    => 'numeric',
+				'type'    => 'DECIMAL(20,6)',
 			);
 		}
 
@@ -686,7 +687,7 @@ class TripSearch {
 				'key'     => '_s_duration',
 				'value'   => array( $min_duration, $max_duration ),
 				'compare' => 'BETWEEN',
-				'type'    => 'numeric',
+				'type'    => 'DECIMAL(20,6)',
 			);
 		}
 

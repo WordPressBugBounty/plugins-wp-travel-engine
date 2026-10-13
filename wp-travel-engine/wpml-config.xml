@@ -1,12 +1,15 @@
 <wpml-config>
 	<custom-types>
 		<custom-type translate="1">trip</custom-type>
-		<custom-type translate="1">booking</custom-type>
-		<custom-type translate="1">customer</custom-type>
-		<custom-type translate="1">enquiry</custom-type>
+		<custom-type translate="0">booking</custom-type>
+		<custom-type translate="0">customer</custom-type>
+		<custom-type translate="0">enquiry</custom-type>
 		<custom-type translate="1">wte-services</custom-type>
 		<custom-type translate="0">trip-packages</custom-type>
 	</custom-types>
+	<taxonomies>
+		<taxonomy translate="0">trip-packages-categories</taxonomy>
+	</taxonomies>
 	<custom-fields>
 		<custom-field action="ignore">wp_fixed_departure_dates_setting</custom-field>
 		<custom-field action="ignore">wte_fixed_departure_dates_setting</custom-field>

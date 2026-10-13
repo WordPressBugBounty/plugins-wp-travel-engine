@@ -3833,7 +3833,8 @@ function wptravelengine_analytics_dashboard_data() {
 				)
 			);
 			$order_trips  = maybe_unserialize( $order_trips );
-			$trip_name    = is_array( $order_trips ) ? reset( $order_trips )['title'] : '';
+			$first_trip   = is_array( $order_trips ) ? reset( $order_trips ) : false;
+			$trip_name    = $first_trip['title'] ?? '';
 
 			$customer_name   = $first_name . ' ' . $last_name;
 			$customer_data[] = array(

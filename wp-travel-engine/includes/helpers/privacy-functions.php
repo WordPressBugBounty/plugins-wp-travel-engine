@@ -281,13 +281,14 @@ add_filter( 'wp_privacy_personal_data_exporters', 'register_wp_travel_engine_plu
  * @param   Object $post       Post Object.
  *
  * @since   1.7.6
+ * @since   6.8.10 Hide Clone action for users without `manage_wte_trip`.
  *
  * @return  Array $actions;
  */
 function wp_travel_engine_post_duplicator_action_row( $actions, $post ) {
 	// Get the post type object
 	$post_type = get_post_type_object( $post->post_type );
-	if ( 'trip' === $post_type->name && function_exists( 'wp_travel_engine_post_duplicator_action_row_link' ) ) {
+	if ( 'trip' === $post_type->name && wptravelengine_curr_user_can( 'manage_wte_trip' ) ) {
 		$actions['wp_travel_engine_clone_post'] = wp_travel_engine_post_duplicator_action_row_link( $post );
 	}
 	return $actions;
