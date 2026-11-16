@@ -17,6 +17,11 @@ use WPTravelEngine\Registers\AjaxRequestRegistry;
  */
 class WTE_Ajax {
 
+	/**
+	 * Registers the AJAX handlers.
+	 *
+	 * @return void
+	 */
 	public function __construct() {
 
 		/* @var $ajax_registry AjaxRequestRegistry */
@@ -26,12 +31,21 @@ class WTE_Ajax {
 		$ajax_registry->register( Ajax\Checkout::class );
 		$ajax_registry->register( Ajax\ApplyCoupon::class );
 		$ajax_registry->register( Ajax\Cart::class );
+
 		/**
 		 * Adds resend purchase receipt action
 		 *
 		 * @since 6.4.0
 		 */
 		$ajax_registry->register( Ajax\ResendPurchaseReceipt::class );
+
+		/**
+		 * Adds send payment reminder action
+		 *
+		 * @since 6.9.0
+		 */
+		$ajax_registry->register( Ajax\SendPaymentReminder::class );
+
 		/**
 		 * @since 6.8.0
 		 */

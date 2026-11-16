@@ -3,6 +3,7 @@
  * Wp_Travel_Engine_User_Account.
  *
  * @package WP Travel
+ * @deprecated 6.9.0 No longer loaded by WP Travel Engine. It will be removed in a future release.
  */
 namespace WPTravelEngine\Dashboard;
 

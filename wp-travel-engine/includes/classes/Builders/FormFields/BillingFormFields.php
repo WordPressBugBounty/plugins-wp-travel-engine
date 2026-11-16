@@ -7,9 +7,6 @@
 
 namespace WPTravelEngine\Builders\FormFields;
 
-use WPTravelEngine\Core\Models\Post\Customer;
-
-
 /**
  * Form field class to render billing form fields.
  *
@@ -36,6 +33,14 @@ class BillingFormFields extends FormField {
 		<?php
 	}
 
+	/**
+	 * Names the fields for checkout and fills in their defaults.
+	 *
+	 * @param array    $fields      Billing form fields.
+	 * @param int|null $booking_ref Booking post ID.
+	 * @return array
+	 * @since 6.9.0 Label falls back to the placeholder only when the field has none.
+	 */
 	protected function map_fields( $fields, $booking_ref ) {
 		$billing_form_data = $this->get_billing_form_data( $booking_ref );
 
@@ -61,7 +66,7 @@ class BillingFormFields extends FormField {
 						$field['name'] = sprintf( 'billing[%s]', $name );
 						$field['id']   = sprintf( 'billing_%s', $name );
 					}
-					$field['field_label'] = isset( $field['placeholder'] ) && $field['placeholder'] !== '' ? $field['placeholder'] : $field['field_label'];
+					$field['field_label'] = ! empty( $field['field_label'] ) ? $field['field_label'] : ( $field['placeholder'] ?? '' );
 					$field['default']     = $billing_form_data[ $name ] ?? $field['default'] ?? '';
 
 				}
@@ -81,6 +86,7 @@ class BillingFormFields extends FormField {
 	 *
 	 * @return array
 	 * @since 6.8.0
+	 * @since 6.9.0 Customer defaults come from Customer::get_checkout_defaults().
 	 */
 	protected function get_billing_form_data( $booking_ref ): array {
 		if ( $booking_ref ) {
@@ -94,31 +100,28 @@ class BillingFormFields extends FormField {
 		$session_data = is_array( $session_data ) ? $session_data : array();
 
 		$user = get_user_by( 'id', get_current_user_id() );
+
 		if ( ! $user ) {
 			return $session_data;
 		}
 
-		$customer_id = Customer::is_exists( $user->user_email );
-		if ( ! $customer_id ) {
+		$customer = wptravelengine_get_customer( $user );
+
+		if ( ! $customer ) {
 			return $session_data;
 		}
 
-		$customer          = new Customer( $customer_id );
-		$customer_defaults = array_merge(
-			array(
-				'fname' => $customer->get_customer_fname(),
-				'lname' => $customer->get_customer_lname(),
-				'email' => $customer->get_customer_email(),
-			),
-			$customer->get_customer_addresses()
-		);
-
-		return array_merge( $customer_defaults, array_filter( $session_data ) );
+		// The checkout prefills from what this customer last booked under, not from what they
+		// have since saved on their account — the opposite priority to the model's own getters,
+		// which is why this reads `get_checkout_defaults()` rather than them. The gaps are
+		// filled from the account filling the form, which need not be the customer's own.
+		return array_merge( $customer->get_checkout_defaults( $user->user_email ), array_filter( $session_data ) );
 	}
 
 	/**
 	 * @param array $form_data
 	 * @return array
+	 * @since 6.9.0 Label falls back to the placeholder only when the field has none.
 	 */
 	public function with_values( array $form_data ) {
 		$this->fields = DefaultFormFields::billing_form_fields();
@@ -129,7 +132,7 @@ class BillingFormFields extends FormField {
 
 				// Extract the name using regex patterns.
 				if ( preg_match( '#\[([^\[]+)]$#', $field['name'], $matches ) ) {
-						$name = $matches[1];
+					$name = $matches[1];
 				} elseif ( preg_match( '/^[^\s]+$/', $field['name'], $matches ) ) {
 					$name = $matches[0];
 				}
@@ -145,7 +148,7 @@ class BillingFormFields extends FormField {
 						$field['name'] = sprintf( 'billing[%s]', $name );
 						$field['id']   = sprintf( 'billing_%s', $name );
 					}
-					$field['field_label'] = isset( $field['placeholder'] ) && $field['placeholder'] !== '' ? $field['placeholder'] : $field['field_label'];
+					$field['field_label'] = ! empty( $field['field_label'] ) ? $field['field_label'] : ( $field['placeholder'] ?? '' );
 					$value                = $form_data[ $name ] ?? $field['default'] ?? '';
 					$field['default']     = $value;
 					$field['value']       = self::resolve_display_value( $value, $field['type'] );

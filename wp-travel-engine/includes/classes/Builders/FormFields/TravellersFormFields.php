@@ -27,22 +27,38 @@ class TravellersFormFields extends TravellerFormFields {
 	protected $number_of_lead_travellers;
 
 	/**
+	 * Traveler category label per traveler slot (lead travelers included), in order.
+	 *
+	 * @var string[]
+	 * @since 6.9.0
+	 */
+	protected array $traveler_category_labels = array();
+
+	/**
 	 * @var array
 	 */
 	public $fields;
 
 
+	/**
+	 * Constructor.
+	 *
+	 * @param array $args Optional arguments: `number_of_travellers`, `number_of_lead_travellers`, `traveler_category_labels`.
+	 * @since 6.9.0 Accepts `traveler_category_labels`.
+	 */
 	public function __construct( $args = array() ) {
 		$args = wp_parse_args(
 			$args,
 			array(
 				'number_of_travellers'      => 1,
 				'number_of_lead_travellers' => 1,
+				'traveler_category_labels'  => array(),
 			)
 		);
 
 		$this->number_of_travellers      = (int) $args['number_of_travellers'];
 		$this->number_of_lead_travellers = (int) $args['number_of_lead_travellers'];
+		$this->traveler_category_labels  = (array) $args['traveler_category_labels'];
 
 		$this->fields = DefaultFormFields::traveller_form_fields();
 		parent::__construct();
@@ -90,6 +106,7 @@ class TravellersFormFields extends TravellerFormFields {
 
 	/**
 	 * @return void
+	 * @since 6.9.0 Shows each traveler's category badge, filterable via `wptravelengine_traveller_category_label`.
 	 */
 	public function fellow_traveller_form_fields() {
 		for ( $i = 0; $i < ( $this->number_of_travellers - $this->number_of_lead_travellers ); $i++ ) :
@@ -100,6 +117,7 @@ class TravellersFormFields extends TravellerFormFields {
 					/* translators: %d: Traveller number */
 					printf( __( 'Traveler %d', 'wp-travel-engine' ), $this->traveller_number + 1 );
 					?>
+					<span class="wpte-checkout__traveler-badge"><?php echo esc_html( apply_filters( 'wptravelengine_traveller_category_label', $this->traveler_category_labels[ $this->traveller_number ] ?? __( 'Adult', 'wp-travel-engine' ), $this->traveller_number ) ); ?></span>
 				</h5>
 				<?php $this->render_traveler_fields( $this->fields ); ?>
 			</div>
@@ -107,6 +125,13 @@ class TravellersFormFields extends TravellerFormFields {
 		endfor;
 	}
 
+	/**
+	 * Map the fields.
+	 *
+	 * @param array $fields Form fields.
+	 * @return array
+	 * @since 6.9.0 Labels use the field label, falling back to the placeholder only when it is empty.
+	 */
 	protected function map_fields( $fields ) {
 		$form_data = WTE()->session->get( 'travellers_form_data' );
 		if ( ! $form_data ) {
@@ -124,7 +149,7 @@ class TravellersFormFields extends TravellerFormFields {
 						$field['id'] = sprintf( 'travellers_%d_%s', $this->traveller_number, $name );
 
 				}
-				$field['field_label'] = isset( $field['placeholder'] ) && $field['placeholder'] !== '' ? $field['placeholder'] : $field['field_label'];
+				$field['field_label'] = ! empty( $field['field_label'] ) ? $field['field_label'] : ( $field['placeholder'] ?? '' );
 				$field['default']     = $form_data[ $this->traveller_number ][ $name ] ?? $field['default'] ?? '';
 
 				return $field;

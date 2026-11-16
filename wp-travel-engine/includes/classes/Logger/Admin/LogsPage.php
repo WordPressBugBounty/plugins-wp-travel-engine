@@ -8,7 +8,7 @@
 
 namespace WPTravelEngine\Logger\Admin;
 
-use WPTravelEngine\Interfaces\AdminPage;
+use WPTravelEngine\Abstracts\AdminMenuPage;
 use WPTravelEngine\Logger\Utilities\LogUtils;
 
 /**
@@ -18,60 +18,46 @@ use WPTravelEngine\Logger\Utilities\LogUtils;
  *
  * @since 6.7.6
  */
-class LogsPage implements AdminPage {
+class LogsPage extends AdminMenuPage {
 
 	/**
 	 * Page slug.
 	 */
-	const SLUG = 'wptravelengine-logs';
+	public const SLUG = 'wptravelengine-logs';
 
 	/**
 	 * Parent slug.
 	 *
-	 * @var string
+	 * @since 6.9.0
 	 */
-	public string $parent_slug;
-
-	/**
-	 * Page title.
-	 *
-	 * @var string
-	 */
-	public string $page_title;
-
-	/**
-	 * Menu title.
-	 *
-	 * @var string
-	 */
-	public string $menu_title;
+	public const PARENT_SLUG = 'tools.php';
 
 	/**
 	 * Capability.
 	 *
-	 * @var string
+	 * @since 6.9.0
 	 */
-	public string $capability;
+	public const CAPABILITY = 'view_wte_logs';
 
 	/**
-	 * Position.
+	 * Menu position.
 	 *
-	 * @var int
+	 * @since 6.9.0
 	 */
-	public int $position;
+	public const POSITION = 99;
 
 	/**
 	 * Constructor.
 	 *
 	 * @since 6.7.6
 	 * @since 6.8.7 Check view_wte_logs instead of manage_options.
+	 * @since 6.9.0 Extends AdminMenuPage; slug, capability and position come from class constants.
 	 */
 	public function __construct() {
-		$this->parent_slug = 'tools.php';
-		$this->page_title  = __( 'WP Travel Engine Logs', 'wp-travel-engine' );
-		$this->menu_title  = __( 'WTE Logs', 'wp-travel-engine' );
-		$this->capability  = 'view_wte_logs';
-		$this->position    = 99;
+		parent::__construct();
+
+		$this->page_title = __( 'WP Travel Engine Logs', 'wp-travel-engine' );
+		$this->menu_title = __( 'WTE Logs', 'wp-travel-engine' );
 	}
 
 	/**

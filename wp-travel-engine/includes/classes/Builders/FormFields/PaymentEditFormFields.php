@@ -13,6 +13,8 @@ use WPTravelEngine\Traits\Singleton;
 use WPTravelEngine\Helpers\Functions;
 use WPTravelEngine\Utilities\ArrayUtility;
 use WPTravelEngine\Core\Cart\Adjustments\GatewayFee;
+use WPTravelEngine\Core\Cart\Adjustments\TaxAdjustment;
+use WPTravelEngine\Core\Tax;
 
 /**
  * Form field class to render billing form fields.
@@ -34,6 +36,7 @@ class PaymentEditFormFields extends BookingEditFormFields {
 	 * Constructor
 	 *
 	 * @updated 6.7.0
+	 * @since 6.9.0 Tax label and rate come from the booking's tax snapshot, as a percentage TaxAdjustment.
 	 */
 	public function __construct( array $defaults = array(), string $mode = 'edit', array $labels = array() ) {
 		$this->use_legacy_template( true );
@@ -74,10 +77,15 @@ class PaymentEditFormFields extends BookingEditFormFields {
 					);
 				}
 			} else {
-				$labels['tax']               = wptravelengine_get_tax_label();
+				// Label and rate the booking was charged under, not the site's current settings; a legacy booking with no snapshot falls back to the site's.
+				$booking_tax                 = Tax::for_booking( $booking->ID );
+				$labels['tax']               = $booking_tax->get_tax_label();
 				$fields['tax']               = $this->get_default_structure( 'tax', $labels['tax'] );
 				$fields['tax']['behaviours'] = array(
-					'type' => 'fee',
+					'type'            => 'fee',
+					'adjustment_type' => 'percentage',
+					'percentage'      => $booking_tax->get_tax_percentage(),
+					'class_name'      => TaxAdjustment::class,
 				);
 				$fields['tax']['attributes'] = array(
 					'step' => 'any',

@@ -10,7 +10,6 @@ use WPTravelEngine\Abstracts\AjaxController;
 use WPTravelEngine\Core\Models\Post\Booking as BookingModel;
 use WPTravelEngine\Core\Models\Post\Payment as PaymentModel;
 use WPTravelEngine\Core\Models\Post\Trip as TripModel;
-use WPTravelEngine\Helpers\CartInfoParser;
 
 class ResendPurchaseReceipt extends AjaxController {
 
@@ -130,12 +129,13 @@ class ResendPurchaseReceipt extends AjaxController {
 	 * @return bool|string Booking detail
 	 *
 	 * @since 6.8.7 updated function to static and remove mail_tags params.
+	 * @since 6.9.0 Reads cart info through wptravelengine_get_cart_info().
 	 */
 	public static function get_booking_detail( $booking_id ) {
 		$booking          = BookingModel::make( $booking_id );
 		$cart_info        = $booking->get_cart_info() ?? array();
 		$line_items       = $cart_info['items'][0]['line_items'] ?? array();
-		$cart_info        = new CartInfoParser( $cart_info );
+		$cart_info        = wptravelengine_get_cart_info( $booking->ID );
 		$totals           = $cart_info->get_totals() ?? array();
 		$deductible_items = $cart_info->get_deductible_items() ?? array();
 		$fees             = $cart_info->get_fees() ?? array();

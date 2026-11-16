@@ -11,6 +11,8 @@ class Template {
 
 	/**
 	 * Initializes hooks for template inclusion and excerpt modification.
+	 *
+	 * @since 6.9.0 Hooks `wp_robots` to keep the account page out of search indexes.
 	 */
 	public function hooks() {
 		add_filter( 'template_include', array( $this, 'include_trip_template' ) );
@@ -23,6 +25,8 @@ class Template {
 
 		add_filter( 'wptravelengine_hide_emergency_form', array( $this, 'modify_emergency_form' ) );
 
+		add_filter( 'wp_robots', array( $this, 'noindex_account_page' ) );
+
 		$fse_templates = new FSE_Template();
 		$fse_templates->hooks();
 	}
@@ -33,6 +37,7 @@ class Template {
 	 * @param string $template_path The current template path.
 	 *
 	 * @return string The modified template path.
+	 * @since 6.9.0 On the account page, enqueues only the `my-account` or `account-auth` bundle, by login state.
 	 */
 	public function include_trip_template( string $template_path ): string {
 
@@ -105,11 +110,15 @@ class Template {
 		}
 
 		if ( wp_travel_engine_is_account_page() ) {
+			// The page is either the React dashboard or the auth forms, never both, so only
+			// that half's bundle is enqueued.
+			$account_handle = is_user_logged_in() ? 'my-account' : 'account-auth';
+
 			Assets::instance()
 				->dequeue_script( 'wp-travel-engine' )
 				->dequeue_style( 'wp-travel-engine' )
-				->enqueue_script( 'my-account' )
-				->enqueue_style( 'my-account' );
+				->enqueue_script( $account_handle )
+				->enqueue_style( $account_handle );
 		}
 
 		$this->enqueue_elementor_assets();
@@ -182,10 +191,11 @@ class Template {
 	 *
 	 * @return boolean true if traveller emergency information should be hidden, false otherwise.
 	 * @since 6.8.0 Removed checkout template v1.0 logic.
+	 * @since 6.9.0 Treats a missing `traveller_emergency_details_form` setting as `on_checkout`.
 	 */
 	public function modify_traveller_emergency_form() {
 		$settings = get_option( 'wp_travel_engine_settings', array() );
-		return ! ( wptravelengine_toggled( $settings['display_travellers_info'] ) && wptravelengine_replace( $settings['traveller_emergency_details_form'], 'after_checkout', true, false ) );
+		return ! ( wptravelengine_toggled( $settings['display_travellers_info'] ) && wptravelengine_replace( $settings['traveller_emergency_details_form'] ?? 'on_checkout', 'after_checkout', true, false ) );
 	}
 
 	/**
@@ -193,11 +203,12 @@ class Template {
 	 *
 	 * @return string 'yes' if traveller information should be hidden, false otherwise.
 	 * @since 6.8.0 Removed checkout template v1.0 logic.
+	 * @since 6.9.0 Defaults `traveller_emergency_details_form` to `on_checkout`.
 	 */
 	public function modify_traveller_form() {
 		$settings                         = get_option( 'wp_travel_engine_settings', array() );
 		$is_enabled_travellers_info       = $settings['display_travellers_info'] ?? 'no';
-		$traveller_emergency_details_form = $settings['traveller_emergency_details_form'] ?? 'after_checkout';
+		$traveller_emergency_details_form = $settings['traveller_emergency_details_form'] ?? 'on_checkout';
 
 		if ( $traveller_emergency_details_form == 'on_checkout' && $is_enabled_travellers_info == 'yes' ) {
 			return 'yes';
@@ -211,9 +222,29 @@ class Template {
 	 *
 	 * @return boolean true if traveller emergency information should be hidden, false otherwise.
 	 * @since 6.8.0 Removed checkout template v1.0 logic.
+	 * @since 6.9.0 Shows the emergency form only when it is collected on checkout, defaulting to `on_checkout`.
 	 */
 	public function modify_emergency_form() {
 		$settings = get_option( 'wp_travel_engine_settings', array() );
-		return ! ( wptravelengine_toggled( $settings['display_emergency_contact'] ) && wptravelengine_toggled( $settings['display_travellers_info'] ) && in_array( $settings['traveller_emergency_details_form'] ?? 'after_checkout', array( 'on_checkout', 'after_checkout' ) ) );
+		return ! ( wptravelengine_toggled( $settings['display_emergency_contact'] ) && wptravelengine_toggled( $settings['display_travellers_info'] ) && in_array( $settings['traveller_emergency_details_form'] ?? 'on_checkout', array( 'on_checkout' ), true ) );
+	}
+
+	/**
+	 * Keeps the account page out of search indexes.
+	 *
+	 * The page renders nothing but a login form to an unauthenticated crawler, so there is
+	 * no content to index and no reason to spend crawl budget on it.
+	 *
+	 * @param array $robots Robots directives.
+	 *
+	 * @return array Filtered directives.
+	 * @since 6.9.0
+	 */
+	public function noindex_account_page( array $robots ): array {
+		if ( wp_travel_engine_is_account_page() ) {
+			return wp_robots_no_robots( $robots );
+		}
+
+		return $robots;
 	}
 }

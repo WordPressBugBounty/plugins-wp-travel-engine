@@ -148,6 +148,19 @@ abstract class EmailTags extends TemplateTags {
 	}
 
 	/**
+	 * Link to the traveler's dashboard (My Account) page.
+	 *
+	 * The frontend counterpart to {booking_url}, which opens wp-admin.
+	 *
+	 * @since 6.9.0
+	 *
+	 * @return string
+	 */
+	public function get_traveler_dashboard(): string {
+		return wptravelengine_dashboard_url() ?: home_url( '/' );
+	}
+
+	/**
 	 * Render an email tag template and return its output.
 	 *
 	 * @param string $file Template file name, relative to includes/templates/template-emails/tags/.
@@ -188,6 +201,7 @@ abstract class EmailTags extends TemplateTags {
 	 *
 	 * @return array<string, callable>
 	 * @since 6.8.7 Moved here from DummyTags::build_callbacks(); Template_Tags mirrors the same tag => method names.
+	 * @since 6.9.0 Registers the {traveler_dashboard} tag.
 	 */
 	protected function build_callbacks(): array {
 		$callbacks = array(
@@ -213,6 +227,7 @@ abstract class EmailTags extends TemplateTags {
 			// Booking tags.
 			'{booking_id}'                => array( $this, 'get_booking_id' ),
 			'{booking_url}'               => array( $this, 'get_booking_url' ),
+			'{traveler_dashboard}'        => array( $this, 'get_traveler_dashboard' ),
 			'{booking_trips_count}'       => array( $this, 'get_booking_trips_count' ),
 			'{trip_booked_date}'          => array( $this, 'get_trip_booked_date' ),
 

@@ -219,6 +219,7 @@ final class PaymentCalculator {
 	 * @return bool True if the value is equals to the given value, false otherwise.
 	 * @throws InvalidArgumentException If the operator is invalid.
 	 * @since 6.7.7
+	 * @since 6.9.0 Accepts '!==' to match the JS calculator.
 	 */
 	public function is( string $a, string $operator, string $b ) {
 		$result = $this->compare( $a, $b );
@@ -227,6 +228,7 @@ final class PaymentCalculator {
 			case '===':
 				return $result === 0;
 			case '!=':
+			case '!==':
 				return $result !== 0;
 			case '>':
 				return $result > 0;
@@ -351,5 +353,52 @@ final class PaymentCalculator {
 			return rtrim( rtrim( sprintf( '%.20F', floatval( $value ) ), '0' ), '.' );
 		}
 		return $value;
+	}
+
+	/**
+	 * Check if the value is zero.
+	 *
+	 * @param string $value Value to check.
+	 * @return bool True if the value is zero at this scale, false otherwise.
+	 * @since 6.9.0
+	 */
+	public function is_zero( string $value ): bool {
+		return 0 === $this->compare( $value, '0' );
+	}
+
+	/**
+	 * Add a list of amounts, settling on the scale at each step.
+	 *
+	 * Settling per step is what `add()` does, so a total built here and one built by folding
+	 * `add()` agree. Summing at full precision and settling once would not.
+	 *
+	 * @param string|int|float ...$args The values to add, or one array of them.
+	 * @return string The total; nothing to add gives zero.
+	 * @since 6.9.0
+	 */
+	public function sum( ...$args ): string {
+		if ( count( $args ) === 1 && is_array( $args[0] ) ) {
+			$args = $args[0];
+		}
+
+		$total = '0';
+
+		foreach ( $args as $value ) {
+			$total = $this->add( $total, strval( $value ) );
+		}
+
+		return $this->normalize( $total );
+	}
+
+	/**
+	 * A share of an amount, from a rate out of a hundred.
+	 *
+	 * @param string $amount Amount to take a share of.
+	 * @param string $percentage Rate out of 100, e.g. '20' for a fifth.
+	 * @return string The share.
+	 * @since 6.9.0
+	 */
+	public function percentage_of( string $amount, string $percentage ): string {
+		return $this->divide( $this->multiply( $amount, $percentage ), '100' );
 	}
 }

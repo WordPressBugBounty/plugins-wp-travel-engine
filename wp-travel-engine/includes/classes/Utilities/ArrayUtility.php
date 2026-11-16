@@ -15,6 +15,14 @@ use WPTravelEngine\Traits\Factory;
  */
 class ArrayUtility {
 	/**
+	 * Callback key standing for every value rather than one named key.
+	 *
+	 * @var string
+	 * @since 6.9.0
+	 */
+	const ALL = '__all__';
+
+	/**
 	 * @var mixed
 	 */
 	protected $data;
@@ -154,8 +162,8 @@ class ArrayUtility {
 	}
 
 	/**
-	 * @param array $data
-	 * @param null  $base_index
+	 * @param array    $data
+	 * @param null|int $base_index
 	 *
 	 * @return array
 	 * @since 6.4.0
@@ -186,5 +194,221 @@ class ArrayUtility {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Returns a value when it is already an array, and an empty array otherwise.
+	 *
+	 * Unlike an `(array)` cast, a scalar does not become a one-element list.
+	 *
+	 * @param mixed $value Value to guard.
+	 * @return array<mixed> The value, or an empty array.
+	 * @since 6.9.0
+	 */
+	public static function to_array( $value ): array {
+		return is_array( $value ) ? $value : array();
+	}
+
+	/**
+	 * Adds items to the end of a list, optionally capping what the result keeps.
+	 *
+	 * @param array<int, mixed> $entries List to add to.
+	 * @param array<int, mixed> $items   Items to add after it.
+	 * @param int|null          $limit   How many entries to keep, or null to keep them all.
+	 * @return array<int, mixed> The combined list.
+	 * @since 6.9.0
+	 */
+	public static function append( array $entries, array $items, ?int $limit = null ): array {
+		$result = array_merge( array_values( $entries ), array_values( $items ) );
+
+		return null === $limit ? $result : array_slice( $result, 0, max( 0, $limit ) );
+	}
+
+	/**
+	 * Keys as a map to intersect against, named either as a list of values
+	 * ( `array( 'id', 'label' )` ) or as the keys themselves ( `array( 'id' => true )` ).
+	 *
+	 * @param array<mixed> $keys Keys, in either spelling.
+	 * @return array<string|int, mixed> Map keyed by the names.
+	 * @since 6.9.0
+	 */
+	public static function key_mask( array $keys ): array {
+		$is_list = array_keys( $keys ) === range( 0, count( $keys ) - 1 );
+
+		return $is_list ? array_flip( $keys ) : $keys;
+	}
+
+	/**
+	 * The named keys of an array, and nothing else.
+	 *
+	 * @param array<string, mixed> $array Array to take from.
+	 * @param array<mixed>         $keys  Keys to keep.
+	 * @return array<string, mixed> The kept entries.
+	 * @since 6.9.0
+	 */
+	public static function only( array $array, array $keys ): array {
+		return $keys ? array_intersect_key( $array, static::key_mask( $keys ) ) : array();
+	}
+
+	/**
+	 * `only()` over a list of rows.
+	 *
+	 * @param array<mixed> $rows Rows to take from.
+	 * @param array<mixed> $keys Keys to keep from each row.
+	 * @return array<mixed> The rows, reduced.
+	 * @since 6.9.0
+	 */
+	public static function only_each( array $rows, array $keys ): array {
+		if ( ! $keys ) {
+			return array();
+		}
+
+		$mask = static::key_mask( $keys );
+		$kept = array();
+
+		foreach ( $rows as $key => $row ) {
+			$kept[ $key ] = array_intersect_key( static::to_array( $row ), $mask );
+		}
+
+		return $kept;
+	}
+
+	/**
+	 * The array with its keys renamed, wherever the map names one.
+	 *
+	 * @param array<string, mixed>  $array Array to rename within.
+	 * @param array<string, string> $map   Current key => what to call it.
+	 * @return array<string, mixed> The array, renamed.
+	 * @since 6.9.0
+	 */
+	public static function rename( array $array, array $map ): array {
+		if ( ! $map ) {
+			return $array;
+		}
+
+		$renamed = array();
+
+		foreach ( $array as $key => $value ) {
+			$name = $map[ $key ] ?? null;
+
+			$renamed[ is_string( $name ) && '' !== $name ? $name : $key ] = $value;
+		}
+
+		return $renamed;
+	}
+
+	/**
+	 * `rename()` over a list of rows.
+	 *
+	 * @param array<mixed>          $rows Rows to rename within.
+	 * @param array<string, string> $map  Current key => what to call it.
+	 * @return array<mixed> The rows, renamed.
+	 * @since 6.9.0
+	 */
+	public static function rename_each( array $rows, array $map ): array {
+		if ( ! $map ) {
+			return $rows;
+		}
+
+		$renamed = array();
+
+		foreach ( $rows as $key => $row ) {
+			$renamed[ $key ] = static::rename( static::to_array( $row ), $map );
+		}
+
+		return $renamed;
+	}
+
+	/**
+	 * The array with the named keys put through their own callable.
+	 *
+	 * `self::ALL` names a callable for every value, which a key's own overrides; anything
+	 * unnamed is left as it was. The callable gets the value alone, since `floatval` and the
+	 * like refuse a second argument.
+	 *
+	 * @param array<string, mixed>    $array     Array to convert within.
+	 * @param array<string, callable> $callbacks Key => callable, plus `self::ALL` for the rest.
+	 * @return array<string, mixed> The array, converted.
+	 * @since 6.9.0
+	 */
+	public static function transform( array $array, array $callbacks ): array {
+		$all = $callbacks[ static::ALL ] ?? null;
+
+		if ( ! is_callable( $all ) ) {
+			foreach ( $callbacks as $key => $callback ) {
+				if ( array_key_exists( $key, $array ) && is_callable( $callback ) ) {
+					$array[ $key ] = $callback( $array[ $key ] );
+				}
+			}
+
+			return $array;
+		}
+
+		$transformed = array();
+
+		foreach ( $array as $key => $value ) {
+			$callback = $callbacks[ $key ] ?? null;
+
+			$transformed[ $key ] = is_callable( $callback ) ? $callback( $value ) : $all( $value );
+		}
+
+		return $transformed;
+	}
+
+	/**
+	 * `transform()` over a list of rows.
+	 *
+	 * @param array<mixed>            $rows      Rows to take from.
+	 * @param array<string, callable> $callbacks Key => what to put its value through.
+	 * @return array<mixed> The rows, converted.
+	 * @since 6.9.0
+	 */
+	public static function transform_each( array $rows, array $callbacks ): array {
+		if ( ! $callbacks ) {
+			return $rows;
+		}
+
+		$transformed = array();
+
+		foreach ( $rows as $key => $row ) {
+			$transformed[ $key ] = static::transform( static::to_array( $row ), $callbacks );
+		}
+
+		return $transformed;
+	}
+
+	/**
+	 * The key of the first row matching every key and value given.
+	 *
+	 * @param array<mixed>         $rows   Rows to search.
+	 * @param array<string, mixed> $match  Key => value every match must carry.
+	 * @param bool                 $strict False compares values as strings, so a stored `123` matches a `'123'`.
+	 * @return int|string|null The matching row's key, or null when none matches.
+	 * @since 6.9.0
+	 */
+	public static function get_key( array $rows, array $match, bool $strict = false ) {
+		if ( ! $match ) {
+			return null;
+		}
+
+		foreach ( $rows as $index => $row ) {
+			$row = static::to_array( $row );
+
+			foreach ( $match as $key => $value ) {
+				if ( ! array_key_exists( $key, $row ) ) {
+					continue 2;
+				}
+
+				$same = $strict ? $row[ $key ] === $value : (string) $row[ $key ] === (string) $value;
+
+				if ( ! $same ) {
+					continue 2;
+				}
+			}
+
+			return $index;
+		}
+
+		return null;
 	}
 }

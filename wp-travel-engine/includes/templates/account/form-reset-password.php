@@ -34,23 +34,13 @@ wp_travel_engine_print_notices(); ?>
 			<h2 class="wpte-lrf-title"><?php echo wp_kses_post( apply_filters( 'wp_travel_engine_reset_password_message', $set_password_page_label ) ); ?></h2>
 		</div>
 		<form method="post" class="wpte-lrf">
-			<div class="wpte-form-field wpte-material-ui-input-control">
+			<div class="wpte-form-field">
 				<label for="password_1"><?php echo esc_attr__( 'Enter new password', 'wp-travel-engine' ); ?><span class="required">*</span></label>
-				<input required name="password_1" id="password_1" type="password" placeholder="<?php esc_html_e( 'New password', 'wp-travel-engine' ); ?>">
-				<fieldset>
-					<legend>
-						<span><?php echo esc_attr__( 'Enter new password', 'wp-travel-engine' ); ?><span class="required">*</span></span>
-					</legend>
-				</fieldset>
+				<input required name="password_1" id="password_1" type="password">
 			</div>
-			<div class="wpte-form-field wpte-material-ui-input-control">
+			<div class="wpte-form-field">
 				<label for="password_2"><?php echo esc_attr__( 'Re-enter new password', 'wp-travel-engine' ); ?><span class="required">*</span></label>
-				<input required name="password_2" id="password_2" type="password" placeholder="<?php esc_html_e( 'Re-enter new password', 'wp-travel-engine' ); ?>">
-				<fieldset>
-					<legend>
-						<span><?php echo esc_attr__( 'Re-enter new password', 'wp-travel-engine' ); ?><span class="required">*</span></span>
-					</legend>
-				</fieldset>
+				<input required name="password_2" id="password_2" type="password">
 			</div>
 
 			<input type="hidden" name="reset_key" value="<?php echo esc_attr( $args['key'] ); ?>" />

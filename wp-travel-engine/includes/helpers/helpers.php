@@ -21,10 +21,138 @@ use WPTravelEngine\Pages\Checkout;
 use WPTravelEngine\PaymentGateways\PaymentGateways;
 use WPTravelEngine\Utilities\Price;
 use WPTravelEngine\Utilities\RequestParser;
+use WPTravelEngine\Helpers\CartInfoParser;
 use WPTravelEngine\Helpers\PackageDateParser;
 use WPTravelEngine\Core\Cart\Items\ExtraService;
 use WPTravelEngine\Core\Cart\Cart;
 use WPTravelEngine\Core\Capabilities;
+
+/**
+ * Get CartInfoParser instance for a booking, parsed once per request.
+ *
+ * @param int        $booking_id Booking the cart belongs to.
+ * @param array|null $data       The cart as it now stands; the booking's own is read when omitted.
+ * @return CartInfoParser
+ * @since 6.9.0
+ */
+function wptravelengine_get_cart_info( int $booking_id, ?array $data = null ): CartInfoParser {
+	$cart_info = apply_filters( 'wptravelengine_cart_info_instance', false, $booking_id, $data );
+
+	if ( $cart_info instanceof CartInfoParser ) {
+		return $cart_info;
+	}
+
+	$parser = CartInfoParser::for( $booking_id, $data );
+
+	// Only when it differs: re-parsing drops the `BookedItem`s the held one has already built.
+	if ( null !== $data && $data !== $parser->data() ) {
+		$parser = CartInfoParser::refresh( $booking_id, $data );
+	}
+
+	return $parser;
+}
+
+/**
+ * Text as it reads, for one stored with HTML entities in it.
+ *
+ * @param mixed $value Stored text.
+ *
+ * @return string
+ * @since 6.9.0
+ */
+function wptravelengine_decode_entity( $value ): string {
+	return html_entity_decode( (string) $value, ENT_QUOTES, 'UTF-8' );
+}
+
+/**
+ * Slug-to-label dictionaries for the enumerated values the REST API returns.
+ *
+ * The API returns slugs only: a label is translated, and for payment status many-to-one, so
+ * it cannot be turned back into a slug. `payment_status` is keyed by status *type* rather
+ * than raw slug, since the raw vocabulary is open and extensible while the four types are
+ * closed. Callers should fall back to the slug when a key is absent.
+ *
+ * @param string|null $set One dictionary by name, or null for all of them.
+ * @return array<string, mixed> The named dictionary, or all of them. Unknown name gives array().
+ * @since 6.9.0
+ */
+function wptravelengine_get_labels( ?string $set = null ) {
+	$booking_status = array_map(
+		function ( $status ): string {
+			return (string) ( $status['text'] ?? '' );
+		},
+		wp_travel_engine_get_booking_status()
+	);
+
+	// `N/A` is the not-found placeholder of that map, not a status a booking can hold.
+	unset( $booking_status['N/A'] );
+
+	$labels = apply_filters(
+		'wptravelengine_labels',
+		array(
+			'booking_status'    => $booking_status,
+			'payment_status'    => array(
+				'success'  => __( 'Completed', 'wp-travel-engine' ),
+				'pending'  => __( 'Pending', 'wp-travel-engine' ),
+				'failed'   => __( 'Failed', 'wp-travel-engine' ),
+				'refunded' => __( 'Refunded', 'wp-travel-engine' ),
+			),
+			'booking_payment'   => array(
+				'completed'      => __( 'Fully Paid', 'wp-travel-engine' ),
+				'partially-paid' => __( 'Deposit Paid', 'wp-travel-engine' ),
+				'pending'        => __( 'Payment Pending', 'wp-travel-engine' ),
+			),
+			'payment_source'    => array(
+				'checkout' => __( 'Checkout', 'wp-travel-engine' ),
+				'admin'    => __( 'Admin', 'wp-travel-engine' ),
+			),
+			'availability'      => array(
+				'available' => __( 'Seats available', 'wp-travel-engine' ),
+				'full'      => __( 'Full', 'wp-travel-engine' ),
+				'oversold'  => __( 'Oversold', 'wp-travel-engine' ),
+				'unlimited' => __( 'Unlimited', 'wp-travel-engine' ),
+				'past'      => __( 'Departed', 'wp-travel-engine' ),
+				'unknown'   => __( 'Unknown', 'wp-travel-engine' ),
+			),
+			'activity_category' => array(
+				'all'       => __( 'All', 'wp-travel-engine' ),
+				'payments'  => __( 'Payments', 'wp-travel-engine' ),
+				'travelers' => __( 'Traveler details', 'wp-travel-engine' ),
+				'addons'    => __( 'Add-ons', 'wp-travel-engine' ),
+			),
+			'line_item_group'   => array(
+				'pricing_category' => __( 'Travelers', 'wp-travel-engine' ),
+				'price_category'   => __( 'Travelers', 'wp-travel-engine' ),
+				'accommodation'    => __( 'Accommodation', 'wp-travel-engine' ),
+				'extra_service'    => __( 'Extra Services', 'wp-travel-engine' ),
+				'travel_insurance' => __( 'Travel Insurance', 'wp-travel-engine' ),
+				'pickup_point'     => __( 'Pickup Points', 'wp-travel-engine' ),
+				'fees'             => __( 'Fees', 'wp-travel-engine' ),
+				'discounts'        => __( 'Discounts', 'wp-travel-engine' ),
+			),
+		)
+	);
+
+	if ( null === $set ) {
+		return $labels;
+	}
+
+	return $labels[ $set ] ?? array();
+}
+
+/**
+ * Turns a field key into a readable label.
+ *
+ * A last resort for a value whose field no longer describes itself — a form field a site has
+ * since renamed away or dropped, leaving older records holding the key alone.
+ *
+ * @param string $key Field key, e.g. `billing_first_name`.
+ * @return string Label, e.g. `Billing First Name`.
+ * @since 6.9.0
+ */
+function wptravelengine_humanize_key( string $key ): string {
+	return ucwords( str_replace( array( '_', '-' ), ' ', trim( $key ) ) );
+}
 
 /**
  * Check if the current user can perform the provided capability.
@@ -75,23 +203,27 @@ function wptravelengine_get_date_parser( TripPackage $trip_package, array $args 
  * Sanitize Request Params.
  *
  * @param array $params Parameters to sanitize.
+ * @param array $multiline_keys Keys whose value is prose and may run to several lines.
  *
  * @return array
  * @since 6.7.0
+ * @since 6.9.0 Keeps line breaks for the named keys, which sanitize_text_field() collapses.
  */
-function wptravelengine_sanitize_params_recursive( array $params ): array {
+function wptravelengine_sanitize_params_recursive( array $params, array $multiline_keys = array() ): array {
 
 	$sanitized_params = array();
 
 	foreach ( $params as $key => $value ) {
 		if ( is_array( $value ) ) {
-			$sanitized_params[ $key ] = wptravelengine_sanitize_params_recursive( $value );
+			$sanitized_params[ $key ] = wptravelengine_sanitize_params_recursive( $value, $multiline_keys );
 		} elseif ( is_int( $value ) ) {
 			$sanitized_params[ $key ] = intval( $value );
 		} elseif ( is_float( $value ) ) {
 			$sanitized_params[ $key ] = floatval( $value );
 		} elseif ( is_bool( $value ) ) {
 			$sanitized_params[ $key ] = filter_var( $value, FILTER_VALIDATE_BOOLEAN );
+		} elseif ( in_array( $key, $multiline_keys, true ) ) {
+			$sanitized_params[ $key ] = sanitize_textarea_field( (string) $value );
 		} elseif ( is_email( $value ) ) {
 			$sanitized_params[ $key ] = sanitize_email( $value );
 		} elseif ( filter_var( $value, FILTER_VALIDATE_URL ) ) {
@@ -318,6 +450,7 @@ function wptravelengine_get_template_args( array $args = array() ): array {
  *
  * @return array
  * @since 6.3.0
+ * @since 6.9.0 Ignores traveller_emergency_details_form; passes traveler category labels; scopes coupons to cart trips.
  */
 function wptravelengine_get_checkout_template_args( array $args = array() ): array {
 	global $wte_cart;
@@ -327,7 +460,6 @@ function wptravelengine_get_checkout_template_args( array $args = array() ): arr
 	$display_header_footer   = $wptravelengine_settings['display_header_footer'] ?? 'no';
 	$show_travellers_info    = $wptravelengine_settings['display_travellers_info'] ?? 'yes';
 	$show_emergency_contact  = $wptravelengine_settings['display_emergency_contact'] ?? 'yes';
-	$traveller_details_form  = $wptravelengine_settings['traveller_emergency_details_form'] ?? 'on_checkout';
 	$display_billing_details = $wptravelengine_settings['display_billing_details'] ?? 'yes';
 	$show_additional_note    = $wptravelengine_settings['show_additional_note'] ?? 'yes';
 	$show_coupon_form        = $wptravelengine_settings['show_discount'] ?? 'yes';
@@ -341,11 +473,11 @@ function wptravelengine_get_checkout_template_args( array $args = array() ): arr
 		'tour-details-title'    => 'show',
 		'cart-summary'          => 'show',
 		'cart-summary-title'    => 'show',
-		'lead-travellers'       => $is_payment_due ? 'hide' : ( $show_travellers_info == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide' ),
+		'lead-travellers'       => $is_payment_due ? 'hide' : ( $show_travellers_info == 'yes' ? 'show' : 'hide' ),
 		'lead-travellers-title' => 'show',
-		'travellers'            => $is_payment_due ? 'hide' : ( $show_travellers_info == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide' ),
+		'travellers'            => $is_payment_due ? 'hide' : ( $show_travellers_info == 'yes' ? 'show' : 'hide' ),
 		'travellers-title'      => 'show',
-		'emergency'             => $is_payment_due ? 'hide' : ( $show_emergency_contact == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide' ),
+		'emergency'             => $is_payment_due ? 'hide' : ( $show_emergency_contact == 'yes' ? 'show' : 'hide' ),
 		'emergency-title'       => 'show',
 		'billing'               => $display_billing_details == 'yes' ? 'show' : 'hide',
 		'billing-title'         => 'show',
@@ -353,7 +485,7 @@ function wptravelengine_get_checkout_template_args( array $args = array() ): arr
 		'additional-note-title' => 'show',
 		'payment'               => 'show',
 		'payment-title'         => 'show',
-		'coupon_form'           => $show_coupon_form == 'yes' && Coupons::is_coupon_available() && 'due' !== $wte_cart->get_payment_type() ? 'show' : 'hide',
+		'coupon_form'           => $show_coupon_form == 'yes' && Coupons::is_coupon_available( $wte_cart->get_cart_trip_ids() ) && 'due' !== $wte_cart->get_payment_type() ? 'show' : 'hide',
 		'footer_copyright'      => $wptravelengine_settings['footer_copyright'] ?? '',
 	);
 
@@ -391,7 +523,11 @@ function wptravelengine_get_checkout_template_args( array $args = array() ): arr
 	$billing_form_fields         = new BillingFormFields();
 	$lead_travellers_form_fields = array();
 	foreach ( $wte_cart->getItems( true ) as $cart_item ) {
-		$lead_travellers_form_fields[] = new LeadTravellersFormFields();
+		$lead_travellers_form_fields[] = new LeadTravellersFormFields(
+			array(
+				'traveler_category_label' => $cart_item->get_traveler_category_labels()[0] ?? '',
+			)
+		);
 	}
 
 	$travellers_form_fields = array();
@@ -400,6 +536,7 @@ function wptravelengine_get_checkout_template_args( array $args = array() ): arr
 			array(
 				'number_of_travellers'      => array_sum( $cart_item->travelers ?? $cart_item->pax ),
 				'number_of_lead_travellers' => 1,
+				'traveler_category_labels'  => $cart_item->get_traveler_category_labels(),
 			)
 		);
 	}
@@ -1043,9 +1180,16 @@ function wte_get_template_html( $template_name, $args = array(), $template_path 
  * Get list of all available payment gateways.
  *
  * @return array
+ * @since 6.9.0 Caches the gateways for the request.
  */
 function wp_travel_engine_get_available_payment_gateways(): array {
-	return PaymentGateways::instance()->get_payment_gateways( true );
+	static $gateways = null;
+
+	if ( null === $gateways ) {
+		$gateways = PaymentGateways::instance()->get_payment_gateways( true );
+	}
+
+	return $gateways;
 }
 
 /**
@@ -1085,18 +1229,14 @@ function wp_travel_engine_get_active_payment_gateways(): array {
  * Get booking confirmation page URL
  *
  * @return url Confirmation page url.
+ * @since 6.9.0 Always returns the thank-you page URL.
  */
 function wp_travel_engine_get_booking_confirm_url() {
 
 	$wte_settings = get_option( 'wp_travel_engine_settings', array() );
 
-	$wte_confirm = wte_array_get( $wte_settings, 'pages.wp_travel_engine_confirmation_page', '' );
-
-	$hide_traveler_information = apply_filters( 'wptravelengine_hide_traveler_emergency_form', wte_array_get( $wte_settings, 'travelers_information', 'yes' ) === 'yes' );
-
-	if ( $hide_traveler_information || empty( $wte_confirm ) ) {
-		$wte_confirm = wte_array_get( $wte_settings, 'pages.wp_travel_engine_thank_you', '' );
-	}
+	// Always the thank-you page: deferred traveler details are now completed from the account dashboard.
+	$wte_confirm = wte_array_get( $wte_settings, 'pages.wp_travel_engine_thank_you', '' );
 
 	if ( empty( $wte_confirm ) ) :
 		$wte_confirm = esc_url( home_url( '/' ) );
@@ -1396,7 +1536,7 @@ function wp_travel_engine_get_settings( $key = null ) {
 /**
  * Get dashboard page ID or resort to default.
  *
- * @return void
+ * @return int|string
  */
 function wp_travel_engine_get_dashboard_page_id() {
 	$settings = wptravelengine_settings()->get();
@@ -1671,6 +1811,7 @@ function wp_travel_engine_get_raw_referer() {
 
 /**
  * @since 6.8.4 Overview tab is no longer hidden when Trip Highlights has content, even if Overview text is empty.
+ * @since 6.9.0 Filters the result through wptravelengine_active_single_trip_tabs.
  */
 function wte_get_active_single_trip_tabs() {
 	global $post;
@@ -1762,7 +1903,17 @@ function wte_get_active_single_trip_tabs() {
 		}
 	}
 
-	return $settings;
+	/**
+	 * Filters the trip tabs shown on a single trip.
+	 *
+	 * An extension hides its own tab by unsetting it in `trip_tabs['id']`.
+	 *
+	 * @since 6.9.0
+	 *
+	 * @param array   $settings Settings with the resolved `trip_tabs`.
+	 * @param WP_Post $post     Trip the tabs belong to.
+	 */
+	return apply_filters( 'wptravelengine_active_single_trip_tabs', $settings, $post );
 }
 
 /**
@@ -2485,6 +2636,7 @@ function wpte_add_custom_tabs_to_trip_meta( array $trip_meta_tabs ): array {
  * Get Booking Status List.
  *
  * @since 1.0.5
+ * @since 6.9.0 Adds the archived status.
  */
 function wp_travel_engine_get_booking_status() {
 	$status = array(
@@ -2516,6 +2668,10 @@ function wp_travel_engine_get_booking_status() {
 			'color' => '#892E2C',
 			'text'  => __( 'N/A', 'wp-travel-engine' ),
 		),
+		'archived' => array(
+			'color' => '#626871',
+			'text'  => __( 'Archived', 'wp-travel-engine' ),
+		),
 	);
 
 	return apply_filters( 'wp_travel_engine_booking_status_list', $status );
@@ -2524,12 +2680,15 @@ function wp_travel_engine_get_booking_status() {
 /**
  * Get all Booking IDs that have the given trip ID.
  *
- * @param int $trip_id Trip ID
+ * @param int|int[] $trip_id Trip ID, or several to match any of.
  * @since 6.3.5
+ * @since 6.9.0 Accepts an array of trip IDs.
  *
  * @return array
  */
 function wptravelengine_get_booking_ids( $trip_id ) {
+	$trip_ids = array_flip( array_map( 'intval', (array) $trip_id ) );
+
 	global $wpdb;
 
 	// Get all bookings with cart_info.
@@ -2556,7 +2715,7 @@ function wptravelengine_get_booking_ids( $trip_id ) {
 				$cart_data = maybe_unserialize( $cart_info );
 				if ( is_array( $cart_data ) && isset( $cart_data['items'] ) && is_array( $cart_data['items'] ) ) {
 					foreach ( $cart_data['items'] as $item ) {
-						if ( is_array( $item ) && isset( $item['trip_id'] ) && intval( $item['trip_id'] ) === intval( $trip_id ) ) {
+						if ( is_array( $item ) && isset( $item['trip_id'] ) && isset( $trip_ids[ intval( $item['trip_id'] ) ] ) ) {
 							$filtered_bookings[] = $booking_id;
 							break;
 						}
@@ -2575,13 +2734,13 @@ function wptravelengine_get_booking_ids( $trip_id ) {
 					'posts_per_page' => -1,
 				)
 			),
-			function ( $result, $item ) use ( $trip_id ) {
+			function ( $result, $item ) use ( $trip_ids ) {
 				$order_trips = $item->order_trips ?? array();
 				if ( ! empty( $order_trips ) ) {
 					$order_trip    = (object) array_shift( $order_trips );
 					$order_trip_id = $order_trip->ID ?? null;
 
-					if ( $order_trip_id !== null && intval( $order_trip_id ) === intval( $trip_id ) ) {
+					if ( $order_trip_id !== null && isset( $trip_ids[ intval( $order_trip_id ) ] ) ) {
 						$result[] = $item->ID;
 					}
 				}
@@ -3276,6 +3435,7 @@ function wptravelengine_deprecated_email_tags(): array {
  *
  * @return array All Email Tags
  * @since 6.7.9
+ * @since 6.9.0 Adds the traveler_dashboard email tag.
  */
 function wptravelengine_all_email_tags(): array {
 	$common = apply_filters(
@@ -3300,6 +3460,7 @@ function wptravelengine_all_email_tags(): array {
 		'{country}'                   => __( 'The buyer\'s country', 'wp-travel-engine' ),
 		'{tprice}'                    => __( 'The trip price', 'wp-travel-engine' ),
 		'{booking_url}'               => __( 'The trip booking link', 'wp-travel-engine' ),
+		'{traveler_dashboard}'        => __( 'Link to the traveler\'s dashboard (My Account) page.', 'wp-travel-engine' ),
 		'{payment_method}'            => __( 'Payment Method used to checkout.', 'wp-travel-engine' ),
 		'{trip_booking_details}'      => __( 'The trip booking & Payment details.', 'wp-travel-engine' ),
 		'{trip_booking_summary}'      => __( 'The trip booking summary.', 'wp-travel-engine' ),

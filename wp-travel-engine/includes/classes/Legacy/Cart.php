@@ -128,6 +128,14 @@ class Cart {
 	protected $booking_ref = null;
 
 	/**
+	 * Payment the cart is settling, when the customer arrived through a payment request.
+	 *
+	 * @var int|null
+	 * @since 6.9.0
+	 */
+	protected ?int $payment_ref = null;
+
+	/**
 	 * @var float[] $default_totals Default total values.
 	 */
 	protected array $default_totals = array(
@@ -348,6 +356,7 @@ class Cart {
 	 * @param mixed ...$args
 	 *
 	 * @return bool
+	 * @since 6.9.0 Hands an unpaid payment request to checkout, which settles it in place.
 	 */
 	public function add( ...$args ): bool {
 
@@ -368,6 +377,7 @@ class Cart {
 		$this->cart_key = wptravelengine_generate_key( time() );
 
 		$this->set_booking_ref();
+		$this->set_payment_ref();
 		$this->set_payment_type( 'full' );
 
 		if ( ! is_null( $request->get_param( 'booking_id' ) ) ) {
@@ -388,10 +398,15 @@ class Cart {
 				$cart_items[] = Item::from_order_item( $order_item, $booking, $this );
 			}
 
-			$this->set_payment_type( 'due' );
-			$this->set_booking_ref( $booking->get_id() );
+			$booking_id = (int) $booking->get_id();
+			$requested  = $booking->get_payment_by_id( (int) $request->get_param( 'payment_id' ) );
+			$payment_id = $requested && $requested->is_payment_request() && ! $requested->is_completed() ? $requested->get_id() : null;
 
-			WTE()->session->set( "__cart_{$this->cart_key}", array( 'booking_id' => $booking->get_id() ) );
+			$this->set_payment_type( 'due' );
+			$this->set_booking_ref( $booking_id );
+			$this->set_payment_ref( $payment_id );
+
+			WTE()->session->set( "__cart_{$this->cart_key}", compact( 'booking_id', 'payment_id' ) );
 		} else {
 			$item = Item::from_request( $request, $this );
 
@@ -433,6 +448,8 @@ class Cart {
 
 	/**
 	 * Write changes to cart session.
+	 *
+	 * @since 6.9.0 Stores the payment_ref.
 	 */
 	protected function write() {
 
@@ -457,6 +474,7 @@ class Cart {
 		$cart['payment_type']    = $this->payment_type;
 		$cart['payment_gateway'] = $this->payment_gateway ?? 'booking_only';
 		$cart['booking_ref']     = $this->booking_ref;
+		$cart['payment_ref']     = $this->payment_ref;
 		$cart['tax']             = $this->tax->get_tax_percentage();
 		$cart['version']         = $this->version;
 
@@ -613,6 +631,7 @@ class Cart {
 	 * Read items from cart session.
 	 *
 	 * @return void
+	 * @since 6.9.0 Restores payment_ref; booking_ref goes through set_booking_ref(), which loads the booking's tax snapshot.
 	 */
 	protected function read() {
 
@@ -628,7 +647,8 @@ class Cart {
 
 		$this->set_payment_type( $_cart['payment_type'] ?? 'full_payment' );
 		$this->set_payment_gateway( $_cart['payment_gateway'] ?? 'booking_only' );
-		$this->booking_ref = $_cart['booking_ref'] ?? null;
+		$this->set_booking_ref( isset( $_cart['booking_ref'] ) ? (int) $_cart['booking_ref'] : null );
+		$this->payment_ref = isset( $_cart['payment_ref'] ) ? (int) $_cart['payment_ref'] : null;
 		$this->discounts   = $_cart['discounts'] ?? array();
 		$this->attributes  = $_cart['attributes'] ?? array();
 		$this->cart_key    = $_cart['id'] ?? '';
@@ -665,9 +685,30 @@ class Cart {
 	 * @param int|null $booking_id Currently processing booking ID.
 	 *
 	 * @return void
+	 * @since 6.9.0 Answers for tax as the booking was charged it.
 	 */
 	public function set_booking_ref( ?int $booking_id = null ) {
 		$this->booking_ref = $booking_id;
+
+		if ( ! $booking_id ) {
+			return;
+		}
+
+		$booking   = wptravelengine_get_booking( $booking_id, true );
+		$snapshot  = $booking ? $booking->get_tax_settings_snapshot() : null;
+		$this->tax = new Tax( $snapshot ? array_merge( wptravelengine_settings()->get(), $snapshot ) : null );
+	}
+
+	/**
+	 * Set the payment the cart is settling.
+	 *
+	 * @param int|null $payment_id Payment the customer arrived to settle, or null for none.
+	 *
+	 * @return void
+	 * @since 6.9.0
+	 */
+	public function set_payment_ref( ?int $payment_id = null ) {
+		$this->payment_ref = $payment_id > 0 ? $payment_id : null;
 	}
 
 	/**
@@ -733,6 +774,8 @@ class Cart {
 
 	/**
 	 * Add Discount Values
+	 *
+	 * @since 6.9.0 Coupon line label comes from Coupon::label().
 	 */
 	public function add_discount_values( $discount_id, $discount_name, $discount_type, $discount_value ) {
 
@@ -747,11 +790,7 @@ class Cart {
 					$this,
 					array(
 						'name'            => 'coupon',
-						'label'           => sprintf(
-							__( 'Coupon: %1$s (%2$s)', 'wp-travel-engine' ),
-							$coupon->code,
-							'percentage' === $coupon->type ? ( $coupon->value . '%' ) : wptravelengine_the_price( $coupon->value, false, false ),
-						),
+						'label'           => $coupon->label(),
 						'adjustment_type' => $coupon->type,
 						'percentage'      => $coupon->value,
 					)
@@ -835,6 +874,8 @@ class Cart {
 
 	/**
 	 * Clear all items in the cart.
+	 *
+	 * @since 6.9.0 Also clears the payment_ref.
 	 */
 	public function clear() {
 
@@ -842,6 +883,7 @@ class Cart {
 		$this->attributes   = array();
 		$this->discounts    = array();
 		$this->booking_ref  = null;
+		$this->payment_ref  = null;
 		$this->payment_type = 'full';
 		$this->tax          = new Tax();
 		$this->discount_clear();
@@ -1193,6 +1235,16 @@ class Cart {
 	 */
 	public function get_booking_ref() {
 		return $this->booking_ref;
+	}
+
+	/**
+	 * Holds the payment reference when the cart is settling one payment request.
+	 *
+	 * @return int|null
+	 * @since 6.9.0
+	 */
+	public function get_payment_ref(): ?int {
+		return $this->payment_ref;
 	}
 
 	/**

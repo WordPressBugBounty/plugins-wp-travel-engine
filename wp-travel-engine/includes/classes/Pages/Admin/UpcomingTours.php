@@ -8,48 +8,34 @@
 
 namespace WPTravelEngine\Pages\Admin;
 
-use WPTravelEngine\Interfaces\AdminPage;
+use WPTravelEngine\Abstracts\AdminMenuPage;
 use WPTravelEngine\Core\Models\Post\Trip;
 
 /**
  * Upcoming Tours Class
  */
-class UpcomingTours implements AdminPage {
+class UpcomingTours extends AdminMenuPage {
+
+	/**
+	 * Page slug.
+	 *
+	 * @since 6.9.0
+	 */
+	public const SLUG = 'wptravelengine-upcoming-tours';
 
 	/**
 	 * Parent slug.
 	 *
-	 * @var string
+	 * @since 6.9.0
 	 */
-	public string $parent_slug;
+	public const PARENT_SLUG = 'edit.php?post_type=booking';
 
 	/**
-	 * Page title.
+	 * Menu position.
 	 *
-	 * @var string
+	 * @since 6.9.0
 	 */
-	public string $page_title;
-
-	/**
-	 * Menu title.
-	 *
-	 * @var string
-	 */
-	public string $menu_title;
-
-	/**
-	 * Capability.
-	 *
-	 * @var string
-	 */
-	public string $capability;
-
-	/**
-	 * Position.
-	 *
-	 * @var int
-	 */
-	public int $position;
+	public const POSITION = 1;
 
 	/**
 	 * Cached cache version for the current request (avoids repeated get_transient calls).
@@ -60,13 +46,14 @@ class UpcomingTours implements AdminPage {
 
 	/**
 	 * Constructor.
+	 *
+	 * @since 6.9.0 Extends AdminMenuPage; slug, parent and position come from class constants.
 	 */
 	public function __construct() {
-		$this->parent_slug = 'edit.php?post_type=booking';
-		$this->page_title  = __( 'Upcoming Tours', 'wp-travel-engine' );
-		$this->menu_title  = __( 'Upcoming Tours', 'wp-travel-engine' );
-		$this->capability  = 'manage_options';
-		$this->position    = 1;
+		parent::__construct();
+
+		$this->page_title = __( 'Upcoming Tours', 'wp-travel-engine' );
+		$this->menu_title = __( 'Upcoming Tours', 'wp-travel-engine' );
 	}
 
 	/**
@@ -84,8 +71,11 @@ class UpcomingTours implements AdminPage {
 
 	/**
 	 * Render the page of Upcoming Tours.
+	 *
+	 * @return void
+	 * @since 6.9.0 Declares the void return type required by the AdminPage interface.
 	 */
-	public function view() {
+	public function view(): void {
 		wp_enqueue_script( 'wptravelengine-upcoming-tours' );
 		wptravelengine_get_admin_template( 'upcoming-tours/index.php', self::get_template_args() );
 	}

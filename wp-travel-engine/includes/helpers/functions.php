@@ -5,13 +5,16 @@
 use Elementor\Plugin;
 use Firebase\JWT\JWT;
 use WPTravelEngine\Email;
-use WPTravelEngine\Booking\Email\Template_Tags;
-use WPTravelEngine\Builders\FormFields\FormField;
-use WPTravelEngine\Core\Cart\Cart;
 use WPTravelEngine\Core\Functions;
+use WPTravelEngine\Core\Cart\Cart;
+use WPTravelEngine\Core\Models\Post\Trip;
 use WPTravelEngine\Core\Models\Post\Booking;
 use WPTravelEngine\Core\Models\Post\Payment;
-use WPTravelEngine\Core\Models\Post\Trip;
+use WPTravelEngine\Core\Models\Post\Customer;
+use WPTravelEngine\Booking\Email\Template_Tags;
+use WPTravelEngine\Builders\FormFields\FormField;
+use WPTravelEngine\Core\Models\User\BillingDetails;
+use WPTravelEngine\Core\Models\User\EmergencyContact;
 use WPTravelEngine\Core\Models\Settings\PluginSettings;
 use WPTravelEngine\Helpers\Functions as HelperFunctions;
 require_once __DIR__ . '/tax.php';
@@ -19,6 +22,83 @@ require_once __DIR__ . '/helpers-analytics.php';
 require_once __DIR__ . '/helpers-prices.php';
 require_once __DIR__ . '/wp-travel-engine-form-fields.php';
 require_once __DIR__ . '/cart.php';
+
+/**
+ * How a traveler's account gets created at checkout.
+ *
+ * One reading of the two switches that already decide this, rather than a setting of its own:
+ * `generate_user_account` creates one outright, `enable_checkout_customer_registration` sends
+ * the traveler to register first, and neither means no account at all. Nothing to migrate, and
+ * the switches cannot disagree with what the admin picked.
+ *
+ * @param PluginSettings|null $settings Settings to read; null reads the saved ones.
+ * @return string One of `auto`, `self` or `none`.
+ * @since 6.9.0
+ */
+function wptravelengine_account_creation_mode( ?PluginSettings $settings = null ): string {
+	$settings = $settings ?? wptravelengine_settings();
+
+	if ( wptravelengine_toggled( $settings->get( 'generate_user_account', 'yes' ) ) ) {
+		return 'auto';
+	}
+
+	return wptravelengine_toggled( $settings->get( 'enable_checkout_customer_registration', 'no' ) ) ? 'self' : 'none';
+}
+
+/**
+ * The frontend Traveler Dashboard page URL, optionally with query args appended.
+ *
+ * Always the frontend page — never `wp_login_url()`/`wp-login.php` — since the dashboard
+ * page itself renders its own frontend login form for logged-out visitors.
+ *
+ * @since 6.9.0
+ *
+ * @param array<string, mixed> $args Query args to append, e.g. `[ 'action' => 'booking-details' ]`.
+ *
+ * @return string Dashboard page URL, or an empty string if no dashboard page is set.
+ */
+function wptravelengine_dashboard_url( array $args = array() ): string {
+	if ( ! function_exists( 'wp_travel_engine_get_dashboard_page_id' ) ) {
+		return '';
+	}
+
+	$url = get_permalink( wp_travel_engine_get_dashboard_page_id() );
+
+	if ( empty( $url ) ) {
+		return '';
+	}
+
+	return ! empty( $args ) ? add_query_arg( $args, $url ) : $url;
+}
+
+/**
+ * Determines the type of a payment status.
+ *
+ * @param string $status Payment status.
+ *
+ * @return string One of 'refunded', 'failed', 'success', 'pending', or '' if the status is unrecognized.
+ * @since 6.9.0
+ */
+function wptravelengine_payment_status_type( string $status ): string {
+	static $groups = null;
+
+	if ( null === $groups ) {
+		$groups = array(
+			'refunded' => wptravelengine_refund_payment_status(),
+			'failed'   => wptravelengine_failed_payment_status(),
+			'success'  => wptravelengine_success_payment_status(),
+			'pending'  => wptravelengine_pending_payment_status(),
+		);
+	}
+
+	foreach ( $groups as $type => $statuses ) {
+		if ( isset( $statuses[ $status ] ) ) {
+			return $type;
+		}
+	}
+
+	return '';
+}
 
 /**
  * Defined successful payment status.
@@ -349,6 +429,7 @@ function wptravelengine_get_label_by_slug( string $slug, $count = 1, bool $do_tr
  *                     - we-travel
  *                     - weather-forecast
  *                     - zapier
+ *                     - slicewp
  *                     - custom-booking-link
  *                     - booking-fee
  *                     - activity-tour
@@ -371,6 +452,7 @@ function wptravelengine_get_label_by_slug( string $slug, $count = 1, bool $do_tr
  * @since 6.2.2
  * @since 6.7.8 Performance improvement via static property cache.
  * @since 6.8.0 Added aliases (extra_service, travel_insurance, pickup_point), applied wptravelengine.is.addon.active filter, and changed return type to strict bool.
+ * @since 6.9.0 Recognises the slicewp addon.
  */
 function wptravelengine_is_addon_active( string $addon ): bool {
 
@@ -398,6 +480,7 @@ function wptravelengine_is_addon_active( string $addon ): bool {
 			'we-travel'            => 'WTE_AFFILIATE_BOOKING_FILE_PATH',
 			'weather-forecast'     => 'WTE_WEATHER_FORECAST_BASE_PATH',
 			'zapier'               => 'WTE_ZAPIER_PLUGIN_FILE',
+			'slicewp'              => 'WPTRAVELENGINE_SLICEWP_INTEGRATION_FILE',
 			'custom-booking-link'  => 'WTE_CBL_FILE_PATH',
 			'booking-fee'          => 'WPTRAVELENGINE_BOOKING_FEE_FILE',
 			'activity-tour'        => 'WPTRAVELENGINE_ACTIVITY_TOUR_BOOKING_PATH',
@@ -797,19 +880,21 @@ function wptravelengine_get_email_template( string $template_name ): string {
  * Get the instance of the trip.
  *
  * @param int|WP_Post|Trip $object Object Name.
+ * @param bool             $make    Reuse the container's instance.
  *
  * @return Trip|null
  * @since 6.0.0
- * @updated 6.6.0
+ * @since 6.6.0 Added early check of Trip instance
+ * @since 6.9.0 Adds `$make`, which returns the container's shared instance.
  */
-function wptravelengine_get_trip( $object ): ?Trip {
+function wptravelengine_get_trip( $object, bool $make = false ): ?Trip {
 
 	if ( $object instanceof Trip ) {
 		return $object;
 	}
 
 	try {
-		return new Trip( $object );
+		return $make ? Trip::make( $object ) : new Trip( $object );
 	} catch ( InvalidArgumentException $e ) {
 		return null;
 	}
@@ -818,30 +903,120 @@ function wptravelengine_get_trip( $object ): ?Trip {
 /**
  * Get the instance of the booking.
  *
- * @param int|WP_Post $object Object Name.
+ * @param int|WP_Post|Booking $object Object Name.
+ * @param bool                $make   Reuse the container's instance.
  *
  * @return Booking|null
  * @since 6.0.0
+ * @since 6.9.0 Adds early check of Booking instance and `$make`.
  */
-function wptravelengine_get_booking( $object ): ?Booking {
+function wptravelengine_get_booking( $object, bool $make = false ): ?Booking {
+
+	if ( $object instanceof Booking ) {
+		return $object;
+	}
+
 	try {
-		return new Booking( $object );
+		return $make ? Booking::make( $object ) : new Booking( $object );
 	} catch ( InvalidArgumentException $e ) {
 		return null;
 	}
 }
 
 /**
+ * Unlike trip/booking/payment helpers, also accepts an email or WP_User, since a customer
+ * is usually known by the email it was booked under.
+ *
+ * @param Customer|WP_User|WP_Post|int|string $object
+ * @param bool                                $make Reuse the container's instance.
+ * @return Customer|null Null when no customer post matches.
+ * @since 6.9.0
+ */
+function wptravelengine_get_customer( $object, bool $make = false ): ?Customer {
+
+	if ( $object instanceof Customer ) {
+		return $object;
+	}
+
+	if ( $object instanceof WP_User ) {
+		$object = $object->user_email;
+	}
+
+	// Customer posts are titled with the email, so it must be looked up, not handed to the model.
+	if ( is_string( $object ) && is_email( $object ) ) {
+		$object = Customer::is_exists( $object );
+
+		if ( ! $object ) {
+			return null;
+		}
+	}
+
+	try {
+		return $make ? Customer::make( $object ) : new Customer( $object );
+	} catch ( InvalidArgumentException $e ) {
+		return null;
+	}
+}
+
+/**
+ * Get the billing record of a user.
+ *
+ * @param BillingDetails|WP_User|int|string $object User, user ID, or email address.
+ * @return BillingDetails|null Null when no such user exists.
+ * @since 6.9.0
+ */
+function wptravelengine_get_user( $object ): ?BillingDetails {
+
+	if ( $object instanceof BillingDetails ) {
+		return $object;
+	}
+
+	if ( is_string( $object ) && is_email( $object ) ) {
+		$object = get_user_by( 'email', $object );
+
+		if ( ! $object ) {
+			return null;
+		}
+	}
+
+	try {
+		return new BillingDetails( $object );
+	} catch ( InvalidArgumentException $e ) {
+		return null;
+	}
+}
+
+/**
+ * The emergency contact a traveler keeps on their account, keyed like the checkout's fields.
+ *
+ * @param WP_User|int $user User, or user ID; 0 for the current user.
+ * @return array<string, string> Empty when none is saved or there is no such user.
+ * @since 6.9.0
+ */
+function wptravelengine_get_user_emergency_contact( $user = 0 ): array {
+	$contact = EmergencyContact::get( $user );
+
+	return $contact ? $contact->all() : array();
+}
+
+/**
  * Get the instance of the payment.
  *
- * @param int|WP_Post $object Object Name.
+ * @param int|WP_Post|Payment $object Object Name.
+ * @param bool                $make   Reuse the container's instance.
  *
  * @return Payment|null
  * @since 6.0.0
+ * @since 6.9.0 Adds early check of Payment instance and `$make`.
  */
-function wptravelengine_get_payment( $object ): ?Payment {
+function wptravelengine_get_payment( $object, bool $make = false ): ?Payment {
+
+	if ( $object instanceof Payment ) {
+		return $object;
+	}
+
 	try {
-		return new Payment( $object );
+		return $make ? Payment::make( $object ) : new Payment( $object );
 	} catch ( InvalidArgumentException $e ) {
 		return null;
 	}
@@ -964,6 +1139,16 @@ function wte_jwt_decode( string $jwt, string $key ) {
 }
 
 /**
+ * Whether WPTE_DEBUG is on.
+ *
+ * @return bool
+ * @since 6.9.0
+ */
+function wptravelengine_debug_enabled(): bool {
+	return defined( 'WPTE_DEBUG' ) && WPTE_DEBUG;
+}
+
+/**
  * WTE Log data in json format.
  *
  * @param mixed $data
@@ -971,7 +1156,7 @@ function wte_jwt_decode( string $jwt, string $key ) {
  * @return void
  */
 function wte_log( $data, $name = 'data', $dump = false, $raw = true ) {
-	if ( defined( 'WPTE_DEBUG' ) && WPTE_DEBUG ) {
+	if ( wptravelengine_debug_enabled() ) {
 		if ( $raw ) {
 			error_log( print_r( $data, true ), 3, WP_CONTENT_DIR . '/wte.log' ); // phpcs:ignore
 

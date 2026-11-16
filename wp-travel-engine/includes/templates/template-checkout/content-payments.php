@@ -10,12 +10,12 @@ global $wte_cart;
 <!-- Payment Form -->
 <div class="wpte-checkout__box">
 	<?php if ( $show_title ) : ?>
-		<h3 class="wpte-checkout__box-title"><?php echo __( 'Payment', 'wp-travel-engine' ); ?></h3>
+		<h3 class="wpte-checkout__box-title"><span class="wpte-checkout__box-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span><?php echo __( 'Payment', 'wp-travel-engine' ); ?></h3>
 	<?php endif; ?>
 	<div class="wpte-checkout__box-content" data-checkout-payment-methods>
 		<?php if ( count( $payment_methods ) ) : ?>
 			<div class="wpte-checkout__ssl-message">
-				<?php echo __( 'This is a secure and SSL encrypted payment. Your credit card details are safe!', 'wp-travel-engine' ); ?>
+				<?php echo __( 'This is a secure and SSL-encrypted payment. Your card details are safe!', 'wp-travel-engine' ); ?>
 			</div>
 		<?php endif; ?>
 		<div data-checkout-payment-modes>

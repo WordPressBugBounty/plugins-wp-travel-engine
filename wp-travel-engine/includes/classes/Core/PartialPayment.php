@@ -126,6 +126,7 @@ class PartialPayment {
 	 *
 	 * @return array
 	 * @since 6.7.0
+	 * @since 6.9.0 Shown on a due payment even when partial payment is off; reads the cart's initial deposit.
 	 */
 	public function get_initial_deposit_row( Checkout $checkout, bool $is_due ): array {
 		$is_partial_payment = in_array(
@@ -138,7 +139,7 @@ class PartialPayment {
 			true
 		);
 
-		if ( ! $this->is_enable || ! $is_partial_payment ) {
+		if ( ( ! $this->is_enable && ! $is_due ) || ! $is_partial_payment ) {
 			return array();
 		}
 
@@ -146,7 +147,7 @@ class PartialPayment {
 
 		return $checkout->get_row(
 			array(
-				'key'   => 'partial_total',
+				'key'   => 'initial_deposit',
 				'label' => $label,
 			)
 		);

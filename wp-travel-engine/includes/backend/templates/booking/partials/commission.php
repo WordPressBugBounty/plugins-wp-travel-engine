@@ -4,6 +4,7 @@
  *
  * @param  object $booking
  * @return void
+ * @deprecated 6.9.0 No longer loaded by WP Travel Engine, so a theme override of it has no effect. It will be removed in a future release.
  */
 if ( ! function_exists( 'slicewp_get_commissions' ) || ! function_exists( 'slicewp_get_affiliate' ) ) {
 	return;

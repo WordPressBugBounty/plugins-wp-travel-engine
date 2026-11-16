@@ -29,6 +29,7 @@ class Checkout extends Shortcode {
 	 *
 	 * @return string
 	 * @since 1.0
+	 * @since 6.9.0 Enqueues the account-auth assets for the login form.
 	 */
 	public function output( $atts ): string {
 		global $wte_cart;
@@ -48,8 +49,8 @@ class Checkout extends Shortcode {
 		if ( 'no' === $generate_user_account && 'yes' === $require_login_to_checkout && ! is_user_logged_in() ) {
 
 			Assets::instance()
-			->enqueue_style( 'my-account' )
-			->enqueue_script( 'my-account' );
+			->enqueue_style( 'account-auth' )
+			->enqueue_script( 'account-auth' );
 
 			wte_get_template( 'account/form-login.php' );
 

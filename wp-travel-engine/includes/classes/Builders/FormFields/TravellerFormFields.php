@@ -43,6 +43,7 @@ class TravellerFormFields extends FormField {
 	 *
 	 * @return array
 	 * @since 6.3.3
+	 * @since 6.9.0 Label falls back to the placeholder only when the field has none.
 	 */
 	public function with_values( array $form_data, $booking = null ): array {
 		++$this->traveller_count;
@@ -64,7 +65,7 @@ class TravellerFormFields extends FormField {
 
 						$field['id'] = sprintf( 'travellers_%s', $name );
 				}
-				$field['field_label'] = isset( $field['placeholder'] ) && $field['placeholder'] !== '' ? $field['placeholder'] : $field['field_label'];
+				$field['field_label'] = ! empty( $field['field_label'] ) ? $field['field_label'] : ( $field['placeholder'] ?? '' );
 				$value                = $form_data[ $name ] ?? $field['default'] ?? '';
 				$field['value']       = self::resolve_display_value( $value, $field['type'] );
 				return $field;

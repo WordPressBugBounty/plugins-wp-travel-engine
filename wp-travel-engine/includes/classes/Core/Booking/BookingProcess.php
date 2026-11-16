@@ -8,22 +8,22 @@
 
 namespace WPTravelEngine\Core\Booking;
 
-use WPTravelEngine\Abstracts\PaymentGateway;
-use WPTravelEngine\PaymentGateways\BaseGateway;
-use WPTravelEngine\Core\Cart\Cart;
 use WPTravelEngine\Filters\Events;
-use WPTravelEngine\Helpers\CartInfoParser;
-use WPTravelEngine\Core\Models\Post\Booking;
-use WPTravelEngine\Core\Models\Post\Customer;
-use WPTravelEngine\Core\Models\Post\Payment;
-use WPTravelEngine\Core\Models\Post\Trip;
+use WPTravelEngine\Core\Cart\Cart;
+use WPTravelEngine\Core\Cart\Item;
 use WPTravelEngine\Modules\CouponCode;
-use WPTravelEngine\PaymentGateways\PaymentGateways;
+use WPTravelEngine\Core\Models\Post\Trip;
 use WPTravelEngine\Utilities\RequestParser;
+use WPTravelEngine\Abstracts\PaymentGateway;
+use WPTravelEngine\Core\Models\Post\Booking;
+use WPTravelEngine\Core\Models\Post\Payment;
+use WPTravelEngine\Core\Models\Post\Customer;
+use WPTravelEngine\PaymentGateways\BaseGateway;
+use WPTravelEngine\PaymentGateways\PaymentGateways;
+use WPTravelEngine\Core\Models\User\EmergencyContact;
 use WPTravelEngine\Validator\Checkout as CheckoutValidator;
 use WPTravelEngine\Validator\Travelers as TravelersValidator;
 use WPTravelEngine\Validator\Emergency as EmergencyValidator;
-use WPTravelEngine\Core\Cart\Item;
 
 class BookingProcess {
 
@@ -112,6 +112,7 @@ class BookingProcess {
 	 *
 	 * @param RequestParser $request Request parser.
 	 * @param Cart          $cart Cart.
+	 * @since 6.9.0 Saves the emergency contact on an account this checkout created; sets the payment link for any balance due.
 	 */
 	public function __construct( RequestParser $request, Cart $cart ) {
 		if ( empty( $cart->getItems( true ) ) ) {
@@ -206,6 +207,16 @@ class BookingProcess {
 			$this->booking->set_emergency_contact_details( $emergency );
 		}
 
+		// An account this checkout created starts with the emergency contact given here; My Profile edits it.
+		if ( ! empty( $emergency ) && 'yes' === get_post_meta( $this->booking->get_id(), 'wptravelengine_account_created', true ) ) {
+			$account = get_user_by( 'email', sanitize_email( $this->billing_info['email'] ?? '' ) );
+
+			// Looked up by email, not the current user: the new account is not always logged in yet.
+			if ( $account ) {
+				( new EmergencyContact( $account ) )->put( isset( $emergency[0] ) ? (array) $emergency[0] : $emergency );
+			}
+		}
+
 		if ( $this->payment_method === 'booking_only' ) {
 			$this->payment_type = 'full_payment';
 		} else {
@@ -221,10 +232,12 @@ class BookingProcess {
 
 		$this->booking->add_payment( $this->payment->get_id() );
 
+		$this->snapshot_settings();
+
 		$this->booking->save();
 
-		// TODO: This needs to be $due = (float) $this->booking->get_due_amount(); only and should be handled properly in Core/Cart Class.
-		if ( (float) $this->booking->get_due_amount() >= 1 ) {
+		// Judged at the currency's scale, not the legacy `due_amount` meta against 1, which missed balances under 1.
+		if ( $this->booking->has_due_payment() ) {
 			$this->booking->set_payment_transient();
 		}
 
@@ -349,9 +362,46 @@ class BookingProcess {
 	}
 
 	/**
+	 * Snapshots the settings the booking was made under, so later changes to them leave it be.
+	 *
+	 * - form_fields_snapshot:  form field identities by form type, skipping disabled fields.
+	 * - tax_snapshot:          the tax settings the cart was charged under.
+	 *
+	 * @return void
+	 * @since 6.9.0
+	 */
+	protected function snapshot_settings(): void {
+		if ( function_exists( 'wptravelengine_form_editor_get_form_fields' ) ) {
+			$snapshot = array();
+
+			foreach ( wptravelengine_form_editor_get_form_fields() as $form_type => $fields ) {
+				foreach ( (array) $fields as $key => $field ) {
+					// Disabled fields never render, so they are not part of the submission.
+					if ( ! is_array( $field ) || false === ( $field['enabled'] ?? true ) ) {
+						continue;
+					}
+
+					// The input `name` maps a field later deleted to its stored value.
+					$snapshot[ $form_type ][ $key ] = array(
+						'key'   => $key,
+						'name'  => $field['name'] ?? '',
+						'type'  => $field['type'] ?? 'text',
+						'label' => $field['field_label'] ?? ( $field['label'] ?? '' ),
+					);
+				}
+			}
+
+			$this->booking->set_meta( 'form_fields_snapshot', $snapshot );
+		}
+
+		$this->booking->set_meta( 'tax_snapshot', $this->cart->tax()->get_settings() );
+	}
+
+	/**
 	 * Process Booking - create booking and update metas.
 	 *
 	 * @return Booking
+	 * @since 6.9.0 Stores the cart_version meta.
 	 */
 	protected function process_booking(): Booking {
 		if ( $booking_id = $this->get_booking_ref() ) {
@@ -407,6 +457,7 @@ class BookingProcess {
 
 		return $booking->set_meta( 'paid_amount', (float) $booking->get_meta( 'paid_amount' ) )
 						->set_meta( 'due_amount', $this->cart->get_cart_total() - (float) $booking->get_meta( 'paid_amount' ) ?? 0 )
+						->set_meta( 'cart_version', $this->cart->version )
 						->set_cart_info(
 							apply_filters(
 								'wptravelengine_before_setting_cart_info',
@@ -435,6 +486,7 @@ class BookingProcess {
 	 *
 	 * @param array $lead_traveller Optional. Sanitized lead traveller data (index 0) to store on customer for future checkouts.
 	 * @return Customer
+	 * @since 6.9.0 Flags the booking and logs the customer in when an account is created.
 	 */
 	protected function process_customer( array $lead_traveller = array() ): Customer {
 		$email = sanitize_email( $this->billing_info['email'] ?? '' );
@@ -468,7 +520,13 @@ class BookingProcess {
 			$customer_model->set_my_meta( 'wptravelengine_traveller_details.0', $lead_traveller );
 		}
 
-		$customer_model->maybe_register_as_user();
+		$account_created = $customer_model->maybe_register_as_user();
+
+		// Flag the booking so the thank-you page can announce the newly created account.
+		if ( $account_created && isset( $this->booking ) ) {
+			update_post_meta( $this->booking->get_id(), 'wptravelengine_account_created', 'yes' );
+			$customer_model->maybe_login();
+		}
 
 		return $customer_model;
 	}
@@ -478,10 +536,11 @@ class BookingProcess {
 	 *
 	 * @return Payment
 	 * @updated 6.7.0
+	 * @since 6.9.0 Reads cart info through wptravelengine_get_cart_info().
 	 */
 	protected function create_payment(): Payment {
 
-		$cart_info = new CartInfoParser( $this->booking->get_cart_info() );
+		$cart_info = wptravelengine_get_cart_info( $this->booking->ID );
 
 		$cart_totals = $cart_info->get_totals();
 
@@ -594,6 +653,7 @@ class BookingProcess {
 	 *
 	 * @return array{items: array, settings: array}
 	 * @since 6.8.0
+	 * @since 6.9.0 Stores trip duration, unit and nights per item instead of the title.
 	 */
 	public static function prepare_items( array $_items ): array {
 		$items    = array();
@@ -614,7 +674,9 @@ class BookingProcess {
 
 			$items[ $cart_item_id ] = array(
 				'ID'                 => $trip->get_id(),
-				'title'              => $trip->get_title(),
+				'duration'           => $trip->get_trip_duration(),
+				'duration_unit'      => $trip->get_trip_duration_unit(),
+				'duration_nights'    => (int) $trip->get_setting( 'trip_duration_nights' ),
 				'cost'               => $data['trip_price'],
 				'pax'                => $data['pax'],
 				'pax_cost'           => $data['pax_cost'],

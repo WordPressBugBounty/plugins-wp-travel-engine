@@ -1,6 +1,7 @@
 <?php
 /**
  * @var BillingEditFormFields $billing_edit_form_fields
+ * @deprecated 6.9.0 No longer loaded by WP Travel Engine, so a theme override of it has no effect. It will be removed in a future release.
  */
 
 use WPTravelEngine\Builders\FormFields\BillingEditFormFields;

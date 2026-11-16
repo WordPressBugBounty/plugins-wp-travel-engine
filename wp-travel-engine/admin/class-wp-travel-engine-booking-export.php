@@ -20,12 +20,13 @@ class WP_Travel_Engine_Booking_Export {
 	 * Register Booking Export hooks.
 	 *
 	 * @since 6.8.0
+	 * @since 6.9.0 Hooks the export button to wptravelengine_bookings_toolbar instead of admin_head.
 	 */
 	public static function register_hooks() {
 		$self = new self();
 
 		add_action( 'admin_init', array( $self, 'init' ) );
-		add_action( 'admin_head', array( $self, 'add_booking_export_button' ) );
+		add_action( 'wptravelengine_bookings_toolbar', array( $self, 'add_booking_export_button' ) );
 	}
 
 	/**
@@ -1546,6 +1547,7 @@ class WP_Travel_Engine_Booking_Export {
 	 * @param array $queries_data Queries Data.
 	 *
 	 * @since 6.7.4
+	 * @since 6.9.0 Catches Throwable per row, so an Error skips that booking instead of aborting the export.
 	 */
 	public function data_export( $queries_data ) {
 		if ( ! is_array( $queries_data ) ) {
@@ -1594,7 +1596,7 @@ class WP_Travel_Engine_Booking_Export {
 				$row_data = self::process_booking_row( $data, $field_definitions, $payment_fields_with_actual_values, $billing_fields_with_values, $traveler_fields_with_values, $emergency_fields_with_values, $countries_list );
 				$row_data = array_map( array( __CLASS__, 'sanitize_csv_value' ), $row_data );
 				fputcsv( $file, $row_data );
-			} catch ( \Exception $e ) {
+			} catch ( \Throwable $e ) {
 				$export_errors[] = array(
 					'booking_id' => $data->BookingID,
 					'message'    => $e->getMessage(),
@@ -1621,6 +1623,7 @@ class WP_Travel_Engine_Booking_Export {
 	 * @param array  $countries_list Countries list.
 	 * @return array Row data array.
 	 * @since 6.7.4
+	 * @since 6.9.0 JSON-encodes an object gateway response as well as an array.
 	 */
 	private static function process_booking_row( $data, $field_definitions, $payment_fields_with_actual_values, $billing_fields_with_values, $traveler_fields_with_values, $emergency_fields_with_values, $countries_list ) {
 		$tripname         = '';
@@ -2016,7 +2019,7 @@ class WP_Travel_Engine_Booking_Export {
 						}
 						if ( in_array( 'gateway_response', $payment_fields_with_actual_values, true ) && method_exists( $payment, 'get_gateway_response' ) ) {
 							$gw                              = $payment->get_gateway_response();
-							$payment_row['gateway_response'] = is_array( $gw ) ? wp_json_encode( $gw ) : (string) $gw;
+							$payment_row['gateway_response'] = ( is_array( $gw ) || is_object( $gw ) ) ? wp_json_encode( $gw ) : (string) $gw;
 						}
 
 						// Add fee fields using same pattern as payment edit form (get_fees()); only fields visible in payment form.
@@ -2099,6 +2102,7 @@ class WP_Travel_Engine_Booking_Export {
 	 * @since 5.7.4
 	 * @since 6.3.5 Added the booking export button to the booking page.
 	 * @since 6.8.0 Migrated from WPTravelEngine\Core\PostTypes\Booking to here.
+	 * @since 6.9.0 Renders on wptravelengine_bookings_toolbar; notice removal moved to AdminNoticeSuppressor.
 	 */
 	public function add_booking_export_button() {
 		global $post_type;
@@ -2110,8 +2114,6 @@ class WP_Travel_Engine_Booking_Export {
 		}
 
 		if ( isset( $_GET['post_type'] ) && 'booking' === $_GET['post_type'] && 'booking' === $post_type ) {
-			// Remove admin notices.
-			remove_all_actions( 'admin_notices' );
 
 			$trips = wp_travel_engine_get_trips_array() ?? array();
 			$trips = array( 'all' => __( 'Select Trip', 'wp-travel-engine' ) ) + $trips;
@@ -2133,15 +2135,13 @@ class WP_Travel_Engine_Booking_Export {
 			?>
 			<form id="wpte-booking-export-form" class="wpte-export-form" method="post">
 				<?php wp_nonce_field( 'booking_export_nonce_action', 'booking_export_nonce' ); ?>
-				<input type="text" data-fpconfig='{"mode":"range","showMonths":"2"}' id="wte-flatpickr__date-range"
-						class="wte-flatpickr">
 				<button id="wpte-booking-export-open-modal" type="button" class="button button-primary">
-					<?php esc_html_e( 'Export Bookings', 'wp-travel-engine' ); ?>
+					<?php esc_html_e( 'Export', 'wp-travel-engine' ); ?>
 				</button>
 				<div class="wpte-booking-export-modal-overlay">
 					<div class="wpte-booking-export-modal">
 						<div class="wpte-booking-export-modal-header">
-							<h2><?php esc_html_e( 'Export Bookings', 'wp-travel-engine' ); ?></h2>
+							<h2><?php esc_html_e( 'Export', 'wp-travel-engine' ); ?></h2>
 							<button type="button" class="wpte-booking-modal-close">
 								<svg width="24" height="24" viewBox="0 0 24 24" fill="none"
 									xmlns="http://www.w3.org/2000/svg">
@@ -2154,8 +2154,9 @@ class WP_Travel_Engine_Booking_Export {
 							<div class="wpte-field">
 								<label
 									for="wpte-booking-export-date"><?php esc_html_e( 'Date', 'wp-travel-engine' ); ?></label>
-								<input style="max-width: 320px;" id="wpte-booking-export-date" type="text"
+								<input id="wpte-booking-export-date" type="text"
 										name="wte_booking_range" data-fpconfig='{"mode":"range","showMonths":"2"}'
+										placeholder="<?php esc_attr_e( 'Select date range', 'wp-travel-engine' ); ?>"
 										value="<?php echo esc_attr( isset( $_POST['wte_booking_range'] ) ? wp_unslash( $_POST['wte_booking_range'] ) : '' ); ?>"
 										class="wte-flatpickr">
 							</div>
@@ -2172,7 +2173,7 @@ class WP_Travel_Engine_Booking_Export {
 							<div class="wpte-field">
 								<label
 									for="wpte-booking-export-status"><?php esc_html_e( 'Booking Status', 'wp-travel-engine' ); ?></label>
-								<select style="max-width: 320px;" name="wptravelengine_booking_status"
+								<select name="wptravelengine_booking_status"
 										id="wpte-booking-export-status">
 									<?php foreach ( $status as $key => $value ) : ?>
 										<option value="<?php echo esc_attr( $key ); ?>"

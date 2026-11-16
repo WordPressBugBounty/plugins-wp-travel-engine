@@ -9,6 +9,7 @@
 namespace WPTravelEngine\Core\Models\Post;
 
 use WPTravelEngine\Abstracts\PostModel;
+use WPTravelEngine\Core\Models\User\BillingDetails;
 use WPTravelEngine\Utilities\ArrayUtility;
 
 /**
@@ -63,75 +64,156 @@ class Customer extends PostModel {
 	 * Retrieves customer first name.
 	 *
 	 * @return string Customer First Name
+	 * @since 6.9.0 Prefers the account's billing record, falling back to the value captured at checkout.
 	 */
 	public function get_customer_fname() {
-		$customer_details = $this->get_customer_details();
-
-		return $customer_details['fname'] ?? '';
+		return $this->billing_first( 'first_name', $this->detail( 'fname' ) );
 	}
 
 	/**
 	 * Retrieves customer last name.
 	 *
 	 * @return string Customer Last Name
+	 * @since 6.9.0 Prefers the account's billing record, falling back to the value captured at checkout.
 	 */
 	public function get_customer_lname() {
-		$customer_details = $this->get_customer_details();
-
-		return $customer_details['lname'] ?? '';
+		return $this->billing_first( 'last_name', $this->detail( 'lname' ) );
 	}
 
 	/**
 	 * Retrieves customer email.
 	 *
+	 * Read from the customer post alone, never from the billing record: it is the key that
+	 * record is found by, so reading it the other way round would not terminate.
+	 *
 	 * @return string Customer Email
 	 */
 	public function get_customer_email() {
-		$customer_details = $this->get_customer_details();
+		return $this->detail( 'email' );
+	}
 
-		return $customer_details['email'] ?? '';
+	/**
+	 * One value as the customer post itself recorded it.
+	 *
+	 * @param string $key Detail key, as the checkout submission keys it.
+	 * @return string
+	 * @since 6.9.0
+	 */
+	public function detail( string $key ): string {
+		$details = $this->get_customer_details();
+
+		return isset( $details[ $key ] ) ? (string) $details[ $key ] : '';
+	}
+
+	/**
+	 * One value, preferring the billing record — the one the traveler can edit — over what the
+	 * checkout captured at the time of booking.
+	 *
+	 * @param string $slot     Billing slot name.
+	 * @param string $fallback Value recorded on the customer post.
+	 * @return string
+	 * @since 6.9.0
+	 */
+	public function billing_first( string $slot, string $fallback ): string {
+		$billing = $this->billing_details();
+
+		return $billing ? $billing->get( $slot, $fallback ) : $fallback;
+	}
+
+	/**
+	 * The inverse priority of the getters above: the booking's own values win, and the account
+	 * record only fills what the booking never captured.
+	 *
+	 * @param ?string $user_email Fill the gaps from this account's record rather than from
+	 *                            the customer's own; see `billing_details()`.
+	 * @return array<string, string> Keyed as the checkout submission keys them.
+	 * @since 6.9.0
+	 */
+	public function get_checkout_defaults( ?string $user_email = null ): array {
+		$billing  = $this->billing_details( $user_email );
+		$slots    = BillingDetails::slots();
+		$defaults = array();
+
+		foreach ( BillingDetails::fields() as $field_key => $field ) {
+			$param = BillingDetails::param_for( (string) $field_key );
+			$key   = rtrim( substr( strrchr( '[' . ( $field['name'] ?? '' ), '[' ), 1 ), ']' );
+
+			if ( '' === $param || '' === $key ) {
+				continue;
+			}
+
+			$recorded         = $this->detail( $key );
+			$defaults[ $key ] = '' !== $recorded || ! $billing ? $recorded : $billing->get( $slots[ $param ] );
+		}
+
+		if ( isset( $defaults['email'] ) && '' === $defaults['email'] && $user_email ) {
+			$defaults['email'] = $user_email;
+		}
+
+		$details = $this->get_customer_details();
+		$choices = BillingDetails::choice_slots();
+
+		foreach ( BillingDetails::custom_params() as $field_key => $meta_key ) {
+			$recorded = $details[ $field_key ] ?? '';
+
+			if ( ! isset( $choices[ $meta_key ] ) ) {
+				$value                  = is_scalar( $recorded ) ? (string) $recorded : '';
+				$defaults[ $field_key ] = '' !== $value || ! $billing ? $value : $billing->get( $meta_key );
+
+				continue;
+			}
+
+			$keys = BillingDetails::to_keys( $recorded );
+
+			if ( ! $keys && $billing ) {
+				$keys = $billing->get_keys( $meta_key );
+			}
+
+			// A select matches one key against each option; a checkbox or radio is rendered
+			// against the whole list, so each gets the shape its field type compares.
+			$defaults[ $field_key ] = 'select' === $choices[ $meta_key ] ? ( $keys[0] ?? '' ) : $keys;
+		}
+
+		return $defaults;
 	}
 
 	/**
 	 * Retrieves customer address.
 	 *
 	 * @return string Customer Address
+	 * @since 6.9.0 Prefers the account's billing record, falling back to the value captured at checkout.
 	 */
 	public function get_customer_address() {
-		$customer_details = $this->get_customer_details();
-
-		return $customer_details['address'] ?? '';
+		return $this->billing_first( 'address', $this->detail( 'address' ) );
 	}
 
 	/**
 	 * Retrieves customer city.
 	 *
 	 * @return string Customer City
+	 * @since 6.9.0 Prefers the account's billing record, falling back to the value captured at checkout.
 	 */
 	public function get_customer_city() {
-		$customer_details = $this->get_customer_details();
-
-		return $customer_details['city'] ?? '';
+		return $this->billing_first( 'city', $this->detail( 'city' ) );
 	}
 
 	/**
 	 * Retrives customer country.
+	 *
+	 * @since 6.9.0 Prefers the account's billing record, falling back to the value captured at checkout.
 	 */
 	public function get_customer_country() {
-		$customer_details = $this->get_customer_details();
-
-		return $customer_details['country'] ?? '';
+		return $this->billing_first( 'country', $this->detail( 'country' ) );
 	}
 
 	/**
 	 * Retrieves customer post code.
 	 *
 	 * @return string Customer Post Code
+	 * @since 6.9.0 Prefers the account's billing record, falling back to the value captured at checkout.
 	 */
 	public function get_customer_postcode() {
-		$customer_details = $this->get_customer_details();
-
-		return $customer_details['postcode'] ?? '';
+		return $this->billing_first( 'zip_code', $this->detail( 'postcode' ) );
 	}
 
 	/**
@@ -149,11 +231,10 @@ class Customer extends PostModel {
 	 *
 	 * @return string Customer Phone
 	 * @since 6.4.0
+	 * @since 6.9.0 Prefers the account's billing record, falling back to the value captured at checkout.
 	 */
 	public function get_customer_phone() {
-		$customer_details = $this->get_customer_details();
-
-		return $customer_details['phone'] ?? '';
+		return $this->billing_first( 'phone', $this->detail( 'phone' ) );
 	}
 
 	/**
@@ -161,11 +242,10 @@ class Customer extends PostModel {
 	 *
 	 * @return string Customer State
 	 * @since 6.4.0
+	 * @since 6.9.0 Prefers the account's billing record, falling back to the value captured at checkout.
 	 */
 	public function get_customer_state() {
-		$customer_details = $this->get_customer_details();
-
-		return $customer_details['state'] ?? '';
+		return $this->billing_first( 'state', $this->detail( 'state' ) );
 	}
 
 	/**
@@ -180,15 +260,18 @@ class Customer extends PostModel {
 	}
 
 	/**
-	 * Retrieves the IDs of the customer's booked trip.
+	 * Retrieves the customer's bookings.
 	 *
-	 * @return array Customer Booked Trip IDs
+	 * @return array List of Booking models.
+	 *
+	 * @since 6.9.0 primed the post cache alongside the meta cache.
 	 */
 	public function get_customer_bookings() {
 		$bookings_ids = $this->get_meta( 'wp_travel_engine_bookings' );
 		$bookings     = array();
 
 		if ( is_array( $bookings_ids ) && ! empty( $bookings_ids ) ) {
+			_prime_post_caches( $bookings_ids, false, false );
 			update_meta_cache( 'post', $bookings_ids );
 		}
 
@@ -216,20 +299,30 @@ class Customer extends PostModel {
 	 *
 	 * @return array Customer Detail Info
 	 * @since 6.4.0
+	 * @since 6.9.0 Reads through the model getters, so the account's billing record wins over the user profile.
 	 */
 	public function get_customer_info() {
-		$user = get_user_by( 'email', $this->get_customer_email() );
-		$data = array();
-		if ( $user instanceof \WP_User ) {
-			$data = get_user_meta( $user->ID, 'wp_travel_engine_customer_billing_details', true );
-		}
-
 		return array(
-			'fname' => $user->first_name ?? $this->get_customer_fname(),
-			'lname' => $user->last_name ?? $this->get_customer_lname(),
-			'email' => $user->user_email ?? $this->get_customer_email(),
-			'phone' => $data['billing_phone'] ?? $this->get_customer_phone(),
+			'fname' => $this->get_customer_fname(),
+			'lname' => $this->get_customer_lname(),
+			'email' => $this->get_customer_email(),
+			'phone' => $this->get_customer_phone(),
 		);
+	}
+
+	/**
+	 * The billing record of the user this customer is, when they have an account at all.
+	 *
+	 * @param ?string $email Read a given account's record instead of the customer's own —
+	 *                       the checkout does this, where the traveler filling the form is
+	 *                       not necessarily the email the customer post is titled with.
+	 * @return ?BillingDetails Null when no user is registered under that email.
+	 * @since 6.9.0
+	 */
+	public function billing_details( ?string $email = null ): ?BillingDetails {
+		$email = $email ?? ( $this->get_customer_email() ? $this->get_customer_email() : $this->get_title() );
+
+		return $email ? wptravelengine_get_user( $email ) : null;
 	}
 
 	/**
@@ -237,27 +330,26 @@ class Customer extends PostModel {
 	 *
 	 * @return array Customer Address Info
 	 * @since 6.4.0
+	 * @since 6.9.0 Reads through the model getters, so the account's billing record wins over the user profile.
 	 */
 	public function get_customer_addresses() {
-		$user = get_user_by( 'email', $this->get_customer_email() );
-		$data = array();
-		if ( $user instanceof \WP_User ) {
-			$data = get_user_meta( $user->ID, 'wp_travel_engine_customer_billing_details', true );
-		}
-
 		return array(
-			'address'  => $data['billing_address'] ?? $this->get_customer_address(),
-			'city'     => $data['billing_city'] ?? $this->get_customer_city(),
-			'state'    => $data['billing_state'] ?? $this->get_customer_state(),
-			'postcode' => $data['billing_zip_code'] ?? $this->get_customer_postcode(),
-			'country'  => $data['billing_country'] ?? $this->get_customer_country(),
+			'address'  => $this->get_customer_address(),
+			'city'     => $this->get_customer_city(),
+			'state'    => $this->get_customer_state(),
+			'postcode' => $this->get_customer_postcode(),
+			'country'  => $this->get_customer_country(),
 		);
 	}
 
 	/**
-	 * @return void
+	 * Register the customer as a WP user account when enabled.
+	 *
+	 * @param bool $force Force registration regardless of the generate_user_account setting.
+	 * @return bool True when a new user account was created, false otherwise.
+	 * @since 6.9.0 Returns whether a new account was created (previously void).
 	 */
-	public function maybe_register_as_user( bool $force = false ) {
+	public function maybe_register_as_user( bool $force = false ): bool {
 		$register_user = $force || wptravelengine_settings()->is( 'generate_user_account', 'yes' );
 
 		if ( $register_user ) {
@@ -287,21 +379,30 @@ class Customer extends PostModel {
 							$user_id->get_error_message()
 						)
 					);
-					return;
+					return false;
 				}
 
 				update_user_meta( $user_id, 'customer_id', $this->get_id() );
-				$data_array = array(
-					'billing_address'  => $this->get_customer_address(),
-					'billing_city'     => $this->get_customer_city(),
-					'billing_zip_code' => $this->get_customer_postcode(),
-					'billing_country'  => $this->get_customer_country(),
-					'billing_phone'    => $this->get_customer_phone(),
-				);
-				update_user_meta( $user_id, 'wp_travel_engine_customer_billing_details', $data_array );
+				$record = wptravelengine_get_user( $user_id );
+
+				if ( $record ) {
+					$record->put(
+						array(
+							'address'  => $this->get_customer_address(),
+							'city'     => $this->get_customer_city(),
+							'zip_code' => $this->get_customer_postcode(),
+							'country'  => $this->get_customer_country(),
+							'phone'    => $this->get_customer_phone(),
+						)
+					);
+				}
 				do_action( 'wp_travel_engine_created_customer', $user_id, $userdata, true, 'emails/customer-new-account.php' );
+
+				return true;
 			}
 		}
+
+		return false;
 	}
 
 	/**
@@ -392,7 +493,9 @@ class Customer extends PostModel {
 	/**
 	 * Checks if customer exists
 	 *
-	 * @return int|false
+	 * @param string $email Customer email, matched exactly against the customer post title.
+	 * @return int|false Customer post ID, or false when none matches.
+	 * @since 6.9.0 Match the email exactly instead of a LIKE '%email%' substring, which let a suffix resolve a foreign customer (CWE-863).
 	 */
 	public static function is_exists( string $email ) {
 		global $wpdb;
@@ -401,7 +504,7 @@ class Customer extends PostModel {
 			return false;
 		}
 
-		$prepared_statement = $wpdb->prepare( "SELECT `ID` FROM {$wpdb->posts} WHERE `post_title` LIKE %s AND `post_type` = %s", '%' . $wpdb->esc_like( sanitize_email( $email ) ) . '%', 'customer' );
+		$prepared_statement = $wpdb->prepare( "SELECT `ID` FROM {$wpdb->posts} WHERE `post_title` = %s AND `post_type` = %s", sanitize_email( $email ), 'customer' );
 
 		return $wpdb->get_row( $prepared_statement )->ID ?? false;
 	}
@@ -467,5 +570,43 @@ class Customer extends PostModel {
 			'postcode'   => $this->get_customer_postcode(),
 			'phone'      => $this->get_customer_phone(),
 		);
+	}
+
+	/**
+	 * Logs the traveler into the account just created for them at checkout, for a limited time.
+	 *
+	 * Call only after maybe_register_as_user() returned true: that guarantees the email had no
+	 * account before this request, so it cannot sign anyone into an existing account.
+	 *
+	 * @return void
+	 * @since 6.9.0
+	 */
+	public function maybe_login(): void {
+		if ( is_user_logged_in() || 'auto' !== wptravelengine_account_creation_mode() ) {
+			return;
+		}
+
+		$user = get_user_by( 'email', sanitize_email( trim( $this->get_title() ) ) );
+
+		if ( ! $user ) {
+			return;
+		}
+
+		/**
+		 * Filters how long, in seconds, a traveler stays logged in after checkout created their account.
+		 *
+		 * @param int      $duration Session length in seconds.
+		 * @param \WP_User $user     The new account.
+		 * @since 6.9.0
+		 */
+		$duration = (int) apply_filters( 'wptravelengine_checkout_auto_login_duration', 4 * HOUR_IN_SECONDS, $user );
+
+		$expiration = static function () use ( $duration ) {
+			return $duration;
+		};
+
+		add_filter( 'auth_cookie_expiration', $expiration, PHP_INT_MAX );
+		wp_set_auth_cookie( $user->ID, true );
+		remove_filter( 'auth_cookie_expiration', $expiration, PHP_INT_MAX );
 	}
 }

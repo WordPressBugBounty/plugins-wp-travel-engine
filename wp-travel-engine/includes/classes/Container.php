@@ -83,9 +83,16 @@ final class Container {
 	 * @param string $post_model_class The PostModel class name.
 	 *
 	 * @return PostModel The post model instance.
+	 * @since 6.9.0 Guards an id that resolves to no post, which used to warn twice before
+	 *             the model constructor rejected it.
 	 */
 	public static function post( $args, string $post_model_class ) {
 		$post = get_post( $args[0] );
+
+		// Nothing to key the cache on; let the model constructor reject it as it would anyway.
+		if ( ! $post instanceof \WP_Post ) {
+			return new $post_model_class( ...$args );
+		}
 
 		$instance = self::$instances[ $post->post_type ] ?? null;
 

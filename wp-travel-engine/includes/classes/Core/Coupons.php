@@ -9,24 +9,29 @@
 
 namespace WPTravelEngine\Core;
 
+use WPTravelEngine\Modules\CouponCode;
+
 /**
  * WP Travel Engine Coupons Class.
  */
 class Coupons {
 
 	/**
-	 * Whether at least one active coupon exists site-wide for the checkout form to render.
+	 * Whether at least one active coupon exists for the checkout form to render.
 	 *
-	 * Trip-id restriction, trip-date window, minimum spend etc. are enforced when the
-	 * coupon is actually applied (see ApplyCoupon controller). Hiding the form based on
-	 * restricted_trips here prevented users on non-restricted-trip pages from seeing the
-	 * form even when they had a valid code for another trip; we now only gate on
-	 * coupon-level validity (status, usage cap, start/expiry window).
+	 * Coupon-level validity (status, usage cap, start/expiry window) is always checked. When
+	 * `$trip_ids` is given, a coupon also has to be unrestricted or restricted to one of those
+	 * trips — otherwise the coupon field shows up at checkout with nothing that can be applied.
 	 *
 	 * @since 6.7.1 Refined the query to improve performance.
-	 * @since 6.8.2  Stopped gating on restricted_trips so the form always appears when any active coupon exists.
+	 * @since 6.8.2 Stopped gating on restricted_trips so the form always appears when any active coupon exists.
+	 * @since 6.9.0 Re-added trip-id gating via `$trip_ids`, scoped to the trips actually in the cart.
+	 *
+	 * @param array<int> $trip_ids Trip IDs to match against each coupon's restricted trips. Empty means site-wide.
+	 *
+	 * @return bool
 	 */
-	public static function is_coupon_available() {
+	public static function is_coupon_available( array $trip_ids = array() ) {
 		$args = array(
 			'post_type'   => 'wte-coupon',
 			'post_status' => 'publish',
@@ -66,6 +71,19 @@ class Coupons {
 			$start = $meta['general']['coupon_start_date'] ?? '';
 			if ( $start && $start > $today ) {
 				continue;
+			}
+
+			if ( ! empty( $trip_ids ) ) {
+				$applies_to_cart = false;
+				foreach ( $trip_ids as $trip_id ) {
+					if ( CouponCode::coupon_can_be_applied( $coupon->ID, $trip_id ) ) {
+						$applies_to_cart = true;
+						break;
+					}
+				}
+				if ( ! $applies_to_cart ) {
+					continue;
+				}
 			}
 
 			return true;

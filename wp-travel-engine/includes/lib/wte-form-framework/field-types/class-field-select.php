@@ -31,6 +31,7 @@ class WP_Travel_Engine_Form_Field_Select {
 	 *
 	 * @param boolean $display
 	 * @return string|void
+	 * @since 6.9.0 Escape option key, value and data-* attribute values on output.
 	 */
 	function render( $display = true ) {
 
@@ -98,13 +99,13 @@ class WP_Travel_Engine_Form_Field_Select {
 
 						if ( ! is_array( $attr ) ) :
 
-							$option_attributes .= sprintf( '%s="%s"', $key1, $attr );
+							$option_attributes .= sprintf( '%s="%s"', $key1, esc_attr( $attr ) );
 
 						else :
 
 							foreach ( $attr as $att ) :
 
-								$option_attributes .= sprintf( '%s="%s"', $key1, $att );
+								$option_attributes .= sprintf( '%s="%s"', $key1, esc_attr( $att ) );
 
 							endforeach;
 
@@ -115,14 +116,14 @@ class WP_Travel_Engine_Form_Field_Select {
 					$assoc_option_atts = $this->field['assoc_option_atts'];
 					foreach ( $assoc_option_atts as $att_key => $att_arr ) :
 						if ( isset( $att_arr[ $key ] ) ) :
-							$option_attributes .= sprintf( '%s="%s"', 'data-' . $att_key, $att_arr[ $key ] );
+							$option_attributes .= sprintf( '%s="%s"', 'data-' . $att_key, esc_attr( $att_arr[ $key ] ) );
 						endif;
 					endforeach;
 				endif;
 
 				$selected = ( $key == $this->field['default'] ) ? 'selected' : '';
 
-				$output .= sprintf( '<option %s value="%s" %s>%s</option>', $option_attributes, $key, $selected, $value );
+				$output .= sprintf( '<option %s value="%s" %s>%s</option>', $option_attributes, esc_attr( $key ), $selected, esc_html( $value ) );
 			}
 		endif;
 

@@ -3,6 +3,7 @@
  * Booking Tab.
  *
  * @package wp-travel-engine/includes/templates/account/tab-content/
+ * @deprecated 6.9.0 No longer loaded by WP Travel Engine, so a theme override of it has no effect. It will be removed in a future release.
  */
 wp_enqueue_script( 'jquery-fancy-box' );
 $bookings = $args['bookings'];

@@ -736,25 +736,29 @@ class Settings {
 	 *
 	 * @return array
 	 * @since 6.2.0
+	 * @since 6.9.0 Adds `traveler_details_timing` and `fill_later_message`; new defaults for confirmation message, footer copyright, emergency contact and additional note.
 	 */
 	protected function prepare_checkout_details( WP_REST_Request $request ): array {
 		$settings                             = array();
 		$settings['enable_travellers_info']   = ! wptravelengine_toggled( $this->plugin_settings->get( 'travelers_information', 'yes' ) );
 		$settings['enable_emergency_contact'] = ! wptravelengine_toggled( $this->plugin_settings->get( 'emergency', null ) );
-		$settings['booking_confirmation_msg'] = (string) $this->plugin_settings->get( 'confirmation_msg', 'Thank you for booking the trip. Please check your email for confirmation. Below is your booking detail:' );
+		$settings['booking_confirmation_msg'] = (string) $this->plugin_settings->get( 'confirmation_msg', __( "Your booking confirmation has been sent to {email}. Please check your spam folder if it doesn't arrive within a few minutes.", 'wp-travel-engine' ) );
 		$settings['gdpr_msg']                 = (string) $this->plugin_settings->get( 'gdpr_msg', 'By contacting us, you agree to our' );
 		$settings['checkout_page_template']   = '2.0';
 
 		$settings['display_header_footer']            = wptravelengine_toggled( $this->plugin_settings->get( 'display_header_footer', 'no' ) );
-		$settings['display_emergency_contact']        = wptravelengine_toggled( $this->plugin_settings->get( 'display_emergency_contact', 'no' ) );
+		$settings['display_emergency_contact']        = wptravelengine_toggled( $this->plugin_settings->get( 'display_emergency_contact', 'yes' ) );
 		$settings['display_travellers_info']          = wptravelengine_toggled( $this->plugin_settings->get( 'display_travellers_info', 'no' ) );
 		$settings['traveller_emergency_details_form'] = (string) $this->plugin_settings->get( 'traveller_emergency_details_form', 'on_checkout' );
 		$settings['travellers_details_type']          = (string) $this->plugin_settings->get( 'travellers_details_type', 'all' );
+		$settings['traveler_details_timing']          = (string) $this->plugin_settings->get( 'traveler_details_timing', 'before_pay' );
 		$settings['display_billing_details']          = wptravelengine_toggled( $this->plugin_settings->get( 'display_billing_details', 'yes' ) );
-		$settings['show_additional_note']             = wptravelengine_toggled( $this->plugin_settings->get( 'show_additional_note', 'no' ) );
+		$settings['show_additional_note']             = wptravelengine_toggled( $this->plugin_settings->get( 'show_additional_note', 'yes' ) );
 		$settings['show_discount']                    = wptravelengine_toggled( $this->plugin_settings->get( 'show_discount', 'yes' ) );
 		$settings['privacy_policy_msg']               = (string) $this->plugin_settings->get( 'privacy_policy_msg', __( 'Check the box to confirm you\'ve read and agree to our', 'wp-travel-engine' ) );
-		$settings['footer_copyright']                 = (string) $this->plugin_settings->get( 'footer_copyright', sprintf( 'Copyright © %s %d. All Rights Reserved.', get_bloginfo( 'name' ), date( 'Y' ) ) );
+		$settings['footer_copyright']                 = (string) $this->plugin_settings->get( 'footer_copyright', __( 'Copyright © %1$current_year% %2$site_name% . All Rights Reserved.', 'wp-travel-engine' ) );
+		$fill_later_message                           = (string) $this->plugin_settings->get( 'fill_later_message', '' );
+		$settings['fill_later_message']               = '' !== $fill_later_message ? $fill_later_message : __( "No problem - add them later. You can complete traveler details for this trip from your dashboard after completing checkout. Your booking isn't affected.", 'wp-travel-engine' );
 
 		return $settings;
 	}
@@ -1079,6 +1083,7 @@ class Settings {
 	 *
 	 * @return array
 	 * @since 6.2.0
+	 * @since 6.9.0 Adds `account_creation_mode` and `allow_traveler_details_edit`.
 	 */
 	protected function prepare_dashboard_settings( WP_REST_Request $request ): array {
 
@@ -1086,11 +1091,15 @@ class Settings {
 
 		$settings = array();
 
+		$settings['account_creation_mode'] = wptravelengine_account_creation_mode( $plugin_settings );
+
 		$settings['generate_user_account'] = wptravelengine_toggled( $plugin_settings->get( 'generate_user_account', 'yes' ) );
 
 		$settings['enable_booking_registration'] = wptravelengine_toggled( $plugin_settings->get( 'enable_checkout_customer_registration', 'no' ) );
 
 		$settings['enable_account_registration'] = ! wptravelengine_toggled( $plugin_settings->get( 'disable_my_account_customer_registration', 'yes' ) );
+
+		$settings['allow_traveler_details_edit'] = wptravelengine_toggled( $plugin_settings->get( 'allow_traveler_details_edit', 'no' ) );
 
 		$settings['login_page_label']        = $plugin_settings->get( 'login_page_label', 'Log into Your Account' );
 		$settings['forgot_page_label']       = $plugin_settings->get( 'forgot_page_label', 'Reset Your Password' );
@@ -2013,6 +2022,7 @@ class Settings {
 	 *
 	 * @return void
 	 * @since 6.2.0
+	 * @since 6.9.0 Saves `traveler_details_timing` and `fill_later_message`.
 	 */
 	protected function set_checkout( WP_REST_Request $request ) {
 		$plugin_settings = $this->plugin_settings;
@@ -2057,6 +2067,10 @@ class Settings {
 			$plugin_settings->set( 'travellers_details_type', $request['travellers_details_type'] );
 		}
 
+		if ( isset( $request['traveler_details_timing'] ) ) {
+			$plugin_settings->set( 'traveler_details_timing', $request['traveler_details_timing'] );
+		}
+
 		if ( isset( $request['display_billing_details'] ) ) {
 			$plugin_settings->set( 'display_billing_details', wptravelengine_replace( $request['display_billing_details'], true, 'yes', 'no' ) );
 		}
@@ -2075,6 +2089,10 @@ class Settings {
 
 		if ( isset( $request['footer_copyright'] ) ) {
 			$plugin_settings->set( 'footer_copyright', $request['footer_copyright'] );
+		}
+
+		if ( isset( $request['fill_later_message'] ) ) {
+			$plugin_settings->set( 'fill_later_message', $request['fill_later_message'] );
 		}
 	}
 
@@ -2415,9 +2433,19 @@ class Settings {
 	 *
 	 * @return void
 	 * @since 6.2.0
+	 * @since 6.9.0 Saves `account_creation_mode` (as its two switches) and `allow_traveler_details_edit`.
 	 */
 	protected function set_dashboard_settings( WP_REST_Request $request ) {
 		$plugin_settings = $this->plugin_settings;
+
+		// Stored as the two switches it stands for, which is what the checkout, the confirmation
+		// and the new-account email have always read.
+		if ( isset( $request['account_creation_mode'] ) ) {
+			$mode = (string) $request['account_creation_mode'];
+
+			$plugin_settings->set( 'generate_user_account', 'auto' === $mode ? 'yes' : 'no' );
+			$plugin_settings->set( 'enable_checkout_customer_registration', 'self' === $mode ? 'yes' : 'no' );
+		}
 
 		if ( isset( $request['generate_user_account'] ) ) {
 			$plugin_settings->set( 'generate_user_account', wptravelengine_replace( $request['generate_user_account'], true, 'yes', 'no' ) );
@@ -2429,6 +2457,10 @@ class Settings {
 
 		if ( isset( $request['enable_account_registration'] ) ) {
 			$plugin_settings->set( 'disable_my_account_customer_registration', wptravelengine_replace( $request['enable_account_registration'], false, 'yes', 'no' ) );
+		}
+
+		if ( isset( $request['allow_traveler_details_edit'] ) ) {
+			$plugin_settings->set( 'allow_traveler_details_edit', wptravelengine_replace( $request['allow_traveler_details_edit'], true, 'yes', 'no' ) );
 		}
 
 		if ( isset( $request['login_page_label'] ) ) {
@@ -2856,6 +2888,7 @@ class Settings {
 	 *
 	 * @return array
 	 * @since 6.2.0
+	 * @since 6.9.0 Adds `traveler_details_timing`, `fill_later_message`, `account_creation_mode` and `allow_traveler_details_edit`.
 	 */
 	public function get_schema(): array {
 		$_schema = array(
@@ -3723,6 +3756,11 @@ class Settings {
 				'type'        => 'string',
 				'enum'        => array( 'all', 'only_lead' ),
 			),
+			'traveler_details_timing'          => array(
+				'description' => __( 'When traveler details are collected relative to payment', 'wp-travel-engine' ),
+				'type'        => 'string',
+				'enum'        => array( 'before_pay', 'pay_later' ),
+			),
 			'display_billing_details'          => array(
 				'description' => __( 'Display Billing Details', 'wp-travel-engine' ),
 				'type'        => 'boolean',
@@ -3741,6 +3779,10 @@ class Settings {
 			),
 			'footer_copyright'                 => array(
 				'description' => __( 'Footer Copyright', 'wp-travel-engine' ),
+				'type'        => 'string',
+			),
+			'fill_later_message'               => array(
+				'description' => __( 'Fill Later Message to Travelers', 'wp-travel-engine' ),
 				'type'        => 'string',
 			),
 			'debug_mode'                       => array(
@@ -3874,12 +3916,21 @@ class Settings {
 					),
 				),
 			),
+			'account_creation_mode'            => array(
+				'description' => __( 'How a traveler account is created at checkout.', 'wp-travel-engine' ),
+				'type'        => 'string',
+				'enum'        => array( 'auto', 'self', 'none' ),
+			),
 			'generate_user_account'            => array(
 				'description' => __( 'Generate User Account Automatically or Not', 'wp-travel-engine' ),
 				'type'        => 'boolean',
 			),
 			'enable_account_registration'      => array(
 				'description' => __( 'Whether to prevent customers from creating new accounts on the account page.', 'wp-travel-engine' ),
+				'type'        => 'boolean',
+			),
+			'allow_traveler_details_edit'      => array(
+				'description' => __( 'Whether a traveler may come back to their dashboard and change details they have already given. Filling them in for the first time is always allowed.', 'wp-travel-engine' ),
 				'type'        => 'boolean',
 			),
 			'enable_booking_registration'      => array(

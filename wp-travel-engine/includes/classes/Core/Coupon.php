@@ -231,4 +231,23 @@ class Coupon {
 	public function set_type( $type ) {
 		$this->type = $type;
 	}
+
+	/**
+	 * How the coupon reads where it is applied, e.g. `Coupon: SUMMER (10%)`.
+	 *
+	 * @return string
+	 * @since 6.9.0
+	 */
+	public function label(): string {
+		$off = 'percentage' === $this->type
+			? $this->value . '%'
+			: wptravelengine_decode_entity( wptravelengine_the_price( $this->value, false, false ) );
+
+		return sprintf(
+			/* translators: 1: coupon code, 2: the rate or amount it takes off. */
+			__( 'Coupon: %1$s (%2$s)', 'wp-travel-engine' ),
+			$this->code,
+			$off
+		);
+	}
 }

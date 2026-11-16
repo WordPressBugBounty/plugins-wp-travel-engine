@@ -44,11 +44,17 @@ class EmergencyFormFields extends FormField {
 		<?php
 	}
 
+	/**
+	 * Names the fields for checkout and fills in their defaults.
+	 *
+	 * @param array $fields Emergency form fields.
+	 * @return array
+	 * @since 6.9.0 Prefills from the contact saved on the account; what this session typed wins.
+	 */
 	protected function map_fields( $fields ) {
 		$form_data = WTE()->session->get( 'emergency_form_data' );
-		if ( ! $form_data ) {
-			$form_data = array();
-		}
+		$form_data = is_array( $form_data ) ? $form_data : array();
+		$form_data = array_merge( wptravelengine_get_user_emergency_contact(), array_filter( $form_data ) );
 
 		return array_map(
 			function ( $field ) use ( $form_data ) {
@@ -61,7 +67,7 @@ class EmergencyFormFields extends FormField {
 						$field['id'] = sprintf( 'emergency_%s', $name );
 
 				}
-				$field['field_label'] = isset( $field['placeholder'] ) && $field['placeholder'] !== '' ? $field['placeholder'] : $field['field_label'];
+				$field['field_label'] = ! empty( $field['field_label'] ) ? $field['field_label'] : ( $field['placeholder'] ?? '' );
 				$field['default']     = $form_data[ $name ] ?? $field['default'] ?? '';
 
 				return $field;
@@ -77,6 +83,7 @@ class EmergencyFormFields extends FormField {
 	 *
 	 * @return array
 	 * @since 6.4.0
+	 * @since 6.9.0 Label falls back to the placeholder only when the field has none.
 	 */
 	public function with_values( $form_data, $booking = null ): array {
 		if ( $booking && $booking->get_meta( 'traveller_page_type' ) == 'old' ) {
@@ -96,7 +103,7 @@ class EmergencyFormFields extends FormField {
 						$field['id'] = sprintf( 'emergency_%s', $name );
 
 				}
-				$field['field_label'] = isset( $field['placeholder'] ) && $field['placeholder'] !== '' ? $field['placeholder'] : $field['field_label'];
+				$field['field_label'] = ! empty( $field['field_label'] ) ? $field['field_label'] : ( $field['placeholder'] ?? '' );
 				$value                = $form_data[ $name ] ?? $field['default'] ?? '';
 				$field['default']     = $value;
 				$field['value']       = self::resolve_display_value( $value, $field['type'] );

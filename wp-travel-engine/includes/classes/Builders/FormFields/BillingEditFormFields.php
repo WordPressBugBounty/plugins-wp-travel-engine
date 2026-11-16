@@ -10,6 +10,18 @@ use WPTravelEngine\Abstracts\BookingEditFormFields;
 
 class BillingEditFormFields extends BookingEditFormFields {
 
+	/**
+	 * @inheritDoc
+	 * @since 6.9.0
+	 */
+	protected const ID_FIELD_FORMAT = 'billing_%s';
+
+	/**
+	 * @inheritDoc
+	 * @since 6.9.0
+	 */
+	protected const NAME_FIELD_FORMAT = 'billing[%s]';
+
 	public function __construct( array $defaults = array(), string $mode = 'edit' ) {
 		parent::__construct( $defaults, $mode );
 		$this->init( $this->map_fields( static::structure( $mode ) ) );

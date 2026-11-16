@@ -13,8 +13,10 @@
 				strtr(
 					$copyright,
 					array(
-						'%current_year%' => date( 'Y' ),
-						'%site_name%'    => get_bloginfo( 'name' ),
+						'%1$current_year%' => date( 'Y' ),
+						'%2$site_name%'    => get_bloginfo( 'name' ),
+						'%current_year%'   => date( 'Y' ),
+						'%site_name%'      => get_bloginfo( 'name' ),
 					)
 				)
 			);

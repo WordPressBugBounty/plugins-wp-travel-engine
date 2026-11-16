@@ -92,6 +92,7 @@ class BookingEmail extends Email {
 	 * @param string|string[] $to Email address or 'admin|customer'
 	 *
 	 * @return $this
+	 * @since 6.9.0 Leaves the customer address empty when no booking is set.
 	 */
 	public function to( string $to ): BookingEmail {
 
@@ -112,7 +113,7 @@ class BookingEmail extends Email {
 					$this->to = $this->get_settings( 'emails' );
 					break;
 				case 'customer':
-					$this->to = $this->booking->get_billing_info( 'email' );
+					$this->to = $this->booking ? $this->booking->get_billing_info( 'email' ) : '';
 					break;
 			}
 		}

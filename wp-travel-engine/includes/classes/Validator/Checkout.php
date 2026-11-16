@@ -18,11 +18,28 @@ namespace WPTravelEngine\Validator;
 class Checkout extends Validator {
 
 	/**
+	 * Billing field key => key its value is stored under.
+	 *
+	 * @since 6.9.0
+	 * @var array<string, string>
+	 */
+	const FIELD_NAME_MAPPING = array(
+		'booking_first_name' => 'fname',
+		'booking_last_name'  => 'lname',
+		'booking_email'      => 'email',
+		'booking_phone'      => 'phone',
+		'booking_address'    => 'address',
+		'booking_city'       => 'city',
+		'booking_country'    => 'country',
+	);
+
+	/**
 	 * Validates the input data.
 	 *
 	 * @param mixed $data The input data.
 	 *
 	 * @return $this
+	 * @since 6.9.0 Reads the key map from `FIELD_NAME_MAPPING`.
 	 */
 	public function validate( $data ): Checkout {
 		$this->raw_data = $data;
@@ -31,15 +48,7 @@ class Checkout extends Validator {
 
 		$booking_data = $data['wp_travel_engine_booking_setting']['place_order']['booking'] ?? $data['billing'] ?? array();
 
-		$field_name_mapping = array(
-			'booking_first_name' => 'fname',
-			'booking_last_name'  => 'lname',
-			'booking_email'      => 'email',
-			'booking_phone'      => 'phone',
-			'booking_address'    => 'address',
-			'booking_city'       => 'city',
-			'booking_country'    => 'country',
-		);
+		$field_name_mapping = self::FIELD_NAME_MAPPING;
 
 		foreach ( $checkout_fields as $field_key => $field ) {
 			$field['required_field'] = $field['validations']['required'] ?? $field['required_field'] ?? false;

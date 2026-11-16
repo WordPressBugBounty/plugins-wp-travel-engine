@@ -340,11 +340,15 @@ class Travelers extends Validator {
 	 * @param array $data Data.
 	 * @param array $field_name_mapping Field name mapping.
 	 * @since 6.4.3
+	 * @since 6.9.0 Seeds an empty entry for each traveler row before mapping its fields.
 	 */
 	protected function process_traveler_fields( array $traveler_fields, array $data, array $field_name_mapping ) {
 		if ( ! empty( $traveler_fields ) ) {
 			foreach ( $traveler_fields as $field_key => $field ) {
 				foreach ( $data as $key => $value ) {
+					if ( ! isset( $this->data['travelers'][ $key ] ) ) {
+						$this->data['travelers'][ $key ] = array();
+					}
 					$mapped_key = $field_name_mapping[ $field_key ] ?? $field['name'] ?? '';
 
 					// For exisiting naming convention of travelers fields.

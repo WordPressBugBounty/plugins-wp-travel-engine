@@ -64,23 +64,13 @@ $enable_linkedin_login     = isset( $wp_travel_engine_settings['enable_linkedin_
 
 				<span class="wpte-divider"><?php esc_html_e( 'or', 'wp-travel-engine' ); ?></span>
 
-				<div class="wpte-form-field wpte-material-ui-input-control">
+				<div class="wpte-form-field">
 					<label><?php echo esc_attr__( 'Email or username', 'wp-travel-engine' ); ?><span class="required">*</span></label>
-					<input id="username" required data-parsley-required-message="<?php esc_attr_e( 'Please enter your valid email or username', 'wp-travel-engine' ); ?>" type="text" name="username" value="" placeholder="<?php esc_attr_e( 'Email or username', 'wp-travel-engine' ); ?>">
-					<fieldset>
-						<legend>
-							<span><?php echo esc_attr__( 'Email or username', 'wp-travel-engine' ); ?><span class="required">*</span></span>
-						</legend>
-					</fieldset>
+					<input id="username" required data-parsley-required-message="<?php esc_attr_e( 'Please enter your valid email or username', 'wp-travel-engine' ); ?>" type="text" name="username" value="">
 				</div>
-				<div class="wpte-form-field wpte-material-ui-input-control">
+				<div class="wpte-form-field">
 					<label><?php echo esc_attr__( 'Password', 'wp-travel-engine' ); ?><span class="required">*</span></label>
-					<input required data-parsley-required-message="<?php esc_attr_e( 'Please enter your password', 'wp-travel-engine' ); ?>" type="password" name="password" value="" placeholder="<?php esc_attr_e( 'Password', 'wp-travel-engine' ); ?>">
-					<fieldset>
-						<legend>
-							<span><?php echo esc_attr__( 'Password', 'wp-travel-engine' ); ?><span class="required">*</span></span>
-						</legend>
-					</fieldset>
+					<input required data-parsley-required-message="<?php esc_attr_e( 'Please enter your password', 'wp-travel-engine' ); ?>" type="password" name="password" value="">
 				</div>
 				<div class="wpte-form-field lrf-rememberme">
 					<div>
@@ -109,23 +99,13 @@ $enable_linkedin_login     = isset( $wp_travel_engine_settings['enable_linkedin_
 							<?php echo esc_html( $login_page_label ); ?>
 						</h2>
 					</div>
-					<div class="wpte-form-field wpte-material-ui-input-control">
+					<div class="wpte-form-field">
 						<label for="username"><?php echo esc_attr__( 'Username or Email', 'wp-travel-engine' ); ?><span class="required">*</span></label>
-						<input id="username" required data-parsley-required-message="<?php esc_attr_e( 'Please enter your valid email or username', 'wp-travel-engine' ); ?>" type="text" name="username" value="" placeholder="<?php esc_attr_e( 'Email or username', 'wp-travel-engine' ); ?>">
-						<fieldset>
-							<legend>
-								<span><?php echo esc_attr__( 'Username or Email', 'wp-travel-engine' ); ?><span class="required">*</span></span>
-							</legend>
-						</fieldset>
+						<input id="username" required data-parsley-required-message="<?php esc_attr_e( 'Please enter your valid email or username', 'wp-travel-engine' ); ?>" type="text" name="username" value="">
 					</div>
-					<div class="wpte-form-field wpte-material-ui-input-control">
+					<div class="wpte-form-field">
 						<label><?php echo esc_attr__( 'Password', 'wp-travel-engine' ); ?><span class="required">*</span></label>
-						<input required data-parsley-required-message="<?php esc_attr_e( 'Please enter your password', 'wp-travel-engine' ); ?>" type="password" name="password" value="" placeholder="<?php esc_attr_e( 'Password', 'wp-travel-engine' ); ?>">
-						<fieldset>
-							<legend>
-								<span><?php echo esc_attr__( 'Password', 'wp-travel-engine' ); ?><span class="required">*</span></span>
-							</legend>
-						</fieldset>
+						<input required data-parsley-required-message="<?php esc_attr_e( 'Please enter your password', 'wp-travel-engine' ); ?>" type="password" name="password" value="">
 					</div>
 					<div class="wpte-form-field lrf-rememberme">
 						<div>
@@ -191,32 +171,17 @@ $enable_linkedin_login     = isset( $wp_travel_engine_settings['enable_linkedin_
 					</div>
 					<span class="wpte-divider">or</span>
 					<div class="wpte-lrf-right">
-						<div class="wpte-form-field wpte-material-ui-input-control">
+						<div class="wpte-form-field">
 							<label><?php echo esc_attr__( 'Username', 'wp-travel-engine' ); ?><span class="required">*</span></label>
-							<input required data-parsley-required-message="<?php esc_attr_e( 'Please enter your desired username', 'wp-travel-engine' ); ?>" name="username" type="text" placeholder="<?php echo esc_attr__( 'Username', 'wp-travel-engine' ); ?>" />
-							<fieldset>
-								<legend>
-									<span><?php echo esc_attr__( 'Username', 'wp-travel-engine' ); ?><span class="required">*</span></span>
-								</legend>
-							</fieldset>
+							<input required data-parsley-required-message="<?php esc_attr_e( 'Please enter your desired username', 'wp-travel-engine' ); ?>" name="username" type="text" />
 						</div>
-						<div class="wpte-form-field wpte-material-ui-input-control">
+						<div class="wpte-form-field">
 							<label><?php echo esc_attr__( 'Email', 'wp-travel-engine' ); ?><span class="required">*</span></label>
-							<input required data-parsley-required-message="<?php esc_attr_e( 'Please enter a valid email address', 'wp-travel-engine' ); ?>" name="email" type="email" placeholder="<?php echo esc_attr__( 'Email address', 'wp-travel-engine' ); ?>" />
-							<fieldset>
-								<legend>
-									<span><?php echo esc_attr__( 'Email', 'wp-travel-engine' ); ?><span class="required">*</span></span>
-								</legend>
-							</fieldset>
+							<input required data-parsley-required-message="<?php esc_attr_e( 'Please enter a valid email address', 'wp-travel-engine' ); ?>" name="email" type="email" />
 						</div>
-						<div class="wpte-form-field wpte-material-ui-input-control">
+						<div class="wpte-form-field">
 							<label><?php echo esc_attr__( 'Password', 'wp-travel-engine' ); ?><span class="required">*</span></label>
-							<input required data-parsley-required-message="<?php esc_attr_e( 'Please enter a valid password', 'wp-travel-engine' ); ?>" name="password" type="password" placeholder="<?php echo esc_attr__( 'Password', 'wp-travel-engine' ); ?>" />
-							<fieldset>
-								<legend>
-									<span><?php echo esc_attr__( 'Password', 'wp-travel-engine' ); ?><span class="required">*</span></span>
-								</legend>
-							</fieldset>
+							<input required data-parsley-required-message="<?php esc_attr_e( 'Please enter a valid password', 'wp-travel-engine' ); ?>" name="password" type="password" />
 						</div>
 						<?php
 
@@ -241,32 +206,17 @@ $enable_linkedin_login     = isset( $wp_travel_engine_settings['enable_linkedin_
 								<?php esc_html_e( 'Create an account', 'wp-travel-engine' ); ?>
 							</h2>
 						</div>
-						<div class="wpte-form-field wpte-material-ui-input-control">
+						<div class="wpte-form-field">
 							<label><?php echo esc_attr__( 'Username', 'wp-travel-engine' ); ?><span class="required">*</span></label>
-							<input required data-parsley-required-message="<?php esc_attr_e( 'Please enter your desired username', 'wp-travel-engine' ); ?>" name="username" type="text" placeholder="<?php echo esc_attr__( 'Username', 'wp-travel-engine' ); ?>" />
-							<fieldset>
-								<legend>
-									<span><?php echo esc_attr__( 'Username', 'wp-travel-engine' ); ?><span class="required">*</span></span>
-								</legend>
-							</fieldset>
+							<input required data-parsley-required-message="<?php esc_attr_e( 'Please enter your desired username', 'wp-travel-engine' ); ?>" name="username" type="text" />
 						</div>
-						<div class="wpte-form-field wpte-material-ui-input-control">
+						<div class="wpte-form-field">
 							<label><?php echo esc_attr__( 'Email', 'wp-travel-engine' ); ?><span class="required">*</span></label>
-							<input required data-parsley-required-message="<?php esc_attr_e( 'Please enter a valid email address', 'wp-travel-engine' ); ?>" name="email" type="email" placeholder="<?php echo esc_attr__( 'Email address', 'wp-travel-engine' ); ?>" />
-							<fieldset>
-								<legend>
-									<span><?php echo esc_attr__( 'Email', 'wp-travel-engine' ); ?><span class="required">*</span></span>
-								</legend>
-							</fieldset>
+							<input required data-parsley-required-message="<?php esc_attr_e( 'Please enter a valid email address', 'wp-travel-engine' ); ?>" name="email" type="email" />
 						</div>
-						<div class="wpte-form-field wpte-material-ui-input-control">
+						<div class="wpte-form-field">
 							<label><?php echo esc_attr__( 'Password', 'wp-travel-engine' ); ?><span class="required">*</span></label>
-							<input required data-parsley-required-message="<?php esc_attr_e( 'Please enter a valid password', 'wp-travel-engine' ); ?>" name="password" type="password" placeholder="<?php echo esc_attr__( 'Password', 'wp-travel-engine' ); ?>" />
-							<fieldset>
-								<legend>
-									<span><?php echo esc_attr__( 'Password', 'wp-travel-engine' ); ?><span class="required">*</span></span>
-								</legend>
-							</fieldset>
+							<input required data-parsley-required-message="<?php esc_attr_e( 'Please enter a valid password', 'wp-travel-engine' ); ?>" name="password" type="password" />
 						</div>
 						<?php
 

@@ -43,7 +43,7 @@ class Attributes {
 	 *
 	 * @return mixed The attribute value, or the default value if the attribute does not exist.
 	 */
-	public function get( string $key = null, $default = '' ) {
+	public function get( ?string $key = null, $default = '' ) {
 
 		if ( is_null( $key ) ) {
 			return $this->attributes;

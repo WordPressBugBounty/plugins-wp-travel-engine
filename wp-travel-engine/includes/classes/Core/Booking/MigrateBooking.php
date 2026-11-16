@@ -10,7 +10,6 @@ namespace WPTravelEngine\Core\Booking;
 use WPTravelEngine\Core\Cart\Adjustments\CouponAdjustment;
 use WPTravelEngine\Core\Cart\Adjustments\TaxAdjustment;
 use WPTravelEngine\Core\Models\Post\Booking as BookingModel;
-use WPTravelEngine\Helpers\CartInfoParser;
 use WPTravelEngine\Utilities\PaymentCalculator;
 
 class MigrateBooking {
@@ -50,6 +49,12 @@ class MigrateBooking {
 		);
 	}
 
+	/**
+	 * Migrates the booking's cart info to version 4.0.
+	 *
+	 * @return void
+	 * @since 6.9.0 Reads cart info through wptravelengine_get_cart_info().
+	 */
 	protected function migrate(): void {
 		if ( $this->booking->is_curr_cart() ) {
 			return;
@@ -61,7 +66,7 @@ class MigrateBooking {
 			return;
 		}
 
-		$parser = new CartInfoParser( $cart_info );
+		$parser = wptravelengine_get_cart_info( $this->booking->ID, $cart_info );
 
 		$new_cart_info                     = $cart_info;
 		$new_cart_info['version']          = '4.0';

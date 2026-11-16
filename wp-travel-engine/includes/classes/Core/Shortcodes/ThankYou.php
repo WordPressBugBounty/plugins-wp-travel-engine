@@ -107,6 +107,7 @@ class ThankYou extends Shortcode {
 	 * @param $atts
 	 *
 	 * @return string
+	 * @since 6.9.0 Wraps the thank-you content in a `.wpte-thankyou` container.
 	 */
 	public function output( array $atts ): string {
 
@@ -137,9 +138,11 @@ class ThankYou extends Shortcode {
 							->enqueue_script( 'trip-thank-you' );
 
 					ob_start();
+					echo '<div class="wpte-thankyou">';
 					do_action( 'wptravelengine_thankyou_before_content' );
 					do_action( 'wptravelengine_thankyou_content' );
 					do_action( 'wptravelengine_thankyou_after_content' );
+					echo '</div>';
 
 					return ob_get_clean();
 				}

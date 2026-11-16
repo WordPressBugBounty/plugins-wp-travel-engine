@@ -23,6 +23,7 @@ class ExternalPayment {
 	 *
 	 * @param RequestParser $request Incoming HTTP request containing `_payment_key`.
 	 * @since 6.8.0 Redirects to 404 if the key is missing, expired, the booking ID is absent, or {@see AddToCart} returns a WP_Error.
+	 * @since 6.9.0 Redirects to 404 for a canceled booking too, so links already sent stop working.
 	 */
 	public function __construct( RequestParser $request ) {
 		$result = false;
@@ -33,7 +34,7 @@ class ExternalPayment {
 
 			$booking_id = $data['booking_id'] ?? false;
 
-			if ( $booking_id ) {
+			if ( $booking_id && 'canceled' !== get_post_meta( (int) $booking_id, 'wp_travel_engine_booking_status', true ) ) {
 				$request = Functions::create_request( 'POST' );
 
 				$request->set_body(
@@ -42,6 +43,7 @@ class ExternalPayment {
 							'_nonce'       => wp_create_nonce( 'wte_add_trip_to_cart' ),
 							'cart_version' => '2.0',
 							'booking_id'   => $booking_id,
+							'payment_id'   => $data['payment_id'] ?? 0,
 						)
 					)
 				);

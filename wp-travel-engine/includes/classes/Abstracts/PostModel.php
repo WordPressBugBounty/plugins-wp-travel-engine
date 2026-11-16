@@ -327,6 +327,7 @@ abstract class PostModel {
 	 *
 	 * @return void
 	 * @since 6.7.0
+	 * @since 6.9.0 Keeps the cached read in step, so a synced key reads back as written.
 	 */
 	public function sync_metas( array $metadata = array() ) {
 		if ( empty( $metadata ) ) {
@@ -335,6 +336,8 @@ abstract class PostModel {
 
 		foreach ( $metadata as $key => $value ) {
 			update_post_meta( $this->ID, $key, $value );
+
+			$this->data[ $key ] = $value;
 		}
 	}
 

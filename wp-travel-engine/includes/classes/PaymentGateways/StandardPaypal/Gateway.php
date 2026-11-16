@@ -163,6 +163,7 @@ class Gateway extends BaseGateway {
 	 * Handle Notification Request.
 	 *
 	 * @return void
+	 * @since 6.9.0 Duplicate-txn guard scoped to other payments so a Pending -> Completed IPN (same txn_id) still completes the payment.
 	 */
 	public function handle_notification_request( Booking $booking, Payment $payment ) {
 		$listener = new IPNListener();
@@ -191,9 +192,35 @@ class Gateway extends BaseGateway {
 				return;
 			}
 
-			// Halt on duplicate txn_id.
+			// `custom` must match the booking from the notify URL, else a verified IPN could be replayed onto another booking.
+			$custom = absint( wp_unslash( $_POST['custom'] ?? 0 ) );
+			if ( $custom !== (int) $booking->get_id() ) {
+				header( 'HTTP/1.1 200 OK' );
+				return;
+			}
+
+			// Same txn_id recorded against a *different* payment = a verified IPN replayed onto
+			// another booking. Halt so one transaction cannot mark multiple bookings paid.
 			$transaction_id = sanitize_text_field( wp_unslash( $_REQUEST['txn_id'] ?? '' ) );
-			if ( $transaction_id && $transaction_id === $payment->get_meta( '_transaction_id' ) ) {
+			$existing_txn   = $transaction_id ? get_posts(
+				array(
+					'post_type'      => 'wte-payments',
+					'post_status'    => 'any',
+					'fields'         => 'ids',
+					'posts_per_page' => 1,
+					'no_found_rows'  => true,
+					'post__not_in'   => array( $payment->get_id() ),
+					'meta_key'       => '_transaction_id',
+					'meta_value'     => $transaction_id,
+				)
+			) : array();
+
+			if ( ! empty( $existing_txn ) ) {
+				header( 'HTTP/1.1 200 OK' );
+				return;
+			}
+
+			if ( $transaction_id && $transaction_id === $payment->get_meta( '_transaction_id' ) && $payment->is_completed() ) {
 				header( 'HTTP/1.1 200 OK' );
 				return;
 			}

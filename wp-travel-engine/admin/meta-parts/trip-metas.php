@@ -930,7 +930,16 @@ $trip_meta_tabs['advanced-settings'] = array(
 		array(
 			'field' => array(
 				'type' => 'TAB',
-				'tabs' => wp_travel_engine_sort_array_by_priority( $advanced_settings_tabs ),
+				'tabs' => wp_travel_engine_sort_array_by_priority(
+					/**
+					 * Filters the sub-tabs under Advanced Settings on the trip edit screen.
+					 *
+					 * @since 6.9.0
+					 *
+					 * @param array $advanced_settings_tabs Sub-tabs, each with an `id`.
+					 */
+					apply_filters( 'wptravelengine_tripedit_advanced_settings_tabs', $advanced_settings_tabs )
+				),
 			),
 		),
 	),

@@ -62,6 +62,26 @@ trait Factory {
 	}
 
 	/**
+	 * Replace the cached instance for a key, and return the new one.
+	 *
+	 * `for()` builds only on the first call and ignores later arguments, so this is how a
+	 * caller holding newer state hands it over.
+	 *
+	 * @param string|int $key     The unique identifier for this instance.
+	 * @param mixed      ...$args Constructor arguments for the replacement.
+	 *
+	 * @return static
+	 * @since 6.9.0
+	 */
+	public static function refresh( $key, ...$args ): object {
+		$instance = empty( $args ) ? new static( $key ) : new static( ...$args );
+
+		Container::register_instance( self::generate_cache_key( $key ), $instance );
+
+		return $instance;
+	}
+
+	/**
 	 * Generate a unique cache key for the factory instance.
 	 *
 	 * @param string|int $key The identifier.

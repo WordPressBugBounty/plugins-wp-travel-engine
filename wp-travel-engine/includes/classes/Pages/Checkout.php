@@ -16,7 +16,6 @@ use WPTravelEngine\Interfaces\CartItem;
 use WPTravelEngine\Core\Models\Settings\Options;
 use WPTravelEngine\Core\Models\Post\Booking;
 use WPTravelEngine\Traits\Singleton;
-use WPTravelEngine\Helpers\CartInfoParser;
 
 /**
  * Checkout page class.
@@ -277,6 +276,7 @@ class Checkout extends BasePage {
 	 * Get additional line items.
 	 *
 	 * @return array
+	 * @since 6.9.0 Renders rows as summary-line divs and items through process() instead of render().
 	 */
 	public function get_additional_line_items(): array {
 
@@ -287,7 +287,7 @@ class Checkout extends BasePage {
 
 			$_rows = array();
 			if ( count( $cart_items ) > 1 ) {
-				$_rows['trip_title'] = sprintf( '<tr><td><strong>%s</strong></td><td></td></tr>', get_the_title( $cart_item->trip_id ) );
+				$_rows['trip_title'] = sprintf( '<div class="wpte-checkout__summary-caption">%s</div>', get_the_title( $cart_item->trip_id ) );
 			}
 
 			foreach ( $additional_line_items as $item ) {
@@ -296,7 +296,7 @@ class Checkout extends BasePage {
 				}
 				/** @var \WPTravelEngine\Abstracts\CartItem $_item */
 				foreach ( $item as $_item ) {
-					$_rows[ $_item->item_type ][] = $_item->render();
+					$_rows[ $_item->item_type ][] = $_item->process();
 				}
 			}
 			$rows['line_items'][] = $_rows;
@@ -305,6 +305,12 @@ class Checkout extends BasePage {
 		return apply_filters( 'wptravelengine_checkout_page_' . __FUNCTION__, $rows, $this->cart );
 	}
 
+	/**
+	 * Cart summary rows in canonical order.
+	 *
+	 * @return array|null
+	 * @since 6.9.0 Legacy-cart rows put fees after Total instead of before it.
+	 */
 	public function get_cart_line_items(): ?array {
 		if ( $this->cart->is_curr_cart() ) {
 			return array_merge(
@@ -314,27 +320,41 @@ class Checkout extends BasePage {
 			);
 		}
 
+		// Canonical summary order: trip breakdown, discount, total, then fees (fee-taxed-with-trip, tax, other fees).
 		return array_merge(
 			$this->get_additional_line_items(),
 			$this->get_cart_subtotal(),
 			$this->get_deductible_line_items(),
-			$this->get_fee_rows(),
 			$this->get_total_row(),
+			$this->get_fee_rows( array( 'tax_inclusive', 'tax', 'tax_exclusive' ) ),
 		);
 	}
 
+	/**
+	 * Rendered fee rows, by type.
+	 *
+	 * @param string|string[] $type One of `tax`, `tax_inclusive`, `tax_exclusive`, or a list of
+	 *                              them collected in the order given; empty for every fee.
+	 * @return array
+	 * @since 6.9.0 Accept a list of types alongside a single one.
+	 */
 	public function get_fee_rows( $type = '' ) {
 
-		if ( in_array( $type, array( 'tax', 'tax_inclusive', 'tax_exclusive' ), true ) ) {
+		$valid = array( 'tax', 'tax_inclusive', 'tax_exclusive' );
+		// A single type or a list of them, kept in the order passed; anything else means every fee.
+		$types = array_values( array_intersect( (array) $type, $valid ) );
+
+		if ( $types ) {
 			$fees_arr = $this->cart->get_fees_by_type();
-			switch ( $type ) {
-				case 'tax':
-					$fees = ( $fees_arr['tax'] ?? false ) ? array( $fees_arr['tax'] ) : array();
-					break;
-				case 'tax_inclusive':
-				case 'tax_exclusive':
-					$fees = $fees_arr[ $type ] ?? array();
-					break;
+			$fees     = array();
+			foreach ( $types as $one ) {
+				// Tax is a single adjustment; the inclusive/exclusive buckets are already lists.
+				$fees = array_merge(
+					$fees,
+					'tax' === $one
+						? ( ( $fees_arr['tax'] ?? false ) ? array( $fees_arr['tax'] ) : array() )
+						: ( $fees_arr[ $one ] ?? array() )
+				);
 			}
 		} else {
 			$fees = $this->cart->get_fees();
@@ -349,7 +369,9 @@ class Checkout extends BasePage {
 			$items[ $fee->name ] = $fee->render();
 		}
 
-		return apply_filters( 'wptravelengine_checkout_page_' . __FUNCTION__ . ( $type ? "_$type" : '' ), $items, $this->cart );
+		$suffix = is_array( $type ) ? ( $types ? '_' . implode( '_', $types ) : '' ) : ( $type ? "_$type" : '' );
+
+		return apply_filters( 'wptravelengine_checkout_page_' . __FUNCTION__ . $suffix, $items, $this->cart );
 	}
 
 	public function get_deductible_line_items(): array {
@@ -367,13 +389,19 @@ class Checkout extends BasePage {
 		return apply_filters( 'wptravelengine_checkout_page_' . __FUNCTION__, $rows, $this->cart );
 	}
 
+	/**
+	 * Subtotal rows of the cart summary.
+	 *
+	 * @return array<string, string>
+	 * @since 6.9.0 Renders as summary-line divs instead of table rows.
+	 */
 	public function get_cart_subtotal() {
 		$rows = array();
 
-		$rows['before_subtotal'] = '<tr class="wpte-checkout__table-separator"><td colspan="2"><hr /></td></tr>';
+		$rows['before_subtotal'] = '<div class="wpte-checkout__summary-sep"></div>';
 
 		$rows['subtotal'] = sprintf(
-			'<tr><td><strong>%s</strong></td><td><strong>%s</strong></td></tr>',
+			'<div class="wpte-checkout__summary-line wpte-checkout__summary-line--subtotal"><span class="wpte-checkout__summary-line__label">%s</span><span class="wpte-checkout__summary-line__value">%s</span></div>',
 			__( 'Subtotal:', 'wp-travel-engine' ),
 			wptravelengine_the_price( $this->cart->get_subtotal(), false )
 		);
@@ -381,16 +409,23 @@ class Checkout extends BasePage {
 		return apply_filters( 'wptravelengine_checkout_page_' . __FUNCTION__, $rows, $this->cart );
 	}
 
+	/**
+	 * Trip detail cards for each cart item.
+	 *
+	 * @return array
+	 * @since 6.9.0 Resolves the booking once and passes it to get_trip_data(); the item filter may receive a null trip.
+	 */
 	public function get_tour_details() {
 		$cart_items   = $this->cart->getItems();
 		$booking_ref  = $this->cart->get_booking_ref();
+		$booking      = ! empty( $booking_ref ) ? Booking::make( $booking_ref ) : null;
 		$item_details = array();
 
 		foreach ( $cart_items as $cart_item ) {
 			/** @var array $cart_item */
-			$trip_data      = $this->get_trip_data( $cart_item, $booking_ref );
+			$trip_data      = $this->get_trip_data( $cart_item, $booking );
 			$item           = $this->generate_trip_details_html( $trip_data );
-			$item_details[] = apply_filters( 'wptravelengine_checkout_page_item_' . __FUNCTION__, $item, $trip_data['trip'], $cart_item );
+			$item_details[] = apply_filters( 'wptravelengine_checkout_page_item_' . __FUNCTION__, $item, $trip_data['trip'] ?? null, $cart_item );
 		}
 
 		return apply_filters( 'wptravelengine_checkout_page_' . __FUNCTION__, $item_details, $cart_items, $this );
@@ -399,53 +434,76 @@ class Checkout extends BasePage {
 	/**
 	 * Get trip data based on booking reference or cart item.
 	 *
-	 * @param array       $cart_item Cart item data.
-	 * @param string|null $booking_ref Booking reference.
+	 * @param array        $cart_item Cart item data.
+	 * @param Booking|null $booking Resolved booking instance, or null for a fresh cart.
 	 * @since 6.5.5
+	 * @since 6.9.0 Accept a resolved Booking instance instead of a ref, so callers reuse one instance per request.
+	 * @since 6.9.0 Return the thumbnail as `{ src, alt }` from Trip::get_thumbnail() instead of the featured-image URL.
 	 * @return array Trip data.
 	 */
-	private function get_trip_data( array $cart_item, ?string $booking_ref = '' ): array {
-		if ( ! empty( $booking_ref ) ) {
-			$booking       = Booking::make( $booking_ref );
-			$cart_info     = new CartInfoParser( $booking->get_cart_info() ?? array() );
+	private function get_trip_data( array $cart_item, ?Booking $booking = null ): array {
+		$date_format = get_option( 'date_format', 'j M, Y' );
+
+		if ( null !== $booking ) {
+			$cart_info     = wptravelengine_get_cart_info( $booking->ID );
 			$order_trip    = $cart_info->get_item();
 			$_package_name = $order_trip->get_package_name();
 
 			$package_name = isset( $_package_name ) && $_package_name !== '' ? $_package_name : ( $booking->get_order_items()[0]['package_name'] ?? '' );
 
-			$trip_id   = $order_trip->get_trip_id();
-			$trip_post = get_post( $trip_id );
-			if ( $trip_post && $trip_post->post_type === 'trip' ) {
-				$trip = new Trip( $trip_id );
-			} else {
-				return array();
+			$cart_id        = $order_trip->get_id();
+			$trip_id        = $order_trip->get_trip_id();
+			$is_custom_trip = wptravelengine_toggled( get_post_meta( $trip_id, 'is_created_from_booking', true ) );
+			$thumbnail      = ( new Trip( $trip_id ) )->get_thumbnail();
+
+			$pax_categories = array();
+			foreach ( $order_trip->get_line_items()['pricing_category'] ?? array() as $line_item ) {
+				$pax_categories[] = array(
+					'count' => (int) ( $line_item['quantity'] ?? 0 ),
+					'label' => $line_item['label'] ?? '',
+				);
 			}
 
 			return array(
-				'trip'         => new Trip( $order_trip->get_trip_id() ),
-				'package_name' => $package_name,
-				'trip_code'    => $order_trip->get_trip_code(),
-				'start_date'   => $order_trip->get_trip_date(),
-				'end_date'     => wptravelengine_format_trip_datetime( $order_trip->get_end_date() ),
-				'travelers'    => $order_trip->travelers_count(),
+				'title'          => $booking->get_trip_title( $cart_id ),
+				'permalink'      => $is_custom_trip ? '' : get_the_permalink( $trip_id ),
+				'thumbnail'      => $thumbnail,
+				'package_name'   => $package_name,
+				'trip_code'      => $order_trip->get_trip_code(),
+				'start_date'     => $order_trip->get_trip_date(),
+				'end_date'       => wptravelengine_format_trip_datetime( $order_trip->get_end_date(), $date_format ),
+				'has_time'       => ! empty( $booking->get_order_items()[0]['has_time'] ),
+				'travelers'      => $order_trip->travelers_count(),
+				'pax_categories' => $pax_categories,
 			);
 		}
 
 		$trip            = new Trip( $cart_item['trip_id'] );
 		$trip_start_date = ! empty( $cart_item['trip_time'] ) ? $cart_item['trip_time'] : $cart_item['trip_date'];
-		$trip_end_date   = wptravelengine_format_trip_end_datetime( $trip_start_date, $trip );
+		$trip_end_date   = wptravelengine_format_trip_end_datetime( $trip_start_date, $trip, $date_format );
 
 		// if ( ! empty( $cart_item['trip_time_range'] ) ) {
 		// $trip_end_date = wptravelengine_format_trip_datetime( $cart_item['trip_time_range'][1] ?? '' );
 		// }
 
+		$pax_categories = array();
+		$pax_info       = $cart_item['category_info'] ?? array();
+		foreach ( ( $cart_item['pax'] ?? array() ) as $cat_id => $cat_count ) {
+			$pax_categories[] = array(
+				'count' => (int) $cat_count,
+				'label' => $pax_info[ $cat_id ]['label'] ?? '',
+			);
+		}
+
 		return array(
-			'trip'         => $trip,
-			'package_name' => get_the_title( $cart_item['price_key'] ?? '' ),
-			'trip_code'    => $trip->get_trip_code(),
-			'start_date'   => $trip_start_date,
-			'end_date'     => $trip_end_date,
-			'travelers'    => array_sum( $cart_item['pax'] ?? array() ),
+			'trip'           => $trip,
+			'package_name'   => get_the_title( $cart_item['price_key'] ?? '' ),
+			'trip_code'      => $trip->get_trip_code(),
+			'start_date'     => $trip_start_date,
+			'end_date'       => $trip_end_date,
+			'has_time'       => ! empty( $cart_item['trip_time'] ),
+			'travelers'      => array_sum( $cart_item['pax'] ?? array() ),
+			'pax_categories' => $pax_categories,
 		);
 	}
 
@@ -454,69 +512,113 @@ class Checkout extends BasePage {
 	 *
 	 * @param array $trip_data Trip data.
 	 * @since 6.5.5
+	 * @since 6.9.0 Source the trip thumbnail from Trip::get_thumbnail(), including its alt text.
+	 * @since 6.9.0 Pluralizes the traveler count, shows categories as "Adult: 2" and separates them with a dot element.
 	 * @return array HTML rows.
 	 */
 	private function generate_trip_details_html( array $trip_data ): array {
-		$trip    = $trip_data['trip'];
-		$trip_id = ( $trip instanceof Trip ) ? $trip->ID : $trip;
-		$link    = wptravelengine_toggled( $trip->get_meta( 'is_created_from_booking' ) ) ? '' : get_the_permalink( $trip_id );
+		if ( array_key_exists( 'title', $trip_data ) ) {
+			// Booking-sourced: title/permalink/thumbnail already resolved from the booking snapshot.
+			$title = $trip_data['title'];
+			$link  = $trip_data['permalink'] ?? '';
+			$thumb = $trip_data['thumbnail'] ?? array();
+		} else {
+			// Fresh cart, no booking yet — trip data must be read live.
+			$trip    = $trip_data['trip'];
+			$trip_id = ( $trip instanceof Trip ) ? $trip->ID : $trip;
+			$title   = get_the_title( $trip_id );
+			$link    = wptravelengine_toggled( $trip->get_meta( 'is_created_from_booking' ) ) ? '' : get_the_permalink( $trip_id );
+			$thumb   = ( $trip instanceof Trip ? $trip : new Trip( $trip_id ) )->get_thumbnail();
+		}
 
-		return array(
-			sprintf(
-				'<tr><td colspan="2">%s</td></tr>',
+		$thumb_src = $thumb['src'] ?? '';
+		$thumb_alt = $thumb['alt'] ?? '';
+
+		$cal_icon   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
+		$usr_icon   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+		$clock_icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+
+		// Primary badge = package name; secondary = trip code.
+		$badges = '';
+		if ( ! empty( $trip_data['package_name'] ) ) {
+			$badges .= sprintf( '<span class="wpte-checkout__trip-badge">%s</span>', esc_html( $trip_data['package_name'] ) );
+		}
+		if ( ! empty( $trip_data['trip_code'] ) ) {
+			$badges .= sprintf( '<span class="wpte-checkout__trip-badge wpte-checkout__trip-badge--muted">%s</span>', esc_html( $trip_data['trip_code'] ) );
+		}
+
+		$date_range = wptravelengine_format_trip_datetime( $trip_data['start_date'] ?? '', get_option( 'date_format', 'j M, Y' ) );
+		if ( ! empty( $trip_data['end_date'] ) ) {
+			$date_range .= ' – ' . $trip_data['end_date'];
+		}
+
+		$meta = sprintf( '<div class="wpte-checkout__trip-meta-row">%s<span><strong>%s</strong></span></div>', $cal_icon, esc_html( $date_range ) );
+		if ( ! empty( $trip_data['has_time'] ) && ! empty( $trip_data['start_date'] ) ) {
+			$start_time = wp_date( get_option( 'time_format', 'g:i a' ), strtotime( $trip_data['start_date'] ), new \DateTimeZone( 'UTC' ) );
+			/* translators: %s: departure time, e.g. "8:27 am". */
+			$meta .= sprintf(
+				'<div class="wpte-checkout__trip-meta-row">%s<span><strong>%s</strong></span></div>',
+				$clock_icon,
+				esc_html( sprintf( __( 'Starts at %s', 'wp-travel-engine' ), $start_time ) )
+			);
+		}
+
+		// Per-category breakdown as "Adult: 2, Child: 1": category names are site terms with no plural form.
+		$pax_parts = array();
+		foreach ( $trip_data['pax_categories'] ?? array() as $pax_category ) {
+			if ( $pax_category['count'] < 1 || '' === $pax_category['label'] ) {
+				continue;
+			}
+			$pax_parts[] = sprintf(
+				/* translators: 1: traveler category name, e.g. "Adult", 2: number of travelers in it. */
+				_x( '%1$s: %2$d', 'checkout traveler category count', 'wp-travel-engine' ),
+				$pax_category['label'],
+				(int) $pax_category['count']
+			);
+		}
+
+		$traveler_count = (int) ( $trip_data['travelers'] ?? 0 );
+
+		$meta .= sprintf(
+			'<div class="wpte-checkout__trip-meta-row">%s<span><strong>%s</strong>%s</span></div>',
+			$usr_icon,
+			esc_html(
 				sprintf(
-					'<tr><td colspan="2">%s</td></tr>',
-					sprintf(
-						'<a %sclass="wpte-checkout__trip-name">%s</a>',
-						$link ? 'href="' . esc_url( $link ) . '" ' : '',
-						get_the_title( $trip_id )
-					)
+					/* translators: %d: number of travelers on the booked trip. */
+					_nx( '%d Traveler', '%d Travelers', $traveler_count, 'checkout trip summary', 'wp-travel-engine' ),
+					$traveler_count
 				)
 			),
-			sprintf(
-				'<tr><td>%s</td><td><strong>%s</strong></td></tr>',
-				__( 'Package:', 'wp-travel-engine' ),
-				esc_html( $trip_data['package_name'] ?? '' )
-			),
-			sprintf(
-				'<tr><td>%s</td><td><strong>%s</strong></td></tr>',
-				__( 'Trip Code:', 'wp-travel-engine' ),
-				esc_html( $trip_data['trip_code'] ?? '' )
-			),
-			sprintf(
-				'<tr><td>%s</td><td><strong>%s</strong></td></tr>',
-				__( 'Starts on:', 'wp-travel-engine' ),
-				wptravelengine_format_trip_datetime( $trip_data['start_date'] ?? '' )
-			),
-			sprintf(
-				'<tr><td>%s</td><td><strong>%s</strong></td></tr>',
-				__( 'Ends on:', 'wp-travel-engine' ),
-				esc_html( $trip_data['end_date'] ?? '' )
-			),
-			sprintf(
-				'<tr><td>%s</td><td><strong>%s</strong></td></tr>',
-				__( 'No. of Travelers:', 'wp-travel-engine' ),
-				esc_html( $trip_data['travelers'] ?? '' )
-			),
+			! empty( $pax_parts ) ? '<span class="wpte-checkout__trip-meta-sep" aria-hidden="true"></span>' . esc_html( implode( ', ', $pax_parts ) ) : ''
 		);
+
+		$card = sprintf(
+			'<div class="wpte-checkout__trip-summary"><div class="wpte-checkout__trip-summary-head">%s<div class="wpte-checkout__trip-summary-info"><a %sclass="wpte-checkout__trip-name">%s</a><div class="wpte-checkout__trip-badges">%s</div></div></div><div class="wpte-checkout__trip-meta">%s</div></div>',
+			$thumb_src ? sprintf( '<img class="wpte-checkout__trip-summary-thumb" src="%s" alt="%s" loading="lazy">', esc_url( $thumb_src ), esc_attr( $thumb_alt ) ) : '',
+			$link ? 'href="' . esc_url( $link ) . '" ' : '',
+			esc_html( $title ),
+			$badges,
+			$meta
+		);
+
+		return array( $card );
 	}
 
 	/**
 	 * Get total row.
 	 *
 	 * @return array
+	 * @since 6.9.0 Renders as a summary-line div; drops the before_total and after_total spacer rows.
 	 */
 	public function get_total_row(): array {
 		$tax  = $this->cart->tax();
 		$rows = array(
-			'before_total' => '<tr class="wpte-checkout__table-spacer"><td colspan="2"></td></tr>',
-			'total'        => sprintf(
-				'<tr class="wpte-checkout__booking-summary-total"><td><strong>%s</strong></td><td><strong>%s</strong>%s</td></tr>',
+			'total' => sprintf(
+				'<div class="wpte-checkout__summary-line wpte-checkout__summary-line--total"><span class="wpte-checkout__summary-line__label">%s</span><span class="wpte-checkout__summary-line__value">%s%s</span></div>',
 				__( 'Total:', 'wp-travel-engine' ),
 				wptravelengine_the_price_with_decimal( $this->cart->get_totals()['total'], false ),
 				( $tax->is_taxable() && $tax->is_inclusive() ) ? sprintf( __( ' (Incl. %s%% tax)', 'wp-travel-engine' ), $tax->get_tax_percentage() ) : ''
 			),
-			'after_total'  => '<tr class="wpte-checkout__table-spacer"><td colspan="2"></td></tr>',
 		);
 
 		return apply_filters( 'wptravelengine_checkout_page_' . __FUNCTION__, $rows, $this->cart );
@@ -539,6 +641,7 @@ class Checkout extends BasePage {
 	 * @since 6.7.0
 	 * @since 6.7.10 Updated Payment status for thank you page.
 	 * @since 6.8.6 Adds a refund-adjustment note below the Payable Now row when the booking's deposit was partially refunded.
+	 * @since 6.9.0 Shows the payment-due note on the confirmation page for any unpaid booking, not only partial payments.
 	 */
 	public function get_fragments_after_line_items(): array {
 		$override_fragments_after_total = apply_filters( 'wptravelengine_checkout_page_override_fragments_after_total', array(), $this );
@@ -584,7 +687,7 @@ class Checkout extends BasePage {
 		if ( $cart_total['has_refunded'] ?? false ) {
 			$summary_rows += array(
 				'refund_note' => sprintf(
-					'<tr class="wpte-checkout__booking-summary-info"><td colspan="2">%s</td></tr>',
+					'<div class="wpte-checkout__summary-line wpte-checkout__summary-line--info"><span class="wpte-checkout__summary-line__label">%s</span></div>',
 					Booking::get_refund_fallback_msg()
 				),
 			);
@@ -592,13 +695,21 @@ class Checkout extends BasePage {
 
 		if ( 'partial' === $this->cart->get_payment_type() ) {
 			$excl          = $this->cart->get_exclusion_label();
-			$summary_rows += array( 'spacer' => '<tr class="wpte-checkout__table-spacer"><td colspan="2"></td></tr>' );
 			$summary_rows += $this->get_row(
 				array(
 					'key'   => 'due_total',
-					'label' => sprintf( '<strong>%s</strong>%s', __( 'Amount Due', 'wp-travel-engine' ), $excl ? sprintf( ' (excl. %s)', $excl ) : '' ),
+					'label' => sprintf( '<strong>%s</strong>%s', __( 'Balance Due', 'wp-travel-engine' ), $excl ? sprintf( ' (excl. %s)', $excl ) : '' ),
+					'type'  => 'due',
 				)
 			);
+		}
+
+		// Unpaid bookings (Book Now Pay Later, bank transfer) have no balance-due row but still owe money.
+		if ( isset( $summary_rows['due_total'] ) || ( ! $this->is_checkout_page && ! $this->payment_completed ) ) {
+			// $summary_rows['due_total_note'] = sprintf(
+			// '<div class="wpte-checkout__summary-line wpte-checkout__summary-line--info"><span class="wpte-checkout__summary-line__label">%s</span></div>',
+			// esc_html__( 'Please complete your payment before the due date.', 'wp-travel-engine' )
+			// );
 		}
 
 		return $summary_rows;
@@ -609,6 +720,7 @@ class Checkout extends BasePage {
 	 *
 	 * @param array $args
 	 * @return string[]
+	 * @since 6.9.0 Reads the `initial_deposit` row from the cart's initial deposit.
 	 */
 	public function get_row( array $args ): array {
 
@@ -626,21 +738,22 @@ class Checkout extends BasePage {
 
 		$cart_total = $this->cart->get_totals();
 
-		$amount = $cart_total[ "total_{$key}" ] ?? $cart_total[ $key ] ?? null;
+		if ( 'initial_deposit' === $key ) {
+			$amount = $this->cart->initial_deposit ?? $cart_total['partial_total'] ?? null;
+		} else {
+			$amount = $cart_total[ "total_{$key}" ] ?? $cart_total[ $key ] ?? null;
+		}
 
 		if ( ! isset( $amount ) ) {
 			return array();
 		}
 
-		$tr_class = 'info' === $type ? 'blue' : ( 'deductible' === $type ? 'discount' : $type );
-		$tr_class = $tr_class ? 'wpte-checkout__booking-summary-' . $tr_class : '';
+		$modifier  = 'info' === $type ? 'blue' : ( 'deductible' === $type ? 'discount' : $type );
+		$row_class = 'wpte-checkout__summary-line' . ( $modifier ? ' wpte-checkout__summary-line--' . $modifier : '' );
 
 		$row = sprintf(
-			'<tr class="%s">
-				<td>%s%s</td>
-				<td><strong>%s %s</strong></td>
-			</tr>',
-			$tr_class,
+			'<div class="%s"><span class="wpte-checkout__summary-line__label">%s%s</span><span class="wpte-checkout__summary-line__value">%s %s</span></div>',
+			$row_class,
 			$label,
 			! empty( $description )
 				? sprintf(

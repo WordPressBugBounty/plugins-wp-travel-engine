@@ -1,6 +1,8 @@
 <?php
 /**
  * Booking Details Metabox Content.
+ *
+ * @deprecated 6.9.0 No longer loaded by WP Travel Engine, so a theme override of it has no effect. It will be removed in a future release.
  */
 
 wptravelengine_set_template_args( array( 'is_new_booking' => false ) );

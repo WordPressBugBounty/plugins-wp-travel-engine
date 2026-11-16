@@ -27,6 +27,7 @@
                 "phpseclib/phpseclib": "Needed to support Apple provider"
             },
             "time": "2026-04-02T19:11:26+00:00",
+            "published-time": "2026-04-02T19:17:57+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -91,6 +92,7 @@
                 "ext-intl": "Intl extension is needed for humanReadable()"
             },
             "time": "2025-04-25T07:40:09+00:00",
+            "published-time": "2025-05-05T05:18:37+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {

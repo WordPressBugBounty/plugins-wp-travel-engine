@@ -15,11 +15,30 @@ class Tax implements TaxInterface {
 	 */
 	protected float $tax_percentage = 0;
 
-	public function __construct() {
-		$settings       = get_option( 'wp_travel_engine_settings', array() );
+	/**
+	 * Tax as the given settings define it.
+	 *
+	 * @param array<string, mixed>|null $settings Tax settings to answer for, such as a booking's own; null reads the site's.
+	 * @since 6.9.0 Takes the settings to answer for.
+	 */
+	public function __construct( ?array $settings = null ) {
+		$settings     ??= wptravelengine_settings()->get();
 		$this->settings = is_array( $settings ) ? $settings : array();
 
 		$this->tax_percentage = (float) ( $this->settings['tax_percentage'] ?? 0 );
+	}
+
+	/**
+	 * Tax as the given booking was charged it, from its snapshot (the site's settings for a legacy booking without one).
+	 *
+	 * @param int $booking_id Booking to answer for.
+	 * @return self
+	 * @since 6.9.0
+	 */
+	public static function for_booking( int $booking_id ): self {
+		$booking = wptravelengine_get_booking( $booking_id, true );
+
+		return new self( $booking ? $booking->get_tax_settings_snapshot() : null );
 	}
 
 	/**
@@ -80,5 +99,24 @@ class Tax implements TaxInterface {
 	 */
 	public function set_tax_percentage( float $percentage ) {
 		$this->tax_percentage = $percentage;
+	}
+
+	/**
+	 * The `tax_*` settings this answers for; the rest of the plugin settings are left out.
+	 *
+	 * @return array<string, mixed>
+	 * @since 6.9.0
+	 */
+	public function get_settings(): array {
+		$settings = array();
+		foreach ( $this->settings as $key => $value ) {
+			if ( 0 === strpos( (string) $key, 'tax_' ) ) {
+				$settings[ $key ] = $value;
+			}
+		}
+
+		$settings['tax_percentage'] = $this->tax_percentage;
+
+		return $settings;
 	}
 }

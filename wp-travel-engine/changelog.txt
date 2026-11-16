@@ -1,5 +1,19 @@
 == Changelog ==
 
+= 6.9.0 - 16th November 2026 =
+* New Feature: Added a traveler dashboard setting that allows travelers to update their personal details.
+* New Feature: Added an activity log to the admin booking edit page, allowing admins to track changes made by travelers and admins.
+* New Feature: Added an option for travelers to skip entering their personal details during checkout and provide them later.
+* New Feature: Added the ability for admins to add multiple notes and apply discounts directly from the booking edit page.
+* New Feature: Added a payment link generator, allowing admins to create payment links for custom amounts or the full outstanding balance.
+* Improved: Redesigned the admin Add Booking and Edit Booking sections to provide a clearer and more intuitive booking management experience.
+* Improved: Redesigned the checkout page, admin booking list, thank-you page, and traveler dashboard for an improved user experience.
+* Improved: Added more robust validation checks for PayPal Standard IPN request parameters to ensure payment requests are properly validated.
+* Security: Fixed a stored Cross-Site Scripting (XSS) vulnerability.
+* Security: Fixed an authorization vulnerability exposing sensitive customer information to authenticated users.
+* Deprecated: Traveler dashboard template overrides are no longer supported following the dashboard redesign.
+* Deprecated: Admin booking edit template overrides are no longer supported following the booking edit page redesign.
+
 = 6.8.10 - 13th October 2026 =
 * Improved: Updated the Freemius SDK to the latest version.
 * Fixed: Corrected date formatting in the datepicker field to match WordPress date format settings.

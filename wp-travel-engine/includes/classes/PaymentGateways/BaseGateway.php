@@ -126,11 +126,12 @@ class BaseGateway extends PaymentGateway {
 	 * @param array   $query_args
 	 *
 	 * @return string
+	 * @since 6.9.0 Callback transient lives 30 days so delayed IPNs (eChecks clear in days, PayPal resends) still resolve the payment.
 	 */
 	public function get_callback_url( Payment $payment, string $callback_type = 'success', array $query_args = array() ): string {
 		$payment_key = $payment->get_payment_key();
 
-		set_transient( "payment_key_$payment_key", $payment->get_id(), 60 * 10 );
+		set_transient( "payment_key_$payment_key", $payment->get_id(), MONTH_IN_SECONDS );
 
 		$base_url = home_url( '/' );
 		if ( $this->enabled_payment_debug() ) {

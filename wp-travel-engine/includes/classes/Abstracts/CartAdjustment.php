@@ -181,21 +181,19 @@ abstract class CartAdjustment implements CartAdjustmentInterface {
 		);
 	}
 
-	/*
-		* Render.
-		*
-		* @return string
-		* @since 6.3.5
-		*/
+	/**
+	 * Render.
+	 *
+	 * @return string
+	 * @since 6.3.5
+	 * @since 6.9.0 Renders a summary-line div instead of a table row.
+	 */
 	public function render(): string {
 		if ( ! isset( $this->cart->get_totals()[ "total_{$this->name}" ] ) ) {
 			return '';
 		}
 		return sprintf(
-			'<tr class="wpte-checkout__booking-summary-%s">
-				<td>%s%s</td>
-				<td><strong>%s %s</strong></td>
-			</tr>',
+			'<div class="wpte-checkout__summary-line wpte-checkout__summary-line--%s"><span class="wpte-checkout__summary-line__label">%s%s</span><span class="wpte-checkout__summary-line__value">%s %s</span></div>',
 			'coupon' === $this->name ? 'discount' : ( $this->type === 'fee' ? 'tax' : ( $this->type === 'deductible' ? 'discount' : $this->name ) ),
 			$this->label,
 			! empty( $this->description )

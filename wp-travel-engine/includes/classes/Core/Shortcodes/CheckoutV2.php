@@ -19,6 +19,7 @@ class CheckoutV2 extends Checkout {
 	 * Default attributes for the shortcode.
 	 *
 	 * @return array
+	 * @since 6.9.0 Ignores traveller_emergency_details_form, shows emergency by default, scopes coupons to cart trips.
 	 */
 	protected function default_attributes(): array {
 		global $wte_cart;
@@ -26,8 +27,7 @@ class CheckoutV2 extends Checkout {
 		$wptravelengine_settings = get_option( 'wp_travel_engine_settings', array() );
 		$display_header_footer   = $wptravelengine_settings['display_header_footer'] ?? 'no';
 		$show_travellers_info    = $wptravelengine_settings['display_travellers_info'] ?? 'yes';
-		$show_emergency_contact  = $wptravelengine_settings['display_emergency_contact'] ?? '';
-		$traveller_details_form  = $wptravelengine_settings['traveller_emergency_details_form'] ?? 'on_checkout';
+		$show_emergency_contact  = $wptravelengine_settings['display_emergency_contact'] ?? 'yes';
 		$display_billing_details = $wptravelengine_settings['display_billing_details'] ?? 'yes';
 		$show_additional_note    = $wptravelengine_settings['show_additional_note'] ?? 'yes';
 		$show_coupon_form        = $wptravelengine_settings['show_discount'] ?? 'yes';
@@ -41,11 +41,11 @@ class CheckoutV2 extends Checkout {
 			'tour-details-title'    => 'show',
 			'cart-summary'          => 'show',
 			'cart-summary-title'    => 'show',
-			'lead-travellers'       => $is_payment_due ? 'hide' : ( $show_travellers_info == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide' ),
+			'lead-travellers'       => $is_payment_due ? 'hide' : ( $show_travellers_info == 'yes' ? 'show' : 'hide' ),
 			'lead-travellers-title' => 'show',
-			'travellers'            => $is_payment_due ? 'hide' : ( $show_travellers_info == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide' ),
+			'travellers'            => $is_payment_due ? 'hide' : ( $show_travellers_info == 'yes' ? 'show' : 'hide' ),
 			'travellers-title'      => 'show',
-			'emergency'             => $is_payment_due ? 'hide' : ( $show_emergency_contact == 'yes' && $traveller_details_form == 'on_checkout' ? 'show' : 'hide' ),
+			'emergency'             => $is_payment_due ? 'hide' : ( $show_emergency_contact == 'yes' ? 'show' : 'hide' ),
 			'emergency-title'       => 'show',
 			'billing'               => $display_billing_details == 'yes' ? 'show' : 'hide',
 			'billing-title'         => 'show',
@@ -53,7 +53,7 @@ class CheckoutV2 extends Checkout {
 			'additional-note-title' => 'show',
 			'payment'               => 'show',
 			'payment-title'         => 'show',
-			'coupon_form'           => $show_coupon_form == 'yes' && Coupons::is_coupon_available() && 'due' !== $wte_cart->get_payment_type() ? 'show' : 'hide',
+			'coupon_form'           => $show_coupon_form == 'yes' && Coupons::is_coupon_available( $wte_cart->get_cart_trip_ids() ) && 'due' !== $wte_cart->get_payment_type() ? 'show' : 'hide',
 			'footer_copyright'      => $wptravelengine_settings['footer_copyright'] ?? '',
 		);
 	}
@@ -65,6 +65,7 @@ class CheckoutV2 extends Checkout {
 	 *
 	 * @return string
 	 * @since 1.0
+	 * @since 6.9.0 Enqueues the account-auth assets for the login form.
 	 */
 	public function output( $atts ): string {
 		global $wte_cart;
@@ -77,8 +78,8 @@ class CheckoutV2 extends Checkout {
 			ob_start();
 
 			Assets::instance()
-			->enqueue_style( 'my-account' )
-			->enqueue_script( 'my-account' );
+			->enqueue_style( 'account-auth' )
+			->enqueue_script( 'account-auth' );
 
 			wte_get_template( 'account/form-login.php' );
 

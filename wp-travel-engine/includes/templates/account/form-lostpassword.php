@@ -30,14 +30,9 @@ wp_travel_engine_print_notices();
 					<?php echo esc_html( $forgot_page_label ); ?>
 				</h2>
 			</div>
-			<div class="wpte-form-field wpte-material-ui-input-control">
+			<div class="wpte-form-field">
 				<label for="username"><?php echo esc_attr__( 'Username or Email', 'wp-travel-engine' ); ?><span class="required">*</span></label>
-				<input id="username" required type="text" name="user_login" id="user_login" value="" placeholder="<?php echo esc_attr__( 'Email or username', 'wp-travel-engine' ); ?>">
-				<fieldset>
-					<legend>
-						<span><?php echo esc_attr__( 'Username or Email', 'wp-travel-engine' ); ?><span class="required">*</span></span>
-					</legend>
-				</fieldset>
+				<input id="username" required type="text" name="user_login" id="user_login" value="">
 			</div>
 			<?php do_action( 'wp_travel_engine_lostpassword_form' ); ?>
 			<input type="hidden" name="wp_travel_engine_reset_password" value="true" />

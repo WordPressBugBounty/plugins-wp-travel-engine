@@ -24,16 +24,26 @@ use WPTravelEngine\Pages\Checkout;
  */
 class CheckoutPageTemplate extends BookingProcessPageTemplate {
 
+	/**
+	 * Register Hooks.
+	 *
+	 * @return void
+	 * @since 6.3.0
+	 * @since 6.9.0 renamed the cart hook prefix and resolves each label at render time, not registration
+	 */
 	public function hooks() {
-		add_action(
-			'wptravelengine_cart_before_pricing_category_line_items',
-			array( $this, 'print_pricing_category_line_items_title' )
-		);
-
-		add_action(
-			'wptravelengine_cart_before_extra_service_line_items',
-			array( $this, 'print_extra_service_line_items_title' )
-		);
+		$line_item_group_keys = array_keys( wptravelengine_get_labels( 'line_item_group' ) );
+		foreach ( $line_item_group_keys as $key ) {
+			add_action(
+				"wptravelengine_before_{$key}_cart_line_items",
+				static function () use ( $key ) {
+					$val = wptravelengine_get_labels( 'line_item_group' )[ $key ] ?? '';
+					if ( ! empty( $val ) ) {
+						print( '<div class="wpte-checkout__summary-caption">' . esc_html( $val ) . '</div>' );
+					}
+				}
+			);
+		}
 
 		add_action( 'wptravelengine_checkout_form_submit_button', array( $this, 'print_checkout_form_button' ) );
 
@@ -153,13 +163,18 @@ class CheckoutPageTemplate extends BookingProcessPageTemplate {
 	 * @param array $args Arguments.
 	 * @since 6.4.3
 	 * @return void
+	 * @since 6.9.0 Passes the first traveler category label to the lead traveler form.
 	 */
 	public function print_lead_travellers_details( array $args ) {
 		global $wte_cart;
 		if ( ! isset( $lead_travellers_form_fields ) ) {
 			$lead_travellers_form_fields = array();
 			foreach ( $wte_cart->getItems( true ) as $cart_item ) {
-				$lead_travellers_form_fields[] = new LeadTravellersFormFields( array() );
+				$lead_travellers_form_fields[] = new LeadTravellersFormFields(
+					array(
+						'traveler_category_label' => $cart_item->get_traveler_category_labels()[0] ?? '',
+					)
+				);
 			}
 		}
 		$args = array_merge( compact( 'lead_travellers_form_fields' ), $args );
@@ -170,6 +185,7 @@ class CheckoutPageTemplate extends BookingProcessPageTemplate {
 	 * Print the Travellers Details.
 	 *
 	 * @return void
+	 * @since 6.9.0 Passes the traveler category labels to the traveler forms.
 	 */
 	public function print_travellers_details( array $args ) {
 		global $wte_cart;
@@ -180,6 +196,7 @@ class CheckoutPageTemplate extends BookingProcessPageTemplate {
 					array(
 						'number_of_travellers'      => array_sum( $cart_item->travelers ?? $cart_item->pax ),
 						'number_of_lead_travellers' => 1,
+						'traveler_category_labels'  => $cart_item->get_traveler_category_labels(),
 					)
 				);
 			}
@@ -264,6 +281,7 @@ class CheckoutPageTemplate extends BookingProcessPageTemplate {
 	 * @param array $args Arguments to be passed in cart summary template.
 	 *
 	 * @return void
+	 * @since 6.9.0 Shows the coupon form only when a coupon applies to the cart trips.
 	 */
 	public function print_cart_summary( $args ) {
 		global $wte_cart;
@@ -281,7 +299,7 @@ class CheckoutPageTemplate extends BookingProcessPageTemplate {
 			),
 			true
 		);
-		$show_coupon_form   = wptravelengine_settings()->get( 'show_discount' ) === 'yes' && Coupons::is_coupon_available() && 'due' !== $wte_cart->get_payment_type() ? 'show' : 'hide';
+		$show_coupon_form   = wptravelengine_settings()->get( 'show_discount' ) === 'yes' && Coupons::is_coupon_available( $wte_cart->get_cart_trip_ids() ) && 'due' !== $wte_cart->get_payment_type() ? 'show' : 'hide';
 
 		$coupons = array();
 
@@ -359,6 +377,7 @@ class CheckoutPageTemplate extends BookingProcessPageTemplate {
 	 * Print the Checkout Form Button.
 	 *
 	 * @return void
+	 * @since 6.9.0 Adds a lock icon and lets button and SVG markup through wp_kses().
 	 */
 	public function print_checkout_form_button() {
 		global $wte_cart;
@@ -367,22 +386,70 @@ class CheckoutPageTemplate extends BookingProcessPageTemplate {
 		ob_start();
 		?>
 		<button type="submit" class="wpte-checkout__form-submit-button">
+			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M17 11V8C17 5.23858 14.7614 3 12 3C9.23858 3 7 5.23858 7 8V11M8.8 21H15.2C16.8802 21 17.7202 21 18.362 20.673C18.9265 20.3854 19.3854 19.9265 19.673 19.362C20 18.7202 20 17.8802 20 16.2V15.8C20 14.1198 20 13.2798 19.673 12.638C19.3854 12.0735 18.9265 11.6146 18.362 11.327C17.7202 11 16.8802 11 15.2 11H8.8C7.11984 11 6.27976 11 5.63803 11.327C5.07354 11.6146 4.6146 12.0735 4.32698 12.638C4 13.2798 4 14.1198 4 15.8V16.2C4 17.8802 4 18.7202 4.32698 19.362C4.6146 19.9265 5.07354 20.3854 5.63803 20.673C6.27976 21 7.11984 21 8.8 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 			<?php echo __( 'Confirm Booking', 'wp-travel-engine' ); ?>
 		</button>
 		<?php
 		$button = apply_filters( "wptravelengine_checkout_{$payment_gateway}_button", ob_get_clean(), $wte_cart );
-		echo wp_kses_post( $button );
+
+		$allowed_button_html = array_merge(
+			wp_kses_allowed_html( 'post' ),
+			array(
+				'button' => array(
+					'type'              => true,
+					'class'             => true,
+					'id'                => true,
+					'name'              => true,
+					'value'             => true,
+					'disabled'          => true,
+					'aria-label'        => true,
+					'data-payment'      => true,
+					'data-acceptui-url' => true,
+				),
+				'svg'    => array(
+					'width'        => true,
+					'height'       => true,
+					'viewbox'      => true,
+					'fill'         => true,
+					'xmlns'        => true,
+					'stroke'       => true,
+					'stroke-width' => true,
+					'class'        => true,
+					'aria-hidden'  => true,
+				),
+				'path'   => array(
+					'd'               => true,
+					'stroke'          => true,
+					'fill'            => true,
+					'stroke-width'    => true,
+					'stroke-linecap'  => true,
+					'stroke-linejoin' => true,
+				),
+				'rect'   => array(
+					'x'      => true,
+					'y'      => true,
+					'width'  => true,
+					'height' => true,
+					'rx'     => true,
+				),
+				'use'    => array( 'xlink:href' => true ),
+			)
+		);
+		echo wp_kses( $button, $allowed_button_html );
 	}
 
 	/**
 	 * Print the Payment Options.
 	 *
 	 * @return void
+	 * @since 6.9.0 Shows the due-payment option for an existing booking even when partial payment is off.
 	 */
 	public function print_payment_modes() {
 		global $wte_cart;
 
-		if ( ! wp_travel_engine_is_cart_partially_payable() || ( $wte_cart->get_totals()['total'] <= 0 ) ) {
+		$cart_totals = $wte_cart->get_totals();
+
+		if ( ( ! wp_travel_engine_is_cart_partially_payable() && ! $wte_cart->get_booking_ref() ) || ( $cart_totals['payable_now'] <= 0 ) ) {
 			return;
 		}
 
@@ -403,26 +470,29 @@ class CheckoutPageTemplate extends BookingProcessPageTemplate {
 			$payment_mode = 'due';
 		}
 
-		$down_payment_amount = $instance->cart->get_totals()['partial_total'];
-		$full_payment_amount = $instance->cart->get_totals()['total'];
-
 		switch ( $payment_mode ) {
 			case 'due':
 			case 'remaining_payment':
-				global $wte_cart;
-				$due_payment_amount = $wte_cart->get_due_total();
+				$due_payment_amount = $cart_totals['due_total'];
+
 				wptravelengine_get_template(
 					'template-checkout/content-payment-mode-due.php',
 					compact( 'payment_mode', 'due_payment_amount' )
 				);
+
 				break;
 			case 'partial':
 			case 'full':
 			case 'full_payment':
 			default:
+				$down_payment_amount = $cart_totals['partial_total'];
+				$full_payment_amount = $cart_totals['total'];
+
+				$due_payment_amount = $full_payment_amount - $down_payment_amount;
+
 				wptravelengine_get_template(
 					'template-checkout/content-payment-modes.php',
-					compact( 'payment_mode', 'full_payment_enabled', 'down_payment_amount', 'full_payment_amount' )
+					compact( 'payment_mode', 'full_payment_enabled', 'down_payment_amount', 'full_payment_amount', 'due_payment_amount' )
 				);
 				break;
 		}
@@ -437,27 +507,6 @@ class CheckoutPageTemplate extends BookingProcessPageTemplate {
 		?>
 		<div class="wpte-checkout__payment-cc-placeholder">
 			<div id="stripe-payment-element"></div>
-			<!--			<div id="stripe-payment-card-element" data-parsley-excluded="true">-->
-			<!--				<div class="strip-element stripe-card-number-wrapper">-->
-			<!--					<div id="stripe-card-number"></div>-->
-			<!--					<fieldset>-->
-			<!--						<legend>-->
-			<?php // echo __( 'Card Number', 'wp-travel-engine' ) ?><!--</legend>-->
-			<!--					</fieldset>-->
-			<!--				</div>-->
-			<!--				<div class="strip-element stripe-card-expiry-wrapper">-->
-			<!--					<div id="stripe-card-expiry"></div>-->
-			<!--					<fieldset>-->
-			<!--						<legend>--><?php // echo __( 'Expiry', 'wp-travel-engine' ) ?><!--</legend>-->
-			<!--					</fieldset>-->
-			<!--				</div>-->
-			<!--				<div class="strip-element stripe-card-cvc-wrapper">-->
-			<!--					<div id="stripe-card-cvc"></div>-->
-			<!--					<fieldset>-->
-			<!--						<legend>--><?php // echo __( 'CVC', 'wp-travel-engine' ) ?><!--</legend>-->
-			<!--					</fieldset>-->
-			<!--				</div>-->
-			<!--			</div>-->
 			<div id="stripe-card-errors" role="alert"></div>
 		</div>
 		<?php
@@ -467,11 +516,13 @@ class CheckoutPageTemplate extends BookingProcessPageTemplate {
 	 * Print the PayPal Checkout Button.
 	 *
 	 * @return string
+	 * @since 6.9.0 Adds a lock icon to the button.
 	 */
 	public function print_paypal_checkout_button(): string {
 		ob_start();
 		?>
 		<button type="submit" class="wpte-checkout__form-submit-button">
+			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M17 11V8C17 5.23858 14.7614 3 12 3C9.23858 3 7 5.23858 7 8V11M8.8 21H15.2C16.8802 21 17.7202 21 18.362 20.673C18.9265 20.3854 19.3854 19.9265 19.673 19.362C20 18.7202 20 17.8802 20 16.2V15.8C20 14.1198 20 13.2798 19.673 12.638C19.3854 12.0735 18.9265 11.6146 18.362 11.327C17.7202 11 16.8802 11 15.2 11H8.8C7.11984 11 6.27976 11 5.63803 11.327C5.07354 11.6146 4.6146 12.0735 4.32698 12.638C4 13.2798 4 14.1198 4 15.8V16.2C4 17.8802 4 18.7202 4.32698 19.362C4.6146 19.9265 5.07354 20.3854 5.63803 20.673C6.27976 21 7.11984 21 8.8 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 			<?php echo __( 'Pay &amp; Confirm Booking', 'wp-travel-engine' ); ?>
 		</button>
 		<?php
@@ -560,36 +611,5 @@ class CheckoutPageTemplate extends BookingProcessPageTemplate {
 			esc_attr( wp_json_encode( $data ) ),
 			esc_html__( 'Pay & Confirm Booking', 'wp-travel-engine' )
 		);
-	}
-
-	/**
-	 * Print Pricing Category Title.
-	 *
-	 * @return void
-	 */
-	public function print_pricing_category_line_items_title() {
-		?>
-		<tr>
-			<td><strong><?php _e( 'Traveler(s):', 'wp-travel-engine' ); ?></strong></td>
-			<td></td>
-		</tr>
-		<?php
-	}
-
-	/**
-	 * Print Extra Service Title.
-	 *
-	 * @return void
-	 */
-	public function print_extra_service_line_items_title() {
-		$settings = get_option( 'wp_travel_engine_settings' );
-		$title    = ! empty( $settings['extra_service_title'] ) ? $settings['extra_service_title'] : __( 'Extra Services', 'wp-travel-engine' );
-		$title    = apply_filters( 'wptravelengine_mini_cart_services_title', $title );
-		?>
-		<tr>
-			<td><strong><?php echo esc_html( $title ); ?></strong></td>
-			<td></td>
-		</tr>
-		<?php
 	}
 }

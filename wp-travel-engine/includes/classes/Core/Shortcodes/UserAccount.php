@@ -8,9 +8,11 @@
 
 namespace WPTravelEngine\Core\Shortcodes;
 
+use WPTravelEngine\Email\UserEmail;
+use WPTravelEngine\Helpers\Countries;
 use WPTravelEngine\Abstracts\Shortcode;
 use WPTravelEngine\Core\Models\Settings\PluginSettings;
-use WPTravelEngine\Email\UserEmail;
+use WPTravelEngine\Builders\FormFields\BookingFormFields;
 
 /**
  * Class UserAccount.
@@ -28,84 +30,442 @@ class UserAccount extends Shortcode {
 	const TAG = 'wp_travel_engine_dashboard';
 
 	/**
-	 * Dashboard menus.
+	 * Dashboard menus. Keys double as route slugs.
 	 *
-	 * @return array Menus.
+	 * @return array Menus, keyed by route slug.
+	 * @since 6.9.0 Made public; added `overview`, `icon`; renamed `address`/`account` keys.
 	 */
-	private static function dashboard_menus() {
-		$dashboard_menus        = array(
+	public static function dashboard_menus() {
+		$dashboard_menus = array(
+			'overview' => array(
+				'menu_title' => __( 'Overview', 'wp-travel-engine' ),
+				'menu_class' => 'lrf-overview',
+				'icon'       => 'overview',
+				'priority'   => 10,
+			),
 			'bookings' => array(
-				'menu_title'      => __( 'Booking', 'wp-travel-engine' ),
-				'menu_class'      => 'lrf-bookings',
-				'menu_content_cb' => array( __CLASS__, 'dashboard_menu_bookings_tab' ),
-				'priority'        => 20,
+				'menu_title' => __( 'Booking', 'wp-travel-engine' ),
+				'menu_class' => 'lrf-bookings',
+				'icon'       => 'bookings',
+				'priority'   => 20,
 			),
-			'address'  => array(
-				'menu_title'      => __( 'Billing Info', 'wp-travel-engine' ),
-				'menu_class'      => 'lrf-address',
-				'menu_content_cb' => array( __CLASS__, 'dashboard_menu_address_tab' ),
-				'priority'        => 30,
+			'billing'  => array(
+				'menu_title' => __( 'Billing Info', 'wp-travel-engine' ),
+				'menu_class' => 'lrf-address',
+				'icon'       => 'billing',
+				'priority'   => 30,
 			),
-			'account'  => array(
-				'menu_title'      => __( 'Account Details', 'wp-travel-engine' ),
-				'menu_class'      => 'lrf-account',
-				'menu_content_cb' => array( __CLASS__, 'dashboard_menu_account_tab' ),
-				'priority'        => 40,
+			'profile'  => array(
+				'menu_title' => __( 'Account Details', 'wp-travel-engine' ),
+				'menu_class' => 'lrf-account',
+				'icon'       => 'profile',
+				'priority'   => 40,
 			),
 		);
-		return $dashboard_menus = apply_filters( 'wp_travel_engine_user_dashboard_menus', $dashboard_menus );
+
+		$dashboard_menus = apply_filters( 'wp_travel_engine_user_dashboard_menus', $dashboard_menus );
+
+		// Legacy `address`/`account` filter keys still work: moved to the new key, which wins if both exist.
+		$renamed_keys = array(
+			'address' => 'billing',
+			'account' => 'profile',
+		);
+
+		foreach ( $renamed_keys as $legacy => $current ) {
+			if ( ! isset( $dashboard_menus[ $legacy ] ) ) {
+				continue;
+			}
+
+			if ( ! isset( $dashboard_menus[ $current ] ) ) {
+				$dashboard_menus[ $current ] = $dashboard_menus[ $legacy ];
+			}
+
+			unset( $dashboard_menus[ $legacy ] );
+		}
+
+		return $dashboard_menus;
 	}
 
 	/**
 	 * Bookings Dashboard menus.
 	 *
 	 * @return array Menus.
+	 * @since 6.9.0 Made public so the account REST routes can reuse the filtered menus.
 	 */
-	private static function bookings_dashboard_menus() {
+	public static function bookings_dashboard_menus() {
 		$bookings_dashboard_menus        = array(
 			'active'  => array(
-				'menu_title'      => __( 'Upcoming Trips', 'wp-travel-engine' ),
-				'menu_class'      => 'wpte-active-bookings',
-				'menu_content_cb' => array( __CLASS__, 'bookings_menu_active_tab' ),
-				'priority'        => 10,
+				'menu_title' => __( 'Upcoming Trips', 'wp-travel-engine' ),
+				'menu_class' => 'wpte-active-bookings',
+				'priority'   => 10,
 			),
 			'history' => array(
-				'menu_title'      => __( 'Booking History', 'wp-travel-engine' ),
-				'menu_class'      => 'wpte-history-bookings',
-				'menu_content_cb' => array( __CLASS__, 'bookings_menu_history_tab' ),
-				'priority'        => 30,
+				'menu_title' => __( 'Booking History', 'wp-travel-engine' ),
+				'menu_class' => 'wpte-history-bookings',
+				'priority'   => 30,
 			),
 		);
 		return $bookings_dashboard_menus = apply_filters( 'wp_travel_engine_user_dashboard_booking_menus', $bookings_dashboard_menus );
 	}
 
-	public static function dashboard_menu_bookings_tab( $args ) {
-		wte_get_template( 'account/tab-content/bookings.php', $args );
+	/**
+	 * Form definitions the dashboard renders records with.
+	 *
+	 * @return array<string, array<string, array<string, mixed>>>
+	 * @since 6.9.0
+	 */
+	protected static function form_fields(): array {
+		return BookingFormFields::form_definitions();
 	}
 
-	public static function dashboard_menu_address_tab( $args ) {
-		wte_get_template( 'account/tab-content/address.php', $args );
+	/**
+	 * Bootstrap data for the React dashboard mount point. Empty off the account page.
+	 *
+	 * @return array Empty when not on the account page.
+	 * @since 6.9.0
+	 */
+	public static function get_dashboard_data(): array {
+		if ( ! wp_travel_engine_is_account_page() || ! is_user_logged_in() ) {
+			return array();
+		}
+
+		$dashboard_page_id = wp_travel_engine_get_dashboard_page_id();
+		$dashboard_url     = wp_travel_engine_get_page_permalink_by_id( $dashboard_page_id );
+
+		// Presentational keys only; `menu_content_cb` is a classic-dashboard concern the
+		// `my/<slug>` REST routes do not resolve.
+		$menus = array();
+		foreach ( wp_travel_engine_sort_array_by_priority( self::dashboard_menus() ) as $key => $menu ) {
+
+			$markup = '';
+
+			if ( ! empty( $menu['render'] ) ) {
+				ob_start();
+
+				try {
+					$template_args = array_merge(
+						self::get_args(),
+						array(
+							'menu' => $menu,
+							'key'  => $key,
+						)
+					);
+
+					wte_get_template( $menu['render'], $template_args, '', $menu['render_path'] ?? '' );
+					$markup = ob_get_clean();
+				} catch ( \Throwable $e ) {
+					ob_end_clean();
+					$markup = '';
+				}
+			}
+
+			$menus[] = array(
+				'key'      => $key,
+				'title'    => $menu['menu_title'] ?? '',
+				'class'    => $menu['menu_class'] ?? '',
+				'priority' => $menu['priority'] ?? 10,
+				'icon'     => $menu['icon'] ?? '',
+				'markup'   => $markup,
+			);
+		}
+
+		$user    = wp_get_current_user();
+		$billing = get_user_meta( $user->ID, 'wp_travel_engine_customer_billing_details', true );
+		$billing = is_array( $billing ) ? $billing : array();
+
+		return array(
+			'root'           => esc_url_raw( rest_url( 'wptravelengine/v1/' ) ),
+			'nonce'          => wp_create_nonce( 'wp_rest' ),
+			'pageUrl'        => $dashboard_url,
+			'user'           => array(
+				'firstName' => ! empty( $billing['billing_first_name'] ) ? $billing['billing_first_name'] : $user->first_name,
+				'lastName'  => ! empty( $billing['billing_last_name'] ) ? $billing['billing_last_name'] : $user->last_name,
+				'email'     => ! empty( $billing['billing_email'] ) ? $billing['billing_email'] : $user->user_email,
+				'username'  => $user->user_login,
+			),
+			'logoutUrl'      => html_entity_decode( wp_logout_url( $dashboard_url ), ENT_QUOTES, 'UTF-8' ),
+			'countries'      => Countries::list(),
+			'formFields'     => self::form_fields(),
+			'bookingsCount'  => self::get_owned_bookings_count(),
+			'canEditDetails' => self::travelers_may_edit(),
+			'labels'         => wptravelengine_get_labels(),
+			'menus'          => $menus,
+			'dateFormat'     => self::date_format_data(),
+		);
 	}
 
-	public static function dashboard_menu_account_tab( $args ) {
-		wte_get_template( 'account/tab-content/account.php', $args );
+	/**
+	 * The site's date and time formats, with the locale's names to spell them in.
+	 *
+	 * @since 6.9.0
+	 * @return array{date: string, time: string, months: string[], monthsShort: string[], weekdays: string[], weekdaysShort: string[], meridiem: array<string, string>}
+	 */
+	public static function date_format_data(): array {
+		global $wp_locale;
+
+		$months   = array_values( $wp_locale->month );
+		$weekdays = array_values( $wp_locale->weekday );
+
+		return array(
+			'date'          => (string) get_option( 'date_format', 'F j, Y' ),
+			'time'          => (string) get_option( 'time_format', 'g:i a' ),
+			'months'        => $months,
+			'monthsShort'   => array_map( array( $wp_locale, 'get_month_abbrev' ), $months ),
+			'weekdays'      => $weekdays,
+			'weekdaysShort' => array_map( array( $wp_locale, 'get_weekday_abbrev' ), $weekdays ),
+			'meridiem'      => $wp_locale->meridiem,
+		);
 	}
 
-	public static function bookings_menu_active_tab( $args ) {
-		wte_get_template( 'account/tab-content/bookings/bookings-manager.php', array_merge( $args, array( 'type' => 'active' ) ) );
+	/**
+	 * Whether a traveler may come back and change details they have already given.
+	 *
+	 * @return bool
+	 * @since 6.9.0
+	 */
+	public static function travelers_may_edit(): bool {
+		return wptravelengine_toggled( wptravelengine_settings()->get( 'allow_traveler_details_edit', false ) );
 	}
 
-	public static function bookings_menu_history_tab( $args ) {
-		wte_get_template( 'account/tab-content/bookings/bookings-manager.php', array_merge( $args, array( 'type' => 'history' ) ) );
+	/**
+	 * Whether traveler details are collected at all; off, the dashboard neither shows nor takes them.
+	 *
+	 * @return bool
+	 * @since 6.9.0
+	 */
+	public static function collects_travelers(): bool {
+		return wptravelengine_toggled( wptravelengine_settings()->get( 'display_travellers_info', 'yes' ) );
+	}
+
+	/**
+	 * IDs of the bookings belonging to the current user, oldest first.
+	 *
+	 * Separate from the models so the sidebar's badge can count without building one Booking
+	 * per ID on pages that never read the list.
+	 *
+	 * @return array<int> Booking post IDs, in the order they are stored.
+	 * @since 6.9.0
+	 */
+	protected static function stored_booking_ids(): array {
+		// Keyed by user so the cache, which outlives one REST dispatch, can't leak between users.
+		static $cache = array();
+
+		$user_id = get_current_user_id();
+
+		if ( isset( $cache[ $user_id ] ) ) {
+			return $cache[ $user_id ];
+		}
+
+		// Customer post meta only; legacy user-meta is not merged (it has leaked other customers' booking IDs).
+		$customer = wptravelengine_get_customer( wp_get_current_user() );
+		$ids      = $customer ? $customer->get_meta( 'wp_travel_engine_bookings' ) : array();
+		$ids      = array_values( array_unique( array_map( 'intval', is_array( $ids ) ? $ids : array() ) ) );
+
+		if ( ! empty( $ids ) ) {
+			_prime_post_caches( $ids, false, false );
+			update_meta_cache( 'post', $ids );
+		}
+
+		// The Booking model's own validity rule, applied without constructing one per ID.
+		$cache[ $user_id ] = array_values(
+			array_filter(
+				$ids,
+				function ( $id ) {
+					return 'booking' === get_post_type( $id );
+				}
+			)
+		);
+
+		return $cache[ $user_id ];
+	}
+
+	/**
+	 * Whether a booking belongs to the current user.
+	 *
+	 * @param int $booking_id Booking post ID.
+	 * @return bool
+	 * @since 6.9.0
+	 */
+	public static function owns_booking( int $booking_id ): bool {
+		return is_user_logged_in() && in_array( $booking_id, self::stored_booking_ids(), true );
+	}
+
+	/**
+	 * How many bookings the current user owns.
+	 *
+	 * @return int Booking count.
+	 * @since 6.9.0
+	 */
+	public static function get_owned_bookings_count(): int {
+		return count( self::stored_booking_ids() );
+	}
+
+	/**
+	 * Bookings belonging to the current user, newest first.
+	 *
+	 * @return array
+	 * @since 6.9.0 Built from stored_booking_ids(), which primes the post cache for legacy IDs too.
+	 */
+	public static function get_owned_bookings(): array {
+		static $cache = array();
+
+		$user_id = get_current_user_id();
+
+		if ( isset( $cache[ $user_id ] ) ) {
+			return $cache[ $user_id ];
+		}
+
+		$bookings = array();
+
+		foreach ( self::stored_booking_ids() as $booking_id ) {
+			$booking = wptravelengine_get_booking( $booking_id );
+
+			if ( $booking ) {
+				$bookings[] = $booking;
+			}
+		}
+
+		$cache[ $user_id ] = array_reverse( $bookings );
+
+		self::prime_booking_caches( $cache[ $user_id ] );
+
+		return $cache[ $user_id ];
+	}
+
+	/**
+	 * Warms the object cache for bookings and their trips, avoiding an O(bookings + trips)
+	 * query fan-out (a 7-booking page previously cost 145 queries).
+	 *
+	 * @param array $bookings Booking models.
+	 * @return void
+	 * @since 6.9.0
+	 */
+	protected static function prime_booking_caches( array $bookings ): void {
+		$booking_ids = array();
+
+		foreach ( $bookings as $booking ) {
+			$booking_ids[] = $booking->get_id();
+		}
+
+		if ( ! $booking_ids ) {
+			return;
+		}
+
+		update_meta_cache( 'post', $booking_ids );
+
+		$trip_ids = array();
+
+		foreach ( $bookings as $booking ) {
+			foreach ( wptravelengine_get_cart_info( $booking->ID )->get_items() as $item ) {
+				$trip_id = (int) $item->get_trip_id();
+
+				if ( $trip_id ) {
+					$trip_ids[ $trip_id ] = $trip_id;
+				}
+			}
+		}
+
+		if ( ! $trip_ids ) {
+			return;
+		}
+
+		// Meta included: the dashboard reads each trip's gallery from `wpte_gallery_id` meta.
+		_prime_post_caches( array_values( $trip_ids ), false, true );
+	}
+
+	/**
+	 * Booking IDs belonging to the current user.
+	 *
+	 * @return array Booking IDs, newest first.
+	 * @since 6.9.0 Read from the stored IDs rather than from a Booking per ID.
+	 */
+	public static function get_owned_booking_ids(): array {
+		return array_reverse( self::stored_booking_ids() );
+	}
+
+	/**
+	 * Arguments for a tab template/callback, same shape the classic dashboard passed.
+	 * `*_glance*` keys (misspelling included) are unread by core, kept only for add-ons.
+	 *
+	 * @return array Template args.
+	 * @since 6.9.0
+	 */
+	public static function get_args(): array {
+		$user_id     = get_current_user_id();
+		$booking_ids = self::get_owned_booking_ids();
+
+		return array(
+			'current_user'             => wp_get_current_user(),
+			'dashboard_menus'          => self::dashboard_menus(),
+			'bookings_dashboard_menus' => self::bookings_dashboard_menus(),
+			'bookings'                 => $booking_ids,
+			'bookings_glance'          => array_slice( $booking_ids, 0, 5 ),
+			'biling_glance_data'       => get_user_meta( $user_id, 'wp_travel_engine_customer_billing_details', true ),
+		);
+	}
+
+	/**
+	 * Classic dashboard tab, which the React dashboard has replaced.
+	 *
+	 * @param array $args Unused.
+	 * @return void
+	 * @deprecated 6.9.0 No longer called by WP Travel Engine. It will be removed in a future release.
+	 */
+	public static function dashboard_menu_bookings_tab( $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		_deprecated_function( __METHOD__, '6.9.0' );
+	}
+
+	/**
+	 * Classic dashboard tab, which the React dashboard has replaced.
+	 *
+	 * @param array $args Unused.
+	 * @return void
+	 * @deprecated 6.9.0 No longer called by WP Travel Engine. It will be removed in a future release.
+	 */
+	public static function dashboard_menu_address_tab( $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		_deprecated_function( __METHOD__, '6.9.0' );
+	}
+
+	/**
+	 * Classic dashboard tab, which the React dashboard has replaced.
+	 *
+	 * @param array $args Unused.
+	 * @return void
+	 * @deprecated 6.9.0 No longer called by WP Travel Engine. It will be removed in a future release.
+	 */
+	public static function dashboard_menu_account_tab( $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		_deprecated_function( __METHOD__, '6.9.0' );
+	}
+
+	/**
+	 * Classic dashboard tab, which the React dashboard has replaced.
+	 *
+	 * @param array $args Unused.
+	 * @return void
+	 * @deprecated 6.9.0 No longer called by WP Travel Engine. It will be removed in a future release.
+	 */
+	public static function bookings_menu_active_tab( $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		_deprecated_function( __METHOD__, '6.9.0' );
+	}
+
+	/**
+	 * Classic dashboard tab, which the React dashboard has replaced.
+	 *
+	 * @param array $args Unused.
+	 * @return void
+	 * @deprecated 6.9.0 No longer called by WP Travel Engine. It will be removed in a future release.
+	 */
+	public static function bookings_menu_history_tab( $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		_deprecated_function( __METHOD__, '6.9.0' );
 	}
 
 	/**
 	 * Retrieves the UserAccount shortcode output.
 	 *
-	 * This function generates the HTML output for the user account shortcode based on the provided attributes.
-	 *
 	 * @param array $atts Shortcode attributes.
 	 * @return string The generated HTML output.
+	 * @since 6.9.0 Logged-in branch now prints the React dashboard's mount point instead of
+	 *             account/content-dashboard.php.
 	 */
 	public function output( $atts ): string {
 
@@ -141,12 +501,20 @@ class UserAccount extends Shortcode {
 				wte_get_template( 'account/form-login.php' );
 			}
 		} else {
-			$current_user = wp_get_current_user();
-			$args['current_user'] = $current_user;
-			$args['dashboard_menus'] = self::dashboard_menus();
-			$args['bookings_dashboard_menus'] = self::bookings_dashboard_menus();
-			// Get user Dashboard.
-			wte_get_template( 'account/content-dashboard.php', $args );
+			$localize = static function () {
+				wp_localize_script( 'my-account', 'wptravelengineDashboardData', self::get_dashboard_data() );
+			};
+
+			if ( wp_script_is( 'my-account', 'registered' ) ) {
+				$localize();
+			} else {
+				add_action( 'wp_enqueue_scripts', $localize, 20 );
+			}
+
+			echo '<div id="wpte-traveler-dashboard" class="wpte-tdash loading">
+				<div class="wpte-tdash__shell"></div>
+				<div class="wpte-view"></div>
+				</div>';
 		}
 
 		return ob_get_clean();

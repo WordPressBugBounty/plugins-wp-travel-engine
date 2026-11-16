@@ -10,7 +10,9 @@ namespace WPTravelEngine\Core\Models\Post;
 
 use Error;
 use InvalidArgumentException;
+use WPTravelEngine\Filters\Events;
 use WPTravelEngine\Abstracts\PostModel;
+use WPTravelEngine\Utilities\ArrayUtility;
 
 /**
  * Class Payment.
@@ -80,11 +82,27 @@ class Payment extends PostModel {
 	 *
 	 * @return string
 	 * @since 6.7.3
+	 * @since 6.9.0 A source recorded on the payment wins over the billing info, so an operator's edit reads as theirs.
 	 */
 	public function get_payment_source(): string {
-		$billing_info   = $this->get_billing_info();
-		$payment_source = $this->get_meta( 'payment_source' );
-		return $billing_info ? 'checkout' : ( $payment_source ?: 'admin' );
+		$payment_source = (string) $this->get_meta( 'payment_source' );
+
+		if ( '' !== $payment_source ) {
+			return $payment_source;
+		}
+
+		return $this->get_billing_info() ? 'checkout' : 'admin';
+	}
+
+	/**
+	 * Records where the payment was last recorded from.
+	 *
+	 * @param string $source `checkout` or `admin`.
+	 * @return void
+	 * @since 6.9.0
+	 */
+	public function set_payment_source( string $source ): void {
+		$this->set_meta( 'payment_source', $source );
 	}
 
 	/**
@@ -316,6 +334,124 @@ class Payment extends PostModel {
 	}
 
 	/**
+	 * Sets what this payment settled, keeping the currency it was taken in.
+	 *
+	 * The amount is what the booking's paid and due totals are summed from, so a caller that
+	 * changes it is responsible for refreshing those - see Booking::sync_totals().
+	 *
+	 * @param float $amount Amount settled, in the payment's own currency.
+	 * @return void
+	 * @since 6.9.0
+	 */
+	public function set_amount( float $amount ): void {
+		$this->set_meta(
+			'payment_amount',
+			array(
+				'value'    => $amount,
+				'currency' => $this->get_currency(),
+			)
+		);
+	}
+
+	/**
+	 * How a request's deposit was arrived at, as `{ type, value }`.
+	 *
+	 * Kept beside the amount rather than derived from it: a rate cannot be worked back out of
+	 * what the deposit came to, since the balance it was taken from moves.
+	 *
+	 * @return array{type: string, value: string} Empty strings when the payment records none.
+	 * @since 6.9.0
+	 */
+	public function get_request_deposit(): array {
+		$deposit = ArrayUtility::to_array( $this->get_meta( 'payment_request_depost' ) );
+
+		return array(
+			'type'  => (string) ( $deposit['type'] ?? '' ),
+			'value' => (string) ( $deposit['value'] ?? '' ),
+		);
+	}
+
+	/**
+	 * Records how a request's deposit was arrived at.
+	 *
+	 * @param string $type  `percent` or `fixed`.
+	 * @param string $value The figure it was worked out from, as the operator entered it.
+	 * @return void
+	 * @since 6.9.0
+	 */
+	public function set_request_deposit( string $type, string $value ): void {
+		$this->set_meta(
+			'payment_request_depost',
+			array(
+				'type'  => $type,
+				'value' => $value,
+			)
+		);
+	}
+
+	/**
+	 * Sets what this payment is for, which is what a request asks the customer to settle.
+	 *
+	 * @param float $amount Amount payable.
+	 * @return void
+	 * @since 6.9.0
+	 */
+	public function set_payable_amount( float $amount ): void {
+		$this->set_meta(
+			'payable',
+			array(
+				'currency' => $this->get_payable_currency(),
+				'amount'   => $amount,
+			)
+		);
+	}
+
+	/**
+	 * The operator's note on this payment, never shown to the customer.
+	 *
+	 * @return string
+	 * @since 6.9.0
+	 */
+	public function get_remark(): string {
+		return (string) $this->get_meta( '_remark' );
+	}
+
+	/**
+	 * Records the operator's note on this payment.
+	 *
+	 * @param string $remark Note on the payment.
+	 * @return void
+	 * @since 6.9.0
+	 */
+	public function set_remark( string $remark ): void {
+		$this->set_meta( '_remark', $remark );
+	}
+
+	/**
+	 * What the payment covered before the fees it carried.
+	 *
+	 * @return float The whole amount on a record that never split it.
+	 * @since 6.9.0
+	 */
+	public function get_deposit(): float {
+		$totals = (array) $this->get_cart_totals();
+
+		return isset( $totals['deposit'] ) ? (float) $totals['deposit'] : $this->get_amount();
+	}
+
+	/**
+	 * What this payment collects now, fees included.
+	 *
+	 * @return float The amount on a record whose cart never worked one out.
+	 * @since 6.9.0
+	 */
+	public function get_payable_now(): float {
+		$totals = (array) $this->get_cart_totals();
+
+		return isset( $totals['payable_now'] ) ? (float) $totals['payable_now'] : $this->get_amount();
+	}
+
+	/**
 	 * @return array
 	 * @since 6.5.2
 	 */
@@ -376,5 +512,147 @@ class Payment extends PostModel {
 	 */
 	public function get_gateway_fee(): float {
 		return (float) ( $this->get_meta( 'gateway_fee' ) ?: 0 );
+	}
+
+	/**
+	 * Whether this payment is a request the customer has yet to settle.
+	 *
+	 * @return bool
+	 * @since 6.9.0
+	 */
+	public function is_payment_request(): bool {
+		return wptravelengine_toggled( $this->get_meta( 'is_payment_request' ) );
+	}
+
+	/**
+	 * Records whether this payment is a request the customer settles for themselves.
+	 *
+	 * @param bool $is_request Whether the payment was opened as a request.
+	 * @return void
+	 * @since 6.9.0
+	 */
+	public function set_payment_request( bool $is_request ): void {
+		$this->set_meta( 'is_payment_request', wptravelengine_replace( $is_request, true, 'yes', 'no' ) );
+	}
+
+	/**
+	 * The URL the customer settles this payment through.
+	 *
+	 * @return string Empty when the payment is not a request, is already completed, or carries no booking to return to, or the booking is canceled.
+	 * @since 6.9.0
+	 */
+	public function get_payment_link(): string {
+		$booking_id = (int) $this->get_meta( 'booking_id' );
+
+		if ( ! $this->is_payment_request() || $this->is_completed() || ! $booking_id || 'canceled' === get_post_meta( $booking_id, 'wp_travel_engine_booking_status', true ) ) {
+			return '';
+		}
+
+		$payment_key = $this->get_payment_key();
+
+		// A link the operator may send on has to outlive the session it was raised in.
+		set_transient(
+			"_payment_key_{$payment_key}",
+			wp_json_encode(
+				array(
+					'action'     => 'remaining_payment',
+					'booking_id' => $booking_id,
+					'payment_id' => $this->ID,
+				)
+			),
+			365 * DAY_IN_SECONDS
+		);
+
+		$payment_link = add_query_arg( array( '_payment_key' => $payment_key ), home_url() );
+
+		return apply_filters( 'wptravelengine_payment_link', $payment_link, $this->get_id() );
+	}
+
+	/**
+	 * Opens a payment record against a booking.
+	 *
+	 * @param int   $booking_id Booking the record is attached to.
+	 * @param array $args {
+	 *     Optional. Opening state; every key falls back to an unsettled admin record.
+	 *
+	 *     @type bool   $is_request     Record is a request the customer settles.
+	 *     @type string $source         `admin` or `checkout`.
+	 *     @type string $status         Raw payment status slug.
+	 *     @type string $currency       Currency both amounts are in.
+	 *     @type float  $payment_amount What the record settles.
+	 *     @type float  $payable_amount What it is raised against.
+	 *     @type bool   $is_due_payment Settles a balance, which the due-payment email keys off.
+	 *     @type string $post_title     Title the record is listed under.
+	 *     @type array  $meta_input     Further meta to write with the post; overrides the keys above.
+	 * }
+	 * @return Payment The new record, already attached to the booking.
+	 * @throws InvalidArgumentException When no booking answers to the given ID.
+	 * @since 6.9.0
+	 */
+	public static function create( int $booking_id, array $args = array() ): Payment {
+		$booking = wptravelengine_get_booking( $booking_id, true );
+
+		if ( ! $booking ) {
+			throw new InvalidArgumentException( 'Invalid Booking ID' );
+		}
+
+		$args = wp_parse_args(
+			$args,
+			array(
+				'is_request'     => false,
+				'source'         => 'admin',
+				'status'         => 'pending',
+				'currency'       => (string) $booking->get_currency(),
+				'payment_amount' => 0,
+				'payable_amount' => $booking->get_total_due_amount(),
+				'is_due_payment' => false,
+				'post_title'     => sprintf(
+					/* translators: %s: booking ID the payment is raised against. */
+					__( 'Payment for booking #%s', 'wp-travel-engine' ),
+					$booking->ID
+				),
+				'meta_input'     => array(),
+			)
+		);
+
+		/*
+		 * Written with the post rather than queued on the model: the fields below are what the
+		 * caller reads back off the record, and a queued write is not readable until it saves.
+		 */
+		$payment = static::create_post(
+			array(
+				'post_type'   => 'wte-payments',
+				'post_status' => 'publish',
+				'post_title'  => (string) $args['post_title'],
+				'meta_input'  => wp_parse_args(
+					(array) $args['meta_input'],
+					array(
+						'booking_id'         => $booking->ID,
+						'payment_source'     => (string) $args['source'],
+						'payment_status'     => (string) $args['status'],
+						'is_payment_request' => wptravelengine_replace( (bool) $args['is_request'], true, 'yes', 'no' ),
+						'is_due_payment'     => wptravelengine_replace( (bool) $args['is_due_payment'], true, 'yes', 'no' ),
+						'payment_amount'     => array(
+							'value'    => (float) $args['payment_amount'],
+							'currency' => (string) $args['currency'],
+						),
+						'payable'            => array(
+							'currency' => (string) $args['currency'],
+							'amount'   => (float) $args['payable_amount'],
+						),
+					)
+				),
+			)
+		);
+
+		// Held with the booking's other writes under `with_delayed_save()`; `get_payments()` reads it back.
+		$booking->update_meta(
+			'payments',
+			array_merge( ArrayUtility::to_array( $booking->get_payment_detail() ), array( $payment->ID ) )
+		);
+
+		Events::payment_created( $payment );
+
+		return $payment;
 	}
 }

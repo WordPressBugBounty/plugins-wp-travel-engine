@@ -189,12 +189,26 @@ abstract class CartItem implements CartItemInterface {
 	 *
 	 * @return string
 	 * @since 6.3.5
+	 * @since 6.9.0 Renders a checkout summary line instead of a table row.
 	 */
 	public function render(): string {
 		return sprintf(
-			'<tr><td>%s</td><td><strong>%s</strong></td></tr>',
+			'<div class="wpte-checkout__summary-line"><span class="wpte-checkout__summary-line__label">%s</span><span class="wpte-checkout__summary-line__value">%s</span></div>',
 			sprintf( '%s: %s x %s', $this->label, $this->quantity, wptravelengine_the_price( $this->price, false ) ),
 			wptravelengine_the_price( $this->get_subtotal(), false )
 		);
+	}
+
+	/**
+	 * Process and return the rendered HTML output.
+	 *
+	 * Uses self-binding to prevent compatibility drift when child classes
+	 * or dependent plugins override the render method.
+	 *
+	 * @return string
+	 * @since 6.9.0
+	 */
+	public function process(): string {
+		return self::render();
 	}
 }

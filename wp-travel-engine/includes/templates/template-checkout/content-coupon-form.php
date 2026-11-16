@@ -39,7 +39,7 @@ elseif ( $show_coupon_form ) :
 	<!-- Coupon Form -->
 	<form action="" class="wpte-checkout__coupon-form">
 		<label><?php esc_html_e( 'Have a coupon code?', 'wp-travel-engine' ); ?></label>
-		<div class="wpte-checkout__form-control wpte-material-ui-input-control">
+		<div class="wpte-checkout__form-control wpte-checkout__input-control wpte-checkout__coupon-input-control">
 			<input type="text" id="wpte-checkout__coupon" name="wpte-checkout__coupon"
 					class="wpte-checkout__input wpte-checkout__coupon-code-input"
 					data-coupon-code

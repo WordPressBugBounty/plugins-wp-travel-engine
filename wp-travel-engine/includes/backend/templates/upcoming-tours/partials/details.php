@@ -36,11 +36,11 @@
 					<span class="wpte-meta-value"><?php echo esc_html( $trip_details['duration'] ); ?></span>
 				</div>
 				<div class="wpte-meta-item">
-					<span class="wpte-meta-label"><?php _e( 'Starts on:', 'wp-travel-engine' ); ?></span>
+					<span class="wpte-meta-label"><?php _e( 'Starts On:', 'wp-travel-engine' ); ?></span>
 					<span class="wpte-meta-value"><?php echo esc_html( $trip_details['start_date'] ); ?></span>
 				</div>
 				<div class="wpte-meta-item">
-					<span class="wpte-meta-label"><?php _e( 'Ends on:', 'wp-travel-engine' ); ?></span>
+					<span class="wpte-meta-label"><?php _e( 'Ends On:', 'wp-travel-engine' ); ?></span>
 					<span class="wpte-meta-value"><?php echo esc_html( $trip_details['end_date'] ); ?></span>
 				</div>
 				<div class="wpte-meta-item">

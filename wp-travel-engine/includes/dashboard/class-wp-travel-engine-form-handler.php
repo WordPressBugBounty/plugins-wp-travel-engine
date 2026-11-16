@@ -4,6 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+use WPTravelEngine\Core\Models\User\BillingDetails;
 use WPTravelEngine\Core\Models\Post\Customer;
 use WPTravelEngine\Core\Shortcodes\UserAccount;
 
@@ -307,6 +308,9 @@ class Wp_Travel_Engine_Form_Handler {
 
 	/**
 	 * Update User Billing Data.
+	 *
+	 * @since 6.9.0 Validation and persistence extracted to persist_billing_details() so the
+	 *              account REST route can reuse them; this method now only handles the request.
 	 */
 	public static function update_user_billing_data() {
 
@@ -326,73 +330,170 @@ class Wp_Travel_Engine_Form_Handler {
 			return;
 		}
 
-		$current_user = get_user_by( 'id', $user_id );
+		$result = self::persist_billing_details( $user_id, wp_unslash( $_POST ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above.
 
-		// Get Billing Data.
-		$billing_address  = ! empty( $_POST['customer_billing_address'] ) ? wp_travel_engine_clean_vars( $_POST['customer_billing_address'] ) : '';
-		$billing_city     = ! empty( $_POST['customer_billing_city'] ) ? wp_travel_engine_clean_vars( $_POST['customer_billing_city'] ) : '';
-		$billing_company  = ! empty( $_POST['customer_billing_company'] ) ? wp_travel_engine_clean_vars( $_POST['customer_billing_company'] ) : '';
-		$billing_state    = ! empty( $_POST['customer_billing_state'] ) ? wp_travel_engine_clean_vars( $_POST['customer_billing_state'] ) : '';
-		$billing_zip_code = ! empty( $_POST['customer_zip_code'] ) ? wp_travel_engine_clean_vars( $_POST['customer_zip_code'] ) : '';
-		$billing_country  = ! empty( $_POST['customer_country'] ) ? wp_travel_engine_clean_vars( $_POST['customer_country'] ) : '';
-		$billing_phone    = ! empty( $_POST['customer_phone'] ) ? wp_travel_engine_clean_vars( $_POST['customer_phone'] ) : '';
+		if ( is_wp_error( $result ) ) {
+			wp_travel_engine_add_wp_error_notices( $result );
 
-		// Handle required fields.
-		$required_fields = apply_filters(
-			'wp_travel_engine_save_customer_billing_details_required_fields',
+			return;
+		}
+
+		WTE()->notices->add( __( 'Billing Details Updated Successfully', 'wp-travel-engine' ), 'success' );
+
+		wp_safe_redirect( wp_travel_engine_get_page_permalink_by_id( wp_travel_engine_get_dashboard_page_id() ) );
+		exit;
+	}
+
+	/**
+	 * Replaces every locked billing field in a submission with the value already stored.
+	 *
+	 * Overwrites rather than rejects: a locked field posted unchanged must not fail the save,
+	 * and one posted edited must not land.
+	 *
+	 * @param int   $user_id User being saved.
+	 * @param array $data    Submitted values.
+	 *
+	 * @return array Values with locked fields forced back to what is stored.
+	 * @since 6.9.0
+	 */
+	protected static function apply_locked_billing_fields( int $user_id, array $data ): array {
+		$locked = BillingDetails::locked_params();
+
+		if ( ! $locked ) {
+			return $data;
+		}
+
+		$stored = get_user_meta( $user_id, 'wp_travel_engine_customer_billing_details', true );
+		$stored = is_array( $stored ) ? $stored : array();
+
+		foreach ( $locked as $field => $meta_key ) {
+			$data[ $field ] = (string) ( $stored[ $meta_key ] ?? '' );
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Validates and persists a user's billing details.
+	 *
+	 * Shared by the classic dashboard form and the `my/billing` REST route. Authorising
+	 * $user_id is the caller's job.
+	 *
+	 * @param int   $user_id User ID.
+	 * @param array $data    Unslashed values keyed by form field name, e.g. `customer_billing_address`.
+	 *
+	 * @return true|WP_Error True on success, or one message per missing required field.
+	 * @since 6.9.0
+	 * @since 6.9.0 Billing name and email are stored on the billing record itself; locked
+	 *              fields are forced to their stored values before anything is written; the
+	 *              saved name and email are written through to the WordPress user.
+	 */
+	public static function persist_billing_details( int $user_id, array $data ) {
+
+		$data = self::apply_locked_billing_fields( $user_id, $data );
+
+		$value = fn ( string $key ) => ! empty( $data[ $key ] ) ? wp_travel_engine_clean_vars( $data[ $key ] ) : '';
+
+		$data_array = array();
+
+		// Custom checkout questions keep their answer in the same record, under their own key.
+		// Written first so the fixed slots below always win if a key ever collided.
+		foreach ( BillingDetails::custom_params() as $param => $meta_key ) {
+			$data_array[ $meta_key ] = $value( $param );
+		}
+
+		$locked = BillingDetails::locked_params();
+
+		foreach ( BillingDetails::params() as $param => $meta_key ) {
+			// A locked slot is not written at all, rather than written back as whatever is
+			// stored: re-writing it puts an empty value over a slot the traveler cannot fill,
+			// and `put()` merges over what is there, so leaving it out preserves it.
+			if ( isset( $locked[ $param ] ) ) {
+				continue;
+			}
+
+			$data_array[ $meta_key ] = $value( $param );
+		}
+
+		$billing_email = $data_array['billing_email'] ?? '';
+
+		$errors = new WP_Error();
+
+		foreach ( BillingDetails::required_params() as $param => $label ) {
+			if ( ! empty( $data[ $param ] ) ) {
+				continue;
+			}
+
+			/* translators: %s: Name of the required field. */
+			$errors->add( 'wptravelengine_required_field', sprintf( __( 'Error :   %s is a required field.', 'wp-travel-engine' ), esc_html( $label ) ) );
+		}
+
+		// The billing email is who invoices go to, not who signs in, so it is validated as an
+		// address but never checked for uniqueness against other accounts.
+		if ( '' !== $billing_email && ! is_email( $billing_email ) ) {
+			$errors->add( 'wptravelengine_invalid_email', __( 'Please Provide a valid email address', 'wp-travel-engine' ) );
+		}
+
+		if ( $errors->has_errors() ) {
+			return $errors;
+		}
+
+		if ( array_key_exists( 'billing_email', $data_array ) ) {
+			$data_array['billing_email'] = '' !== $billing_email ? sanitize_email( $billing_email ) : '';
+		}
+
+		$record = wptravelengine_get_user( $user_id );
+
+		if ( ! $record ) {
+			return new WP_Error( 'wptravelengine_invalid_user', __( 'Could not find the account to save against.', 'wp-travel-engine' ) );
+		}
+
+		$record->put( $data_array );
+
+		// Read back rather than reusing what was written: a locked slot was left out of the
+		// write, and the syncs below still need the value the record actually holds.
+		$stored = array();
+
+		foreach ( BillingDetails::params() as $meta_key ) {
+			$stored[ $meta_key ] = $record->get( $meta_key );
+		}
+
+		$synced = self::sync_account_from_billing( $user_id, $stored );
+
+		if ( is_wp_error( $synced ) ) {
+			return $synced;
+		}
+
+		// Sync billing data to customer post lead traveller.
+		$current_user   = get_user_by( 'id', $user_id );
+		$customer_model = self::get_or_create_customer( $current_user->user_email );
+		self::sync_lead_traveller(
+			$customer_model,
 			array(
-				'customer_billing_address' => __( 'Billing Address', 'wp-travel-engine' ),
-				'customer_country'         => __( 'Country', 'wp-travel-engine' ),
-				'customer_phone'           => __( 'Phone', 'wp-travel-engine' ),
+				'address'  => $stored['billing_address'] ?? '',
+				'city'     => $stored['billing_city'] ?? '',
+				'state'    => $stored['billing_state'] ?? '',
+				'postcode' => $stored['billing_zip_code'] ?? '',
+				'country'  => $stored['billing_country'] ?? '',
+				'phone'    => $stored['billing_phone'] ?? '',
+				'company'  => $stored['billing_company'] ?? '',
+				'fname'    => $stored['billing_first_name'] ?? '',
+				'lname'    => $stored['billing_last_name'] ?? '',
+				'email'    => $stored['billing_email'] ?? '',
 			)
 		);
 
-		foreach ( $required_fields as $field_key => $field_name ) {
-			if ( empty( $_POST[ $field_key ] ) ) {
-				WTE()->notices->add( sprintf( __( 'Error :   %s is a required field.', 'wp-travel-engine' ), esc_html( $field_name ) ), 'error' );
-			}
-		}
+		do_action( 'wp_travel_engine_save_billing_details', $user_id );
 
-		if ( wp_travel_engine_get_notice_count( 'error' ) === 0 ) {
-
-			$data_array = array(
-				'billing_address'  => $billing_address,
-				'billing_city'     => $billing_city,
-				'billing_state'    => $billing_state,
-				'billing_zip_code' => $billing_zip_code,
-				'billing_country'  => $billing_country,
-				'billing_phone'    => $billing_phone,
-				'billing_company'  => $billing_company,
-			);
-
-			update_user_meta( $user_id, 'wp_travel_engine_customer_billing_details', $data_array );
-
-			// Sync billing data to customer post lead traveller.
-			$customer_model = self::get_or_create_customer( $current_user->user_email );
-			self::sync_lead_traveller(
-				$customer_model,
-				array(
-					'address'  => $billing_address,
-					'city'     => $billing_city,
-					'state'    => $billing_state,
-					'postcode' => $billing_zip_code,
-					'country'  => $billing_country,
-					'phone'    => $billing_phone,
-					'company'  => $billing_company,
-				)
-			);
-
-			WTE()->notices->add( __( 'Billing Details Updated Successfully', 'wp-travel-engine' ), 'success' );
-
-			do_action( 'wp_travel_engine_save_billing_details', $user_id );
-
-			wp_safe_redirect( wp_travel_engine_get_page_permalink_by_id( wp_travel_engine_get_dashboard_page_id() ) );
-			exit;
-		}
+		return true;
 	}
 
 	/**
 	 * Save the password/account details and redirect back to the my account page.
+	 *
+	 * @since 6.9.0 Validation and persistence extracted to persist_account_details() and the
+	 *              profile-photo handling to persist_profile_image(), so the account REST route
+	 *              can reuse them; this method now only handles the request.
 	 */
 	public static function save_account_details() {
 		if ( 'POST' !== strtoupper( $_SERVER['REQUEST_METHOD'] ) ) {
@@ -411,17 +512,172 @@ class Wp_Travel_Engine_Form_Handler {
 			return;
 		}
 
-		$current_user       = get_user_by( 'id', $user_id );
-		$current_first_name = $current_user->first_name;
-		$current_last_name  = $current_user->last_name;
-		$current_email      = $current_user->user_email;
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce verified above.
+		$posted = wp_unslash( $_POST );
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
-		$account_first_name = ! empty( $_POST['account_first_name'] ) ? wp_travel_engine_clean_vars( $_POST['account_first_name'] ) : '';
-		$account_last_name  = ! empty( $_POST['account_last_name'] ) ? wp_travel_engine_clean_vars( $_POST['account_last_name'] ) : '';
-		$account_email      = ! empty( $_POST['account_email'] ) ? wp_travel_engine_clean_vars( $_POST['account_email'] ) : '';
-		$pass_cur           = ! empty( $_POST['password_current'] ) ? wte_clean( wp_unslash( $_POST['password_current'] ) ) : '';
-		$pass1              = ! empty( $_POST['password_1'] ) ? wte_clean( wp_unslash( $_POST['password_1'] ) ) : '';
-		$pass2              = ! empty( $_POST['password_2'] ) ? wte_clean( wp_unslash( $_POST['password_2'] ) ) : '';
+		// A failed photo upload aborts the whole save, as it did before this was extracted.
+		$image_result = self::persist_profile_image( $user_id, $posted );
+
+		if ( is_wp_error( $image_result ) ) {
+			wp_travel_engine_add_wp_error_notices( $image_result );
+
+			return;
+		}
+
+		$result = self::persist_account_details( $user_id, $posted );
+
+		if ( is_wp_error( $result ) ) {
+			wp_travel_engine_add_wp_error_notices( $result );
+
+			return;
+		}
+
+		WTE()->notices->add( __( 'Account Details Updated Successfully', 'wp-travel-engine' ), 'success' );
+
+		wp_safe_redirect( wp_travel_engine_get_page_permalink_by_id( wp_travel_engine_get_dashboard_page_id() ) );
+		exit;
+	}
+
+	/**
+	 * Writes the billing name and email through to the WordPress user.
+	 *
+	 * Billing is the one place a traveler's details are edited, so the account follows it.
+	 * Empty values are skipped — propagating them would blank the account's name or email.
+	 *
+	 * @param int   $user_id User ID.
+	 * @param array $billing Billing values as just saved, keyed by meta key.
+	 *
+	 * @return true|WP_Error True on success, or an error if the email cannot be taken.
+	 * @since 6.9.0
+	 */
+	protected static function sync_account_from_billing( int $user_id, array $billing ) {
+		$current = get_user_by( 'id', $user_id );
+
+		if ( ! $current ) {
+			return new WP_Error( 'wptravelengine_invalid_user', __( 'Invalid user.', 'wp-travel-engine' ) );
+		}
+
+		$fields = array( 'ID' => $user_id );
+
+		foreach ( array(
+			'first_name' => 'billing_first_name',
+			'last_name'  => 'billing_last_name',
+		) as $property => $meta_key ) {
+			$value = (string) ( $billing[ $meta_key ] ?? '' );
+
+			if ( '' !== $value && $value !== $current->$property ) {
+				$fields[ $property ] = $value;
+			}
+		}
+
+		$email = (string) ( $billing['billing_email'] ?? '' );
+
+		if ( '' !== $email && $email !== $current->user_email ) {
+			if ( ! is_email( $email ) ) {
+				return new WP_Error( 'wptravelengine_invalid_email', __( 'Please Provide a valid email address', 'wp-travel-engine' ) );
+			}
+
+			if ( email_exists( $email ) ) {
+				return new WP_Error( 'wptravelengine_email_exists', __( 'The email address is already registered', 'wp-travel-engine' ) );
+			}
+
+			$fields['user_email'] = $email;
+		}
+
+		// Nothing but the ID means nothing changed; wp_update_user() would still fire its
+		// hooks and, for an email, notify the user about a change that did not happen.
+		if ( count( $fields ) < 2 ) {
+			return true;
+		}
+
+		$result = wp_update_user( $fields );
+
+		return is_wp_error( $result ) ? $result : true;
+	}
+
+	/**
+	 * Account fields a traveler cannot change about themselves.
+	 *
+	 * Enforced in persist_account_details(), which is the only way either the dashboard or
+	 * the classic form writes these — so a submitted value is ignored no matter how the
+	 * request was built. The dashboard renders them read-only to match, but that is
+	 * presentation; this is the rule.
+	 *
+	 * @return array Field names, keyed by the user property each one writes.
+	 * @since 6.9.0
+	 */
+	public static function locked_account_fields(): array {
+		/**
+		 * Filters the account fields a traveler cannot change.
+		 *
+		 * Keys are form field names, values the `WP_User` property each reads its current
+		 * value from. Return an empty array to let travelers edit their own name and email.
+		 *
+		 * @param array $fields Locked fields.
+		 * @since 6.9.0
+		 */
+		return (array) apply_filters(
+			'wptravelengine_locked_account_fields',
+			array(
+				'account_first_name' => 'first_name',
+				'account_last_name'  => 'last_name',
+				'account_email'      => 'user_email',
+			)
+		);
+	}
+
+	/**
+	 * Replaces every locked field in a submission with the value already on the account.
+	 *
+	 * Overwrites rather than rejects: a locked field that arrives unchanged — which is what
+	 * both forms post — must not fail the save, and one that arrives edited must not take
+	 * effect. Required-field validation still sees a value, so nothing downstream changes.
+	 *
+	 * @param WP_User $user User being saved.
+	 * @param array   $data Submitted values.
+	 *
+	 * @return array Values with locked fields forced back to what is stored.
+	 * @since 6.9.0
+	 */
+	protected static function apply_locked_account_fields( $user, array $data ): array {
+		foreach ( self::locked_account_fields() as $field => $property ) {
+			$data[ $field ] = (string) ( $user->$property ?? '' );
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Validates and persists a user's account details (name, email, password).
+	 *
+	 * Shared by the classic dashboard form and the `account/profile` REST route. Profile
+	 * photos are handled separately by persist_profile_image(). Authorising $user_id is the
+	 * caller's job.
+	 *
+	 * @param int   $user_id User ID.
+	 * @param array $data    Unslashed values keyed by form field name, e.g. `account_first_name`.
+	 *
+	 * @return true|WP_Error True on success, or one message per validation failure.
+	 * @since 6.9.0
+	 * @since 6.9.0 Locked fields are forced to their stored values before anything is written.
+	 */
+	public static function persist_account_details( int $user_id, array $data ) {
+
+		$current_user = get_user_by( 'id', $user_id );
+
+		if ( ! $current_user ) {
+			return new WP_Error( 'wptravelengine_invalid_user', __( 'Invalid user.', 'wp-travel-engine' ) );
+		}
+
+		$data = self::apply_locked_account_fields( $current_user, $data );
+
+		$account_first_name = ! empty( $data['account_first_name'] ) ? wp_travel_engine_clean_vars( $data['account_first_name'] ) : '';
+		$account_last_name  = ! empty( $data['account_last_name'] ) ? wp_travel_engine_clean_vars( $data['account_last_name'] ) : '';
+		$account_email      = ! empty( $data['account_email'] ) ? wp_travel_engine_clean_vars( $data['account_email'] ) : '';
+		$pass_cur           = ! empty( $data['password_current'] ) ? wte_clean( $data['password_current'] ) : '';
+		$pass1              = ! empty( $data['password_1'] ) ? wte_clean( $data['password_1'] ) : '';
+		$pass2              = ! empty( $data['password_2'] ) ? wte_clean( $data['password_2'] ) : '';
 		$save_pass          = true;
 
 		$user             = new stdClass();
@@ -431,6 +687,8 @@ class Wp_Travel_Engine_Form_Handler {
 
 		// Prevent emails being displayed, or leave alone.
 		$user->display_name = is_email( $current_user->display_name ) ? $user->first_name : $current_user->display_name;
+
+		$errors = new WP_Error();
 
 		// Handle required fields.
 		$required_fields = apply_filters(
@@ -443,35 +701,36 @@ class Wp_Travel_Engine_Form_Handler {
 		);
 
 		foreach ( $required_fields as $field_key => $field_name ) {
-			if ( empty( $_POST[ $field_key ] ) ) {
-				WTE()->notices->add( sprintf( __( 'Error :   %s is a required field.', 'wp-travel-engine' ), esc_html( $field_name ) ), 'error' );
+			if ( empty( $data[ $field_key ] ) ) {
+				/* translators: %s: Name of the required field. */
+				$errors->add( 'wptravelengine_required_field', sprintf( __( 'Error :   %s is a required field.', 'wp-travel-engine' ), esc_html( $field_name ) ) );
 			}
 		}
 
 		if ( $account_email ) {
 			$account_email = sanitize_email( $account_email );
 			if ( ! is_email( $account_email ) ) {
-				WTE()->notices->add( __( 'Please Provide a valid email address', 'wp-travel-engine' ), 'error' );
+				$errors->add( 'wptravelengine_invalid_email', __( 'Please Provide a valid email address', 'wp-travel-engine' ) );
 			} elseif ( email_exists( $account_email ) && $account_email !== $current_user->user_email ) {
-				WTE()->notices->add( __( 'The email address is already registered', 'wp-travel-engine' ), 'error' );
+				$errors->add( 'wptravelengine_email_exists', __( 'The email address is already registered', 'wp-travel-engine' ) );
 			}
 			$user->user_email = $account_email;
 		}
 
 		if ( ! empty( $pass_cur ) && empty( $pass1 ) && empty( $pass2 ) ) {
-			WTE()->notices->add( __( 'Please Fill Out All Password Fields.', 'wp-travel-engine' ), 'error' );
+			$errors->add( 'wptravelengine_password_empty', __( 'Please Fill Out All Password Fields.', 'wp-travel-engine' ) );
 			$save_pass = false;
 		} elseif ( ! empty( $pass1 ) && empty( $pass_cur ) ) {
-			WTE()->notices->add( __( 'Please Enter Your Current Password', 'wp-travel-engine' ), 'error' );
+			$errors->add( 'wptravelengine_password_current_missing', __( 'Please Enter Your Current Password', 'wp-travel-engine' ) );
 			$save_pass = false;
 		} elseif ( ! empty( $pass1 ) && empty( $pass2 ) ) {
-			WTE()->notices->add( __( 'Please re-enter your password', 'wp-travel-engine' ), 'error' );
+			$errors->add( 'wptravelengine_password_confirm_missing', __( 'Please re-enter your password', 'wp-travel-engine' ) );
 			$save_pass = false;
 		} elseif ( ( ! empty( $pass1 ) || ! empty( $pass2 ) ) && $pass1 !== $pass2 ) {
-			WTE()->notices->add( __( 'New Passwords do not match', 'wp-travel-engine' ), 'error' );
+			$errors->add( 'wptravelengine_password_mismatch', __( 'New Passwords do not match', 'wp-travel-engine' ) );
 			$save_pass = false;
 		} elseif ( ! empty( $pass1 ) && ! wp_check_password( $pass_cur, $current_user->user_pass, $current_user->ID ) ) {
-			WTE()->notices->add( __( 'Your current password is incorrect', 'wp-travel-engine' ), 'error' );
+			$errors->add( 'wptravelengine_password_incorrect', __( 'Your current password is incorrect', 'wp-travel-engine' ) );
 			$save_pass = false;
 		}
 
@@ -479,68 +738,87 @@ class Wp_Travel_Engine_Form_Handler {
 			$user->user_pass = $pass1;
 		}
 
+		// Allow plugins to return their own errors.
+		do_action_ref_array( 'wp_travel_engine_save_account_details_errors', array( &$errors, &$user ) );
+
+		if ( $errors->has_errors() ) {
+			return $errors;
+		}
+
+		wp_update_user( $user );
+
+		// Sync account name/email to customer post and lead traveller.
+		$customer_email   = ! empty( $account_email ) ? $account_email : $current_user->user_email;
+		$customer_model   = self::get_or_create_customer( $customer_email );
+		$customer_details = array(
+			'fname' => $account_first_name,
+			'lname' => $account_last_name,
+			'email' => $customer_email,
+		);
+		$customer_model->set_customer_details( $customer_details );
+		$customer_model->save();
+		self::sync_lead_traveller( $customer_model, $customer_details );
+
+		do_action( 'wp_travel_engine_save_account_details', $user->ID );
+
+		return true;
+	}
+
+	/**
+	 * Attaches, replaces or clears a user's dashboard profile photo.
+	 *
+	 * A missing `user_profile_image` value means "no photo", which clears any existing
+	 * attachment — matching the classic form, where an empty field removes the photo.
+	 *
+	 * @param int   $user_id User ID.
+	 * @param array $data    Unslashed values keyed by form field name.
+	 *
+	 * @return true|WP_Error True on success, WP_Error when the attachment could not be created.
+	 * @since 6.9.0
+	 */
+	public static function persist_profile_image( int $user_id, array $data ) {
+
 		$users_meta = get_user_meta( $user_id, 'wte_users_meta', true );
-		if ( ! is_array( $users_meta ) || empty( $users_meta ) ) :
+
+		if ( ! is_array( $users_meta ) || empty( $users_meta ) ) {
 			$users_meta = array();
-		endif;
+		}
 
-		$user_profile_image_file = isset( $_POST['user_profile_image'] ) && ! empty( $_POST['user_profile_image'] ) ? sanitize_text_field( wp_normalize_path( $_POST['user_profile_image'] ) ) : false;
-		$user_profile_image_url  = isset( $_POST['user_profile_image_url'] ) && ! empty( $_POST['user_profile_image_url'] ) ? esc_url_raw( $_POST['user_profile_image_url'] ) : false;
-		if ( $user_profile_image_file && $user_profile_image_url && $user_profile_image_file != 'custom-image' ) :
+		$existing_id = isset( $users_meta['user_profile_image_id'] ) && is_numeric( $users_meta['user_profile_image_id'] )
+			? $users_meta['user_profile_image_id']
+			: false;
 
-			if ( isset( $users_meta['user_profile_image_id'] ) && is_numeric( $users_meta['user_profile_image_id'] ) ) :
-				wp_delete_attachment( $users_meta['user_profile_image_id'] );
-			endif;
+		$image_file = ! empty( $data['user_profile_image'] ) ? sanitize_text_field( wp_normalize_path( $data['user_profile_image'] ) ) : false;
+		$image_url  = ! empty( $data['user_profile_image_url'] ) ? esc_url_raw( $data['user_profile_image_url'] ) : false;
 
-			$attached_img_id = self::set_user_profile_image( $user_profile_image_file, $user_id );
+		if ( $image_file && $image_url && 'custom-image' !== $image_file ) {
 
-			if ( ! $attached_img_id ) :
-				WTE()->notices->add( __( 'There was an issue updating your profile photo.', 'wp-travel-engine' ), 'error' );
-			else :
-				$users_meta['user_profile_image_id'] = absint( $attached_img_id );
-				update_user_meta( $user_id, 'wte_users_meta', $users_meta );
-			endif;
+			if ( $existing_id ) {
+				wp_delete_attachment( $existing_id );
+			}
 
-		elseif ( ! $user_profile_image_file ) :
-			if ( isset( $users_meta['user_profile_image_id'] ) && is_numeric( $users_meta['user_profile_image_id'] ) ) :
-				wp_delete_attachment( $users_meta['user_profile_image_id'] );
-			endif;
+			$attached_img_id = self::set_user_profile_image( $image_file, $user_id );
+
+			if ( ! $attached_img_id ) {
+				return new WP_Error( 'wptravelengine_profile_image_failed', __( 'There was an issue updating your profile photo.', 'wp-travel-engine' ) );
+			}
+
+			$users_meta['user_profile_image_id'] = absint( $attached_img_id );
+			update_user_meta( $user_id, 'wte_users_meta', $users_meta );
+
+			return true;
+		}
+
+		if ( ! $image_file ) {
+			if ( $existing_id ) {
+				wp_delete_attachment( $existing_id );
+			}
 
 			$users_meta['user_profile_image_id'] = false;
 			update_user_meta( $user_id, 'wte_users_meta', $users_meta );
-		endif;
-		// Allow plugins to return their own errors.
-		$errors = new WP_Error();
-		do_action_ref_array( 'wp_travel_engine_save_account_details_errors', array( &$errors, &$user ) );
-
-		if ( $errors->get_error_messages() ) {
-			foreach ( $errors->get_error_messages() as $error ) {
-				WTE()->notices->add( $error, 'error' );
-			}
 		}
 
-		if ( wp_travel_engine_get_notice_count( 'error' ) === 0 ) {
-			wp_update_user( $user );
-
-			// Sync account name/email to customer post and lead traveller.
-			$customer_email   = ! empty( $account_email ) ? $account_email : $current_user->user_email;
-			$customer_model   = self::get_or_create_customer( $customer_email );
-			$customer_details = array(
-				'fname' => $account_first_name,
-				'lname' => $account_last_name,
-				'email' => $customer_email,
-			);
-			$customer_model->set_customer_details( $customer_details );
-			$customer_model->save();
-			self::sync_lead_traveller( $customer_model, $customer_details );
-
-			WTE()->notices->add( __( 'Account Details Updated Successfully', 'wp-travel-engine' ), 'success' );
-
-			do_action( 'wp_travel_engine_save_account_details', $user->ID );
-
-			wp_safe_redirect( wp_travel_engine_get_page_permalink_by_id( wp_travel_engine_get_dashboard_page_id() ) );
-			exit;
-		}
+		return true;
 	}
 
 	/**

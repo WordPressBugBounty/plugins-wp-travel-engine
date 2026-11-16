@@ -8,11 +8,13 @@
 
 namespace WPTravelEngine\Core\PostTypes;
 
+use WPTravelEngine\Helpers\Asset;
 use WPTravelEngine\Helpers\Functions;
 use WPTravelEngine\Helpers\BookedItem;
 use WPTravelEngine\Abstracts\PostType;
-use WPTravelEngine\Core\Booking\SaveBooking;
+use WPTravelEngine\Core\Booking\ListBooking;
 use WPTravelEngine\Core\Booking\ViewBooking;
+use WPTravelEngine\Integrations\SliceWP\Commissions;
 use WPTravelEngine\Core\Models\Post\Booking as BookingModel;
 
 /**
@@ -20,8 +22,19 @@ use WPTravelEngine\Core\Models\Post\Booking as BookingModel;
  * This class represents a trip booking to the WP Travel Engine plugin.
  *
  * @since 6.8.0
+ * @since 6.9.0 Uses the ListBooking trait, which holds the list screen.
  */
 class Booking extends PostType {
+
+	use ListBooking;
+
+	/**
+	 * Post type slug.
+	 *
+	 * @var string
+	 * @since 6.9.0
+	 */
+	public const POST_TYPE = 'booking';
 
 	/**
 	 * Post type name.
@@ -29,14 +42,6 @@ class Booking extends PostType {
 	 * @var string
 	 */
 	protected string $post_type = 'booking';
-
-	/**
-	 * Serialized fragment identifying a v4.0 cart_info structure.
-	 * Bookings missing this are treated as deprecated.
-	 *
-	 * @since 6.8.0
-	 */
-	private const CART_INFO_VERSION = 's:7:"version";s:3:"4.0";';
 
 	/**
 	 * SVG icon for the "migrated" booking state badge (double-arrow exchange).
@@ -70,76 +75,48 @@ class Booking extends PostType {
 	 * Constructor.
 	 *
 	 * @since 6.4.0
+	 * @since 6.9.0 List screen hooks moved to ListBooking::register_list_hooks().
 	 */
 	public function __construct() {
-		add_action( "add_meta_boxes_{$this->post_type}", array( $this, 'meta_box_booking' ) );
-		add_action( 'restrict_manage_posts', array( $this, 'add_filter_options' ) );
-		add_action( 'parse_query', array( $this, 'filter_bookings' ) );
-		add_filter( 'disable_months_dropdown', array( $this, 'remove_date_filter' ) );
+		$this->register_list_hooks();
 
+		add_action( "add_meta_boxes_{$this->post_type}", array( $this, 'meta_box_booking' ) );
 		add_filter( 'wptravelengine_booking_line_item_group_title', array( $this, 'add_booking_line_item_title' ), 10, 2 );
 		add_filter( 'wptravelengine_booking_line_items', array( $this, 'add_booking_line_items' ), 10, 2 );
 		add_filter( 'wp_travel_engine_traveller_info_fields_display', array( $this, 'add_pricing_category_field_to_traveller' ), 10, 1 );
 		add_filter( 'wp_travel_engine_lead_traveller_info_fields_display', array( $this, 'add_pricing_category_field_to_lead_traveller' ), 10, 1 );
 		add_filter( 'wptravelengine_form_field_options', array( $this, 'add_none_option_to_select_options' ), 10, 1 );
-		add_action( 'wp_insert_post', array( $this, 'save' ), 10, 3 );
 		add_action( 'load-post-new.php', array( $this, 'redirect_new_booking' ) );
-
-		add_action( 'pre_get_posts', array( $this, 'exclude_migrated_bookings' ) );
-		add_action( 'load-edit.php', array( $this, 'delete_auto_drafts' ) );
-		add_filter( 'views_edit-booking', array( $this, 'fix_booking_view_counts' ) );
-		add_filter( 'display_post_states', array( $this, 'append_booking_state_badges' ), 10, 2 );
 		add_action( 'admin_menu', array( $this, 'modify_submenu' ), 20 );
 
 		\WP_Travel_Engine_Booking_Export::register_hooks();
+		Commissions::register_hooks();
 		ViewBooking::register_hooks();
+
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 	}
 
 	/**
-	 * Save booking data.
+	 * Adds the legacy Booking Details box.
 	 *
-	 * @param int      $post_id Post ID.
-	 * @param \WP_Post $post Post object.
-	 * @param bool     $update Whether this is an update.
+	 * @param \WP_Post $post Booking being edited.
 	 * @return void
 	 * @since 6.4.0
-	 * @since 6.8.0 Refined and migrated from WPTravelEngine\Core\Booking\SaveBooking class.
+	 * @since 6.9.0 Only for a booking the React app does not take over, e.g. a pre-4.0 cart.
 	 */
-	public function save( $post_id, $post, $update = false ) {
-		static $processing = array();
+	public function meta_box_booking( \WP_Post $post ): void {
+		/** @var ViewBooking $booking_view */
+		$booking_view = ViewBooking::instance( (int) $post->ID );
 
-		if ( isset( $processing[ $post_id ] ) ) {
+		if ( $booking_view->should_render_app() ) {
 			return;
 		}
 
-		// Verify nonce.
-		if ( $this->post_type !== $post->post_type || ! wp_verify_nonce( $_POST['wptravelengine_new_booking_nonce'] ?? '', 'wptravelengine_new_booking' ) ) {
-			return;
-		}
-
-		$processing[ $post_id ] = true;
-		try {
-			$booking = new SaveBooking( $post_id );
-			$booking->process();
-		} finally {
-			unset( $processing[ $post_id ] );
-		}
-	}
-
-	/**
-	 * @return void
-	 * @since 6.4.0
-	 */
-	public function meta_box_booking() {
 		add_meta_box(
 			'booking_details_id',
 			__( 'Booking Details', 'wp-travel-engine' ),
-			function () {
-				global $post;
-				$booking_view = new ViewBooking( $post->ID );
-				$booking_view->process_markup();
-			},
-			'booking',
+			array( $booking_view, 'process_markup' ),
+			$this->post_type,
 			'normal',
 			'high'
 		);
@@ -194,6 +171,7 @@ class Booking extends PostType {
 	 * menu labels, and more.
 	 *
 	 * @return array An array containing the labels for the Booking post type.
+	 * @since 6.9.0 The add_new_item label reads "Add New".
 	 */
 	public function get_labels(): array {
 		return array(
@@ -202,7 +180,7 @@ class Booking extends PostType {
 			'menu_name'          => _x( 'WP Travel Engine', 'admin menu', 'wp-travel-engine' ),
 			'name_admin_bar'     => _x( 'Booking', 'add new on admin bar', 'wp-travel-engine' ),
 			'add_new'            => _x( 'Add New', 'Booking', 'wp-travel-engine' ),
-			'add_new_item'       => esc_html__( 'Add New Booking', 'wp-travel-engine' ),
+			'add_new_item'       => esc_html__( 'Add New', 'wp-travel-engine' ),
 			'new_item'           => esc_html__( 'New Booking', 'wp-travel-engine' ),
 			'edit_item'          => esc_html__( 'Edit Booking', 'wp-travel-engine' ),
 			'view_item'          => esc_html__( 'View Booking', 'wp-travel-engine' ),
@@ -283,64 +261,6 @@ class Booking extends PostType {
 	}
 
 	/**
-	 * Add filter options.
-	 *
-	 * @param string $post_type Post type.
-	 *
-	 * @since 5.7.4 - Booking Export button added.
-	 * @modified_since 6.3.5 - Trip Name filter and Booking Status filter added.
-	 */
-	public function add_filter_options( $post_type ) {
-		$current_screen = get_current_screen();
-		if ( 'booking' !== $post_type && 'edit-booking' !== $current_screen->id ) {
-			return;
-		}
-		remove_all_actions( 'admin_notices' );
-		// Booking status and Trip Name filter options.
-		$trips            = wp_travel_engine_get_trips_array();
-		$status           = wp_travel_engine_get_booking_status();
-		$booking_selected = isset( $_REQUEST['booking_status'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['booking_status'] ) ) : 'all';
-		$trip_selected    = isset( $_REQUEST['trip_id'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['trip_id'] ) ) : 'all';
-
-		$mappings = array(
-			'trip_id'        => array(
-				'data'     => $trips,
-				'label'    => __( 'Trip Name', 'wp-travel-engine' ),
-				'selected' => $trip_selected,
-			),
-			'booking_status' => array(
-				'data'     => $status,
-				'label'    => __( 'Booking Status', 'wp-travel-engine' ),
-				'selected' => $booking_selected,
-			),
-		);
-		foreach ( $mappings as $id => $data ) { ?>
-			<select id="<?php echo esc_attr( $id ); ?>_filter" name="<?php echo esc_attr( $id ); ?>">
-				<option value="all"> <?php echo esc_html( $data['label'] ); ?> </option>
-				<?php
-				foreach ( $data['data'] as $key => $value ) :
-					$display = 'booking_status' === $id ? $value['text'] : $value;
-					?>
-					<option value="<?php echo esc_html( $key ); ?>" <?php selected( $data['selected'], $key ); ?>>
-						<?php echo esc_html( $display ); ?>
-					</option>
-				<?php endforeach; ?>
-			</select>
-			<?php
-		}
-	}
-
-	/**
-	 * Remove date filter given by WordPress
-	 *
-	 * @return bool
-	 * @since 6.3.5
-	 */
-	public function remove_date_filter() {
-		return 'booking' === ( $_GET['post_type'] ?? '' );
-	}
-
-	/**
 	 * Add "None" as first option for select fields on backend (same as frontend FormField filter).
 	 *
 	 * @param array $options Select field options.
@@ -388,6 +308,7 @@ class Booking extends PostType {
 	 * @param string $field_key Key to use for the field.
 	 * @return array Modified fields array.
 	 * @since 6.7.0
+	 * @since 6.9.0 Sorts first wherever fields are ordered by priority.
 	 */
 	private function add_pricing_category_field( $fields, $field_key ) {
 		// Only process on booking post type admin page.
@@ -445,6 +366,7 @@ class Booking extends PostType {
 			'class'         => 'input',
 			'default_field' => true,
 			'options'       => $pricing_categories,
+			'priority'      => 1,
 		);
 
 		// Add the field at the beginning of the array.
@@ -454,94 +376,8 @@ class Booking extends PostType {
 	}
 
 	/**
-	 * Return query after filtering bookings.
-	 *
-	 * @param object $query Query.
-	 *
-	 * @modified_since 6.4.0 Modified the query for the selected trip name and date range filter option.
-	 *
-	 * @return object $query
-	 */
-	public function filter_bookings( $query ) {
-		// Modify the query only if it is admin and main query.
-		if ( ! is_admin() || ! $query->is_main_query() ) {
-			return $query;
-		}
-		$current_screen = get_current_screen();
-		$trip_id        = 'all';
-		$booking_status = 'all';
-		if ( isset( $_REQUEST['trip_id'] ) ) {
-			$trip_id = sanitize_text_field( wp_unslash( $_REQUEST['trip_id'] ) );
-		}
-		if ( isset( $_REQUEST['booking_status'] ) ) {
-			$booking_status = sanitize_text_field( wp_unslash( $_REQUEST['booking_status'] ) );
-		}
-		$date_range = isset( $_REQUEST['wte_booking_range'] ) ? sanitize_text_field( $_REQUEST['wte_booking_range'] ) : '';
-		$dates      = explode( ' to ', $date_range );
-
-		// Store the dates in separate variables.
-		$start_date = isset( $dates[0] ) ? $dates[0] : '';
-		$end_date   = isset( $dates[1] ) ? $dates[1] : '';
-
-		// Modify the query for the targeted screen and filter option.
-		if ( ( 'edit-booking' !== $current_screen->id ) || ( 'all' === $booking_status && 'all' === $trip_id && empty( $date_range ) ) ) {
-			return $query;
-		}
-		$filter_ids = wptravelengine_get_booking_ids( (int) $trip_id );
-		$filter_ids = empty( $filter_ids ) ? array( 0 ) : $filter_ids;
-
-		// Add query for selected booking status.
-		if ( 'all' !== $booking_status ) {
-			$query->set(
-				'meta_query',
-				array(
-					array(
-						'key'     => 'wp_travel_engine_booking_status',
-						'compare' => '=',
-						'value'   => $booking_status,
-						'type'    => 'string',
-					),
-				)
-			);
-		}
-
-		// Add query for selected trip ids.
-		if ( 'all' !== $trip_id ) {
-			$query->set( 'post__in', $filter_ids );
-		}
-
-		// Add query for selected date range.
-		if ( ! empty( $start_date ) && ! empty( $end_date ) ) {
-			$query->set(
-				'date_query',
-				array(
-					array(
-						'after'     => $start_date,
-						'before'    => $end_date,
-						'inclusive' => true,
-					),
-				)
-			);
-		} elseif ( ! empty( $start_date ) ) {
-			$get_specific_date = explode( '-', $start_date );
-			$query->set(
-				'date_query',
-				array(
-					array(
-						'year'  => $get_specific_date[0],
-						'month' => $get_specific_date[1],
-						'day'   => $get_specific_date[2],
-					),
-				)
-			);
-		}
-
-		return $query;
-	}
-
-	/**
 	 * Tags the "Bookings" list item for `Capabilities::hide_submenu()` to target with CSS,
-	 * and removes "Add New Booking" outright — manual creation goes through
+	 * and removes "Add New" outright — manual creation goes through
 	 * `redirect_new_booking()`'s auto-draft flow, not this form.
 	 *
 	 * @return void
@@ -566,273 +402,64 @@ class Booking extends PostType {
 	}
 
 	/**
-	 * Redirects post-new.php for bookings to a single auto-draft edit screen,
-	 * preventing a new orphan post from being created on every page reload.
+	 * Sends post-new.php for bookings to the list, where the add booking wizard opens.
 	 *
 	 * @return void
 	 * @since 6.8.0
+	 * @since 6.9.0 Opens the wizard on the list instead of creating an auto-draft for the legacy form.
 	 */
 	public function redirect_new_booking(): void {
 		if ( ( $_GET['post_type'] ?? '' ) !== $this->post_type ) {
 			return;
 		}
 
-		$booking    = BookingModel::create_booking( array( 'post_status' => 'auto-draft' ) );
-		$booking_id = $booking->ID;
-
-		if ( $booking_id ) {
-			$booking->update_meta( '__is_manual', 'yes' );
-			wp_safe_redirect( admin_url( "post.php?post={$booking_id}&action=edit&wptravelengine_action=edit" ) );
-			exit;
-		}
+		wp_safe_redirect( admin_url( "edit.php?post_type={$this->post_type}&add-booking=1" ) );
+		exit;
 	}
 
 	/**
-	 * Add "Deprecated" view tab for bookings without cart_info version 4.0.
+	 * Enqueues the booking edit app.
 	 *
-	 * @param array $views View links HTML keyed by status slug.
-	 * @return array
-	 * @since 6.8.0
-	 */
-	public function fix_booking_view_counts( array $views ): array {
-		$is_deprecated = isset( $_GET['wte_deprecated'] );
-
-		if ( $is_deprecated ) {
-			foreach ( $views as &$link ) {
-				$link = str_replace( array( ' class="current"', ' aria-current="page"' ), '', $link );
-			}
-			unset( $link );
-		}
-
-		$deprecated_ids = $this->get_deprecated_booking_ids();
-
-		if ( empty( $deprecated_ids ) ) {
-			return $views;
-		}
-
-		$deprecated_url          = add_query_arg(
-			array(
-				'post_type'      => 'booking',
-				'wte_deprecated' => '1',
-			),
-			admin_url( 'edit.php' )
-		);
-		$views['wte_deprecated'] = sprintf(
-			'<a href="%s"%s>%s <span class="count">(%s)</span></a>',
-			esc_url( $deprecated_url ),
-			$is_deprecated ? ' class="current" aria-current="page"' : '',
-			esc_html__( 'Deprecated', 'wp-travel-engine' ),
-			number_format_i18n( count( $deprecated_ids ) )
-		);
-
-		if ( ! empty( $deprecated_ids ) && isset( $views['publish'] ) ) {
-			global $wpdb;
-			$ids_str              = implode( ',', $deprecated_ids );
-			$published_deprecated = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-				"SELECT COUNT(*) FROM {$wpdb->posts} WHERE ID IN ({$ids_str}) AND post_status = 'publish'" // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			);
-
-			if ( $published_deprecated > 0 ) {
-				preg_match( '/<span class="count">\((\d+)\)<\/span>/', $views['publish'], $matches );
-				if ( isset( $matches[1] ) ) {
-					$new              = max( 0, (int) $matches[1] - $published_deprecated );
-					$views['publish'] = preg_replace(
-						'/<span class="count">\(\d+\)<\/span>/',
-						'<span class="count">(' . number_format_i18n( $new ) . ')</span>',
-						$views['publish']
-					);
-				}
-			}
-		}
-
-		return $views;
-	}
-
-	/**
-	 * Delete all auto-draft booking posts when the booking list screen loads.
-	 *
+	 * @param string $hook_suffix Current admin page.
 	 * @return void
-	 * @since 6.8.0
+	 * @since 6.9.0
 	 */
-	public function delete_auto_drafts(): void {
-		if ( ( $_GET['post_type'] ?? '' ) !== $this->post_type ) {
+	public function enqueue_scripts( string $hook_suffix ): void {
+		if ( 'post.php' !== $hook_suffix ) {
 			return;
 		}
 
-		$deprecated_ids = $this->get_deprecated_booking_ids();
+		global $post;
 
-		$args = array(
-			'post_type'      => $this->post_type,
-			'post_status'    => 'auto-draft',
-			'posts_per_page' => -1,
-			'fields'         => 'ids',
+		$screen = get_current_screen();
+
+		if ( ! $screen || $this->post_type !== $screen->post_type ) {
+			return;
+		}
+
+		/**
+		 * @var ?ViewBooking $booking_view
+		 */
+		$booking_view = $post instanceof \WP_Post ? ViewBooking::instance( (int) $post->ID ) : null;
+
+		if ( ! $booking_view || ! $booking_view->should_render_app() ) {
+			return;
+		}
+
+		wp_enqueue_script( 'wte-dropzone' );
+
+		$handle = self::enqueue_app_script( 'wptravelengine-booking-edit-app', 'admin/booking-edit-app.js' );
+		$style  = Asset::register( $handle, 'admin/booking-edit-app.css' );
+
+		wp_enqueue_style( $handle, $style->source, array( 'wte-dropzone' ), $style->version );
+		wp_add_inline_style( $handle, '.wptravelengine-booking-edit-screen .wrap > .wp-heading-inline, .wptravelengine-booking-edit-screen .wrap > .page-title-action { display: none; }' );
+		wp_localize_script( $handle, 'wptravelengineBookingEditData', ViewBooking::get_edit_data( (int) $post->ID ) );
+
+		add_filter(
+			'admin_body_class',
+			static function ( string $classes ): string {
+				return $classes . ' wptravelengine-booking-edit-screen ';
+			}
 		);
-
-		if ( ! empty( $deprecated_ids ) ) {
-			$args['post__not_in'] = $deprecated_ids;
-		}
-
-		$auto_drafts = get_posts( $args );
-
-		foreach ( $auto_drafts as $post_id ) {
-			wp_delete_post( $post_id, true );
-		}
-	}
-
-	/**
-	 * Appends pill-style status badges to the booking title in the admin list.
-	 * Renders on the "All" and "Published" list tabs, and on all search results.
-	 *
-	 * @param string[]      $states Existing post states.
-	 * @param \WP_Post|null $post   Current post.
-	 * @return string[]
-	 * @since 6.8.0
-	 * @since 6.8.1 Badges now render in search results regardless of post_status parameter.
-	 * @since 6.8.5 Accept nullable $post; core calls get_post_states( null ) from nav-menu setup.
-	 */
-	public function append_booking_state_badges( array $states, ?\WP_Post $post ): array {
-		if ( ! $post instanceof \WP_Post || 'booking' !== $post->post_type ) {
-			return $states;
-		}
-
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$current_status = sanitize_key( $_GET['post_status'] ?? '' );
-		if ( empty( $_GET['s'] ) && $current_status && 'publish' !== $current_status ) {
-			return $states;
-		}
-
-		// Maps badge type → wpte-tag modifier + icon + label.
-		$state_badges = array(
-			'migrated'   => array(
-				'modifier' => 'migrated',
-				'icon'     => self::BADGE_ICON_MIGRATED,
-				'label'    => __( 'Migrated', 'wp-travel-engine' ),
-			),
-			'deprecated' => array(
-				'modifier' => '',
-				'icon'     => self::BADGE_ICON_DEPRECATED,
-				'label'    => __( 'Deprecated', 'wp-travel-engine' ),
-			),
-			'modified'   => array(
-				'modifier' => 'warning',
-				'icon'     => self::BADGE_ICON_MODIFIED,
-				'label'    => __( 'Modified', 'wp-travel-engine' ),
-			),
-			'manual'     => array(
-				'modifier' => 'manual',
-				'icon'     => self::BADGE_ICON_MANUAL,
-				'label'    => __( 'Manual', 'wp-travel-engine' ),
-			),
-		);
-
-		$badges              = array();
-		$post_id             = $post->ID;
-		$booking_state_badge = static function ( array $badge ): string {
-			$class = trim( 'wpte-tag ' . $badge['modifier'] );
-			return \sprintf(
-				'<span class="%1$s">%2$s%3$s</span>',
-				esc_attr( $class ),
-				$badge['icon'],
-				esc_html( $badge['label'] )
-			);
-		};
-
-		$deprecated_ids = $this->get_deprecated_booking_ids();
-
-		if ( absint( get_post_meta( $post_id, '_migrated_from', true ) ) ) {
-			$badges[] = $booking_state_badge( $state_badges['migrated'] );
-		}
-
-		if ( in_array( $post_id, $deprecated_ids ) ) {
-			$badges[] = $booking_state_badge( $state_badges['deprecated'] );
-		}
-
-		if ( wptravelengine_toggled( get_post_meta( $post_id, '__is_manual', true ) ) ) {
-			$badges[] = $booking_state_badge( $state_badges['manual'] );
-		} elseif ( wptravelengine_toggled( get_post_meta( $post_id, '_user_edited', true ) ) ) {
-			$badges[] = $booking_state_badge( $state_badges['modified'] );
-		}
-
-		if ( ! empty( $badges ) ) {
-			$states['wte_booking_states'] = '<span class="wte-booking-states">' . implode( '', $badges ) . '</span>';
-		}
-
-		return $states;
-	}
-
-	/**
-	 * Exclude deprecated bookings from the admin listing.
-	 * Search requests skip the exclusion so deprecated bookings remain findable.
-	 *
-	 * @param \WP_Query $query Current query.
-	 *
-	 * @return void
-	 * @since 6.8.0
-	 * @since 6.8.1 Search requests skip post__not_in so deprecated bookings appear in results.
-	 */
-	public function exclude_migrated_bookings( \WP_Query $query ): void {
-		global $pagenow;
-
-		if ( ! is_admin() || ! $query->is_main_query() || 'edit.php' !== $pagenow ) {
-			return;
-		}
-
-		if ( ( $_GET['post_type'] ?? '' ) !== 'booking' ) {
-			return;
-		}
-
-		$deprecated_ids = $this->get_deprecated_booking_ids();
-
-		if ( isset( $_GET['wte_deprecated'] ) ) {
-			$query->set( 'post__in', ! empty( $deprecated_ids ) ? $deprecated_ids : array( 0 ) );
-			$query->set( 'post_status', 'any' );
-			return;
-		}
-
-		if ( ! empty( $_GET['s'] ) ) {
-			return;
-		}
-
-		if ( ! isset( $_GET['post_status'] ) ) {
-			return;
-		}
-
-		if ( empty( $deprecated_ids ) ) {
-			return;
-		}
-
-		$existing = (array) $query->get( 'post__not_in' );
-		$query->set( 'post__not_in', array_unique( array_merge( $existing, $deprecated_ids ) ) );
-	}
-
-	/**
-	 * Get IDs of deprecated bookings — those whose cart_info lacks version 4.0.
-	 *
-	 * @return int[]
-	 * @since 6.8.0
-	 */
-	private function get_deprecated_booking_ids(): array {
-		static $ids = null;
-		if ( null !== $ids ) {
-			return $ids;
-		}
-
-		global $wpdb;
-		$like = '%' . $wpdb->esc_like( self::CART_INFO_VERSION ) . '%';
-		$ids  = array_map(
-			'absint',
-			$wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-				$wpdb->prepare(
-					"SELECT p.ID FROM {$wpdb->posts} p
-					LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'cart_info'
-					WHERE p.post_type = 'booking'
-					AND p.post_status = 'publish'
-					AND (pm.meta_value IS NULL OR pm.meta_value NOT LIKE %s)",
-					$like
-				)
-			)
-		);
-
-		return $ids;
 	}
 }

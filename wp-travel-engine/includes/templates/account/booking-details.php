@@ -14,13 +14,13 @@
  * @see     https://wptravelengine.com
  * @author  WP Travel Engine
  * @package WP Travel Engine/includes/templates
- * @version 1.3.7
+ * @version 1.3.8
+ * @deprecated 6.9.0 No longer loaded by WP Travel Engine, so a theme override of it has no effect. It will be removed in a future release.
  */
 
 use WPTravelEngine\Core\Models\Post\Trip;
 use WPTravelEngine\Core\Models\Post\Booking;
 use WPTravelEngine\Builders\FormFields\TravellerFormFields;
-use WPTravelEngine\Helpers\CartInfoParser;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -40,7 +40,7 @@ if ( ! $booking_instance->trip_exists() ) {
 }
 
 $booking_payments = $booking_instance->get_payments() ?? array();
-$cart_info        = new CartInfoParser( $booking_instance->get_cart_info() ?? array() );
+$cart_info        = wptravelengine_get_cart_info( $booking_instance->ID );
 $settings         = wptravelengine_settings()->get();
 $dashboard_id     = isset( $settings['pages']['wp_travel_engine_dashboard_page'] ) ? esc_attr( $settings['pages']['wp_travel_engine_dashboard_page'] ) : wp_travel_engine_get_page_id( 'my-account' );
 
@@ -182,6 +182,21 @@ if ( $booking_instance->is_curr_cart() ) {
 					</div>
 				<?php } ?>
 
+				<?php
+				/**
+				 * Fires at the end of the booking detail content, before the summary column.
+				 *
+				 * Lets an extension add its own section to a traveler's booking --
+				 * documents shared with them, for example -- without taking over
+				 * this template.
+				 *
+				 * @since 6.9.0
+				 *
+				 * @param Booking $booking_instance The booking being displayed.
+				 */
+				do_action( 'wptravelengine_account_booking_details_sections', $booking_instance );
+				?>
+
 			</div>
 			<div class="wte-booking-detail-right-section">
 				<div class="wpte-booking-details">
@@ -213,8 +228,8 @@ if ( $booking_instance->is_curr_cart() ) {
 							sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Booking ID:', 'wp-travel-engine' ), $booking ),
 							sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Package:', 'wp-travel-engine' ), $trip_package ),
 							sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Trip Code:', 'wp-travel-engine' ), $trip->get_trip_code() ),
-							sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Starts on:', 'wp-travel-engine' ), $start_date ),
-							sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Ends on:', 'wp-travel-engine' ), $end_date ),
+							sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Starts On:', 'wp-travel-engine' ), $start_date ),
+							sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'Ends On:', 'wp-travel-engine' ), $end_date ),
 							sprintf( '<tr><td>%s</td><td><strong>%s</strong></td></tr>', __( 'No. of Travelers:', 'wp-travel-engine' ), $travelers_count ),
 						);
 

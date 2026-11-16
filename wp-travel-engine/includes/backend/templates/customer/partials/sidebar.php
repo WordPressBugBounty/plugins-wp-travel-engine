@@ -12,6 +12,9 @@
 				<a href="#" class="wpte-tab" data-target="<?php echo esc_attr( $tab['target'] ); ?>">
 					<?php echo wptravelengine_display_icon( $tab['icon'] ); ?>
 					<?php echo esc_html( $tab['label'] ); ?>
+					<?php if ( ! empty( $tab['count'] ) ) : ?>
+						<span class="wpte-tab-count"><?php echo esc_html( $tab['count'] ); ?></span>
+					<?php endif; ?>
 				</a>
 			</li>
 		<?php endforeach; ?>

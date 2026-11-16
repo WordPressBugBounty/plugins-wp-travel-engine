@@ -358,6 +358,21 @@ class Trip extends PostModel {
 	}
 
 	/**
+	 * Get one of the trip's packages by ID.
+	 *
+	 * Null when the package does not exist or belongs to another trip, so a stale ID
+	 * stored against a booking resolves to nothing rather than a package of the wrong trip.
+	 *
+	 * @param int $package_id Trip package post ID.
+	 *
+	 * @return ?TripPackage
+	 * @since 6.9.0
+	 */
+	public function get_package( int $package_id ): ?TripPackage {
+		return $this->trip_packages->get_package( $package_id );
+	}
+
+	/**
 	 * Get the trip packages.
 	 *
 	 * @return TripPackages
@@ -939,8 +954,7 @@ class Trip extends PostModel {
 	 */
 	public function get_gallery_images(): array {
 		$gallery_data                   = $this->get_meta( 'wpte_gallery_id' );
-		$option                         = new PluginSettings();
-		$show_featured_image_in_gallery = $option->get( 'show_featured_image_in_gallery', 'yes' );
+		$show_featured_image_in_gallery = wptravelengine_settings()->get( 'show_featured_image_in_gallery', 'yes' );
 
 		if ( isset( $gallery_data['enable'] ) ) {
 			unset( $gallery_data['enable'] );
@@ -1779,5 +1793,39 @@ class Trip extends PostModel {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * First gallery image of the trip, as a thumbnail.
+	 *
+	 * @return array `{ src, alt }`, both empty when the trip has no gallery image.
+	 * @since 6.9.0
+	 */
+	public function get_thumbnail(): array {
+		$empty = array(
+			'src' => '',
+			'alt' => '',
+		);
+
+		$trip_id = $this->post->ID ?? 0;
+
+		if ( ! $trip_id ) {
+			return $empty;
+		}
+
+		static $cache = array();
+
+		if ( isset( $cache[ $trip_id ] ) ) {
+			return $cache[ $trip_id ];
+		}
+
+		$first = $this->get_gallery_images()[0] ?? array();
+
+		$cache[ $trip_id ] = array(
+			'src' => (string) ( $first['src'] ?? '' ),
+			'alt' => (string) ( $first['alt'] ?? '' ),
+		);
+
+		return $cache[ $trip_id ];
 	}
 }

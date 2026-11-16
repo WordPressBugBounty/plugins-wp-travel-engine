@@ -10,23 +10,40 @@ namespace WPTravelEngine\Core\Models\Post;
 
 use InvalidArgumentException;
 use WP_POST;
-use WPTravelEngine\Abstracts\PostModel;
-use WPTravelEngine\Core\Booking\Inventory;
-use WPTravelEngine\Helpers\CartInfoParser;
-use WPTravelEngine\Helpers\Functions;
-use WPTravelEngine\Utilities\ArrayUtility;
-use WPTravelEngine\Utilities\PaymentCalculator;
-use WPTravelEngine\Filters\Events;
 use WPTravelEngine\Core\Cart\Cart;
+use WPTravelEngine\Filters\Events;
+use WPTravelEngine\Helpers\Functions;
+use WPTravelEngine\Abstracts\PostModel;
+use WPTravelEngine\Helpers\CartInfoParser;
+use WPTravelEngine\Utilities\ArrayUtility;
+use WPTravelEngine\Core\Booking\Inventory;
+use WPTravelEngine\Utilities\PaymentCalculator;
 
 /**
- * Class Booking.
- * This class represents a trip booking to the WP Travel Engine plugin.
+ * Trip booking model; read accessors live on `BookingAttributes`.
  *
  * @since 6.0.0
+ * @since 6.9.0 Read accessors moved to the `BookingAttributes` trait.
  */
 #[\AllowDynamicProperties]
 class Booking extends PostModel {
+	use BookingAttributes;
+
+	/**
+	 * Meta key holding the booking's activity log, newest entry first.
+	 *
+	 * @var string
+	 * @since 6.9.0
+	 */
+	const ACTIVITY_META_KEY = 'tracked_activities';
+
+	/**
+	 * Max activity log entries, or null for no cap.
+	 *
+	 * @var int|null
+	 * @since 6.9.0
+	 */
+	const ACTIVITY_LOG_LIMIT = null;
 
 	/**
 	 * Post type name.
@@ -36,451 +53,11 @@ class Booking extends PostModel {
 	protected string $post_type = 'booking';
 
 	/**
-	 * @var null|Payment[] $payments Payments made for this booking.
-	 */
-	protected ?array $payments = null;
-
-	/**
 	 * Indicates if the booking is trashed.
 	 *
 	 * @var bool
 	 */
 	protected $trashed = false;
-
-	/**
-	 * Payments data.
-	 *
-	 * @var array
-	 * @since 6.7.0
-	 */
-	public array $payments_data = array();
-
-	/**
-	 * Retrieves booking status.
-	 *
-	 * @return string Booking status
-	 */
-	public function get_booking_status(): string {
-		$status = $this->get_meta( 'wp_travel_engine_booking_status' );
-
-		return ! $status ? $this->post->post_status : $status;
-	}
-
-	/**
-	 * Retrieves booking status label.
-	 *
-	 * @return string Booking status label.
-	 * @since 6.8.0
-	 */
-	public function get_booking_status_label(): string {
-		$status     = strtolower( $this->get_booking_status() );
-		$all_status = wp_travel_engine_get_booking_status();
-		return $all_status[ $status ]['text'] ?? __( 'Pending', 'wp-travel-engine' );
-	}
-
-	/**
-	 * Retrieves order trip.
-	 *
-	 * @return object|null Order trip.
-	 */
-	public function get_order_trip() {
-		$order_trips = $this->get_meta( 'order_trips' ) ?? array();
-
-		if ( ! is_array( $order_trips ) || empty( $order_trips ) ) {
-			return null;
-		}
-
-		$order_trip_object = new \stdClass();
-
-		$order_trip_object->cart_id = key( $order_trips );
-
-		foreach ( current( $order_trips ) as $key => $value ) {
-			$order_trip_object->$key = $value;
-		}
-
-		return $order_trip_object;
-	}
-
-	/**
-	 * Get Booked Trip ID.
-	 *
-	 * @return int Booked Trip ID
-	 */
-	public function get_trip_id() {
-		$order_trips = $this->get_order_items();
-
-		return $order_trips['trip_id'] ?? $order_trips[0]['ID'] ?? $this->get_cart_info( 'items' )[0]['trip_id'] ?? 0;
-	}
-
-	/**
-	 * Check if booked trip exists.
-	 *
-	 * @since 6.8.6
-	 *
-	 * @return bool
-	 */
-	public function trip_exists(): bool {
-		return get_post_type( $this->get_trip_id() ) === 'trip';
-	}
-
-	/**
-	 * Get Booked Trip Title.
-	 *
-	 * @return string Booked Trip Title
-	 * @since 6.8.6 Get Trip title from order_items as first priority.
-	 */
-	public function get_trip_title() {
-		$order_trips = $this->get_order_items();
-
-		return $order_trips['title'] ?? $order_trips[0]['title'] ?? get_the_title( $this->get_trip_id() ) ?? '';
-	}
-
-	/**
-	 * Get Trip Cost.
-	 *
-	 * @return float Trip Cost
-	 */
-	public function get_trip_cost() {
-		$order_trips = $this->get_order_items();
-
-		return $order_trips['cost'] ?? 0;
-	}
-
-	/**
-	 * Get Trip Partial Cost.
-	 *
-	 * @return float Trip Partial Cost
-	 */
-	public function get_partial_cost() {
-		$order_trips = $this->get_order_items();
-
-		return $order_trips['partial_cost'] ?? 0;
-	}
-
-	/**
-	 * Get Trip DateTime.
-	 *
-	 * @return string Trip DateTime
-	 */
-	public function get_trip_datetime() {
-		$order_trips = $this->get_order_items();
-
-		return $order_trips['datetime'] ?? $order_trips[0]['datetime'] ?? gmdate( 'Y-m-d' );
-	}
-
-	/**
-	 * Get Trip Pax.
-	 *
-	 * @return array Trip Pax
-	 */
-	public function get_trip_pax() {
-		$order_trips = $this->get_order_items();
-
-		return $order_trips['pax'] ?? $order_trips[0]['pax'] ?? array();
-	}
-
-	/**
-	 * Get Trip Pax Cost.
-	 *
-	 * @return array Trip Pax Cost
-	 */
-	public function get_trip_pax_cost() {
-		$order_trips = $this->get_order_items();
-
-		return $order_trips['pax_cost'] ?? array();
-	}
-
-	/**
-	 * Get Trip Extras.
-	 *
-	 * @return array Trip Extras
-	 */
-	public function get_trip_extras() {
-		$order_trips = $this->get_order_items();
-
-		return $order_trips['trip_extras'] ?? array();
-	}
-
-	/**
-	 * Get Trip Package name.
-	 * Modified function since enhancement/booking-details since it was not working.
-	 *
-	 * @return string Trip Package name
-	 */
-	public function get_trip_package_name() {
-		$order_trips = $this->get_order_items();
-
-		if ( is_array( $order_trips ) && ! empty( $order_trips ) ) {
-			foreach ( $order_trips as $order_trip ) {
-				if ( isset( $order_trip['package_name'] ) && ! empty( $order_trip['package_name'] ) ) {
-					return $order_trip['package_name'];
-				}
-			}
-		}
-
-		return '';
-	}
-
-
-	/**
-	 * Get Trip has time.
-	 *
-	 * @return bool Trip has time
-	 */
-	public function get_trip_has_time() {
-		$order_trips = $this->get_order_items();
-
-		return $order_trips['has_time'] ?? false;
-	}
-
-	/**
-	 * Retrieves due amount.
-	 *
-	 * @return float Due Amount.
-	 */
-	public function get_due_amount(): float {
-		$amount = floatval( $this->get_meta( 'due_amount' ) ?: 0 );
-
-		return (float) number_format( $amount, 2, '.', '' );
-	}
-
-	/**
-	 * Retrieves paid amount.
-	 *
-	 * @return float Paid Amount
-	 */
-	public function get_paid_amount(): float {
-		$amount = $this->get_meta( 'paid_amount' ) ?? 0;
-
-		return (float) number_format( ! $amount ? 0 : $amount, 2, '.', '' );
-	}
-
-	/**
-	 * Retrieves booking cart info.
-	 *
-	 * @return mixed Booking cart info
-	 */
-	public function get_cart_info( $key = null ) {
-		$cart_info = $this->get_meta( 'cart_info' ) ?? array();
-
-		if ( ! is_null( $key ) ) {
-			return $cart_info[ $key ] ?? null;
-		}
-
-		if ( (bool) $cart_info ) {
-			if ( ! isset( $cart_info['items'] ) ) {
-				$cart_info['items'] = $this->get_order_items();
-			}
-		}
-
-		return ! $cart_info ? array() : $cart_info;
-	}
-
-	/**
-	 * Retrieves booking cart info - Currency.
-	 *
-	 * @return string Currency
-	 */
-	public function get_currency() {
-		$cart_info = $this->get_cart_info();
-
-		return $cart_info['currency'] ?? '';
-	}
-
-	/**
-	 * Retrieves booking cart info - Subtotal.
-	 *
-	 * @return float Subtotal
-	 */
-	public function get_subtotal() {
-		$cart_info = $this->get_cart_info();
-
-		return $cart_info['totals']['subtotal'] ?? 0;
-	}
-
-	/**
-	 * Retrieves booking cart info - Total.
-	 *
-	 * @return float Total
-	 */
-	public function get_total(): float {
-		$cart_info = $this->get_cart_info();
-
-		return (float) ( $cart_info['totals']['total'] ?? 0 );
-	}
-
-	/**
-	 * Retrieves booking cart info - Cart Partial.
-	 *
-	 * @return float Cart Partial
-	 */
-	public function get_cart_partial(): float {
-		$cart_info = $this->get_cart_info();
-
-		return (float) ( $cart_info['totals']['partial_total'] ?? 0 );
-	}
-
-	/**
-	 * Retrieves booking cart info - Discounts.
-	 *
-	 * @return array Discounts
-	 */
-	public function get_discounts() {
-		$cart_info = $this->get_cart_info();
-
-		return $cart_info['discounts'] ?? array();
-	}
-
-	/**
-	 * Retrieves booking cart info - Tax Amount.
-	 *
-	 * @return float Tax Amount
-	 */
-	public function get_tax_amount() {
-		$cart_info = $this->get_cart_info();
-
-		return $cart_info['tax_amount'] ?? 0;
-	}
-
-	/**
-	 * Retrieves payment details.
-	 *
-	 * @return array payment details
-	 */
-	public function get_payment_detail() {
-		return $this->get_meta( 'payments' ) ?? array();
-	}
-
-	/**
-	 * Retrives Payment Details - Payment Status.
-	 *
-	 * @return string Payment Status
-	 */
-	public function get_payment_status() {
-		return $this->get_meta( 'wp_travel_engine_booking_payment_status' );
-	}
-
-	/**
-	 * Retrives Payment Details - Payment Gateway.
-	 *
-	 * @return string Payment Gateway
-	 */
-	public function get_payment_gateway() {
-		return $this->get_meta( 'wp_travel_engine_booking_payment_gateway' );
-	}
-
-	/**
-	 * Retrives Payment Details - Payment Method.
-	 *
-	 * @return string Payment Method
-	 */
-	public function get_payment_method() {
-		return $this->get_meta( 'wp_travel_engine_booking_payment_method' );
-	}
-
-	/**
-	 * Retries Billing Info Data.
-	 *
-	 * @return string|array Billing Info Data
-	 */
-	public function get_billing_info( ?string $key = null ) {
-		if ( $this->has_meta( 'wptravelengine_billing_details' ) ) {
-			$billing_info = $this->get_meta( 'wptravelengine_billing_details' );
-		} else {
-			$billing_info = $this->get_meta( 'billing_info' ) ?? array();
-		}
-
-		if ( ! is_null( $key ) ) {
-			return $billing_info[ $key ] ?? '';
-		}
-
-		return ! $billing_info ? array() : $billing_info;
-	}
-
-	/**
-	 * Get Billing Info - First Name.
-	 *
-	 * @return string First Name
-	 */
-	public function get_billing_fname(): string {
-		return $this->get_billing_info( 'fname' );
-	}
-
-	/**
-	 * Get Billing Info - Last Name.
-	 *
-	 * @return string Last Name
-	 */
-	public function get_billing_lname(): string {
-		return $this->get_billing_info( 'lname' );
-	}
-
-	/**
-	 * Get Billing Info - Email.
-	 *
-	 * @return string Email
-	 */
-	public function get_billing_email(): string {
-		return $this->get_billing_info( 'email' );
-	}
-
-	/**
-	 * Get Billing Info - Address.
-	 *
-	 * @return string Address
-	 */
-	public function get_billing_address(): string {
-		return $this->get_billing_info( 'address' );
-	}
-
-	/**
-	 * Get Billing Info - City.
-	 *
-	 * @return string City
-	 */
-	public function get_billing_city(): string {
-		return $this->get_billing_info( 'city' );
-	}
-
-	/**
-	 * Get Billing Info - Country.
-	 *
-	 * @return string Country.
-	 */
-	public function get_billing_country(): string {
-		return $this->get_billing_info( 'country' );
-	}
-
-	/**
-	 * Get Order Items.
-	 *
-	 * @return array
-	 */
-	public function get_order_items(): array {
-		$order_trips = $this->get_meta( 'order_trips' );
-
-		return is_array( $order_trips ) ? array_values( $order_trips ) : array();
-	}
-
-	/**
-	 * Get Payments Object.
-	 *
-	 * @return Payment[]
-	 */
-	public function get_payments(): array {
-		$payments = $this->get_meta( 'payments' ) ?: array();
-
-		if ( count( $payments ) > 0 ) {
-			$this->payments = array_map(
-				function ( $payment ) {
-					return wptravelengine_get_payment( $payment );
-				},
-				$payments
-			);
-		}
-
-		return array_filter( $this->payments ?? array() );
-	}
 
 	/**
 	 * @param int $payment_id
@@ -499,90 +76,6 @@ class Booking extends PostModel {
 		$this->set_meta( 'payments', array_unique( $payments ) );
 
 		return $this;
-	}
-
-	/**
-	 * Retrieves Additional Fields Data.
-	 *
-	 * @return array Additional Fields Data.
-	 */
-	public function get_additional_fields(): array {
-		return $this->get_meta( 'additional_fields' ) ?? array();
-	}
-
-	/**
-	 * Retrieves Traveler Info Data - Travelers.
-	 *
-	 * @return array Travelers
-	 * @since 6.4.0 Retrieves travelers info from wptravelengine_travelers_details and in particular format.
-	 * @since 6.8.3 Adds `cat_id`/`cat_label` per traveler from cart_info's subtotal_reservations.
-	 */
-	public function get_travelers(): array {
-		if ( $this->has_meta( 'wptravelengine_travelers_details' ) ) {
-			$travelers = $this->get_meta( 'wptravelengine_travelers_details' ) ?? array();
-			$items     = $this->get_cart_info( 'items' ) ?? array();
-
-			$pc_travelers  = $items[0]['subtotal_reservations']['travelers'] ?? array();
-			$pc_line_items = $items[0]['line_items']['pricing_category'] ?? array();
-
-			$traveler_count = count( $travelers );
-
-			$i = 0;
-			$k = 0;
-			foreach ( $pc_travelers as $price_category ) {
-				for ( $j = 0; $j < $price_category['quantity']; $j++ ) {
-					if ( $k >= $traveler_count ) {
-						break 2;
-					}
-
-					$id = $travelers[ $k ]['cat_id'] ?? $price_category['id'];
-
-					$travelers[ $k ]['cat_id']      = $id;
-					$travelers[ $k ]['cat_label'] ??= $pc_line_items[ $i ]['label'] ?? "Category - {$id}";
-					++$k;
-				}
-				++$i;
-			}
-
-			return $travelers;
-		}
-
-		// Check for legacy format.
-		$traveler_info = $this->get_meta( 'wp_travel_engine_placeorder_setting' );
-
-		if ( ! empty( $traveler_info['place_order']['travelers'] ) ) {
-			return ArrayUtility::normalize( $traveler_info['place_order']['travelers'], 'fname' );
-		}
-
-		return array();
-	}
-
-	/**
-	 * Retrieves Traveler Info Data - Emergency Contact Details.
-	 *
-	 * @return array Emergency Contact Details
-	 */
-	public function get_emergency_contacts(): array {
-		if ( $this->has_meta( 'wptravelengine_emergency_details' ) ) {
-			$emergency_contacts = $this->get_meta( 'wptravelengine_emergency_details' );
-			if ( empty( $emergency_contacts ) ) {
-				return array();
-			}
-			if ( ! isset( $emergency_contacts[0] ) ) {
-				$emergency_contacts = array( $emergency_contacts );
-			}
-
-			return $emergency_contacts;
-		}
-
-		// Check for legacy format first.
-		$emergency_info = $this->get_meta( 'wp_travel_engine_placeorder_setting' );
-
-		if ( ! empty( $emergency_info['place_order']['relation'] ) ) {
-			return ArrayUtility::normalize( $emergency_info['place_order']['relation'] );
-		}
-
-		return array();
 	}
 
 	/**
@@ -607,10 +100,41 @@ class Booking extends PostModel {
 	/**
 	 * Set Cart Information.
 	 *
-	 * @return $this
+	 * @return Booking
 	 */
 	public function set_cart_info( array $data ): Booking {
 		return $this->set_meta( 'cart_info', wp_slash( $data ) );
+	}
+
+	/**
+	 * Queues a meta write, keeping the parsed cart in step.
+	 *
+	 * @param string $meta_key   Meta key being written.
+	 * @param mixed  $meta_value Value being written, slashed as post meta is.
+	 * @return Booking
+	 * @since 6.9.0
+	 */
+	public function set_meta( $meta_key, $meta_value ): Booking {
+		if ( 'cart_info' === $meta_key ) {
+			$this->parsed_cart = wptravelengine_get_cart_info( $this->ID, (array) wp_unslash( $meta_value ) );
+		}
+
+		return parent::set_meta( $meta_key, $meta_value );
+	}
+
+	/**
+	 * Writes metas straight through, keeping the parsed cart in step.
+	 *
+	 * @param array<mixed> $metadata Key-value pairs of metadata to be synced.
+	 * @return void
+	 * @since 6.9.0
+	 */
+	public function sync_metas( array $metadata = array() ) {
+		if ( isset( $metadata['cart_info'] ) ) {
+			$this->parsed_cart = wptravelengine_get_cart_info( $this->ID, (array) $metadata['cart_info'] );
+		}
+
+		parent::sync_metas( $metadata );
 	}
 
 	/**
@@ -646,8 +170,7 @@ class Booking extends PostModel {
 	}
 
 	/**
-	 * Update Paid Amount.
-	 * If parameter `$update` is false will replace the current meta-value.
+	 * Update paid amount; replaces it when `$update` is false.
 	 *
 	 * @return $this
 	 */
@@ -675,22 +198,13 @@ class Booking extends PostModel {
 	}
 
 	/**
-	 * Last Payment.
-	 *
-	 * @return  false|Payment
-	 */
-	public function get_last_payment() {
-		$payments = $this->get_payments();
-
-		return end( $payments );
-	}
-
-	/**
 	 * Save Booking.
 	 *
 	 * @param int     $post_id Post ID.
 	 * @param WP_POST $post Post Object.
 	 * @param bool    $update Update Flag.
+	 *
+	 * @since 6.9.0 Coerce each traveler's `cat_id` to an integer before storing (defense-in-depth for stored XSS).
 	 */
 	public static function save_post_booking( int $post_id, WP_Post $post, bool $update = false ) {
 
@@ -719,7 +233,9 @@ class Booking extends PostModel {
 			$travelers = array();
 			if ( isset( $traveler_info['travelers'] ) && is_array( $traveler_info['travelers'] ) ) {
 				foreach ( $traveler_info['travelers'] as $key => $value ) {
-					$travelers['travelers'][ $key ] = array_map( 'sanitize_text_field', wp_unslash( $value ) );
+					// cat_id is a pricing-category term ID; keep it an integer here too (legacy getter reads this meta).
+					$callback                       = 'cat_id' === $key ? 'absint' : 'sanitize_text_field';
+					$travelers['travelers'][ $key ] = array_map( $callback, wp_unslash( $value ) );
 				}
 			}
 			if ( isset( $traveler_info['relation'] ) && is_array( $traveler_info['relation'] ) ) {
@@ -734,6 +250,13 @@ class Booking extends PostModel {
 
 			if ( ! empty( $travelers_detail ) ) {
 				$travelers_detail = static::sanitize_data_array( $travelers_detail );
+				// cat_id is a pricing-category term ID; force int so a non-numeric value can't break out of the option attribute on the admin booking screen.
+				foreach ( $travelers_detail as &$traveler ) {
+					if ( isset( $traveler['cat_id'] ) && '' !== $traveler['cat_id'] ) {
+						$traveler['cat_id'] = absint( $traveler['cat_id'] );
+					}
+				}
+				unset( $traveler );
 				$booking->set_meta( 'wptravelengine_travelers_details', $travelers_detail );
 			}
 			if ( ! empty( $emergency_contacts ) ) {
@@ -821,7 +344,6 @@ class Booking extends PostModel {
 			do_action( 'wptravelengine.booking.updated', $booking->get_data(), $booking );
 		}
 	}
-
 
 	/**
 	 * Sanitize Data Array.
@@ -965,117 +487,6 @@ class Booking extends PostModel {
 	}
 
 	/**
-	 * @return bool
-	 * @since 6.4.0
-	 */
-	public function has_due_payment(): bool {
-		$payments    = $this->get_payment_detail();
-		$paid_amount = 0;
-		$due_amount  = $this->get_total_due_amount();
-		if ( $due_amount && is_numeric( $due_amount ) ) {
-			return $due_amount > 1;
-		}
-
-		if ( is_array( $payments ) && count( $payments ) > 0 ) {
-			foreach ( $payments as $payment ) {
-				$payment      = Payment::make( $payment );
-				$paid_amount += $payment->get_amount();
-			}
-		}
-		$due_amount = $this->get_total() - $paid_amount;
-
-		return $due_amount > 1;
-	}
-
-	/**
-	 * Get Total Paid Amount.
-	 *
-	 * @return float
-	 * @since 6.4.0
-	 * @since 6.7.8 Support for old cart version where total paid amount is not stored.
-	 */
-	public function get_total_paid_amount(): float {
-		if ( $this->is_curr_cart() ) {
-			$paid_amount = $this->get_meta( 'total_paid_amount' );
-			// Check if the value exists and is numeric, even if it's 0
-			if ( $paid_amount !== null && $paid_amount !== false && is_numeric( $paid_amount ) ) {
-				return (float) $paid_amount;
-			}
-		}
-		$payments    = get_post_meta( $this->ID, 'payments', true );
-		$paid_amount = 0;
-		if ( is_array( $payments ) && count( $payments ) > 0 ) {
-			foreach ( $payments as $p_id ) {
-				$payment = wptravelengine_get_payment( $p_id );
-				if ( $payment && $payment->is_completed() ) {
-					$paid_amount += $payment->get_amount();
-				}
-			}
-		}
-
-		return $paid_amount;
-	}
-
-	/**
-	 * Get Revenue.
-	 *
-	 * Nets total_paid_amount against total_extra_charges (taxes/fees passed through
-	 * to the gateway). Current cart version stores total_extra_charges per payment
-	 * reliably; legacy carts often don't separate it out, so total_tax is used as
-	 * a proxy for those payments.
-	 *
-	 * @return float
-	 * @since 6.8.6
-	 */
-	public function get_revenue(): float {
-		$calculator          = PaymentCalculator::for( $this->get_currency() );
-		$is_curr_cart        = $this->is_curr_cart();
-		$total_extra_charges = '0.00';
-
-		foreach ( $this->get_payments() as $payment ) {
-			if ( ! $payment->is_completed() || $payment->is_refunded() ) {
-				continue;
-			}
-
-			$cart_totals   = $payment->get_cart_totals();
-			$extra_charges = $cart_totals['total_extra_charges'] ?? null;
-
-			if ( null === $extra_charges && ! $is_curr_cart ) {
-				// Legacy carts baked fees into tax; use it as the closest proxy.
-
-				$totals = $this->get_cart_info( 'totals' );
-
-				foreach ( $this->get_fees() as $fee ) {
-					$key                 = 'total_' . ( $fee['name'] ?? '' );
-					$total_extra_charges = $calculator->add( $total_extra_charges, (string) ( $totals[ $key ] ?? '0.00' ) );
-				}
-
-				break;
-			} elseif ( is_numeric( $extra_charges ) ) {
-				$total_extra_charges = $calculator->add( $total_extra_charges, (string) $extra_charges );
-			}
-		}
-
-		return (float) $calculator->subtract( (string) $this->get_total_paid_amount(), $total_extra_charges );
-	}
-
-	/**
-	 * Get Total Due Amount.
-	 *
-	 * @return float
-	 * @since 6.4.0
-	 */
-	public function get_total_due_amount(): float {
-		$due_amount = $this->get_meta( 'total_due_amount' );
-		if ( $due_amount !== null && $due_amount !== false && is_numeric( $due_amount ) ) {
-			return (float) $due_amount;
-		}
-		$paid_amount = $this->get_total_paid_amount();
-
-		return $this->get_total() - $paid_amount;
-	}
-
-	/**
 	 * Set Total Due Amount.
 	 *
 	 * @param float $amount
@@ -1100,9 +511,21 @@ class Booking extends PostModel {
 	}
 
 	/**
+	 * Set Total Refunded Amount.
+	 *
+	 * @param float $amount Refunded across every payment.
+	 * @return void
+	 * @since 6.9.0
+	 */
+	public function set_refunded_amount( float $amount ): void {
+		$this->set_meta( 'total_refunded_amount', $amount );
+	}
+
+	/**
 	 * Get Remaining Payment Link.
 	 *
 	 * @return string URL for remaining payment or empty string if payment is not pending
+	 * @since 6.9.0 Links any balance due, whether or not the trip takes partial payment; none for a canceled booking.
 	 */
 	public function get_due_payment_link(): string {
 		$payment_key  = wptravelengine_generate_key( $this->get_id() );
@@ -1110,15 +533,7 @@ class Booking extends PostModel {
 
 		$this->set_payment_transient( $payment_key );
 
-		$is_partial_payment = false;
-		foreach ( $this->get_payments() as $payment ) {
-			if ( $payment->get_payment_gateway() === 'booking_only' ) {
-				$is_partial_payment = true;
-				break;
-			}
-		}
-
-		if ( $this->has_due_payment() && ( wp_travel_engine_is_trip_partially_payable( $this->get_trip_id() ) || $is_partial_payment ) ) {
+		if ( 'canceled' !== $this->get_booking_status() && $this->has_due_payment() ) {
 			$payment_link = add_query_arg(
 				array(
 					'_payment_key' => $payment_key,
@@ -1154,24 +569,6 @@ class Booking extends PostModel {
 	}
 
 	/**
-	 * Get customer note.
-	 *
-	 * @return string Additional Details
-	 */
-	public function get_customer_note(): string {
-		return $this->get_meta( 'wptravelengine_additional_note' ) ?? '';
-	}
-
-	/**
-	 * Get Admin Notes.
-	 *
-	 * @return string Admin Notes
-	 */
-	public function get_admin_note(): string {
-		return $this->get_meta( 'wptravelengine_admin_notes' ) ?? '';
-	}
-
-	/**
 	 * Set Traveller Details.
 	 *
 	 * @param array $data
@@ -1200,27 +597,6 @@ class Booking extends PostModel {
 	}
 
 	/**
-	 * @return object
-	 */
-	public function get_customer(): object {
-		$email_address = $this->get_billing_email();
-		$_customer     = new \stdClass();
-
-		if ( $customer_id = Customer::is_exists( $email_address ) ) {
-			$customer  = new Customer( $customer_id );
-			$_customer = $customer->get_data();
-		} else {
-			$_customer->id         = 0;
-			$_customer->first_name = '';
-			$_customer->last_name  = '';
-			$_customer->email      = $email_address;
-			$_customer->phone      = $this->get_billing_info( 'phone' );
-		}
-
-		return (object) $_customer;
-	}
-
-	/**
 	 * Set Additional Details.
 	 *
 	 * @param string $additional_details Additional Details
@@ -1241,67 +617,55 @@ class Booking extends PostModel {
 	}
 
 	/**
-	 * @return array
-	 * @since 6.5.2
+	 * Builds one activity entry stamped with actor and time, without writing it.
+	 *
+	 * @param string               $type     What kind of event it was; decides the icon the client draws.
+	 * @param string               $category Which filter the entry falls under, or '' when none fits.
+	 * @param string               $text     What happened, in a sentence, already translated.
+	 * @param string               $actor    Who it is attributed to: `admin` or `traveler`.
+	 * @param array<string, mixed> $extra    Further keys the entry carries, e.g. the travelers it names.
+	 * @return array<string, mixed>
+	 * @since 6.9.0
 	 */
-	public function get_data(): array {
+	public static function record_activity( string $type, string $category, string $text, string $actor = 'admin', array $extra = array() ): array {
+		$who = wp_get_current_user()->display_name;
 
-		$cart_info        = $this->get_cart_info();
-		$cart_info_parser = new CartInfoParser( $cart_info );
+		if ( '' === $who ) {
+			$who = 'traveler' === $actor
+				? __( 'Traveler', 'wp-travel-engine' )
+				: __( 'Admin', 'wp-travel-engine' );
+		}
 
-		$booked_trips = array_map(
-			function ( $item ) {
-				return array(
-					'id'                   => $item->get_trip_id(),
-					'title'                => $item->get_trip_title(),
-					'url'                  => get_permalink( $item->get_trip_id() ),
-					'trip_start_date'      => $item->get_trip_date(),
-					'trip_end_date'        => $item->get_end_date(),
-					'number_of_travellers' => $item->travelers_count(),
-					'line_items'           => array_map(
-						function ( $line_items ) {
-							return array_map(
-								function ( $_line_item ) {
-									$label    = '';
-									$quantity = 0;
-									$price    = 0;
-									$total    = 0;
-									extract( $_line_item );
-
-									return compact( 'label', 'quantity', 'price', 'total' );
-								},
-								$line_items
-							);
-						},
-						$item->get_line_items()
-					),
-				);
-			},
-			$cart_info_parser->get_items()
+		return array_merge(
+			$extra,
+			array(
+				'id'       => wp_generate_uuid4(),
+				'type'     => $type,
+				'category' => $category,
+				'actor'    => $actor,
+				'who'      => $who,
+				'user_id'  => get_current_user_id(),
+				'date'     => current_time( 'mysql', true ),
+				'text'     => $text,
+			)
 		);
+	}
 
-		return array(
-			'id'             => $this->ID,
-			'booking_status' => $this->get_booking_status(),
-			'booked_date'    => $this->post->post_date_gmt,
-			'total_amount'   => $cart_info_parser->get_totals( 'total' ),
-			'paid_amount'    => $this->get_paid_amount(),
-			'due_amount'     => $this->get_due_amount(),
-			'currency'       => $cart_info_parser->get_currency(),
-			'booked_trips'   => $booked_trips,
-			'customer'       => $this->get_customer(),
-			'payments'       => array_map(
-				function ( $payment ) {
-					return array(
-						'id'              => $payment->ID,
-						'amount'          => $payment->get_amount(),
-						'date'            => $payment->get_transaction_date(),
-						'status'          => $payment->get_payment_status(),
-						'payment_gateway' => $payment->get_payment_gateway(),
-					);
-				},
-				$this->get_payments()
-			),
+	/**
+	 * Queues entries at the front of the activity log; outside with_delayed_save() it needs a save().
+	 *
+	 * @param array<int, array<string, mixed>> $activities Entries to record, in the order they happened.
+	 * @return void
+	 * @since 6.9.0
+	 */
+	public function add_activities( array $activities ): void {
+		if ( empty( $activities ) ) {
+			return;
+		}
+
+		$this->set_meta(
+			self::ACTIVITY_META_KEY,
+			ArrayUtility::append( $activities, $this->get_activities(), self::ACTIVITY_LOG_LIMIT )
 		);
 	}
 
@@ -1329,7 +693,6 @@ class Booking extends PostModel {
 
 	/**
 	 * Ensure payment key is stored for this booking.
-	 * This allows payment links to work independently without requiring the booking details page.
 	 *
 	 * @return string The payment key
 	 * @since 6.7.0
@@ -1341,234 +704,6 @@ class Booking extends PostModel {
 		$this->update_meta( '_payment_key', $payment_key );
 
 		return $payment_key;
-	}
-
-	/**
-	 * Compare current cart version with the given version.
-	 *
-	 * @param string $op Operator to compare. Default is '=='.
-	 * @param string $version Version to compare with. Default is '4.0'.
-	 * @return bool
-	 * @since 6.7.0
-	 */
-	public function is_curr_cart( string $op = '==', string $version = '4.0' ): bool {
-		global $current_screen;
-		if ( $current_screen && $current_screen->id === 'booking' && $current_screen->action === 'add' && $current_screen->base === 'post' ) {
-			return true;
-		}
-		return version_compare( $this->get_cart_version(), $version, $op );
-	}
-
-	/**
-	 * Retrieves booking cart info - Version.
-	 *
-	 * @return string Version
-	 * @since 6.7.0
-	 */
-	public function get_cart_version(): string {
-		return (string) ( $this->get_cart_info( 'version' ) ?? '3.0' );
-	}
-
-	/**
-	 * Checks whether booking migrated from legacy booking post.
-	 *
-	 * @return bool
-	 * @since 6.8.6
-	 */
-	public function is_migrated(): bool {
-		return (bool) absint( $this->get_meta( '_migrated_to' ) );
-	}
-
-	/**
-	 * Get fees data.
-	 *
-	 * @return array Fees data.
-	 * @since 6.7.0
-	 */
-	public function get_fees(): array {
-		return $this->get_cart_info( 'fees' ) ?? array();
-	}
-
-	/**
-	 * Get Payment by ID.
-	 *
-	 * @param int $payment_id The payment ID.
-	 *
-	 * @return ?Payment
-	 * @since 6.7.0
-	 */
-	public function get_payment_by_id( int $payment_id ) {
-		foreach ( $this->get_payments() as $payment ) {
-			if ( $payment->ID === $payment_id ) {
-				return $payment;
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Get fees by type.
-	 *
-	 * @return array
-	 * @since 6.7.0
-	 */
-	public function get_fee_types(): array {
-		$fees         = $this->get_fees();
-		$fees_by_type = array();
-
-		foreach ( $fees as $fee ) {
-			$apply_tax = $fee['apply_tax'] ?? true;
-			if ( 'tax' === $fee['name'] ) {
-				$fees_by_type['tax'] = $fee;
-			} elseif ( $apply_tax ) {
-				$fees_by_type['tax_inclusive'][] = $fee;
-			} else {
-				$fees_by_type['tax_exclusive'][] = $fee;
-			}
-		}
-
-		return $fees_by_type;
-	}
-
-	/**
-	 * Get payments data.
-	 *
-	 * @param bool $success Whether to include successful payments only. Default true.
-	 *
-	 * @return array Payments data.
-	 * {
-	 *  'totals' => array<mixed>,
-	 *  'payments' => array<mixed>,
-	 * }
-	 * @since 6.7.0
-	 * @since 6.7.1 Skips calculation for failed payments.
-	 * @since 6.8.6 Adds the payment status slug to each payment entry.
-	 * @since 6.8.6 Nets total_paid/total_deposit against the booking's refunded amount instead of excluding refunded payments entirely.
-	 */
-	public function get_payments_data( bool $success = true ): array {
-
-		$key = $success ? 'success' : 'not_success';
-
-		if ( isset( $this->payments_data[ $key ] ) ) {
-			return $this->payments_data[ $key ];
-		}
-
-		$totals    = array(
-			'total_deposit'   => '0',
-			'total_paid'      => '0',
-			'total_exclusive' => '0',
-			'total_discount'  => '0',
-			'total_refund'    => '0',
-			'due_exclusive'   => '0',
-			'payable'         => '0',
-			'extra_charges'   => '0',
-			'gateway_fee'     => '0',
-		);
-		$payments  = array();
-		$fee_types = $this->get_fee_types();
-
-		$calc = PaymentCalculator::for( $this->get_currency() );
-
-		$discounts = $this->get_discounts();
-
-		foreach ( $this->get_payments() as $payment ) {
-			$cart_totals = $payment->get_cart_totals();
-
-			$is_refunded = $payment->is_refunded();
-			if ( ! $is_refunded && ( ! $cart_totals || $payment->is_failed() || ( $success && ! $payment->is_completed() ) ) ) {
-				continue;
-			}
-
-			$p_id         = $payment->ID;
-			$refunded_amt = $payment->get_refunded_amount();
-
-			$payments[ $p_id ]['total']         = (string) $payment->get_amount();
-			$payments[ $p_id ]['deposit']       = (string) ( $cart_totals['deposit'] ?? '0.00' );
-			$payments[ $p_id ]['payable']       = (string) ( $cart_totals['payable_now'] ?? '0.00' );
-			$payments[ $p_id ]['extra_charges'] = (string) ( $cart_totals['total_extra_charges'] ?? '0.00' );
-			$payments[ $p_id ]['gateway_fee']   = (string) ( $payment->get_gateway_fee() );
-			$payments[ $p_id ]['is_refunded']   = $is_refunded;
-			$payments[ $p_id ]['refunded_amt']  = $refunded_amt;
-			$payments[ $p_id ]['status']        = $payment->get_payment_status();
-
-			if ( $is_refunded ) {
-				$totals['total_paid']   = $calc->subtract( (string) $totals['total_paid'], (string) $refunded_amt );
-				$totals['total_refund'] = $calc->add( (string) $totals['total_refund'], (string) $refunded_amt );
-				continue;
-			}
-
-			foreach ( $discounts as $_key => $_ ) {
-				if ( isset( $cart_totals[ 'total_' . $_key ] ) ) {
-					$totals['total_discount'] = $calc->add( $totals['total_discount'], (string) $cart_totals[ 'total_' . $_key ] );
-				}
-			}
-
-			foreach ( $fee_types['tax_inclusive'] ?? array() as $fee ) {
-				$payments[ $p_id ][ $fee['name'] ]                = (string) ( $cart_totals[ 'total_' . $fee['name'] ] ?? '0.00' );
-				$totals['tax_inclusive'][ $fee['name'] ]['label'] = $fee['label'];
-				$totals['tax_inclusive'][ $fee['name'] ]['value'] = $calc->add(
-					$totals['tax_inclusive'][ $fee['name'] ]['value'] ?? '0.00',
-					$payments[ $p_id ][ $fee['name'] ]
-				);
-			}
-
-			foreach ( $fee_types['tax_exclusive'] ?? array() as $fee ) {
-				if ( 'gateway_fee' === $fee['name'] ) {
-					continue;
-				}
-				$payments[ $p_id ][ $fee['name'] ]                = (string) ( $cart_totals[ 'total_' . $fee['name'] ] ?? '0.00' );
-				$totals['tax_exclusive'][ $fee['name'] ]['label'] = $fee['label'];
-				$totals['tax_exclusive'][ $fee['name'] ]['value'] = $calc->add(
-					$totals['tax_exclusive'][ $fee['name'] ]['value'] ?? '0.00',
-					$payments[ $p_id ][ $fee['name'] ]
-				);
-			}
-
-			if ( isset( $fee_types['tax'], $cart_totals['total_tax'] ) ) {
-				$payments[ $p_id ]['tax'] = (string) ( $cart_totals['total_tax'] ?? '0.00' );
-				$totals['tax']            = array(
-					'label' => $fee_types['tax']['label'],
-					'value' => $calc->add(
-						$totals['tax']['value'] ?? '0.00',
-						$payments[ $p_id ]['tax']
-					),
-				);
-			}
-
-			$totals['total_paid']    = $calc->add(
-				$totals['total_paid'] ?? '0.00',
-				$payments[ $p_id ]['total']
-			);
-			$totals['total_deposit'] = $calc->add(
-				$totals['total_deposit'] ?? '0.00',
-				$payments[ $p_id ]['deposit']
-			);
-			$totals['payable']       = $calc->add(
-				$totals['payable'] ?? '0.00',
-				$payments[ $p_id ]['payable']
-			);
-			$totals['extra_charges'] = $calc->add(
-				$totals['extra_charges'] ?? '0.00',
-				$payments[ $p_id ]['extra_charges']
-			);
-			$totals['gateway_fee']   = $calc->add(
-				$totals['gateway_fee'] ?? '0.00',
-				$payments[ $p_id ]['gateway_fee']
-			);
-		}
-
-		$totals['total_exclusive'] = (string) $this->get_total();
-
-		$totals['due_exclusive'] = $calc->subtract(
-			$totals['total_exclusive'],
-			$totals['total_deposit']
-		);
-
-		$totals['subtotal'] = $calc->add( $totals['total_exclusive'], $totals['total_discount'] );
-
-		$this->payments_data[ $key ] = compact( 'totals', 'payments' );
-
-		return $this->payments_data[ $key ];
 	}
 
 	/**
@@ -1587,6 +722,7 @@ class Booking extends PostModel {
 	 * @since 6.7.0
 	 * @since 6.7.1 Added support for send_booking_emails, send_payment_emails arguments and payment event trigger.
 	 * @since 6.7.11 Added wptravelengine_verify_payment_success_status filter to allow bypassing completed-status guard.
+	 * @since 6.9.0 Sets the booking payment status to `partially-paid` while a balance is still due.
 	 */
 	public function sync_payment_success_metas( int $payment_id, float $paid_amount, array $args = array() ): void {
 		$args = wp_parse_args(
@@ -1668,7 +804,7 @@ class Booking extends PostModel {
 			'actual_total_paid_amount'                => $actual_total_paid_amount,
 			'total_due_amount'                        => $total_due_amount,
 			'_prev_booking_status'                    => $this->get_booking_status(),
-			'wp_travel_engine_booking_payment_status' => 'completed',
+			'wp_travel_engine_booking_payment_status' => $calculator->is( $total_due_amount, '>', '0.00' ) ? 'partially-paid' : 'completed',
 			'wp_travel_engine_booking_status'         => 'booked',
 		);
 
@@ -1808,6 +944,61 @@ class Booking extends PostModel {
 	}
 
 	/**
+	 * Recalculates cart totals, the paid/due meta and the payment status, flushed in one save.
+	 *
+	 * @return Booking
+	 * @since 6.9.0
+	 */
+	public function sync_totals(): Booking {
+		return $this->with_delayed_save(
+			function ( Booking $booking ): void {
+				/** @var CartInfoParser $cart_info */
+				$cart_info = $booking->cart_info;
+
+				$cart = $cart_info->recalculate_totals();
+				$calc = PaymentCalculator::for( $booking->get_currency() );
+
+				$booking->set_cart_info( $cart->data() );
+
+				// A refunded payment was still taken, so it counts as collected and its refund comes off.
+				$collected = '0.00';
+				$deposited = '0.00';
+				foreach ( $booking->get_payments() as $payment ) {
+					if ( ! $payment instanceof Payment || ! ( $payment->is_completed() || $payment->is_refunded() ) ) {
+						continue;
+					}
+
+					$collected = $calc->add( $collected, (string) $payment->get_amount() );
+
+					if ( $payment->is_completed() ) {
+						$deposited = $calc->add( $deposited, (string) $payment->get_deposit() );
+					}
+				}
+
+				$refunded   = $calc->sum( wp_list_pluck( $booking->get_refunds(), 'amount' ) );
+				$total_paid = $calc->max( '0.00', $calc->subtract( $collected, $refunded ) );
+				// A refund comes off what was paid, not off what the trip still owes.
+				$total_due = $calc->max( '0.00', $calc->subtract( (string) $cart->get_total(), $deposited ) );
+
+				$booking->set_refunded_amount( (float) $refunded );
+				$booking->set_total_due_amount( (float) $total_due );
+				$booking->set_total_paid_amount( (float) $total_paid );
+				$booking->set_meta( 'actual_total_paid_amount', (float) $collected );
+
+				if ( ! $calc->is_positive( $collected ) ) {
+					$payment_status = 'pending';
+				} elseif ( $calc->is_positive( $refunded ) && $calc->is( $refunded, '>=', $collected ) ) {
+					$payment_status = 'refunded';
+				} else {
+					$payment_status = $calc->is_positive( $total_due ) ? 'partially-paid' : 'completed';
+				}
+
+				$booking->set_meta( 'wp_travel_engine_booking_payment_status', $payment_status );
+			}
+		);
+	}
+
+	/**
 	 * Set payment gateway reference and link it to the booking.
 	 *
 	 * @param string $gateway Gateway slug.
@@ -1863,64 +1054,5 @@ class Booking extends PostModel {
 		);
 
 		return parent::create_post( $booking_args );
-	}
-
-	/**
-	 * Get Booking End DateTime.
-	 *
-	 * @return string Booking End DateTime
-	 * @since 6.8.3
-	 */
-	public function get_end_datetime(): string {
-		$order_trips = $this->get_order_items();
-
-		return $order_trips[0]['end_datetime'] ?? $this->get_nested_meta( 'wp_travel_engine_booking_setting.place_order.tenddate', '' );
-	}
-
-	/**
-	 * Gets the booked quantity per price category for a package on a date/time.
-	 *
-	 * @param int $package_id Package ID.
-	 *
-	 * @return array<int, int> Category ID => booked quantity.
-	 * @since 6.8.4
-	 */
-	public function get_booked_count( int $package_id ): array {
-		$items = $this->get_cart_info( 'items' );
-
-		if ( ! is_array( $items ) ) {
-			return array();
-		}
-
-		$cart_key = ( new Inventory( $this->get_trip_id() ) )->get_cart_key( $package_id, $this->get_trip_datetime() );
-
-		foreach ( $items as $item ) {
-			if ( ! is_array( $item ) || ( $item['id'] ?? null ) !== $cart_key ) {
-				continue;
-			}
-
-			return is_array( $item['pax'] ?? null ) ? $item['pax'] : array();
-		}
-
-		return array();
-	}
-
-	/**
-	 * Get total refunded amount.
-	 *
-	 * @since 6.8.6
-	 */
-	public function get_refunded_amount(): float {
-		return (float) $this->get_meta( 'total_refunded_amount' );
-	}
-
-	/**
-	 * Get the fallback note shown when a booking's initial deposit reflects a partial refund.
-	 *
-	 * @return string
-	 * @since 6.8.6
-	 */
-	public static function get_refund_fallback_msg(): string {
-		return __( 'Part of your deposit was refunded, so the Initial Deposit shown here reflects that adjustment.', 'wp-travel-engine' );
 	}
 }

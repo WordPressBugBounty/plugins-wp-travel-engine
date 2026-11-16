@@ -10,6 +10,8 @@ use Wp_Travel_Engine_Loader;
 use Wp_Travel_Engine_Public;
 use WPTravelEngine\Core\Booking\BookingProcess;
 use WPTravelEngine\Core\Booking\ExternalPayment;
+use WPTravelEngine\Core\Controllers\RestAPI\V2\Files as FilesController;
+use WPTravelEngine\Core\AdminNoticeSuppressor;
 use WPTravelEngine\Core\Capabilities;
 use WPTravelEngine\Core\Cart\Cart;
 use WPTravelEngine\Core\Controllers\RestAPI\V2\Settings;
@@ -46,8 +48,9 @@ use WPTravelEngine\Traits\Singleton;
 use WPTravelEngine\Email\Email;
 use function WTE\Upgrade500\wte_process_migration;
 use const WP_TRAVEL_ENGINE_FILE_PATH;
-use WPTravelEngine\Core\Models\Post\TripPackages;
+use WPTravelEngine\Core\Controllers\RestAPI\V1\MyOverview;
 use WPTravelEngine\Core\Controllers\RestAPI\V2\Booking as BookingController;
+use WPTravelEngine\Core\Controllers\RestAPI\V2\Customer as CustomerController;
 use WPTravelEngine\Core\Models\Post\Payment;
 use WPTravelEngine\Core\Shortcodes\TripFaq;
 use WPTravelEngine\Pages\Admin\UpcomingTours;
@@ -156,6 +159,11 @@ final class Plugin {
 		$schema_filters->hooks();
 
 		Events::instance();
+
+		/**
+		 * @since 6.9.0
+		 */
+		AdminNoticeSuppressor::instance();
 
 		Capabilities::instance();
 
@@ -675,6 +683,7 @@ final class Plugin {
 	/**
 	 * @return void
 	 * @since 5.6.10
+	 * @since 6.9.0 Registers the customer-scoped account controller.
 	 */
 	public function rest_api_init() {
 		require_once plugin_dir_path( WP_TRAVEL_ENGINE_FILE_PATH ) . 'includes/rest-api/class-trip-controller.php';
@@ -687,6 +696,15 @@ final class Plugin {
 
 		$booking_controller = new BookingController( 'booking' );
 		$booking_controller->register_routes();
+
+		$files_controller = new FilesController();
+		$files_controller->register_routes();
+
+		$customer_controller = new CustomerController();
+		$customer_controller->register_routes();
+
+		$my_dashboard = new MyOverview();
+		$my_dashboard->register_routes();
 	}
 
 	function wte_login_integration() {

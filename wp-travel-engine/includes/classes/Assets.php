@@ -122,7 +122,7 @@ class Assets extends AssetsAbstract {
 				'midtrans' 			=> wptravelengine_is_addon_active( 'midtrans' ),
 				'payu_money_bolt' 	=> wptravelengine_is_addon_active( 'payu_money_bolt' ),
 			) ),
-			'wptravelengineCart' => $this->get_cart_data()
+			'wptravelengineCart' => $this->get_cart_data(),
 		];
 
 		$objects = explode( ',', $object_name );
@@ -136,20 +136,22 @@ class Assets extends AssetsAbstract {
 
 	/**
 	 * Register Plugin Scripts.
+	 *
+	 * @since 6.9.0 Front-end script translations set in set_public_script_translations().
 	 */
 	public function plugin_scripts() {
 		add_filter( 'script_loader_tag', array( $this, 'add_script_attributes' ), 10, 3 );
 		add_filter( 'style_loader_tag', array( $this, 'add_style_attributes' ), 10, 3 );
 		$this->register_dependency_libraries();
 		$this->register_plugin_scripts();
-
-		wp_set_script_translations( 'trip-booking-modal', 'wp-travel-engine', plugin_dir_path( WP_TRAVEL_ENGINE_FILE_PATH ) . 'languages/' );
+		$this->set_public_script_translations();
 	}
 
 	/**
 	 * Register Plugin Scripts for Admin.
 	 *
 	 * @since 6.2.0
+	 * @since 6.9.0 Registers the wte-dropzone script and style.
 	 */
 	public function plugin_admin_scripts() {
 		$this->register_script( Asset::register( 'wptravelengine-settings', 'admin/global-settings.js' ) );
@@ -162,12 +164,18 @@ class Assets extends AssetsAbstract {
 
 		$this->register_script( Asset::register( 'wptravelengine-exports', 'admin/exports.js' )->dependencies( [ 'wte-fpickr' ] ) )->localize( 'wptravelengine-exports', 'wteL10n' );
 
+		// File fields on the booking edit screen render through Dropzone.
+		$this->register_script( AssetLib::register( 'wte-dropzone', 'dropzone/dropzone.min.js' )->version( '5.9.2' ) )
+		     ->register_style( AssetLib::register( 'wte-dropzone', 'dropzone/dropzone.min.css' )->version( '5.9.2' ) );
+		wp_add_inline_script( 'wte-dropzone', 'Dropzone.autoDiscover = false;' );
+
 	}
 
 	/**
 	 * Register Plugin Scripts.
 	 *
 	 * @since 6.7.11 Added wte-trip-faqs style and script registration.
+	 * @since 6.9.0 Script translations moved to set_public_script_translations().
 	 */
 	protected function register_plugin_scripts() {
 		/* @var PluginSettings $plugin_settings */
@@ -229,10 +237,16 @@ class Assets extends AssetsAbstract {
 			wp_add_inline_script( 'wp-travel-engine', $wptravelengine_cart );
 		}
 
-		//My Account Page.
-		$this->register_style( Asset::register( 'my-account', 'public/my-account.css' ) )
-		     ->register_script( Asset::register( 'my-account', 'public/my-account.js' ) )
-		     ->localize( 'my-account', 'wte_account_page' );
+		// React traveler dashboard, enqueued on the account page for a logged-in visitor; its
+		// bootstrap data is localized as `wptravelengineDashboardData` (see UserAccount::output()).
+		// Depends on Dropzone for the traveler form's file fields.
+		$this->register_style( Asset::register( 'my-account', 'public/my-account.css' )->dependencies( array( 'wte-dropzone' ) ) )
+		     ->register_script( Asset::register( 'my-account', 'public/my-account.js' )->dependencies( array( 'wte-dropzone' ) ) );
+
+		// Login / register / password forms. Separate from the dashboard because the checkout
+		// shortcodes render these forms too, and must not pull the dashboard in with them.
+		$this->register_style( Asset::register( 'account-auth', 'public/account-auth.css' ) )
+		     ->register_script( Asset::register( 'account-auth', 'public/account-auth.js' ) );
 
 		//Trip Reviews Page.
 		$this->register_style( Asset::register( 'trip-reviews', 'public/trip-reviews.css' ) );
@@ -243,7 +257,20 @@ class Assets extends AssetsAbstract {
 		     ->localize( 'trip-checkout', 'wteL10n,wptravelengine_load_gateway_scripts,wptravelengineCart' );
 
 		$this->register_style( Asset::register( 'trip-thank-you', 'public/thank-you.css' ) );
-		$this->register_script( Asset::register( 'trip-thank-you', 'public/thank-you.js' ) );
+		// Head script: the thank-you page renders via the [WP_TRAVEL_ENGINE_THANK_YOU] shortcode during
+		// the_content, and on this template no wp_footer scripts are emitted — a footer-registered handle
+		// would be dropped. The script is DOMContentLoaded-guarded, so head placement is safe.
+		$this->register_script( Asset::register( 'trip-thank-you', 'public/thank-you.js' )->in_footer( false )->dependencies( array( 'wte-popper', 'wte-tippyjs' ) ) );
+
+		// Enqueue thank-you (confirmation) template assets on wp_enqueue_scripts so the
+		// stylesheet prints in <head>. ThankYou::output() also enqueues these, but that
+		// runs during the_content — too late for styles to be printed on the page.
+		if ( wp_travel_engine_post_content_has_shortcode( 'WP_TRAVEL_ENGINE_THANK_YOU' ) ) {
+			$this->enqueue_script( 'wte-popper' );
+			$this->enqueue_script( 'wte-tippyjs' );
+			$this->enqueue_style( 'trip-thank-you' );
+			$this->enqueue_script( 'trip-thank-you' );
+		}
 
 		// Enqueue checkout template version 2.0 script and style.
 		if ( wp_travel_engine_is_checkout_page() && isset( $wte_cart ) ) {
@@ -1244,6 +1271,21 @@ class Assets extends AssetsAbstract {
 		wp_set_script_translations( 'wptravelengine-coupon-edit', 'wp-travel-engine', $languages_path );
 		wp_set_script_translations( 'wptravelengine-customer-edit', 'wp-travel-engine', $languages_path );
 		wp_set_script_translations( 'wptravelengine-upcoming-tours', 'wp-travel-engine', $languages_path );
+	}
+
+	/**
+	 * Set script translations for the front-end scripts.
+	 *
+	 * Runs after registration: a handle not yet registered gets no translations.
+	 *
+	 * @return void
+	 * @since 6.9.0
+	 */
+	private function set_public_script_translations() {
+		$languages_path = plugin_dir_path( WP_TRAVEL_ENGINE_FILE_PATH ) . 'languages/';
+		wp_set_script_translations( 'trip-booking-modal', 'wp-travel-engine', $languages_path );
+		wp_set_script_translations( 'my-account', 'wp-travel-engine', $languages_path );
+		wp_set_script_translations( 'trip-thank-you', 'wp-travel-engine', $languages_path );
 	}
 
 }

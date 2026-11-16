@@ -25,6 +25,13 @@ class TripCheckout extends Shortcode {
 		);
 	}
 
+	/**
+	 * Renders the checkout shortcode.
+	 *
+	 * @param array $atts Shortcode attributes.
+	 * @return string
+	 * @since 6.9.0 Coupon form shows only when a coupon applies to the trips in the cart.
+	 */
 	public function output( $atts ): string {
 		global $wte_cart;
 		if ( isset( $atts['content'] ) ) {
@@ -42,7 +49,7 @@ class TripCheckout extends Shortcode {
 				array(
 					'show_title'       => $atts['title'] === 'show',
 					'content_only'     => $atts['content-only'] === 'yes',
-					'show_coupon_form' => $atts['show_coupon_form'] === 'show' && Coupons::is_coupon_available() && $wte_cart->get_payment_type() !== 'due',
+					'show_coupon_form' => $atts['show_coupon_form'] === 'show' && Coupons::is_coupon_available( $wte_cart->get_cart_trip_ids() ) && $wte_cart->get_payment_type() !== 'due',
 				)
 			);
 			echo '</div>';

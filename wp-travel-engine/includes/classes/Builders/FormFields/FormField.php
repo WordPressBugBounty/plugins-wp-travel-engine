@@ -3,6 +3,7 @@
 namespace WPTravelEngine\Builders\FormFields;
 
 use WPTravelEngine\Helpers\Functions;
+
 if ( ! class_exists( '\WP_Travel_Engine_Form_Field' ) ) {
 	require_once WP_TRAVEL_ENGINE_ABSPATH . 'includes/lib/wte-form-framework/class-wte-form-field.php';
 }
@@ -84,6 +85,7 @@ class FormField extends \WP_Travel_Engine_Form_Field {
 	 * @param string $content Inner content for the field.
 	 *
 	 * @return string Generated HTML content.
+	 * @since 6.9.0 Uses the wpte-checkout__input-control and required classes.
 	 */
 	public function template( $field, $content ) {
 		if ( $this->use_legacy_template ) {
@@ -103,7 +105,7 @@ class FormField extends \WP_Travel_Engine_Form_Field {
 		<div
 			class="<?php echo esc_attr( $field['wrapper_class'] ?? '' ) . ( $field['type'] == 'file' ? ' full' : '' ); ?>">
 			<div
-				class="wpte-checkout__form-control <?php echo ! $is_checkbox ? 'wpte-material-ui-input-control' : ''; ?>">
+				class="wpte-checkout__form-control <?php echo ! $is_checkbox ? 'wpte-checkout__input-control' : ''; ?>">
 
 				<?php if ( $is_checkbox ) : ?>
 				<div class="<?php echo "wpte-checkout__{$field['type']}-control"; ?>">
@@ -111,7 +113,7 @@ class FormField extends \WP_Travel_Engine_Form_Field {
 
 					<?php if ( ( $field['name'] != 'wp_travel_engine_booking_setting[terms_conditions]' ) ) : ?>
 						<label
-							for="<?php echo esc_attr( $field['id'] ); ?>"><?php echo wp_kses_post( $field['field_label'] ) . ( $is_required ? '<span class="wpte-checkout__field-required">*</span>' : '' ); ?></label>
+							for="<?php echo esc_attr( $field['id'] ); ?>"><?php echo wp_kses_post( $field['field_label'] ) . ( $is_required ? '<span class="required">*</span>' : '' ); ?></label>
 					<?php endif; ?>
 
 					<?php if ( $field['type'] == 'file' ) : ?>
@@ -125,7 +127,7 @@ class FormField extends \WP_Travel_Engine_Form_Field {
 					<?php if ( ! $is_checkbox && ( $field['name'] != 'wp_travel_engine_booking_setting[terms_conditions]' ) ) : ?>
 						<fieldset>
 							<legend>
-								<span><?php echo wp_kses_post( $field['field_label'] ) . ( $is_required ? '<span class="wpte-checkout__field-required">*</span>' : '' ); ?></span>
+								<span><?php echo wp_kses_post( $field['field_label'] ) . ( $is_required ? '<span class="required">*</span>' : '' ); ?></span>
 							</legend>
 						</fieldset>
 					<?php endif; ?>
@@ -149,6 +151,7 @@ class FormField extends \WP_Travel_Engine_Form_Field {
 	/**
 	 * @return $this
 	 * @since 6.4.0
+	 * @since 6.9.0 Labels a field by its field_label, falling back to the placeholder.
 	 */
 	public function set_default_value( array $form_data ): FormField {
 
@@ -156,7 +159,7 @@ class FormField extends \WP_Travel_Engine_Form_Field {
 			function ( $field ) use ( $form_data ) {
 				$name = preg_match( '#\[([^\[]+)]$#', $field['name'], $matches ) ? $matches[1] : $field['name'];
 
-				$field['field_label'] = isset( $field['placeholder'] ) && $field['placeholder'] !== '' ? $field['placeholder'] : $field['field_label'];
+				$field['field_label'] = ! empty( $field['field_label'] ) ? $field['field_label'] : ( $field['placeholder'] ?? '' );
 				$field['default']     = $form_data[ $name ] ?? $field['default'] ?? '';
 				$field['value']       = $field['default'];
 

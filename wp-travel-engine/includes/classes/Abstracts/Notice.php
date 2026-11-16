@@ -10,7 +10,6 @@ namespace WPTravelEngine\Abstracts;
 
 /**
  * Base class for an `admin_notices` notice. When `DISMISSIBLE` is true (the default),
- * each notice item can be dismissed independently and stays dismissed, persisted
  * per-user via user meta and an ajax callback.
  */
 abstract class Notice {
@@ -26,21 +25,44 @@ abstract class Notice {
 	const TYPE = 'info';
 
 	/**
+	 * Whether this notice should still show on screens where
+	 * `WPTravelEngine\Core\AdminNoticeSuppressor` clears `admin_notices`.
+	 *
+	 * @since 6.9.0
+	 */
+	const SURVIVES_SUPPRESSION = true;
+
+	/**
 	 * Whether the shared dismiss script has already been printed on this page load.
 	 */
 	private static bool $script_printed = false;
 
 	/**
-	 * Hooks the notice display and, if dismissible, its dismiss handler.
+	 * Attaches the notice and, if dismissible, its dismiss handler.
 	 *
 	 * @return void
+	 * @since 6.9.0 Registration moved into attach_notice(), which also re-runs on suppressed screens.
 	 */
 	public function __construct() {
-		add_action( 'admin_notices', array( $this, 'display' ) );
+		$this->attach_notice();
+
+		if ( static::SURVIVES_SUPPRESSION ) {
+			add_action( 'wptravelengine_admin_notices_suppressed', array( $this, 'attach_notice' ) );
+		}
 
 		if ( static::DISMISSIBLE ) {
 			add_action( 'wp_ajax_' . $this->dismiss_action(), array( $this, 'handle_dismiss' ) );
 		}
+	}
+
+	/**
+	 * Hooks `display()` onto `admin_notices`.
+	 *
+	 * @return void
+	 * @since 6.9.0
+	 */
+	public function attach_notice(): void {
+		add_action( 'admin_notices', array( $this, 'display' ) );
 	}
 
 	/**

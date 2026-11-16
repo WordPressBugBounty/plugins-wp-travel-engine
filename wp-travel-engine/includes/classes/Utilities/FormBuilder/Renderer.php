@@ -105,6 +105,7 @@ class Renderer {
 	 * Parse form arguments.
 	 *
 	 * @return array|false
+	 * @since 6.9.0 Falls back to the field label for an empty placeholder.
 	 */
 	protected function parse_form_arguments( $field ) {
 		if ( ! array_key_exists( ( $field['type'] ?? '__invalid' ), static::$field_types ) ) {
@@ -129,8 +130,13 @@ class Renderer {
 			$field['attributes']['data-parsley-required-message'] = __( 'This value is required', 'wp-travel-engine' );
 		}
 
-		if ( empty( $field['attributes']['placeholder'] ) && ! empty( $field['placeholder'] ) ) {
-			$field['attributes']['placeholder'] = $field['placeholder'];
+		if ( empty( $field['attributes']['placeholder'] ) ) {
+			if ( ! empty( $field['placeholder'] ) ) {
+				$field['attributes']['placeholder'] = $field['placeholder'];
+			} elseif ( ! empty( $field['field_label'] ) ) {
+				// Fall back to the field label so every input has a placeholder hint.
+				$field['attributes']['placeholder'] = wp_strip_all_tags( $field['field_label'] );
+			}
 		}
 
 		if ( empty( $field['attributes']['rows'] ) && ! empty( $field['rows'] ) ) {

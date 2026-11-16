@@ -14,7 +14,6 @@ use WPTravelEngine\Core\Cart\Item;
 use WPTravelEngine\Core\Coupon;
 use WPTravelEngine\Core\Models\Post\Trip;
 use WPTravelEngine\Core\Models\Post\Booking;
-use WPTravelEngine\Helpers\CartInfoParser;
 use WPTravelEngine\Abstracts\CartAdjustment;
 use WPTravelEngine\Core\Cart\Item as CartItem;
 use WPTravelEngine\Helpers\BookedItem;
@@ -38,13 +37,14 @@ class AddCartItems {
 	 * @param Cart  $cart
 	 * @since 6.4.0
 	 * @return array
+	 * @since 6.9.0 Reads cart info through wptravelengine_get_cart_info().
 	 */
 	public function modify_totals( $totals, $cart ) {
 		$booking_ref = $cart->get_booking_ref();
 
 		if ( ! $cart->is_curr_cart() && $booking_ref !== null ) {
 			$booking   = Booking::make( $booking_ref );
-			$cart_info = new CartInfoParser( $booking->get_cart_info() );
+			$cart_info = wptravelengine_get_cart_info( $booking->ID );
 			$totals    = $cart_info->get_totals();
 
 			$payments = $booking->get_payment_detail();
@@ -79,13 +79,15 @@ class AddCartItems {
 
 	/**
 	 * Add tax as a fee to the cart.
+	 *
+	 * @since 6.9.0 Reads cart info through wptravelengine_get_cart_info().
 	 */
 	public function add_tax( array $items, Cart $cart ) {
 
 		if ( $cart->get_booking_ref() !== null ) {
 			$booking_id = $cart->get_booking_ref();
 			$booking    = Booking::make( $booking_id );
-			$cart_info  = new CartInfoParser( $booking->get_cart_info() );
+			$cart_info  = wptravelengine_get_cart_info( $booking->ID );
 			$fees       = $cart_info->get_fees();
 
 			if ( ! empty( $fees ) ) {
@@ -112,12 +114,13 @@ class AddCartItems {
 	 * @param Cart  $cart
 	 * @since 6.4.0
 	 * @return void
+	 * @since 6.9.0 Reads cart info through wptravelengine_get_cart_info().
 	 */
 	public function add_deductible_items( array $items, Cart $cart ) {
 		if ( $cart->get_booking_ref() !== null ) {
 			$booking_id       = $cart->get_booking_ref();
 			$booking          = Booking::make( $booking_id );
-			$cart_info        = new CartInfoParser( $booking->get_cart_info() );
+			$cart_info        = wptravelengine_get_cart_info( $booking->ID );
 			$deductible_items = $cart_info->get_deductible_items();
 
 			foreach ( $deductible_items as $discount ) {
@@ -137,6 +140,7 @@ class AddCartItems {
 	 * @return void
 	 * @since 6.4.0
 	 * @since 6.8.5 Added wptravelengine_cart_extra_services_handled filter to allow add-ons to short-circuit extra services handling.
+	 * @since 6.9.0 Reads cart info through wptravelengine_get_cart_info().
 	 */
 	public function add_extra_services( Item $item, $cart_attributes, $cart ) {
 		if ( apply_filters( 'wptravelengine_cart_extra_services_handled', false, $item, $cart_attributes, $cart ) ) {
@@ -152,7 +156,7 @@ class AddCartItems {
 		if ( $cart->get_booking_ref() !== null ) {
 			$booking_id           = $cart->get_booking_ref();
 			$booking              = Booking::make( $booking_id );
-			$cart_info            = new CartInfoParser( $booking->get_cart_info() );
+			$cart_info            = wptravelengine_get_cart_info( $booking->ID );
 			$extra_services_items = $cart_info->get_item()->get_line_items()['extra_service'];
 		}
 

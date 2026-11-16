@@ -818,8 +818,8 @@ class DefaultFormFields extends \WTE_Default_Form_Fields {
 				),
 				'option_attributes' => array(
 					'required'                      => true,
-					'data-msg'                      => __( 'Please make sure to check the privacy policy checkbox', 'wp-travel-engine' ),
-					'data-parsley-required-message' => __( 'Please make sure to check the privacy policy checkbox', 'wp-travel-engine' ),
+					'data-msg'                      => __( 'Please accept the terms to complete your booking.', 'wp-travel-engine' ),
+					'data-parsley-required-message' => __( 'Please accept the terms to complete your booking.', 'wp-travel-engine' ),
 				),
 				'priority'          => 70,
 			);

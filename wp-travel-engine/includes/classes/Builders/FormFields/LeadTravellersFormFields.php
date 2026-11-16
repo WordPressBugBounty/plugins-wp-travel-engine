@@ -23,12 +23,22 @@ class LeadTravellersFormFields extends LeadTravellerFormFields {
 	public $fields;
 
 	/**
+	 * Traveler category label for the lead traveler (e.g. 'Adult', 'Child').
+	 *
+	 * @var string
+	 * @since 6.9.0
+	 */
+	protected string $traveler_category_label = '';
+
+	/**
 	 * Constructor.
 	 *
-	 * @param array $args Optional arguments (unused, for compatibility).
+	 * @param array $args Optional arguments: `traveler_category_label`.
+	 * @since 6.9.0 Accepts `traveler_category_label`.
 	 */
 	public function __construct( $args = array() ) {
-		$this->fields = DefaultFormFields::lead_traveller_form_fields();
+		$this->fields                  = DefaultFormFields::lead_traveller_form_fields();
+		$this->traveler_category_label = (string) ( $args['traveler_category_label'] ?? '' );
 		parent::__construct();
 	}
 
@@ -57,11 +67,13 @@ class LeadTravellersFormFields extends LeadTravellerFormFields {
 
 	/**
 	 * Render the lead traveller form fields.
+	 *
+	 * @since 6.9.0 Shows the traveler category badge, filterable via `wptravelengine_lead_traveller_category_label`.
 	 */
 	public function lead_traveller_form_fields() {
 		?>
 			<div id="wpte-lead-traveller" class="wpte-checkout__form-section">
-				<h5 class="wpte-checkout__form-title"><?php echo esc_html( sprintf( /* translators: %d: traveller number */ __( 'Lead Traveler %d', 'wp-travel-engine' ), 1 ) ); ?></h5>
+				<h5 class="wpte-checkout__form-title"><?php echo esc_html( sprintf( /* translators: %d: traveller number */ __( 'Lead Traveler %d', 'wp-travel-engine' ), 1 ) ); ?><span class="wpte-checkout__traveler-badge"><?php echo esc_html( apply_filters( 'wptravelengine_lead_traveller_category_label', $this->traveler_category_label ?: __( 'Adult', 'wp-travel-engine' ) ) ); ?></span></h5>
 				<?php
 				$this->render_traveler_fields( $this->fields );
 				?>
@@ -118,6 +130,7 @@ class LeadTravellersFormFields extends LeadTravellerFormFields {
 	 * @return array
 	 *
 	 * @since 6.8.0 Fixed: use $merged_lead instead of $form_data as default value source to prevent blank-field regression.
+	 * @since 6.9.0 Labels use the field label, falling back to the placeholder only when it is empty.
 	 */
 	protected function map_fields( $fields ) {
 		// Session lead traveller (index 0); merged on top of customer data so current-session input is preserved (e.g. after validation errors).
@@ -148,7 +161,7 @@ class LeadTravellersFormFields extends LeadTravellerFormFields {
 					$field['name']          = sprintf( 'travellers[%d][%s]', 0, $name );
 					$field['id']            = sprintf( 'travellers_%d_%s', 0, $name );
 				}
-				$field['field_label'] = isset( $field['placeholder'] ) && '' !== $field['placeholder'] ? $field['placeholder'] : $field['field_label'];
+				$field['field_label'] = ! empty( $field['field_label'] ) ? $field['field_label'] : ( $field['placeholder'] ?? '' );
 				$field['default']     = $merged_lead[ $name ] ?? $field['default'] ?? '';
 
 				return $field;

@@ -15,6 +15,7 @@
  * @author  WP Travel Engine
  * @package WP Travel Engine/includes/templates
  * @version 1.3.7
+ * @deprecated 6.9.0 No longer loaded by WP Travel Engine, so a theme override of it has no effect. It will be removed in a future release.
  */
 
 use WPTravelEngine\Helpers\Functions;

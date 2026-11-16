@@ -15,7 +15,6 @@ use WPTravelEngine\Core\Controllers\Ajax\ResendPurchaseReceipt;
 use WPTravelEngine\Core\Models\Settings\PluginSettings;
 use WPTravelEngine\Helpers\Countries;
 use WPTravelEngine\Abstracts\EmailTags;
-use WPTravelEngine\Helpers\CartInfoParser;
 use WPTravelEngine\Core\Models\Post\Booking;
 use WPTravelEngine\Utilities\PaymentCalculator;
 
@@ -90,6 +89,7 @@ class Template_Tags extends EmailTags {
 	 *
 	 * @since 6.8.0 Use get_post_meta() directly for traveller_details to bypass magic property caching.
 	 * @since 6.8.7 Use wptravelengine_get_booking()/wptravelengine_get_payment() (Booking/Payment models) instead of get_post(); meta reads go through get_meta() accordingly.
+	 * @since 6.9.0 Reads cart info through wptravelengine_get_cart_info().
 	 *
 	 * @param int $booking_id Booking post ID.
 	 * @param int $payment_id Payment post ID.
@@ -109,7 +109,7 @@ class Template_Tags extends EmailTags {
 			throw new \InvalidArgumentException( sprintf( 'Payment with ID %d not found.', $payment_id ) );
 		}
 
-		$this->cart_info = new CartInfoParser( (array) $this->booking->get_cart_info() );
+		$this->cart_info = wptravelengine_get_cart_info( $this->booking->ID );
 
 		$this->order_trips  = $this->booking->get_order_items();
 		$this->billing_info = $this->booking->get_billing_info() ?: array();
@@ -136,7 +136,7 @@ class Template_Tags extends EmailTags {
 	 * @since 6.8.7
 	 */
 	public function get_booked_trip_name(): string {
-		return html_entity_decode( $this->trip->title ?: 'Untitled Trip', ENT_QUOTES, 'UTF-8' );
+		return wptravelengine_decode_entity( $this->trip->title ?: ( get_the_title( $this->trip->ID ) ?: 'Untitled Trip' ) );
 	}
 
 	/**

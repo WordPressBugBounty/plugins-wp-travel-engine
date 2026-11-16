@@ -208,69 +208,83 @@ class Item {
 	}
 
 	/**
+	 * Head count, cost and `category_info` snapshot of each package category booked.
+	 *
+	 * @param TripPackage     $package Package the trip is booked under.
+	 * @param array<int, int> $pax     Head count by category ID; a category under one is left out.
+	 * @return array{pax?: array<int, int>, info?: array<int, array<string, mixed>>, cost?: array<int, float>}
+	 * @since 6.9.0
+	 */
+	public static function get_travelers_details( TripPackage $package, array $pax ): array {
+		$travelers = array();
+
+		foreach ( $package->get_traveler_categories() as $package_traveler ) {
+			$count = $pax[ $package_traveler->id ] ?? 0;
+
+			if ( $count < 1 ) {
+				continue;
+			}
+
+			$applicable_price = isset( $package_traveler->has_sale ) && $package_traveler->has_sale ? $package_traveler->sale_price : $package_traveler->price;
+
+			$enable_group_discount = (bool) ( $package_traveler->enabled_group_discount ?? false );
+			$group_pricing         = $package->get_group_pricing()[ $package_traveler->id ] ?? array();
+
+			$travelers['pax'][ $package_traveler->id ] = $count;
+
+			if ( $enable_group_discount && ! empty( $group_pricing ) ) {
+				foreach ( $group_pricing as $pricing ) {
+					if ( $pricing['from'] <= $count && ( empty( $pricing['to'] ) || ( $pricing['to'] >= $count ) ) ) {
+						$applicable_price = $pricing['price'];
+						break;
+					}
+				}
+			}
+
+			$travelers['info'][ $package_traveler->id ] = array(
+				'label'                => $package_traveler->label,
+				'price'                => $package_traveler->price,
+				'enabledSale'          => $package_traveler->has_sale ?? false,
+				'salePrice'            => $package_traveler->sale_price,
+				'pricingType'          => $package_traveler->pricing_type,
+				'minPax'               => $package_traveler->min_pax,
+				'maxPax'               => $package_traveler->max_pax,
+				'groupPricing'         => $group_pricing,
+				'enabledGroupDiscount' => $enable_group_discount,
+			);
+
+			$travelers['cost'][ $package_traveler->id ] = $package_traveler->pricing_type === 'per-group' ? $applicable_price : (float) $applicable_price * $count;
+		}
+
+		return $travelers;
+	}
+
+	/**
 	 * Set Item properties from Request.
 	 *
 	 * @param WP_REST_Request $request
 	 * @param Cart            $cart
 	 *
 	 * @return Item|\WP_Error
+	 * @since 6.9.0 Returns a WP_Error for a trip that no longer exists, rather than throwing.
 	 */
 	public static function from_request( WP_REST_Request $request, Cart $cart ) {
 		$cart_data = (object) $request->get_json_params();
 
-		$trip    = Trip::make( $cart_data->tripID );
-		$package = $trip->packages()->get_package( (int) $cart_data->packageID );
+		$trip = wptravelengine_get_trip( $cart_data->tripID ?? 0, true );
+
+		if ( ! $trip ) {
+			return new \WP_Error( 'invalid_trip', __( 'This trip is no longer available.', 'wp-travel-engine' ) );
+		}
+
+		$package = $trip->packages()->get_package( (int) ( $cart_data->packageID ?? 0 ) );
 		if ( null === $package ) {
 			return new \WP_Error( 'invalid_package', __( 'Invalid package for this trip.', 'wp-travel-engine' ) );
 		}
 
-		$trip_price = 0;
-		$travelers  = array();
-
-		if ( isset( $cart_data->{'travelers'} ) && is_array( $cart_data->{'travelers'} ) ) {
-			$package_travelers    = $package->get_traveler_categories();
-			$cart_pricing_options = $cart_data->{'travelers'};
-
-			foreach ( $package_travelers as $package_traveler ) {
-				$pax = $cart_pricing_options[ $package_traveler->id ] ?? 0;
-				if ( $pax < 1 ) {
-					continue;
-				}
-				if ( isset( $cart_pricing_options[ $package_traveler->id ] ) ) {
-					$applicable_price = isset( $package_traveler->has_sale ) && $package_traveler->has_sale ? $package_traveler->sale_price : $package_traveler->price;
-
-					$enable_group_discount = (bool) ( $package_traveler->enabled_group_discount ?? false );
-					$group_pricing         = $package->get_group_pricing()[ $package_traveler->id ] ?? array();
-
-					$travelers['pax'][ $package_traveler->id ] = $pax;
-
-					if ( $enable_group_discount && ! empty( $group_pricing ) ) {
-						foreach ( $group_pricing as $pricing ) {
-							if ( $pricing['from'] <= $pax && ( empty( $pricing['to'] ) || ( $pricing['to'] >= $pax ) ) ) {
-								$applicable_price = $pricing['price'];
-								break;
-							}
-						}
-					}
-
-					$travelers['info'][ $package_traveler->id ] = array(
-						'label'                => $package_traveler->label,
-						'price'                => $package_traveler->price,
-						'enabledSale'          => $package_traveler->has_sale ?? false,
-						'salePrice'            => $package_traveler->sale_price,
-						'pricingType'          => $package_traveler->pricing_type,
-						'minPax'               => $package_traveler->min_pax,
-						'maxPax'               => $package_traveler->max_pax,
-						'groupPricing'         => $group_pricing,
-						'enabledGroupDiscount' => $enable_group_discount,
-					);
-
-					$travelers['cost'][ $package_traveler->id ] = $package_traveler->pricing_type === 'per-group' ? $applicable_price : (float) $applicable_price * $pax;
-
-					$trip_price += $travelers['cost'][ $package_traveler->id ];
-				}
-			}
-		}
+		$cart_travelers = $cart_data->{'travelers'} ?? array();
+		$travelers      = is_array( $cart_travelers ) ? self::get_travelers_details( $package, $cart_travelers ) : array();
+		$trip_price     = array_sum( $travelers['cost'] ?? array() );
 
 		$tax   = $cart->tax();
 		$attrs = apply_filters(
@@ -293,7 +307,7 @@ class Item {
 				'datetime'              => $cart_data->{'tripDate'},
 				'tax_amount'            => $tax->get_tax_percentage(),
 				'subtotal_reservations' => $cart_data->{'subtotalReservations'} ?? array(),
-				'travelers'             => $cart_data->{'travelers'},
+				'travelers'             => $cart_travelers,
 			)
 		);
 
@@ -829,6 +843,7 @@ class Item {
 	 * @param $order_item
 	 *
 	 * @since 6.3.3
+	 * @since 6.9.0 Keeps each pricing category's `id` on its line item.
 	 */
 	public function add_line_items_from_order_item( $order_item ) {
 
@@ -839,6 +854,8 @@ class Item {
 				new PricingCategory(
 					$this->cart,
 					array(
+						// Kept, so editing the booking can match its head counts to these rows.
+						'id'       => $pricing_category['id'] ?? null,
 						'label'    => $pricing_category['label'],
 						'quantity' => $pricing_category['quantity'],
 						'price'    => $pricing_category['price'],
@@ -897,5 +914,50 @@ class Item {
 		// }
 		// }
 		// }
+	}
+
+	/**
+	 * Get the traveler category label for each traveler slot, in order.
+	 *
+	 * E.g. 2 Adults + 3 Children selected on the trip becomes
+	 * `[ 'Adult', 'Adult', 'Child', 'Child', 'Child' ]`, one entry per
+	 * traveler so the checkout form can show the right badge per traveler.
+	 *
+	 * @since 6.9.0
+	 *
+	 * @return string[]
+	 */
+	public function get_traveler_category_labels(): array {
+		$labels = array();
+
+		if ( ! isset( $this->pax ) || ! is_array( $this->pax ) ) {
+			return $labels;
+		}
+
+		$names   = array();
+		$trip    = wptravelengine_get_trip( $this->trip_id, true );
+		$package = $trip ? $trip->packages()->get_package( (int) $this->price_key ) : null;
+
+		if ( $package ) {
+			foreach ( $package->get_traveler_categories() as $package_traveler ) {
+				$names[ $package_traveler->id ] = $package_traveler->label;
+			}
+		} else {
+			// The trip or package was deleted since; the category terms still name the slots.
+			foreach ( array_keys( $this->pax ) as $category_id ) {
+				$term                  = get_term( (int) $category_id );
+				$names[ $category_id ] = $term instanceof \WP_Term ? $term->name : '';
+			}
+		}
+
+		foreach ( $names as $category_id => $label ) {
+			$pax = (int) ( $this->pax[ $category_id ] ?? 0 );
+
+			for ( $i = 0; $i < $pax; $i++ ) {
+				$labels[] = $label;
+			}
+		}
+
+		return $labels;
 	}
 }

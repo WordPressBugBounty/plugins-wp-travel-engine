@@ -4,6 +4,7 @@
  * User dashboard template.
  *
  * @package WP_Travel
+ * @deprecated 6.9.0 No longer loaded by WP Travel Engine, so a theme override of it has no effect. It will be removed in a future release.
  */
 wp_enqueue_script( 'wte-dropzone' );
 wp_enqueue_style( 'wte-dropzone' );
@@ -30,11 +31,11 @@ if ( ! empty( $current_user->user_email ) ) {
 /**
  * Merge user meta bookings for backward compatibility with legacy data.
  */
-$user_bookings = get_user_meta( $current_user->ID, 'wp_travel_engine_user_bookings', true );
-if ( ! empty( $user_bookings ) && is_array( $user_bookings ) ) {
-	$user_bookings = array_map( 'intval', $user_bookings );
-	$bookings      = array_unique( array_merge( $bookings, $user_bookings ) );
-}
+// $user_bookings = get_user_meta( $current_user->ID, 'wp_travel_engine_user_bookings', true );
+// if ( ! empty( $user_bookings ) && is_array( $user_bookings ) ) {
+// $user_bookings = array_map( 'intval', $user_bookings );
+// $bookings      = array_unique( array_merge( $bookings, $user_bookings ) );
+// }
 
 // Resverse Chronological Order For Bookings.
 if ( ! empty( $bookings ) && is_array( $bookings ) ) {

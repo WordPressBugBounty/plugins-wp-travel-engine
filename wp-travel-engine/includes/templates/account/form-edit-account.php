@@ -14,7 +14,8 @@
  * @see     https://wptravelengine.com
  * @author  WP Travel Engine
  * @package WP Travel Engine/includes/templates
- * @version 1.3.7
+ * @version 1.3.8
+ * @deprecated 6.9.0 No longer loaded by WP Travel Engine, so a theme override of it has no effect. It will be removed in a future release.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -22,6 +23,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 do_action( 'wp_travel_engine_before_edit_account_form' );
+
+// Which fields the server refuses to write, so the form does not offer them as editable.
+$wptravelengine_locked_fields = Wp_Travel_Engine_Form_Handler::locked_account_fields();
+
 $current_user       = wp_get_current_user();
 $users_meta         = get_user_meta( $current_user->ID, 'wte_users_meta', true );
 $user_custom_avatar = isset( $users_meta['user_profile_image_id'] ) && $users_meta['user_profile_image_id'] ? $users_meta['user_profile_image_id'] : '';
@@ -73,12 +78,12 @@ endif;
 	</div>
 	<div class="wpte-form-field horizontal lrf-text">
 		<label class="lrf-field-label" for="lrf-first-name"><?php esc_html_e( 'First Name:', 'wp-travel-engine' ); ?><span class="required">*</span> </label>
-		<input type="text" name="account_first_name" id="lrf-first-name" required="1" data-msg="Please enter your first name" data-parsley-required-message="Please enter your first name" value="<?php echo esc_attr( $user->first_name ); ?>" />
+		<input type="text" name="account_first_name" id="lrf-first-name" required="1" <?php echo isset( $wptravelengine_locked_fields['account_first_name'] ) ? 'readonly' : ''; ?> data-msg="Please enter your first name" data-parsley-required-message="Please enter your first name" value="<?php echo esc_attr( $user->first_name ); ?>" />
 	</div>
 
 	<div class="wpte-form-field horizontal lrf-text">
 		<label class="lrf-field-label" for="lrf-last-name"><?php esc_html_e( 'Last Name:', 'wp-travel-engine' ); ?><span class="required">*</span></label>
-		<input type="text" name="account_last_name" id="lrf-last-name" required="1" data-msg="Please enter your last name" data-parsley-required-message="Please enter your last name" value="<?php echo esc_attr( $user->last_name ); ?>" />
+		<input type="text" name="account_last_name" id="lrf-last-name" required="1" <?php echo isset( $wptravelengine_locked_fields['account_last_name'] ) ? 'readonly' : ''; ?> data-msg="Please enter your last name" data-parsley-required-message="Please enter your last name" value="<?php echo esc_attr( $user->last_name ); ?>" />
 	</div>
 
 	<div class="wpte-form-field horizontal lrf-email">

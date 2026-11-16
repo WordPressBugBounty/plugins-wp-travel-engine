@@ -5,7 +5,7 @@ Tags: tour-booking, tour-operator, travel, travel-booking, travel-agency
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 6.8.10
+Stable tag: 6.9.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -323,6 +323,18 @@ If you find any bug, please report it via our [support ticket](https://wptravele
 
 You can request the features on [WP Travel Engine’s roadmap](https://wptravelengine.com/roadmap/?utm_source=wp.org&utm_medium=wp.org&utm_campaign=wp_profile). You can also vote on features requested by other users.
 
+= Why don't I see other plugins' admin notices on WP Travel Engine screens? =
+
+WP Travel Engine hides third-party admin notices on the single booking screen and on every page under the Bookings and Trips menus (any admin URL with `?post_type=` set to `booking`, `trip`, `enquiry`, `customer` or `wte-coupon`), so those screens stay readable. Notices from WP Travel Engine and WP Travel Engine Pro still show. If you need the others back, remove the rules with the `wptravelengine_suppressed_notice_screens` filter:
+
+```
+add_filter( 'wptravelengine_suppressed_notice_screens', '__return_empty_array' );
+```
+
+You can also drop a single rule instead of all of them. Each rule matches by a `screen` key (the WordPress screen ID, `booking` for a single booking) and/or a `query` key (URL parameters such as `post_type`).
+
+Add-on developers: a notice added to `admin_notices` at priority 11111 or later, or re-added on the `wptravelengine_admin_notices_suppressed` action, is kept on these screens.
+
 = Do you have developer documentation? =
 
 Yes. We have [developer documentation](https://docs.wptravelengine.com/docs/wp-travel-engine-developer-documentation/?utm_source=wp.org&utm_medium=wp.org&utm_campaign=wp_profile) with lots of hooks and filters.
@@ -349,11 +361,20 @@ Please send us an email via [support ticket](https://wptravelengine.com/support-
 
 == Changelog ==
 
-= 6.8.10 - 13th October 2026 =
+= 6.9.0 - 16th November 2026 =
 
-* Improved: Updated the Freemius SDK to the latest version.
-* Fixed: Corrected date formatting in the datepicker field to match WordPress date format settings.
-* Fixed: Hid the Clone Trip action and restricted access for users with view-only Trip permissions.
+* New Feature: Added a traveler dashboard setting that allows travelers to update their personal details.
+* New Feature: Added an activity log to the admin booking edit page, allowing admins to track changes made by travelers and admins.
+* New Feature: Added an option for travelers to skip entering their personal details during checkout and provide them later.
+* New Feature: Added the ability for admins to add multiple notes and apply discounts directly from the booking edit page.
+* New Feature: Added a payment link generator, allowing admins to create payment links for custom amounts or the full outstanding balance.
+* Improved: Redesigned the admin Add Booking and Edit Booking sections to provide a clearer and more intuitive booking management experience.
+* Improved: Redesigned the checkout page, admin booking list, thank-you page, and traveler dashboard for an improved user experience.
+* Improved: Added more robust validation checks for PayPal Standard IPN request parameters to ensure payment requests are properly validated.
+* Security: Fixed a stored Cross-Site Scripting (XSS) vulnerability.
+* Security: Fixed an authorization vulnerability exposing sensitive customer information to authenticated users.
+* Deprecated: Traveler dashboard template overrides are no longer supported following the dashboard redesign.
+* Deprecated: Admin booking edit template overrides are no longer supported following the booking edit page redesign.
 
 [See changelog for all versions](https://plugins.svn.wordpress.org/wp-travel-engine/trunk/changelog.txt).
 

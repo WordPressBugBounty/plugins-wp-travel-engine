@@ -167,10 +167,15 @@ class TripPackage extends PostModel {
 	/**
 	 * Gets package's categories data.
 	 *
+	 * @param bool $new Rebuild from current meta (true, default) or reuse the Factory-cached instance (false).
+	 *
 	 * @return TravelerCategories
+	 * @since 6.9.0 Factory-cached per package ID; $new=true rebuilds so reads after a write aren't stale.
 	 */
-	public function get_traveler_categories(): TravelerCategories {
-		return new TravelerCategories( $this->trip, $this );
+	public function get_traveler_categories( bool $new = true ): TravelerCategories {
+		return $new
+			? TravelerCategories::refresh( $this->ID, $this->trip, $this )
+			: TravelerCategories::for( $this->ID, $this->trip, $this );
 	}
 
 	/**

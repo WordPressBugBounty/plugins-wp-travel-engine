@@ -14,13 +14,9 @@ foreach ( get_pages() as $page ) {
 	);
 }
 
-return apply_filters(
-	'general_pages',
-	array(
-		'title'  => __( 'Pages', 'wp-travel-engine' ),
-		'order'  => 5,
-		'id'     => 'general_pages',
-		'fields' => array(
+$wptravelengine_page_fields = array_values(
+	array_filter(
+		array(
 			array(
 				'label'        => __( 'Checkout Page', 'wp-travel-engine' ),
 				'description'  => __( 'This is the checkout page where buyers will complete their order. The <strong>[WP_TRAVEL_ENGINE_PLACE_ORDER]</strong> shortcode must be on this page.', 'wp-travel-engine' ),
@@ -40,7 +36,7 @@ return apply_filters(
 				'isSearchable' => true,
 			),
 			array(
-				'label'        => __( 'Thank You Page', 'wp-travel-engine' ),
+				'label'        => __( 'Booking Confirmation Page', 'wp-travel-engine' ),
 				'description'  => __( 'This is the thank you page where trip bookers will get the payment confirmation message. The <strong>[WP_TRAVEL_ENGINE_THANK_YOU]</strong> shortcode must be on this page.', 'wp-travel-engine' ),
 				'field_type'   => 'SELECT',
 				'options'      => $wptravelengine_pages,
@@ -48,7 +44,7 @@ return apply_filters(
 				'divider'      => true,
 				'isSearchable' => true,
 			),
-			array(
+			wptravelengine_is_new_user() ? null : array(
 				'label'        => __( 'Confirmation Page', 'wp-travel-engine' ),
 				'description'  => __( 'This is the confirmation page where trip bookers will fill the full form of the travellers. The <strong>[WP_TRAVEL_ENGINE_BOOK_CONFIRMATION]</strong> shortcode must be on this page.', 'wp-travel-engine' ),
 				'field_type'   => 'SELECT',
@@ -56,9 +52,10 @@ return apply_filters(
 				'name'         => 'confirmation_page',
 				'divider'      => true,
 				'isSearchable' => true,
+				'isDeprecated' => true,
 			),
 			array(
-				'label'        => __( 'User Dashboard Page', 'wp-travel-engine' ),
+				'label'        => __( 'Traveler Dashboard Page', 'wp-travel-engine' ),
 				'description'  => __( 'This is the dashboard page that lets your users login and interact with bookings from the frontend. The <strong>[wp_travel_engine_dashboard]</strong> shortcode must be on this page.', 'wp-travel-engine' ),
 				'field_type'   => 'SELECT',
 				'options'      => $wptravelengine_pages,
@@ -92,6 +89,16 @@ return apply_filters(
 				'name'         => 'search_page',
 				'isSearchable' => true,
 			),
-		),
+		)
+	)
+);
+
+return apply_filters(
+	'general_pages',
+	array(
+		'title'  => __( 'Pages', 'wp-travel-engine' ),
+		'order'  => 5,
+		'id'     => 'general_pages',
+		'fields' => $wptravelengine_page_fields,
 	)
 );

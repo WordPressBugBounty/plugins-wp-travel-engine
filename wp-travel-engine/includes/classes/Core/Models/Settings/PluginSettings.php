@@ -66,13 +66,14 @@ class PluginSettings extends BaseSetting {
 	 *
 	 * @return mixed
 	 * @since 6.2.0
+	 * @since 6.9.0 Returns $default_value when the stored value is null.
 	 */
 	public function get( ?string $key = null, $default_value = null ) {
 
 		if ( isset( $this->callbacks[ $key ?? '' ] ) ) {
 			$value = call_user_func( $this->callbacks[ $key ] );
 		} elseif ( is_null( $key ) || wptravelengine_key_exists( parent::get(), explode( '.', $key ) ) ) {
-				$value = parent::get( $key );
+				$value = parent::get( $key ) ?? $default_value;
 		} else {
 			$this->set( $key, $default_value );
 			$value = $default_value;
@@ -614,6 +615,7 @@ class PluginSettings extends BaseSetting {
 	 * Set the default values.
 	 *
 	 * @return void
+	 * @since 6.9.0 Migrates a saved `after_checkout` traveller form setting to `on_checkout`.
 	 */
 	private function set_defaults() {
 		if ( is_null( Options::get( 'wte_update_mail_template' ) ) && ! is_null( Options::get( 'wptravelengine_since' ) ) ) {
@@ -631,5 +633,45 @@ class PluginSettings extends BaseSetting {
 				)
 			);
 		}
+
+		/**
+		 * `after_checkout` is retired for `traveller_emergency_details_form` — sites that had it
+		 * saved from before are migrated to `on_checkout` once, here. For backward compatibility,
+		 * their traveler-details flow is mapped to "Everyone on the booking" + "pay now, fill in
+		 * later", unless those settings were already explicitly configured.
+		 *
+		 * @since 6.9.0 Map legacy `after_checkout` to `travellers_details_type`/`traveler_details_timing`.
+		 */
+		if ( 'after_checkout' === $this->get( 'traveller_emergency_details_form' ) ) {
+			$this->set( 'traveller_emergency_details_form', 'on_checkout' );
+
+			if ( ! wptravelengine_key_exists( parent::get(), array( 'travellers_details_type' ) ) ) {
+				$this->set( 'travellers_details_type', 'all' );
+			}
+
+			if ( ! wptravelengine_key_exists( parent::get(), array( 'traveler_details_timing' ) ) ) {
+				$this->set( 'traveler_details_timing', 'pay_later' );
+			}
+
+			$this->save();
+		}
+	}
+
+	/**
+	 * The plugin's settings screen, optionally at one section of it.
+	 *
+	 * The screen is reached by a query string the whole plugin repeats; kept here so a link to
+	 * it is not spelled out again wherever one is needed.
+	 *
+	 * @param string $section Section anchor, e.g. `general_pages`, with or without its `#`.
+	 *
+	 * @return string Admin URL.
+	 * @since 6.9.0
+	 */
+	public static function url( string $section = '' ): string {
+		$url     = admin_url( 'edit.php?post_type=booking&page=class-wp-travel-engine-admin.php' );
+		$section = ltrim( $section, '#' );
+
+		return '' !== $section ? $url . '#' . $section : $url;
 	}
 }

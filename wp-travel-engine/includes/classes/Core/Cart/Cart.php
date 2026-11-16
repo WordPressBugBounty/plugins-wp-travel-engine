@@ -35,6 +35,14 @@ class Cart extends LegacyCart {
 	public const CURRENT_VERSION = '4.0';
 
 	/**
+	 * Deposit already paid on the booking, or the partial amount for a new one; null until v4.0 totals run.
+	 *
+	 * @var string|null
+	 * @since 6.9.0
+	 */
+	public ?string $initial_deposit = null;
+
+	/**
 	 * @inheritDoc
 	 */
 	public function __construct() {
@@ -58,6 +66,7 @@ class Cart extends LegacyCart {
 	/**
 	 * @inheritDoc
 	 * @updated 6.7.0
+	 * @since 6.9.0 Resets the initial deposit; a balance payment takes its fees as the booking was charged them.
 	 */
 	public function calculate_totals(): void {
 
@@ -67,8 +76,25 @@ class Cart extends LegacyCart {
 		}
 
 		$this->reset_totals();
+		$this->initial_deposit = null;
 
 		do_action( 'wptravelengine_before_calculate_totals', $this );
+
+		// A balance payment carries exactly the fees the booking was charged — not the live add-on state —
+		// so an add-on toggled on or off since booking changes neither what it owes nor what it leaves out.
+		if ( $this->booking_ref ) {
+			$this->fees = array();
+
+			$saved_fees = array_column( (array) wptravelengine_get_cart_info( (int) $this->booking_ref )->get_fees(), null, 'name' );
+
+			foreach ( $saved_fees as $saved ) {
+				$class = $saved['_class_name'] ?? '';
+
+				if ( '' !== $class && class_exists( $class ) ) {
+					$this->fees[] = new $class( $this, $saved );
+				}
+			}
+		}
 
 		// Here the other cart versions can be handled in the future.
 		if ( $this->is_curr_cart( '<' ) ) {
@@ -86,6 +112,7 @@ class Cart extends LegacyCart {
 	 * @return void
 	 * @since 6.7.0
 	 * @since 6.8.6 Adds the booking's refunded amount back to the due amount so a remaining-balance checkout reflects any refund.
+	 * @since 6.9.0 Charges what an outstanding payment request asked for, rather than the whole balance; sets the initial deposit.
 	 */
 	protected function calculate_totals_v4_0(): void {
 		// Initialize calculator
@@ -146,6 +173,18 @@ class Cart extends LegacyCart {
 				$due_amount = $booking->get_total_due_amount();
 				$amount     = ! empty( $due_amount ) ? (string) $due_amount : '0.00';
 
+				/*
+				 * A payment request asks for a set figure, which need not be the whole balance:
+				 * a customer who followed its link pays what was asked of them. `payment_ref`
+				 * names the payment that link was raised for, so several open requests on one
+				 * booking each collect their own amount.
+				 */
+				$requested_payment = $this->payment_ref ? $booking->get_payment_by_id( $this->payment_ref ) : null;
+
+				if ( $requested_payment && $requested_payment->is_payment_request() && ! $requested_payment->is_completed() ) {
+					$amount = $calculator->normalize( (string) $requested_payment->get_deposit() );
+				}
+
 				$refunded_amount = $booking->get_refunded_amount();
 				if ( $refunded_amount > 0.00 ) {
 					$totals['has_refunded'] = true;
@@ -161,6 +200,7 @@ class Cart extends LegacyCart {
 				}
 
 				$totals['partial_total'] = $calculator->subtract( $actual_total, $amount );
+				$this->initial_deposit   = $calculator->subtract( $actual_total, ! empty( $due_amount ) ? (string) $due_amount : $actual_total );
 			} else {
 				// Calculate partial total
 				$totals['partial_total'] = $calculator->normalize(
@@ -169,6 +209,8 @@ class Cart extends LegacyCart {
 						(float) $actual_total
 					)
 				);
+
+				$this->initial_deposit = $totals['partial_total'];
 
 				$amount = 'partial' === $this->payment_type ? $totals['partial_total'] : $actual_total;
 			}

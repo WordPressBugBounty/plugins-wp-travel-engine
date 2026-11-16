@@ -2,7 +2,7 @@
 /**
  * Coupon Form Template.
  *
- * @var $wte_cart Cart
+ * @var WPTravelEngine\Core\Cart\Cart $wte_cart
  * @since __addonmigration__
  */
 global $wte_cart;
@@ -16,7 +16,7 @@ $code                      = isset( $wp_travel_engine_settings['currency_code'] 
 $currency                  = wp_travel_engine_get_currency_code_or_symbol();
 wp_enqueue_script( 'wp-util' );
 
-if ( Coupons::is_coupon_available() && 'due' !== $wte_cart->get_payment_type() ) :
+if ( Coupons::is_coupon_available( $wte_cart->get_cart_trip_ids() ) && 'due' !== $wte_cart->get_payment_type() ) :
 	?>
 	<div class="wte-coupon-whole-wrap" id="wte-checkout-coupon">
 		<div

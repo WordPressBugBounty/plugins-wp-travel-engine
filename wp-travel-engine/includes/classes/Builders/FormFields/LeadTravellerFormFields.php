@@ -34,6 +34,7 @@ class LeadTravellerFormFields extends FormField {
 	 * @param array $form_data
 	 *
 	 * @return array
+	 * @since 6.9.0 Labels a field by its field_label, falling back to the placeholder.
 	 */
 	public function with_values( array $form_data, $booking = null ): array {
 		if ( $booking && $booking->get_meta( 'traveller_page_type' ) == 'old' ) {
@@ -51,7 +52,7 @@ class LeadTravellerFormFields extends FormField {
 
 						$field['id'] = sprintf( 'travellers_%s', $name );
 				}
-				$field['field_label'] = isset( $field['placeholder'] ) && $field['placeholder'] !== '' ? $field['placeholder'] : $field['field_label'];
+				$field['field_label'] = ! empty( $field['field_label'] ) ? $field['field_label'] : ( $field['placeholder'] ?? '' );
 				$value                = $form_data[ $name ] ?? $field['default'] ?? '';
 				$field['value']       = self::resolve_display_value( $value, $field['type'] );
 				return $field;

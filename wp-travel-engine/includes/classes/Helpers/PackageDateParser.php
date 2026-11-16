@@ -89,6 +89,17 @@ class PackageDateParser {
 	protected Trip $trip;
 
 	/**
+	 * Memoized package max capacity across all traveler categories.
+	 *
+	 * Null until first computed. Scoped to this parser so each package keeps its own cap;
+	 * the value is invariant per package, so get_cat_max_cap() runs at most once per parser.
+	 *
+	 * @var int|string|null
+	 * @since 6.9.0
+	 */
+	protected $max_cap_cache = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param TripPackage $trip_package Trip package object.
@@ -369,9 +380,10 @@ class PackageDateParser {
 	 *
 	 * @since 6.6.7
 	 * @since 6.8.7 Zero out seats left when a required traveler category can't meet its minimum pax for this date.
+	 * @since 6.9.0 Reuses the cached traveler categories and memoizes the package max capacity per parser.
 	 */
 	public function get_seats_details( string $date, string $time = '00:00' ) {
-		foreach ( $this->package->get_traveler_categories() as $tc ) {
+		foreach ( $this->package->get_traveler_categories( false ) as $tc ) {
 			/** @var TravelerCategory $tc */
 			$seats_left = $this->package->get_cat_seats_left( $tc->id, $date );
 			if ( is_numeric( $seats_left ) && $tc->is_min_required && $seats_left < $tc->min_pax ) {
@@ -379,9 +391,12 @@ class PackageDateParser {
 			}
 		}
 
-		$cat_seats_left = $this->package->get_cat_max_cap( null );
-		$my_seats       = is_numeric( $cat_seats_left ) ? ( is_numeric( $this->seats ) ? min( $cat_seats_left, $this->seats ) : $cat_seats_left ) : $this->seats;
-		$total_seats    = $this->total_seats;
+		$this->max_cap_cache ??= $this->package->get_cat_max_cap( null );
+
+		$cat_seats_left = $this->max_cap_cache;
+
+		$my_seats    = is_numeric( $cat_seats_left ) ? ( is_numeric( $this->seats ) ? min( $cat_seats_left, $this->seats ) : $cat_seats_left ) : $this->seats;
+		$total_seats = $this->total_seats;
 
 		$booked_seats_for_this_pac = $this->booked_seats[ $this->package->get_id() ][ $date ][ $time ] ?? 0;
 
@@ -423,13 +438,14 @@ class PackageDateParser {
 	 *
 	 * @return int|string
 	 * @since 6.8.7
+	 * @since 6.9.0 Reuses the cached traveler categories instead of rebuilding them.
 	 */
 	protected function get_net_seats_left( $seats_left ) {
 		if ( ! is_numeric( $seats_left ) ) {
 			return $seats_left;
 		}
 
-		foreach ( $this->package->get_traveler_categories() as $tc ) {
+		foreach ( $this->package->get_traveler_categories( false ) as $tc ) {
 			/** @var TravelerCategory $tc */
 			if ( $tc->is_min_required && $seats_left < $tc->min_pax ) {
 				return 0;

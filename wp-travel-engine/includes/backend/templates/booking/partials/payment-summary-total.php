@@ -5,6 +5,7 @@
  * @var \WPTravelEngine\Core\Models\Post\Booking $booking
  * @var array $payments_total
  * @since 6.7.0
+ * @deprecated 6.9.0 No longer loaded by WP Travel Engine, so a theme override of it has no effect. It will be removed in a future release.
  */
 $payments_total = $temp_payments_data['totals'] ?? $payments_data['totals'] ?? array();
 

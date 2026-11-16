@@ -5,6 +5,7 @@
  *
  * @since 6.0.0
  * @package wp-travel-engine/includes/templates/account/tab-content/bookings
+ * @deprecated 6.9.0 No longer loaded by WP Travel Engine, so a theme override of it has no effect. It will be removed in a future release.
  */
 $map = array(
 	__( 'Partially Paid', 'wp-travel-engine' ) => 'partially-paid',
